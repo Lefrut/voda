@@ -3,14 +3,17 @@ package com.vodovoz.app.domain.general
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.vodovoz.app.data.vodovoz_service.mappers.executeRequest
+import com.vodovoz.app.data.vodovoz_service.model.VodovozResponseDTO
 import com.vodovoz.app.util.extensions.debugLog
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.singleOrNull
 import retrofit2.Response
+import java.lang.reflect.Type
+import kotlin.reflect.javaType
+import kotlin.reflect.typeOf
 
-class VodovozPagingSource<T : Any, R : Any>(
-    private val request: suspend (page: Int, limit: Int) -> Response<T>,
-    private val mapper: (T) -> List<R>,
+class VodovozPagingSource<T : Any, R : Any> constructor(
+    private val request: suspend (page: Int, limit: Int) -> Response<VodovozResponseDTO<T>>,
+    private val mapper: (VodovozResponseDTO<T>) -> List<R>,
 ) : PagingSource<Int, R>() {
 
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, R> {
