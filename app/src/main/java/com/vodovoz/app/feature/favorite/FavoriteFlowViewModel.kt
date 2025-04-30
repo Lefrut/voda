@@ -26,6 +26,7 @@ import com.vodovoz.app.design_system.model.toUi
 import com.vodovoz.app.design_system.model.withUpdatedCart
 import com.vodovoz.app.design_system.model.withUpdatedFavorites
 import com.vodovoz.app.design_system.model.withUpdatedLoading
+import com.vodovoz.app.domain.general.model.EmptyResultException
 import com.vodovoz.app.domain.general.model.FavoritesNotFoundException
 import com.vodovoz.app.domain.general.model.ProductsSectionUi
 import com.vodovoz.app.domain.general.model.toUi
@@ -233,10 +234,8 @@ class FavoriteFlowViewModel @Inject constructor(
 
         }.onFailure { fail ->
             val uiState = when (fail) {
-                is FavoritesNotFoundException -> fail.errorData?.run {
-                    FavoriteUiState.Empty(
-                        placeholder = toUi(),
-                    )
+                is EmptyResultException -> fail.errorData?.run {
+                    FavoriteUiState.Empty(placeholder = toUi(),)
                 } ?: FavoriteUiState.Error
 
                 else -> FavoriteUiState.Error

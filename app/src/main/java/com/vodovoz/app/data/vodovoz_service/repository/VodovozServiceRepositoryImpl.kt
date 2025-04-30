@@ -17,6 +17,11 @@ import com.vodovoz.app.data.vodovoz_service.mappers.executeRequest
 import com.vodovoz.app.data.vodovoz_service.mappers.executeVodovozRequest
 import com.vodovoz.app.data.vodovoz_service.mappers.mapToDomain
 import com.vodovoz.app.data.vodovoz_service.mappers.toDomain
+import com.vodovoz.app.data.vodovoz_service.model.BrandSectionDTO
+import com.vodovoz.app.data.vodovoz_service.model.ProductCommentsDTO
+import com.vodovoz.app.data.vodovoz_service.model.ProductsSectionDTO
+import com.vodovoz.app.data.vodovoz_service.model.PromotionDetailsDTO
+import com.vodovoz.app.data.vodovoz_service.model.PromotionsDTO
 import com.vodovoz.app.data.vodovoz_service.model.VodovozErrorResponseDTO
 import com.vodovoz.app.data.vodovoz_service.model.VodovozPlaceholderDTO
 import com.vodovoz.app.data.vodovoz_service.model.VodovozResponseDTO
@@ -74,7 +79,6 @@ import com.vodovoz.app.domain.general.model.order.OrderQuestionDetailsModel
 import com.vodovoz.app.domain.general.model.toQueries
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.feature.preorder.model.FieldUi
-import com.vodovoz.app.util.extensions.debugLog
 import com.vodovoz.app.util.extensions.singleResult
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -87,6 +91,8 @@ import okhttp3.RequestBody.Companion.asRequestBody
 import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.reflect.javaType
+import kotlin.reflect.typeOf
 
 
 @Singleton
@@ -183,11 +189,13 @@ class VodovozServiceRepositoryImpl @Inject constructor(
                 val userId = accountManager.fetchAccountId()
                 vodovozService.getOrderDetails(userId, orderId)
             },
-            mapper = { request ->
-                request.checkError { errorDataModel ->
-                    throw UserNotLoginException(errorData = errorDataModel)
-                }
-                request.data!!.toDomain()
+            mapper = { it ->
+                it.data!!.toDomain()
+            },
+            onFail = { response ->
+                val placeholder =
+                    moshi.fromJson<VodovozResponseDTO<VodovozPlaceholderDTO>>(response.stringBody()).data!!.toDomain()
+                throw UserNotLoginException(errorData = placeholder)
             }
         )
     }
@@ -476,27 +484,14 @@ class VodovozServiceRepositoryImpl @Inject constructor(
                 vodovozService.getProfileDetails(accountManager.fetchAccountId() ?: -1)
             },
             mapper = {
-                val errorData = it.error?.toDomain()
-                if (errorData != null) {
-                    throw UserNotLoginException(
-                        message = it.message ?: "",
-                        errorData = errorData,
-                    )
-                }
                 it.data!!.toDomain()
             },
             onFail = { response ->
-                val code = response.code()
-                val errorData = moshi.fromJson<VodovozResponseDTO<String>>(
-                    response.stringBody(),
-                    Types.newParameterizedType(VodovozResponseDTO::class.java, String::class.java)
-                ).error
+                val errorData = moshi.fromJson<VodovozResponseDTO<VodovozPlaceholderDTO>>(
+                    response.errorBody()?.string() ?: ""
+                ).data
 
-                val exception = when {
-                    code == 404 && errorData != null -> UserNotLoginException(errorData = errorData.toDomain())
-                    else -> RequestException(response.messageWithCode())
-                }
-                Result.failure(exception)
+                Result.failure(UserNotLoginException(errorData = errorData!!.toDomain()))
             }
         )
     }
@@ -677,10 +672,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
             },
             onFail = { response ->
                 val jsonBody = response.stringBody()
-                val errorResponse = moshi.fromJson<VodovozResponseDTO<String>>(
-                    jsonBody,
-                    Types.newParameterizedType(VodovozResponseDTO::class.java, String::class.java)
-                )
+                val errorResponse = moshi.fromJson<VodovozResponseDTO<String>>(jsonBody)
 
                 Result.failure(RequestException(errorResponse.message ?: ""))
             }
@@ -727,13 +719,15 @@ class VodovozServiceRepositoryImpl @Inject constructor(
                 )
             },
             mapper = { response ->
-                response.checkError { errorData ->
-                    throw EmptyResultException(
-                        errorData = errorData,
-                        message = errorData.descriptionHtml
-                    )
-                }
                 response.data!!.toDomain()
+            },
+            onFail = { response ->
+                val placeholder =
+                    moshi.fromJson<VodovozResponseDTO<VodovozPlaceholderDTO>>(
+                        response.stringBody()
+                    ).data
+
+                throw EmptyResultException(errorData = placeholder!!.toDomain())
             }
         )
     }
@@ -750,6 +744,10 @@ class VodovozServiceRepositoryImpl @Inject constructor(
         return Pager(
             config = PagingConfig(pageSize = 5, initialLoadSize = 5),
             pagingSourceFactory = {
+                val type = Types.newParameterizedType(
+                    VodovozResponseDTO::class.java,
+                    ProductsSectionDTO::class.java
+                )
                 VodovozPagingSource(
                     request = { page, _ ->
                         vodovozService.getCategoryProducts(
@@ -764,7 +762,6 @@ class VodovozServiceRepositoryImpl @Inject constructor(
                         )
                     },
                     mapper = { response ->
-                        response.checkError()
                         response.data?.DATA?.mapNotNull { product -> product.toDomain() }
                             ?: throw IllegalArgumentException("Paged search products can't be null")
                     }
@@ -784,6 +781,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
             config = PagingConfig(pageSize = 5, initialLoadSize = 5),
             pagingSourceFactory = {
                 VodovozPagingSource(
+
                     request = { page, _ ->
                         vodovozService.getSearchProducts(
                             query = query,
@@ -917,19 +915,12 @@ class VodovozServiceRepositoryImpl @Inject constructor(
                 )
             },
             mapper = { responseDTO ->
-                val result = responseDTO.data!!.toDomain()
-                result.products.ifEmpty { throw IllegalArgumentException("Products can't be empty") }
-                result
+                responseDTO.data!!.toDomain()
             },
             onFail = { response ->
-                val body = response.stringBody()
-                val vodovozResponse = moshi.fromJson<VodovozResponseDTO<VodovozPlaceholderDTO>>(
-                    body, Types.newParameterizedType(
-                        VodovozResponseDTO::class.java,
-                        VodovozPlaceholderDTO::class.java
-                    )
-                )
-                throw EmptyResultException(errorData = vodovozResponse.data!!.toDomain())
+                val value =
+                    moshi.fromJson<VodovozResponseDTO<VodovozPlaceholderDTO>>(response.stringBody())
+                throw EmptyResultException(errorData = value.data!!.toDomain())
             }
         )
 
@@ -1005,8 +996,12 @@ class VodovozServiceRepositoryImpl @Inject constructor(
                 vodovozService.getCartDetails(userId, coupon)
             },
             mapper = { vodovozResponse ->
-                vodovozResponse.checkError()
                 vodovozResponse.data!!.toDomain()
+            },
+            onFail = { response ->
+                val value =
+                    moshi.fromJson<VodovozResponseDTO<VodovozPlaceholderDTO>>(response.stringBody())
+                throw EmptyResultException(errorData = value.data!!.toDomain())
             }
         )
     }
@@ -1188,7 +1183,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
                     mapper = { promotionDetailsDTOVodovozResponseDTO ->
                         promotionDetailsDTOVodovozResponseDTO.data?.TOVAR?.DATA?.mapToDomain()
                             ?: emptyList()
-                    }
+                    },
                 )
             }
         ).flow
@@ -1221,7 +1216,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
                     },
                     mapper = { promotionsDTOVodovozResponseDTO ->
                         promotionsDTOVodovozResponseDTO.data?.toDomain()?.promotions ?: emptyList()
-                    }
+                    },
                 )
             }
         ).flow
@@ -1285,7 +1280,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
                     },
                     mapper = { response ->
                         response.data?.DATA?.mapToDomain() ?: emptyList()
-                    }
+                    },
                 )
             }
         ).flow
@@ -1330,7 +1325,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
                     },
                     mapper = { response ->
                         response.data?.DATA?.mapToDomain() ?: emptyList()
-                    }
+                    },
                 )
             }
         ).flow
@@ -1379,7 +1374,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
                     mapper = { response ->
                         response.checkError()
                         response.data?.DATA?.mapToDomain() ?: emptyList()
-                    }
+                    },
                 )
             }
         ).flow

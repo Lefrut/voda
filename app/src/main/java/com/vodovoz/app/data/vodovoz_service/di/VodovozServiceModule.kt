@@ -1,14 +1,10 @@
 package com.vodovoz.app.data.vodovoz_service.di
 
 import com.squareup.moshi.Moshi
-import com.squareup.moshi.Types
-import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import com.vodovoz.app.core.network.VodovozWebConfig
 import com.vodovoz.app.core.network.interceptor.BaseUrlInterceptor
-import com.vodovoz.app.core.network.interceptor.ChangeUrlInterceptor
 import com.vodovoz.app.core.network.interceptor.CookieHandlerInterceptor
 import com.vodovoz.app.data.vodovoz_service.VodovozService
-import com.vodovoz.app.data.vodovoz_service.model.VodovozResponseDTO
 import com.vodovoz.app.data.vodovoz_service.repository.VodovozServiceRepositoryImpl
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import dagger.Binds
@@ -16,12 +12,16 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import dagger.multibindings.IntoSet
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
+import okhttp3.RequestBody
+import okhttp3.ResponseBody
 import okhttp3.logging.HttpLoggingInterceptor
+import retrofit2.Call
+import retrofit2.CallAdapter
+import retrofit2.Converter
 import retrofit2.Retrofit
-import retrofit2.converter.moshi.MoshiConverterFactory
+import java.lang.reflect.Type
 import java.util.concurrent.TimeUnit
 import javax.inject.Named
 import javax.inject.Singleton
@@ -38,7 +38,7 @@ abstract class VodovozServiceModule {
     @Binds
     @Singleton
     abstract fun providerBaseUrlInterceptor(
-        baseUrlInterceptor: BaseUrlInterceptor
+        baseUrlInterceptor: BaseUrlInterceptor,
     ): Interceptor
 
 
@@ -53,7 +53,8 @@ abstract class VodovozServiceModule {
         fun providesVodovozRetrofit(@Named("vodovoz") okHttpClient: OkHttpClient, moshi: Moshi): Retrofit {
             return Retrofit.Builder()
                 .baseUrl(VodovozWebConfig.VODOVOZ_URL + VodovozWebConfig.VODOVOZ_PATH)
-                .addConverterFactory(MoshiConverterFactory.create(moshi))
+                .addCallAdapterFactory(NoOpCallAdapterFactory.create())
+                .addConverterFactory(NoOpConverterFactory.create())
                 .client(okHttpClient)
                 .build()
         }
@@ -69,7 +70,7 @@ abstract class VodovozServiceModule {
         @Named("vodovoz")
         fun providesOkHttpClient(
             cookieHandlerInterceptor: CookieHandlerInterceptor,
-            baseUrlInterceptor: BaseUrlInterceptor
+            baseUrlInterceptor: BaseUrlInterceptor,
         ): OkHttpClient {
             return OkHttpClient.Builder()
                 .addInterceptor(cookieHandlerInterceptor)
@@ -87,4 +88,59 @@ abstract class VodovozServiceModule {
 
 fun String.toFullUrl(): String {
     return VodovozServiceModule.BASE_URL.removePrefix("/") + this
+}
+
+class NoOpCallAdapterFactory private constructor() : CallAdapter.Factory() {
+
+    override fun get(
+        returnType: Type,
+        annotations: Array<Annotation>,
+        retrofit: Retrofit,
+    ): CallAdapter<*, *> {
+
+        return object : CallAdapter<Any?, Any?> {
+            override fun responseType(): Type {
+                return Any::class.java
+            }
+
+            override fun adapt(call: Call<Any?>): Any {
+                return call
+            }
+        }
+
+    }
+
+    companion object {
+        fun create(): NoOpCallAdapterFactory {
+            return NoOpCallAdapterFactory()
+        }
+    }
+}
+
+class NoOpConverterFactory private constructor(): Converter.Factory() {
+
+    override fun responseBodyConverter(
+        type: Type, annotations: Array<Annotation>, retrofit: Retrofit,
+    ): Converter<ResponseBody, *> {
+        return Converter<ResponseBody, Any?> { value ->
+            value.string()
+        }
+    }
+
+    override fun requestBodyConverter(
+        type: Type,
+        parameterAnnotations: Array<Annotation>,
+        methodAnnotations: Array<Annotation>,
+        retrofit: Retrofit,
+    ): Converter<Any?, RequestBody?> {
+        return Converter<Any?, RequestBody?> {
+            null
+        }
+    }
+
+    companion object {
+        fun create(): NoOpConverterFactory {
+            return NoOpConverterFactory()
+        }
+    }
 }

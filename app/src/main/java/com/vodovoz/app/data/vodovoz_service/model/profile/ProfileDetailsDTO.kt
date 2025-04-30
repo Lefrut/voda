@@ -3,9 +3,11 @@ package com.vodovoz.app.data.vodovoz_service.model.profile
 
 import com.squareup.moshi.Json
 import androidx.annotation.Keep
+import com.squareup.moshi.JsonClass
 import com.vodovoz.app.data.vodovoz_service.model.BannerDTO
 import com.vodovoz.app.data.vodovoz_service.model.TOVARY_DTO
 
+@JsonClass(generateAdapter = true)
 @Keep
 data class ProfileDetailsDTO(
     @Json(name = "PROFIL")

@@ -21,7 +21,7 @@ fun ProductsSectionDTO.toDomain(): ProductsSectionModel {
         sortingTitle = SORTIROVKA?.NAMEGLAV ?: "",
         productsQuantityText = TOVARVSEGO ?: COUNT ?: "",
         sorting = SORTIROVKA?.DANNIESORT?.mapNotNull { it?.toDomain() } ?: emptyList(),
-        products = DATA?.mapToDomain() ?: emptyList(),
+        products = DATA?.mapToDomain() ?: throw IllegalArgumentException("Favorite products can't be empty"),
         categories = RAZDEL?.LISTRAZDEL?.mapNotNull { it?.toDomain() } ?: emptyList(),
         share = PODELITCA?.toDomain() ?: ShareModel.Empty
     )
