@@ -356,9 +356,10 @@ class QuestionnairesFlowViewModel @Inject constructor(
             vodovozServiceRepository.sendQuestionnairesAnswers(currentWho, answers).singleResult()
 
         sendQuestionnairesResult.onSuccess {
-            it
+            debugLog { it }
         }.onFailure {
-            it
+            debugLog { it.toString() }
+
         }
     }
 
@@ -366,15 +367,17 @@ class QuestionnairesFlowViewModel @Inject constructor(
         return this
             .mapNotNull { comp ->
                 val raw = when (comp) {
-                    is FieldComponentUi         -> comp.ui.value
-                    is SwitchUi                 -> comp.selectedOption
-                    is CheckboxListUi           -> comp.options
+                    is FieldComponentUi -> comp.ui.value
+                    is SwitchUi -> comp.selectedOption
+                    is CheckboxListUi -> comp.options
                         .filter { it.isChecked }
                         .joinToString(",") { it.label }
-                    is ToggleListUi             -> comp.options
+
+                    is ToggleListUi -> comp.options
                         .firstOrNull { it.isSelected }
                         ?.label
                         .orEmpty()
+
                     is ConditionsCheckboxListUi -> comp.options
                         .filter { it.isChecked }
                         .joinToString(",") { it.label }
