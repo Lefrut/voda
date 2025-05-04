@@ -33,10 +33,11 @@ fun FavoriteScreen(
         modifier = Modifier.fillMaxWidth()
     ) {
         FavoriteTopBar(
+            title = viewState.productsSection.title,
+            showSearch = viewState.uiState !is FavoriteFlowViewModel.FavoriteUiState.Error,
             onSearchClick = {
                 viewModel.navigateToSearch()
-            },
-            showSearch = viewState.uiState is FavoriteFlowViewModel.FavoriteUiState.Success || viewState.uiState is FavoriteFlowViewModel.FavoriteUiState.Loading
+            }
         )
 
         val categories = viewState.productsSection.categories

@@ -38,7 +38,7 @@ fun POLE_DTO.toDomain(): FieldModel? {
         valueType = POLE ?: "text",
         isRequired = (OBYZATELNO ?: OBAZATELEN) == "Y",
         readOnly = ZABLOCKPOLE == "Y",
-        supportingText = TEXT ?: OPIS ?: "",
+        supportingText = OPIS ?: "",
         hint = TEXTOPIS ?: TEXT_V_POLE ?: TEXTVPOLE ?:  "",
     )
 }

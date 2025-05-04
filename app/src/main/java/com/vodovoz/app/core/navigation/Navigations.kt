@@ -29,8 +29,8 @@ fun NavController.navigateToFAQ(faq: FAQUi) {
         bundleOf("faq" to faq),
         SlideNavOptions
     )
-
 }
+
 
 fun NavController.navigateToCancelOrder(orderId: Long) {
     navigate(
@@ -106,7 +106,7 @@ fun NavController.navigateToButtonProductList(buttonId: Int) {
 }
 
 fun NavController.navigateToAboutApp() {
-    navigate(R.id.aboutAppDialogFragment, Bundle.EMPTY, SlideNavOptions)
+    navigate(R.id.aboutAppFragment, Bundle.EMPTY, SlideNavOptions)
 }
 
 

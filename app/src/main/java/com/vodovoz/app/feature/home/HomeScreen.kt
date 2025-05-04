@@ -78,7 +78,9 @@ fun HomeScreen(
                     HomeLoadingPlaceholder()
                 }
 
-                HomeFlowViewModel.HomeUiState.NetworkError -> {}
+                HomeFlowViewModel.HomeUiState.NetworkError -> {
+
+                }
                 HomeFlowViewModel.HomeUiState.Success -> {
                     HomeBody(
                         topProductsLazyListState = topProductsLazyListState,
@@ -154,7 +156,9 @@ fun HomeScreen(
         SpecialPromotionBottomSheet(
             specialPromotionUi = viewState.specialPromotion,
             onDismissRequest = { viewModel.closeSpecialPromotionBottomSheet() },
-            onButtonClick = { }
+            onButtonClick = {
+                viewModel.activateAction(it.actionWithButton.action)
+            }
         )
     }
 

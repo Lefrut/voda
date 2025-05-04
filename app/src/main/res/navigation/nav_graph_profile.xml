@@ -5,11 +5,16 @@
     android:id="@+id/graph_profile"
     app:startDestination="@id/profileFragment">
 
+    <fragment
+        android:id="@+id/aboutAppFragment"
+        android:name="com.vodovoz.app.feature.about_app.AboutAppFragment"
+        android:label="AboutAppFragment"
+        />
 
     <fragment
         android:id="@+id/faqFragment"
         android:name="com.vodovoz.app.feature.faq.FAQFragment"
-        android:label="fragment_faq">
+        android:label="FAQFragment">
 
         <argument
             android:name="faq"

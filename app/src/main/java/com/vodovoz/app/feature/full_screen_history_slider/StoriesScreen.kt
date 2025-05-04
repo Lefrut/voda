@@ -53,7 +53,6 @@ enum class DragAnchor(val value: Float) {
 
 
 @SuppressLint("RestrictedApi")
-@OptIn(ExperimentalFoundationApi::class)
 @Suppress("NonSkippableComposable")
 @Composable
 fun StoriesScreen(

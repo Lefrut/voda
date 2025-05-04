@@ -22,7 +22,7 @@ import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.feature.preorder.model.FieldUi
 import com.vodovoz.app.feature.preorder.model.checkFields
 import com.vodovoz.app.feature.preorder.model.mapToUi
-import com.vodovoz.app.feature.preorder.model.updateFieldAndResetErrors
+import com.vodovoz.app.feature.preorder.model.updateFieldAndResetError
 import com.vodovoz.app.feature.sitestate.SiteStateManager
 import com.vodovoz.app.ui.model.enum.AuthType
 import com.vodovoz.app.util.FieldValidationsSettings
@@ -31,19 +31,18 @@ import com.vodovoz.app.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
 import java.util.Date
 import javax.inject.Inject
 
-//todo - handle site state
 @HiltViewModel
 class LoginFlowViewModel @Inject constructor(
     private val repository: MainRepository,
@@ -85,9 +84,10 @@ class LoginFlowViewModel @Inject constructor(
     fun fetchLoginDetails() = viewModelScope.launch {
         uiStateListener.updateData { s -> s.copy(uiState = LoginUiState.Loading) }
 
-        val loginDetailsResult = vodovozServiceRepository.getLoginDetails().singleResult()
-
+        val loginDetailsDeferred = async { vodovozServiceRepository.getLoginDetails().singleResult() }
         val siteState = siteStateManager.requestSiteState()
+        val loginDetailsResult = loginDetailsDeferred.await()
+
         val agreementText = AgreementController.getText()
         val showRegisterText = siteState?.isSmsEnabled != true
 
@@ -377,7 +377,7 @@ class LoginFlowViewModel @Inject constructor(
 
     fun changeField(field: FieldUi, updatedField: FieldUi) = viewModelScope.launch {
         uiStateListener.updateData { s ->
-            val updatedFields = s.fields.updateFieldAndResetErrors(field, updatedField)
+            val updatedFields = s.fields.updateFieldAndResetError(field, updatedField)
 
             s.copy(
                 fields = updatedFields,

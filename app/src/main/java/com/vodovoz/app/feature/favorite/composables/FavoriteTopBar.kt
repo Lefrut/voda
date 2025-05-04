@@ -20,7 +20,12 @@ import androidx.compose.ui.unit.dp
 import com.vodovoz.app.R
 
 @Composable
-fun FavoriteTopBar(modifier: Modifier = Modifier, onSearchClick: () -> Unit, showSearch: Boolean) {
+fun FavoriteTopBar(
+    modifier: Modifier = Modifier,
+    title: String,
+    onSearchClick: () -> Unit,
+    showSearch: Boolean
+) {
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -33,12 +38,12 @@ fun FavoriteTopBar(modifier: Modifier = Modifier, onSearchClick: () -> Unit, sho
             modifier = Modifier
                 .weight(1f)
                 .padding(end = 16.dp),
-            text = stringResource(id = R.string.favorite),
+            text = title.ifEmpty { stringResource(id = R.string.favorite) },
             color = MaterialTheme.colorScheme.onBackground,
             style = MaterialTheme.typography.headlineSmall
         )
 
-        if(showSearch) {
+        if (showSearch) {
             Icon(
                 painter = painterResource(id = R.drawable.icon_search),
                 contentDescription = null,

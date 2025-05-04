@@ -56,7 +56,6 @@ class FullScreenHistoriesSliderFlowFragment : Fragment() {
     }
 
 
-    @OptIn(ExperimentalSharedTransitionApi::class)
     @SuppressLint("UnsafeRepeatOnLifecycleDetector")
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -65,8 +64,8 @@ class FullScreenHistoriesSliderFlowFragment : Fragment() {
     ): View {
         val navController = findNavController()
         return ComposeView(requireContext()).apply {
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
 
-            setViewCompositionStrategy(ViewCompositionStrategy.Default)
             setContent {
                 VodovozTheme {
                     val viewState by viewModel.observeUiState().collectAsStateWithLifecycle()

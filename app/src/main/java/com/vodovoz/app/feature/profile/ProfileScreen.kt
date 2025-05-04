@@ -5,13 +5,18 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.Indicator
+import androidx.compose.material3.pulltorefresh.PullToRefreshState
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.Dp
@@ -32,94 +37,114 @@ import com.vodovoz.app.feature.profile.composables.SupportingBottomSheet
 fun ProfileScreen(
     viewModel: ProfileFlowViewModel,
     viewState: ProfileFlowViewModel.ProfileState,
+    pullRefreshState: PullToRefreshState,
 ) {
-    Column(
+    PullToRefreshBox(
         modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.surface)
-            .verticalScroll(rememberScrollState())
+            .systemBarsPadding()
+            .fillMaxSize(),
+        isRefreshing = viewState.showRefreshIndicator,
+        onRefresh = {
+            viewModel.refresh()
+        },
+        state = pullRefreshState,
+        indicator = {
+            Indicator(
+                modifier = Modifier.align(Alignment.TopCenter),
+                isRefreshing = viewState.showRefreshIndicator,
+                state = pullRefreshState,
+                containerColor = MaterialTheme.colorScheme.background,
+                color = MaterialTheme.colorScheme.primary
+            )
+        }
     ) {
-
         Column(
             modifier = Modifier
-                .clip(
-                    MaterialTheme.shapes.large.copy(
-                        topStart = CornerSize(0.dp),
-                        topEnd = CornerSize(0.dp)
-                    )
-                )
-                .background(MaterialTheme.colorScheme.background)
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.surface)
+                .verticalScroll(rememberScrollState())
         ) {
-            ProfileUserInfoRow(
-                userInfoBlock = viewState.userInfoBlock,
-                onClick = {
-                    viewModel.navigateToUserData()
-                }
-            )
-            ProfileCardsRow(
-                modifier = Modifier.padding(top = 16.dp),
-                cards = viewState.cards,
-                onCardClick = {
-
-                }
-            )
-            ProfileWalletItemsRow(
-                modifier = Modifier.padding(top = 16.dp),
-                walletItems = viewState.walletItems,
-                onCardClick = { walletItem ->
-                    viewModel.activateWalletItem(walletItem)
-                }
-            )
-
-            val bannerImages = viewState.banners.map { bannerUi -> bannerUi.detailPicture }
-            val pagerState = rememberPagerState { bannerImages.size }
-
-            AuthScrollImagePager(
+            Column(
                 modifier = Modifier
-                    .padding(top = 17.dp, bottom = 16.dp)
-                    .height(68.dp),
-                images = bannerImages,
-                onImageClick = { page ->
-                    val banner = viewState.banners[page]
-                    viewModel.activateBannerAction(banner)
-                },
-                pageWidth = Dp.Unspecified,
-                pagerState = pagerState,
-                chip = { page ->
-                    val advertising = viewState.banners[page].advertising
-                    advertising?.let {
-                        AdvertisingChip { viewModel.showAdvertisingBottomSheet(advertising) }
+                    .clip(
+                        MaterialTheme.shapes.large.copy(
+                            topStart = CornerSize(0.dp),
+                            topEnd = CornerSize(0.dp)
+                        )
+                    )
+                    .background(MaterialTheme.colorScheme.background)
+            ) {
+                ProfileUserInfoRow(
+                    userInfoBlock = viewState.userInfoBlock,
+                    onClick = {
+                        viewModel.navigateToUserData()
                     }
+                )
+                ProfileCardsRow(
+                    modifier = Modifier.padding(top = 16.dp),
+                    cards = viewState.cards,
+                    onCardClick = {
+
+                    }
+                )
+                ProfileWalletItemsRow(
+                    modifier = Modifier.padding(top = 16.dp),
+                    walletItems = viewState.walletItems,
+                    onCardClick = { walletItem ->
+                        viewModel.activateWalletItem(walletItem)
+                    }
+                )
+
+                val bannerImages = viewState.banners.map { bannerUi -> bannerUi.detailPicture }
+                val pagerState = rememberPagerState { bannerImages.size }
+
+                AuthScrollImagePager(
+                    modifier = Modifier
+                        .padding(top = 17.dp, bottom = 16.dp)
+                        .height(68.dp),
+                    images = bannerImages,
+                    onImageClick = { page ->
+                        val banner = viewState.banners[page]
+                        viewModel.activateBannerAction(banner)
+                    },
+                    pageWidth = Dp.Unspecified,
+                    pagerState = pagerState,
+                    chip = { page ->
+                        val advertising = viewState.banners[page].advertising
+                        advertising?.let {
+                            AdvertisingChip { viewModel.showAdvertisingBottomSheet(advertising) }
+                        }
+                    }
+                )
+            }
+
+
+
+            ProfileMenuColumn(
+                modifier = Modifier
+                    .padding(top = 8.dp)
+                    .clip(MaterialTheme.shapes.extraLarge),
+                menuItems = viewState.smallMenu,
+                onItemClick = { menuItem ->
+                    viewModel.activateMenuItem(menuItem)
+                }
+            )
+
+            ProfileMenuColumn(
+                modifier = Modifier
+                    .padding(top = 8.dp)
+                    .clip(
+                        MaterialTheme.shapes.large.copy(
+                            bottomEnd = CornerSize(0.dp),
+                            bottomStart = CornerSize(0.dp)
+                        )
+                    ),
+                menuItems = viewState.normalMenu,
+                onItemClick = { menuItem ->
+                    viewModel.activateMenuItem(menuItem)
                 }
             )
         }
-
-
-
-        ProfileMenuColumn(
-            modifier = Modifier
-                .padding(top = 8.dp)
-                .clip(MaterialTheme.shapes.extraLarge),
-            menuItems = viewState.smallMenu,
-            onItemClick = { menuItem ->
-                viewModel.activateMenuItem(menuItem)
-            }
-        )
-
-        ProfileMenuColumn(
-            modifier = Modifier
-                .padding(top = 8.dp)
-                .clip(
-                    MaterialTheme.shapes.large.copy(
-                        bottomEnd = CornerSize(0.dp),
-                        bottomStart = CornerSize(0.dp)
-                    )
-                ),
-            menuItems = viewState.normalMenu,
-            onItemClick = { menuItem ->
-                viewModel.activateMenuItem(menuItem)
-            }
-        )
     }
 
     if (viewState.showAdvertisingBS) {

@@ -24,6 +24,7 @@ class SplashFileViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             kotlin.runCatching {
                 SplashFileConfig.downloadSplashFile(appContext)
+                _fileIsLoading.update { false }
             }.onFailure {
                 _fileIsLoading.update { false }
             }

@@ -4,11 +4,17 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
@@ -92,10 +98,21 @@ class CartFragment : Fragment() {
                         }
 
                         is CartFlowViewModel.CartUiState.Empty -> {
-                            VodovozPlaceholder(
-                                data = uiState.errorData,
-                                onButtonClick = { viewModel.navigateToCatalog() }
-                            )
+                            val placeholder = uiState.placeholder
+                            Column {
+                                Text(
+                                    text = placeholder.title.ifEmpty {
+                                        stringResource(R.string.cart)
+                                    },
+                                    color = MaterialTheme.colorScheme.onBackground,
+                                    style = MaterialTheme.typography.headlineSmall,
+                                    modifier = Modifier.padding(16.dp)
+                                )
+                                VodovozPlaceholder(
+                                    data = placeholder,
+                                    onButtonClick = { viewModel.navigateToCatalog() }
+                                )
+                            }
                         }
 
                         CartFlowViewModel.CartUiState.Error -> {

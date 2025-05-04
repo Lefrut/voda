@@ -2,10 +2,21 @@ package com.vodovoz.app.feature.profile
 
 import android.os.Bundle
 import android.view.View
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
@@ -28,10 +39,10 @@ import com.vodovoz.app.core.navigation.navigateToUserData
 import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.composables.placeholders.LoadingPlaceholder
 import com.vodovoz.app.design_system.composables.placeholders.NetworkErrorPlaceholder
+import com.vodovoz.app.design_system.composables.placeholders.VodovozPlaceholder
 import com.vodovoz.app.feature.cart.CartFlowViewModel
 import com.vodovoz.app.feature.favorite.FavoriteFlowViewModel
 import com.vodovoz.app.feature.home.HomeFlowViewModel
-import com.vodovoz.app.feature.profile.composables.UserNotFountPlaceholder
 import com.vodovoz.app.feature.profile.core.ProfileChatsNavigator
 import com.vodovoz.app.util.extensions.copyText
 import dagger.hilt.android.AndroidEntryPoint
@@ -71,17 +82,19 @@ class ProfileFragment : Fragment() {
         observeTabReselect()
     }
 
+    @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreateView(
         inflater: android.view.LayoutInflater,
         container: android.view.ViewGroup?,
         savedInstanceState: Bundle?,
     ): View {
         return ComposeView(requireContext()).apply {
-            setViewCompositionStrategy(ViewCompositionStrategy.Default)
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnDetachedFromWindow)
             setContent {
                 VodovozTheme {
                     val pagingState by viewModel.observeUiState().collectAsStateWithLifecycle()
                     val viewState by rememberUpdatedState(newValue = pagingState.data)
+                    val pullToRefreshState = rememberPullToRefreshState()
 
                     when (val uiState = viewState.uiState) {
                         ProfileFlowViewModel.ProfileUiState.Loading -> {
@@ -91,21 +104,33 @@ class ProfileFragment : Fragment() {
                         ProfileFlowViewModel.ProfileUiState.Profile -> {
                             ProfileScreen(
                                 viewModel = viewModel,
-                                viewState = viewState
+                                viewState = viewState,
+                                pullRefreshState = pullToRefreshState
                             )
                         }
 
                         is ProfileFlowViewModel.ProfileUiState.UserNotFound -> {
-                            UserNotFountPlaceholder(
-                                title = uiState.title,
-                                header = uiState.header,
-                                description = uiState.description,
-                                image = uiState.imageUrl,
-                                button = uiState.button,
-                                onButtonClick = {
-                                    viewModel.navigateToLoginOrRegister()
-                                }
-                            )
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .systemBarsPadding()
+                            ) {
+                                Text(
+                                    text = uiState.placeholder.title,
+                                    color = MaterialTheme.colorScheme.onBackground,
+                                    style = MaterialTheme.typography.headlineSmall,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    modifier = Modifier.padding(16.dp)
+                                )
+                                VodovozPlaceholder(
+                                    data = uiState.placeholder,
+                                    onButtonClick = {
+                                        viewModel.navigateToLoginOrRegister()
+                                    }
+                                )
+
+                            }
                         }
 
                         ProfileFlowViewModel.ProfileUiState.Error -> {

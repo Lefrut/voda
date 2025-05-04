@@ -1,5 +1,6 @@
 package com.vodovoz.app.feature.full_screen_history_slider
 
+import androidx.compose.runtime.Immutable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.vodovoz.app.common.content.ErrorState
@@ -236,6 +237,7 @@ class FullScreenHistoriesSliderFlowViewModel @Inject constructor(
         data object Success : UiState()
     }
 
+    @Immutable
     data class HistoriesSliderState(
         val historyUIList: List<HistoryUI> = listOf(),
         val stories: List<StoryUi> = listOf(),

@@ -14,7 +14,6 @@ import com.vodovoz.app.core.network.stringBody
 import com.vodovoz.app.data.vodovoz_service.VodovozService
 import com.vodovoz.app.data.vodovoz_service.mappers.checkError
 import com.vodovoz.app.data.vodovoz_service.mappers.executeRequest
-import com.vodovoz.app.data.vodovoz_service.mappers.executeVodovozRequest
 import com.vodovoz.app.data.vodovoz_service.mappers.mapToDomain
 import com.vodovoz.app.data.vodovoz_service.mappers.toDomain
 import com.vodovoz.app.data.vodovoz_service.model.BrandSectionDTO
@@ -91,8 +90,6 @@ import okhttp3.RequestBody.Companion.asRequestBody
 import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlin.reflect.javaType
-import kotlin.reflect.typeOf
 
 
 @Singleton
@@ -126,7 +123,10 @@ class VodovozServiceRepositoryImpl @Inject constructor(
         )
     }
 
-    override fun sendQuestionnairesAnswers(who: String, answers: String): Flow<Result<String>> {
+    override fun sendQuestionnairesAnswers(
+        who: String,
+        answers: String
+    ): Flow<Result<VodovozPlaceholderModel>> {
         return executeRequest(
             request = {
                 vodovozService.sendQuestionnaires(
@@ -136,7 +136,13 @@ class VodovozServiceRepositoryImpl @Inject constructor(
                 )
             },
             mapper = {
-                it.data ?: ""
+                it.ata!!.toDomain()
+            },
+            onFail = { response ->
+                val message =
+                    moshi.fromJson<VodovozResponseDTO<String>>(response.stringBody()).data ?: ""
+
+                throw RequestException(message = message)
             }
         )
     }
@@ -235,6 +241,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
             config = PagingConfig(pageSize = 5),
             pagingSourceFactory = {
                 VodovozPagingSource(
+                    clazz = BrandSectionDTO::class,
                     request = { page, _ ->
                         if (page > 1 && searchQuery.isNotBlank()) {
                             throw EmptyResultException()
@@ -285,6 +292,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
             config = PagingConfig(pageSize = 5),
             pagingSourceFactory = {
                 VodovozPagingSource(
+                    clazz = ProductsSectionDTO::class,
                     request = { page, _ ->
                         vodovozService.getBrandProducts(
                             brandId = brandId,
@@ -356,6 +364,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
             config = PagingConfig(pageSize = 5),
             pagingSourceFactory = {
                 VodovozPagingSource(
+                    clazz = ProductsSectionDTO::class,
                     request = { page, _ ->
                         vodovozService.getBannerProducts(
                             bannerId = bannerId,
@@ -401,12 +410,12 @@ class VodovozServiceRepositoryImpl @Inject constructor(
     }
 
     override fun updatePassword(password: String): Flow<Result<Unit>> {
-        return executeVodovozRequest(
+        return executeRequest(
             request = {
                 vodovozService.updatePassword(accountManager.fetchAccountId() ?: -1, password)
             },
             mapper = { vodovozResponseDTO ->
-                vodovozResponseDTO?.checkError { error -> throw UserNotLoginException(errorData = error) }
+                vodovozResponseDTO.checkError { error -> throw UserNotLoginException(errorData = error) }
             },
             onFail = { response ->
                 val errorBody = moshi.fromJson<VodovozErrorResponseDTO>(response.stringBody())
@@ -418,12 +427,11 @@ class VodovozServiceRepositoryImpl @Inject constructor(
     }
 
     override fun getChangePasswordDetails(): Flow<Result<ChangePasswordDetailsModel>> {
-        return executeVodovozRequest(
+        return executeRequest(
             request = {
                 vodovozService.getChangePasswordDetails(accountManager.fetchAccountId() ?: -1)
             },
             mapper = { vodovozResponse ->
-                vodovozResponse!!.checkError { error -> throw UserNotLoginException(errorData = error) }
                 vodovozResponse.data!!.toDomain()
             }
         )
@@ -488,7 +496,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
             },
             onFail = { response ->
                 val errorData = moshi.fromJson<VodovozResponseDTO<VodovozPlaceholderDTO>>(
-                    response.errorBody()?.string() ?: ""
+                    response.stringBody()
                 ).data
 
                 Result.failure(UserNotLoginException(errorData = errorData!!.toDomain()))
@@ -622,6 +630,8 @@ class VodovozServiceRepositoryImpl @Inject constructor(
                 it.data!!
             },
             onResponse = { response ->
+                if (response.code() != 200) return@executeRequest
+
                 val cookies = response.headers().values("Set-Cookie")
                 val sessionId = cookies.firstOrNull { s -> s.startsWith("PHPSESSID=") }
                 cookieManager.updateCookieSessionId(sessionId)
@@ -644,11 +654,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
                 throw when (response.code()) {
                     404 -> {
                         val errorDTO = moshi.fromJson<VodovozResponseDTO<String>>(
-                            json = jsonBody,
-                            type = Types.newParameterizedType(
-                                VodovozResponseDTO::class.java,
-                                String::class.java
-                            )
+                            json = jsonBody
                         )
                         ValidationException(message = errorDTO.message ?: "")
                     }
@@ -744,11 +750,8 @@ class VodovozServiceRepositoryImpl @Inject constructor(
         return Pager(
             config = PagingConfig(pageSize = 5, initialLoadSize = 5),
             pagingSourceFactory = {
-                val type = Types.newParameterizedType(
-                    VodovozResponseDTO::class.java,
-                    ProductsSectionDTO::class.java
-                )
                 VodovozPagingSource(
+                    clazz = ProductsSectionDTO::class,
                     request = { page, _ ->
                         vodovozService.getCategoryProducts(
                             page = page,
@@ -762,7 +765,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
                         )
                     },
                     mapper = { response ->
-                        response.data?.DATA?.mapNotNull { product -> product.toDomain() }
+                        response.data?.DATA?.mapToDomain()
                             ?: throw IllegalArgumentException("Paged search products can't be null")
                     }
                 )
@@ -781,7 +784,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
             config = PagingConfig(pageSize = 5, initialLoadSize = 5),
             pagingSourceFactory = {
                 VodovozPagingSource(
-
+                    clazz = ProductsSectionDTO::class,
                     request = { page, _ ->
                         vodovozService.getSearchProducts(
                             query = query,
@@ -933,6 +936,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
             config = PagingConfig(pageSize = 4, initialLoadSize = 4, enablePlaceholders = false),
             pagingSourceFactory = {
                 VodovozPagingSource(
+                    clazz = ProductsSectionDTO::class,
                     request = { page, _ ->
                         val userId = accountManager.fetchAccountId()
                         vodovozService.getFavoriteProducts(
@@ -1078,6 +1082,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
             config = PagingConfig(pageSize = 10, initialLoadSize = 10),
             pagingSourceFactory = {
                 VodovozPagingSource(
+                    clazz = ProductCommentsDTO::class,
                     request = { page, _ ->
                         vodovozService.getComments(
                             productId = productId,
@@ -1177,6 +1182,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
             config = PagingConfig(pageSize = limit, initialLoadSize = limit),
             pagingSourceFactory = {
                 VodovozPagingSource(
+                    clazz = PromotionDetailsDTO::class,
                     request = { page, limit ->
                         vodovozService.getPromotionDetails(promotionId, page, limit)
                     },
@@ -1207,6 +1213,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
             config = PagingConfig(pageSize = limit, initialLoadSize = limit),
             pagingSourceFactory = {
                 VodovozPagingSource(
+                    clazz = PromotionsDTO::class,
                     request = { page, limit ->
                         vodovozService.getPromotionsWithSections(
                             page = page,
@@ -1270,6 +1277,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
             config = PagingConfig(5),
             pagingSourceFactory = {
                 VodovozPagingSource(
+                    clazz = ProductsSectionDTO::class,
                     request = { page, _ ->
                         vodovozService.getAllNewProducts(
                             page = page,
@@ -1315,6 +1323,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
             config = PagingConfig(4, 4),
             pagingSourceFactory = {
                 VodovozPagingSource(
+                    clazz = ProductsSectionDTO::class,
                     request = { page, _ ->
                         vodovozService.getAllHurryUpBuyProducts(
                             page = page,
@@ -1362,6 +1371,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
             config = PagingConfig(4, 4),
             pagingSourceFactory = {
                 VodovozPagingSource(
+                    clazz = ProductsSectionDTO::class,
                     request = { page, _ ->
                         vodovozService.getAllSuperTop(
                             id = id.toLong(),

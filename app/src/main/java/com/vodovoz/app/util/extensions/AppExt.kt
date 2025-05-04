@@ -44,6 +44,7 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 import kotlin.properties.ReadOnlyProperty
+import androidx.core.net.toUri
 
 
 inline fun Fragment.addOnBackPressedCallback(crossinline callback: () -> Unit) {
@@ -361,7 +362,7 @@ inline fun <T : View> T.preDraw(crossinline callBack: (isReady: Boolean) -> Unit
 
 fun Context.openUrl(url: String){
     kotlin.runCatching {
-        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+        val intent = Intent(Intent.ACTION_VIEW, url.toUri())
         startActivity(intent)
     }
 }

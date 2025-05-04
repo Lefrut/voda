@@ -32,7 +32,7 @@ import com.vodovoz.app.feature.preorder.model.FieldUi
 import com.vodovoz.app.feature.preorder.model.checkFields
 import com.vodovoz.app.feature.preorder.model.getErrorText
 import com.vodovoz.app.feature.preorder.model.mapToDomain
-import com.vodovoz.app.feature.preorder.model.updateFieldAndResetErrors
+import com.vodovoz.app.feature.preorder.model.updateFieldAndResetError
 import com.vodovoz.app.feature.preorder.model.vodovozValidators
 import com.vodovoz.app.mapper.BuyCertificateBundleMapper.mapToUI
 import com.vodovoz.app.mapper.OrderingCompletedInfoBundleMapper.mapToUI
@@ -442,7 +442,7 @@ class BuyCertificateViewModel @Inject constructor(
         uiStateListener.updateData { s ->
             s.copy(
                 currentTab = s.currentTab.copy(
-                    fields = s.currentTab.fields.updateFieldAndResetErrors(field, updatedField)
+                    fields = s.currentTab.fields.updateFieldAndResetError(field, updatedField)
                 )
             )
         }
@@ -523,11 +523,16 @@ class BuyCertificateViewModel @Inject constructor(
             uiStateListener.updateData { s ->
                 s.copy(
                     uiState = BuyCertificateUiState.Success(buyCertificate.placeholder.toUi()),
-                    paymentInfo = paymentInfo
+                    paymentInfo = paymentInfo,
+                    button = s.button.copy(loading = false)
                 )
             }
         }.onFailure {
             eventListener.emit(BuyCertificateEvents.ShowToast(resourcesProvider.getString(R.string.order_failed)))
+
+            uiStateListener.updateData { s ->
+                s.copy(button = s.button.copy(loading = false))
+            }
         }
 
 

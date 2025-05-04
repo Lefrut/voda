@@ -21,6 +21,7 @@ import com.vodovoz.app.data.model.common.ResponseEntity
 import com.vodovoz.app.design_system.model.AboutAdvertisingUi
 import com.vodovoz.app.design_system.model.BannerUi
 import com.vodovoz.app.design_system.model.ColorfulButtonUi
+import com.vodovoz.app.design_system.model.VodovozPlaceholderUi
 import com.vodovoz.app.design_system.model.mapToUi
 import com.vodovoz.app.design_system.model.toUi
 import com.vodovoz.app.domain.general.model.UserNotLoginException
@@ -78,7 +79,6 @@ class ProfileFlowViewModel @Inject constructor(
     private val accountManager: AccountManager,
     private val siteStateManager: SiteStateManager,
     private val tabManager: TabManager,
-    private val application: Application,
     private val waterAppHelper: WaterAppHelper,
     private val vodovozServiceRepository: VodovozServiceRepository,
 ) : PagingContractViewModel<ProfileFlowViewModel.ProfileState, ProfileFlowViewModel.ProfileEvents>(
@@ -91,7 +91,6 @@ class ProfileFlowViewModel @Inject constructor(
         }
         //todo - check user auth else logout
         fetchProfileDetails()
-
     }
 
     fun fetchProfileDetails() = viewModelScope.launch {
@@ -115,151 +114,24 @@ class ProfileFlowViewModel @Inject constructor(
         }.onFailure { t ->
 
             val uiState = when {
-                t is UserNotLoginException && t.errorData != null -> with(t.errorData) {
-                    ProfileUiState.UserNotFound(
-                        title = title,
-                        header = headerHtml,
-                        description = descriptionHtml,
-                        imageUrl = imageUrl,
-                        button = button?.toUi() ?: return@with ProfileUiState.Error
-                    )
-                }
+                t is UserNotLoginException && t.errorData != null -> ProfileUiState.UserNotFound(
+                    placeholder = t.errorData.toUi(),
+                )
 
                 else -> ProfileUiState.Error
             }
 
             uiStateListener.updateData { s ->
-                s.copy(uiState = uiState)
+                s.copy(uiState = uiState, )
             }
         }
     }
 
-    fun fetchFirstUserData() {
-        viewModelScope.launch {
-            val userId = accountManager.fetchAccountId()
-            if (userId == null) {
-                uiStateListener.value =
-                    state.copy(data = state.data.copy(isLogin = false), loadingPage = false)
-                return@launch
-            }
-            flow { emit(repository.fetchUserData(userId)) }
-                .catch {
-                    debugLog { "fetch user data error ${it.localizedMessage}" }
-                    uiStateListener.value =
-                        state.copy(error = it.toErrorState(), loadingPage = false)
-                }
-                .onEach {
-                    if (it is ResponseEntity.Success) {
-                        firstLoad()
-                    } else {
-                        logout()
-                    }
-                }
-                .collect()
-        }
-    }
-
-    private fun CoroutineScope.firstLoadTasks(userId: Long) = arrayOf(
-        async(Dispatchers.IO) { fetchProfileData(POSITION_1, userId) },
-        async(Dispatchers.IO) {
-            fetchProfileCategories(
-                POSITION_2,
-                POSITION_3,
-                POSITION_4,
-                userId
-            )
-        },
-    )
 
     private fun CoroutineScope.secondLoadTasks(userId: Long) = arrayOf(
         async(Dispatchers.IO) { fetchViewedProductsSlider(POSITION_6_TITLE, POSITION_7, userId) },
         async(Dispatchers.IO) { fetchPersonalProducts(POSITION_8, userId) },
     )
-
-    private suspend fun fetchProfileData(position: Int, userId: Long): List<PositionItem> {
-        return runCatching {
-            val response = repository.fetchUserData(userId)
-            withContext(Dispatchers.Default) {
-                if (response is ResponseEntity.Success) {
-                    listOf(
-                        PositionItem(
-                            position,
-                            ProfileHeader(
-                                position, response.data.mapToUI()
-                            )
-                        )
-                    )
-                } else {
-                    emptyList()
-                }
-            }
-        }
-            .onFailure { showNetworkError(it) }
-            .getOrDefault(emptyList())
-    }
-
-    private suspend fun fetchProfileCategories(
-        positionBlock: Int,
-        positionOrders: Int,
-        position: Int,
-        userId: Long,
-    ): List<PositionItem> {
-        return runCatching {
-            val responseBody = repository.fetchProfileCategories(
-                userId = userId,
-                isTablet = application.isTablet()
-            )
-            withContext(Dispatchers.Default) {
-                if (responseBody.status != null && responseBody.status == "Success") {
-                    val mapped = responseBody.fetchProfileCategoryUIList()
-                    val item = PositionItem(
-                        position,
-                        ProfileMain(items = mapped.list)
-                    )
-
-                    val blockList = responseBody.block
-                    val itemBlock = if (!blockList.isNullOrEmpty()) {
-                        PositionItem(
-                            positionBlock,
-                            ProfileBlock(data = blockList)
-                        )
-                    } else {
-                        null
-                    }
-
-                    val ordersList = responseBody.zakaz
-                    val itemOrders = if (!ordersList.isNullOrEmpty()) {
-                        PositionItem(
-                            positionOrders,
-                            ProfileOrders(position, ordersList.mapToUi())
-                        )
-                    } else {
-                        null
-                    }
-
-                    tabManager.saveBottomNavProfileState(mapped.amount)
-
-                    if (itemBlock != null) {
-                        if (itemOrders != null) {
-                            listOf(itemBlock, itemOrders, item)
-                        } else {
-                            listOf(itemBlock, item)
-                        }
-                    } else {
-                        if (itemOrders != null) {
-                            listOf(itemOrders, item)
-                        } else {
-                            listOf(item)
-                        }
-                    }
-                } else {
-                    emptyList()
-                }
-            }
-        }
-            .onFailure { showNetworkError(it) }
-            .getOrDefault(emptyList())
-    }
 
     private suspend fun fetchViewedProductsSlider(
         positionTitle: Int,
@@ -343,124 +215,14 @@ class ProfileFlowViewModel @Inject constructor(
         }
     }
 
-    fun firstLoad() {
-        fetchProfileDetails()
-        if (!state.isFirstLoad) {
-            uiStateListener.value = state.copy(loadingPage = true)
-
-            val userId = accountManager.fetchAccountId()
-            if (userId == null) {
-                uiStateListener.value =
-                    state.copy(data = state.data.copy(isLogin = false), loadingPage = false)
-                return
-            }
-
-            viewModelScope.launch {
-                val tasks = firstLoadTasks(userId)
-                val start = System.currentTimeMillis()
-                val result = awaitAll(*tasks).flatten()
-                debugLog { "profile first load task ${System.currentTimeMillis() - start} result size ${result.size}" }
-                val positionItemsSorted =
-                    (/*state.data.positionItems + */result).sortedBy { it.position }
-                uiStateListener.value = state.copy(
-                    loadingPage = false,
-                    data = state.data.copy(
-                        positionItems = positionItemsSorted,
-                        items = positionItemsSorted.map { it.item },
-                        isLogin = true
-                    ),
-                    isFirstLoad = true,
-                    error = if (result.isNotEmpty()) {
-                        null
-                    } else {
-                        state.error
-                    }
-                )
-                secondLoad(userId)
-            }
+    fun refresh() = viewModelScope.launch {
+        uiStateListener.updateData {s ->
+            s.copy(showRefreshIndicator = true)
         }
-    }
+        fetchProfileDetails().join()
 
-    private fun secondLoad(userId: Long) {
-        viewModelScope.launch {
-            val tasks = secondLoadTasks(userId)
-            val start = System.currentTimeMillis()
-            val result = awaitAll(*tasks).flatten()
-            val mappedResult = if (result.isNotEmpty()) {
-                result + fetchStaticItems()
-            } else {
-                result
-            }
-            val positionItemsSorted =
-                (state.data.positionItems + mappedResult).sortedBy { it.position }
-            uiStateListener.value = state.copy(
-                loadingPage = false,
-                data = state.data.copy(
-                    positionItems = positionItemsSorted,
-                    items = positionItemsSorted.map { it.item },
-//                    isSecondLoad = true,
-                    isLogin = true
-                ),
-                page = 1,
-                error = if (mappedResult.isNotEmpty()) {
-                    null
-                } else {
-                    state.error
-                }
-            )
-        }
-    }
-
-    fun refresh() {
-
-        fetchProfileDetails()
-
-        if (!state.loadingPage) {
-            val userId = accountManager.fetchAccountId()
-
-            if (userId == null) {
-                uiStateListener.value = state.copy(data = state.data.copy(isLogin = false))
-                return
-            }
-
-            uiStateListener.value =
-                state.copy(
-                    loadingPage = true,
-                    data = state.data.copy(
-                        items = ProfileState.idle().items,
-                        positionItems = ProfileState.idle().positionItems,
-                        isSecondLoad = false,
-                        isLogin = true
-                    ),
-                    isFirstLoad = false
-                )
-            viewModelScope.launch {
-                val tasks = firstLoadTasks(userId) + secondLoadTasks(userId)
-                val result = awaitAll(*tasks).flatten()
-                val mappedResult = if (result.isNotEmpty()) {
-                    result + fetchStaticItems()
-                } else {
-                    result
-                }
-                val positionItemsSorted =
-                    (/*state.data.positionItems + */mappedResult).sortedBy { it.position }
-                uiStateListener.value = state.copy(
-                    loadingPage = false,
-                    data = state.data.copy(
-                        positionItems = positionItemsSorted,
-                        items = positionItemsSorted.map { it.item },
-//                        isSecondLoad = true,
-                        isLogin = true
-                    ),
-                    page = 1,
-                    error = if (mappedResult.isNotEmpty()) {
-                        null
-                    } else {
-                        state.error
-                    },
-                    isFirstLoad = true
-                )
-            }
+        uiStateListener.updateData {s ->
+            s.copy(showRefreshIndicator = false)
         }
     }
 
@@ -707,6 +469,7 @@ class ProfileFlowViewModel @Inject constructor(
         val showAdvertisingBS: Boolean = false,
         val showSupportingBS: Boolean = false,
         val showBalanceBS: Boolean = false,
+        val showRefreshIndicator: Boolean =false,
 
         val currentBalanceBSData: ProfileWalletPopupWindowUi? = null,
         val currentSupportingBSData: ProfileChatsPopupWindowUi = ProfileChatsPopupWindowUi.Empty,
@@ -737,13 +500,7 @@ class ProfileFlowViewModel @Inject constructor(
 
         data object Loading : ProfileUiState
         data object Profile : ProfileUiState
-        data class UserNotFound(
-            val title: String,
-            val header: String,
-            val description: String,
-            val imageUrl: String,
-            val button: ColorfulButtonUi,
-        ) : ProfileUiState
+        data class UserNotFound(val placeholder: VodovozPlaceholderUi) : ProfileUiState
 
         data object Error : ProfileUiState
 

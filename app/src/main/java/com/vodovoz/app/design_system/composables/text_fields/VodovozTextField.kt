@@ -60,8 +60,16 @@ fun VodovozTextField(
     }
     val isFocused by interactionSource.collectIsFocusedAsState()
     val isMessage = field.id.contains("message", true) || field.id == "dr127"
+    val visualTransformation = when (field.keyboardType) {
+        KeyboardType.Phone -> PhoneNumberVisualTransformation()
+        KeyboardType.Password -> if (!field.isValueVisible) {
+            PasswordVisualTransformation('•')
+        } else VisualTransformation.None
 
-    if (field.id == "phone") {
+        else -> VisualTransformation.None
+    }
+
+    if (visualTransformation is PhoneNumberVisualTransformation) {
         LaunchedEffect(isFocused) {
             if (isFocused) onFieldChange(field, field)
         }
@@ -85,14 +93,7 @@ fun VodovozTextField(
         maxLines = if (isMessage) 3 else 1,
         minLines = if (isMessage) 2 else 1,
         supportingText = field.supportingText,
-        visualTransformation = when (field.keyboardType) {
-            KeyboardType.Phone -> PhoneNumberVisualTransformation()
-            KeyboardType.Password -> if (!field.isValueVisible) {
-                PasswordVisualTransformation('•')
-            } else VisualTransformation.None
-
-            else -> VisualTransformation.None
-        },
+        visualTransformation = visualTransformation,
         trailingIcon = {
             if (field.keyboardType == KeyboardType.Password) {
                 PasswordIcon(valueIsVisible = field.isValueVisible) {
@@ -245,6 +246,7 @@ fun VodovozTextField(
     prefix: String? = null,
     trailingIcon: @Composable (() -> Unit)? = null,
     isError: Boolean = false,
+    isDate: Boolean = false,
     visualTransformation: VisualTransformation = VisualTransformation.None,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     keyboardActions: KeyboardActions = KeyboardActions.Default,
@@ -286,7 +288,9 @@ fun VodovozTextField(
     VodovozTextField(
         modifier = modifier,
         value = textFieldValue,
-        onValueChange = { newTextFieldValueState ->
+        onValueChange = onValueChange@{ newTextFieldValueState ->
+            if(isDate) return@onValueChange
+
             val newText =
                 if (isPhone) formatRussianPhoneNumber(newTextFieldValueState.text) else newTextFieldValueState.text
             val newSelection =

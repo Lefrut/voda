@@ -16,7 +16,7 @@ import com.vodovoz.app.feature.preorder.model.checkFields
 import com.vodovoz.app.feature.preorder.model.getErrorText
 import com.vodovoz.app.feature.preorder.model.mapToDomain
 import com.vodovoz.app.feature.preorder.model.mapToUi
-import com.vodovoz.app.feature.preorder.model.updateFieldAndResetErrors
+import com.vodovoz.app.feature.preorder.model.updateFieldAndResetError
 import com.vodovoz.app.feature.preorder.model.vodovozValidators
 import com.vodovoz.app.ui.mvi.MviViewModel
 import com.vodovoz.app.util.extensions.singleResult
@@ -49,7 +49,7 @@ class OrderQuestionViewModel @Inject constructor(
     fun changeField(field: FieldUi, updatedField: FieldUi) = viewModelScope.launch {
         _state.update { s ->
 
-            val updatedFields = s.fields.updateFieldAndResetErrors(field, updatedField)
+            val updatedFields = s.fields.updateFieldAndResetError(field, updatedField)
             val buttonIsEnabled = updatedFields.checkFields(
                 validators = listOf(PhoneNumberValidator, EmptyTextValidator)
             )

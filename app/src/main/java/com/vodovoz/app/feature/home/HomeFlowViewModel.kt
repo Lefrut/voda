@@ -2,6 +2,7 @@ package com.vodovoz.app.feature.home
 
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.viewModelScope
+import com.vodovoz.app.R
 import com.vodovoz.app.common.account.data.AccountManager
 import com.vodovoz.app.common.cart.CartManager
 import com.vodovoz.app.common.content.ErrorState
@@ -13,6 +14,7 @@ import com.vodovoz.app.common.content.toErrorState
 import com.vodovoz.app.common.content.updateData
 import com.vodovoz.app.common.like.LikeManager
 import com.vodovoz.app.common.product.rating.RatingProductManager
+import com.vodovoz.app.common.resources.ResourcesProvider
 import com.vodovoz.app.core.network.VodovozWebConfig
 import com.vodovoz.app.data.MainRepository
 import com.vodovoz.app.data.model.common.ResponseEntity
@@ -77,6 +79,7 @@ class HomeFlowViewModel @Inject constructor(
     private val ratingProductManager: RatingProductManager,
     private val accountManager: AccountManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
+    private val resourcesProvider: ResourcesProvider
 ) : PagingContractViewModel<HomeFlowViewModel.HomeState, HomeFlowViewModel.HomeEvents>(HomeState.idle()) {
 
     suspend fun listenLoadingProducts() =
@@ -291,7 +294,12 @@ class HomeFlowViewModel @Inject constructor(
         uiStateListener.updateData { s -> s.copy(uiState = HomeUiState.Loading) }
         fetchPrimaryDetails()
         fetchSecondaryDetails()
-        fetchOptionalDetails()
+        if (
+            accountManager.isAlreadyLogin()
+            && dataState.specialPromotion == SpecialPromotionUi.Empty
+        ) {
+            fetchOptionalDetails()
+        }
     }
 
     fun firstLoad() {
@@ -711,6 +719,11 @@ class HomeFlowViewModel @Inject constructor(
         eventListener.emit(HomeEvents.ActivateVodovozAction(banner.action))
     }
 
+    fun activateAction(action: VodovozAction) = viewModelScope.launch {
+        eventListener.emit(HomeEvents.ActivateVodovozAction(action))
+    }
+
+
     fun navigateToOrderDetails(order: OrderUi) = viewModelScope.launch {
         eventListener.emit(HomeEvents.GoToOrderDetails(order.orderId))
     }
@@ -718,7 +731,12 @@ class HomeFlowViewModel @Inject constructor(
     fun navigateByMenuItem(menuItem: MenuItemUi) = viewModelScope.launch {
         val event = when (menuItem.type) {
             MenuItemTypeUi.History -> HomeEvents.GoToOrdersHistory
-            MenuItemTypeUi.Payment -> HomeEvents.GoToWebView(VodovozWebConfig.ABOUT_PAYMENT_URL, "")
+            MenuItemTypeUi.Payment -> HomeEvents.GoToWebView(
+                VodovozWebConfig.ABOUT_PAYMENT_URL, resourcesProvider.getString(
+                    R.string.space
+                )
+            )
+
             MenuItemTypeUi.None -> {
                 //todo - show toast
                 TODO()
@@ -801,7 +819,7 @@ class HomeFlowViewModel @Inject constructor(
         val specialPromotion: SpecialPromotionUi = SpecialPromotionUi.Empty,
         val currentAdvertising: AboutAdvertisingUi = AboutAdvertisingUi.Empty,
 
-        val uiState: HomeUiState = HomeUiState.Success,
+        val uiState: HomeUiState = HomeUiState.Loading,
         val showSpecialPromotionBS: Boolean = false,
         val showUnratedProductsBS: Boolean = true,
         val showAdvertisingBS: Boolean = false,

@@ -10,8 +10,7 @@ import com.vodovoz.app.feature.preorder.model.FieldUi
 import com.vodovoz.app.feature.preorder.model.checkFields
 import com.vodovoz.app.feature.preorder.model.mapToDomain
 import com.vodovoz.app.feature.preorder.model.toUi
-import com.vodovoz.app.feature.preorder.model.updateFieldAndResetErrors
-import com.vodovoz.app.feature.preorder.model.updateFieldValueAndResetErrors
+import com.vodovoz.app.feature.preorder.model.updateFieldAndResetError
 import com.vodovoz.app.feature.profile.change_password.model.ChangePasswordEvent
 import com.vodovoz.app.feature.profile.change_password.model.ChangePasswordState
 import com.vodovoz.app.feature.profile.change_password.model.ChangePasswordUiState
@@ -70,7 +69,7 @@ class ChangePasswordViewModel @Inject constructor(
 
     fun changeField(field: FieldUi, updatedField: FieldUi) = viewModelScope.launch {
         _state.update { s ->
-            val updatedFields = s.fields.updateFieldAndResetErrors(field, updatedField)
+            val updatedFields = s.fields.updateFieldAndResetError(field, updatedField)
             s.copy(
                 fields = updatedFields,
                 buttonEnabled = updatedFields.checkFields()
@@ -124,7 +123,7 @@ class ChangePasswordViewModel @Inject constructor(
         viewModelScope.launch {
             _state.update { s ->
                 s.copy(
-                    fields = s.fields.updateFieldAndResetErrors(
+                    fields = s.fields.updateFieldAndResetError(
                         field,
                         field.copy(isValueVisible = newValueIsVisible)
                     )

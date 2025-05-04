@@ -3,11 +3,14 @@ package com.vodovoz.app.feature.splash
 import android.animation.Animator
 import android.os.Bundle
 import android.view.View
+import androidx.annotation.IdRes
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.navOptions
 import by.kirich1409.viewbindingdelegate.viewBinding
 import com.vodovoz.app.R
 import com.vodovoz.app.common.account.data.AccountManager
@@ -30,9 +33,11 @@ import com.vodovoz.app.util.extensions.debugLog
 import com.vodovoz.app.util.extensions.disableFullScreen
 import com.vodovoz.app.util.extensions.enableFullScreen
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
 import org.json.JSONObject
 import java.io.FileInputStream
@@ -50,13 +55,13 @@ class SplashFragment : BaseFragment() {
     }
 
     private val activityViewModel: MainActivityViewModel by activityViewModels()
-    private val viewModel: SplashViewModel by activityViewModels()
-    private val fileViewModel: SplashFileViewModel by activityViewModels()
+    private val splashViewModel: SplashViewModel by activityViewModels()
     private val homeViewModel: HomeFlowViewModel by activityViewModels()
     private val catalogViewModel: CatalogFlowViewModel by activityViewModels()
     private val cartFlowViewModel: CartFlowViewModel by activityViewModels()
     private val favoriteViewModel: FavoriteFlowViewModel by activityViewModels()
     private val profileViewModel: ProfileFlowViewModel by activityViewModels()
+
 
     @Inject
     lateinit var accountManager: AccountManager
@@ -67,35 +72,38 @@ class SplashFragment : BaseFragment() {
     @Inject
     lateinit var reloginManager: ReloginManager
 
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+    override fun onStart() {
+        super.onStart()
         requireActivity().enableFullScreen()
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
+    override fun onStop() {
+        super.onStop()
         requireActivity().disableFullScreen()
     }
 
+
+    @OptIn(FlowPreview::class)
     private fun listenAppState() = viewLifecycleOwner.lifecycleScope.launch {
         repeatOnLifecycle(Lifecycle.State.STARTED) {
+            activityViewModel.appState.debounce(30L).collect { appState ->
 
-            activityViewModel.appState.combine(viewModel.isLoading) { appState, splashIsLoading ->
-                appState to splashIsLoading
-            }.collectLatest { (appState, splashIsLoading) ->
                 val navController = findNavController()
+
                 when (appState) {
                     AppState.App -> {
-                        if (splashIsLoading) {
-                            firstLoad()
-                            return@collectLatest
+                        if (splashViewModel.isLoading.value) {
+                            fetchDataForScreens().join()
                         }
-                        navController.navigate(R.id.mainFragment)
+                        navController.navigateToScreen(
+                            R.id.mainFragment,
+                        )
                     }
 
                     AppState.Blocked -> {
-                        navController.navigate(R.id.blockAppFragment)
+                        navController.navigateToScreen(
+                            R.id.blockAppFragment,
+                        )
                     }
 
                     AppState.ErrorLoading -> {
@@ -104,33 +112,40 @@ class SplashFragment : BaseFragment() {
 
                     AppState.Loading -> {
                         if (navController.currentDestination?.id != R.id.splashFragment) {
-                            navController.navigate(R.id.splashFragment)
+                            navController.navigateToScreen(R.id.splashFragment)
                         }
                     }
                 }
             }
+
         }
     }
 
-    private fun firstLoad() {
-        viewModel.sendFirebaseToken()
-        fetchDataForScreens()
+    private fun NavController.navigateToScreen(@IdRes screenId: Int){
+        navigate(
+            screenId,
+            null,
+            navOptions { launchSingleTop = true }
+        )
+
     }
 
-    private fun refreshLoad() = lifecycleScope.launch {
+
+    private fun refreshApp() = lifecycleScope.launch {
         activityViewModel.checkAppState()
-        viewModel.sendFirebaseToken()
         fetchDataForScreens()
     }
 
     private fun fetchDataForScreens() = lifecycleScope.launch {
+        splashViewModel.sendFirebaseToken()
+
         favoriteViewModel.fetchFavoriteProducts()
         homeViewModel.fetchHomeDetails()
-        catalogViewModel.refresh()
-        cartFlowViewModel.refreshIdle()
-        profileViewModel.refresh()
-        delay(350)
-        viewModel.finishLoading()
+        catalogViewModel.fetchCatalogDetails()
+        cartFlowViewModel.fetchCartDetails()
+        profileViewModel.fetchProfileDetails()
+        delay(200)
+        splashViewModel.finishLoading()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -138,9 +153,28 @@ class SplashFragment : BaseFragment() {
         listenAppState()
         accountManager.reportEvent("Зашел в приложение")
 
+        bindErrorRefresh {
+            refreshApp()
+        }
+
         val lottieSplashView = binding.lottieSplashView
 
-        lottieSplashView.addAnimatorListener(splashFragmentAnimatorListener)
+        lottieSplashView.addAnimatorListener(object : Animator.AnimatorListener {
+
+            override fun onAnimationStart(animation: Animator) {
+                kotlin.runCatching {
+                    val fileViewModel: SplashFileViewModel by activityViewModels()
+                    fileViewModel.finishFileLoading()
+                }
+            }
+
+            override fun onAnimationEnd(animation: Animator) = Unit
+
+            override fun onAnimationCancel(animation: Animator) = Unit
+
+            override fun onAnimationRepeat(animation: Animator) = Unit
+        }
+        )
 
         if (requireContext().isTablet()) {
             lottieSplashView.cancelAnimation()
@@ -166,9 +200,6 @@ class SplashFragment : BaseFragment() {
 
 
         handlePushData()
-        bindErrorRefresh {
-            refreshLoad()
-        }
     }
 
     private fun initAnimation() {
@@ -194,19 +225,6 @@ class SplashFragment : BaseFragment() {
                 logoLayout.visibility = View.VISIBLE
             }
         }
-    }
-
-    private val splashFragmentAnimatorListener = object : Animator.AnimatorListener {
-
-        override fun onAnimationStart(animation: Animator) {
-            fileViewModel.finishFileLoading()
-        }
-
-        override fun onAnimationEnd(animation: Animator) = Unit
-
-        override fun onAnimationCancel(animation: Animator) = Unit
-
-        override fun onAnimationRepeat(animation: Animator) = Unit
     }
 
     private fun handlePushData() {

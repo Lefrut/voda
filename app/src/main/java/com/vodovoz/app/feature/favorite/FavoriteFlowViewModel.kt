@@ -235,13 +235,20 @@ class FavoriteFlowViewModel @Inject constructor(
         }.onFailure { fail ->
             val uiState = when (fail) {
                 is EmptyResultException -> fail.errorData?.run {
-                    FavoriteUiState.Empty(placeholder = toUi(),)
+                    FavoriteUiState.Empty(
+                        placeholder = toUi()
+                    )
                 } ?: FavoriteUiState.Error
 
                 else -> FavoriteUiState.Error
             }
+
             uiStateListener.updateData { s ->
+                val productsSection = s.productsSection
+                val title =
+                    (uiState as? FavoriteUiState.Empty)?.placeholder?.title ?: productsSection.title
                 s.copy(
+                    productsSection = productsSection.copy(title = title),
                     uiState = uiState,
                     showRefreshIndicator = false
                 )
