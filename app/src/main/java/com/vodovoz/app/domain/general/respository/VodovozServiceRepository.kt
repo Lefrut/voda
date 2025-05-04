@@ -56,7 +56,7 @@ interface VodovozServiceRepository {
 
     fun getQuestionnairesDetails(who: String): Flow<Result<QuestionnairesDetailsModel>>
 
-    fun sendQuestionnairesAnswers(who: String, answers: String): Flow<Result<String>>
+    fun sendQuestionnairesAnswers(who: String, answers: String): Flow<Result<VodovozPlaceholderModel>>
 
     fun getCancelOrderDetails(orderId: Long): Flow<Result<CancelOrderDetailsModel>>
 

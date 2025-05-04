@@ -18,14 +18,11 @@ import com.vodovoz.app.feature.auth.login.composables.LoginByEmailUiState
 import com.vodovoz.app.feature.auth.login.model.LoginByEmailEvent
 import com.vodovoz.app.feature.auth.login.model.LoginByEmailState
 import com.vodovoz.app.feature.preorder.model.FieldUi
-import com.vodovoz.app.feature.preorder.model.KeyboardTypeValidator
-import com.vodovoz.app.feature.preorder.model.NameValidator
-import com.vodovoz.app.feature.preorder.model.NoRequiredValidator
 import com.vodovoz.app.feature.preorder.model.checkFields
 import com.vodovoz.app.feature.preorder.model.mapToDomain
 import com.vodovoz.app.feature.preorder.model.mapToUi
 import com.vodovoz.app.feature.preorder.model.updateField
-import com.vodovoz.app.feature.preorder.model.updateFieldAndResetErrors
+import com.vodovoz.app.feature.preorder.model.updateFieldAndResetError
 import com.vodovoz.app.feature.sitestate.SiteStateManager
 import com.vodovoz.app.ui.mvi.MviViewModel
 import com.vodovoz.app.util.extensions.singleResult
@@ -180,7 +177,7 @@ class LoginByEmailViewModel @Inject constructor(
 
     fun changeField(field: FieldUi, updatedField: FieldUi) = viewModelScope.launch {
         _state.update { s ->
-            val updatedFields = s.fields.updateFieldAndResetErrors(field, updatedField)
+            val updatedFields = s.fields.updateFieldAndResetError(field, updatedField)
 
             s.copy(
                 fields = updatedFields,

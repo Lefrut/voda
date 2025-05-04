@@ -1,6 +1,7 @@
 package com.vodovoz.app.feature.questionnaires.components
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
@@ -24,6 +25,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -56,6 +58,7 @@ fun QuestionnairesBody(
     onFieldChange: (FieldComponentUi, FieldUi) -> Unit,
     onToggleChange: (ToggleListUi, ToggleOption) -> Unit,
     onSwitchChange: (SwitchUi, String) -> Unit,
+    onFieldClick: (FieldComponentUi) -> Unit
 ) {
     Column(
         modifier = modifier.fillMaxSize()
@@ -80,7 +83,14 @@ fun QuestionnairesBody(
 
                         is FieldComponentUi -> {
                             VodovozTextField(
-                                modifier = Modifier.padding(horizontal = 16.dp),
+                                modifier = Modifier
+                                    .padding(horizontal = 16.dp)
+                                    .pointerInput(Unit) {
+                                        awaitEachGesture {
+                                            awaitPointerEvent(androidx.compose.ui.input.pointer.PointerEventPass.Initial)
+                                            onFieldClick(component)
+                                        }
+                                    },
                                 field = component.ui,
                                 onFieldChange = { _, updatedField ->
                                     onFieldChange(component, updatedField)
@@ -136,7 +146,7 @@ private fun ConditionCheckboxListComponent(
         Text(
             modifier = Modifier.padding(horizontal = 16.dp),
             text = ui.label,
-            color = if(ui.error) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.surfaceTint,
+            color = if (ui.error) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.surfaceTint,
             style = MaterialTheme.typography.bodySmall
         )
         ui.conditions.forEach { condition ->
@@ -153,9 +163,10 @@ private fun ConditionCheckboxListComponent(
         Column {
 
             ui.options.forEach { option ->
-                Row(modifier = Modifier
-                    .clickable { onClick(ui, option) }
-                    .padding(16.dp)) {
+                Row(
+                    modifier = Modifier
+                        .clickable { onClick(ui, option) }
+                        .padding(16.dp)) {
                     Checkbox(
                         modifier = Modifier.size(24.dp),
                         checked = option.isChecked,
@@ -171,7 +182,9 @@ private fun ConditionCheckboxListComponent(
 
                     Text(
                         text = option.label,
-                        modifier = Modifier.padding(start = 16.dp).weight(1f),
+                        modifier = Modifier
+                            .padding(start = 16.dp)
+                            .weight(1f),
                         color = MaterialTheme.colorScheme.onBackground,
                         style = MaterialTheme.typography.bodyMedium
                     )

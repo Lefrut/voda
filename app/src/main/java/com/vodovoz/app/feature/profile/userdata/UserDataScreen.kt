@@ -4,7 +4,6 @@ import VodovozCalendarDialog
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
@@ -18,7 +17,6 @@ import com.vodovoz.app.design_system.composables.top_bar.VodovozTopBar
 import com.vodovoz.app.feature.profile.userdata.composables.UserDataBody
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-import kotlin.reflect.jvm.internal.impl.descriptors.Visibilities.Local
 
 @Composable
 fun UserDataScreen(
@@ -64,7 +62,7 @@ fun UserDataScreen(
                 viewModel.chooseImage()
             },
             onFieldClick = { field ->
-                viewModel.checkDatePicker(field)
+                viewModel.checkBirthdayField(field)
             }
         )
     }

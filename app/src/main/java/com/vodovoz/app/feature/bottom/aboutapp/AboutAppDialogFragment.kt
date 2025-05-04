@@ -17,6 +17,7 @@ import com.vodovoz.app.BuildConfig
 import com.vodovoz.app.R
 import com.vodovoz.app.common.content.BaseFragment
 import com.vodovoz.app.databinding.FragmentAboutAppFlowBinding
+import com.vodovoz.app.feature.about_app.AboutAppViewModel
 import com.vodovoz.app.feature.bottom.aboutapp.adapter.AboutApp
 import com.vodovoz.app.feature.bottom.aboutapp.adapter.AboutAppClickListener
 import com.vodovoz.app.feature.bottom.aboutapp.adapter.AboutAppFlowAdapter
@@ -36,7 +37,7 @@ class AboutAppDialogFragment : BaseFragment() {
             contentView
         )
     }
-    private val viewModel: AboutAppFlowViewModel by viewModels()
+    private val viewModel: AboutAppViewModel by viewModels()
 
     private val space by lazy { resources.getDimension(R.dimen.space_8).toInt() }
 

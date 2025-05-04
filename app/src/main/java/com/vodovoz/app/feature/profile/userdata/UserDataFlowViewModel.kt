@@ -21,8 +21,8 @@ import com.vodovoz.app.feature.preorder.model.FieldUi
 import com.vodovoz.app.feature.preorder.model.checkFields
 import com.vodovoz.app.feature.preorder.model.mapToDomain
 import com.vodovoz.app.feature.preorder.model.toUi
-import com.vodovoz.app.feature.preorder.model.updateFieldAndResetErrors
-import com.vodovoz.app.feature.preorder.model.updateFieldValueAndResetErrors
+import com.vodovoz.app.feature.preorder.model.updateFieldAndResetError
+import com.vodovoz.app.feature.preorder.model.updateFieldValueAndResetError
 import com.vodovoz.app.mapper.UserDataMapper.mapToUI
 import com.vodovoz.app.ui.model.UserDataUI
 import com.vodovoz.app.util.extensions.debugLog
@@ -64,45 +64,6 @@ class UserDataFlowViewModel @Inject constructor(
                     mediaManager.removeAvatarImage()
                 }
         }
-    }
-
-    private fun addAvatar(image: File) {
-        val userId = accountManager.fetchAccountId() ?: return
-        viewModelScope.launch {
-            flow { emit(repository.addAvatar(userId, image)) }
-                .onEach {
-                    if (!it.isSuccessful) {
-                        clearAvatarState()
-                    } else {
-                        eventListener.emit(UserDataEvents.UpdateProfile)
-                    }
-                }
-                .catch {
-                    debugLog { "add avatar error ${it.localizedMessage}" }
-                    clearAvatarState()
-                    uiStateListener.value =
-                        state.copy(
-                            error = it.toErrorState(),
-                            loadingPage = false,
-                            loadMore = false,
-                            bottomItem = null
-                        )
-                }.collect()
-        }
-    }
-
-
-    private fun clearAvatarState() {
-        mediaManager.removeAvatarImage()
-
-        uiStateListener.value =
-            state.copy(
-                data = state.data.copy(
-                    item = state.data.item?.copy(
-                        avatar = ""
-                    )
-                )
-            )
     }
 
     fun fetchUserData() = viewModelScope.launch {
@@ -242,36 +203,13 @@ class UserDataFlowViewModel @Inject constructor(
         )
     }
 
-    fun navigateToGenderChoose() {
-        viewModelScope.launch {
-            val name = state.data.item?.gender?.name ?: return@launch
-            eventListener.emit(UserDataEvents.NavigateToGenderChoose(name))
-        }
-    }
-
-    fun onBirthdayClick() {
-        val birthday = state.data.item?.birthday
-        val canChange = state.data.canChangeBirthDay
-        viewModelScope.launch {
-            if (birthday != null && birthday == "Не указано" && canChange) {
-                eventListener.emit(UserDataEvents.ShowDatePicker)
-            } else {
-                eventListener.emit(UserDataEvents.UpdateUserDataEvent("Это поле нельзя изменить!"))
-            }
-        }
-    }
-
-    fun showPassword() {
-        uiStateListener.value =
-            state.copy(data = state.data.copy(showPassword = !state.data.showPassword))
-    }
 
     fun navigateBack() = viewModelScope.launch {
         eventListener.emit(UserDataEvents.GoBack)
     }
 
     fun changeFieldValue(field: FieldUi, newValue: String) = viewModelScope.launch {
-        val updatedFields = dataState.fields.updateFieldValueAndResetErrors(field, newValue)
+        val updatedFields = dataState.fields.updateFieldValueAndResetError(field, newValue)
 
         updatedFields.checkFields(false) { fields, isValid ->
             uiStateListener.updateData { s ->
@@ -355,7 +293,7 @@ class UserDataFlowViewModel @Inject constructor(
         }
     }
 
-    fun checkDatePicker(field: FieldUi) = viewModelScope.launch {
+    fun checkBirthdayField(field: FieldUi) = viewModelScope.launch {
         if (field.id != "data") return@launch
 
         uiStateListener.updateData { s ->
@@ -374,7 +312,7 @@ class UserDataFlowViewModel @Inject constructor(
         uiStateListener.updateData { s ->
             val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
             val formattedDate = date.format(formatter)
-            val updatedFields = s.fields.updateFieldAndResetErrors(
+            val updatedFields = s.fields.updateFieldAndResetError(
                 dateField,
                 dateField.copy(value = formattedDate)
             )

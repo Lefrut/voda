@@ -8,10 +8,13 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.res.stringResource
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
@@ -25,6 +28,7 @@ import com.vodovoz.app.core.navigation.navigateToWebView
 import com.vodovoz.app.core.network.ApiConfig
 import com.vodovoz.app.core.network.interceptor.BaseUrlInterceptor
 import com.vodovoz.app.design_system.VodovozTheme
+import com.vodovoz.app.design_system.composables.dialogs.VodovozDialog
 import com.vodovoz.app.design_system.composables.placeholders.LoadingPlaceholder
 import com.vodovoz.app.design_system.composables.placeholders.NetworkErrorPlaceholder
 import com.vodovoz.app.design_system.composables.placeholders.VodovozLongPlaceholder
@@ -89,13 +93,16 @@ class QuestionnairesFlowFragment : Fragment() {
                     val pagingState by viewModel.observeUiState().collectAsStateWithLifecycle()
                     val viewState by rememberUpdatedState(newValue = pagingState.data)
                     val scrollState = rememberScrollState()
+                    val snackbarHostState = remember { SnackbarHostState() }
 
                     when (val uiState = viewState.uiState) {
                         QuestionnairesFlowViewModel.QuestionnairesUiState.Body -> {
                             QuestionnairesScreen(
                                 viewModel = viewModel,
                                 viewState = viewState,
-                                scrollState = scrollState)
+                                scrollState = scrollState,
+                                snackbarHostState = snackbarHostState
+                            )
                         }
 
                         QuestionnairesFlowViewModel.QuestionnairesUiState.Loading -> {
@@ -132,7 +139,23 @@ class QuestionnairesFlowFragment : Fragment() {
                     }
 
 
-                    LifecycleEffect {
+                    if(viewState.showCancelDialog){
+                        VodovozDialog(
+                            title = stringResource(R.string.questionnaire_cancel_title),
+                            description = stringResource(R.string.questionnaire_cancel_description),
+                            acceptButtonText = stringResource(R.string.exit),
+                            cancelButtonText = stringResource(R.string.cancel),
+                            onDismiss = {
+                                viewModel.closeCancelDialog()
+                            },
+                            onAccept = {
+                                viewModel.fetchWelcomeDetails()
+                            }
+                        )
+                    }
+
+
+                    LifecycleEffect(arg2 = snackbarHostState) {
                         viewModel.observeEvent().collect { event ->
                             when (event) {
                                 QuestionnairesFlowViewModel.QuestionnaireEvents.GoBack -> {
@@ -149,6 +172,12 @@ class QuestionnairesFlowFragment : Fragment() {
                                 QuestionnairesFlowViewModel.QuestionnaireEvents.ScrollToTop -> {
                                     launch {
                                         scrollState.animateScrollTo(0)
+                                    }
+                                }
+
+                                is QuestionnairesFlowViewModel.QuestionnaireEvents.ShowToast -> {
+                                    launch {
+                                        snackbarHostState.showSnackbar(event.message)
                                     }
                                 }
                             }

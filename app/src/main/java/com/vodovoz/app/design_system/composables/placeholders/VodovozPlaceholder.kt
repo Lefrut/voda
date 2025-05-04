@@ -26,8 +26,17 @@ import com.vodovoz.app.design_system.composables.button.VodovozButtonDefaults
 import com.vodovoz.app.design_system.model.VodovozPlaceholderUi
 
 @Composable
-fun VodovozPlaceholder(modifier: Modifier = Modifier, data: VodovozPlaceholderUi, onButtonClick: () -> Unit = {}) {
-    Column(modifier = modifier.fillMaxSize().background(MaterialTheme.colorScheme.background), horizontalAlignment = Alignment.CenterHorizontally) {
+fun VodovozPlaceholder(
+    modifier: Modifier = Modifier,
+    data: VodovozPlaceholderUi,
+    onButtonClick: () -> Unit = {}
+) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
         Spacer(modifier = Modifier.weight(1f))
 
         Column(
@@ -56,8 +65,7 @@ fun VodovozPlaceholder(modifier: Modifier = Modifier, data: VodovozPlaceholderUi
         }
 
 
-        val button = data.button
-        if(button != null){
+        data.button?.let { button ->
             VodovozButton(
                 modifier = Modifier
                     .padding(horizontal = 16.dp)
@@ -70,17 +78,6 @@ fun VodovozPlaceholder(modifier: Modifier = Modifier, data: VodovozPlaceholderUi
                 ),
             )
         }
-        else {
-            VodovozButton(
-                modifier = Modifier
-                    .padding(horizontal = 16.dp)
-                    .padding(top = 32.dp),
-                text = stringResource(id = R.string.catalog_button_text),
-                onClick = onButtonClick,
-                colors = VodovozButtonDefaults.secondaryColors()
-            )
-        }
-
 
 
         Spacer(modifier = Modifier.weight(1.2f))

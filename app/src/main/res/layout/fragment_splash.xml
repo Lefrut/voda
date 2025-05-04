@@ -5,7 +5,8 @@
     android:id="@+id/relativeGlav"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="false">
+    android:fitsSystemWindows="false"
+    android:theme="@style/Theme.Vodovoz">
     <!--    android:background="#05a4ff"-->
 
     <com.airbnb.lottie.LottieAnimationView

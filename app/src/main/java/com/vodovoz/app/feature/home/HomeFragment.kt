@@ -35,6 +35,7 @@ import com.vodovoz.app.common.permissions.PermissionsController
 import com.vodovoz.app.common.product.rating.RatingProductManager
 import com.vodovoz.app.common.speechrecognizer.SpeechDialogFragment
 import com.vodovoz.app.common.tab.TabManager
+import com.vodovoz.app.core.navigation.navigateToBrandProductList
 import com.vodovoz.app.core.network.ApiConfig
 import com.vodovoz.app.data.model.common.ActionEntity
 import com.vodovoz.app.databinding.FragmentMainHomeFlowBinding

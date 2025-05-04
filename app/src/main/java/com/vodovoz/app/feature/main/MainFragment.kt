@@ -123,7 +123,6 @@ class MainFragment : BaseFragment() {
 
     override fun onStart() {
         super.onStart()
-        WindowCompat.setDecorFitsSystemWindows(requireActivity().window, true)
         if (!viewModel.isBottomBarInitialized) {
             setupBottomNavigationBar()
         }

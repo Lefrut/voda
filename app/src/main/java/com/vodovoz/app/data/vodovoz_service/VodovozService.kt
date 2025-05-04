@@ -30,6 +30,7 @@ import com.vodovoz.app.data.vodovoz_service.model.SiteStateResponseDTO
 import com.vodovoz.app.data.vodovoz_service.model.StoriesDTO
 import com.vodovoz.app.data.vodovoz_service.model.SuperTopAndBottomSectionsDTO
 import com.vodovoz.app.data.vodovoz_service.model.VodovozErrorResponseDTO
+import com.vodovoz.app.data.vodovoz_service.model.VodovozPlaceholderDTO
 import com.vodovoz.app.data.vodovoz_service.model.VodovozResponseDTO
 import com.vodovoz.app.data.vodovoz_service.model.auth.LoginDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.auth.UserAuthInfoDTO
@@ -534,5 +535,5 @@ interface VodovozService {
         @Query("action") who: String,
         @Query("userid") userId: Long?,
         @Query("filtervalue") answers: String
-    ): Response<VodovozResponseDTO<String>>
+    ): Response<VodovozResponseDTO<VodovozPlaceholderDTO>>
 }

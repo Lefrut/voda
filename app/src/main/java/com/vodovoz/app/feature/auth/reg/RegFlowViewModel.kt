@@ -29,7 +29,7 @@ import com.vodovoz.app.feature.preorder.model.checkFields
 import com.vodovoz.app.feature.preorder.model.getErrorText
 import com.vodovoz.app.feature.preorder.model.mapToUi
 import com.vodovoz.app.feature.preorder.model.toDomain
-import com.vodovoz.app.feature.preorder.model.updateFieldAndResetErrors
+import com.vodovoz.app.feature.preorder.model.updateFieldAndResetError
 import com.vodovoz.app.feature.sitestate.SiteStateManager
 import com.vodovoz.app.util.extensions.debugLog
 import com.vodovoz.app.util.extensions.singleResult
@@ -225,7 +225,7 @@ class RegFlowViewModel @Inject constructor(
 
 
     fun changeField(field: FieldUi, updatedField: FieldUi) = viewModelScope.launch {
-        val updatedFields = dataState.fields.updateFieldAndResetErrors(field, updatedField)
+        val updatedFields = dataState.fields.updateFieldAndResetError(field, updatedField)
 
 
         updatedFields.checkFields(

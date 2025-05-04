@@ -135,7 +135,9 @@ class CartFlowViewModel @Inject constructor(
         }.onFailure { t ->
             val uiState = when (t) {
                 is EmptyResultException -> {
-                    CartUiState.Empty(errorData = t.errorData?.toUi() ?: VodovozPlaceholderUi.Empty)
+                    CartUiState.Empty(
+                        placeholder = t.errorData?.toUi() ?: VodovozPlaceholderUi.Empty
+                    )
                 }
 
                 else -> {
@@ -559,7 +561,7 @@ class CartFlowViewModel @Inject constructor(
     sealed interface CartUiState {
         data object Loading : CartUiState
         data object Cart : CartUiState
-        data class Empty(val errorData: VodovozPlaceholderUi) : CartUiState
+        data class Empty(val placeholder: VodovozPlaceholderUi) : CartUiState
         data object Error : CartUiState
     }
 

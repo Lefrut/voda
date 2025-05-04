@@ -79,12 +79,12 @@ fun VodovozCalendarDialog(
     onDateSelected: (LocalDate) -> Unit,
     onDismiss: () -> Unit,
 ) {
-    var selection by remember { mutableStateOf(initialDate) }
+    var selection by remember(initialDate) { mutableStateOf(initialDate) }
     val daysOfWeek = remember { daysOfWeek(firstDayOfWeek = DayOfWeek.MONDAY) }
     val coroutineScope = rememberCoroutineScope()
 
     val today = remember { LocalDate.now() }
-    val currentMonth = remember { selection.yearMonth }
+    val currentMonth = remember(initialDate) { selection.yearMonth }
     val state = rememberCalendarState(
         startMonth = remember { currentMonth.minusYears(100) },
         endMonth = remember { currentMonth.plusYears(100) },

@@ -2,6 +2,7 @@ package com.vodovoz.app.feature.questionnaires
 
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.viewModelScope
+import com.vodovoz.app.R
 import com.vodovoz.app.common.account.data.AccountManager
 import com.vodovoz.app.common.content.ErrorState
 import com.vodovoz.app.common.content.Event
@@ -9,6 +10,7 @@ import com.vodovoz.app.common.content.PagingContractViewModel
 import com.vodovoz.app.common.content.State
 import com.vodovoz.app.common.content.toErrorState
 import com.vodovoz.app.common.content.updateData
+import com.vodovoz.app.util.formatters.DateFormatters
 import com.vodovoz.app.common.resources.ResourcesProvider
 import com.vodovoz.app.data.MainRepository
 import com.vodovoz.app.data.model.common.ResponseEntity
@@ -16,6 +18,7 @@ import com.vodovoz.app.design_system.model.ColorfulButtonUi
 import com.vodovoz.app.design_system.model.VodovozPlaceholderUi
 import com.vodovoz.app.design_system.model.mapToUi
 import com.vodovoz.app.design_system.model.toUi
+import com.vodovoz.app.domain.general.model.RequestException
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.feature.preorder.model.checkFields
 import com.vodovoz.app.feature.preorder.model.getErrorText
@@ -44,6 +47,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 import javax.inject.Inject
 
 @HiltViewModel
@@ -68,7 +72,11 @@ class QuestionnairesFlowViewModel @Inject constructor(
 
     fun fetchWelcomeDetails() = viewModelScope.launch {
         uiStateListener.updateData { s ->
-            s.copy(uiState = QuestionnairesUiState.Loading, currentWho = null)
+            s.copy(
+                uiState = QuestionnairesUiState.Loading,
+                currentWho = null,
+                showCancelDialog = false
+            )
         }
 
         val welcomeDetailsResult =
@@ -184,6 +192,23 @@ class QuestionnairesFlowViewModel @Inject constructor(
         updateComponents(newComponents)
     }
 
+    fun checkBirthdayField(component: FieldComponentUi) = viewModelScope.launch {
+        if (component.ui.id != "DR") return@launch
+
+        uiStateListener.updateData { s ->
+            s.copy(
+                showDatePicker = true,
+                currentDateField = component
+            )
+        }
+
+    }
+
+    fun closeDatePicker() = viewModelScope.launch {
+        uiStateListener.updateData { s ->
+            s.copy(showDatePicker = false)
+        }
+    }
 
     private fun updateComponents(newComponents: List<QuestionnaireComponentUi>) {
         uiStateListener.updateData { s ->
@@ -284,12 +309,29 @@ class QuestionnairesFlowViewModel @Inject constructor(
     }
 
     fun navigateBack() = viewModelScope.launch {
-        if (dataState.uiState is QuestionnairesUiState.Body || dataState.currentWho != null) {
-            fetchWelcomeDetails()
+        val uiState = dataState.uiState
+        if (uiState is QuestionnairesUiState.Body
+            || dataState.currentWho != null
+            && uiState !is QuestionnairesUiState.Success
+        ) {
+            showCancelDialog()
         } else {
             eventListener.emit(QuestionnaireEvents.GoBack)
         }
     }
+
+    private fun showCancelDialog() = viewModelScope.launch {
+        uiStateListener.updateData { s ->
+            s.copy(showCancelDialog = true)
+        }
+    }
+
+    fun closeCancelDialog() = viewModelScope.launch {
+        uiStateListener.updateData { s ->
+            s.copy(showCancelDialog = false)
+        }
+    }
+
 
     fun activateWelcomeButton(btn: ColorfulButtonUi) = viewModelScope.launch {
         uiStateListener.updateData { s ->
@@ -300,42 +342,37 @@ class QuestionnairesFlowViewModel @Inject constructor(
 
     fun sendAnswers(button: ColorfulButtonUi) = viewModelScope.launch {
         val checkedComponents = dataState.components.map { component ->
-            return@map when {
-                component is CheckboxListUi && component.options.none { it.isChecked } -> {
-                    component.copy(error = true)
+            when (component) {
+                is CheckboxListUi -> {
+                    if (component.options.none { it.isChecked }) component.copy(error = true)
+                    else component
                 }
 
-                component is FieldComponentUi && !listOf(component.ui).checkFields(validators = vodovozValidators) -> {
+                is FieldComponentUi -> {
                     val field = component.ui
-                    component.copy(
-                        ui = field.copy(
-                            isError = true,
-                            supportingText = field.getErrorText { resourcesProvider.getString(it) }
+                    if (!listOf(field).checkFields(validators = vodovozValidators)) {
+                        component.copy(
+                            ui = field.copy(
+                                isError = true,
+                                supportingText = field.getErrorText { resourcesProvider.getString(it) }
+                            )
                         )
-                    )
+                    } else component
                 }
 
-                component is SwitchUi && component.options.find { it == component.selectedOption } == null -> {
-                    component.copy(
-                        error = true
-                    )
+                is SwitchUi -> {
+                    if (component.selectedOption !in component.options) component.copy(error = true)
+                    else component
                 }
 
-                component is ToggleListUi && component.options.none { toggleOption -> toggleOption.isSelected } -> {
-                    component.copy(
-                        error = true
-                    )
-
+                is ToggleListUi -> {
+                    if (component.options.none { it.isSelected }) component.copy(error = true)
+                    else component
                 }
 
-                component is ConditionsCheckboxListUi && component.options.any { !it.isChecked } -> {
-                    component.copy(
-                        error = true
-                    )
-                }
-
-                else -> {
-                    component
+                is ConditionsCheckboxListUi -> {
+                    if (component.options.any { !it.isChecked }) component.copy(error = true)
+                    else component
                 }
             }
         }
@@ -352,13 +389,35 @@ class QuestionnairesFlowViewModel @Inject constructor(
 
         val answers = dataState.components.toAnswerString()
 
+        uiStateListener.updateData { s ->
+            s.copy(button = s.button.copy(loading = true))
+        }
+
         val sendQuestionnairesResult =
             vodovozServiceRepository.sendQuestionnairesAnswers(currentWho, answers).singleResult()
 
         sendQuestionnairesResult.onSuccess {
-            debugLog { it }
-        }.onFailure {
-            debugLog { it.toString() }
+            val placeholder = it.toUi()
+            uiStateListener.updateData { s ->
+                s.copy(
+                    uiState = QuestionnairesUiState.Success(placeholder),
+                    button = s.button.copy(loading = false)
+                )
+            }
+        }.onFailure { t ->
+            if (t is RequestException) {
+                eventListener.emit(QuestionnaireEvents.ShowToast(t.message ?: ""))
+            } else {
+                eventListener.emit(
+                    QuestionnaireEvents.ShowToast(
+                        resourcesProvider.getString(R.string.questionnaire_failed)
+                    )
+                )
+            }
+
+            uiStateListener.updateData { s ->
+                s.copy(button = s.button.copy(loading = false))
+            }
 
         }
     }
@@ -399,6 +458,27 @@ class QuestionnairesFlowViewModel @Inject constructor(
         eventListener.emit(QuestionnaireEvents.GoToWebView(condition.url))
     }
 
+    fun changeDate(selectedDate: LocalDate) = viewModelScope.launch {
+        val value = kotlin.runCatching { selectedDate.format(DateFormatters.DMY) }
+            .getOrElse { "" }
+        val currentDateField = dataState.currentDateField ?: return@launch
+        val updatedCurrentDateField = currentDateField.copy(
+            ui = currentDateField.ui.copy(
+                value = value
+            )
+        )
+
+        uiStateListener.updateData { s ->
+            s.copy(
+                showDatePicker = false,
+                currentDateField = updatedCurrentDateField,
+                components = s.components.map {
+                    if (it.id == updatedCurrentDateField.id) updatedCurrentDateField else it
+                }
+            )
+        }
+    }
+
 
     @Immutable
     data class QuestionnaireState(
@@ -412,10 +492,15 @@ class QuestionnairesFlowViewModel @Inject constructor(
         val title: String = "",
         val button: ColorfulButtonUi = ColorfulButtonUi.Empty,
         val components: List<QuestionnaireComponentUi> = emptyList(),
+        val showDatePicker: Boolean = false,
+        val currentDateField: FieldComponentUi? = null,
+        val showCancelDialog: Boolean = false
     ) : State
 
     sealed class QuestionnaireEvents : Event {
         data class GoToWebView(val url: String) : QuestionnaireEvents()
+        data class ShowToast(val message: String) : QuestionnaireEvents()
+
         data object GoBack : QuestionnaireEvents()
         data object ScrollToTop : QuestionnaireEvents()
     }

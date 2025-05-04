@@ -10,7 +10,5 @@ fun <T> Response<T>.messageWithCode(): String {
 fun <T> Response<T>.stringBody(): String {
     return try {
         ((body() as? String) ?: (errorBody() ?: raw().body)?.string()) ?: ""
-    } catch (_: Throwable) {
-        ""
-    }
+    } catch (_: Throwable) { "" }
 }

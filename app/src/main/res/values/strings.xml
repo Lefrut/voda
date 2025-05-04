@@ -329,5 +329,28 @@
     </string>
 
     <string name="order_failed">Не удалось оформить заказ. Пожалуйста, попробуйте снова позже.</string>
+    <string name="questionnaire_failed">Не удалось отправить анкету. Попробуйте ещё раз.</string>
+
+    <string name="questionnaire_cancel_title">Отменить анкету?</string>
+    <string name="questionnaire_cancel_description">Если вы выйдете сейчас, данные анкеты будут потеряны.</string>
+
+    <string name="contact_developers">Написать разработчикам</string>
+    <string name="rate_app">Оценить приложение</string>
+    <string name="privacy_policy">Политика конфиденциальности</string>
+    <string name="public_offer">Публикация оферты</string>
+
+    <string name="error_action_failed">Не удалось выполнить операцию. Пожалуйста, попробуйте позже.</string>
+
+    <string name="email_subject">Обращение по мобильному приложению</string>
+    <string name="email_body_template">
+        Устройство: %1$s\n
+        Версия приложения: %2$s\n
+        ID пользователя: %3$d
+</string>
+    <string name="device_info">Android: %1$s, Версия: %2$s, %3$s.</string>
+    <string name="tablet">Планшет</string>
+    <string name="no_email_client">Нет почтового клиента</string>
+    <string name="choose_email_client">Написать разработчикам</string>
+
 
 </resources>

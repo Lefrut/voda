@@ -50,21 +50,23 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks,
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        splashFileViewModel.downloadSplashFile()
         installSplashScreen().apply {
             setKeepOnScreenCondition { splashFileViewModel.fileLoading.value }
         }
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+
+        supportActionBar?.hide()
+        splashFileViewModel.downloadSplashFile()
+        viewModel.checkAppState()
+
+
         MapKitFactory.initialize(this)
         observeRatingSnackbar()
 
         binding = ActivityMainBinding.inflate(layoutInflater).apply { setContentView(root) }
 
-        viewModel.checkAppState()
-
         handleIntent(intent)
         handlePushIntent(intent)
-
     }
 
 

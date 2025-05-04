@@ -33,7 +33,11 @@ class MainActivityViewModel @Inject constructor(
 
         siteStateDeferred.await()
 
-        if(!siteStateManager.siteActive()){
+        if(siteStateManager.siteStateSnapshot == null){
+            _appState.update { AppState.ErrorLoading }
+            return@launch
+        }
+        else if(!siteStateManager.siteActive()){
             _appState.update { AppState.Blocked }
             return@launch
         }
@@ -42,9 +46,16 @@ class MainActivityViewModel @Inject constructor(
 
         reloginResult.onFailure { t ->
             when (t) {
-                is UserNotLoginException -> { _appState.update { AppState.App } }
+                is UserNotLoginException -> {
+                    _appState.update { AppState.App }
+                }
 
-                else -> { _appState.update { AppState.ErrorLoading } }
+                //todo - add logout when relogin user error
+
+                else -> {
+                    //todo - change to _appState.update { AppState.ErrorLoading }
+                    _appState.update { AppState.App }
+                }
             }
         }.onSuccess {
             _appState.update { AppState.App }

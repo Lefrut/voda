@@ -155,19 +155,21 @@ val MessageValidator = FieldValidator { field ->
     }
 }
 
-fun List<FieldUi>.updateFieldValueAndResetErrors(field: FieldUi, newValue: String): List<FieldUi> {
-    val fieldIndex = indexOfFirst { field.id == it.id }
-    return toMutableList()
-        .apply { set(fieldIndex, get(fieldIndex).copy(value = newValue)) }
-        .map { it.copy(isError = false, supportingText = "") }
-
+fun List<FieldUi>.updateFieldValueAndResetError(field: FieldUi, newValue: String): List<FieldUi> {
+    return updateFieldAndResetError(field, field.copy(value = newValue))
 }
 
-fun List<FieldUi>.updateFieldAndResetErrors(field: FieldUi, newField: FieldUi): List<FieldUi> {
+fun List<FieldUi>.updateFieldAndResetError(field: FieldUi, newField: FieldUi): List<FieldUi> {
     val fieldIndex = indexOfFirst { field.id == it.id }
-    return toMutableList()
-        .apply { set(fieldIndex, newField) }
-        .map { it.copy(isError = false, supportingText = "") }
+    return toMutableList().apply {
+        set(
+            fieldIndex,
+            newField.copy(
+                isError = false,
+                supportingText = if (newField.isError) "" else newField.supportingText
+            )
+        )
+    }
 }
 
 fun List<FieldUi>.updateField(field: FieldUi, newField: FieldUi): List<FieldUi> {
