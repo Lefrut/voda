@@ -76,8 +76,13 @@ class WaterAppFragment : Fragment() {
                                     userDataStage = uiState,
                                     userData = viewState.userData,
                                     onGenderSelect = { isMan -> viewModel.selectGender(isMan) },
-                                    onBackClick = {},
-                                    onCloseClick = { })
+                                    onBackClick = {
+
+                                    },
+                                    onCloseClick = {
+
+                                    }
+                                )
                             }
 
                             WaterAppUiState.Welcome -> {
