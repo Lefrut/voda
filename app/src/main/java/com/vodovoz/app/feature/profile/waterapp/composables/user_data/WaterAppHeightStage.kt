@@ -35,15 +35,9 @@ import com.vodovoz.app.feature.profile.waterapp.composables.WaterAppButton
 @Composable
 fun WaterAppHeightStage(
     modifier: Modifier = Modifier,
-    onNextClick: () -> Unit,
+    height: String
 ) {
     Column(modifier = modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(
-            text = stringResource(R.string.you_height),
-            modifier = Modifier.padding(top = 16.dp),
-            color = MaterialTheme.colorScheme.onBackground,
-            style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.SemiBold)
-        )
 
         Box(
             modifier = Modifier
@@ -52,7 +46,6 @@ fun WaterAppHeightStage(
                 .fillMaxWidth(),
 
         ) {
-
             Image(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
@@ -86,9 +79,6 @@ fun WaterAppHeightStage(
 
 
         Spacer(modifier = Modifier.weight(1f))
-
-        WaterAppButton(modifier = Modifier.padding(vertical = 20.dp)) { onNextClick() }
-
     }
 }
 

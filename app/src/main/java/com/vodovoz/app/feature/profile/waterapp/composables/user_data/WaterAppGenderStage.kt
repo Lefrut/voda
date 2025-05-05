@@ -29,16 +29,9 @@ import com.vodovoz.app.feature.profile.waterapp.composables.WaterAppButton
 fun WaterAppGenderStage(
     modifier: Modifier = Modifier,
     isMan: Boolean,
-    onNextClick: () -> Unit,
     onGenderSelect: (isMan: Boolean) -> Unit,
 ) {
     Column(modifier = modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(
-            text = stringResource(R.string.you_sex),
-            modifier = Modifier.padding(top = 16.dp),
-            color = MaterialTheme.colorScheme.onBackground,
-            style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.SemiBold)
-        )
         Spacer(modifier = Modifier.weight(1.3f))
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -58,10 +51,6 @@ fun WaterAppGenderStage(
             )
         }
         Spacer(modifier = Modifier.weight(1.6f))
-        WaterAppButton(modifier = Modifier.padding(vertical = 20.dp)) {
-            onNextClick()
-        }
-
     }
 }
 

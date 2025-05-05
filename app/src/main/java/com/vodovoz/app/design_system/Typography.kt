@@ -14,6 +14,18 @@ import com.vodovoz.app.R
 
 
 val vodovozTypography = Typography(
+    displayLarge = TextStyle(
+        fontSize = 50.sp,
+        fontFamily = robotoFontFamily,
+        lineHeightStyle = LineHeightStyle(
+            LineHeightStyle.Alignment.Center,
+            LineHeightStyle.Trim.None
+        ),
+        platformStyle = PlatformTextStyle(
+            includeFontPadding = false
+        ),
+        fontWeight = FontWeight.Medium
+    ),
     displaySmall = TextStyle(
         fontSize = 32.sp,
         lineHeight = 40.sp,

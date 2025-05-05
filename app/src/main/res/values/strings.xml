@@ -281,6 +281,11 @@
     <string name="man">Мужчина</string>
     <string name="girl">Женщина</string>
     <string name="you_height">Ваш рост</string>
+    <string name="you_weight">Ваш вес</string>
+    <string name="wake_up_time">Время пробуждения</string>
+    <string name="sleep_time">Время для сна</string>
+    <string name="activity_level">Уровень активности</string>
+
     <string name="change">Изменить</string>
 
     <string name="error_password_validation">Пароль не соответствует требованиям. Проверьте введенные данные.</string>
@@ -351,6 +356,15 @@
     <string name="tablet">Планшет</string>
     <string name="no_email_client">Нет почтового клиента</string>
     <string name="choose_email_client">Написать разработчикам</string>
+    <string name="kg">КГ</string>
 
+    <string name="activity_level_low_title">Мало</string>
+    <string name="activity_level_low_desc">Не занимаюсь спортом</string>
+
+    <string name="activity_level_medium_title">Средне</string>
+    <string name="activity_level_medium_desc">Иногда тренируюсь</string>
+
+    <string name="activity_level_high_title">Много</string>
+    <string name="activity_level_high_desc">Занимаюсь спортом</string>
 
 </resources>

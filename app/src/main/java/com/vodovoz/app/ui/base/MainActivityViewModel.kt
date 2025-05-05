@@ -58,7 +58,7 @@ class MainActivityViewModel @Inject constructor(
                 }
             }
         }.onSuccess {
-            _appState.update { AppState.App }
+            _appState.update { AppState.ErrorLoading }
         }
     }
 }

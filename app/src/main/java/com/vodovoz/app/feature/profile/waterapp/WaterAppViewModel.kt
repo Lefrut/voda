@@ -6,6 +6,7 @@ import com.vodovoz.app.common.content.Event
 import com.vodovoz.app.common.content.PagingContractViewModel
 import com.vodovoz.app.common.content.State
 import com.vodovoz.app.common.content.updateData
+import com.vodovoz.app.feature.profile.waterapp.model.WaterAppActivityLevel
 import com.vodovoz.app.feature.profile.waterapp.model.WaterAppUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -41,9 +42,38 @@ class WaterAppViewModel @Inject constructor(
         }
     }
 
+    fun navigateToPreviousStage() = viewModelScope.launch {
+        val prevUiState = when (val currentUiState = dataState.uiState) {
+            is WaterAppUiState.UserData -> currentUiState.previous() ?: WaterAppUiState.Welcome
+            else ->
+                currentUiState
+        }
+        uiStateListener.updateData { s ->
+            s.copy(uiState = prevUiState)
+        }
+    }
+
+    fun navigateToNextStage() = viewModelScope.launch {
+        val nextUiState = when (val currentUiState = dataState.uiState) {
+            is WaterAppUiState.UserData -> currentUiState.next() ?: WaterAppUiState.WaterGoal
+            else -> currentUiState
+        }
+        uiStateListener.updateData { s ->
+            s.copy(uiState = nextUiState)
+        }
+    }
+
+    fun selectActivityLevel(activityLevel: WaterAppActivityLevel) {
+        uiStateListener.updateData { s ->
+            s.copy(
+                userData = s.userData.copy(sport = activityLevel.value.toString())
+            )
+        }
+    }
+
     data class WaterAppState(
         val userData: WaterAppHelper.WaterAppUserData = WaterAppHelper.WaterAppUserData(),
-        val uiState: WaterAppUiState = WaterAppUiState.UserData.Height,
+        val uiState: WaterAppUiState = WaterAppUiState.Welcome,
     ) : State
 
     sealed class WaterAppEvents : Event {

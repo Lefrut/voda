@@ -94,6 +94,7 @@ class ProfileFlowViewModel @Inject constructor(
     }
 
     fun fetchProfileDetails() = viewModelScope.launch {
+
         uiStateListener.updateData { s ->
             s.copy(uiState = if (s.normalMenu.isEmpty()) ProfileUiState.Loading else s.uiState)
         }
@@ -451,6 +452,20 @@ class ProfileFlowViewModel @Inject constructor(
         }
     }
 
+    fun activateProfileCard(profileCard: ProfileCardUi) = viewModelScope.launch {
+        when(profileCard.id){
+            "otziv" ->{
+
+            }
+            "treker" -> {
+                eventListener.emit(ProfileEvents.GoToWaterApp)
+            }
+            "anketa" -> {
+
+            }
+        }
+    }
+
 
     @Immutable
     data class ProfileState(
@@ -512,6 +527,7 @@ class ProfileFlowViewModel @Inject constructor(
         data object GoToLogin : ProfileEvents()
         data object GoToUserData : ProfileEvents()
         data object GoToRegister : ProfileEvents()
+        data object GoToWaterApp : ProfileEvents()
 
         data class GoByMenuItemId(val itemId: String) : ProfileEvents()
         data class ActivateVodovozAction(val action: VodovozAction) : ProfileEvents()

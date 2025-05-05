@@ -629,8 +629,8 @@ class VodovozServiceRepositoryImpl @Inject constructor(
             mapper = {
                 it.data!!
             },
-            onResponse = { response ->
-                if (response.code() != 200) return@executeRequest
+            onResponse = onResponse@{ response ->
+                if (response.code() != 200) return@onResponse
 
                 val cookies = response.headers().values("Set-Cookie")
                 val sessionId = cookies.firstOrNull { s -> s.startsWith("PHPSESSID=") }

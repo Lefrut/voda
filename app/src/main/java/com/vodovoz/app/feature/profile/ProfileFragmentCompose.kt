@@ -36,6 +36,7 @@ import com.vodovoz.app.core.navigation.ProfileMainNavigator
 import com.vodovoz.app.core.navigation.navigateToLogin
 import com.vodovoz.app.core.navigation.navigateToRegister
 import com.vodovoz.app.core.navigation.navigateToUserData
+import com.vodovoz.app.core.navigation.navigateToWaterApp
 import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.composables.placeholders.LoadingPlaceholder
 import com.vodovoz.app.design_system.composables.placeholders.NetworkErrorPlaceholder
@@ -211,6 +212,10 @@ class ProfileFragment : Fragment() {
                                 navController = findNavController(),
                                 context = requireContext()
                             )
+                        }
+
+                        ProfileFlowViewModel.ProfileEvents.GoToWaterApp -> {
+                            findNavController().navigateToWaterApp()
                         }
                     }
                 }

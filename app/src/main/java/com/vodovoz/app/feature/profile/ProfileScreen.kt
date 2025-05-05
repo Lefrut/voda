@@ -83,8 +83,8 @@ fun ProfileScreen(
                 ProfileCardsRow(
                     modifier = Modifier.padding(top = 16.dp),
                     cards = viewState.cards,
-                    onCardClick = {
-
+                    onCardClick = { profileCard ->
+                        viewModel.activateProfileCard(profileCard)
                     }
                 )
                 ProfileWalletItemsRow(
