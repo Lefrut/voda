@@ -24,11 +24,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.vodovoz.app.R
 import com.vodovoz.app.feature.profile.waterapp.WaterAppHelper
+import com.vodovoz.app.feature.profile.waterapp.composables.user_data.WaterAppActivityStage
 import com.vodovoz.app.feature.profile.waterapp.composables.user_data.WaterAppGenderStage
 import com.vodovoz.app.feature.profile.waterapp.composables.user_data.WaterAppHeightStage
+import com.vodovoz.app.feature.profile.waterapp.composables.user_data.WaterAppStageBox
+import com.vodovoz.app.feature.profile.waterapp.composables.user_data.WaterAppTimeStage
+import com.vodovoz.app.feature.profile.waterapp.composables.user_data.WaterAppWeightStage
+import com.vodovoz.app.feature.profile.waterapp.model.WaterAppActivityLevel
 import com.vodovoz.app.feature.profile.waterapp.model.WaterAppUiState
 
 @Composable
@@ -37,8 +43,10 @@ fun WaterAppUserDataScreen(
     userDataStage: WaterAppUiState.UserData,
     userData: WaterAppHelper.WaterAppUserData,
     onGenderSelect: (isMan: Boolean) -> Unit,
+    onActivityLevelSelect: (WaterAppActivityLevel) -> Unit,
     onBackClick: () -> Unit,
     onCloseClick: () -> Unit,
+    onNextClick: () -> Unit,
 ) {
     Column(modifier = modifier.fillMaxSize()) {
         WaterAppUserDataTopBar(
@@ -49,35 +57,69 @@ fun WaterAppUserDataScreen(
         AnimatedContent(targetState = userDataStage, label = "Animated UserDataStages") { state ->
             when (state) {
                 WaterAppUiState.UserData.Gender -> {
-                    WaterAppGenderStage(
-                        onNextClick = { },
-                        onGenderSelect = { isMan -> onGenderSelect(isMan) },
-                        isMan = userData.gender == "man"
+                    WaterAppStageBox(
+                        title = stringResource(R.string.you_sex),
+                        onNextClick = onNextClick,
+                        content = {
+                            WaterAppGenderStage(
+                                onGenderSelect = { isMan -> onGenderSelect(isMan) },
+                                isMan = userData.gender == "man"
+                            )
+                        }
                     )
                 }
 
                 WaterAppUiState.UserData.Height -> {
-                    WaterAppHeightStage(onNextClick = { })
+                    WaterAppStageBox(
+                        title = stringResource(R.string.you_height),
+                        onNextClick = onNextClick,
+                        content = {
+                            WaterAppHeightStage(
+                                height = userData.height
+                            )
+                        }
+                    )
                 }
 
                 WaterAppUiState.UserData.Weight -> {
-
+                    WaterAppStageBox(
+                        title = stringResource(R.string.you_weight),
+                        onNextClick = onNextClick,
+                        content = {
+                            WaterAppWeightStage(
+                                weight = userData.weight
+                            )
+                        }
+                    )
                 }
 
-                WaterAppUiState.UserData.WakeUpTime -> {
-
-                }
-
-                WaterAppUiState.UserData.SleepTime -> {
-
+                WaterAppUiState.UserData.WakeUpTime, WaterAppUiState.UserData.SleepTime -> {
+                    val isSleepTime = state == WaterAppUiState.UserData.SleepTime
+                    WaterAppStageBox(
+                        title = if (isSleepTime) stringResource(R.string.sleep_time) else stringResource(
+                            R.string.wake_up_time
+                        ),
+                        onNextClick = onNextClick,
+                        content = {
+                            WaterAppTimeStage(
+                                time = if (isSleepTime) userData.formatSleepTime() else userData.formatWakeUpTime(),
+                                isSleepTime = isSleepTime
+                            )
+                        }
+                    )
                 }
 
                 WaterAppUiState.UserData.ActivityLevel -> {
-
-                }
-
-                WaterAppUiState.UserData.WaterGoal -> {
-
+                    WaterAppStageBox(
+                        title = stringResource(R.string.activity_level),
+                        onNextClick = onNextClick,
+                        content = {
+                            WaterAppActivityStage(
+                                currentActivityLevel = WaterAppActivityLevel.getByValue(userData.sport),
+                                onActivityClick = onActivityLevelSelect
+                            )
+                        }
+                    )
                 }
             }
         }
@@ -91,7 +133,7 @@ fun WaterAppUserDataTopBar(
     onBackClick: () -> Unit,
     onCloseClick: () -> Unit,
 ) {
-    val stages = (WaterAppUiState.UserData.entries - WaterAppUiState.UserData.WaterGoal)
+    val stages = WaterAppUiState.UserData.entries
 
     Row(
         modifier = modifier

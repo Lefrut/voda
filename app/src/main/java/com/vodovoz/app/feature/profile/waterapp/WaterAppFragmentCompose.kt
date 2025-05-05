@@ -14,12 +14,14 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.fragment.findNavController
 import com.vodovoz.app.common.tab.TabManager
 import com.vodovoz.app.design_system.VodovozTheme
+import com.vodovoz.app.design_system.effects.LifecycleEffect
 import com.vodovoz.app.feature.profile.waterapp.composables.WaterAppUserDataScreen
 import com.vodovoz.app.feature.profile.waterapp.composables.WaterAppWelcomeScreen
 import com.vodovoz.app.feature.profile.waterapp.model.WaterAppUiState
 import com.vodovoz.app.util.extensions.addOnBackPressedCallback
 import com.vodovoz.app.util.extensions.debugLog
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collectLatest
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -68,19 +70,29 @@ class WaterAppFragment : Fragment() {
                         label = "Animated Water app screens"
                     ) { uiState ->
                         when (uiState) {
-                            WaterAppUiState.GoalCompleted -> TODO()
-                            WaterAppUiState.Main -> TODO()
-                            WaterAppUiState.Settings -> TODO()
+                            WaterAppUiState.GoalCompleted -> {
+
+                            }
+                            WaterAppUiState.Main -> {
+
+                            }
+                            WaterAppUiState.Settings -> {
+
+                            }
                             is WaterAppUiState.UserData -> {
                                 WaterAppUserDataScreen(
                                     userDataStage = uiState,
                                     userData = viewState.userData,
                                     onGenderSelect = { isMan -> viewModel.selectGender(isMan) },
+                                    onActivityLevelSelect = { activityLevel -> viewModel.selectActivityLevel(activityLevel) },
                                     onBackClick = {
-
+                                        viewModel.navigateToPreviousStage()
                                     },
                                     onCloseClick = {
-
+                                        viewModel.navigateBack()
+                                    },
+                                    onNextClick = {
+                                        viewModel.navigateToNextStage()
                                     }
                                 )
                             }
@@ -95,8 +107,22 @@ class WaterAppFragment : Fragment() {
                                     }
                                 )
                             }
+
+                            WaterAppUiState.WaterGoal -> {
+
+                            }
                         }
 
+                    }
+
+                    LifecycleEffect {
+                        viewModel.observeEvent().collectLatest { event ->
+                            when(event){
+                                WaterAppViewModel.WaterAppEvents.GoBack -> {
+                                    findNavController().popBackStack()
+                                }
+                            }
+                        }
                     }
                 }
             }

@@ -13,6 +13,9 @@ import com.vodovoz.app.util.extensions.debugLog
 import com.vodovoz.app.util.extensions.fetchCurrentDayInTimeMillis
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import java.time.LocalDate
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -308,7 +311,33 @@ class WaterAppHelper @Inject constructor(
         val sleepTime: String = "138",
         val wakeUpTime: String = "42",
         val sport: String = "0.25",
-    )
+    ){
+        fun wakeUpTimeToLocalTime(): LocalTime =
+            LocalTime.ofSecondOfDay(wakeUpTime.toLong() * 60)
+
+        fun sleepTimeToLocalTime(): LocalTime =
+            LocalTime.ofSecondOfDay(sleepTime.toLong() * 60)
+
+        fun formatSleepTime(): String {
+            return try {
+                val sleepTime = LocalTime.ofSecondOfDay(sleepTime.toLong() * 60)
+                sleepTime.format(DateTimeFormatter.ofPattern(TIME_FORMAT))
+            }catch (_: Throwable){ "" }
+        }
+
+        fun formatWakeUpTime(): String {
+            return try {
+                val wakeUpTime = LocalTime.ofSecondOfDay(wakeUpTime.toLong() * 60)
+                wakeUpTime.format(DateTimeFormatter.ofPattern(TIME_FORMAT))
+            }catch (_: Throwable){ "" }
+        }
+
+        companion object{
+            private const val TIME_FORMAT = "HH:mm"
+        }
+
+
+    }
 
     data class WaterAppRateData(
         val rate: Int = 2300,
