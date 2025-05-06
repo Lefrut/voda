@@ -1,6 +1,5 @@
 package com.vodovoz.app.feature.profile
 
-import android.app.Application
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.viewModelScope
 import com.vodovoz.app.common.account.data.AccountManager
@@ -20,7 +19,6 @@ import com.vodovoz.app.data.MainRepository
 import com.vodovoz.app.data.model.common.ResponseEntity
 import com.vodovoz.app.design_system.model.AboutAdvertisingUi
 import com.vodovoz.app.design_system.model.BannerUi
-import com.vodovoz.app.design_system.model.ColorfulButtonUi
 import com.vodovoz.app.design_system.model.VodovozPlaceholderUi
 import com.vodovoz.app.design_system.model.mapToUi
 import com.vodovoz.app.design_system.model.toUi
@@ -30,8 +28,6 @@ import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.feature.favorite.mapper.FavoritesMapper
 import com.vodovoz.app.feature.home.viewholders.homeproducts.HomeProducts
 import com.vodovoz.app.feature.home.viewholders.hometitle.HomeTitle
-import com.vodovoz.app.feature.profile.ProfileFlowViewModel.ProfileState.Companion.fetchStaticItems
-import com.vodovoz.app.feature.profile.cats.mapToUi
 import com.vodovoz.app.feature.profile.model.ProfileCardUi
 import com.vodovoz.app.feature.profile.model.ProfileChatItemUi
 import com.vodovoz.app.feature.profile.model.ProfileChatsPopupWindowUi
@@ -42,23 +38,16 @@ import com.vodovoz.app.feature.profile.model.UserInfoBlockUi
 import com.vodovoz.app.feature.profile.model.mapToUi
 import com.vodovoz.app.feature.profile.model.toUi
 import com.vodovoz.app.feature.profile.viewholders.models.ProfileBestForYou
-import com.vodovoz.app.feature.profile.viewholders.models.ProfileBlock
-import com.vodovoz.app.feature.profile.viewholders.models.ProfileHeader
 import com.vodovoz.app.feature.profile.viewholders.models.ProfileLogout
-import com.vodovoz.app.feature.profile.viewholders.models.ProfileMain
-import com.vodovoz.app.feature.profile.viewholders.models.ProfileOrders
 import com.vodovoz.app.feature.profile.waterapp.WaterAppHelper
 import com.vodovoz.app.feature.sitestate.SiteStateManager
 import com.vodovoz.app.mapper.CategoryDetailMapper.mapToUI
-import com.vodovoz.app.mapper.UserDataMapper.mapToUI
-import com.vodovoz.app.ui.extensions.ContextExtensions.isTablet
 import com.vodovoz.app.util.extensions.debugLog
 import com.vodovoz.app.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.firstOrNull
@@ -115,8 +104,8 @@ class ProfileFlowViewModel @Inject constructor(
         }.onFailure { t ->
 
             val uiState = when {
-                t is UserNotLoginException && t.errorData != null -> ProfileUiState.UserNotFound(
-                    placeholder = t.errorData.toUi(),
+                t is UserNotLoginException && t.placeholder != null -> ProfileUiState.UserNotFound(
+                    placeholder = t.placeholder.toUi(),
                 )
 
                 else -> ProfileUiState.Error

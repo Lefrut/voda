@@ -366,5 +366,6 @@
 
     <string name="activity_level_high_title">Много</string>
     <string name="activity_level_high_desc">Занимаюсь спортом</string>
+    <string name="ml">МЛ</string>
 
 </resources>

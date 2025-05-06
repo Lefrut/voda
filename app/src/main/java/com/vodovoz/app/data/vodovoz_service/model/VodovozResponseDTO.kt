@@ -13,11 +13,6 @@ data class VodovozResponseDTO<T>(
     val message: String?,
     @Json(name = "data")
     val data: T?,
-    //todo - remove after a backend fix
-    @Json(name = "ata")
-    val ata: T?,
-    @Json(name = "errordata")
-    val error: VodovozPlaceholderDTO?
 )
 
 @JsonClass(generateAdapter = true)

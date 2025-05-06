@@ -12,21 +12,19 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.paging.CombinedLoadStates
 import androidx.paging.LoadState
-import coil3.compose.rememberAsyncImagePainter
 import com.valentinilk.shimmer.ShimmerBounds
 import com.valentinilk.shimmer.rememberShimmer
-import com.vodovoz.app.R
 import com.vodovoz.app.design_system.composables.list.ProductListCategoriesRow
 import com.vodovoz.app.design_system.composables.list.ProductListOptionsRow
 import com.vodovoz.app.design_system.composables.list.ProductListTitle
 import com.vodovoz.app.design_system.composables.list.gridProducts
 import com.vodovoz.app.design_system.composables.list.linearProducts
-import com.vodovoz.app.design_system.composables.placeholders.EmptyResultPlaceholder
+import com.vodovoz.app.design_system.composables.placeholders.VodovozPlaceholder
 import com.vodovoz.app.design_system.model.ProductUi
+import com.vodovoz.app.design_system.model.toUi
 import com.vodovoz.app.domain.general.model.EmptyResultException
 import com.vodovoz.app.feature.home.model.CategoryUi
 import com.vodovoz.app.feature.product_comments.model.SortUi
@@ -115,17 +113,10 @@ fun ProductsNoFilterBody(
         val refreshLoadState = productsLoadStates.refresh
         if (refreshLoadState is LoadState.Error && refreshLoadState.error is EmptyResultException) {
             item(span = { GridItemSpan(2) }) {
-                //todo - do map domain state if need :)
-                val errorData =
-                    (refreshLoadState.error as? EmptyResultException)?.errorData ?: return@item
+                val placeholder =
+                    (refreshLoadState.error as? EmptyResultException)?.placeholder?.toUi() ?: return@item
 
-                EmptyResultPlaceholder(
-                    title = errorData.headerHtml,
-                    description = errorData.descriptionHtml,
-                    imagePainter = if (errorData.imageUrl.isNotBlank()) {
-                        rememberAsyncImagePainter(errorData.imageUrl)
-                    } else painterResource(id = R.drawable.pic_search)
-                )
+                VodovozPlaceholder(data = placeholder)
             }
         } else if (isGridView) {
             gridProducts(

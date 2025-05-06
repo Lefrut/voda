@@ -708,7 +708,7 @@
     </dialog>
     <fragment
         android:id="@+id/aboutServicesDialogFragment"
-        android:name="com.vodovoz.app.feature.bottom.services.AboutServicesDialogFragment"
+        android:name="com.vodovoz.app.feature.bottom.services.AboutServicesFragment"
         android:label="AboutServicesDialogFragment">
         <action
             android:id="@+id/action_to_serviceDetailFragment"

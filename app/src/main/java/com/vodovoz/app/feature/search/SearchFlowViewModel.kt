@@ -200,7 +200,7 @@ class SearchFlowViewModel @Inject constructor(
         }.onFailure { error ->
 
             val uiState = when (error) {
-                is EmptyResultException -> with(error.errorData) {
+                is EmptyResultException -> with(error.placeholder) {
                     UiState.Empty(
                         description = this?.descriptionHtml ?: "",
                         image = this?.imageUrl ?: ""

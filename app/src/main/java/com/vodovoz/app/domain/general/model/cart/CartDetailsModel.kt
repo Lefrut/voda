@@ -4,7 +4,7 @@ data class CartDetailsModel(
     val title: String,
     val countText: String,
     val items: List<CartItemModel>,
-    val orderSummary: CartOrderSummaryModel,
+    val orderSummary: List<OrderSummaryItemModel>,
     val present: CartPresentModel?,
     val bottlesButton: CartButtonModel?,
     val promotionalCodeButton: CartPromoButtonModel?,

@@ -71,6 +71,12 @@ class WaterAppViewModel @Inject constructor(
         }
     }
 
+    fun navigateToMain() = viewModelScope.launch {
+        uiStateListener.updateData { s ->
+            s.copy(uiState = WaterAppUiState.Main)
+        }
+    }
+
     data class WaterAppState(
         val userData: WaterAppHelper.WaterAppUserData = WaterAppHelper.WaterAppUserData(),
         val uiState: WaterAppUiState = WaterAppUiState.Welcome,

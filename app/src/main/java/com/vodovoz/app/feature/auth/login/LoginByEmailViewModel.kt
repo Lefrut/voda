@@ -1,7 +1,6 @@
 package com.vodovoz.app.feature.auth.login
 
 import androidx.compose.runtime.Stable
-import androidx.core.text.HtmlCompat
 import androidx.lifecycle.viewModelScope
 import com.vodovoz.app.R
 import com.vodovoz.app.common.account.data.AccountManager
@@ -12,7 +11,7 @@ import com.vodovoz.app.common.token.FirebaseTokenManager
 import com.vodovoz.app.design_system.model.ColorfulButtonUi
 import com.vodovoz.app.design_system.model.toUi
 import com.vodovoz.app.design_system.model.updateButton
-import com.vodovoz.app.domain.general.model.RequestException
+import com.vodovoz.app.domain.general.model.ValidationException
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.feature.auth.login.composables.LoginByEmailUiState
 import com.vodovoz.app.feature.auth.login.model.LoginByEmailEvent
@@ -103,11 +102,8 @@ class LoginByEmailViewModel @Inject constructor(
         }.onFailure { t ->
             val defaultMessage = resourcesProvider.getString(R.string.error_login)
 
-            val errorMessage = if (t is RequestException) {
-                HtmlCompat.fromHtml(
-                    t.errorData?.descriptionHtml ?: defaultMessage,
-                    HtmlCompat.FROM_HTML_MODE_LEGACY
-                ).toString()
+            val errorMessage = if (t is ValidationException) {
+                t.message ?: defaultMessage
             } else {
                 defaultMessage
             }

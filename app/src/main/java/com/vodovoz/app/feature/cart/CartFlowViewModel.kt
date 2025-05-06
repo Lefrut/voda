@@ -18,8 +18,8 @@ import com.vodovoz.app.data.parser.response.cart.MessageTextBasket
 import com.vodovoz.app.design_system.model.VodovozPlaceholderUi
 import com.vodovoz.app.design_system.model.toUi
 import com.vodovoz.app.domain.general.model.EmptyResultException
-import com.vodovoz.app.domain.general.model.cart.CartOrderSummaryUi
-import com.vodovoz.app.domain.general.model.cart.toUi
+import com.vodovoz.app.domain.general.model.cart.OrderSummaryItemUi
+import com.vodovoz.app.domain.general.model.cart.mapToUi
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.feature.cart.model.CartButtonUi
 import com.vodovoz.app.feature.cart.model.CartItemUi
@@ -121,7 +121,7 @@ class CartFlowViewModel @Inject constructor(
                     promotionalCodeButton = cartDetails.promotionalCodeButton?.toUi(),
                     presentButton = cartDetails.presentButton?.toUi(),
                     uiState = CartUiState.Cart,
-                    orderSummary = cartDetails.orderSummary.toUi()
+                    orderSummary = cartDetails.orderSummary.mapToUi()
                 )
             }
 
@@ -136,7 +136,7 @@ class CartFlowViewModel @Inject constructor(
             val uiState = when (t) {
                 is EmptyResultException -> {
                     CartUiState.Empty(
-                        placeholder = t.errorData?.toUi() ?: VodovozPlaceholderUi.Empty
+                        placeholder = t.placeholder?.toUi() ?: VodovozPlaceholderUi.Empty
                     )
                 }
 
@@ -552,7 +552,7 @@ class CartFlowViewModel @Inject constructor(
         val currentRemoveItem: CartItemUi? = null,
         val showRefreshIndicator: Boolean = false,
         val blockCart: Boolean = false,
-        val orderSummary: CartOrderSummaryUi = CartOrderSummaryUi.Empty,
+        val orderSummary: List<OrderSummaryItemUi> = emptyList(),
         val showPromotionCodeBottomSheet: Boolean = false,
         val promoCode: String = "",
     ) : State {
