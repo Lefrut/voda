@@ -44,13 +44,6 @@ class AboutServicesNewViewModel @Inject constructor(
 
     private val serviceId = savedStateHandle.get<String>("serviceId")
 
-    init {
-        viewModelScope.launch { delay(250L) }.invokeOnCompletion { fetchAllServicesDetails() }
-    }
-
-    fun fetchAllServicesDetails() = viewModelScope.launch {
-
-    }
 
     fun firstLoadSorted() {
         if (!state.isFirstLoad) {

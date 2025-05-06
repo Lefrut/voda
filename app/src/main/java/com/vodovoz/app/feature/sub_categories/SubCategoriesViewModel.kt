@@ -29,11 +29,9 @@ class SubCategoriesViewModel(
     fun chooseCatalogCategory(catalogCategory: ParentCategoryUi) = viewModelScope.launch {
         if (catalogCategory.childCategories.isNotEmpty()) {
             _events.emit(SubCategoriesEvent.GoToSubCategories(catalogCategory))
-        }
-        else if(catalogCategory.action != null){
+        } else if (catalogCategory.action != null) {
             _events.emit(SubCategoriesEvent.ActivateDataAllAction(catalogCategory.action))
-        }
-        else {
+        } else {
             _events.emit(SubCategoriesEvent.GoToProductList(catalogCategory.id))
 
         }
@@ -48,7 +46,13 @@ class SubCategoriesViewModel(
     }
 
     fun chooseParentCatalogCategory(catalogCategory: ParentCategoryUi) = viewModelScope.launch {
-        _events.emit(SubCategoriesEvent.GoToProductList(catalogCategory.id))
+        if (catalogCategory.action != null) {
+            _events.emit(SubCategoriesEvent.ActivateDataAllAction(catalogCategory.action))
+        } else {
+            _events.emit(SubCategoriesEvent.GoToProductList(catalogCategory.id))
+        }
+
+
     }
 
     fun changeSearchQuery(query: String) = viewModelScope.launch {

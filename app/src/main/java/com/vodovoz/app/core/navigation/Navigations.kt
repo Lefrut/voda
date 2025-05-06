@@ -389,3 +389,7 @@ fun NavController.navigateToWebView(url: String, title: String) {
     navigate(R.id.webViewFragment, bundleOf("url" to url, "title" to title))
 
 }
+
+fun NavController.navigateToAllServices() {
+    navigate(R.id.aboutServicesFragment, null, SlideNavOptions)
+}

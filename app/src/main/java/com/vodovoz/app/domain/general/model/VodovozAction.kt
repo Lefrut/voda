@@ -15,7 +15,7 @@ sealed interface VodovozAction {
 }
 
 enum class DataAllAction : VodovozAction {
-    AllDiscount, AllNewProducts, AllPromotions ,Delivery, Profile, WaterTracker, BuyCertificate, Unknown;
+    AllServices ,AllDiscount, AllNewProducts, AllPromotions, Delivery, Profile, WaterTracker, BuyCertificate, Unknown;
 }
 
 
