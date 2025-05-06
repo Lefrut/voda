@@ -20,8 +20,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.vodovoz.app.R
 import com.vodovoz.app.design_system.composables.button.VodovozButton
-import com.vodovoz.app.domain.general.model.cart.CartOrderSummaryUi
-import com.vodovoz.app.feature.all.orders.detail.composables.ExampleOfProgressBar
+import com.vodovoz.app.domain.general.model.cart.OrderSummaryItemUi
 import com.vodovoz.app.feature.cart.model.CartButtonUi
 import com.vodovoz.app.feature.cart.model.CartItemUi
 import com.vodovoz.app.feature.cart.model.CartPresentUi
@@ -34,7 +33,7 @@ fun CartBody(
     countCartItemsText: String,
     cartItems: List<CartItemUi>,
     cartPresent: CartPresentUi?,
-    cartOrderSummary: CartOrderSummaryUi,
+    cartOrderSummary: List<OrderSummaryItemUi>,
     bottlesButton: CartButtonUi?,
     promotionCodeButton: CartPromoButtonUi?,
     presentButton: CartButtonUi?,
@@ -58,9 +57,9 @@ fun CartBody(
                     modifier = Modifier
                         .padding(bottom = 24.dp)
                         .animateContentSize(),
-                    currentCartPrice = cartOrderSummary.productsPriceText.filter { c ->
+                    currentCartPrice = cartOrderSummary.getOrNull(1)?.value?.filter { c ->
                         c.isDigit()
-                    }.toIntOrNull() ?: 0,
+                    }?.toIntOrNull() ?: 0,
                     present = cartPresent,
                     onChoosePresentClick = onPresentButtonClick
                 )
@@ -150,7 +149,7 @@ fun CartBody(
         item {
             CartOrderSummaryColumn(
                 modifier = Modifier.padding(top = 24.dp),
-                orderSummary = cartOrderSummary
+                items = cartOrderSummary
             )
         }
 

@@ -22,7 +22,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
-class AboutServicesDialogFragment : BaseFragment() {
+class AboutServicesFragment : BaseFragment() {
 
     override fun layout(): Int = R.layout.fragment_about_services_flow_new
 
@@ -116,7 +116,7 @@ class AboutServicesDialogFragment : BaseFragment() {
         return object : ServicesClickListener {
             override fun onItemClick(item: ServiceNew) {
                 val id = item.id ?: return
-                findNavController().navigate(AboutServicesDialogFragmentDirections.actionToServiceDetailNewFragment(id))
+                findNavController().navigate(AboutServicesFragmentDirections.actionToServiceDetailNewFragment(id))
             }
         }
     }

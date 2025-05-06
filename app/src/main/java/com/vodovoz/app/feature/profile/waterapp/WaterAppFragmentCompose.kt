@@ -15,6 +15,7 @@ import androidx.navigation.fragment.findNavController
 import com.vodovoz.app.common.tab.TabManager
 import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.effects.LifecycleEffect
+import com.vodovoz.app.feature.profile.waterapp.composables.WaterAppGoalScreen
 import com.vodovoz.app.feature.profile.waterapp.composables.WaterAppUserDataScreen
 import com.vodovoz.app.feature.profile.waterapp.composables.WaterAppWelcomeScreen
 import com.vodovoz.app.feature.profile.waterapp.model.WaterAppUiState
@@ -109,7 +110,16 @@ class WaterAppFragment : Fragment() {
                             }
 
                             WaterAppUiState.WaterGoal -> {
-
+                                WaterAppGoalScreen(
+                                    //todo - goal
+                                    goal = 3000,
+                                    onCloseClick = {
+                                        viewModel.navigateToMain()
+                                    },
+                                    onStartClick = {
+                                        viewModel.navigateToMain()
+                                    }
+                                )
                             }
                         }
 

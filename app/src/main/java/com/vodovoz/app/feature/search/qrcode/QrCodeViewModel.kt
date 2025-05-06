@@ -46,8 +46,8 @@ class QrCodeViewModel @Inject constructor(
             }
         }.onFailure { t ->
 
-            if (t is EmptyResultException && t.errorData != null) {
-                val errorModel = t.errorData
+            if (t is EmptyResultException && t.placeholder != null) {
+                val errorModel = t.placeholder
 
                 uiStateListener.updateData { s ->
                     s.copy(

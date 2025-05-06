@@ -16,12 +16,20 @@ import com.vodovoz.app.domain.general.model.ProductsSectionModel
 import com.vodovoz.app.domain.general.model.ShareModel
 
 fun ProductsSectionDTO.toDomain(): ProductsSectionModel {
+
+    val sorting = SORTIROVKA?.DANNIESORT?.mapNotNull { it?.toDomain() } ?: emptyList()
+    val products = (DATA ?: TOVAR)?.mapToDomain() ?: emptyList()
+
+    if(sorting.isEmpty() && products.isEmpty()){
+        throw IllegalArgumentException("Product section products and sorting can't be bull")
+    }
+
     return ProductsSectionModel(
         title = TITLE ?: "",
         sortingTitle = SORTIROVKA?.NAMEGLAV ?: "",
         productsQuantityText = TOVARVSEGO ?: COUNT ?: "",
-        sorting = SORTIROVKA?.DANNIESORT?.mapNotNull { it?.toDomain() } ?: emptyList(),
-        products = DATA?.mapToDomain() ?: throw IllegalArgumentException("Favorite products can't be empty"),
+        sorting = sorting,
+        products = products,
         categories = RAZDEL?.LISTRAZDEL?.mapNotNull { it?.toDomain() } ?: emptyList(),
         share = PODELITCA?.toDomain() ?: ShareModel.Empty
     )
@@ -103,7 +111,7 @@ fun List<NALICHIE_MORE_DTO?>.mapToDomain(): List<LabelModel> {
     }
 }
 
-fun NALICHIE_MORE_DTO.toDomain(): LabelModel{
+fun NALICHIE_MORE_DTO.toDomain(): LabelModel {
     return LabelModel(
         name = NAME ?: "",
         colorHex = CVET ?: "",

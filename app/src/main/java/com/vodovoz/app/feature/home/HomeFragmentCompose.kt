@@ -197,6 +197,7 @@ class HomeFragment : Fragment() {
     }
 
 
+    //delete - this
     internal fun ActionEntity.activate(
         navController: NavController = findNavController(),
         activity: FragmentActivity = requireActivity(),
@@ -400,6 +401,8 @@ class HomeFragment : Fragment() {
     }
 
 
+
+    //todo - change actions to nav functions
     private fun observeDeepLinkFromSiteState() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -451,6 +454,7 @@ class HomeFragment : Fragment() {
         }
     }
 
+    //todo - change navigation functions
     private fun observePushFromSiteState() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.RESUMED) {

@@ -13,6 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.vodovoz.app.R
 
 @Composable
@@ -31,7 +32,7 @@ fun WaterAppWeightStage(modifier: Modifier = Modifier, weight: String) {
             modifier = Modifier.padding(top = 1.dp).height(25.dp).wrapContentSize(Alignment.Center),
             text = stringResource(R.string.kg),
             color = MaterialTheme.colorScheme.surfaceTint,
-            style = bodyMedium.copy(lineHeight = bodyMedium.fontSize)
+            style = bodyMedium.copy(lineHeight = bodyMedium.fontSize, letterSpacing = 0.sp)
         )
 
         Spacer(modifier = Modifier.weight(1f))

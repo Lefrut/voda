@@ -44,7 +44,7 @@ inline fun <reified T, R> executeRequest(
         Result.failure(exception)
     },
     crossinline onResponse: (Response<T>) -> Unit = {},
-    type: Type? = typeOf<T>().javaType,
+    type: Type = typeOf<T>().javaType,
 ): Flow<Result<R>> {
     return flow {
         val response = request()
@@ -72,16 +72,4 @@ inline fun <reified T, R> executeRequest(
         result.onFailure { throwable -> debugLog { throwable.stackTraceToString() } }
     }.flowOn(Dispatchers.IO)
 }
-
-
-@Deprecated("use onFail in executeRequest")
-inline fun <T> VodovozResponseDTO<T>.checkError(
-    throwError: (VodovozPlaceholderModel) -> Nothing = { it ->
-        throw EmptyResultException(errorData = it, message = message ?: "")
-    },
-) {
-    val errorModel = this.error?.toDomain() ?: return
-    throwError(errorModel)
-}
-
 

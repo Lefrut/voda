@@ -4,7 +4,7 @@ package com.vodovoz.app.domain.general.model
 open class RequestException(
     message: String = "",
     cause: Throwable? = null,
-    val errorData: VodovozPlaceholderModel? = null,
+    val placeholder: VodovozPlaceholderModel? = null,
 ) : IllegalStateException(
     message, cause
 )
@@ -23,28 +23,20 @@ class ValidationException(
     message, cause
 )
 
-class FavoritesNotFoundException(
-    message: String = "",
-    cause: Throwable? = null,
-    errorData: VodovozPlaceholderModel? = null,
-) : RequestException(
-    message, cause, errorData
-)
-
 class EmptyResultException(
     message: String = "",
-    errorData: VodovozPlaceholderModel? = null,
+    placeholder: VodovozPlaceholderModel? = null,
     cause: Throwable? = null,
 ) : RequestException(
-    message, cause, errorData
+    message, cause, placeholder
 )
 
 class UserNotLoginException(
     message: String = "",
     cause: Throwable? = null,
-    errorData: VodovozPlaceholderModel? = null,
+    placeholder: VodovozPlaceholderModel? = null,
 ) : RequestException(
-    message, cause, errorData
+    message, cause, placeholder
 )
 
 data class VodovozPlaceholderModel(

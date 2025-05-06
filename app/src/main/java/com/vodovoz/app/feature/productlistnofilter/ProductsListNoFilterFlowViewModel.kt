@@ -54,7 +54,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -361,7 +360,7 @@ class ProductsListNoFilterFlowViewModel @Inject constructor(
 
         }.onFailure { t ->
             val uiState = when (t) {
-                is EmptyResultException -> with(t.errorData) {
+                is EmptyResultException -> with(t.placeholder) {
                     UiState.Empty(
                         image = this?.imageUrl ?: "",
                         title = this?.headerHtml ?: resourcesProvider.getString(

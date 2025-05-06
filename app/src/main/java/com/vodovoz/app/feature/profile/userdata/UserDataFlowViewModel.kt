@@ -86,7 +86,7 @@ class UserDataFlowViewModel @Inject constructor(
             }
 
         }.onFailure { t ->
-            if (t is UserNotLoginException && t.errorData != null) {
+            if (t is UserNotLoginException && t.placeholder != null) {
                 eventListener.emit(UserDataEvents.GoBack)
             } else {
                 uiStateListener.updateData { s ->

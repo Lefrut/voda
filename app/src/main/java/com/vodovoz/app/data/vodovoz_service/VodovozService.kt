@@ -77,7 +77,7 @@ interface VodovozService {
         @Query("userid") userId: Long?,
         @Query("idzakaz") orderId: Long,
         @QueryMap queryMap: Map<String, String>,
-    ): Response<VodovozResponseDTO<String>>
+    ): Response<VodovozResponseDTO<VodovozPlaceholderDTO>>
 
     @GET("osnova/form/voprosozakaze.php?action=detail")
     suspend fun getOrderQuestionDetails(

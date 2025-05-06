@@ -32,7 +32,9 @@ class ConcreteFilterFlowViewModel @Inject constructor(
     private val categoryId = savedStateHandle.get<Long>("categoryId")!!.toInt()
 
     init {
-        fetchFilterValues()
+        viewModelScope.launch {
+            delay(250L)
+        }.invokeOnCompletion { fetchFilterValues() }
     }
 
 
@@ -43,8 +45,6 @@ class ConcreteFilterFlowViewModel @Inject constructor(
         val filterValuesResult =
             vodovozServiceRepository.getFilterValues(categoryId, filter.id).singleResult()
 
-        //todo
-        delay(250L)
         filterValuesResult.onSuccess { filterValues ->
 
             uiStateListener.updateData { s ->

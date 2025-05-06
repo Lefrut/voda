@@ -3,7 +3,7 @@ package com.vodovoz.app.data.vodovoz_service.mappers
 import com.vodovoz.app.data.vodovoz_service.di.toFullUrl
 import com.vodovoz.app.data.vodovoz_service.model.cart.CART_KNOPKA_DTO
 import com.vodovoz.app.data.vodovoz_service.model.cart.CartDetailsDTO
-import com.vodovoz.app.data.vodovoz_service.model.cart.ITOG_DTO
+import com.vodovoz.app.data.vodovoz_service.model.cart.ITOG_ITEM_DTO
 import com.vodovoz.app.data.vodovoz_service.model.cart.KNOPKA_PROMOKOD_DTO
 import com.vodovoz.app.data.vodovoz_service.model.cart.KORZINA_PRODUCT_DTO
 import com.vodovoz.app.data.vodovoz_service.model.cart.OKNO_PODAROK_DTO
@@ -15,7 +15,7 @@ import com.vodovoz.app.domain.general.model.ColorfulButtonModel
 import com.vodovoz.app.domain.general.model.cart.CartButtonModel
 import com.vodovoz.app.domain.general.model.cart.CartDetailsModel
 import com.vodovoz.app.domain.general.model.cart.CartItemModel
-import com.vodovoz.app.domain.general.model.cart.CartOrderSummaryModel
+import com.vodovoz.app.domain.general.model.cart.OrderSummaryItemModel
 import com.vodovoz.app.domain.general.model.cart.CartPresentItemModel
 import com.vodovoz.app.domain.general.model.cart.CartPresentModel
 import com.vodovoz.app.domain.general.model.cart.CartPresentPopupWindowModel
@@ -31,18 +31,20 @@ fun CartDetailsDTO.toDomain(): CartDetailsModel {
         bottlesButton = KNOPKI?.BYTYLI?.toDomain(),
         promotionalCodeButton = KNOPKI?.PROMOKOD?.toDomain(),
         presentButton = KNOPKI?.PODARKI?.toDomain(),
-        orderSummary = ITOG?.toDomain()
-            ?: throw IllegalArgumentException("Cart order summary can't be null")
+        orderSummary = ITOG?.mapToDomain() ?: throw IllegalArgumentException("OrderSummary can't be null")
     )
 }
 
-fun ITOG_DTO.toDomain(): CartOrderSummaryModel {
-    return CartOrderSummaryModel(
-        finalPriceText = finalPriceText ?: "",
-        productsPriceText = productsPriceText ?: "",
-        discountText = discountText ?: "",
-        depositText = depositText ?: "",
-        presentText = ""
+@JvmName("mapToOrderSummaryItemModelList")
+fun List<ITOG_ITEM_DTO>.mapToDomain(): List<OrderSummaryItemModel>{
+    return mapNotNull { it.toDomain() }.ifEmpty { throw IllegalArgumentException("OrderSummary can't be null") }
+}
+
+fun ITOG_ITEM_DTO.toDomain(): OrderSummaryItemModel? {
+    return OrderSummaryItemModel(
+        name = name ?: return null,
+        value = value ?: return null,
+        color = color ?: ""
     )
 }
 

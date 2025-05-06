@@ -17,5 +17,5 @@ data class CartDetailsDTO(
     @Json(name = "KNOPKI")
     val KNOPKI: KORZINA_KNOPKI_DTO?,
     @Json(name = "ITOG")
-    val ITOG: ITOG_DTO?
+    val ITOG: List<ITOG_ITEM_DTO>?
 )
