@@ -1,13 +1,13 @@
 package com.vodovoz.app.core.android
 
 import android.app.Activity
-import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.webkit.CookieManager
 import androidx.navigation.NavController
 import com.vodovoz.app.R
 import com.vodovoz.app.common.tab.TabManager
+import com.vodovoz.app.core.navigation.navigateToAllServices
 import com.vodovoz.app.core.navigation.navigateToBannerProductList
 import com.vodovoz.app.core.navigation.navigateToBrandProductList
 import com.vodovoz.app.core.navigation.navigateToButtonProductList
@@ -20,7 +20,6 @@ import com.vodovoz.app.core.navigation.navigateToPromotionDetails
 import com.vodovoz.app.core.navigation.navigateToPromotions
 import com.vodovoz.app.core.navigation.navigateToWaterApp
 import com.vodovoz.app.core.navigation.navigateToWebView
-import com.vodovoz.app.core.network.ApiConfig
 import com.vodovoz.app.core.network.VODOVOZ_URL
 import com.vodovoz.app.core.network.VodovozWebConfig
 import com.vodovoz.app.domain.general.model.ButtonAction
@@ -67,6 +66,10 @@ fun DataAllAction.activate(
 
         DataAllAction.BuyCertificate -> {
             navController.navigateToBuyCertificate()
+        }
+
+        DataAllAction.AllServices -> {
+            navController.navigateToAllServices()
         }
 
         DataAllAction.Unknown -> {

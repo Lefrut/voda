@@ -25,6 +25,7 @@ fun ACTION_DTO.toAction(blockId: Long): VodovozAction? {
 
 fun String.toDataAllAction(): DataAllAction {
     return when (this) {
+        "uslugi" -> DataAllAction.AllServices
         "vseskidki" -> DataAllAction.AllDiscount
         "vsenovinki" -> DataAllAction.AllNewProducts
         "vseakcii" -> DataAllAction.AllPromotions

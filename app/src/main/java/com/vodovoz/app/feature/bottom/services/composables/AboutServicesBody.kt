@@ -79,7 +79,8 @@ private fun ServiceCard(
             shape = MaterialTheme.shapes.large,
             color = MaterialTheme.colorScheme.onBackground.copy(0.2f),
             offsetY = 2.dp,
-            blur = 4.dp
+            blur = 4.dp,
+            spread = 1.dp
         )
     ) {
         Column(
