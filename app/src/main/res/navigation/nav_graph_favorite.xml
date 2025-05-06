@@ -81,7 +81,7 @@
             app:destination="@id/fullScreenHistorySliderFragment" />
         <action
             android:id="@+id/action_to_aboutServicesDialogFragment"
-            app:destination="@id/aboutServicesDialogFragment" />
+            app:destination="@id/aboutServicesFragment" />
         <action
             android:id="@+id/action_to_webViewFragment"
             app:destination="@id/webViewFragment" />
@@ -649,7 +649,7 @@
             />
     </dialog>
     <fragment
-        android:id="@+id/aboutServicesDialogFragment"
+        android:id="@+id/aboutServicesFragment"
         android:name="com.vodovoz.app.feature.bottom.services.AboutServicesFragment"
         android:label="AboutServicesDialogFragment" >
         <action

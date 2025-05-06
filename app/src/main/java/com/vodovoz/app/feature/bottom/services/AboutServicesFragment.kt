@@ -22,7 +22,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
-class AboutServicesFragment : BaseFragment() {
+class AboutServicesFragment1 : BaseFragment() {
 
     override fun layout(): Int = R.layout.fragment_about_services_flow_new
 

@@ -1,0 +1,15 @@
+package com.vodovoz.app.data.vodovoz_service.model.services
+
+
+import com.squareup.moshi.Json
+import androidx.annotation.Keep
+
+@Keep
+data class SERVICE_DTO(
+    @Json(name = "ID")
+    val ID: Int?,
+    @Json(name = "NAME")
+    val NAME: String?,
+    @Json(name = "PREVIEW_PICTURE")
+    val PREVIEW_PICTURE: String?
+)

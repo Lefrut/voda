@@ -13,12 +13,14 @@ import com.vodovoz.app.common.like.LikeManager
 import com.vodovoz.app.common.product.rating.RatingProductManager
 import com.vodovoz.app.data.MainRepository
 import com.vodovoz.app.data.model.common.ResponseEntity
+import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.feature.bottom.services.detail.model.ServiceDetailUI
 import com.vodovoz.app.feature.bottom.services.detail.model.ServicesDetailParser.mapToUI
 import com.vodovoz.app.feature.bottom.services.newservs.model.AboutServicesNew
 import com.vodovoz.app.util.extensions.debugLog
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flow
@@ -34,12 +36,21 @@ class AboutServicesNewViewModel @Inject constructor(
     private val likeManager: LikeManager,
     private val ratingProductManager: RatingProductManager,
     private val accountManager: AccountManager,
+    private val vodovozServiceRepository: VodovozServiceRepository,
     savedStateHandle: SavedStateHandle,
 ) : PagingContractViewModel<AboutServicesNewViewModel.AboutServicesState, AboutServicesNewViewModel.AboutServicesEvents>(
     AboutServicesState()
 ) {
 
     private val serviceId = savedStateHandle.get<String>("serviceId")
+
+    init {
+        viewModelScope.launch { delay(250L) }.invokeOnCompletion { fetchAllServicesDetails() }
+    }
+
+    fun fetchAllServicesDetails() = viewModelScope.launch {
+
+    }
 
     fun firstLoadSorted() {
         if (!state.isFirstLoad) {

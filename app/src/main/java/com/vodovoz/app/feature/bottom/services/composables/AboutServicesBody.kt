@@ -1,0 +1,121 @@
+package com.vodovoz.app.feature.bottom.services.composables
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.fromHtml
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import coil3.compose.AsyncImage
+import coil3.request.ImageRequest
+import coil3.request.crossfade
+import com.vodovoz.app.design_system.VodovozTheme
+import com.vodovoz.app.feature.bottom.services.model.ServiceUi
+import com.vodovoz.app.feature.home.composables.dropShadow
+
+@Suppress("NonSkippableComposable")
+@Composable
+fun AboutServicesBody(
+    modifier: Modifier = Modifier,
+    descriptionHtml: String,
+    services: List<ServiceUi>,
+    onServiceClick: (ServiceUi) -> Unit,
+) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState()),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 8.dp),
+            text = AnnotatedString.fromHtml(descriptionHtml),
+            color = MaterialTheme.colorScheme.onBackground,
+            style = MaterialTheme.typography.bodyMedium
+        )
+
+        Column(
+            modifier = Modifier.padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            services.forEach { service ->
+                ServiceCard(
+                    service = service,
+                    onClick = onServiceClick
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun ServiceCard(
+    modifier: Modifier = Modifier,
+    service: ServiceUi,
+    onClick: (ServiceUi) -> Unit,
+) {
+    val context = LocalContext.current
+    Box(
+        Modifier.dropShadow(
+            shape = MaterialTheme.shapes.large,
+            color = MaterialTheme.colorScheme.onBackground.copy(0.2f),
+            offsetY = 2.dp,
+            blur = 4.dp
+        )
+    ) {
+        Column(
+            modifier = modifier
+                .clip(MaterialTheme.shapes.large)
+                .background(
+                    color = MaterialTheme.colorScheme.background,
+                    shape = MaterialTheme.shapes.large
+                )
+                .clickable { onClick(service) }
+        ) {
+            AsyncImage(
+                model = ImageRequest.Builder(context).data(service.image).crossfade(true).build(),
+                contentDescription = null,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(2f),
+                contentScale = ContentScale.Crop
+            )
+
+            Text(
+                modifier = Modifier.padding(
+                    start = 12.dp, top = 10.dp, end = 16.dp, bottom = 8.dp
+                ),
+                text = service.name,
+                color = MaterialTheme.colorScheme.onBackground,
+                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold)
+            )
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun ServiceCardPreview() {
+    VodovozTheme {
+        ServiceCard(service = ServiceUi("Rent water", "", -1)) {}
+    }
+}
