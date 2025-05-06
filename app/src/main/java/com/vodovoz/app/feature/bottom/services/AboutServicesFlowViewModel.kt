@@ -1,24 +1,32 @@
 package com.vodovoz.app.feature.bottom.services
 
+import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.Stable
 import androidx.lifecycle.viewModelScope
 import com.vodovoz.app.common.content.ErrorState
 import com.vodovoz.app.common.content.Event
 import com.vodovoz.app.common.content.PagingContractViewModel
 import com.vodovoz.app.common.content.State
 import com.vodovoz.app.common.content.toErrorState
+import com.vodovoz.app.common.content.updateData
 import com.vodovoz.app.data.MainRepository
 import com.vodovoz.app.data.model.common.ResponseEntity
 import com.vodovoz.app.data.parser.response.service.AboutServicesResponseJsonParser.parseAboutServicesResponse
 import com.vodovoz.app.data.parser.response.service.ServiceByIdResponseJsonParser.parseServiceByIdResponse
+import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.feature.bottom.services.detail.bottom.adapter.ServiceNameItem
+import com.vodovoz.app.feature.bottom.services.model.ServiceUi
+import com.vodovoz.app.feature.bottom.services.model.mapToUi
 import com.vodovoz.app.mapper.AboutServicesBundleMapper.mapToUI
 import com.vodovoz.app.mapper.ServiceMapper.mapToUI
 import com.vodovoz.app.ui.model.ServiceUI
 import com.vodovoz.app.ui.model.custom.AboutServicesBundleUI
 import com.vodovoz.app.util.extensions.debugLog
+import com.vodovoz.app.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.catch
@@ -30,12 +38,53 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
+@Stable
 class AboutServicesFlowViewModel @Inject constructor(
-    private val repository: MainRepository
-) : PagingContractViewModel<AboutServicesFlowViewModel.AboutServicesState, AboutServicesFlowViewModel.AboutServicesEvents>(AboutServicesState()) {
+    private val repository: MainRepository,
+    private val vodovozServiceRepository: VodovozServiceRepository,
+) : PagingContractViewModel<AboutServicesFlowViewModel.AboutServicesState, AboutServicesFlowViewModel.AboutServicesEvents>(
+    AboutServicesState()
+) {
 
-    private val aboutServicesEventListener = MutableSharedFlow<AboutServicesEvents>(replay = 0, extraBufferCapacity = 1, BufferOverflow.DROP_OLDEST)
+    private val aboutServicesEventListener = MutableSharedFlow<AboutServicesEvents>(
+        replay = 0,
+        extraBufferCapacity = 1,
+        BufferOverflow.DROP_OLDEST
+    )
+
     fun observeAboutServicesEvents() = aboutServicesEventListener.asSharedFlow()
+
+    init {
+        viewModelScope.launch { delay(250L) }.invokeOnCompletion {
+            fetchAboutServicesDetails()
+        }
+    }
+
+    fun fetchAboutServicesDetails() = viewModelScope.launch {
+        uiStateListener.updateData { s ->
+            s.copy(uiState = AboutServicesUiState.Loading)
+        }
+
+        val allServicesDetailsResult =
+            vodovozServiceRepository.getAllServicesDetails().singleResult()
+
+        allServicesDetailsResult.onSuccess { allServicesDetails ->
+
+            uiStateListener.updateData { s ->
+                s.copy(
+                    title = allServicesDetails.title,
+                    descriptionHtml = allServicesDetails.description,
+                    uiState = AboutServicesUiState.Success,
+                    services = allServicesDetails.services.mapToUi()
+                )
+            }
+
+        }.onFailure {
+            uiStateListener.updateData { s ->
+                s.copy(uiState = AboutServicesUiState.Error)
+            }
+        }
+    }
 
     fun firstLoadSorted() {
         if (!state.isFirstLoad) {
@@ -185,21 +234,45 @@ class AboutServicesFlowViewModel @Inject constructor(
     fun navigateToOrder() {
         val service: ServiceUI = state.data.selectedService ?: return
         viewModelScope.launch {
-            aboutServicesEventListener.emit(AboutServicesEvents.NavigateToOrder(service.name, service.type))
+            aboutServicesEventListener.emit(
+                AboutServicesEvents.NavigateToOrder(
+                    service.name,
+                    service.type
+                )
+            )
         }
     }
 
-    sealed class AboutServicesEvents : Event {
-        data class NavigateToDetails(val typeList: List<String>, val type: String) : AboutServicesEvents()
-        data class OnTitleClick(val nameItemList: List<ServiceNameItem>) : AboutServicesEvents()
-        data class NavigateToOrder(val name: String, val type: String) : AboutServicesEvents()
+    fun navigateBack() = viewModelScope.launch {
+        eventListener.emit(AboutServicesEvents.GoBack)
     }
 
+    sealed class AboutServicesEvents : Event {
+        data class NavigateToDetails(val typeList: List<String>, val type: String) :
+            AboutServicesEvents()
+
+        data class OnTitleClick(val nameItemList: List<ServiceNameItem>) : AboutServicesEvents()
+        data class NavigateToOrder(val name: String, val type: String) : AboutServicesEvents()
+        data object GoBack : AboutServicesEvents()
+    }
+
+    @Immutable
     data class AboutServicesState(
         val item: AboutServicesBundleUI? = null,
         val nameItemList: List<ServiceNameItem> = emptyList(),
         val selectedType: String? = null,
         val selectedService: ServiceUI? = null,
-        val itemsWithFullText: List<ServiceUI> = emptyList()
+        val itemsWithFullText: List<ServiceUI> = emptyList(),
+
+        val title: String = "",
+        val descriptionHtml: String = "",
+        val uiState: AboutServicesUiState = AboutServicesUiState.Loading,
+        val services: List<ServiceUi> = emptyList(),
     ) : State
+
+    sealed interface AboutServicesUiState {
+        data object Loading : AboutServicesUiState
+        data object Success : AboutServicesUiState
+        data object Error : AboutServicesUiState
+    }
 }
