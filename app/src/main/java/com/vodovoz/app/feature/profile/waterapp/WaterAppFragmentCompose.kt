@@ -16,6 +16,7 @@ import com.vodovoz.app.common.tab.TabManager
 import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.effects.LifecycleEffect
 import com.vodovoz.app.feature.profile.waterapp.composables.WaterAppGoalScreen
+import com.vodovoz.app.feature.profile.waterapp.composables.WaterAppSettingsScreen
 import com.vodovoz.app.feature.profile.waterapp.composables.WaterAppUserDataScreen
 import com.vodovoz.app.feature.profile.waterapp.composables.WaterAppWelcomeScreen
 import com.vodovoz.app.feature.profile.waterapp.model.WaterAppUiState
@@ -74,18 +75,28 @@ class WaterAppFragment : Fragment() {
                             WaterAppUiState.GoalCompleted -> {
 
                             }
+
                             WaterAppUiState.Main -> {
 
                             }
-                            WaterAppUiState.Settings -> {
 
+                            WaterAppUiState.Settings -> {
+                                WaterAppSettingsScreen(
+                                    onCloseClick = { },
+                                    intervals = viewState.reminderIntervals
+                                )
                             }
+
                             is WaterAppUiState.UserData -> {
                                 WaterAppUserDataScreen(
                                     userDataStage = uiState,
                                     userData = viewState.userData,
                                     onGenderSelect = { isMan -> viewModel.selectGender(isMan) },
-                                    onActivityLevelSelect = { activityLevel -> viewModel.selectActivityLevel(activityLevel) },
+                                    onActivityLevelSelect = { activityLevel ->
+                                        viewModel.selectActivityLevel(
+                                            activityLevel
+                                        )
+                                    },
                                     onBackClick = {
                                         viewModel.navigateToPreviousStage()
                                     },
@@ -127,7 +138,7 @@ class WaterAppFragment : Fragment() {
 
                     LifecycleEffect {
                         viewModel.observeEvent().collectLatest { event ->
-                            when(event){
+                            when (event) {
                                 WaterAppViewModel.WaterAppEvents.GoBack -> {
                                     findNavController().popBackStack()
                                 }

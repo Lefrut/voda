@@ -676,7 +676,7 @@ class HomeFlowViewModel @Inject constructor(
         }
 
         //todo - remove it
-        delay(5000L)
+        delay(10000L)
         uiStateListener.updateData { s ->
             s.copy(
                 showUnratedProductsBS = true
@@ -685,7 +685,7 @@ class HomeFlowViewModel @Inject constructor(
     }
 
     fun changeUnratedProductRating(product: UnratedProductUi, rating: Float) {
-        //todo - finish method(when the product evaluation method is completed)
+        //todo - finish method(when the rate product method is completed)
     }
 
     fun navigateToPopularCategory(popularCategory: PopularCategoryUi) = viewModelScope.launch {
@@ -821,7 +821,7 @@ class HomeFlowViewModel @Inject constructor(
 
         val uiState: HomeUiState = HomeUiState.Loading,
         val showSpecialPromotionBS: Boolean = false,
-        val showUnratedProductsBS: Boolean = true,
+        val showUnratedProductsBS: Boolean = false,
         val showAdvertisingBS: Boolean = false,
         val showRefreshIndicator: Boolean = false,
     ) : State {
