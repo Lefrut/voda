@@ -1,5 +1,6 @@
 package com.vodovoz.app.feature.about_app
 
+import androidx.compose.runtime.Stable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.vodovoz.app.R
@@ -19,6 +20,7 @@ import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
 @HiltViewModel
+@Stable
 class AboutAppViewModel @Inject constructor(
     private val accountManager: AccountManager,
     private val resourcesProvider: ResourcesProvider

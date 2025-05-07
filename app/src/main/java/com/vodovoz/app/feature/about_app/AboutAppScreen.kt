@@ -29,7 +29,10 @@ fun AboutAppScreen(viewModel: AboutAppViewModel, viewState: AboutAppState) {
             title = stringResource(R.string.about_app),
             actionPainter = painterResource(
                 R.drawable.ic_share
-            )
+            ),
+            onActionClick = {
+                viewModel.share()
+            }
         )
         AboutAppBody(
             modifier = Modifier.weight(1f),
