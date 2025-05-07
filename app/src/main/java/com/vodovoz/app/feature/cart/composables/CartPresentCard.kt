@@ -8,11 +8,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -24,10 +22,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -52,10 +52,13 @@ fun CartPresentCard(
     onChoosePresentClick: () -> Unit,
 ) {
     val context = LocalContext.current
+    val density = LocalDensity.current
 
     BoxWithConstraints(modifier = modifier) {
         val maxWidth = maxWidth
+        val minHeight = with(density) { constraints.minHeight.toDp() }
         val horizontalPadding = 16.dp
+        val verticalPadding = 10.dp
         val button = present.button
 
 
@@ -68,6 +71,7 @@ fun CartPresentCard(
                     horizontal = horizontalPadding,
                     vertical = 10.dp
                 )
+
         ) {
             Column(
                 modifier = Modifier
@@ -164,13 +168,10 @@ fun CartPresentCard(
 
             AsyncImage(
                 modifier = Modifier
-                    .heightIn(min = if (button != null) 110.dp else 80.dp)
-                    .widthIn(max = 80.dp)
+                    .size(75.dp)
                     .zIndex(0f),
                 model = ImageRequest.Builder(context).data(present.image).crossfade(true).build(),
                 contentDescription = null,
-                placeholder = painterResource(id = R.drawable.pic_heart), //todo - replace to present
-                error = painterResource(id = R.drawable.pic_heart), //todo - replace to present
                 contentScale = ContentScale.Inside
             )
         }

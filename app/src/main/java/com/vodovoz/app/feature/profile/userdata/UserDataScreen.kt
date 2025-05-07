@@ -30,7 +30,7 @@ fun UserDataScreen(
                 onBack = { viewModel.navigateBack() },
                 title = viewState.title,
                 actionPainter = painterResource(id = R.drawable.ic_logout),
-                onLogoutClick = {
+                onActionClick = {
                     viewModel.showLogoutDialog()
                 }
             )
