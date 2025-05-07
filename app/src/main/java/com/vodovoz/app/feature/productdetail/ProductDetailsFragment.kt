@@ -20,6 +20,7 @@ import com.vodovoz.app.common.like.LikeManager
 import com.vodovoz.app.common.media.MediaManager
 import com.vodovoz.app.common.product.rating.RatingProductManager
 import com.vodovoz.app.common.tab.TabManager
+import com.vodovoz.app.core.navigation.navigateToServiceDetails
 import com.vodovoz.app.databinding.FragmentProductDetailsFlowBinding
 import com.vodovoz.app.feature.home.banneradvinfo.BannerAdvInfoBottomSheetFragment
 import com.vodovoz.app.feature.home.viewholders.homeproducts.ProductsShowAllListener
@@ -192,6 +193,7 @@ class ProductDetailsFragment1 : BaseFragment() {
                                     )
                                 )
                             }
+
                             else -> {}
                         }
                     }
@@ -415,12 +417,7 @@ class ProductDetailsFragment1 : BaseFragment() {
             }
 
             override fun onServiceClick(id: String) {
-                findNavController().navigate(
-                    ProductDetailsFragmentDirections.actionToServiceDetailFragment(
-                        emptyArray(),
-                        id
-                    )
-                )
+                findNavController().navigateToServiceDetails(id.toIntOrNull() ?: return)
             }
         }
     }

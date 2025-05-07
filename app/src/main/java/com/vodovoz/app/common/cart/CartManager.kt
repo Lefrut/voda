@@ -89,7 +89,7 @@ class CartManager @Inject constructor(
 
 
         kotlin.runCatching {
-            withTimeout(5000) {
+            withTimeout(4000) {
                 updateCartOnline(cartChanges, currentFirstCart)
                 updateCartListState(true)
             }

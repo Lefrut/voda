@@ -42,6 +42,7 @@ import com.vodovoz.app.data.vodovoz_service.model.order_details.OrderDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.product_details.ProductDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.profile.ProfileDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.services.AllServicesDetailsDTO
+import com.vodovoz.app.data.vodovoz_service.model.services.ServiceDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.unrated_products.UnratedProductsSectionDTO
 import com.vodovoz.app.data.vodovoz_service.model.user_data.UserDataDTO
 import okhttp3.MultipartBody
@@ -59,10 +60,17 @@ interface VodovozService {
     /**
      * Service requests
      * */
-    @GET("https://vodovoz.net/newmobile_new/glavnaya/uslygi/index.php?action=spisok")
+    @GET("glavnaya/uslygi/index.php?action=spisok")
     suspend fun getAllServicesDetails(
         @Query("userid") userId: Long?
     ): Response<VodovozResponseDTO<AllServicesDetailsDTO>>
+
+
+    @GET("glavnaya/uslygi/index.php?action=details")
+    suspend fun getServiceDetails(
+        @Query("userid") userId: Long?,
+        @Query("id") serviceId: Int?
+    ): Response<VodovozResponseDTO<ServiceDetailsDTO>>
 
 
     /**

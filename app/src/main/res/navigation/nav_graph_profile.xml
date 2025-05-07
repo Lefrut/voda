@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/graph_profile"
-    app:startDestination="@id/waterAppFragment">
+    app:startDestination="@id/profileFragment">
 
     <fragment
         android:id="@+id/aboutAppFragment"
@@ -920,12 +920,19 @@
         android:id="@+id/serviceDetailFragment"
         android:name="com.vodovoz.app.feature.bottom.services.detail.ServiceDetailFragment"
         android:label="ServiceDetailFragment">
+
         <argument
             android:name="typeList"
             app:argType="string[]" />
         <argument
             android:name="selectedType"
             app:argType="string" />
+
+        <argument
+            android:name="serviceId"
+            app:argType="integer"
+            android:defaultValue="-1"/>
+
         <action
             android:id="@+id/action_to_serviceSelectionBS"
             app:destination="@id/serviceSelectionBS" />

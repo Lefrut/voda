@@ -1,7 +1,9 @@
 package com.vodovoz.app.feature.bottom.services
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.vodovoz.app.design_system.composables.top_bar.VodovozTopBar
@@ -12,7 +14,10 @@ fun AboutServicesScreen(
     viewModel: AboutServicesFlowViewModel,
     viewState: AboutServicesFlowViewModel.AboutServicesState,
 ) {
-    Column(modifier = Modifier.fillMaxSize()) {
+    Column(
+        modifier = Modifier.fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+    ) {
         VodovozTopBar(
             title = viewState.title,
             onBack = {
@@ -24,7 +29,7 @@ fun AboutServicesScreen(
             descriptionHtml = viewState.descriptionHtml,
             services = viewState.services,
             onServiceClick = { service ->
-                //todo - implement realization
+                viewModel.navigateToServiceDetails(service)
             }
         )
     }

@@ -22,6 +22,13 @@ private val SlideNavOptions = NavOptions.Builder()
     .setPopExitAnim(R.anim.slide_out_right)
     .build()
 
+fun NavController.navigateToServiceDetails(serviceId: Int){
+    navigate(
+        R.id.serviceDetailFragment,
+        bundleOf("serviceId" to serviceId),
+        SlideNavOptions
+    )
+}
 
 fun NavController.navigateToFAQ(faq: FAQUi) {
     navigate(
