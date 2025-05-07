@@ -14,20 +14,22 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.fromHtml
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.text.HtmlCompat
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import com.vodovoz.app.design_system.VodovozTheme
+import com.vodovoz.app.design_system.utils.toAnnotatedString
+import com.vodovoz.app.design_system.vodovozTextLinkStyle
 import com.vodovoz.app.feature.bottom.services.model.ServiceUi
 import com.vodovoz.app.feature.home.composables.dropShadow
 
@@ -45,9 +47,20 @@ fun AboutServicesBody(
             .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+
+        val linkStyle = vodovozTextLinkStyle
+        val annotatedString = remember(descriptionHtml) {
+            HtmlCompat.fromHtml(
+                descriptionHtml,
+                HtmlCompat.FROM_HTML_MODE_LEGACY,
+            ).toAnnotatedString(linkStyle)
+        }
+
+
+
         Text(
             modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 8.dp),
-            text = AnnotatedString.fromHtml(descriptionHtml),
+            text = annotatedString,
             color = MaterialTheme.colorScheme.onBackground,
             style = MaterialTheme.typography.bodyMedium
         )

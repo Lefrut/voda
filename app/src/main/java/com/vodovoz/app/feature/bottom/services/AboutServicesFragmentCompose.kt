@@ -12,6 +12,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.fragment.findNavController
+import com.vodovoz.app.core.navigation.navigateToServiceDetails
 import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.composables.placeholders.LoadingPlaceholder
 import com.vodovoz.app.design_system.composables.placeholders.NetworkErrorPlaceholder
@@ -46,6 +47,7 @@ class AboutServicesFragment : Fragment() {
                         AboutServicesFlowViewModel.AboutServicesUiState.Loading -> {
                             LoadingPlaceholder()
                         }
+
                         AboutServicesFlowViewModel.AboutServicesUiState.Success -> {
                             AboutServicesScreen(viewModel = viewModel, viewState = viewState)
                         }
@@ -61,11 +63,17 @@ class AboutServicesFragment : Fragment() {
                                 is AboutServicesFlowViewModel.AboutServicesEvents.NavigateToDetails -> {
 
                                 }
+
                                 is AboutServicesFlowViewModel.AboutServicesEvents.NavigateToOrder -> {
 
                                 }
+
                                 is AboutServicesFlowViewModel.AboutServicesEvents.OnTitleClick -> {
 
+                                }
+
+                                is AboutServicesFlowViewModel.AboutServicesEvents.GoToServiceDetails -> {
+                                    findNavController().navigateToServiceDetails(event.serviceId)
                                 }
                             }
 

@@ -247,12 +247,18 @@ class AboutServicesFlowViewModel @Inject constructor(
         eventListener.emit(AboutServicesEvents.GoBack)
     }
 
+    fun navigateToServiceDetails(service: ServiceUi) = viewModelScope.launch {
+        eventListener.emit(AboutServicesEvents.GoToServiceDetails(service.id))
+    }
+
     sealed class AboutServicesEvents : Event {
         data class NavigateToDetails(val typeList: List<String>, val type: String) :
             AboutServicesEvents()
 
         data class OnTitleClick(val nameItemList: List<ServiceNameItem>) : AboutServicesEvents()
         data class NavigateToOrder(val name: String, val type: String) : AboutServicesEvents()
+
+        data class GoToServiceDetails(val serviceId: Int): AboutServicesEvents()
         data object GoBack : AboutServicesEvents()
     }
 

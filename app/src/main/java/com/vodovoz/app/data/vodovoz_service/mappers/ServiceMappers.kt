@@ -2,9 +2,15 @@ package com.vodovoz.app.data.vodovoz_service.mappers
 
 import com.vodovoz.app.data.vodovoz_service.di.toFullUrl
 import com.vodovoz.app.data.vodovoz_service.model.services.AllServicesDetailsDTO
+import com.vodovoz.app.data.vodovoz_service.model.services.SERVICE_DETAILS_BUTTON_DTO
 import com.vodovoz.app.data.vodovoz_service.model.services.SERVICE_DTO
+import com.vodovoz.app.data.vodovoz_service.model.services.ServiceDetailsDTO
+import com.vodovoz.app.data.vodovoz_service.model.services.ServiceProductsDTO
+import com.vodovoz.app.domain.general.model.ColorfulButtonModel
 import com.vodovoz.app.domain.general.model.service.AllServicesDetailsModel
+import com.vodovoz.app.domain.general.model.service.ServiceDetailsModel
 import com.vodovoz.app.domain.general.model.service.ServiceModel
+import com.vodovoz.app.domain.general.model.service.ServiceProductsModel
 
 fun AllServicesDetailsDTO.toDomain(): AllServicesDetailsModel{
     return AllServicesDetailsModel(
@@ -25,3 +31,33 @@ fun SERVICE_DTO.toDomain(): ServiceModel? {
         image = PREVIEW_PICTURE?.toFullUrl() ?: return null
     )
 }
+
+fun ServiceDetailsDTO.toDomain(): ServiceDetailsModel{
+    return ServiceDetailsModel(
+        id = ID ?: throw IllegalArgumentException("Service id can't be null"),
+        name = NAME ?: "",
+        html = DETAIL_TEXT ?: "",
+        image = PREVIEW_PICTURE?.toFullUrl() ?: "",
+        productsSection = TOVAR?.toDomain(),
+        button = KNOPKA?.toDomain()
+    )
+}
+
+fun SERVICE_DETAILS_BUTTON_DTO.toDomain(): ColorfulButtonModel{
+    return ColorfulButtonModel(
+        name = NAME ?: "",
+        backgroundColor = BACKGROUND ?: "",
+        textColor = TEXTCOLOR ?: "",
+        id = ID ?: ""
+    )
+}
+
+fun ServiceProductsDTO.toDomain(): ServiceProductsModel{
+    return ServiceProductsModel(
+        title = TITLE ?: "",
+        coefficient = KOEFFICIENT ?: 1,
+        products = TOVARY?.mapToDomain() ?: emptyList(),
+        additionalProductId =  DOPTOVAR ?: ""
+    )
+}
+

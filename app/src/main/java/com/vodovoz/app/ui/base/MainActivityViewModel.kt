@@ -34,7 +34,8 @@ class MainActivityViewModel @Inject constructor(
         siteStateDeferred.await()
 
         if(siteStateManager.siteStateSnapshot == null){
-            _appState.update { AppState.ErrorLoading }
+            //todo - replace to error loading
+            _appState.update { AppState.App }
             return@launch
         }
         else if(!siteStateManager.siteActive()){
@@ -54,11 +55,11 @@ class MainActivityViewModel @Inject constructor(
 
                 else -> {
                     //todo - change to _appState.update { AppState.ErrorLoading }
-                    _appState.update { AppState.App }
+                    _appState.update { AppState.ErrorLoading }
                 }
             }
         }.onSuccess {
-            _appState.update { AppState.ErrorLoading }
+            _appState.update { AppState.App }
         }
     }
 }

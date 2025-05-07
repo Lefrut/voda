@@ -20,7 +20,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
-class ServiceDetailFragment : BaseFragment() {
+class ServiceDetailFragment1 : BaseFragment() {
 
     companion object {
         const val SERVICE_TYPE = "SERVICE_TYPE"
