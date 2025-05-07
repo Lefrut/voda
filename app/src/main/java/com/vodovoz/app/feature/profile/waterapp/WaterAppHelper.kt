@@ -13,7 +13,6 @@ import com.vodovoz.app.util.extensions.debugLog
 import com.vodovoz.app.util.extensions.fetchCurrentDayInTimeMillis
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.util.concurrent.TimeUnit
@@ -32,6 +31,18 @@ class WaterAppHelper @Inject constructor(
         const val WATER_APP_USER_DATA = "water app user data"
         const val WATER_APP_NOTIFICATION_DATA = "water app notification data"
         const val WATER_APP_RATE = "water app rate"
+
+        val reminderIntervals = listOf(
+            15L, 30L, 60L, 90L, 120L, 180L, 240L, 300L
+        )
+
+        fun shouldDisplayIntervalAsHours(minutes: Long): Boolean = minutes > 90
+
+        fun formatReminderMinutes(minutes: Long): String {
+            return if (minutes < 90) minutes.toString()
+            else ((minutes / 60) + (minutes % 60).toFloat() / 60).toString()
+        }
+
     }
 
     private val adapter = moshi.adapter(WaterAppUserData::class.java)
@@ -252,7 +263,6 @@ class WaterAppHelper @Inject constructor(
             )
                 .setConstraints(Constraints.NONE)
                 .setInitialDelay(data.time.toLong(), TimeUnit.MINUTES)
-//                .setInitialDelay(30L, TimeUnit.SECONDS)
                 .addTag("water")
                 .build()
             WorkManager
@@ -304,6 +314,9 @@ class WaterAppHelper @Inject constructor(
         val started: Boolean = false,
     )
 
+
+
+
     data class WaterAppUserData(
         val gender: String = "man",
         val height: String = "160",
@@ -311,7 +324,7 @@ class WaterAppHelper @Inject constructor(
         val sleepTime: String = "138",
         val wakeUpTime: String = "42",
         val sport: String = "0.25",
-    ){
+    ) {
         fun wakeUpTimeToLocalTime(): LocalTime =
             LocalTime.ofSecondOfDay(wakeUpTime.toLong() * 60)
 
@@ -322,17 +335,21 @@ class WaterAppHelper @Inject constructor(
             return try {
                 val sleepTime = LocalTime.ofSecondOfDay(sleepTime.toLong() * 60)
                 sleepTime.format(DateTimeFormatter.ofPattern(TIME_FORMAT))
-            }catch (_: Throwable){ "" }
+            } catch (_: Throwable) {
+                ""
+            }
         }
 
         fun formatWakeUpTime(): String {
             return try {
                 val wakeUpTime = LocalTime.ofSecondOfDay(wakeUpTime.toLong() * 60)
                 wakeUpTime.format(DateTimeFormatter.ofPattern(TIME_FORMAT))
-            }catch (_: Throwable){ "" }
+            } catch (_: Throwable) {
+                ""
+            }
         }
 
-        companion object{
+        companion object {
             private const val TIME_FORMAT = "HH:mm"
         }
 
@@ -345,4 +362,5 @@ class WaterAppHelper @Inject constructor(
         val lastSavedDate: Long = 0,
         val canFill: Boolean = true,
     )
+
 }

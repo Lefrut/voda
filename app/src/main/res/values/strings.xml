@@ -102,7 +102,7 @@
     <string name="sbrosit_dannye" translatable="false">Сбросить данные</string>
     <string name="nastroyki_uvedomleniy" translatable="false">Настройки уведомлений</string>
     <string name="vasha_norma" translatable="false">Ваша норма</string>
-    <string name="vashe_pravilnoe_potreblenie" translatable="false">Ваше правильное\nежедневное\nпотребление воды</string>
+    <string name="vashe_pravilnoe_potreblenie" translatable="false">Ваше правильное ежедневное\nпотребление воды</string>
     <string name="_2500ml" translatable="false">2500мл</string>
     <string name="nachat" translatable="false">Начать</string>
     <string name="vash_pol" translatable="false">Ваш пол</string>
@@ -367,5 +367,10 @@
     <string name="activity_level_high_title">Много</string>
     <string name="activity_level_high_desc">Занимаюсь спортом</string>
     <string name="ml">МЛ</string>
+
+    <string name="settings">Настройки</string>
+    <string name="notifications">Уведомления</string>
+    <string name="water_reminder_message">Лучше пить воду по стакану каждые 2–3 часа. Мы напомним об этом.</string>
+    <string name="reminder_interval">Интервал напоминаний</string>
 
 </resources>

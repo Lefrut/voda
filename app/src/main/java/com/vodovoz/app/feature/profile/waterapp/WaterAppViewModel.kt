@@ -6,8 +6,10 @@ import com.vodovoz.app.common.content.Event
 import com.vodovoz.app.common.content.PagingContractViewModel
 import com.vodovoz.app.common.content.State
 import com.vodovoz.app.common.content.updateData
+import com.vodovoz.app.feature.profile.waterapp.model.ReminderIntervalUi
 import com.vodovoz.app.feature.profile.waterapp.model.WaterAppActivityLevel
 import com.vodovoz.app.feature.profile.waterapp.model.WaterAppUiState
+import com.vodovoz.app.feature.profile.waterapp.model.mapToReminderIntervalUi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -19,6 +21,29 @@ class WaterAppViewModel @Inject constructor(
 ) : PagingContractViewModel<WaterAppViewModel.WaterAppState, WaterAppViewModel.WaterAppEvents>(
     WaterAppState()
 ) {
+
+
+    init {
+        setupScreen()
+    }
+
+    private fun setupScreen() = viewModelScope.launch {
+
+
+        val currentInterval =
+            waterAppHelper.observeWaterAppNotificationData().value?.time?.toLongOrNull()
+                ?: return@launch
+        val intervals = WaterAppHelper.reminderIntervals.mapToReminderIntervalUi()
+
+        uiStateListener.updateData { s ->
+            s.copy(reminderIntervals = intervals.map { interval ->
+                if (interval.minutes == currentInterval) interval.copy(
+                    selected = true
+                ) else interval
+            })
+        }
+
+    }
 
     fun navigateBack() = viewModelScope.launch {
         eventListener.emit(WaterAppEvents.GoBack)
@@ -79,7 +104,8 @@ class WaterAppViewModel @Inject constructor(
 
     data class WaterAppState(
         val userData: WaterAppHelper.WaterAppUserData = WaterAppHelper.WaterAppUserData(),
-        val uiState: WaterAppUiState = WaterAppUiState.Welcome,
+        val uiState: WaterAppUiState = WaterAppUiState.Settings,
+        val reminderIntervals: List<ReminderIntervalUi> = emptyList(),
     ) : State
 
     sealed class WaterAppEvents : Event {
