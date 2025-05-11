@@ -295,7 +295,7 @@ val LocalExtendedTypography =
     staticCompositionLocalOf<ExtendedTypography> { error("extended typography didn't implement") }
 
 
-private val robotoFontFamily
+val robotoFontFamily
     get() = FontFamily(
         Font(R.font.roboto_regular, FontWeight.Normal),
         Font(R.font.roboto_medium, FontWeight.Medium),

@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.material3.Text
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.ComposeView
@@ -73,17 +74,30 @@ class WaterAppFragment : Fragment() {
                     ) { uiState ->
                         when (uiState) {
                             WaterAppUiState.GoalCompleted -> {
-
+                                Text("Goal completed")
                             }
 
                             WaterAppUiState.Main -> {
-
+                                Text("Water app main")
                             }
 
                             WaterAppUiState.Settings -> {
                                 WaterAppSettingsScreen(
-                                    onCloseClick = { },
-                                    intervals = viewState.reminderIntervals
+                                    onCloseClick = {
+                                        viewModel.goToWaterApp()
+                                    },
+                                    haveNotifications = viewState.notificationData.switch,
+                                    intervals = viewState.reminderIntervals,
+                                    showParameters = viewState.notificationData.firstShow,
+                                    onReminderIntervalClick = { reminderInterval ->
+                                        viewModel.selectReminderInterval(reminderInterval)
+                                    },
+                                    onHaveNotificationsChange = {
+                                        viewModel.changeHaveNotification()
+                                    },
+                                    onNotificationsSaveClick = {
+                                        viewModel.saveNotifications()
+                                    }
                                 )
                             }
 
@@ -91,21 +105,33 @@ class WaterAppFragment : Fragment() {
                                 WaterAppUserDataScreen(
                                     userDataStage = uiState,
                                     userData = viewState.userData,
-                                    onGenderSelect = { isMan -> viewModel.selectGender(isMan) },
+                                    onGenderSelect = { isMan ->
+                                        viewModel.selectGender(isMan)
+                                    },
+                                    onWeightSelect = { weight ->
+                                        viewModel.selectWeight(weight)
+                                    },
+                                    onHeightSelect = { height ->
+                                        viewModel.selectHeight(height)
+                                    },
+                                    onWakeUpTimeChange = { time ->
+                                        viewModel.selectWakeUpTime(time)
+                                    },
+                                    onSleepTimeChange = { time ->
+                                        viewModel.selectSleepTime(time)
+                                    },
                                     onActivityLevelSelect = { activityLevel ->
-                                        viewModel.selectActivityLevel(
-                                            activityLevel
-                                        )
+                                        viewModel.selectActivityLevel(activityLevel)
                                     },
                                     onBackClick = {
-                                        viewModel.navigateToPreviousStage()
+                                        viewModel.goToPreviousStage()
                                     },
                                     onCloseClick = {
                                         viewModel.navigateBack()
                                     },
                                     onNextClick = {
-                                        viewModel.navigateToNextStage()
-                                    }
+                                        viewModel.goToNextStage()
+                                    },
                                 )
                             }
 
@@ -115,20 +141,19 @@ class WaterAppFragment : Fragment() {
                                         viewModel.navigateBack()
                                     },
                                     onStartClick = {
-                                        viewModel.moveToUserFields()
+                                        viewModel.goToUserFields()
                                     }
                                 )
                             }
 
                             WaterAppUiState.WaterGoal -> {
                                 WaterAppGoalScreen(
-                                    //todo - goal
-                                    goal = 3000,
+                                    goal = viewState.rateData.rate,
                                     onCloseClick = {
-                                        viewModel.navigateToMain()
+                                        viewModel.navigateBack()
                                     },
                                     onStartClick = {
-                                        viewModel.navigateToMain()
+                                        viewModel.goToSettings()
                                     }
                                 )
                             }
@@ -147,19 +172,6 @@ class WaterAppFragment : Fragment() {
                     }
                 }
             }
-        }
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        val data = waterAppHelper.fetchAppNotificationData()
-        bindBackPressed()
-    }
-
-    private fun bindBackPressed() {
-        addOnBackPressedCallback {
-            findNavController().popBackStack()
         }
     }
 

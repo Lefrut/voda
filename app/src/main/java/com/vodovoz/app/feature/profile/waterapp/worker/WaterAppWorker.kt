@@ -9,6 +9,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat.getColor
 import androidx.navigation.NavDeepLinkBuilder
+import androidx.work.Data
 import androidx.work.Worker
 import androidx.work.WorkerParameters
 import com.vodovoz.app.R
@@ -16,7 +17,7 @@ import com.vodovoz.app.common.notification.NotificationChannels
 import com.vodovoz.app.common.notification.NotificationConfig
 
 class WaterAppWorker(
-    context: Context,
+    private val context: Context,
     workerParams: WorkerParameters,
 ) : Worker(context, workerParams) {
 
@@ -34,7 +35,7 @@ class WaterAppWorker(
 
         val notification =
             NotificationCompat.Builder(applicationContext, NotificationChannels.NOTIFICATION_CHANNEL_ID)
-                .setContentTitle("Пора пить воду")
+                .setContentTitle(context.getString(R.string.time_to_drink_water))
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setColor(iconColor)
                 .setColorized(true)
@@ -54,6 +55,6 @@ class WaterAppWorker(
         } else {
             NotificationManagerCompat.from(applicationContext).notify(NotificationConfig.NOTIFICATION_ID, notification)
         }
-        return Result.success()
+        return Result.success(Data.EMPTY)
     }
 }

@@ -21,7 +21,6 @@ import com.vodovoz.app.feature.home.composables.HomeLoadingPlaceholder
 import com.vodovoz.app.feature.home.composables.HomeTopBar
 import com.vodovoz.app.feature.home.composables.SpecialPromotionBottomSheet
 import com.vodovoz.app.feature.home.composables.UnratedProductsBottomSheet
-import com.vodovoz.app.feature.home.wheel.VodovozWheel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Suppress("NonSkippableComposable")

@@ -1,11 +1,17 @@
 package com.vodovoz.app.ui.base
 
+import android.annotation.TargetApi
+import android.content.Context
 import android.content.Intent
+import android.content.res.Configuration
+import android.content.res.Resources
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.os.LocaleListCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -17,15 +23,15 @@ import com.vodovoz.app.common.product.rating.RatingProductManager
 import com.vodovoz.app.databinding.ActivityMainBinding
 import com.vodovoz.app.feature.sitestate.SiteStateManager
 import com.vodovoz.app.util.extensions.debugLog
-import com.vodovoz.app.util.extensions.enableFullScreen
 import com.vodovoz.app.util.extensions.snack
 import com.yandex.mapkit.MapKitFactory
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.json.JSONObject
 import pub.devrel.easypermissions.EasyPermissions
+import java.util.Locale
 import javax.inject.Inject
+
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks,
@@ -45,20 +51,28 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks,
     @Inject
     lateinit var permissionsManager: PermissionsManager
 
+
     private val viewModel: MainActivityViewModel by viewModels()
     private val splashFileViewModel: SplashFileViewModel by viewModels()
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
+        val appLocale: LocaleListCompat = LocaleListCompat.forLanguageTags("ru")
+        AppCompatDelegate.setApplicationLocales(appLocale)
+
         super.onCreate(savedInstanceState)
+
         installSplashScreen().apply {
             setKeepOnScreenCondition { splashFileViewModel.fileLoading.value }
         }
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
 
+
+        debugLog { Locale.getDefault().toString() }
+
         supportActionBar?.hide()
         splashFileViewModel.downloadSplashFile()
         viewModel.checkAppState()
-
 
         MapKitFactory.initialize(this)
         observeRatingSnackbar()

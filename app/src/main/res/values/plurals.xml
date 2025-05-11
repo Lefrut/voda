@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <plurals name="reviews_count">
+
+    <plurals name="reviews_count" tools:ignore="MissingDefaultResource,UnusedQuantity">
         <item quantity="zero">%d отзывов</item>
         <item quantity="one">%d отзыв</item>
         <item quantity="two">%d отзыва</item>
@@ -9,19 +10,18 @@
         <item quantity="other">%d отзывов</item>
     </plurals>
 
-    <plurals name="minutes_count">
-        <item quantity="one">%d минута</item>
-        <item quantity="few">%d минуты</item>
-        <item quantity="many">%d минут</item>
-        <item quantity="other">%d минут</item>
+    <plurals name="minutes_count" tools:ignore="MissingDefaultResource">
+        <item quantity="one" tools:ignore="ImpliedQuantity">минута</item>
+        <item quantity="few">минуты</item>
+        <item quantity="many">минут</item>
+        <item quantity="other">минут</item>
     </plurals>
 
-    <plurals name="hours_count">
-        <item quantity="one">%d час</item>
-        <item quantity="few">%d часа</item>
-        <item quantity="many">%d часов</item>
-        <item quantity="other">%d часов</item>
+    <plurals name="hours_count" tools:ignore="MissingDefaultResource,UnusedQuantity">
+        <item quantity="zero">часов</item>
+        <item quantity="one" tools:ignore="ImpliedQuantity">час</item>
+        <item quantity="few">часа</item>
+        <item quantity="many">часов</item>
+        <item quantity="other">часов</item>
     </plurals>
-
-
 </resources>

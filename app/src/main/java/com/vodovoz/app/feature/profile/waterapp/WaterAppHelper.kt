@@ -1,6 +1,9 @@
 package com.vodovoz.app.feature.profile.waterapp
 
+import android.annotation.SuppressLint
 import android.app.Application
+import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.Stable
 import androidx.work.Constraints
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequest
@@ -8,13 +11,19 @@ import androidx.work.WorkManager
 import com.squareup.moshi.Moshi
 import com.vodovoz.app.common.account.data.AccountManager
 import com.vodovoz.app.common.datastore.DataStoreRepository
+import com.vodovoz.app.feature.profile.waterapp.WaterAppHelper.WaterAppUserData.Companion
 import com.vodovoz.app.feature.profile.waterapp.worker.WaterAppWorker
 import com.vodovoz.app.util.extensions.debugLog
 import com.vodovoz.app.util.extensions.fetchCurrentDayInTimeMillis
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import java.time.Duration
 import java.time.LocalTime
+import java.time.Period
 import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
+import java.time.temporal.TemporalAdjusters
+import java.time.temporal.TemporalUnit
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -22,9 +31,9 @@ import javax.inject.Singleton
 @Singleton
 class WaterAppHelper @Inject constructor(
     private val dataStoreRepository: DataStoreRepository,
-    moshi: Moshi,
     private val applicationContext: Application,
     private val accountManager: AccountManager,
+    moshi: Moshi,
 ) {
 
     companion object {
@@ -36,12 +45,46 @@ class WaterAppHelper @Inject constructor(
             15L, 30L, 60L, 90L, 120L, 180L, 240L, 300L
         )
 
-        fun shouldDisplayIntervalAsHours(minutes: Long): Boolean = minutes > 90
+        @SuppressLint("DefaultLocale")
+        val weights: List<Float> = (0..((300f - 20f) / 0.2f).toInt())
+            .map { i ->
+                val a = String.format("%.1f", 20f + i * 0.2f)
+                a.toFloatOrNull() ?: 0f
+            }
+
+        val heights = (50..240).toList()
+
+        val times = (0 until 1440 step 15).map { formatTime(it.toString()) }
+
+        fun shouldDisplayIntervalAsHours(minutes: Long): Boolean = minutes > 91
 
         fun formatReminderMinutes(minutes: Long): String {
-            return if (minutes < 90) minutes.toString()
+            return if (!shouldDisplayIntervalAsHours(minutes)) minutes.toString()
             else ((minutes / 60) + (minutes % 60).toFloat() / 60).toString()
         }
+
+        fun formatTime(minutes: String): String {
+            return try {
+                val sleepTime = LocalTime.ofSecondOfDay(minutes.toLong() * 60)
+                sleepTime.format(DateTimeFormatter.ofPattern(TIME_FORMAT))
+            } catch (_: Throwable) {
+                ""
+            }
+        }
+
+        fun parseTime(time: String): String {
+            return try {
+                val minutes =
+                    LocalTime.parse(time, DateTimeFormatter.ofPattern(TIME_FORMAT)).toSecondOfDay()
+                        .toLong() / 60
+                minutes.toString()
+            } catch (_: Throwable) {
+                ""
+            }
+        }
+
+
+        const val TIME_FORMAT = "HH:mm"
 
     }
 
@@ -253,9 +296,10 @@ class WaterAppHelper @Inject constructor(
     fun saveWaterAppNotificationData() {
 
         val data = waterAppNotificationDataListener.value ?: return
+        val waterTag = "water"
 
         if (data.switch) {
-            WorkManager.getInstance(applicationContext).cancelAllWorkByTag("water")
+            WorkManager.getInstance(applicationContext).cancelAllWorkByTag(waterTag)
             val work = PeriodicWorkRequest.Builder(
                 WaterAppWorker::class.java,
                 data.time.toLong(),
@@ -263,15 +307,15 @@ class WaterAppHelper @Inject constructor(
             )
                 .setConstraints(Constraints.NONE)
                 .setInitialDelay(data.time.toLong(), TimeUnit.MINUTES)
-                .addTag("water")
+                .addTag(waterTag)
                 .build()
             WorkManager
                 .getInstance(applicationContext)
-                .enqueueUniquePeriodicWork("water", ExistingPeriodicWorkPolicy.UPDATE, work)
+                .enqueueUniquePeriodicWork(waterTag, ExistingPeriodicWorkPolicy.UPDATE, work)
         } else {
             WorkManager
                 .getInstance(applicationContext)
-                .cancelAllWorkByTag("water")
+                .cancelAllWorkByTag(waterTag)
         }
 
         val json = adapterNotification.toJson(data)
@@ -307,29 +351,24 @@ class WaterAppHelper @Inject constructor(
         fetchWaterAppRateData()
     }
 
+    @Immutable
     data class WaterAppNotificationData(
         val firstShow: Boolean = false,
         val switch: Boolean = false,
-        val time: String = "60",
+        val time: String = reminderIntervals.getOrElse(2) { 90 }.toString(),
         val started: Boolean = false,
     )
 
 
-
-
+    @Immutable
     data class WaterAppUserData(
         val gender: String = "man",
-        val height: String = "160",
-        val weight: String = "50",
-        val sleepTime: String = "138",
-        val wakeUpTime: String = "42",
+        val height: String = "170",
+        val weight: String = "70.0",
+        val sleepTime: String = "1320",
+        val wakeUpTime: String = "420",
         val sport: String = "0.25",
     ) {
-        fun wakeUpTimeToLocalTime(): LocalTime =
-            LocalTime.ofSecondOfDay(wakeUpTime.toLong() * 60)
-
-        fun sleepTimeToLocalTime(): LocalTime =
-            LocalTime.ofSecondOfDay(sleepTime.toLong() * 60)
 
         fun formatSleepTime(): String {
             return try {
@@ -356,6 +395,7 @@ class WaterAppHelper @Inject constructor(
 
     }
 
+    @Immutable
     data class WaterAppRateData(
         val rate: Int = 2300,
         val currentLevel: Int = 0,
