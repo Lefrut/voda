@@ -44,6 +44,10 @@ fun WaterAppUserDataScreen(
     userData: WaterAppHelper.WaterAppUserData,
     onGenderSelect: (isMan: Boolean) -> Unit,
     onActivityLevelSelect: (WaterAppActivityLevel) -> Unit,
+    onWeightSelect: (Float) -> Unit,
+    onHeightSelect: (Int) -> Unit,
+    onWakeUpTimeChange: (String) -> Unit,
+    onSleepTimeChange: (String) -> Unit,
     onBackClick: () -> Unit,
     onCloseClick: () -> Unit,
     onNextClick: () -> Unit,
@@ -75,7 +79,8 @@ fun WaterAppUserDataScreen(
                         onNextClick = onNextClick,
                         content = {
                             WaterAppHeightStage(
-                                height = userData.height
+                                height = userData.height.toIntOrNull() ?: 175,
+                                onHeightSelect = onHeightSelect
                             )
                         }
                     )
@@ -87,7 +92,8 @@ fun WaterAppUserDataScreen(
                         onNextClick = onNextClick,
                         content = {
                             WaterAppWeightStage(
-                                weight = userData.weight
+                                weight = userData.weight.toFloatOrNull() ?: 80f,
+                                onWeightChange = onWeightSelect
                             )
                         }
                     )
@@ -103,7 +109,9 @@ fun WaterAppUserDataScreen(
                         content = {
                             WaterAppTimeStage(
                                 time = if (isSleepTime) userData.formatSleepTime() else userData.formatWakeUpTime(),
-                                isSleepTime = isSleepTime
+                                isSleepTime = isSleepTime,
+                                onWakeUpTimeChange = onWakeUpTimeChange,
+                                onSleepTimeChange = onSleepTimeChange
                             )
                         }
                     )

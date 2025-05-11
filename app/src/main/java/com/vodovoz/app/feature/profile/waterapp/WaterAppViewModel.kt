@@ -11,6 +11,7 @@ import com.vodovoz.app.feature.profile.waterapp.model.WaterAppActivityLevel
 import com.vodovoz.app.feature.profile.waterapp.model.WaterAppUiState
 import com.vodovoz.app.feature.profile.waterapp.model.mapToReminderIntervalUi
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -28,46 +29,75 @@ class WaterAppViewModel @Inject constructor(
     }
 
     private fun setupScreen() = viewModelScope.launch {
+        waterAppHelper.fetchWaterAppRateData()
+        waterAppHelper.fetchWaterAppUserData()
+        waterAppHelper.fetchWaterAppNotificationData()
 
+        val (userStarted, firstShow) = waterAppHelper.observeWaterAppNotificationData().value?.run {
+            started to firstShow
+        } ?: (null to null)
 
-        val currentInterval =
-            waterAppHelper.observeWaterAppNotificationData().value?.time?.toLongOrNull()
-                ?: return@launch
-        val intervals = WaterAppHelper.reminderIntervals.mapToReminderIntervalUi()
-
-        uiStateListener.updateData { s ->
-            s.copy(reminderIntervals = intervals.map { interval ->
-                if (interval.minutes == currentInterval) interval.copy(
-                    selected = true
-                ) else interval
-            })
+        if (userStarted == true) {
+            uiStateListener.updateData { s ->
+                s.copy(uiState = if (firstShow == true) WaterAppUiState.Main else WaterAppUiState.Settings)
+            }
         }
 
+        launch {
+            waterAppHelper.observeWaterAppUserData().collectLatest { userData ->
+                uiStateListener.updateData { s ->
+                    s.copy(userData = userData ?: s.userData)
+                }
+            }
+        }
+
+        launch {
+            waterAppHelper.observeWaterAppRateData().collectLatest {
+                uiStateListener.updateData { s ->
+                    val rateData = it ?: s.rateData
+                    s.copy(
+                        rateData = rateData,
+                    )
+                }
+            }
+        }
+
+        launch {
+            waterAppHelper.observeWaterAppNotificationData().collectLatest { notificationData ->
+                uiStateListener.updateData { s ->
+                    val uiNotificationData = notificationData ?: s.notificationData
+                    s.copy(
+                        notificationData = uiNotificationData,
+                        reminderIntervals = WaterAppHelper.reminderIntervals
+                            .mapToReminderIntervalUi()
+                            .map { option ->
+                                if (option.minutes == uiNotificationData.time.toLongOrNull()) {
+                                    option.copy(
+                                        selected = true
+                                    )
+                                } else option
+                            }
+                    )
+                }
+            }
+        }
     }
 
     fun navigateBack() = viewModelScope.launch {
         eventListener.emit(WaterAppEvents.GoBack)
     }
 
-    fun moveToUserFields() = viewModelScope.launch {
+    fun goToUserFields() = viewModelScope.launch {
         uiStateListener.updateData { s ->
-            s.copy(
-                uiState = WaterAppUiState.UserData.Gender
-            )
+            s.copy(uiState = WaterAppUiState.UserData.Gender)
         }
     }
 
     fun selectGender(man: Boolean) = viewModelScope.launch {
-        uiStateListener.updateData { s ->
-            s.copy(
-                userData = s.userData.copy(
-                    gender = if (man) "man" else "girl"
-                )
-            )
-        }
+        waterAppHelper.saveGender(if (man) "man" else "gril")
     }
 
-    fun navigateToPreviousStage() = viewModelScope.launch {
+    fun goToPreviousStage() = viewModelScope.launch {
         val prevUiState = when (val currentUiState = dataState.uiState) {
             is WaterAppUiState.UserData -> currentUiState.previous() ?: WaterAppUiState.Welcome
             else ->
@@ -78,33 +108,85 @@ class WaterAppViewModel @Inject constructor(
         }
     }
 
-    fun navigateToNextStage() = viewModelScope.launch {
+    fun goToNextStage() = viewModelScope.launch {
         val nextUiState = when (val currentUiState = dataState.uiState) {
-            is WaterAppUiState.UserData -> currentUiState.next() ?: WaterAppUiState.WaterGoal
+            is WaterAppUiState.UserData -> currentUiState.next() ?: run {
+                waterAppHelper.saveWaterAppUserData()
+                waterAppHelper.saveRate()
+                waterAppHelper.saveStart(true)
+                waterAppHelper.saveWaterAppNotificationData()
+
+                WaterAppUiState.WaterGoal
+            }
+
             else -> currentUiState
         }
+
+
         uiStateListener.updateData { s ->
             s.copy(uiState = nextUiState)
         }
     }
 
     fun selectActivityLevel(activityLevel: WaterAppActivityLevel) {
-        uiStateListener.updateData { s ->
-            s.copy(
-                userData = s.userData.copy(sport = activityLevel.value.toString())
-            )
-        }
+        waterAppHelper.saveSport(activityLevel.value.toString())
     }
 
-    fun navigateToMain() = viewModelScope.launch {
+    fun selectReminderInterval(reminderInterval: ReminderIntervalUi) = viewModelScope.launch {
+        waterAppHelper.saveNotificationTime(reminderInterval.minutes.toString())
+    }
+
+    fun changeHaveNotification() = viewModelScope.launch {
+        //todo - check notification permission
+        waterAppHelper.saveNotificationSwitch(!dataState.notificationData.switch)
+    }
+
+    fun saveNotifications() = viewModelScope.launch {
+        waterAppHelper.saveNotificationFirstShow()
+        waterAppHelper.saveWaterAppNotificationData()
+        uiStateListener.updateData { s -> s.copy(uiState = WaterAppUiState.Main) }
+    }
+
+    fun goToWaterApp() = viewModelScope.launch {
+        if (!dataState.notificationData.firstShow) {
+            waterAppHelper.saveNotificationFirstShow()
+            waterAppHelper.saveWaterAppNotificationData()
+        }
+
         uiStateListener.updateData { s ->
             s.copy(uiState = WaterAppUiState.Main)
         }
     }
 
+    fun goToSettings() = viewModelScope.launch {
+        uiStateListener.updateData { s ->
+            s.copy(uiState = WaterAppUiState.Settings)
+        }
+    }
+
+    fun selectWeight(weight: Float) = viewModelScope.launch {
+        waterAppHelper.saveWeight(weight.toString())
+    }
+
+    fun selectHeight(height: Int) = viewModelScope.launch {
+        waterAppHelper.saveHeight(height.toString())
+    }
+
+    fun selectWakeUpTime(time: String) = viewModelScope.launch {
+        waterAppHelper.saveWakeUpTime(WaterAppHelper.parseTime(time))
+    }
+
+    fun selectSleepTime(time: String) = viewModelScope.launch {
+        waterAppHelper.saveSleepTime(WaterAppHelper.parseTime(time))
+    }
+
+
+
     data class WaterAppState(
         val userData: WaterAppHelper.WaterAppUserData = WaterAppHelper.WaterAppUserData(),
-        val uiState: WaterAppUiState = WaterAppUiState.Settings,
+        val notificationData: WaterAppHelper.WaterAppNotificationData = WaterAppHelper.WaterAppNotificationData(),
+        val rateData: WaterAppHelper.WaterAppRateData = WaterAppHelper.WaterAppRateData(),
+        val uiState: WaterAppUiState = WaterAppUiState.Welcome,
         val reminderIntervals: List<ReminderIntervalUi> = emptyList(),
     ) : State
 

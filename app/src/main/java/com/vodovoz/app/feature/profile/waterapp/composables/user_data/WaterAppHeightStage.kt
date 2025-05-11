@@ -5,14 +5,15 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -20,110 +21,81 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.vodovoz.app.R
-import com.vodovoz.app.feature.profile.waterapp.composables.HorizontalWheelPicker
-import com.vodovoz.app.feature.profile.waterapp.composables.WaterAppButton
+import com.vodovoz.app.feature.profile.waterapp.WaterAppHelper
+import com.vodovoz.app.feature.profile.waterapp.composables.VodovozWheelCore
+import com.vodovoz.app.feature.profile.waterapp.composables.VodovozWheelPicker
+import com.vodovoz.app.feature.profile.waterapp.composables.VodovozWheelPickerVertical
+import com.vodovoz.app.util.extensions.debugLog
+import com.vodovoz.app.util.extensions.indexOfOrNull
 
 @Composable
 fun WaterAppHeightStage(
     modifier: Modifier = Modifier,
-    height: String
+    height: Int,
+    onHeightSelect: (Int) -> Unit
 ) {
-    Column(modifier = modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
-
-        Box(
-            modifier = Modifier
-                .padding(horizontal = 20.dp)
-                .heightIn(300.dp)
-                .fillMaxWidth(),
-
-        ) {
-            Image(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .fillMaxWidth()
-                    .height(82.dp),
-                painter = painterResource(id = R.drawable.ic_wheel_background),
-                contentDescription = null,
-                contentScale = ContentScale.FillBounds,
-                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.surfaceVariant)
-            )
-
-            Box(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .size(22.dp)
-                    .offset(x = 0.dp, y = 17.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.primary)
-            )
-
-            HorizontalWheelPicker(
-                modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 20.dp),
-                totalItems = 100,
-                initialSelectedItem = 20,
-                onItemSelected = { }
-            )
-
-        }
-
-
-
-
-        Spacer(modifier = Modifier.weight(1f))
-    }
-}
-
-@Composable
-fun SquareWithNotchAndBall() {
-    Canvas(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(200.dp)
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(start = 52.dp, end = 32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        val width = size.width
-        val height = size.height
 
-        val notchWidth = 44.dp.toPx()
-        val notchDepth = 44.dp.toPx()
+        Spacer(modifier = Modifier.weight(0.67f))
 
-        val ballMargin = 8.dp.toPx()
+        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
 
-        val path = androidx.compose.ui.graphics.Path().apply {
-            moveTo(0f, 0f)
-            lineTo(width, 0f)
-            lineTo(width, height)
-            lineTo((width + notchWidth) / 2, height)
-            lineTo(width / 2, height - notchDepth)
-            lineTo((width - notchWidth) / 2, height)
-            lineTo(0f, height)
-            close()
+            Spacer(Modifier.weight(0.52f))
+
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = height.toString(),
+                    color = MaterialTheme.colorScheme.onBackground,
+                    style = MaterialTheme.typography.displayLarge
+                )
+
+                val bodyMedium = MaterialTheme.typography.bodyMedium
+
+                Text(
+                    modifier = Modifier
+                        .padding(top = 1.dp)
+                        .height(25.dp)
+                        .wrapContentSize(Alignment.Center),
+                    text = stringResource(R.string.cm),
+                    color = MaterialTheme.colorScheme.surfaceTint,
+                    style = bodyMedium.copy(lineHeight = bodyMedium.fontSize, letterSpacing = 0.sp)
+                )
+            }
+
+            Spacer(Modifier.weight(0.32f))
+
+
+            val heights = WaterAppHelper.heights.reversed()
+
+            VodovozWheelPickerVertical(
+                modifier = Modifier,
+                items = heights,
+                initialIndex = heights.indexOfOrNull(height) ?: 0,
+                onMiddleItemChange = onHeightSelect
+            )
+
+            Spacer(Modifier.weight(0.32f))
+
         }
 
-        drawPath(
-            path = path,
-            color = Color.Gray
-        )
+        Spacer(modifier = Modifier.weight(0.67f))
 
-        val ballRadius = notchWidth / 3
-
-        val ballCenter = Offset(
-            x = width / 2,
-            y = height - notchDepth / 2 + ballMargin
-        )
-
-        drawCircle(
-            color = Color.Red,
-            radius = ballRadius,
-            center = ballCenter
-        )
     }
 }

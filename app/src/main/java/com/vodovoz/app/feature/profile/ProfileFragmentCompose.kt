@@ -10,6 +10,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
@@ -47,6 +48,7 @@ import com.vodovoz.app.feature.home.HomeFlowViewModel
 import com.vodovoz.app.feature.profile.core.ProfileChatsNavigator
 import com.vodovoz.app.util.extensions.copyText
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -93,6 +95,14 @@ class ProfileFragment : Fragment() {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnDetachedFromWindow)
             setContent {
                 VodovozTheme {
+
+                    //todo - remove
+                    LaunchedEffect(Unit) {
+                        delay(500)
+                        findNavController().navigateToWaterApp()
+                    }
+
+
                     val pagingState by viewModel.observeUiState().collectAsStateWithLifecycle()
                     val viewState by rememberUpdatedState(newValue = pagingState.data)
                     val pullToRefreshState = rememberPullToRefreshState()

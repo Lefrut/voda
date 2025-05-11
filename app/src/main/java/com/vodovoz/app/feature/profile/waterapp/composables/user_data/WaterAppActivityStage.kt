@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -33,7 +34,9 @@ fun WaterAppActivityStage(
     onActivityClick: (WaterAppActivityLevel) -> Unit,
 ) {
     Column(modifier = modifier.fillMaxSize()) {
-        Spacer(modifier = Modifier.weight(0.5f))
+
+
+        Spacer(Modifier.height(57.dp))
 
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -49,8 +52,6 @@ fun WaterAppActivityStage(
             }
 
         }
-
-        Spacer(modifier = Modifier.weight(1f))
     }
 }
 

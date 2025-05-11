@@ -11,6 +11,9 @@ import com.yandex.metrica.YandexMetrica
 import com.yandex.metrica.YandexMetricaConfig
 import dagger.hilt.android.HiltAndroidApp
 import timber.log.Timber
+import java.util.Locale
+import android.content.Context
+import android.content.res.Configuration
 
 @HiltAndroidApp
 class VodovozApplication : Application() {
@@ -45,4 +48,6 @@ class VodovozApplication : Application() {
             YandexMetrica.enableActivityAutoTracking(this)
         }
     }
+
+
 }

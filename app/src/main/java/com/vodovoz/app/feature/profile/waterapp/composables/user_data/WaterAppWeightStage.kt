@@ -15,26 +15,56 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.vodovoz.app.R
+import com.vodovoz.app.feature.profile.waterapp.WaterAppHelper
+import com.vodovoz.app.feature.profile.waterapp.composables.VodovozWheelCore
+import com.vodovoz.app.feature.profile.waterapp.composables.VodovozWheelPicker
+import com.vodovoz.app.util.extensions.debugLog
+import com.vodovoz.app.util.extensions.indexOfOrNull
+import com.vodovoz.app.util.toExactIntOrNull
+import kotlin.math.roundToInt
 
 @Composable
-fun WaterAppWeightStage(modifier: Modifier = Modifier, weight: String) {
+fun WaterAppWeightStage(
+    modifier: Modifier = Modifier,
+    weight: Float,
+    onWeightChange: (Float) -> Unit
+) {
     Column(modifier = modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
-        Spacer(modifier = Modifier.weight(0.9f))
+
+        Spacer(Modifier.weight(0.82f))
 
         Text(
-            text = weight,
+            modifier = Modifier,
+            text = weight.toString(),
             color = MaterialTheme.colorScheme.onBackground,
             style = MaterialTheme.typography.displayLarge
         )
 
         val bodyMedium = MaterialTheme.typography.bodyMedium
+
         Text(
-            modifier = Modifier.padding(top = 1.dp).height(25.dp).wrapContentSize(Alignment.Center),
+            modifier = Modifier
+                .padding(top = 1.dp)
+                .height(25.dp)
+                .wrapContentSize(Alignment.Center),
             text = stringResource(R.string.kg),
             color = MaterialTheme.colorScheme.surfaceTint,
             style = bodyMedium.copy(lineHeight = bodyMedium.fontSize, letterSpacing = 0.sp)
         )
 
-        Spacer(modifier = Modifier.weight(1f))
+
+        Spacer(modifier = Modifier.weight(0.71f))
+
+        VodovozWheelPicker(
+            modifier = Modifier.padding(horizontal = 20.dp),
+            items = WaterAppHelper.weights,
+            initialIndex = WaterAppHelper.weights.indexOfOrNull(weight) ?: 0,
+            itemText = { item ->
+                item.roundToInt().toString()
+            },
+            onMiddleItemChange = onWeightChange
+        )
+
+        Spacer(modifier = Modifier.weight(0.84f))
     }
 }

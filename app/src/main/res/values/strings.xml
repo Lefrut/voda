@@ -1,8 +1,8 @@
-<resources translatable="false">
-    <string name="plug" translatable="false">Текст</string>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:locale="ru">
+    <string name="plug">Текст</string>
 
-    <string name="new_app" translatable="false">vodovoz.ru</string>
-    <string name="new_app_ssl_not" translatable="false">http</string>
+    <string name="new_app">vodovoz.ru</string>
+    <string name="new_app_ssl_not">http</string>
     <string name="new_app_ssl" translatable="false">https</string>
 
     <string name="app_name" translatable="false">Vodovoz</string>
@@ -372,5 +372,11 @@
     <string name="notifications">Уведомления</string>
     <string name="water_reminder_message">Лучше пить воду по стакану каждые 2–3 часа. Мы напомним об этом.</string>
     <string name="reminder_interval">Интервал напоминаний</string>
+
+    <string name="hours">часа</string>
+    <string name="minutes">минуты</string>
+    <string name="time_to_drink_water">Пора пить воду</string>
+    <string name="cm">СМ</string>
+
 
 </resources>
