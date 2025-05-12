@@ -12,8 +12,7 @@
 
         <argument
             android:name="faq"
-            app:argType="com.vodovoz.app.feature.buy_certificate.model.FAQUi"
-            />
+            app:argType="com.vodovoz.app.feature.buy_certificate.model.FAQUi" />
 
     </fragment>
 
@@ -49,7 +48,8 @@
             app:argType="com.vodovoz.app.feature.home.model.CategoryUi" />
     </fragment>
 
-    <fragment android:id="@+id/productsCollectionFragment"
+    <fragment
+        android:id="@+id/productsCollectionFragment"
         android:name="com.vodovoz.app.feature.products_collection.ProductsCollectionFragment"
         android:label="fragment_product_collection">
 
@@ -254,7 +254,7 @@
     <fragment
         android:id="@+id/aboutProductFragment"
         android:name="com.vodovoz.app.feature.about_product.AboutProductFragment"
-        android:label="AboutProductFragment"/>
+        android:label="AboutProductFragment" />
 
     <fragment
         android:id="@+id/productDetailFragment"
@@ -439,9 +439,7 @@
         <action
             android:id="@+id/action_to_webViewFragment"
             app:destination="@id/webViewFragment" />
-        <action
-            android:id="@+id/action_to_loginByPhoneCodeFragment"
-            app:destination="@id/loginByPhoneCodeFragment" />
+
         <action
             android:id="@+id/action_to_loginByEmailFragment"
             app:destination="@id/loginByEmailFragment" />
@@ -613,9 +611,7 @@
 
         <argument
             android:name="filters"
-            app:argType="com.vodovoz.app.design_system.model.filters.FiltersUi"/>
-
-
+            app:argType="com.vodovoz.app.design_system.model.filters.FiltersUi" />
 
 
     </fragment>
@@ -1171,26 +1167,20 @@
     <dialog
         android:id="@+id/presentInfoBottomSheetFragment"
         android:name="com.vodovoz.app.feature.productdetail.present.PresentInfoBottomSheetFragment"
-        android:label="PresentInfoBottomSheetFragment" >
+        android:label="PresentInfoBottomSheetFragment">
         <argument
             android:name="presentText"
             app:argType="string" />
         <argument
             android:name="progressBackground"
             app:argType="string" />
-        <argument android:name="percent"
+        <argument
+            android:name="percent"
             app:argType="integer" />
-        <argument android:name="showProgress"
+        <argument
+            android:name="showProgress"
             app:argType="boolean" />
     </dialog>
-    <fragment
-        android:id="@+id/loginByPhoneCodeFragment"
-        android:name="com.vodovoz.app.feature.auth.login.LoginByPhoneCodeFragment"
-        android:label="LoginByEmailFragment" >
-        <argument
-            android:name="phoneNumber"
-            app:argType="string" />
-    </fragment>
     <fragment
         android:id="@+id/loginByEmailFragment"
         android:name="com.vodovoz.app.feature.auth.login.LoginByEmailFragment"

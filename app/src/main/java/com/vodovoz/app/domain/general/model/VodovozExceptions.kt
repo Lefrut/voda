@@ -39,6 +39,16 @@ class UserNotLoginException(
     message, cause, placeholder
 )
 
+class TooManyRequestsException(
+    message: String = "",
+    cause: Throwable? = null,
+    placeholder: VodovozPlaceholderModel? = null,
+    val remainingSeconds: Int = 0,
+) : RequestException(
+    message, cause, placeholder
+)
+
+
 data class VodovozPlaceholderModel(
     val title: String,
     val headerHtml: String,

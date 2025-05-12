@@ -433,9 +433,6 @@
             android:id="@+id/action_to_registerFragment"
             app:destination="@id/registerFragment" />
         <action
-            android:id="@+id/action_to_loginByPhoneCodeFragment"
-            app:destination="@id/loginByPhoneCodeFragment" />
-        <action
             android:id="@+id/action_to_loginByEmailFragment"
             app:destination="@id/loginByEmailFragment" />
     </fragment>
@@ -1215,14 +1212,6 @@
             android:name="showProgress"
             app:argType="boolean" />
     </dialog>
-    <fragment
-        android:id="@+id/loginByPhoneCodeFragment"
-        android:name="com.vodovoz.app.feature.auth.login.LoginByPhoneCodeFragment"
-        android:label="LoginByEmailFragment">
-        <argument
-            android:name="phoneNumber"
-            app:argType="string" />
-    </fragment>
     <fragment
         android:id="@+id/loginByEmailFragment"
         android:name="com.vodovoz.app.feature.auth.login.LoginByEmailFragment"

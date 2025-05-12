@@ -22,7 +22,7 @@ private val SlideNavOptions = NavOptions.Builder()
     .setPopExitAnim(R.anim.slide_out_right)
     .build()
 
-fun NavController.navigateToServiceDetails(serviceId: Int){
+fun NavController.navigateToServiceDetails(serviceId: Int) {
     navigate(
         R.id.serviceDetailFragment,
         bundleOf("serviceId" to serviceId),
@@ -176,6 +176,16 @@ fun NavController.navigateToStories(storyId: Long) {
 
 fun NavController.navigateToRegister() {
     navigate(R.id.registerFragment)
+}
+
+fun NavController.navigateToLoginByPhone(phone: String, waitSeconds: Int) {
+    navigate(
+        R.id.loginByPhoneCodeFragment,
+        bundleOf(
+            "phoneNumber" to phone,
+            "waitRequestCodeSeconds" to waitSeconds
+        )
+    )
 }
 
 fun NavController.navigateToChangePassword() {

@@ -50,7 +50,7 @@ abstract class VodovozServiceModule {
         @Provides
         @Singleton
         @Named("vodovoz")
-        fun providesVodovozRetrofit(@Named("vodovoz") okHttpClient: OkHttpClient, moshi: Moshi): Retrofit {
+        fun providesVodovozRetrofit(@Named("vodovoz") okHttpClient: OkHttpClient): Retrofit {
             return Retrofit.Builder()
                 .baseUrl(VodovozWebConfig.VODOVOZ_URL + VodovozWebConfig.VODOVOZ_PATH)
                 .addCallAdapterFactory(NoOpCallAdapterFactory.create())

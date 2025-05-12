@@ -1,8 +1,7 @@
-package com.vodovoz.app.feature.auth.login
+package com.vodovoz.app.feature.auth.login_by_phone_code
 
 import android.graphics.Typeface
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
@@ -22,13 +21,13 @@ import com.vodovoz.app.common.account.data.AccountManager
 import com.vodovoz.app.common.content.BaseFragment
 import com.vodovoz.app.common.tab.TabManager
 import com.vodovoz.app.databinding.FragmentLoginByPhoneCodeFlowBinding
+import com.vodovoz.app.feature.auth.login.LoginFlowViewModel
 import com.vodovoz.app.feature.auth.login.LoginFlowViewModel.MessageType.Message
 import com.vodovoz.app.feature.cart.CartFlowViewModel
 import com.vodovoz.app.feature.favorite.FavoriteFlowViewModel
 import com.vodovoz.app.feature.home.HomeFlowViewModel
 import com.vodovoz.app.feature.profile.ProfileFlowViewModel
 import com.vodovoz.app.ui.extensions.TextBuilderExtensions.setExpiredCodeText
-import com.vodovoz.app.ui.extensions.TextViewExtensions.setPhoneValidator
 import com.vodovoz.app.util.FieldValidationsSettings
 import com.vodovoz.app.util.extensions.debugLog
 import dagger.hilt.android.AndroidEntryPoint
@@ -37,7 +36,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class LoginByPhoneCodeFragment : BaseFragment() {
+class LoginByPhoneCodeFragment1 : BaseFragment() {
 
     override fun layout(): Int = R.layout.fragment_login_by_phone_code_flow
 

@@ -3,6 +3,7 @@ package com.vodovoz.app.feature.auth.login
 import android.os.CountDownTimer
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.viewModelScope
+import com.vodovoz.app.R
 import com.vodovoz.app.common.account.data.AccountManager
 import com.vodovoz.app.common.account.data.LoginManager
 import com.vodovoz.app.common.agreement.AgreementController
@@ -12,12 +13,14 @@ import com.vodovoz.app.common.content.State
 import com.vodovoz.app.common.content.toErrorState
 import com.vodovoz.app.common.content.updateData
 import com.vodovoz.app.common.like.LikeManager
+import com.vodovoz.app.common.resources.ResourcesProvider
 import com.vodovoz.app.common.token.FirebaseTokenManager
 import com.vodovoz.app.data.MainRepository
 import com.vodovoz.app.data.model.common.ResponseEntity
 import com.vodovoz.app.design_system.model.ColorfulButtonUi
-import com.vodovoz.app.design_system.model.updateButton
 import com.vodovoz.app.design_system.model.toUi
+import com.vodovoz.app.design_system.model.updateButton
+import com.vodovoz.app.domain.general.model.TooManyRequestsException
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.feature.preorder.model.FieldUi
 import com.vodovoz.app.feature.preorder.model.checkFields
@@ -52,6 +55,7 @@ class LoginFlowViewModel @Inject constructor(
     private val siteStateManager: SiteStateManager,
     private val likeManager: LikeManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
+    private val resourcesProvider: ResourcesProvider,
 ) : PagingContractViewModel<LoginFlowViewModel.LoginState, LoginFlowViewModel.LoginEvents>(
     LoginState()
 ) {
@@ -84,7 +88,8 @@ class LoginFlowViewModel @Inject constructor(
     fun fetchLoginDetails() = viewModelScope.launch {
         uiStateListener.updateData { s -> s.copy(uiState = LoginUiState.Loading) }
 
-        val loginDetailsDeferred = async { vodovozServiceRepository.getLoginDetails().singleResult() }
+        val loginDetailsDeferred =
+            async { vodovozServiceRepository.getLoginDetails().singleResult() }
         val siteState = siteStateManager.requestSiteState()
         val loginDetailsResult = loginDetailsDeferred.await()
 
@@ -95,7 +100,7 @@ class LoginFlowViewModel @Inject constructor(
 
             val buttons = loginDetails.buttons.map { colorfulButtonModel ->
                 colorfulButtonModel.toUi()
-            }.updateButton(AUTH_BUTTON){ it.copy(enabled = false) }
+            }.updateButton(AUTH_BUTTON) { it.copy(enabled = false) }
 
             uiStateListener.updateData { s ->
                 s.copy(
@@ -117,6 +122,59 @@ class LoginFlowViewModel @Inject constructor(
             }
         }
 
+    }
+
+    private fun requestCode() = viewModelScope.launch {
+        val phoneField = dataState.fields.firstOrNull() ?: return@launch
+
+        uiStateListener.updateData { s ->
+            s.copy(
+                buttons = s.buttons.updateButton(AUTH_BUTTON) { it.copy(loading = true) }
+            )
+        }
+
+        val requestPhoneCodeUrl = siteStateManager.siteStateFlow.value?.smsUrl?.takeIf {
+            it.isNotBlank()
+        } ?: kotlin.run {
+            siteStateManager.requestSiteState()
+            uiStateListener.updateData { s ->
+                s.copy(
+                    buttons = s.buttons.updateButton(AUTH_BUTTON) { it.copy(loading = false) },
+                    errorText = resourcesProvider.getString(R.string.error_site_login)
+                )
+            }
+            return@launch
+        }
+
+
+        val requestPhoneCodeResult = vodovozServiceRepository.requestPhoneCode(
+            requestPhoneCodeUrl, phoneField.value
+        ).singleResult()
+
+        uiStateListener.updateData { s ->
+            s.copy(
+                buttons = s.buttons.updateButton(AUTH_BUTTON) { btn ->
+                    btn.copy(loading = false)
+                }
+            )
+        }
+
+        requestPhoneCodeResult.onFailure { t ->
+            when (t) {
+                is TooManyRequestsException -> {
+                    eventListener.emit(LoginEvents.GoToLoginByPhone(phoneField.value, t.remainingSeconds))
+                }
+
+                else -> {
+                    uiStateListener.updateData { s ->
+                        s.copy(errorText = resourcesProvider.getString(R.string.error_login))
+                    }
+
+                }
+            }
+        }.onSuccess {
+            eventListener.emit(LoginEvents.GoToLoginByPhone(phoneField.value, it.waitSeconds))
+        }
     }
 
     fun signIn() {
@@ -383,7 +441,8 @@ class LoginFlowViewModel @Inject constructor(
                 fields = updatedFields,
                 buttons = s.buttons.updateButton(AUTH_BUTTON) { button ->
                     button.copy(enabled = updatedFields.checkFields() && s.agreementChecked)
-                }
+                },
+                errorText = ""
             )
         }
     }
@@ -416,13 +475,17 @@ class LoginFlowViewModel @Inject constructor(
     }
 
     fun activateButton(button: ColorfulButtonUi) = viewModelScope.launch {
+        uiStateListener.updateData { s ->
+            s.copy(errorText = "")
+        }
+
         when (button.id) {
             NAVIGATION_BUTTON -> {
                 eventListener.emit(LoginEvents.GoToLoginByEmail)
             }
 
             AUTH_BUTTON -> {
-                //TODO - add auth when will be request
+                requestCode()
             }
 
             else -> {
@@ -444,6 +507,7 @@ class LoginFlowViewModel @Inject constructor(
         data object AuthByEmail : LoginEvents()
         data object GoBack : LoginEvents()
         data object GoToLoginByEmail : LoginEvents()
+        data class GoToLoginByPhone(val phone: String, val waitSeconds: Int) : LoginEvents()
         data object GoToRegister : LoginEvents()
 
         data class SetupByPhone(val time: Int, val phone: String) : LoginEvents()
@@ -475,6 +539,7 @@ class LoginFlowViewModel @Inject constructor(
         val description: String = "",
         val fields: List<FieldUi> = emptyList(),
         val buttons: List<ColorfulButtonUi> = emptyList(),
+        val errorText: String = "",
         val uiState: LoginUiState = LoginUiState.Loading,
     ) : State
 

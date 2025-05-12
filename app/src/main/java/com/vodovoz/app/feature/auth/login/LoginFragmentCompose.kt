@@ -8,7 +8,6 @@ import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.ComposeView
@@ -26,10 +25,9 @@ import androidx.navigation.fragment.findNavController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.vodovoz.app.R
 import com.vodovoz.app.common.account.data.AccountManager
-import com.vodovoz.app.common.agreement.AgreementController
 import com.vodovoz.app.common.tab.TabManager
-import com.vodovoz.app.core.navigation.navigateToLogin
 import com.vodovoz.app.core.navigation.navigateToLoginByEmail
+import com.vodovoz.app.core.navigation.navigateToLoginByPhone
 import com.vodovoz.app.core.navigation.navigateToRegister
 import com.vodovoz.app.core.navigation.navigateToWebView
 import com.vodovoz.app.design_system.VodovozTheme
@@ -273,6 +271,10 @@ class LoginFragment : Fragment() {
 
                             LoginFlowViewModel.LoginEvents.GoToRegister -> {
                                 findNavController().navigateToRegister()
+                            }
+
+                            is LoginFlowViewModel.LoginEvents.GoToLoginByPhone -> {
+                                findNavController().navigateToLoginByPhone(events.phone, events.waitSeconds)
                             }
                         }
                     }
