@@ -43,6 +43,7 @@ import com.vodovoz.app.domain.general.model.cart.CartDetailsModel
 import com.vodovoz.app.domain.general.model.certificate.BuyCertificateDetailsModel
 import com.vodovoz.app.domain.general.model.certificate.BuyCertificateModel
 import com.vodovoz.app.domain.general.model.login.AuthDetailsModel
+import com.vodovoz.app.domain.general.model.login.RequestCodeModel
 import com.vodovoz.app.domain.general.model.login.UserAuthInfoModel
 import com.vodovoz.app.domain.general.model.order.OrderDetailsModel
 import com.vodovoz.app.domain.general.model.order.OrderQuestionDetailsModel
@@ -53,6 +54,17 @@ import kotlinx.coroutines.flow.Flow
 import java.io.File
 
 interface VodovozServiceRepository {
+
+    fun requestPhoneCode(
+        url: String,
+        phone: String
+    ): Flow<Result<RequestCodeModel>>
+
+    fun loginByPhone(
+        url: String,
+        code: String,
+        phone: String
+    ): Flow<Result<UserAuthInfoModel>>
 
     fun getAllServicesDetails(): Flow<Result<AllServicesDetailsModel>>
 

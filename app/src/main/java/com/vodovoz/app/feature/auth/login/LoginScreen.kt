@@ -32,6 +32,7 @@ fun LoginScreen(viewModel: LoginFlowViewModel, viewState: LoginFlowViewModel.Log
             subscribeChecked = viewState.subscribeChecked,
             showRegisterText = viewState.showRegisterText,
             buttons = viewState.buttons,
+            errorText = viewState.errorText,
             onButtonClick = { button ->
                 viewModel.activateButton(button)
             },

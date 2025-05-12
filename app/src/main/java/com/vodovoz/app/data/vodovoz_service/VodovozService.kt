@@ -32,7 +32,9 @@ import com.vodovoz.app.data.vodovoz_service.model.SuperTopAndBottomSectionsDTO
 import com.vodovoz.app.data.vodovoz_service.model.VodovozErrorResponseDTO
 import com.vodovoz.app.data.vodovoz_service.model.VodovozPlaceholderDTO
 import com.vodovoz.app.data.vodovoz_service.model.VodovozResponseDTO
+import com.vodovoz.app.data.vodovoz_service.model.auth.LoginByPhoneDTO
 import com.vodovoz.app.data.vodovoz_service.model.auth.LoginDetailsDTO
+import com.vodovoz.app.data.vodovoz_service.model.auth.RequestCodeDTO
 import com.vodovoz.app.data.vodovoz_service.model.auth.UserAuthInfoDTO
 import com.vodovoz.app.data.vodovoz_service.model.cart.CartDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.catalog.CatalogDetailsDTO
@@ -52,6 +54,7 @@ import retrofit2.http.Headers
 import retrofit2.http.Multipart
 import retrofit2.http.POST
 import retrofit2.http.Part
+import retrofit2.http.Path
 import retrofit2.http.Query
 import retrofit2.http.QueryMap
 
@@ -62,14 +65,14 @@ interface VodovozService {
      * */
     @GET("glavnaya/uslygi/index.php?action=spisok")
     suspend fun getAllServicesDetails(
-        @Query("userid") userId: Long?
+        @Query("userid") userId: Long?,
     ): Response<VodovozResponseDTO<AllServicesDetailsDTO>>
 
 
     @GET("glavnaya/uslygi/index.php?action=details")
     suspend fun getServiceDetails(
         @Query("userid") userId: Long?,
-        @Query("id") serviceId: Int?
+        @Query("id") serviceId: Int?,
     ): Response<VodovozResponseDTO<ServiceDetailsDTO>>
 
 
@@ -81,7 +84,7 @@ interface VodovozService {
     suspend fun getWhereMyOrderDetails(
         @Query("userid") userId: Long?,
         @Query("id") orderId: Long,
-        @Query("vodila") driver: String
+        @Query("vodila") driver: String,
     )
 
     @GET("osnova/form/otmenazakaz.php?action=detail")
@@ -273,6 +276,19 @@ interface VodovozService {
         @QueryMap queries: Map<String, String>,
     ): Response<VodovozResponseDTO<UserAuthInfoDTO>>
 
+
+    @GET("{path}?action=tochkakarta")
+    suspend fun requestPhoneCode(
+        @Path("path", encoded = true) url: String,
+        @Query("telefon") phone: String,
+    ): Response<VodovozResponseDTO<RequestCodeDTO>>
+
+    @GET("{path}?action=tochkakarta")
+    suspend fun loginByPhone(
+        @Path("path", encoded = true) path: String,
+        @Query("telefon") phone: String,
+        @Query("code") code: String,
+    ): Response<VodovozResponseDTO<LoginByPhoneDTO>>
 
     @Headers("Cookie: ")
     @GET("config/openuserid.php?sandroid=${BuildConfig.VERSION_NAME}")
@@ -545,13 +561,13 @@ interface VodovozService {
     @GET("profile/anketa/index.php")
     suspend fun getQuestionnairesDetails(
         @Query("userid") userId: Long?,
-        @Query("action") who: String
+        @Query("action") who: String,
     ): Response<VodovozResponseDTO<QuestionnairesDetailsDTO>>
 
     @GET("profile/anketa/index.php")
     suspend fun sendQuestionnaires(
         @Query("action") who: String,
         @Query("userid") userId: Long?,
-        @Query("filtervalue") answers: String
+        @Query("filtervalue") answers: String,
     ): Response<VodovozResponseDTO<VodovozPlaceholderDTO>>
 }

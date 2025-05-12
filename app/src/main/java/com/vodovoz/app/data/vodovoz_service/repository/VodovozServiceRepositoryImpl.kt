@@ -60,6 +60,7 @@ import com.vodovoz.app.domain.general.model.SectionModel
 import com.vodovoz.app.domain.general.model.SiteState
 import com.vodovoz.app.domain.general.model.SortModel
 import com.vodovoz.app.domain.general.model.StoryModel
+import com.vodovoz.app.domain.general.model.TooManyRequestsException
 import com.vodovoz.app.domain.general.model.TopAndBottomSectionsModel
 import com.vodovoz.app.domain.general.model.UnratedProductsSectionModel
 import com.vodovoz.app.domain.general.model.UserDataModel
@@ -71,6 +72,7 @@ import com.vodovoz.app.domain.general.model.certificate.BuyCertificateDetailsMod
 import com.vodovoz.app.domain.general.model.certificate.BuyCertificateModel
 import com.vodovoz.app.domain.general.model.format
 import com.vodovoz.app.domain.general.model.login.AuthDetailsModel
+import com.vodovoz.app.domain.general.model.login.RequestCodeModel
 import com.vodovoz.app.domain.general.model.login.UserAuthInfoModel
 import com.vodovoz.app.domain.general.model.order.OrderDetailsModel
 import com.vodovoz.app.domain.general.model.order.OrderQuestionDetailsModel
@@ -101,6 +103,41 @@ class VodovozServiceRepositoryImpl @Inject constructor(
     private val cookieManager: CookieManager,
     private val trackingManager: TrackingManager,
 ) : VodovozServiceRepository {
+
+    override fun requestPhoneCode(url: String, phone: String): Flow<Result<RequestCodeModel>> {
+        return executeRequest(
+            request = {
+                vodovozService.requestPhoneCode(url, phone)
+            },
+            mapper = {
+                val mapResult = it.data!!.toDomain()
+                if (it.status == "429") {
+                    throw TooManyRequestsException(remainingSeconds = mapResult.remainingSeconds)
+                }
+                mapResult
+            }
+        )
+    }
+
+    override fun loginByPhone(
+        url: String,
+        code: String,
+        phone: String,
+    ): Flow<Result<UserAuthInfoModel>> {
+        return executeRequest(
+            request = {
+                vodovozService.loginByPhone(url, phone, code)
+            },
+            mapper = {
+                it.data!!.toDomain()
+            },
+            onFail = { it ->
+                val json = it.stringBody()
+                val errorMessage = moshi.fromJson<VodovozResponseDTO<String>>(json).message ?: ""
+                throw RequestException(errorMessage)
+            }
+        )
+    }
 
     override fun getAllServicesDetails(): Flow<Result<AllServicesDetailsModel>> {
         return executeRequest(

@@ -292,6 +292,7 @@
     <string name="error_password_unknown">Не удалось изменить пароль. Попробуйте еще раз позже.</string>
     <string name="success_password_change">Пароль успешно\n изменен!</string>
     <string name="error_login">Не удалось войти. Неизвестная ошибка, попробуйте еще раз.</string>
+
     <string name="fine">Хорошо</string>
 
     <string name="supporting_text_email">Введите корректный email.</string>

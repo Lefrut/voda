@@ -35,6 +35,7 @@ import com.vodovoz.app.common.tab.TabManager
 import com.vodovoz.app.core.android.activate
 import com.vodovoz.app.core.navigation.ProfileMainNavigator
 import com.vodovoz.app.core.navigation.navigateToLogin
+import com.vodovoz.app.core.navigation.navigateToLoginByPhone
 import com.vodovoz.app.core.navigation.navigateToRegister
 import com.vodovoz.app.core.navigation.navigateToUserData
 import com.vodovoz.app.core.navigation.navigateToWaterApp
@@ -95,14 +96,6 @@ class ProfileFragment : Fragment() {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnDetachedFromWindow)
             setContent {
                 VodovozTheme {
-
-                    //todo - remove
-                    LaunchedEffect(Unit) {
-                        delay(500)
-                        findNavController().navigateToWaterApp()
-                    }
-
-
                     val pagingState by viewModel.observeUiState().collectAsStateWithLifecycle()
                     val viewState by rememberUpdatedState(newValue = pagingState.data)
                     val pullToRefreshState = rememberPullToRefreshState()

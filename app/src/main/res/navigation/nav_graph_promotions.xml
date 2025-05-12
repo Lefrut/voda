@@ -1160,7 +1160,7 @@
     </dialog>
     <fragment
         android:id="@+id/loginByPhoneCodeFragment"
-        android:name="com.vodovoz.app.feature.auth.login.LoginByPhoneCodeFragment"
+        android:name="com.vodovoz.app.feature.auth.login_by_phone_code.LoginByPhoneCodeFragment"
         android:label="LoginByEmailFragment" >
         <argument
             android:name="phoneNumber"

@@ -36,6 +36,7 @@ fun LoginBody(
     modifier: Modifier = Modifier,
     fields: List<FieldUi>,
     description: String,
+    errorText: String,
     showAgreements: Boolean,
     showRegisterText: Boolean,
     agreementChecked: Boolean,
@@ -67,8 +68,17 @@ fun LoginBody(
             modifier = Modifier.padding(top = 24.dp),
             fields = fields,
             onFieldChange = onFieldChange,
-            onDone = {  }
+            onDone = { }
         )
+
+        if (errorText.isNotBlank()) {
+            Text(
+                modifier = Modifier.padding(top = 4.dp),
+                text = errorText,
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.labelSmall
+            )
+        }
 
 
         Column(
@@ -91,7 +101,10 @@ fun LoginBody(
             )
         }
 
-        Column(modifier = Modifier.padding(vertical = 24.dp),verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        Column(
+            modifier = Modifier.padding(vertical = 24.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
             buttons.forEach { button ->
                 VodovozButton(
                     text = button.name,

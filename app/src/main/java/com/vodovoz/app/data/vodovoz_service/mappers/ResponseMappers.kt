@@ -2,11 +2,9 @@ package com.vodovoz.app.data.vodovoz_service.mappers
 
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
+import com.vodovoz.app.core.network.converters.LocalDateTimeJsonAdapter
 import com.vodovoz.app.core.network.messageWithCode
-import com.vodovoz.app.data.vodovoz_service.model.VodovozResponseDTO
-import com.vodovoz.app.domain.general.model.EmptyResultException
 import com.vodovoz.app.domain.general.model.RequestException
-import com.vodovoz.app.domain.general.model.VodovozPlaceholderModel
 import com.vodovoz.app.util.extensions.catchResult
 import com.vodovoz.app.util.extensions.debugLog
 import kotlinx.coroutines.Dispatchers
@@ -21,6 +19,7 @@ import okio.buffer
 import okio.source
 import retrofit2.Response
 import java.lang.reflect.Type
+import java.time.LocalDateTime
 import kotlin.reflect.jvm.javaType
 import kotlin.reflect.typeOf
 
@@ -34,7 +33,10 @@ fun String.jsonToResponseBody(): ResponseBody {
     }
 }
 
-val moshiWithJsonAdapter: Moshi = Moshi.Builder().add(KotlinJsonAdapterFactory()).build()
+val moshiWithJsonAdapter: Moshi =
+    Moshi.Builder()
+        .add(LocalDateTime::class.java, LocalDateTimeJsonAdapter().nullSafe())
+        .add(KotlinJsonAdapterFactory()).build()
 
 inline fun <reified T, R> executeRequest(
     crossinline request: suspend () -> Response<T>,

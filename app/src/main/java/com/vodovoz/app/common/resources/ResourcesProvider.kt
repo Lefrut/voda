@@ -1,10 +1,13 @@
 package com.vodovoz.app.common.resources
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import androidx.annotation.DrawableRes
+import androidx.annotation.PluralsRes
 import androidx.annotation.StringRes
+import androidx.core.content.ContextCompat
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -17,6 +20,10 @@ interface ResourcesProvider {
     fun getString(@StringRes resId: Int, vararg args: Any): String
 
     fun getDrawable(@DrawableRes id: Int): Drawable
+
+    fun getQuantityString(@PluralsRes id: Int, quantity: Int, vararg formatArgs: Any): String
+
+    fun getQuantityString(@PluralsRes id: Int, quantity: Int): String
 }
 
 @Singleton
@@ -29,7 +36,16 @@ class ResourcesProviderImpl @Inject constructor(
     }
 
     override fun getDrawable(@DrawableRes id: Int): Drawable {
-        return context.getDrawable(id) ?: ColorDrawable()
+        return ContextCompat.getDrawable(context, id) ?: ColorDrawable()
+    }
+
+    override fun getQuantityString(id: Int, quantity: Int, vararg formatArgs: Any): String {
+        return context.resources.getQuantityString(id, quantity, formatArgs)
+
+    }
+
+    override fun getQuantityString(id: Int, quantity: Int): String {
+        return context.resources.getQuantityString(id, quantity)
     }
 }
 
