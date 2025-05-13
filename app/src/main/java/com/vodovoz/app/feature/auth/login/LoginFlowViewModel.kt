@@ -440,7 +440,7 @@ class LoginFlowViewModel @Inject constructor(
             s.copy(
                 fields = updatedFields,
                 buttons = s.buttons.updateButton(AUTH_BUTTON) { button ->
-                    button.copy(enabled = updatedFields.checkFields() && s.agreementChecked)
+                    button.copy(enabled = updatedFields.checkFields() && (s.agreementChecked || !s.showAgreements))
                 },
                 errorText = ""
             )

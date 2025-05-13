@@ -32,8 +32,8 @@ import com.vodovoz.app.data.vodovoz_service.model.SuperTopAndBottomSectionsDTO
 import com.vodovoz.app.data.vodovoz_service.model.VodovozErrorResponseDTO
 import com.vodovoz.app.data.vodovoz_service.model.VodovozPlaceholderDTO
 import com.vodovoz.app.data.vodovoz_service.model.VodovozResponseDTO
+import com.vodovoz.app.data.vodovoz_service.model.auth.AuthDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.auth.LoginByPhoneDTO
-import com.vodovoz.app.data.vodovoz_service.model.auth.LoginDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.auth.RequestCodeDTO
 import com.vodovoz.app.data.vodovoz_service.model.auth.UserAuthInfoDTO
 import com.vodovoz.app.data.vodovoz_service.model.cart.CartDetailsDTO
@@ -258,10 +258,10 @@ interface VodovozService {
      * Login requests
      * */
     @GET("auth.php?action=glav")
-    suspend fun getLoginDetails(): Response<VodovozResponseDTO<LoginDetailsDTO>>
+    suspend fun getLoginDetails(): Response<VodovozResponseDTO<AuthDetailsDTO>>
 
     @GET("auth.php?action=glav&email=Y")
-    suspend fun getLoginByEmailDetails(): Response<VodovozResponseDTO<LoginDetailsDTO>>
+    suspend fun getLoginByEmailDetails(): Response<VodovozResponseDTO<AuthDetailsDTO>>
 
     @GET("reg.php?action=glav")
     suspend fun getRegisterFields(): Response<VodovozResponseDTO<RegistrationDetailsDTO>>
@@ -296,6 +296,15 @@ interface VodovozService {
         @Query("userid") userId: Long,
         @Query("token") token: String,
     ): Response<VodovozResponseDTO<Boolean>>
+
+    @GET("recoverPass.php?action=glav")
+    suspend fun getRecoverPasswordDetails(): Response<VodovozResponseDTO<AuthDetailsDTO>>
+
+
+    @GET("recoverPass.php?action=otpravka")
+    suspend fun recoverPassword(
+        @QueryMap queries: Map<String, String>,
+    ): Response<VodovozResponseDTO<VodovozPlaceholderDTO>>
 
     /**
      * Main requests

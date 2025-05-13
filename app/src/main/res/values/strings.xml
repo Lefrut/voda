@@ -378,6 +378,7 @@
     <string name="minutes">минуты</string>
     <string name="time_to_drink_water">Пора пить воду</string>
     <string name="cm">СМ</string>
+    <string name="recover_password">Восстановление пароля</string>
 
 
 </resources>

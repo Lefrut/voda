@@ -55,6 +55,10 @@ import java.io.File
 
 interface VodovozServiceRepository {
 
+    fun getRecoverPasswordDetails(): Flow<Result<AuthDetailsModel>>
+
+    fun recoverPassword(fields: List<FieldModel>): Flow<Result<VodovozPlaceholderModel>>
+
     fun requestPhoneCode(
         url: String,
         phone: String
