@@ -37,6 +37,7 @@ import com.vodovoz.app.domain.general.model.EmptyResultException
 import com.vodovoz.app.domain.general.model.FieldModel
 import com.vodovoz.app.domain.general.model.FilterValueModel
 import com.vodovoz.app.domain.general.model.FiltersModel
+import com.vodovoz.app.domain.general.model.NotificationSettingsDetailsModel
 import com.vodovoz.app.domain.general.model.OrderWithMenuModel
 import com.vodovoz.app.domain.general.model.ParentCategoryModel
 import com.vodovoz.app.domain.general.model.PopularCategoryModel
@@ -103,6 +104,31 @@ class VodovozServiceRepositoryImpl @Inject constructor(
     private val cookieManager: CookieManager,
     private val trackingManager: TrackingManager,
 ) : VodovozServiceRepository {
+
+    override fun getNotificationSettingsDetails(): Flow<Result<NotificationSettingsDetailsModel>> {
+        return executeRequest(
+            request = {
+                vodovozService.getNotificationSettingsDetails(accountManager.fetchAccountId())
+            },
+            mapper = {
+                it.data!!.toDomain()
+            }
+        )
+    }
+
+    override fun updateNotificationSettings(params: Map<String, String>): Flow<Result<String>> {
+        return executeRequest(
+            request = {
+                vodovozService.updateNotificationSettings(
+                    accountManager.fetchAccountId(),
+                    params
+                )
+            },
+            mapper = {
+                it.message ?: ""
+            }
+        )
+    }
 
     override fun getRecoverPasswordDetails(): Flow<Result<AuthDetailsModel>> {
         return executeRequest(

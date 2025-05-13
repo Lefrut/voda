@@ -40,6 +40,7 @@ import com.vodovoz.app.data.vodovoz_service.model.cart.CartDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.catalog.CatalogDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.certificate.BuyCertificateDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.filters.FiltersDTO
+import com.vodovoz.app.data.vodovoz_service.model.notification_settings.NotificationSettingsDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.order_details.OrderDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.product_details.ProductDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.profile.ProfileDetailsDTO
@@ -176,6 +177,20 @@ interface VodovozService {
     suspend fun updatePassword(
         @Query("userid") userId: Long,
         @Query("password") password: String,
+    ): Response<VodovozResponseDTO<String>>
+
+    /**
+     * Notification settings requests
+     * */
+    @GET("osnova/form/uvedomlenie.php?action=detail")
+    suspend fun getNotificationSettingsDetails(
+        @Query("userid") userId: Long?,
+    ): Response<VodovozResponseDTO<NotificationSettingsDetailsDTO>>
+
+    @GET("osnova/form/uvedomlenie.php?action=sms")
+    suspend fun updateNotificationSettings(
+        @Query("userid") userId: Long?,
+        @QueryMap queries: Map<String, String>,
     ): Response<VodovozResponseDTO<String>>
 
     /**
@@ -452,23 +467,6 @@ interface VodovozService {
 
     @GET("glavnaya/stories/index.php?iblock_id=12&action=stories&platforma=android")
     suspend fun getStories(): Response<VodovozResponseDTO<StoriesDTO>>
-
-    //todo - delete and use new realization
-    @GET("glavnaya/stories/index.php?iblock_id=12&action=storisdetailtovary&platforma=android")
-    suspend fun getStoriesProducts(
-        @Query("id") productsId: Long,
-        @Query("nav") page: Int = 1,
-        @Query("sect") categoryId: Int = -1,
-        @Query("sort") sort: String = "",
-        @Query("ascdesc") order: String = "",
-    ): Response<VodovozResponseDTO<ProductsSectionDTO>>
-
-    //todo - delete and use new realization
-    @GET("glavnaya/stories/index.php?iblock_id=12&action=storisdetailactions&platforma=android")
-    suspend fun getStoriesPromotions(
-        @Query("id") promotionsId: Long,
-        @Query("nav") page: Int = 1,
-    ): Response<VodovozResponseDTO<PromotionsDTO>>
 
     @GET("glavnaya/menushka.php?action=glavnaya")
     suspend fun getOrderMenu(

@@ -1,4 +1,3 @@
-
 package com.vodovoz.app.design_system
 
 import androidx.compose.material3.Typography
@@ -162,7 +161,8 @@ val vodovozTypography = Typography(
         platformStyle = PlatformTextStyle(
             includeFontPadding = false
         ),
-        fontWeight = FontWeight.Normal
+        fontWeight = FontWeight.Normal,
+        letterSpacing = 0.15.sp
     ),
     bodyMedium = TextStyle(
         fontSize = 16.sp,
@@ -288,7 +288,7 @@ class ExtendedTypography(
     val labelExtraSmall: TextStyle = TextStyle.Default,
     val labelExtraSmallVariant: TextStyle = TextStyle.Default,
     val labelMediumVariant: TextStyle = TextStyle.Default,
-    val labelSmallVariant: TextStyle = TextStyle.Default
+    val labelSmallVariant: TextStyle = TextStyle.Default,
 )
 
 val LocalExtendedTypography =
