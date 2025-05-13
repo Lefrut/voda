@@ -6,7 +6,7 @@ import androidx.annotation.Keep
 import com.vodovoz.app.data.vodovoz_service.model.user_data.POLE_DTO
 
 @Keep
-data class LoginDetailsDTO(
+data class AuthDetailsDTO(
     @Json(name = "TITLE")
     val TITLE: String?,
     @Json(name = "OPISANIE")

@@ -1272,6 +1272,6 @@
     </fragment>
     <fragment
         android:id="@+id/recoverPasswordFragment"
-        android:name="com.vodovoz.app.feature.auth.login.RecoverPasswordFragment"
+        android:name="com.vodovoz.app.feature.auth.recover_password.RecoverPasswordFragment"
         android:label="RecoverPasswordFragment" />
 </navigation>

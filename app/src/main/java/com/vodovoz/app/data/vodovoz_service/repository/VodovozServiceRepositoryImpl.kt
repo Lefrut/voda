@@ -104,6 +104,34 @@ class VodovozServiceRepositoryImpl @Inject constructor(
     private val trackingManager: TrackingManager,
 ) : VodovozServiceRepository {
 
+    override fun getRecoverPasswordDetails(): Flow<Result<AuthDetailsModel>> {
+        return executeRequest(
+            request = {
+                vodovozService.getRecoverPasswordDetails()
+            },
+            mapper = {
+                it.data!!.toDomain()
+            }
+        )
+    }
+
+    override fun recoverPassword(fields: List<FieldModel>): Flow<Result<VodovozPlaceholderModel>> {
+        return executeRequest(
+            request = {
+                vodovozService.recoverPassword(fields.toQueries())
+            },
+            mapper = {
+                it.data!!.toDomain()
+            },
+            onFail = { it ->
+                val errorMessage =
+                    moshi.fromJson<VodovozResponseDTO<String>>(it.stringBody()).message ?: ""
+
+                throw RequestException(errorMessage)
+            }
+        )
+    }
+
     override fun requestPhoneCode(url: String, phone: String): Flow<Result<RequestCodeModel>> {
         return executeRequest(
             request = {
