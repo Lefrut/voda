@@ -25,7 +25,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
-class NotificationSettingsFragment : BaseFragment() {
+class NotificationSettingsFragment1 : BaseFragment() {
 
     override fun layout(): Int = R.layout.fragment_notification_settings
 
@@ -76,6 +76,10 @@ class NotificationSettingsFragment : BaseFragment() {
                             }
                             is NotificationSettingsViewModel.NotSettingsEvents.Failure -> {
                                 requireActivity().snack(it.message)
+                            }
+
+                            else -> {
+
                             }
                         }
 

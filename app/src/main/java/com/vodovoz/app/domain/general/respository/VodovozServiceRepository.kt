@@ -13,6 +13,7 @@ import com.vodovoz.app.domain.general.model.CommentModel
 import com.vodovoz.app.domain.general.model.FieldModel
 import com.vodovoz.app.domain.general.model.FilterValueModel
 import com.vodovoz.app.domain.general.model.FiltersModel
+import com.vodovoz.app.domain.general.model.NotificationSettingsDetailsModel
 import com.vodovoz.app.domain.general.model.OrderWithMenuModel
 import com.vodovoz.app.domain.general.model.ParentCategoryModel
 import com.vodovoz.app.domain.general.model.PopularCategoryModel
@@ -54,6 +55,10 @@ import kotlinx.coroutines.flow.Flow
 import java.io.File
 
 interface VodovozServiceRepository {
+
+    fun getNotificationSettingsDetails(): Flow<Result<NotificationSettingsDetailsModel>>
+
+    fun updateNotificationSettings(params: Map<String, String>): Flow<Result<String>>
 
     fun getRecoverPasswordDetails(): Flow<Result<AuthDetailsModel>>
 
