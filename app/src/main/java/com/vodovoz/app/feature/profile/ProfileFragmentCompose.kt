@@ -10,7 +10,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
@@ -35,9 +34,9 @@ import com.vodovoz.app.common.tab.TabManager
 import com.vodovoz.app.core.android.activate
 import com.vodovoz.app.core.navigation.ProfileMainNavigator
 import com.vodovoz.app.core.navigation.navigateToLogin
-import com.vodovoz.app.core.navigation.navigateToLoginByPhone
 import com.vodovoz.app.core.navigation.navigateToRegister
 import com.vodovoz.app.core.navigation.navigateToUserData
+import com.vodovoz.app.core.navigation.navigateToWaitFeedbackProducts
 import com.vodovoz.app.core.navigation.navigateToWaterApp
 import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.composables.placeholders.LoadingPlaceholder
@@ -49,7 +48,6 @@ import com.vodovoz.app.feature.home.HomeFlowViewModel
 import com.vodovoz.app.feature.profile.core.ProfileChatsNavigator
 import com.vodovoz.app.util.extensions.copyText
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -219,6 +217,10 @@ class ProfileFragment : Fragment() {
 
                         ProfileFlowViewModel.ProfileEvents.GoToWaterApp -> {
                             findNavController().navigateToWaterApp()
+                        }
+
+                        ProfileFlowViewModel.ProfileEvents.GoToWaitFeedbackProducts -> {
+                            findNavController().navigateToWaitFeedbackProducts()
                         }
                     }
                 }

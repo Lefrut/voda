@@ -86,6 +86,7 @@ class ProductsListNoFilterFlowViewModel @Inject constructor(
         }
     )
 
+
     init {
         listenFavorites()
         listenProductsLoadStates()
@@ -285,6 +286,7 @@ class ProductsListNoFilterFlowViewModel @Inject constructor(
         uiStateListener.updateData { s ->
             s.copy(showRefreshIndicator = true)
         }
+
         fetchProductListData().join()
 
         uiStateListener.updateData { s ->

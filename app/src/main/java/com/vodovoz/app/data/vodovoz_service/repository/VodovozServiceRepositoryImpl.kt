@@ -23,6 +23,7 @@ import com.vodovoz.app.data.vodovoz_service.model.PromotionsDTO
 import com.vodovoz.app.data.vodovoz_service.model.VodovozErrorResponseDTO
 import com.vodovoz.app.data.vodovoz_service.model.VodovozPlaceholderDTO
 import com.vodovoz.app.data.vodovoz_service.model.VodovozResponseDTO
+import com.vodovoz.app.data.vodovoz_service.model.WaitFeedbackProductsDTO
 import com.vodovoz.app.domain.general.AllBottlesDetailsModel
 import com.vodovoz.app.domain.general.VodovozPagingSource
 import com.vodovoz.app.domain.general.model.BannerModel
@@ -68,6 +69,7 @@ import com.vodovoz.app.domain.general.model.UserDataModel
 import com.vodovoz.app.domain.general.model.UserNotLoginException
 import com.vodovoz.app.domain.general.model.ValidationException
 import com.vodovoz.app.domain.general.model.VodovozPlaceholderModel
+import com.vodovoz.app.domain.general.model.WaitFeedbackProductModel
 import com.vodovoz.app.domain.general.model.cart.CartDetailsModel
 import com.vodovoz.app.domain.general.model.certificate.BuyCertificateDetailsModel
 import com.vodovoz.app.domain.general.model.certificate.BuyCertificateModel
@@ -104,6 +106,47 @@ class VodovozServiceRepositoryImpl @Inject constructor(
     private val cookieManager: CookieManager,
     private val trackingManager: TrackingManager,
 ) : VodovozServiceRepository {
+
+    override fun getWaitFeedbackProductsTitle(): Flow<Result<String>> {
+        return executeRequest(
+            request = {
+                vodovozService.getWaitFeedbackProducts(accountManager.fetchAccountId())
+            },
+            mapper = {
+                it.data?.products!!.isEmpty()
+
+                it.data.title ?: ""
+            },
+            onFail = { response ->
+                val placeholder =
+                    moshi.fromJson<VodovozResponseDTO<VodovozPlaceholderDTO>>(
+                        response.stringBody()
+                    ).data!!.toDomain()
+
+                throw EmptyResultException(placeholder = placeholder)
+            }
+        )
+    }
+
+    override fun getWaitFeedbackProductsPaged(): Flow<PagingData<WaitFeedbackProductModel>> {
+        return Pager(
+            config = PagingConfig(pageSize = 5),
+            pagingSourceFactory = {
+                VodovozPagingSource(
+                    clazz = WaitFeedbackProductsDTO::class,
+                    request = { page, _ ->
+                        vodovozService.getWaitFeedbackProducts(
+                            accountManager.fetchAccountId(),
+                            page
+                        )
+                    },
+                    mapper = { response ->
+                        response.data!!.products!!.mapToDomain()
+                    }
+                )
+            }
+        ).flow
+    }
 
     override fun getNotificationSettingsDetails(): Flow<Result<NotificationSettingsDetailsModel>> {
         return executeRequest(

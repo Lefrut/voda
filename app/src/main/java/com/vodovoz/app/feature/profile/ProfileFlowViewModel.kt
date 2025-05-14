@@ -444,7 +444,7 @@ class ProfileFlowViewModel @Inject constructor(
     fun activateProfileCard(profileCard: ProfileCardUi) = viewModelScope.launch {
         when(profileCard.id){
             "otziv" ->{
-
+                eventListener.emit(ProfileEvents.GoToWaitFeedbackProducts)
             }
             "treker" -> {
                 eventListener.emit(ProfileEvents.GoToWaterApp)
@@ -517,6 +517,7 @@ class ProfileFlowViewModel @Inject constructor(
         data object GoToUserData : ProfileEvents()
         data object GoToRegister : ProfileEvents()
         data object GoToWaterApp : ProfileEvents()
+        data object GoToWaitFeedbackProducts : ProfileEvents()
 
         data class GoByMenuItemId(val itemId: String) : ProfileEvents()
         data class ActivateVodovozAction(val action: VodovozAction) : ProfileEvents()

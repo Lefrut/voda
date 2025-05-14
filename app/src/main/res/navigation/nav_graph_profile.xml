@@ -6,6 +6,12 @@
     app:startDestination="@id/profileFragment">
 
     <fragment
+        android:id="@+id/waitFeedbackProductsFragment"
+        android:name="com.vodovoz.app.feature.wait_feedback_products.WaitFeedbackProductsFragment"
+        android:label="WaitFeedbackProductsFragment"
+        />
+
+    <fragment
         android:id="@+id/aboutAppFragment"
         android:name="com.vodovoz.app.feature.about_app.AboutAppFragment"
         android:label="AboutAppFragment" />
