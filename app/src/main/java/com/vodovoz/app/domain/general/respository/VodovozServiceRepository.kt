@@ -40,6 +40,7 @@ import com.vodovoz.app.domain.general.model.TopAndBottomSectionsModel
 import com.vodovoz.app.domain.general.model.UnratedProductsSectionModel
 import com.vodovoz.app.domain.general.model.UserDataModel
 import com.vodovoz.app.domain.general.model.VodovozPlaceholderModel
+import com.vodovoz.app.domain.general.model.WaitFeedbackProductModel
 import com.vodovoz.app.domain.general.model.cart.CartDetailsModel
 import com.vodovoz.app.domain.general.model.certificate.BuyCertificateDetailsModel
 import com.vodovoz.app.domain.general.model.certificate.BuyCertificateModel
@@ -55,6 +56,10 @@ import kotlinx.coroutines.flow.Flow
 import java.io.File
 
 interface VodovozServiceRepository {
+
+    fun getWaitFeedbackProductsTitle(): Flow<Result<String>>
+
+    fun getWaitFeedbackProductsPaged(): Flow<PagingData<WaitFeedbackProductModel>>
 
     fun getNotificationSettingsDetails(): Flow<Result<NotificationSettingsDetailsModel>>
 

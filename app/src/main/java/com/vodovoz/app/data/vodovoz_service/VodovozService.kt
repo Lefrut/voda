@@ -32,6 +32,7 @@ import com.vodovoz.app.data.vodovoz_service.model.SuperTopAndBottomSectionsDTO
 import com.vodovoz.app.data.vodovoz_service.model.VodovozErrorResponseDTO
 import com.vodovoz.app.data.vodovoz_service.model.VodovozPlaceholderDTO
 import com.vodovoz.app.data.vodovoz_service.model.VodovozResponseDTO
+import com.vodovoz.app.data.vodovoz_service.model.WaitFeedbackProductsDTO
 import com.vodovoz.app.data.vodovoz_service.model.auth.AuthDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.auth.LoginByPhoneDTO
 import com.vodovoz.app.data.vodovoz_service.model.auth.RequestCodeDTO
@@ -391,6 +392,16 @@ interface VodovozService {
         @Query("sort") sort: String = "",
         @Query("ascdesc") order: String = "",
     ): Response<VodovozResponseDTO<ProductCommentsDTO>>
+
+    /**
+     * Wait comments
+     * */
+
+    @GET("profile/otzyvy.php?action=glav")
+    suspend fun getWaitFeedbackProducts(
+        @Query("userid") userId: Long?,
+        @Query("nav") page: Int = 1
+    ): Response<VodovozResponseDTO<WaitFeedbackProductsDTO>>
 
 
     /**
