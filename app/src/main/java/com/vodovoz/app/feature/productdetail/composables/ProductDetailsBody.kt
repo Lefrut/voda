@@ -62,7 +62,8 @@ fun ProductDetailsBody(
     onCopyArticleNumberClick: () -> Unit,
     onProductAnalogsClick: (ProductUi) -> Unit,
     onIncrementProductToCart: (ProductUi) -> Unit,
-    onDecrementProductToCart: (ProductUi) -> Unit
+    onDecrementProductToCart: (ProductUi) -> Unit,
+    onWriteCommentClick: () -> Unit
 ) {
     Column(
         modifier = modifier.fillMaxSize()
@@ -95,9 +96,7 @@ fun ProductDetailsBody(
             articleNumber = productDetails.articleNumber,
             onReviewsClick = onShowAllCommentsClick,
             onCopyClick = onCopyArticleNumberClick,
-            onZeroReviewsClick = {
-
-            }
+            onZeroReviewsClick = onWriteCommentClick
         )
 
         ProductDetailsPriceInfo(
@@ -160,9 +159,7 @@ fun ProductDetailsBody(
             commentsCount = productDetails.commentsCount,
             comments = comments,
             onShowAllCommentsClick = onShowAllCommentsClick,
-            onWriteCommentClick = {
-
-            },
+            onWriteCommentClick = onWriteCommentClick,
         )
 
 

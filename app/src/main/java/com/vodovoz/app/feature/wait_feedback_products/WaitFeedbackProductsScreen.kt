@@ -58,7 +58,7 @@ fun WaitFeedbackProductsScreen(
                         viewModel.navigateToProductDetails(product)
                     },
                     onProductRatingChange = { product, rating ->
-                        viewModel.navigateToRateProduct(product, rating)
+                        viewModel.navigateToWriteComment(product, rating)
                     },
                     onProductSee = { index ->
                         viewModel.notifyPagingProducts(index)

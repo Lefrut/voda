@@ -128,8 +128,8 @@ class WaitFeedbackProductsViewModel @Inject constructor(
         _events.emit(WaitFeedbackProductsEvent.GoToCatalog)
     }
 
-    fun navigateToRateProduct(product: WaitFeedbackProductUi, rating: Int) {
-
+    fun navigateToWriteComment(product: WaitFeedbackProductUi, rating: Int) = viewModelScope.launch {
+        _events.emit(WaitFeedbackProductsEvent.GoToWriteComment(product.id, product.name, product.image, rating))
     }
 
 }

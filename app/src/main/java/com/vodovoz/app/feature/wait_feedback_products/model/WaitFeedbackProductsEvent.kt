@@ -4,6 +4,12 @@ sealed interface WaitFeedbackProductsEvent {
 
     data object GoBack : WaitFeedbackProductsEvent
     data object GoToCatalog : WaitFeedbackProductsEvent
-    data class GoToProductsDetails(val productId: Long): WaitFeedbackProductsEvent
+    data class GoToProductsDetails(val productId: Long) : WaitFeedbackProductsEvent
+    data class GoToWriteComment(
+        val productId: Long,
+        val productName: String,
+        val productImage: String,
+        val rating: Int,
+    ) : WaitFeedbackProductsEvent
 
 }
