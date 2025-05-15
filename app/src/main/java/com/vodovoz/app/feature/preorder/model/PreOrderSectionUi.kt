@@ -164,12 +164,17 @@ fun List<FieldUi>.updateFieldAndResetError(field: FieldUi, newField: FieldUi): L
     return toMutableList().apply {
         set(
             fieldIndex,
-            newField.copy(
-                isError = false,
-                supportingText = if (newField.isError) "" else newField.supportingText
-            )
+            newField.resetError()
         )
     }
+}
+
+fun FieldUi.resetError(): FieldUi {
+    return copy(
+        isError = false,
+        supportingText = if (isError) "" else supportingText
+    )
+
 }
 
 fun List<FieldUi>.updateField(field: FieldUi, newField: FieldUi): List<FieldUi> {

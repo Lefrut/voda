@@ -22,6 +22,20 @@ private val SlideNavOptions = NavOptions.Builder()
     .setPopExitAnim(R.anim.slide_out_right)
     .build()
 
+fun NavController.navigateToWriteComment(
+    productId: Long,
+    productName: String,
+    productImage: String,
+    rating: Int,
+) {
+    val args = bundleOf(
+        "product_id" to productId,
+        "product_name" to productName,
+        "product_image" to productImage,
+        "rating" to rating
+    )
+    navigate(R.id.writeCommentFragment, args)
+}
 
 fun NavController.navigateToWaitFeedbackProducts() {
     navigate(

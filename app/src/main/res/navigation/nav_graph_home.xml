@@ -6,6 +6,32 @@
     app:startDestination="@id/homeFragment">
 
     <fragment
+        android:id="@+id/writeCommentFragment"
+        android:name="com.vodovoz.app.feature.write_comment.WriteCommentFragment"
+        android:label="WriteCommentFragment">
+
+        <argument
+            android:name="product_name"
+            app:argType="string"/>
+
+        <argument
+            android:name="product_image"
+            app:argType="string"/>
+
+
+        <argument
+            android:name="product_id"
+            app:argType="long"/>
+
+        <argument
+            android:name="rating"
+            app:argType="integer"/>
+
+
+    </fragment>
+
+
+    <fragment
         android:id="@+id/faqFragment"
         android:name="com.vodovoz.app.feature.faq.FAQFragment"
         android:label="fragment_faq">

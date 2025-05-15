@@ -381,6 +381,13 @@
     <string name="recover_password">Восстановление пароля</string>
 
     <string name="quanitity_x">%dx</string>
+    <string name="new_comment">Новый отзыв</string>
+
+    <string name="comment">Комментарий</string>
+    <string name="enter_comment">Введите комментарий</string>
+    <string name="minimal_count_15">Минимальное количество символов 15</string>
+    <string name="photo">Фото</string>
+    <string name="up_to_5_pieces">До 5 штук</string>
 
 
 </resources>

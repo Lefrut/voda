@@ -157,6 +157,9 @@ fun ProductDetailsScreen(
             },
             onProductAnalogsClick = { product ->
                 viewModel.navigateToProductAnalogs(product)
+            },
+            onWriteCommentClick = {
+                viewModel.navigateToWriteComment()
             }
         )
     }

@@ -6,6 +6,32 @@
     app:startDestination="@id/favoriteFragment">
 
     <fragment
+        android:id="@+id/writeCommentFragment"
+        android:name="com.vodovoz.app.feature.write_comment.WriteCommentFragment"
+        android:label="WriteCommentFragment">
+
+        <argument
+            android:name="product_name"
+            app:argType="string"/>
+
+        <argument
+            android:name="product_image"
+            app:argType="string"/>
+
+
+        <argument
+            android:name="product_id"
+            app:argType="long"/>
+
+        <argument
+            android:name="rating"
+            app:argType="integer"/>
+
+
+    </fragment>
+
+
+    <fragment
         android:id="@+id/preOrderFragment"
         android:name="com.vodovoz.app.feature.preorder.PreOrderFragment"
         android:label="PreOrderFragment">
@@ -986,14 +1012,7 @@
         android:id="@+id/allBottlesFragment"
         android:name="com.vodovoz.app.feature.cart.bottles.AllBottlesFlowFragment"
         android:label="AllBottlesFragment" />
-    <fragment
-        android:id="@+id/ordersFiltersDialog"
-        android:name="com.vodovoz.app.feature.filters.order.OrdersFiltersFlowFragment"
-        android:label="OrdersFiltersDialog">
-        <argument
-            android:name="ordersFiltersBundleUI"
-            app:argType="com.vodovoz.app.ui.model.custom.OrdersFiltersBundleUI" />
-    </fragment>
+
     <dialog
         android:id="@+id/replacementProductsSelectionBS"
         android:name="com.vodovoz.app.feature.replacement.ReplacementProductsSelectionBS"

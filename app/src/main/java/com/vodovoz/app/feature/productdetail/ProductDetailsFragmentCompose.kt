@@ -33,6 +33,7 @@ import com.vodovoz.app.core.navigation.navigateToProductImages
 import com.vodovoz.app.core.navigation.navigateToRutubeVideo
 import com.vodovoz.app.core.navigation.navigateToSearch
 import com.vodovoz.app.core.navigation.navigateToSearchProductList
+import com.vodovoz.app.core.navigation.navigateToWriteComment
 import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.composables.placeholders.EmptyResultPlaceholder
 import com.vodovoz.app.design_system.composables.placeholders.EmptyResultPlaceholderItem
@@ -118,158 +119,105 @@ class ProductDetailsFragment : Fragment() {
         }
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        observeResultLiveData()
-        observeMediaManager()
-        initJivoChatButton()
-
-
-    }
-
-    private fun initJivoChatButton() {
-        //todo - check this method
-//        binding.fabJivoSite.isVisible = JivoChatController.isActive()
-//        binding.fabJivoSite.setOnClickListener {
-//            findNavController().navigate(
-//                ProductDetailsFragmentDirections.actionToWebViewFragment(
-//                    JivoChatController.getLink(),
-//                    ""
-//                )
-//            )
-//        }
-    }
-
-    private fun observeMediaManager() {
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                mediaManager
-                    .observeCommentData()
-                    .collect {
-                        if (it != null && it.show) {
-                            mediaManager.dontShow()
-                            if (findNavController().currentBackStackEntry?.destination?.id == R.id.sendCommentAboutProductFragment) {
-                                findNavController().popBackStack()
-                            }
-                            findNavController().navigate(
-                                ProductDetailsFragmentDirections.actionToSendCommentAboutProductFragment(
-                                    it.productId
-                                )
-                            )
-                        }
-                    }
+    private suspend fun observeEvents(): Unit = viewModel.observeEvent().collect { event ->
+        when (event) {
+            is ProductDetailsFlowViewModel.ProductDetailsEvents.GoToPreOrder -> {
+                findNavController().navigateToPreOrder(event.id)
             }
-        }
-    }
 
-    private suspend fun observeEvents() {
-        viewModel.observeEvent().collect { event ->
-            when (event) {
-                is ProductDetailsFlowViewModel.ProductDetailsEvents.GoToPreOrder -> {
-                    findNavController().navigateToPreOrder(event.id)
-                }
+            is ProductDetailsFlowViewModel.ProductDetailsEvents.GoToProfile -> {
+                tabManager.setAuthRedirect(findNavController().graph.id)
+                tabManager.selectTab(R.id.graph_profile)
+            }
 
-                is ProductDetailsFlowViewModel.ProductDetailsEvents.GoToProfile -> {
-                    tabManager.setAuthRedirect(findNavController().graph.id)
-                    tabManager.selectTab(R.id.graph_profile)
-                }
-
-                is ProductDetailsFlowViewModel.ProductDetailsEvents.SendComment -> {
-                    if (findNavController().currentBackStackEntry?.destination?.id == R.id.sendCommentAboutProductFragment) {
-                        findNavController().popBackStack()
-                    }
-                    findNavController().navigate(
-                        ProductDetailsFragmentDirections.actionToSendCommentAboutProductFragment(
-                            event.id
-                        )
-                    )
-                }
-
-                is ProductDetailsFlowViewModel.ProductDetailsEvents.GoToCart -> {
-                    tabManager.setAuthRedirect(findNavController().graph.id)
-                    tabManager.selectTab(R.id.graph_cart)
-                }
-
-                is ProductDetailsFlowViewModel.ProductDetailsEvents.GoToPresentInfo -> {
-                    findNavController().navigate(
-                        ProductDetailsFragmentDirections.actionProductDetailFragmentToPresentInfoBottomSheetFragment(
-                            presentText = event.presentText,
-                            progressBackground = event.progressBackground,
-                            percent = event.progress,
-                            showProgress = event.showText
-                        )
-                    )
-                }
-
-                ProductDetailsFlowViewModel.ProductDetailsEvents.GoToAboutProduct -> {
-                    findNavController().navigate(R.id.aboutProductFragment)
-                }
-
-                is ProductDetailsFlowViewModel.ProductDetailsEvents.GoToProductComments -> {
-                    findNavController().navigateToProductComments(event.productId)
-                }
-
-                is ProductDetailsFlowViewModel.ProductDetailsEvents.GoToProductAnalogs -> {
-                    findNavController().navigateToAnalogs(event.productId)
-                }
-
-                ProductDetailsFlowViewModel.ProductDetailsEvents.GoBack -> {
+            is ProductDetailsFlowViewModel.ProductDetailsEvents.SendComment -> {
+                if (findNavController().currentBackStackEntry?.destination?.id == R.id.sendCommentAboutProductFragment) {
                     findNavController().popBackStack()
                 }
-
-                is ProductDetailsFlowViewModel.ProductDetailsEvents.GoToSearch -> {
-                    findNavController().navigateToSearch(event.query)
-                }
-
-                is ProductDetailsFlowViewModel.ProductDetailsEvents.GoToProductDetails -> {
-                    findNavController().navigateToProductDetails(event.productId)
-                }
-
-                is ProductDetailsFlowViewModel.ProductDetailsEvents.GoToCategoryProductList -> {
-                    findNavController().navigateToCategoryProductList(event.categoryId)
-                }
-
-                is ProductDetailsFlowViewModel.ProductDetailsEvents.Share -> {
-                    kotlin.runCatching { shareText(event.text) }
-                }
-
-                is ProductDetailsFlowViewModel.ProductDetailsEvents.GoToSearchProductList -> {
-                    findNavController().navigateToSearchProductList(event.query)
-                }
-
-                is ProductDetailsFlowViewModel.ProductDetailsEvents.Copy -> {
-                    requireContext().copyText(event.text)
-                }
-
-                is ProductDetailsFlowViewModel.ProductDetailsEvents.GoToProductImages -> {
-                    findNavController().navigateToProductImages(event.image, event.images)
-                }
-
-                is ProductDetailsFlowViewModel.ProductDetailsEvents.GoToRutubeVideo -> {
-                    findNavController().navigateToRutubeVideo(event.video.code)
-                }
-
-                is ProductDetailsFlowViewModel.ProductDetailsEvents.GoToBrandProducts -> {
-                    findNavController().navigateToBrandProductList(event.brandId)
-                }
-            }
-        }
-
-    }
-
-    private fun observeResultLiveData() {
-        findNavController().currentBackStackEntry?.savedStateHandle
-            ?.getLiveData<Long>(ReplacementProductsSelectionBS.SELECTED_PRODUCT_ID)
-            ?.observe(viewLifecycleOwner) { productId ->
-                if (findNavController().currentDestination?.id == R.id.replacementProductsSelectionBS) {
-                    findNavController().popBackStack()
-                    findNavController().navigate(
-                        ProductDetailsFragmentDirections.actionToSelf(
-                            productId
-                        )
+                findNavController().navigate(
+                    ProductDetailsFragmentDirections.actionToSendCommentAboutProductFragment(
+                        event.id
                     )
-                }
+                )
             }
+
+            is ProductDetailsFlowViewModel.ProductDetailsEvents.GoToCart -> {
+                tabManager.setAuthRedirect(findNavController().graph.id)
+                tabManager.selectTab(R.id.graph_cart)
+            }
+
+            is ProductDetailsFlowViewModel.ProductDetailsEvents.GoToPresentInfo -> {
+                findNavController().navigate(
+                    ProductDetailsFragmentDirections.actionProductDetailFragmentToPresentInfoBottomSheetFragment(
+                        presentText = event.presentText,
+                        progressBackground = event.progressBackground,
+                        percent = event.progress,
+                        showProgress = event.showText
+                    )
+                )
+            }
+
+            ProductDetailsFlowViewModel.ProductDetailsEvents.GoToAboutProduct -> {
+                findNavController().navigate(R.id.aboutProductFragment)
+            }
+
+            is ProductDetailsFlowViewModel.ProductDetailsEvents.GoToProductComments -> {
+                findNavController().navigateToProductComments(event.productId)
+            }
+
+            is ProductDetailsFlowViewModel.ProductDetailsEvents.GoToProductAnalogs -> {
+                findNavController().navigateToAnalogs(event.productId)
+            }
+
+            ProductDetailsFlowViewModel.ProductDetailsEvents.GoBack -> {
+                findNavController().popBackStack()
+            }
+
+            is ProductDetailsFlowViewModel.ProductDetailsEvents.GoToSearch -> {
+                findNavController().navigateToSearch(event.query)
+            }
+
+            is ProductDetailsFlowViewModel.ProductDetailsEvents.GoToProductDetails -> {
+                findNavController().navigateToProductDetails(event.productId)
+            }
+
+            is ProductDetailsFlowViewModel.ProductDetailsEvents.GoToCategoryProductList -> {
+                findNavController().navigateToCategoryProductList(event.categoryId)
+            }
+
+            is ProductDetailsFlowViewModel.ProductDetailsEvents.Share -> {
+                kotlin.runCatching { shareText(event.text) }
+            }
+
+            is ProductDetailsFlowViewModel.ProductDetailsEvents.GoToSearchProductList -> {
+                findNavController().navigateToSearchProductList(event.query)
+            }
+
+            is ProductDetailsFlowViewModel.ProductDetailsEvents.Copy -> {
+                requireContext().copyText(event.text)
+            }
+
+            is ProductDetailsFlowViewModel.ProductDetailsEvents.GoToProductImages -> {
+                findNavController().navigateToProductImages(event.image, event.images)
+            }
+
+            is ProductDetailsFlowViewModel.ProductDetailsEvents.GoToRutubeVideo -> {
+                findNavController().navigateToRutubeVideo(event.video.code)
+            }
+
+            is ProductDetailsFlowViewModel.ProductDetailsEvents.GoToBrandProducts -> {
+                findNavController().navigateToBrandProductList(event.brandId)
+            }
+
+            is ProductDetailsFlowViewModel.ProductDetailsEvents.GoToWriteComment -> {
+                findNavController().navigateToWriteComment(
+                    event.id,
+                    event.name,
+                    event.detailPicture,
+                    event.rating
+                )
+            }
+
+        }
     }
 }

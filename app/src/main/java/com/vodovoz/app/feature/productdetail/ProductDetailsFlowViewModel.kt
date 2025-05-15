@@ -56,7 +56,6 @@ import com.vodovoz.app.util.extensions.debugLog
 import com.vodovoz.app.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -67,8 +66,6 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -619,8 +616,20 @@ class ProductDetailsFlowViewModel @Inject constructor(
     }
 
     fun addProductWithGift(buyButton: BuyButtonUi) = viewModelScope.launch {
-        //todo - change realization
-        cartManager.addProductWithGift(buyButton.productId, buyButton.moreProductId)
+        //todo - update realization
+        //cartManager.addProductWithGift(buyButton.productId, buyButton.moreProductId)
+    }
+
+    fun navigateToWriteComment() = viewModelScope.launch {
+        val productDetails = uiStateListener.value.productDetails
+        eventListener.emit(
+            ProductDetailsEvents.GoToWriteComment(
+                productDetails.id,
+                productDetails.detailPicture,
+                productDetails.name,
+                0
+            )
+        )
     }
 
 
@@ -655,6 +664,7 @@ class ProductDetailsFlowViewModel @Inject constructor(
 
         data class GoToRutubeVideo(val video: ProductVideoUi) : ProductDetailsEvents()
         data class GoToBrandProducts(val brandId: Long) : ProductDetailsEvents()
+        data class GoToWriteComment(val id: Long, val detailPicture: String, val name: String, val rating: Int) : ProductDetailsEvents()
     }
 
 
