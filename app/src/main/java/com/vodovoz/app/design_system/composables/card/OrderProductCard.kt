@@ -15,6 +15,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.res.painterResource
@@ -25,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.rememberAsyncImagePainter
 import com.vodovoz.app.R
 import com.vodovoz.app.design_system.ExtendedTheme
+import com.vodovoz.app.design_system.composables.chip.VodovozColorChip
 import com.vodovoz.app.design_system.model.OrderProductUi
 import com.vodovoz.app.feature.cart.model.ProductRestrictionUi
 
@@ -43,7 +45,7 @@ fun OrderProductCard(
             .fillMaxWidth()
             .clickable(
                 onClick = {
-                    if (product.isShowcaseProduct) {
+                    if (product.isShowcaseProduct && product.catalogQuantity > 1) {
                         onClick(product)
                     }
                 },
@@ -51,7 +53,7 @@ fun OrderProductCard(
                 indication = null
             )
     ) {
-        Box{
+        Box {
             Image(
                 painter = rememberAsyncImagePainter(model = product.image),
                 contentDescription = null,
@@ -59,7 +61,14 @@ fun OrderProductCard(
                     .size(76.dp)
                     .alpha(if (product.catalogQuantity < 1) 0.5f else 1f)
             )
-            //TODO - mb put labels
+
+            if (product.quantity > 1) {
+                VodovozColorChip(
+                    modifier = Modifier.align(Alignment.BottomEnd),
+                    color = MaterialTheme.colorScheme.secondary,
+                    text = stringResource(id = R.string.quanitity_x, product.quantity)
+                )
+            }
         }
         Column(
             modifier = Modifier
@@ -108,20 +117,19 @@ fun OrderProductCard(
                         style = ExtendedTheme.typography.labelSmallVariant
                     )
                 }
-
-                if (product.catalogQuantity < 1) {
-                    Text(
-                        text = stringResource(R.string.product_end),
-                        color = MaterialTheme.colorScheme.error,
-                        style = ExtendedTheme.typography.labelSmallVariant
-                    )
-                }
-
             } else {
                 Text(
                     text = presentLabel.title,
                     color = presentLabel.color,
                     style = MaterialTheme.typography.bodySmall
+                )
+            }
+
+            if (product.catalogQuantity < 1) {
+                Text(
+                    text = stringResource(R.string.product_end),
+                    color = MaterialTheme.colorScheme.error,
+                    style = ExtendedTheme.typography.labelSmallVariant
                 )
             }
 

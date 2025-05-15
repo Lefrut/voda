@@ -54,6 +54,8 @@ fun VodovozTextField(
     onFieldChange: (currentField: FieldUi, newField: FieldUi) -> Unit,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     onDone: KeyboardActionScope.() -> Unit = {},
+    maxLines: Int = 1,
+    minLines: Int = 1,
 ) {
     val interactionSource = remember {
         MutableInteractionSource()
@@ -89,9 +91,8 @@ fun VodovozTextField(
         readOnly = field.readOnly,
         label = field.label,
         hint = field.hint,
-        singleLine = !isMessage,
-        maxLines = if (isMessage) 3 else 1,
-        minLines = if (isMessage) 2 else 1,
+        maxLines = if (isMessage) 3 else maxLines,
+        minLines = if (isMessage) 2 else minLines,
         supportingText = field.supportingText,
         visualTransformation = visualTransformation,
         trailingIcon = {
@@ -127,7 +128,7 @@ private fun VodovozTextField(
     visualTransformation: VisualTransformation = VisualTransformation.None,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     keyboardActions: KeyboardActions = KeyboardActions.Default,
-    singleLine: Boolean = true,
+    singleLine: Boolean = false,
     maxLines: Int = if (singleLine) 1 else Int.MAX_VALUE,
     minLines: Int = 1,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
@@ -250,9 +251,8 @@ fun VodovozTextField(
     visualTransformation: VisualTransformation = VisualTransformation.None,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     keyboardActions: KeyboardActions = KeyboardActions.Default,
-    singleLine: Boolean = true,
-    maxLines: Int = if (singleLine) 1 else Int.MAX_VALUE,
     minLines: Int = 1,
+    maxLines: Int = minLines,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
 ) {
     var textFieldValueState by rememberSaveable(stateSaver = TextFieldValue.Saver) {
@@ -289,7 +289,7 @@ fun VodovozTextField(
         modifier = modifier,
         value = textFieldValue,
         onValueChange = onValueChange@{ newTextFieldValueState ->
-            if(isDate) return@onValueChange
+            if (isDate) return@onValueChange
 
             val newText =
                 if (isPhone) formatRussianPhoneNumber(newTextFieldValueState.text) else newTextFieldValueState.text
@@ -320,7 +320,6 @@ fun VodovozTextField(
         keyboardActions = keyboardActions,
         keyboardOptions = keyboardOptions,
         isError = isError,
-        singleLine = singleLine,
         interactionSource = interactionSource,
         trailingIcon = trailingIcon,
         visualTransformation = visualTransformation,

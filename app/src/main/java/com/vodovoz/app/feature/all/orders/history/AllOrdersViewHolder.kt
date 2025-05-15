@@ -1,4 +1,4 @@
-package com.vodovoz.app.feature.all.orders
+package com.vodovoz.app.feature.all.orders.history
 
 import android.os.Parcelable
 import android.view.View

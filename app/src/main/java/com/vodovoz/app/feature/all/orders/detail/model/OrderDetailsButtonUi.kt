@@ -1,4 +1,4 @@
-package com.vodovoz.app.domain.general.model.order.composables
+package com.vodovoz.app.feature.all.orders.detail.model
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color

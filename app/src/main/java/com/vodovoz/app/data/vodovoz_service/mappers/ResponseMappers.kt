@@ -55,23 +55,39 @@ inline fun <reified T, R> executeRequest(
         val adapter = moshiWithJsonAdapter.adapter<T>(type)
 
         val stringBody = (response.body() as? String) ?: ""
-        val body = kotlin.runCatching { adapter.fromJson(stringBody) }.getOrNull()
+        val bodyResult = kotlin.runCatching { adapter.fromJson(stringBody) }
+        val body = bodyResult.getOrNull()
+        val responseCode = response.code()
 
+        bodyResult.onSuccess {
+            if (body != null && responseCode == 200) {
+                val result = kotlin.runCatching {
+                    mapper(body)
+                }
+                if (result.isFailure) {
+                    emit(onFail(Response.error(1100, stringBody.jsonToResponseBody())))
+                } else {
+                    debugLog { result.onFailure { t -> t.toString() + t.stackTraceToString() } }
 
-        if (body != null && response.code() == 200) {
-            val result = kotlin.runCatching {
-                mapper(body)
-            }
-            if (result.isFailure) {
-                emit(onFail(Response.error(1100, stringBody.jsonToResponseBody())))
+                    emit(result)
+                }
             } else {
-                emit(result)
+                emit(onFail(Response.error(responseCode.takeIf { it != 200 } ?: 1100,
+                    stringBody.jsonToResponseBody())))
             }
-        } else {
-            emit(onFail(Response.error(response.code(), stringBody.jsonToResponseBody())))
+        }.onFailure {
+            debugLog {
+                bodyResult.onFailure { t ->
+                    t.toString() + t.stackTraceToString()
+                }
+            }
+
+            emit(onFail(Response.error(responseCode.takeIf { it != 200 } ?: 1100, stringBody.jsonToResponseBody())))
         }
     }.catchResult().take(1).onEach { result ->
-        result.onFailure { throwable -> debugLog { throwable.stackTraceToString() } }
+        result.onFailure { t ->
+            debugLog { t.stackTraceToString() }
+        }
     }.flowOn(Dispatchers.IO)
 }
 

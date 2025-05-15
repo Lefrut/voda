@@ -49,6 +49,8 @@ import com.vodovoz.app.domain.general.model.login.RequestCodeModel
 import com.vodovoz.app.domain.general.model.login.UserAuthInfoModel
 import com.vodovoz.app.domain.general.model.order.OrderDetailsModel
 import com.vodovoz.app.domain.general.model.order.OrderQuestionDetailsModel
+import com.vodovoz.app.domain.general.model.order.OrdersHistoryDetailsModel
+import com.vodovoz.app.domain.general.model.order.OrdersHistoryItemModel
 import com.vodovoz.app.domain.general.model.service.AllServicesDetailsModel
 import com.vodovoz.app.domain.general.model.service.ServiceDetailsModel
 import com.vodovoz.app.feature.preorder.model.FieldUi
@@ -56,6 +58,10 @@ import kotlinx.coroutines.flow.Flow
 import java.io.File
 
 interface VodovozServiceRepository {
+
+    fun getOrdersHistoryDetails(): Flow<Result<OrdersHistoryDetailsModel>>
+
+    fun getOrdersHistoryItemsPaged(statuses: String, searchQuery: String): Flow<PagingData<OrdersHistoryItemModel>>
 
     fun getWaitFeedbackProductsTitle(): Flow<Result<String>>
 
@@ -91,6 +97,8 @@ interface VodovozServiceRepository {
     fun sendQuestionnairesAnswers(who: String, answers: String): Flow<Result<VodovozPlaceholderModel>>
 
     fun getCancelOrderDetails(orderId: Long): Flow<Result<CancelOrderDetailsModel>>
+
+    fun cancelOrder(orderId: Long, params: Map<String, String>): Flow<Result<String>>
 
     fun sendOrderQuestion(
         orderId: Long,

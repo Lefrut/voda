@@ -9,7 +9,7 @@ data class ZAKAZ_DTO(
     @Json(name = "BORDERCOLOR")
     val BORDERCOLOR: String?,
     @Json(name = "IDZAKAZ")
-    val IDZAKAZ: Int?,
+    val IDZAKAZ: Long?,
     @Json(name = "OPISANIE")
     val OPISANIE: String?,
     @Json(name = "PRICE")

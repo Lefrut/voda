@@ -145,8 +145,8 @@ fun NavController.navigateToOrdersHistory() {
     navigate(R.id.allOrdersFragment, Bundle.EMPTY, SlideNavOptions)
 }
 
-fun NavController.navigateToOrderDetails(orderId: Int) {
-    navigate(R.id.orderDetailsFragment, bundleOf("orderId" to orderId.toLong()))
+fun NavController.navigateToOrderDetails(orderId: Long) {
+    navigate(R.id.orderDetailsFragment, bundleOf("orderId" to orderId))
 }
 
 fun NavController.navigateToProductImages(image: String, images: List<String>) {

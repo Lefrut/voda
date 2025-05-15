@@ -5,7 +5,8 @@ import com.vodovoz.app.domain.general.model.ColorfulButtonModel
 data class OrderDetailsModel(
     val title: String,
     val subtitle: String,
-    val currentStatus: OrderStatusModel,
+    val header: String,
+    val currentStatus: List<OrderStatusModel>,
     val statuses: List<OrderStatusModel>,
     val topButtons: List<OrderDetailsButtonModel>,
     val bottomButtons: List<ColorfulButtonModel>,

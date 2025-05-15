@@ -58,8 +58,8 @@ fun OrderDetailsTopBar(
             if (subtitle.isNotBlank()) {
                 Text(
                     text = subtitle,
-                    color = MaterialTheme.colorScheme.onBackground,
-                    style = MaterialTheme.typography.headlineSmall
+                    color = MaterialTheme.colorScheme.surfaceTint,
+                    style = MaterialTheme.typography.labelSmall
                 )
             }
         }

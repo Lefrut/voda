@@ -2,6 +2,7 @@ package com.vodovoz.app.feature.all.orders.detail
 
 import android.os.Bundle
 import android.view.View
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.ComposeView
@@ -16,6 +17,7 @@ import com.vodovoz.app.common.like.LikeManager
 import com.vodovoz.app.common.product.rating.RatingProductManager
 import com.vodovoz.app.core.navigation.navigateToCancelOrder
 import com.vodovoz.app.core.navigation.navigateToOrderQuestion
+import com.vodovoz.app.core.navigation.navigateToProductDetails
 import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.composables.placeholders.LoadingPlaceholder
 import com.vodovoz.app.design_system.composables.placeholders.NetworkErrorPlaceholder
@@ -43,6 +45,11 @@ class OrderDetailsFragment : Fragment() {
     @Inject
     lateinit var ratingProductManager: RatingProductManager
 
+    override fun onResume() {
+        super.onResume()
+        viewModel.fetchOrderDetails()
+    }
+
     override fun onCreateView(
         inflater: android.view.LayoutInflater,
         container: android.view.ViewGroup?,
@@ -56,7 +63,7 @@ class OrderDetailsFragment : Fragment() {
                     val pagingState by viewModel.observeUiState().collectAsStateWithLifecycle()
                     val viewState by rememberUpdatedState(newValue = pagingState.data)
 
-                    when(viewState.uiState){
+                    when (viewState.uiState) {
                         OrderDetailsFlowViewModel.OrderDetailsUiState.Body -> {
                             OrderDetailsScreen(
                                 viewModel = viewModel,
@@ -64,11 +71,13 @@ class OrderDetailsFragment : Fragment() {
                             )
 
                         }
+
                         OrderDetailsFlowViewModel.OrderDetailsUiState.Error -> {
                             NetworkErrorPlaceholder {
                                 viewModel.fetchOrderDetails()
                             }
                         }
+
                         OrderDetailsFlowViewModel.OrderDetailsUiState.Loading -> {
                             LoadingPlaceholder()
                         }
@@ -79,6 +88,10 @@ class OrderDetailsFragment : Fragment() {
                         AboutOrderBottomSheet(data = currentAboutOrder) {
                             viewModel.closeAboutOrderBottomSheet()
                         }
+                    }
+
+                    LifecycleEffect {
+                        viewModel.listenFavorites()
                     }
 
 
@@ -99,6 +112,10 @@ class OrderDetailsFragment : Fragment() {
 
                                 is OrderDetailsFlowViewModel.OrderDetailsEvent.GoToCancelOrder -> {
                                     findNavController().navigateToCancelOrder(event.orderId)
+                                }
+
+                                is OrderDetailsFlowViewModel.OrderDetailsEvent.GoToProductDetails -> {
+                                    findNavController().navigateToProductDetails(event.productId)
                                 }
                             }
                         }

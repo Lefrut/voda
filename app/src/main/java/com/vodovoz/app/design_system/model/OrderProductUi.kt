@@ -26,12 +26,18 @@ data class OrderProductUi(
     val restrictions: ProductRestrictionUi,
 )
 
+
 @Immutable
 data class OrderProductPresentUi(
     val title: String,
     val color: Color,
 )
 
+fun List<OrderProductUi>.withUpdatedFavorites(favorites: Map<Long, Boolean>): List<OrderProductUi> {
+    return map { product ->
+        product.copy(isFavorite = favorites[product.id] ?: product.isFavorite)
+    }
+}
 
 fun List<OrderProductModel>.mapToUi(): List<OrderProductUi> {
     return map { it.toUi() }

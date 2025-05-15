@@ -10,6 +10,8 @@ data class POLE_DTO(
     val TEXT: String?,
     @Json(name = "NAME")
     val NAME: String?,
+    @Json(name = "ID")
+    val ID: String?,
     @Json(name = "CODE")
     val CODE: String?,
     @Json(name = "OBYZATELNO")

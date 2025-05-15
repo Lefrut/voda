@@ -22,11 +22,11 @@ import com.vodovoz.app.data.model.common.ResponseEntity
 import com.vodovoz.app.design_system.model.ColorfulButtonUi
 import com.vodovoz.app.design_system.model.OrderProductUi
 import com.vodovoz.app.design_system.model.mapToUi
-import com.vodovoz.app.domain.general.model.order.composables.OrderDetailsButtonUi
-import com.vodovoz.app.domain.general.model.order.composables.mapToUi
+import com.vodovoz.app.design_system.model.withUpdatedFavorites
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.feature.all.orders.detail.composables.AboutOrderPopupWindowUi
 import com.vodovoz.app.feature.all.orders.detail.model.DriverPointsEntity
+import com.vodovoz.app.feature.all.orders.detail.model.OrderDetailsButtonUi
 import com.vodovoz.app.feature.all.orders.detail.model.OrderDetailsSummaryUi
 import com.vodovoz.app.feature.all.orders.detail.model.OrderStatusUi
 import com.vodovoz.app.feature.all.orders.detail.model.mapToUi
@@ -37,12 +37,17 @@ import com.vodovoz.app.util.extensions.debugLog
 import com.vodovoz.app.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -66,9 +71,16 @@ class OrderDetailsFlowViewModel @Inject constructor(
     private val cancelResultListener = MutableSharedFlow<String>()
     fun observeCancelResult() = cancelResultListener.asSharedFlow()
 
-    init {
-        fetchOrderDetails()
-    }
+    @OptIn(ExperimentalCoroutinesApi::class)
+    suspend fun listenFavorites() =
+        uiStateListener.map { it.data.products }.combine(likeManager.observeLikes()) { _, p2 ->
+            p2
+        }.mapLatest { favorites ->
+            uiStateListener.updateData { s ->
+                s.copy(products = s.products.withUpdatedFavorites(favorites))
+            }
+        }.collect()
+
 
     fun navigateBack() = viewModelScope.launch {
         eventListener.emit(OrderDetailsEvent.GoBack)
@@ -79,8 +91,10 @@ class OrderDetailsFlowViewModel @Inject constructor(
     }
 
     fun fetchOrderDetails() = viewModelScope.launch {
-        uiStateListener.updateData { s ->
-            s.copy(uiState = OrderDetailsUiState.Loading)
+        if(dataState.uiState !is OrderDetailsUiState.Body){
+            uiStateListener.updateData { s ->
+                s.copy(uiState = OrderDetailsUiState.Loading)
+            }
         }
 
         val orderDetailsResult =
@@ -88,17 +102,16 @@ class OrderDetailsFlowViewModel @Inject constructor(
 
         orderDetailsResult.onSuccess { orderDetails ->
 
-            uiStateListener.updateData {
-                it.copy(
+            uiStateListener.updateData { s ->
+                s.copy(
                     topButtons = orderDetails.topButtons.mapToUi(),
                     bottomButtons = orderDetails.bottomButtons.mapToUi(),
                     title = orderDetails.title,
                     subtitle = orderDetails.subtitle,
-                    //todo - put of backend
-                    header = "",
+                    header = orderDetails.header,
                     orderSummary = orderDetails.orderSummary.toUi(),
                     statuses = orderDetails.statuses.mapToUi(),
-                    currentStatus = orderDetails.currentStatus.toUi(),
+                    currentStatuses = orderDetails.currentStatus.mapToUi(),
                     productsTitle = orderDetails.productsTitle,
                     products = orderDetails.products.mapToUi(),
                     uiState = OrderDetailsUiState.Body
@@ -335,14 +348,14 @@ class OrderDetailsFlowViewModel @Inject constructor(
     }
 
     fun changeProductFavorite(orderProduct: OrderProductUi) = viewModelScope.launch {
-
+        likeManager.changeFavorite(orderProduct.id, !orderProduct.isFavorite)
     }
 
     fun navigateToProductDetails(orderProduct: OrderProductUi) = viewModelScope.launch {
-
+        eventListener.emit(OrderDetailsEvent.GoToProductDetails(orderProduct.id))
     }
 
-    fun showAboutOrderBottomSheet(aboutOrderBottomSheet: AboutOrderPopupWindowUi) =
+    private fun showAboutOrderBottomSheet(aboutOrderBottomSheet: AboutOrderPopupWindowUi) =
         viewModelScope.launch {
             uiStateListener.updateData { s ->
                 s.copy(
@@ -370,7 +383,7 @@ class OrderDetailsFlowViewModel @Inject constructor(
         val topButtons: List<OrderDetailsButtonUi> = emptyList(),
         val bottomButtons: List<ColorfulButtonUi> = emptyList(),
         val orderSummary: OrderDetailsSummaryUi = OrderDetailsSummaryUi.Empty,
-        val currentStatus: OrderStatusUi = OrderStatusUi.Empty,
+        val currentStatuses: List<OrderStatusUi> = emptyList(),
         val statuses: List<OrderStatusUi> = emptyList(),
         val productsTitle: String = "",
         val products: List<OrderProductUi> = emptyList(),
@@ -385,8 +398,10 @@ class OrderDetailsFlowViewModel @Inject constructor(
         data class CopyText(val text: String) : OrderDetailsEvent()
         data class GoToOrderQuestion(val orderId: Long) : OrderDetailsEvent()
         data class GoToCancelOrder(val orderId: Long) : OrderDetailsEvent()
+        data class GoToProductDetails(val productId: Long) : OrderDetailsEvent()
     }
 
+    @Immutable
     sealed interface OrderDetailsUiState {
         data object Loading : OrderDetailsUiState
         data object Error : OrderDetailsUiState

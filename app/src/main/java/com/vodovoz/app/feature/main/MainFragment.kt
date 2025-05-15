@@ -11,7 +11,6 @@ import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
-import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat.CONSUMED
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
@@ -64,7 +63,7 @@ class MainFragment : BaseFragment() {
             Snackbar.LENGTH_INDEFINITE
         )
         snackbar.setAction("Обновить") { _ ->
-//                    appUpdateController.completeUpdate()
+            appUpdateController.completeUpdate()
         }
         snackbar.setDuration(5000)
         snackbar.setActionTextColor(
@@ -105,13 +104,12 @@ class MainFragment : BaseFragment() {
 
     private fun checkForUpdate() {
         appUpdateController.checkForUpdate(registerForActivityResult<IntentSenderRequest, ActivityResult>(
-            ActivityResultContracts.StartIntentSenderForResult(),
-            object : ActivityResultCallback<ActivityResult?> {
+            ActivityResultContracts.StartIntentSenderForResult(), object : ActivityResultCallback<ActivityResult?> {
 
                 override fun onActivityResult(result: ActivityResult?) {
                     if (result == null) return
                     if (result.resultCode != Activity.RESULT_OK) {
-                        accountManager.reportError("Update flow failed! Result code: " + result.resultCode)
+                        accountManager.reportError("Update flow failed! Result code: ${result.resultCode}")
                     } else {
                         accountManager.reportEvent("Success update!")
                     }
@@ -220,9 +218,7 @@ class MainFragment : BaseFragment() {
         appUpdateController.onResumeAction()
     }
 
-    /**
-     * Called on first creation and when restoring state.
-     */
+
     private fun setupBottomNavigationBar() = lifecycleScope.launch {
         viewModel.isBottomBarInitialized = true
 

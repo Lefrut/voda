@@ -23,7 +23,7 @@ import com.vodovoz.app.design_system.ExtendedTheme
 import com.vodovoz.app.design_system.composables.button.VodovozButton
 import com.vodovoz.app.design_system.composables.button.VodovozButtonSmall
 import com.vodovoz.app.design_system.composables.button.VodovozOutlineButton
-import com.vodovoz.app.domain.general.model.order.composables.OrderDetailsButtonUi
+import com.vodovoz.app.feature.all.orders.detail.model.OrderDetailsButtonUi
 
 @Suppress("NonSkippableComposable")
 @Composable

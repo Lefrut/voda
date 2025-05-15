@@ -4,7 +4,6 @@ import androidx.annotation.Keep
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
-@JsonClass(generateAdapter = true)
 @Keep
 data class VodovozResponseDTO<T>(
     @Json(name = "status")
@@ -15,7 +14,6 @@ data class VodovozResponseDTO<T>(
     val data: T?,
 )
 
-@JsonClass(generateAdapter = true)
 @Keep
 data class VodovozPlaceholderDTO(
     @Json(name = "TITLE") val title: String?,

@@ -31,8 +31,9 @@ fun OrderDetailsScreen(
     ) { padding ->
         OrderDetailsBody(
             modifier = Modifier.padding(padding),
+            header = viewState.header,
             statuses = viewState.statuses,
-            currentStatus = viewState.currentStatus,
+            currentStatuses = viewState.currentStatuses,
             topButtons = viewState.topButtons,
             productsTitle = viewState.productsTitle,
             products = viewState.products,

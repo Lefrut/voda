@@ -38,7 +38,7 @@ import com.vodovoz.app.domain.general.model.toUi
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.feature.home.model.MenuItemTypeUi
 import com.vodovoz.app.feature.home.model.MenuItemUi
-import com.vodovoz.app.feature.home.model.OrderUi
+import com.vodovoz.app.feature.home.model.HomeOrderUi
 import com.vodovoz.app.feature.home.model.OrderWithMenuUi
 import com.vodovoz.app.feature.home.model.PopularCategoryUi
 import com.vodovoz.app.feature.home.model.UnratedProductUi
@@ -724,7 +724,7 @@ class HomeFlowViewModel @Inject constructor(
     }
 
 
-    fun navigateToOrderDetails(order: OrderUi) = viewModelScope.launch {
+    fun navigateToOrderDetails(order: HomeOrderUi) = viewModelScope.launch {
         eventListener.emit(HomeEvents.GoToOrderDetails(order.orderId))
     }
 
@@ -738,8 +738,7 @@ class HomeFlowViewModel @Inject constructor(
             )
 
             MenuItemTypeUi.None -> {
-                //todo - show toast
-                TODO()
+                return@launch
             }
         }
         eventListener.emit(event)
@@ -783,7 +782,7 @@ class HomeFlowViewModel @Inject constructor(
         data class GoToCategoryProductList(val categoryId: Long) : HomeEvents()
         data class ActivateDataAllAction(val action: DataAllAction) : HomeEvents()
         data class ActivateVodovozAction(val action: VodovozAction) : HomeEvents()
-        data class GoToOrderDetails(val orderId: Int) : HomeEvents()
+        data class GoToOrderDetails(val orderId: Long) : HomeEvents()
         data class GoToWebView(val url: String, val title: String) : HomeEvents()
         data class GoToProductAnalogs(val productId: Long) : HomeEvents()
     }

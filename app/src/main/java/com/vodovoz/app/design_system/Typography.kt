@@ -191,9 +191,8 @@ val vodovozTypography = Typography(
             includeFontPadding = false
         ),
         fontWeight = FontWeight.Normal
-    ),
-
     )
+)
 
 val extendedTypography = ExtendedTypography(
     buttonMedium = TextStyle(
