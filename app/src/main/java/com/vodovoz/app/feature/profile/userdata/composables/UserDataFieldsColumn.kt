@@ -56,7 +56,8 @@ fun UserDataFieldsColumn(
                     hint = field.hint,
                     visualTransformation = if (field.keyboardType == KeyboardType.Phone) PhoneNumberVisualTransformation()
                     else VisualTransformation.None,
-                    singleLine = true,
+                    maxLines = 1,
+                    minLines = 1
                 )
             }
         }

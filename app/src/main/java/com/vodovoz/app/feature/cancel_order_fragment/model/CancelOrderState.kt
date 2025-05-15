@@ -2,6 +2,7 @@ package com.vodovoz.app.feature.cancel_order_fragment.model
 
 import androidx.compose.runtime.Immutable
 import com.vodovoz.app.design_system.model.ColorfulButtonUi
+import com.vodovoz.app.feature.preorder.model.FieldUi
 
 @Immutable
 data class CancelOrderState(
@@ -9,7 +10,9 @@ data class CancelOrderState(
     val title: String = "",
     val warningText: String = "",
     val description: String = "",
+    val checkboxesGroupId: String = "",
     val checkboxesNames: List<String> = emptyList(),
     val currentCheckboxName: String = "",
     val button: ColorfulButtonUi = ColorfulButtonUi.Empty,
+    val commentField: FieldUi? = null
 )

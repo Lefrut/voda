@@ -14,6 +14,11 @@ import com.vodovoz.app.data.vodovoz_service.model.order_details.ORDER_DETAILS_TO
 import com.vodovoz.app.data.vodovoz_service.model.order_details.ORDER_PRODUCT_PODAROK_DTO
 import com.vodovoz.app.data.vodovoz_service.model.order_details.ORDER_STATUS_DTO
 import com.vodovoz.app.data.vodovoz_service.model.order_details.OrderDetailsDTO
+import com.vodovoz.app.data.vodovoz_service.model.order_history.FILTER_STATYS_DTO
+import com.vodovoz.app.data.vodovoz_service.model.order_history.ORDERS_HISTORY_ITEM_DTO
+import com.vodovoz.app.data.vodovoz_service.model.order_history.ORDERS_HISTORY_KNOPKA_DTO
+import com.vodovoz.app.data.vodovoz_service.model.order_history.ORDERS_HISTORY_PRODUCT_DTO
+import com.vodovoz.app.data.vodovoz_service.model.order_history.OrdersHistoryDetailsDTO
 import com.vodovoz.app.domain.general.model.CancelOrderDetailsModel
 import com.vodovoz.app.domain.general.model.ColorfulButtonModel
 import com.vodovoz.app.domain.general.model.PaymentInfoModel
@@ -24,17 +29,23 @@ import com.vodovoz.app.domain.general.model.order.AboutOrderPopupWindowModel
 import com.vodovoz.app.domain.general.model.order.OrderDetailsButtonModel
 import com.vodovoz.app.domain.general.model.order.OrderDetailsModel
 import com.vodovoz.app.domain.general.model.order.OrderDetailsSummaryModel
+import com.vodovoz.app.domain.general.model.order.OrderFilterModel
 import com.vodovoz.app.domain.general.model.order.OrderProductModel
 import com.vodovoz.app.domain.general.model.order.OrderProductPresentModel
 import com.vodovoz.app.domain.general.model.order.OrderQuestionDetailsModel
 import com.vodovoz.app.domain.general.model.order.OrderStatusModel
+import com.vodovoz.app.domain.general.model.order.OrdersHistoryButtonModel
+import com.vodovoz.app.domain.general.model.order.OrdersHistoryDetailsModel
+import com.vodovoz.app.domain.general.model.order.OrdersHistoryItemModel
+import com.vodovoz.app.domain.general.model.order.OrdersHistoryProductModel
 
 
-fun OrderPlaceholderDTO.toDomain(): BuyCertificateModel{
+fun OrderPlaceholderDTO.toDomain(): BuyCertificateModel {
 
     return BuyCertificateModel(
         placeholder = toVodovozPlaceholder(),
-        payment = button?.oplate?.toDomain() ?: throw IllegalArgumentException("Payment cannot be null")
+        payment = button?.oplate?.toDomain()
+            ?: throw IllegalArgumentException("Payment cannot be null")
     )
 }
 
@@ -67,10 +78,10 @@ fun OrderDetailsDTO.toDomain(): OrderDetailsModel {
     return OrderDetailsModel(
         title = TITLE?.ZAGOLOVOK ?: "",
         subtitle = TITLE?.OPIS ?: "",
-        //todo - put actual status
-        currentStatus = OrderStatusModel("Статус"),
+        currentStatus = BLOCK?.STATUS?.mapToDomain() ?: emptyList(),
+        header = BLOCK?.GLAV ?: "",
         statuses = BLOCK?.STATUSY?.mapToDomain() ?: emptyList(),
-        topButtons = this.BLOCK?.KNOPKI?.mapToDomain() ?: emptyList(),
+        topButtons = BLOCK?.KNOPKI?.mapToDomain() ?: emptyList(),
         products = TOVARY?.TOVAR?.mapToDomain() ?: emptyList(),
         productsTitle = TOVARY?.TITLE ?: "",
         bottomButtons = KNOPKI_NIZ?.mapToDomain() ?: emptyList(),
@@ -103,7 +114,8 @@ fun CancelOrderDetailsDTO.toDomain(): CancelOrderDetailsModel {
         title = TITLE ?: "",
         description = OPISANIE ?: "",
         warningText = DOPOPISANIE ?: "",
-        checkboxesNames = STATYS?.ZNACHWNIYA?.mapNotNull { it.VALUE } ?: emptyList<String>(),
+        checkboxesNames = STATYS?.ZNACHWNIYA?.mapNotNull { it.VALUE } ?: emptyList(),
+        checkboxesGroupId = STATYS?.ZNACHWNIYA?.firstOrNull { it.GROUP_ID != null }?.GROUP_ID ?: "statys",
         field = SOOBSHENIE?.toDomain(),
         button = KNOPKA?.toDomain()
             ?: throw IllegalArgumentException("CancelOrderDetails button can't be null")
@@ -145,9 +157,9 @@ fun ORDER_DETAILS_TOVAR_DTO.toDomain(): OrderProductModel? {
     )
 }
 
-fun ORDER_PRODUCT_PODAROK_DTO.toDomain(): OrderProductPresentModel {
+fun ORDER_PRODUCT_PODAROK_DTO.toDomain(): OrderProductPresentModel? {
     return OrderProductPresentModel(
-        title = TITLE ?: "",
+        title = TITLE ?: return null,
         color = COLOR ?: ""
     )
 }
@@ -194,5 +206,75 @@ fun List<ORDER_STATUS_DTO>.mapToDomain(): List<OrderStatusModel> {
 }
 
 fun ORDER_STATUS_DTO.toDomain(): OrderStatusModel? {
-    return OrderStatusModel(this.NAME ?: return null)
+    return OrderStatusModel(
+        name = NAME ?: return null,
+        background = BACKGROUND ?: "",
+        image = IMAGE?.toFullUrl() ?: "",
+        color = COLOR ?: ""
+    )
+}
+
+fun OrdersHistoryDetailsDTO.toDomain(): OrdersHistoryDetailsModel {
+    return OrdersHistoryDetailsModel(
+        title = TITLE ?: "",
+        filters = FILTERSTATYS?.mapNotNull { it.toDomain() } ?: emptyList(),
+        items = DANNYE?.mapToDomain()
+            ?: throw IllegalArgumentException("OrderHistory items can't be null")
+    )
+}
+
+
+@JvmName("mapToOrdersHistoryItemModelList")
+fun List<ORDERS_HISTORY_ITEM_DTO>.mapToDomain(): List<OrdersHistoryItemModel> {
+    return mapNotNull { it.toDomain() }.ifEmpty {
+        throw IllegalArgumentException("OrderHistory items can't be null")
+    }
+}
+
+fun ORDERS_HISTORY_ITEM_DTO.toDomain(): OrdersHistoryItemModel? {
+    return OrdersHistoryItemModel(
+        id = ID ?: return null,
+        date = DATE_INSERT?.toLocalDate(),
+        products = ITEMS?.mapToDomain() ?: emptyList(),
+        priceText = PRICE ?: "",
+        address = ADDRESS ?: "",
+        description = NAME ?: "",
+        status = STATUS?.toDomain(),
+        button = KNOPKA?.toDomain()
+    )
+}
+
+fun ORDERS_HISTORY_KNOPKA_DTO.toDomain(): OrdersHistoryButtonModel? {
+    return OrdersHistoryButtonModel(
+        id = ID ?: return null,
+        name = NAME ?: "",
+        color = COLOR_TEXT ?: "",
+        background = COLOR_BACKGROUND ?: "",
+        image = IMAGE?.toFullUrl() ?: "",
+        url = URL ?: "",
+        browserUrl = BRAYZER == "Y"
+    )
+}
+
+
+@JvmName("mapToOrdersHistoryProductModelList")
+fun List<ORDERS_HISTORY_PRODUCT_DTO>.mapToDomain(): List<OrdersHistoryProductModel> {
+    return mapNotNull { it.toDomain() }
+}
+
+fun ORDERS_HISTORY_PRODUCT_DTO.toDomain(): OrdersHistoryProductModel? {
+    return OrdersHistoryProductModel(
+        showcaseProduct = ACTIVE == "Y",
+        image = DETAIL_PICTURE?.toFullUrl() ?: return null,
+        id = ID ?: return null,
+        quantity = QUANTITY ?: 1
+    )
+}
+
+
+fun FILTER_STATYS_DTO.toDomain(): OrderFilterModel? {
+    return OrderFilterModel(
+        id = ID ?: return null,
+        name = NAME ?: return null
+    )
 }

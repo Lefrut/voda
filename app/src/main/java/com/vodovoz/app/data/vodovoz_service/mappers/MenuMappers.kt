@@ -6,7 +6,7 @@ import com.vodovoz.app.data.vodovoz_service.model.OrderMenuDTO
 import com.vodovoz.app.data.vodovoz_service.model.ZAKAZ_DTO
 import com.vodovoz.app.domain.general.model.MenuItemModel
 import com.vodovoz.app.domain.general.model.MenuItemTypeModel
-import com.vodovoz.app.domain.general.model.OrderModel
+import com.vodovoz.app.domain.general.model.HomeOrderModel
 import com.vodovoz.app.domain.general.model.OrderWithMenuModel
 
 fun OrderMenuDTO.toDomain(): OrderWithMenuModel {
@@ -17,8 +17,8 @@ fun OrderMenuDTO.toDomain(): OrderWithMenuModel {
     )
 }
 
-fun ZAKAZ_DTO.toDomain(): OrderModel? {
-    return OrderModel(
+fun ZAKAZ_DTO.toDomain(): HomeOrderModel? {
+    return HomeOrderModel(
         orderId = this.IDZAKAZ ?: return null,
         title = this.ZAGALOVOK ?: return null,
         description = this.OPISANIE ?: return null,

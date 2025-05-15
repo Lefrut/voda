@@ -39,7 +39,9 @@ fun AboutOrderBottomSheet(data: AboutOrderPopupWindowUi, onDismissRequest: () ->
     ) {
         Column(modifier = Modifier.padding(top = 20.dp)) {
             data.items.forEach { item ->
-                AboutOrderItemCard(item = item)
+                if(item.name.isNotEmpty() || item.description.isNotEmpty()){
+                    AboutOrderItemCard(item = item)
+                }
             }
         }
     }

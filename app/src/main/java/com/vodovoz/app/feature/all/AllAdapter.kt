@@ -8,7 +8,7 @@ import com.vodovoz.app.common.content.itemadapter.ItemAdapter
 import com.vodovoz.app.common.content.itemadapter.ItemViewHolder
 import com.vodovoz.app.common.content.itemadapter.bottomitem.BottomProgressViewHolder
 import com.vodovoz.app.feature.all.brands.AllBrandsViewHolder
-import com.vodovoz.app.feature.all.orders.AllOrdersViewHolder
+import com.vodovoz.app.feature.all.orders.history.AllOrdersViewHolder
 import com.vodovoz.app.feature.all.promotions.AllPromotionsViewHolder
 import com.vodovoz.app.ui.model.BrandUI
 import com.vodovoz.app.ui.model.OrderUI.Companion.ORDER_VIEW_TYPE

@@ -24,6 +24,8 @@ import com.vodovoz.app.data.vodovoz_service.model.VodovozErrorResponseDTO
 import com.vodovoz.app.data.vodovoz_service.model.VodovozPlaceholderDTO
 import com.vodovoz.app.data.vodovoz_service.model.VodovozResponseDTO
 import com.vodovoz.app.data.vodovoz_service.model.WaitFeedbackProductsDTO
+import com.vodovoz.app.data.vodovoz_service.model.order_details.OrderDetailsDTO
+import com.vodovoz.app.data.vodovoz_service.model.order_history.OrdersHistoryDetailsDTO
 import com.vodovoz.app.domain.general.AllBottlesDetailsModel
 import com.vodovoz.app.domain.general.VodovozPagingSource
 import com.vodovoz.app.domain.general.model.BannerModel
@@ -79,6 +81,8 @@ import com.vodovoz.app.domain.general.model.login.RequestCodeModel
 import com.vodovoz.app.domain.general.model.login.UserAuthInfoModel
 import com.vodovoz.app.domain.general.model.order.OrderDetailsModel
 import com.vodovoz.app.domain.general.model.order.OrderQuestionDetailsModel
+import com.vodovoz.app.domain.general.model.order.OrdersHistoryDetailsModel
+import com.vodovoz.app.domain.general.model.order.OrdersHistoryItemModel
 import com.vodovoz.app.domain.general.model.service.AllServicesDetailsModel
 import com.vodovoz.app.domain.general.model.service.ServiceDetailsModel
 import com.vodovoz.app.domain.general.model.toQueries
@@ -106,6 +110,52 @@ class VodovozServiceRepositoryImpl @Inject constructor(
     private val cookieManager: CookieManager,
     private val trackingManager: TrackingManager,
 ) : VodovozServiceRepository {
+
+    override fun getOrdersHistoryDetails(): Flow<Result<OrdersHistoryDetailsModel>> {
+        return executeRequest(
+            request = {
+                vodovozService.getOrdersHistoryDetails(
+                    userId = accountManager.fetchAccountId(),
+                )
+            },
+            mapper = {
+                it.data!!.toDomain()
+            },
+            onFail = { response ->
+                val placeholder =
+                    moshi.fromJson<VodovozResponseDTO<VodovozPlaceholderDTO>>(
+                        response.stringBody()
+                    ).data!!.toDomain()
+
+                throw EmptyResultException(placeholder = placeholder)
+            }
+        )
+    }
+
+    override fun getOrdersHistoryItemsPaged(
+        statuses: String,
+        searchQuery: String,
+    ): Flow<PagingData<OrdersHistoryItemModel>> {
+        return Pager(
+            config = PagingConfig(pageSize = 5),
+            pagingSourceFactory = {
+                VodovozPagingSource(
+                    clazz = OrdersHistoryDetailsDTO::class,
+                    request = { page, _ ->
+                        vodovozService.getOrdersHistoryDetails(
+                            userId = accountManager.fetchAccountId(),
+                            page = page,
+                            statuses = if (searchQuery.isNotBlank()) null else statuses,
+                            search = searchQuery.takeIf { it.isNotBlank() }
+                        )
+                    },
+                    mapper = { response ->
+                        response.data?.toDomain()!!.items
+                    }
+                )
+            }
+        ).flow
+    }
 
     override fun getWaitFeedbackProductsTitle(): Flow<Result<String>> {
         return executeRequest(
@@ -319,6 +369,24 @@ class VodovozServiceRepositoryImpl @Inject constructor(
         )
     }
 
+    override fun cancelOrder(
+        orderId: Long,
+        params: Map<String, String>,
+    ): Flow<Result<String>> {
+        return executeRequest(
+            request = {
+                vodovozService.cancelOrder(
+                    userId = accountManager.fetchAccountId(),
+                    orderId = orderId,
+                    queries = params
+                )
+            },
+            mapper = {
+                it.data ?: ""
+            }
+        )
+    }
+
     override fun sendOrderQuestion(
         orderId: Long,
         fields: List<FieldModel>,
@@ -347,7 +415,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
     }
 
     override fun getOrderDetails(orderId: Long): Flow<Result<OrderDetailsModel>> {
-        return executeRequest(
+        return executeRequest<VodovozResponseDTO<OrderDetailsDTO>, OrderDetailsModel>(
             request = {
                 val userId = accountManager.fetchAccountId()
                 vodovozService.getOrderDetails(userId, orderId)

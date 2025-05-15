@@ -380,5 +380,7 @@
     <string name="cm">СМ</string>
     <string name="recover_password">Восстановление пароля</string>
 
+    <string name="quanitity_x">%dx</string>
+
 
 </resources>

@@ -24,6 +24,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -91,8 +92,8 @@ fun VodovozClosableChip(
         modifier = modifier
             .vodovozSurface(
                 border = if (selected) null else BorderStroke(
-                    1.dp,
-                    MaterialTheme.colorScheme.surfaceVariant
+                    width = 1.dp,
+                    color = MaterialTheme.colorScheme.surfaceVariant
                 ),
                 shape = MaterialTheme.shapes.small,
                 backgroundColor = if (selected) MaterialTheme.colorScheme.surfaceTint else MaterialTheme.colorScheme.surface,
@@ -136,14 +137,16 @@ fun VodovozColorChip(modifier: Modifier = Modifier, color: Color, text: String) 
     Box(
         modifier = modifier
             .clip(MaterialTheme.shapes.medium)
-            .background(color),
+            .background(color)
+            .widthIn(39.dp),
         contentAlignment = Alignment.Center
     ) {
         Text(
             text = text,
             modifier = Modifier.padding(horizontal = 8.dp),
             style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.background
+            color = MaterialTheme.colorScheme.background,
+            textAlign = TextAlign.Center
         )
     }
 }

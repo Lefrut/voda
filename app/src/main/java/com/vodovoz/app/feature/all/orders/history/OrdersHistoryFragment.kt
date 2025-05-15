@@ -1,4 +1,4 @@
-package com.vodovoz.app.feature.all.orders
+package com.vodovoz.app.feature.all.orders.history
 
 import android.os.Bundle
 import android.view.View
@@ -22,7 +22,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class OrdersHistoryFragment : BaseFragment() {
+class OrdersHistoryFragment1 : BaseFragment() {
 
     companion object {
         const val FILTERS_BUNDLE = "FILTERS_BUNDLE"
@@ -153,6 +153,10 @@ class OrdersHistoryFragment : BaseFragment() {
                                     .setNegativeButton("Нет") { dialog, _ -> dialog.dismiss() }
                                     .show()
                             }
+                            else -> {
+
+                            }
+
                         }
                     }
             }

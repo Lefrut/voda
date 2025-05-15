@@ -1,12 +1,12 @@
 package com.vodovoz.app.domain.general.model
 
 data class OrderWithMenuModel(
-    val order: OrderModel? = null,
+    val order: HomeOrderModel? = null,
     val menuItems: List<MenuItemModel>,
 )
 
-data class OrderModel(
-    val orderId: Int,
+data class HomeOrderModel(
+    val orderId: Long,
     val title: String,
     val description: String,
     val borderColorHex: String,

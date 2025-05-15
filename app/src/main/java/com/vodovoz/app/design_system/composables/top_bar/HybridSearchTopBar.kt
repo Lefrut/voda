@@ -5,6 +5,7 @@ import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -39,6 +40,10 @@ fun HybridSearchTopBar(
     onSearchQueryChange: (String) -> Unit,
     onNavigationClick: () -> Unit,
 ) {
+    val focusRequester = remember {
+        FocusRequester()
+    }
+
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -68,14 +73,11 @@ fun HybridSearchTopBar(
                     )
                 }) { targetState ->
                 if (targetState) {
-                    val focusRequester = remember {
-                        FocusRequester()
-                    }
-
                     BasicSearchField(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 16.dp)
+                            .focusable()
                             .focusRequester(focusRequester),
                         value = searchQuery,
                         onValueChange = { s -> onSearchQueryChange(s) },
@@ -98,6 +100,7 @@ fun HybridSearchTopBar(
                     LaunchedEffect(focusRequester) {
                         focusRequester.requestFocus()
                     }
+
                 } else {
                     Text(
                         modifier = Modifier
@@ -121,7 +124,6 @@ fun HybridSearchTopBar(
                 modifier = Modifier.clip(CircleShape),
                 painter = painterResource(id = if (!isSearchMode) R.drawable.icon_search else R.drawable.ic_clean),
                 tint = if (!isSearchMode) MaterialTheme.colorScheme.onBackground
-                    else if (searchQuery.isBlank()) Color.Transparent
                     else MaterialTheme.colorScheme.surfaceTint,
                 onClick = { onSearchModeChange(!isSearchMode) }
             )

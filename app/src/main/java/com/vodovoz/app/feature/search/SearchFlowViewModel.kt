@@ -135,7 +135,7 @@ class SearchFlowViewModel @Inject constructor(
     suspend fun listenSearchHistory() =
         uiStateListener.combine(searchManager.fetchSearchHistoryFlow()) { _, searchHistory ->
             searchHistory
-        }.collectLatest { searchHistory->
+        }.collectLatest { searchHistory ->
             uiStateListener.updateData { s ->
                 s.copy(
                     searchHistory = searchHistory.filter { query ->
@@ -155,29 +155,26 @@ class SearchFlowViewModel @Inject constructor(
                 )
             }
             emit(previousSearchQuery)
-        }.debounceWithMax(200L, 5)
-            .mapLatest { query ->
-
-                fun checkAvailableData() {
-                    if (dataState.matchingQueries.isEmpty() && dataState.sectionRecommendations.items.isEmpty()) {
-                        uiStateListener.updateData { s ->
-                            s.copy(uiState = UiState.Error)
-                        }
+        }.debounceWithMax(200L, 5).mapLatest { query ->
+            fun checkAvailableData() {
+                if (dataState.matchingQueries.isEmpty() && dataState.sectionRecommendations.items.isEmpty()) {
+                    uiStateListener.updateData { s ->
+                        s.copy(uiState = UiState.Error)
                     }
                 }
-
-                val timeout: Long =
-                    if (dataState.uiState == UiState.Loading) 30_000L else 3_000L
-
-                withTimeoutOrNull(timeout) {
-                    if (query.isBlank()) {
-                        searchByEmptyQuery()
-                    } else {
-                        searchByQuery(query)
-                    }
-                } ?: checkAvailableData()
             }
-            .launchIn(viewModelScope)
+
+            val timeout: Long =
+                if (dataState.uiState == UiState.Loading) 30_000L else 3_000L
+
+            withTimeoutOrNull(timeout) {
+                if (query.isBlank()) {
+                    searchByEmptyQuery()
+                } else {
+                    searchByQuery(query)
+                }
+            } ?: checkAvailableData()
+        }.launchIn(viewModelScope)
 
 
     private suspend fun searchByQuery(query: String) {

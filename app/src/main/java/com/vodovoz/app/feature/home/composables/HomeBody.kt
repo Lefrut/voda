@@ -21,7 +21,7 @@ import com.vodovoz.app.design_system.model.SectionUi
 import com.vodovoz.app.design_system.model.StoryUi
 import com.vodovoz.app.domain.general.model.ButtonAction
 import com.vodovoz.app.feature.home.model.MenuItemUi
-import com.vodovoz.app.feature.home.model.OrderUi
+import com.vodovoz.app.feature.home.model.HomeOrderUi
 import com.vodovoz.app.feature.home.model.OrderWithMenuUi
 import com.vodovoz.app.feature.home.model.PopularCategoryUi
 
@@ -44,7 +44,7 @@ fun HomeBody(
     onStoryClick: (StoryUi) -> Unit,
     onCategorySelect: (CategoryWithProductsUi) -> Unit,
     onPopularCategoryClick: (PopularCategoryUi) -> Unit,
-    onOrderClick: (OrderUi) -> Unit,
+    onOrderClick: (HomeOrderUi) -> Unit,
     onMenuItemClick: (MenuItemUi) -> Unit,
     onShowAllClick: (ButtonAction) -> Unit,
     onProductCardClick: (ProductUi) -> Unit,

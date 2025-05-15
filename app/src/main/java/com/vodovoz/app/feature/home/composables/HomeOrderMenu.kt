@@ -26,14 +26,14 @@ import coil3.compose.AsyncImage
 import com.vodovoz.app.R
 import com.vodovoz.app.design_system.composables.card.VodovozOutlinedCard
 import com.vodovoz.app.feature.home.model.MenuItemUi
-import com.vodovoz.app.feature.home.model.OrderUi
+import com.vodovoz.app.feature.home.model.HomeOrderUi
 import com.vodovoz.app.feature.home.model.OrderWithMenuUi
 
 @Composable
 fun HomeOrderMenu(
     modifier: Modifier = Modifier,
     orderWithMenu: OrderWithMenuUi,
-    onOrderClick: (OrderUi) -> Unit,
+    onOrderClick: (HomeOrderUi) -> Unit,
     onMenuItemClick: (MenuItemUi) -> Unit,
 ) {
     val order = orderWithMenu.order
@@ -100,7 +100,7 @@ fun MenuOrderItem(
 }
 
 @Composable
-private fun OrderItem(modifier: Modifier = Modifier, order: OrderUi, onClick: (OrderUi) -> Unit) {
+private fun OrderItem(modifier: Modifier = Modifier, order: HomeOrderUi, onClick: (HomeOrderUi) -> Unit) {
     VodovozOutlinedCard(
         modifier = modifier,
         contentPadding = PaddingValues(

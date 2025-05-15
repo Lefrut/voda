@@ -4,13 +4,13 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
 import com.vodovoz.app.domain.general.model.MenuItemModel
 import com.vodovoz.app.domain.general.model.MenuItemTypeModel
-import com.vodovoz.app.domain.general.model.OrderModel
+import com.vodovoz.app.domain.general.model.HomeOrderModel
 import com.vodovoz.app.domain.general.model.OrderWithMenuModel
 import com.vodovoz.app.util.fromHexOrNull
 
 @Immutable
 data class OrderWithMenuUi(
-    val order: OrderUi? = null,
+    val order: HomeOrderUi? = null,
     val menuItems: List<MenuItemUi>,
 ){
     companion object {
@@ -23,8 +23,8 @@ fun OrderWithMenuModel.toUi(): OrderWithMenuUi {
     return OrderWithMenuUi(order?.toUi(), menuItems.map { it.toUi() })
 }
 
-fun OrderModel.toUi(): OrderUi {
-    return OrderUi(
+fun HomeOrderModel.toUi(): HomeOrderUi {
+    return HomeOrderUi(
         orderId = orderId,
         title = title,
         text = description,
@@ -46,8 +46,8 @@ fun MenuItemModel.toUi(): MenuItemUi {
 
 
 @Immutable
-data class OrderUi(
-    val orderId: Int,
+data class HomeOrderUi(
+    val orderId: Long,
     val title: String,
     val text: String,
     val price: String,

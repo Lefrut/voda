@@ -43,6 +43,7 @@ import com.vodovoz.app.data.vodovoz_service.model.certificate.BuyCertificateDeta
 import com.vodovoz.app.data.vodovoz_service.model.filters.FiltersDTO
 import com.vodovoz.app.data.vodovoz_service.model.notification_settings.NotificationSettingsDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.order_details.OrderDetailsDTO
+import com.vodovoz.app.data.vodovoz_service.model.order_history.OrdersHistoryDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.product_details.ProductDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.profile.ProfileDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.services.AllServicesDetailsDTO
@@ -95,6 +96,13 @@ interface VodovozService {
         @Query("idzakaz") orderId: Long,
     ): Response<VodovozResponseDTO<CancelOrderDetailsDTO>>
 
+    @GET("osnova/form/otmenazakaz.php?action=otpravka")
+    suspend fun cancelOrder(
+        @Query("userid") userId: Long?,
+        @Query("idzakaz") orderId: Long,
+        @QueryMap queries: Map<String, String>
+    ): Response<VodovozResponseDTO<String>>
+
     @GET("osnova/form/voprosozakaze.php?action=otpravka")
     suspend fun sendOrderQuestion(
         @Query("userid") userId: Long?,
@@ -114,6 +122,18 @@ interface VodovozService {
         @Query("userid") userId: Long?,
         @Query("id") orderId: Long,
     ): Response<VodovozResponseDTO<OrderDetailsDTO>>
+
+    /**
+     * OrdersHistory requests
+     * */
+    //todo - check this
+    @GET("profile/historyorder/spisokzakazov.php?action=spisok")
+    suspend fun getOrdersHistoryDetails(
+        @Query("userid") userId: Long?,
+        @Query("nav") page: Int = 1,
+        @Query("status") statuses: String? = null,
+        @Query("search") search: String? = null,
+    ): Response<VodovozResponseDTO<OrdersHistoryDetailsDTO>>
 
     /**
      * Brand requests

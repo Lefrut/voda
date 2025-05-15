@@ -703,7 +703,7 @@
     </fragment>
     <fragment
         android:id="@+id/allOrdersFragment"
-        android:name="com.vodovoz.app.feature.all.orders.OrdersHistoryFragment"
+        android:name="com.vodovoz.app.feature.all.orders.history.OrdersHistoryFragment"
         android:label="AllOrdersFragment">
         <action
             android:id="@+id/action_to_productDetailFragment"
