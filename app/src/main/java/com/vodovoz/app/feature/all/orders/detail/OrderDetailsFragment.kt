@@ -216,13 +216,13 @@ class OrderDetailsFragment1 : BaseFragment() {
 
                             debugLog { "driverId ${orderDetailsUI.driverId}" }
 
-                            findNavController().navigate(
-                                OrderDetailsFragmentDirections.actionToTraceOrderFragment(
-                                    orderDetailsUI.driverId,
-                                    orderDetailsUI.driverName,
-                                    orderDetailsUI.id.toString()
-                                )
-                            )
+//                            findNavController().navigate(
+//                                OrderDetailsFragmentDirections.actionToTraceOrderFragment(
+//                                    orderDetailsUI.driverId,
+//                                    orderDetailsUI.id,
+//                                    orderDetailsUI.driverName,
+//                                )
+//                            )
                         }
 
                     } else {

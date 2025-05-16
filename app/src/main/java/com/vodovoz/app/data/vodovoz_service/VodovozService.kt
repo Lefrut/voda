@@ -87,8 +87,8 @@ interface VodovozService {
     suspend fun getWhereMyOrderDetails(
         @Query("userid") userId: Long?,
         @Query("id") orderId: Long,
-        @Query("vodila") driver: String,
-    )
+        @Query("vodila") driverId: String,
+    ): Response<VodovozResponseDTO<String>>
 
     @GET("osnova/form/otmenazakaz.php?action=detail")
     suspend fun getCancelOrderDetails(

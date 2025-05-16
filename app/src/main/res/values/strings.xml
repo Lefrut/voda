@@ -388,6 +388,11 @@
     <string name="minimal_count_15">Минимальное количество символов 15</string>
     <string name="photo">Фото</string>
     <string name="up_to_5_pieces">До 5 штук</string>
+    <string name="where_is_my_order">Где мой заказ</string>
 
+    <string name="location_permission_title">Геолокация</string>
+    <string name="location_permission_description">Разрешите доступ к геолокации в настройках.</string>
+    <string name="location_permission_accept">Открыть</string>
+    <string name="location_permission_cancel">Отмена</string>
 
 </resources>

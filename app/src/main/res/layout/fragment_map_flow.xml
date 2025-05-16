@@ -193,7 +193,7 @@
         android:layout_marginTop="32dp"
         android:elevation="10dp"
         android:background="@drawable/bg_with_ripple"
-        android:src="@drawable/icon_geo_location"
+        android:src="@drawable/ic_geo_location"
         app:layout_constraintEnd_toEndOf="@+id/minusIB"
         app:layout_constraintStart_toStartOf="@+id/minusIB"
         app:layout_constraintTop_toBottomOf="@+id/minusIB"/>

@@ -57,7 +57,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class TraceOrderFragment : BaseFragment(), InputListener,
+class TraceOrderFragment1 : BaseFragment(), InputListener,
     UserLocationObjectListener, TrafficListener {
 
 
@@ -116,8 +116,8 @@ class TraceOrderFragment : BaseFragment(), InputListener,
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        debugLog { "args ${args.driverId}" }
-        viewModel.fetchDriverData(args.driverId, args.orderId)
+        //debugLog { "args ${args.driverId}" }
+        //viewModel.fetchDriverData(args.driverId, args.orderId)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -320,7 +320,8 @@ class TraceOrderFragment : BaseFragment(), InputListener,
         userLocationView.arrow.setIcon(
             ImageProvider.fromResource(
                 context, R.drawable.png_gps_1
-            ), IconStyle().setScale(0.1f).setRotationType(RotationType.ROTATE).setZIndex(1f)
+            ),
+            IconStyle().setScale(0.1f).setRotationType(RotationType.ROTATE).setZIndex(1f)
         )
 
         val pinIcon: CompositeIcon = userLocationView.pin.useCompositeIcon()

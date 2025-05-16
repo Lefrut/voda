@@ -173,12 +173,14 @@ fun OrdersHistoryItemCard(
             }
         }
 
-        Text(
-            modifier = Modifier.padding(top = 8.dp),
-            text = orderHistoryItem.address,
-            color = MaterialTheme.colorScheme.onBackground,
-            style = MaterialTheme.typography.bodyMedium.copy(letterSpacing = 0.sp)
-        )
+        if(orderHistoryItem.address.isNotEmpty()){
+            Text(
+                modifier = Modifier.padding(top = 8.dp),
+                text = orderHistoryItem.address,
+                color = MaterialTheme.colorScheme.onBackground,
+                style = MaterialTheme.typography.bodyMedium.copy(letterSpacing = 0.sp)
+            )
+        }
 
         if (orderHistoryItem.products.isNotEmpty()) {
             Row(
