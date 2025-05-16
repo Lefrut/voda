@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.core.os.bundleOf
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
+import androidx.navigation.navOptions
 import com.vodovoz.app.R
 import com.vodovoz.app.design_system.model.ParentCategoryUi
 import com.vodovoz.app.design_system.model.filters.FilterUi
@@ -21,6 +22,10 @@ private val SlideNavOptions = NavOptions.Builder()
     .setExitAnim(R.anim.fade_out)
     .setPopExitAnim(R.anim.slide_out_right)
     .build()
+
+fun NavController.navigateToTraceOrder(dividerId: String, orderId: Long){
+    navigate(R.id.traceOrderFragment, bundleOf("driverId" to dividerId, "orderId" to orderId), SlideNavOptions)
+}
 
 fun NavController.navigateToWriteComment(
     productId: Long,

@@ -1168,10 +1168,11 @@
             app:argType="string" />
         <argument
             android:name="driverName"
-            app:argType="string" />
+            app:argType="string"
+            android:defaultValue=""/>
         <argument
             android:name="orderId"
-            app:argType="string" />
+            app:argType="long" />
 
         <action
             android:id="@+id/action_to_webViewFragment"

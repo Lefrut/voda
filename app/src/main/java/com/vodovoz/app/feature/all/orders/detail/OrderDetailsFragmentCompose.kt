@@ -18,6 +18,7 @@ import com.vodovoz.app.common.product.rating.RatingProductManager
 import com.vodovoz.app.core.navigation.navigateToCancelOrder
 import com.vodovoz.app.core.navigation.navigateToOrderQuestion
 import com.vodovoz.app.core.navigation.navigateToProductDetails
+import com.vodovoz.app.core.navigation.navigateToTraceOrder
 import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.composables.placeholders.LoadingPlaceholder
 import com.vodovoz.app.design_system.composables.placeholders.NetworkErrorPlaceholder
@@ -116,6 +117,10 @@ class OrderDetailsFragment : Fragment() {
 
                                 is OrderDetailsFlowViewModel.OrderDetailsEvent.GoToProductDetails -> {
                                     findNavController().navigateToProductDetails(event.productId)
+                                }
+
+                                is OrderDetailsFlowViewModel.OrderDetailsEvent.GoToTraceOrder -> {
+                                    findNavController().navigateToTraceOrder(event.dividerId, event.orderId)
                                 }
                             }
                         }

@@ -491,7 +491,8 @@ class MapController(
         suggestSession.suggest(query, boundingBox, searchOptions, this)
     }
 
-    override fun onResponse(p0: MutableList<SuggestItem>) {
+    override fun onResponse(p0: List<SuggestItem>) {
+
         val addressList = mutableListOf<AddressResult>()
         for (item in p0) {
             if (item.uri?.contains("geo") == true) {
@@ -544,14 +545,14 @@ class MapController(
             RequestPoint(
                 start,
                 RequestPointType.WAYPOINT,
-                null
+                null,
             )
         )
         requestPoints.add(
             RequestPoint(
                 end,
                 RequestPointType.WAYPOINT,
-                null
+                null,
             )
         )
         drivingSession =

@@ -66,7 +66,7 @@ class OrderDetailsFlowViewModel @Inject constructor(
 
     private val firebaseDatabase = FirebaseDatabase.getInstance().reference
 
-    private val orderId = savedState.get<Long>("orderId")
+    private val orderId = savedState.get<Long>("orderId") ?: navigateBack().run { -1 }
 
     private val cancelResultListener = MutableSharedFlow<String>()
     fun observeCancelResult() = cancelResultListener.asSharedFlow()
@@ -98,7 +98,7 @@ class OrderDetailsFlowViewModel @Inject constructor(
         }
 
         val orderDetailsResult =
-            vodovozServiceRepository.getOrderDetails(orderId ?: return@launch).singleResult()
+            vodovozServiceRepository.getOrderDetails(orderId).singleResult()
 
         orderDetailsResult.onSuccess { orderDetails ->
 
@@ -328,7 +328,8 @@ class OrderDetailsFlowViewModel @Inject constructor(
             }
 
             is OrderDetailsButtonUi.WhereOrderButton -> {
-
+                orderDetailsButton.id
+                eventListener.emit(OrderDetailsEvent.GoToTraceOrder(orderDetailsButton.driverId, orderId))
             }
         }
     }
@@ -399,6 +400,7 @@ class OrderDetailsFlowViewModel @Inject constructor(
         data class GoToOrderQuestion(val orderId: Long) : OrderDetailsEvent()
         data class GoToCancelOrder(val orderId: Long) : OrderDetailsEvent()
         data class GoToProductDetails(val productId: Long) : OrderDetailsEvent()
+        data class GoToTraceOrder(val dividerId: String, val orderId: Long) : OrderDetailsEvent()
     }
 
     @Immutable

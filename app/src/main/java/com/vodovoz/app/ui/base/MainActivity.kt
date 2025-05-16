@@ -67,14 +67,11 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks,
         }
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
 
-
-        debugLog { Locale.getDefault().toString() }
-
         supportActionBar?.hide()
+        MapKitFactory.initialize(this)
         splashFileViewModel.downloadSplashFile()
         viewModel.checkAppState()
 
-        MapKitFactory.initialize(this)
         observeRatingSnackbar()
 
         binding = ActivityMainBinding.inflate(layoutInflater).apply { setContentView(root) }

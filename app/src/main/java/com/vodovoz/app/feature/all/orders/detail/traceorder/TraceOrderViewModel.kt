@@ -2,6 +2,8 @@ package com.vodovoz.app.feature.all.orders.detail.traceorder
 
 import android.app.Application
 import android.graphics.Bitmap
+import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.Stable
 import androidx.lifecycle.viewModelScope
 import com.bumptech.glide.Glide
 import com.google.firebase.database.DataSnapshot
@@ -13,6 +15,8 @@ import com.vodovoz.app.common.content.Event
 import com.vodovoz.app.common.content.PagingContractViewModel
 import com.vodovoz.app.common.content.State
 import com.vodovoz.app.common.content.itemadapter.Item
+import com.vodovoz.app.common.content.updateData
+import com.vodovoz.app.design_system.model.MapPointUi
 import com.vodovoz.app.feature.all.orders.detail.model.DriverPointsEntity
 import com.vodovoz.app.util.extensions.debugLog
 import com.yandex.mapkit.geometry.Point
@@ -22,6 +26,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
+@Stable
 class TraceOrderViewModel @Inject constructor(
     private val application: Application,
     private val accountManager: AccountManager,
@@ -42,6 +47,10 @@ class TraceOrderViewModel @Inject constructor(
                 false
             )
         }
+    }
+
+    fun navigateBack() = viewModelScope.launch {
+        eventListener.emit(TraceOrderEvents.GoBack)
     }
 
     private fun generateBitmap(url: String, auto: Boolean) {
@@ -164,6 +173,42 @@ class TraceOrderViewModel @Inject constructor(
         }
     }
 
+    fun plusZoom() = viewModelScope.launch {
+        eventListener.emit(TraceOrderEvents.MoveCameraPlus)
+    }
+
+    fun minusZoom() = viewModelScope.launch {
+        eventListener.emit(TraceOrderEvents.MoveCameraMinus)
+    }
+
+    fun checkGeo() = viewModelScope.launch {
+        eventListener.emit(TraceOrderEvents.CheckGeo)
+    }
+
+    fun showSettingDialog() = viewModelScope.launch {
+        uiStateListener.updateData { s ->
+            s.copy(showSettingDialog = true)
+        }
+    }
+
+    fun moveToGeo() = viewModelScope.launch {
+        eventListener.emit(TraceOrderEvents.MoveToGeo)
+    }
+
+    fun closeSettingsDialog() = viewModelScope.launch {
+        uiStateListener.updateData { s ->
+            s.copy(showSettingDialog = false)
+        }
+    }
+
+    fun navigateToLocationSettings() = viewModelScope.launch {
+        uiStateListener.updateData { s ->
+            s.copy(showSettingDialog = false)
+        }
+        eventListener.emit(TraceOrderEvents.GoToLocationSettings)
+    }
+
+    @Immutable
     data class TraceOrderState(
         val item: Item? = null,
         val name: String? = null,
@@ -172,7 +217,24 @@ class TraceOrderViewModel @Inject constructor(
         val autoBitmap: Bitmap? = null,
         val homeBitmap: Bitmap? = null,
         val driverPointsEntity: DriverPointsEntity? = null,
+
+        val showSettingDialog: Boolean = false,
+        val carPoint: MapPointUi = MapPointUi(55.740117, 37.565874),
+        val deliveryPoint: MapPointUi = MapPointUi(55.729210, 37.574360)
     ) : State
 
-    sealed class TraceOrderEvents : Event
+    sealed class TraceOrderEvents : Event{
+
+        data object GoBack: TraceOrderEvents()
+
+        data object MoveCameraPlus: TraceOrderEvents()
+
+        data object MoveCameraMinus: TraceOrderEvents()
+
+        data object CheckGeo : TraceOrderEvents()
+        data object MoveToGeo : TraceOrderEvents()
+        data object GoToLocationSettings : TraceOrderEvents()
+
+
+    }
 }

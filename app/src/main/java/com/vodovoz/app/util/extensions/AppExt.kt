@@ -3,8 +3,12 @@ package com.vodovoz.app.util.extensions
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.Canvas
 import android.graphics.Color
-import android.net.Uri
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.VectorDrawable
 import android.os.Build
 import android.os.Parcelable
 import android.provider.Settings
@@ -27,6 +31,7 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
+import androidx.core.net.toUri
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -44,7 +49,34 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 import kotlin.properties.ReadOnlyProperty
-import androidx.core.net.toUri
+
+
+fun getBitmap(context: Context, drawableId: Int): Bitmap {
+    return when (val drawable = ContextCompat.getDrawable(context, drawableId)) {
+        is BitmapDrawable -> {
+            BitmapFactory.decodeResource(context.resources, drawableId);
+        }
+
+        is VectorDrawable -> {
+            getBitmap(drawable)
+        }
+
+        else -> {
+            throw IllegalArgumentException("unsupported drawable type");
+        }
+    }
+}
+
+private fun getBitmap(vectorDrawable: VectorDrawable): Bitmap {
+    val bitmap = Bitmap.createBitmap(
+        vectorDrawable.intrinsicWidth,
+        vectorDrawable.intrinsicHeight, Bitmap.Config.ARGB_8888
+    )
+    val canvas = Canvas(bitmap)
+    vectorDrawable.setBounds(0, 0, canvas.width, canvas.height)
+    vectorDrawable.draw(canvas)
+    return bitmap
+}
 
 
 inline fun Fragment.addOnBackPressedCallback(crossinline callback: () -> Unit) {
@@ -330,7 +362,8 @@ fun String.getColorWithAlpha(): Int {
 fun Activity.enableFullScreen() {
     WindowCompat.setDecorFitsSystemWindows(window, false)
     val insetsController = WindowCompat.getInsetsController(window, window.decorView)
-    insetsController.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+    insetsController.systemBarsBehavior =
+        WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
     insetsController.hide(WindowInsetsCompat.Type.statusBars())
     insetsController.hide(WindowInsetsCompat.Type.navigationBars())
 }
@@ -360,7 +393,7 @@ inline fun <T : View> T.preDraw(crossinline callBack: (isReady: Boolean) -> Unit
 }
 
 
-fun Context.openUrl(url: String){
+fun Context.openUrl(url: String) {
     kotlin.runCatching {
         val intent = Intent(Intent.ACTION_VIEW, url.toUri())
         startActivity(intent)
