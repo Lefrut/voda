@@ -111,6 +111,29 @@ class VodovozServiceRepositoryImpl @Inject constructor(
     private val trackingManager: TrackingManager,
 ) : VodovozServiceRepository {
 
+    override fun removeFirebaseToken(token: String): Flow<Result<String>> {
+        return executeRequest(
+            request = {
+                vodovozService.removeFirebaseToken(accountManager.fetchAccountId(), token)
+            },
+            mapper = {
+                it.message ?: ""
+            }
+        )
+    }
+
+    override fun sendFirebaseToken(token: String): Flow<Result<String>> {
+        return executeRequest(
+            request = {
+                vodovozService.sendFirebaseToken(accountManager.fetchAccountId(), token)
+            },
+            mapper = {
+                it.message ?: ""
+            }
+        )
+
+    }
+
     override fun getOrdersHistoryDetails(): Flow<Result<OrdersHistoryDetailsModel>> {
         return executeRequest(
             request = {

@@ -63,6 +63,23 @@ import retrofit2.http.QueryMap
 
 interface VodovozService {
 
+
+    /**
+     * Push requests
+     * */
+
+    @GET("osnova/userpushapi.php?action=token")
+    suspend fun sendFirebaseToken(
+        @Query("userid") userId: Long?,
+        @Query("token") token: String
+    ): Response<VodovozResponseDTO<String>>
+
+    @GET("osnova/userpushapi.php?action=del")
+    suspend fun removeFirebaseToken(
+        @Query("userid") userId: Long?,
+        @Query("token") token: String
+    ): Response<VodovozResponseDTO<String>>
+
     /**
      * Service requests
      * */
@@ -367,6 +384,9 @@ interface VodovozService {
     /**
      * Cart requests
      * */
+
+    //todo - https://vodovoz.net/newmobile_new/korzina/minikorzina.php?action=getbasketuser
+
     @GET("korzina/index.php?action=getbasket")
     suspend fun getCartDetails(
         @Query("userid") userId: Long? = null,

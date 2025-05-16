@@ -59,6 +59,10 @@ import java.io.File
 
 interface VodovozServiceRepository {
 
+    fun removeFirebaseToken(token: String): Flow<Result<String>>
+
+    fun sendFirebaseToken(token: String): Flow<Result<String>>
+
     fun getOrdersHistoryDetails(): Flow<Result<OrdersHistoryDetailsModel>>
 
     fun getOrdersHistoryItemsPaged(statuses: String, searchQuery: String): Flow<PagingData<OrdersHistoryItemModel>>
