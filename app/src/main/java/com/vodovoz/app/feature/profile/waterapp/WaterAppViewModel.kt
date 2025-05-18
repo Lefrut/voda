@@ -29,6 +29,7 @@ class WaterAppViewModel @Inject constructor(
     }
 
     private fun setupScreen() = viewModelScope.launch {
+
         waterAppHelper.fetchWaterAppRateData()
         waterAppHelper.fetchWaterAppUserData()
         waterAppHelper.fetchWaterAppNotificationData()

@@ -9,6 +9,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -16,6 +17,7 @@ import androidx.navigation.fragment.findNavController
 import com.vodovoz.app.common.tab.TabManager
 import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.effects.LifecycleEffect
+import com.vodovoz.app.feature.profile.waterapp.composables.WaterAppGoalCompletedScreen
 import com.vodovoz.app.feature.profile.waterapp.composables.WaterAppGoalScreen
 import com.vodovoz.app.feature.profile.waterapp.composables.WaterAppSettingsScreen
 import com.vodovoz.app.feature.profile.waterapp.composables.WaterAppUserDataScreen
@@ -63,6 +65,8 @@ class WaterAppFragment : Fragment() {
         savedInstanceState: Bundle?,
     ): View {
         return ComposeView(requireContext()).apply {
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+
             setContent {
                 VodovozTheme {
                     val pagingState by viewModel.observeUiState().collectAsStateWithLifecycle()
@@ -74,7 +78,12 @@ class WaterAppFragment : Fragment() {
                     ) { uiState ->
                         when (uiState) {
                             WaterAppUiState.GoalCompleted -> {
-                                Text("Goal completed")
+                                WaterAppGoalCompletedScreen(
+                                    goal = viewState.rateData.rate,
+                                    onCloseClick = {
+                                        viewModel.navigateBack()
+                                    }
+                                )
                             }
 
                             WaterAppUiState.Main -> {

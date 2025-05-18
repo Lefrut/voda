@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.app.Application
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
+import androidx.compose.ui.graphics.Color
 import androidx.work.Constraints
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequest
@@ -35,6 +36,13 @@ class WaterAppHelper @Inject constructor(
     private val accountManager: AccountManager,
     moshi: Moshi,
 ) {
+
+    data object Colors{
+
+        val lightBlue = Color(0xFF5AC3FF)
+        val darkBlue = Color(0xFF078FDD)
+
+    }
 
     companion object {
         const val WATER_APP_USER_DATA = "water app user data"

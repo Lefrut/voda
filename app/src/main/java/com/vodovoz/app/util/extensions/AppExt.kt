@@ -1,9 +1,12 @@
 package com.vodovoz.app.util.extensions
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
+import android.content.ContextWrapper
 import android.content.Intent
 import android.graphics.Bitmap
+import android.graphics.Bitmap.createBitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.Color
@@ -22,6 +25,7 @@ import android.view.ContextThemeWrapper
 import android.view.Gravity
 import android.view.View
 import android.view.ViewTreeObserver
+import android.view.Window
 import android.widget.EditText
 import android.widget.FrameLayout
 import androidx.activity.OnBackPressedCallback
@@ -67,8 +71,9 @@ fun getBitmap(context: Context, drawableId: Int): Bitmap {
     }
 }
 
+@SuppressLint("UseKtx")
 private fun getBitmap(vectorDrawable: VectorDrawable): Bitmap {
-    val bitmap = Bitmap.createBitmap(
+    val bitmap = createBitmap(
         vectorDrawable.intrinsicWidth,
         vectorDrawable.intrinsicHeight, Bitmap.Config.ARGB_8888
     )
@@ -399,6 +404,13 @@ fun Context.openUrl(url: String) {
         startActivity(intent)
     }
 }
+
+fun Context.window(): Window? =
+    when (this) {
+        is Activity -> window
+        is ContextWrapper -> baseContext.window()
+        else -> null
+    }
 
 /*
  * <item name="android:statusBarColor">@android:color/transparent</item>
