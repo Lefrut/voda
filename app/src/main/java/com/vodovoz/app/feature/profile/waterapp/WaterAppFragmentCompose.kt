@@ -17,6 +17,7 @@ import androidx.navigation.fragment.findNavController
 import com.vodovoz.app.common.tab.TabManager
 import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.effects.LifecycleEffect
+import com.vodovoz.app.feature.profile.waterapp.composables.WaterAppBottleScreen
 import com.vodovoz.app.feature.profile.waterapp.composables.WaterAppGoalCompletedScreen
 import com.vodovoz.app.feature.profile.waterapp.composables.WaterAppGoalScreen
 import com.vodovoz.app.feature.profile.waterapp.composables.WaterAppSettingsScreen
@@ -87,7 +88,29 @@ class WaterAppFragment : Fragment() {
                             }
 
                             WaterAppUiState.Main -> {
-                                Text("Water app main")
+                                WaterAppBottleScreen(
+                                    maxLevel = viewState.rateData.rate,
+                                    currentLevel = viewState.rateData.currentLevel,
+                                    changeWaterStep = viewState.changeWaterStep,
+                                    onBackClick = {
+                                        viewModel.navigateBack()
+                                    },
+                                    onSettingsClick = {
+                                        viewModel.goToSettings()
+                                    },
+                                    onProgressChanged = { progress ->
+                                        viewModel.changeWaterLevel(progress)
+                                    },
+                                    onMinusClick ={
+
+                                    },
+                                    onPlusClick = {
+
+                                    },
+                                    onBottleClick = {
+                                        viewModel.addWater()
+                                    }
+                                )
                             }
 
                             WaterAppUiState.Settings -> {

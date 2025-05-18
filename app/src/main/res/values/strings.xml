@@ -397,5 +397,8 @@
     <string name="see_you_tomorrow">До завтра!</string>
     <string name="you_have_drunk_water_goal">Вы выпили свою суточную\nнорму воды</string>
     <string name="congratulations">Поздравляем!</string>
+    <string name="splash">" / "</string>
+    <string name="click_on_bottle">Нажмите на бутылку, если\nвыпили воду</string>
+    <string name="quantity_ml">%1$s мл</string>
 
 </resources>
