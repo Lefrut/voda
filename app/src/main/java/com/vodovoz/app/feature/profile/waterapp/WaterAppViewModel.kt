@@ -181,6 +181,15 @@ class WaterAppViewModel @Inject constructor(
         waterAppHelper.saveSleepTime(WaterAppHelper.parseTime(time))
     }
 
+    fun changeWaterLevel(progress: Float) = viewModelScope.launch {
+        val rateData = dataState.rateData
+        val currentLevel = (progress * rateData.rate).toInt()
+        waterAppHelper.setWaterLevel(currentLevel)
+    }
+
+    fun addWater() = viewModelScope.launch {
+        waterAppHelper.tryToChangeWaterLevel(dataState.changeWaterStep)
+    }
 
 
     data class WaterAppState(
@@ -189,6 +198,7 @@ class WaterAppViewModel @Inject constructor(
         val rateData: WaterAppHelper.WaterAppRateData = WaterAppHelper.WaterAppRateData(),
         val uiState: WaterAppUiState = WaterAppUiState.Welcome,
         val reminderIntervals: List<ReminderIntervalUi> = emptyList(),
+        val changeWaterStep: Int = 250,
     ) : State
 
     sealed class WaterAppEvents : Event {

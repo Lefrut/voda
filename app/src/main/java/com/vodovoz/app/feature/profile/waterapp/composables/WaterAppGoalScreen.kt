@@ -12,9 +12,11 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -23,8 +25,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -33,6 +37,8 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.ClipOp
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.PathFillType
+import androidx.compose.ui.graphics.PathOperation
 import androidx.compose.ui.graphics.asComposePath
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.clipPath
@@ -54,6 +60,7 @@ import androidx.compose.ui.unit.sp
 import com.vodovoz.app.R
 import com.vodovoz.app.design_system.composables.button.VodovozButton
 import kotlinx.coroutines.launch
+import java.math.BigInteger
 import kotlin.random.Random
 import android.graphics.Matrix as AndroidMatrix
 import android.graphics.Path as AndroidPath
@@ -173,14 +180,25 @@ fun BubblesUnderGround(
     bubbleCount: Int = 100,
 ) {
     val density = LocalDensity.current
-    val canvasSize = remember { mutableStateOf(Size.Zero) }
+    var canvasSize by remember { mutableStateOf(Size.Zero) }
 
-    val svgComposePaths = remember(imageVector) {
-        imageVector.toAndroidPaths().map { it.asComposePath() }
+    val svgComposePaths = remember(imageVector, canvasSize) {
+        imageVector.toAndroidPaths(
+            canvasSize.width,
+            canvasSize.height
+        ).map { it.asComposePath() }
+
     }
 
-    val clipPath = remember(svgComposePaths) {
-        Path().apply { svgComposePaths.forEach { addPath(it) } }
+    val clipPath = remember(svgComposePaths, canvasSize) {
+        svgComposePaths.reduceOrNull { acc, path ->
+            Path().apply {
+                op(acc, path, PathOperation.Union)
+            }
+        } ?: svgComposePaths.firstOrNull()?.let { first ->
+            Path().apply { addPath(first) }
+        }
+        ?: Path()
     }
 
     @Immutable
@@ -203,15 +221,15 @@ fun BubblesUnderGround(
         }
     }
 
-    LaunchedEffect(canvasSize.value) {
-        if (canvasSize.value == Size.Zero) return@LaunchedEffect
+    LaunchedEffect(canvasSize) {
+        if (canvasSize == Size.Zero) return@LaunchedEffect
         var last = withFrameNanos { it }
         while (true) {
             val now = withFrameNanos { it }
             val dt = (now - last) / 1_000_000_000f
             last = now
-            val h = canvasSize.value.height
-            val w = canvasSize.value.width
+            val h = canvasSize.height
+            val w = canvasSize.width
             bubbles.forEach { b ->
                 b.y -= b.speed * dt
                 if (b.y * h + b.r < 0f) {
@@ -222,63 +240,25 @@ fun BubblesUnderGround(
         }
     }
 
-    Canvas(modifier = modifier.fillMaxSize()) {
-        canvasSize.value = size
-
-
-        val r1 = 12.dp.toPx()
-        val r2 = 18.dp.toPx()
-        val r3 = 8.dp.toPx()
-
-        val c1 = Offset(x = 100f, y = 100f)
-        val c2 = Offset(x = size.width * 0.5f, y = size.height / 2)
-        val c3 = Offset(x = size.width - 80f, y = size.height / 4)
-
-        val color1 = Color.Red
-        val color2 = Color.Green
-        val color3 = Color.Yellow
-
+    Canvas(modifier = modifier) {
+        canvasSize = size
         drawPath(
             path = clipPath,
             color = Color.Red,
             style = Stroke(width = 2.dp.toPx())
         )
 
+        clipPath(path = clipPath, clipOp = ClipOp.Intersect) {
 
-
-
-        clipPath(clipPath, clipOp = ClipOp.Intersect){
-
-            drawCircle(
-                color = color1,
-                radius = r1,
-                center = Offset(x = 100f, y = -100f)
-            )
-
-            drawCircle(
-                color = color1,
-                radius = r1,
-                center = c1
-            )
-            drawCircle(
-                color = color2,
-                radius = r2,
-                center = c2
-            )
-            drawCircle(
-                color = color3,
-                radius = r3,
-                center = c3
-            )
         }
 
-//            bubbles.forEach { b ->
-//                drawCircle(
-//                    color = b.color,
-//                    radius = b.r,
-//                    center = Offset(b.x * size.width, b.y * size.height)
-//                )
-//            }
+        bubbles.forEach { b ->
+            drawCircle(
+                color = b.color,
+                radius = b.r,
+                center = Offset(b.x * size.width, b.y * size.height)
+            )
+        }
     }
 }
 
@@ -313,82 +293,43 @@ fun ImageVector.toAndroidPaths(): List<AndroidPath> {
 }
 
 
-@Preview
-@Composable
-private fun GradientWavesPreview() {
-    DoubleInfiniteWaveFixedHeight()
-}
+fun ImageVector.toAndroidPaths(
+    targetWidth: Float,
+    targetHeight: Float
+): List<AndroidPath> {
 
-@Composable
-fun DoubleInfiniteWaveFixedHeight(
-    modifier: Modifier = Modifier,
-    waveAmplitude: Dp = 40.dp,
-    waveColor1: Color = Color.Cyan,
-    waveColor2: Color = Color.Blue,
-) {
-    val waveHeightPx = with(LocalDensity.current) { waveAmplitude.toPx() }
-    val screenHeight =
-        with(LocalDensity.current) { LocalConfiguration.current.screenHeightDp.dp.toPx() }
-    val waveLength =
-        with(LocalDensity.current) { LocalConfiguration.current.screenWidthDp.dp.toPx() }
 
-    val progress1 = remember { Animatable(0f) }
-    val progress2 = remember { Animatable(0f) }
 
-    LaunchedEffect(Unit) {
-        launch {
-            while (true) {
-                progress1.animateTo(
-                    waveLength,
-                    animationSpec = infiniteRepeatable(
-                        animation = tween(3000, easing = LinearEasing),
-                        repeatMode = RepeatMode.Restart
-                    )
-                )
-                progress1.snapTo(0f)
-            }
+
+    val scaleX = targetWidth.toBigDecimal().divide(viewportWidth.toBigDecimal()).toFloat()
+    val scaleY = (targetHeight.toBigDecimal() / viewportHeight.toBigDecimal()).toFloat()
+
+    val result = mutableListOf<AndroidPath>()
+
+    fun traverse(group: VectorGroup, currentMatrix: AndroidMatrix) {
+        val groupMatrix = AndroidMatrix(currentMatrix).apply {
+            preScale(group.scaleX, group.scaleY)
+            preRotate(group.rotation, group.pivotX, group.pivotY)
+            preTranslate(group.translationX, group.translationY)
         }
 
-        launch {
-            while (true) {
-                progress2.animateTo(
-                    waveLength,
-                    animationSpec = infiniteRepeatable(
-                        animation = tween(3000, easing = LinearEasing),
-                        repeatMode = RepeatMode.Restart
-                    )
-                )
-                progress2.snapTo(0f)
+        group.forEach { node ->
+            when (node) {
+                is VectorGroup -> traverse(node, groupMatrix)
+                is VectorPath -> {
+                    val ap = AndroidPath().apply {
+                        node.pathData.toPath(asComposePath())
+                        transform(groupMatrix)
+                    }
+                    result += ap
+                }
             }
         }
     }
 
-    Canvas(modifier = modifier.fillMaxSize()) {
-        fun drawWave(offsetX: Float, isReversed: Boolean, color: Color, alpha: Float) {
-            val path = Path()
-            val startX = -waveLength + offsetX
-            val baseY = screenHeight - waveHeightPx
-
-            path.moveTo(startX, screenHeight)
-
-            var x = startX
-            while (x < size.width + waveLength) {
-                val controlX = x + waveLength / 4
-                val controlY = if (isReversed) baseY + waveHeightPx else baseY - waveHeightPx
-                val endX = x + waveLength / 2
-
-                path.quadraticBezierTo(controlX, controlY, endX, baseY)
-                x += waveLength / 2
-            }
-
-            path.lineTo(size.width, screenHeight)
-            path.lineTo(0f, screenHeight)
-            path.close()
-
-            drawPath(path, color = color.copy(alpha = alpha))
-        }
-
-        drawWave(progress1.value, isReversed = false, color = waveColor1, alpha = 1f)
-        drawWave(progress2.value, isReversed = true, color = waveColor2, alpha = 0.5f)
+    val initialMatrix = AndroidMatrix().apply {
+        preScale(scaleX, scaleY)
     }
+    traverse(root, initialMatrix)
+    return result
 }

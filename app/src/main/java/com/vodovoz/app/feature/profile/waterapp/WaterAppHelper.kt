@@ -3,7 +3,6 @@ package com.vodovoz.app.feature.profile.waterapp
 import android.annotation.SuppressLint
 import android.app.Application
 import androidx.compose.runtime.Immutable
-import androidx.compose.runtime.Stable
 import androidx.compose.ui.graphics.Color
 import androidx.work.Constraints
 import androidx.work.ExistingPeriodicWorkPolicy
@@ -12,19 +11,13 @@ import androidx.work.WorkManager
 import com.squareup.moshi.Moshi
 import com.vodovoz.app.common.account.data.AccountManager
 import com.vodovoz.app.common.datastore.DataStoreRepository
-import com.vodovoz.app.feature.profile.waterapp.WaterAppHelper.WaterAppUserData.Companion
 import com.vodovoz.app.feature.profile.waterapp.worker.WaterAppWorker
 import com.vodovoz.app.util.extensions.debugLog
 import com.vodovoz.app.util.extensions.fetchCurrentDayInTimeMillis
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import java.time.Duration
 import java.time.LocalTime
-import java.time.Period
 import java.time.format.DateTimeFormatter
-import java.time.temporal.ChronoUnit
-import java.time.temporal.TemporalAdjusters
-import java.time.temporal.TemporalUnit
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -217,37 +210,43 @@ class WaterAppHelper @Inject constructor(
     fun startCalculate() {
 
         accountManager.reportEvent("trekervodi_vhod")
+
     }
 
-    fun tryToChangeWaterLevel(step: Int) {
-
+    fun tryToChangeWaterLevel(levelChange: Int) {
         accountManager.reportEvent("trekervodi_chasha")
 
         val rateState = waterAppRateDataListener.value ?: return
+        val current = rateState.currentLevel
+        val max = rateState.rate
 
-        debugLog { "try to change $step rateState $rateState currentLevel ${rateState.currentLevel} canFill ${rateState.canFill}" }
-
-        if (rateState.currentLevel == rateState.rate) {
-            waterAppRateDataListener.value = waterAppRateDataListener.value?.copy(
-                canFill = false
-            )
-            return
+        debugLog {
+            "try to change $levelChange rateState $rateState currentLevel $current canFill ${rateState.canFill}"
         }
 
-        if (step + rateState.currentLevel > rateState.rate) {
-            val newStep = rateState.rate - rateState.currentLevel
+        val newLevel = (current + levelChange).coerceAtMost(max)
+        val canFill = newLevel < max
 
-            waterAppRateDataListener.value = waterAppRateDataListener.value?.copy(
-                canFill = true,
-                currentLevel = rateState.currentLevel + newStep
-            )
-        } else {
-            waterAppRateDataListener.value = waterAppRateDataListener.value?.copy(
-                canFill = true,
-                currentLevel = rateState.currentLevel + step
-            )
-        }
+        waterAppRateDataListener.value = rateState.copy(
+            currentLevel = newLevel,
+            canFill = canFill
+        )
     }
+
+    fun setWaterLevel(newLevel: Int) {
+        val rateState = waterAppRateDataListener.value ?: return
+
+        val max = rateState.rate
+
+        val clampedLevel = newLevel.coerceIn(0, max)
+        val canFill = clampedLevel < max
+
+        waterAppRateDataListener.value = rateState.copy(
+            currentLevel = clampedLevel,
+            canFill = canFill
+        )
+    }
+
 
     fun saveWaterAppRateData() {
 
