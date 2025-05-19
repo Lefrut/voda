@@ -1,10 +1,8 @@
 package com.vodovoz.app.mapper
 
 import com.vodovoz.app.data.model.common.ProductDetailsBundleEntity
-import com.vodovoz.app.feature.product_comments.model.CommentImage
 import com.vodovoz.app.mapper.CategoryDetailMapper.mapToUI
 import com.vodovoz.app.mapper.CategoryMapper.mapToUI
-import com.vodovoz.app.mapper.CommentMapper.mapToUI
 import com.vodovoz.app.mapper.ProductDetailMapper.mapToUI
 import com.vodovoz.app.mapper.ProductMapper.mapToUI
 import com.vodovoz.app.mapper.PromotionMapper.mapToUI
@@ -16,10 +14,6 @@ object ProductDetailBundleMapper {
         productDetailUI = productDetailEntity.mapToUI(),
         serviceUIList = serviceEntityList.mapToUI(),
         categoryUI = categoryEntity.mapToUI(),
-        commentImages = commentImages?.map {
-            CommentImage(it.ID, it.SRC)
-        } ?: emptyList(),
-        commentUIList = commentEntityList.mapToUI(),
         searchWordList = searchWordList,
         maybeLikeProductUIList = maybeLikeProductEntityList.mapToUI(),
         promotionsAction = promotionsActionEntity?.mapToUI(),

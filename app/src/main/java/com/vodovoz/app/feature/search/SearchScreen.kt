@@ -4,6 +4,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -19,6 +21,7 @@ import com.vodovoz.app.feature.search.composables.SearchTopBar
 @Composable
 fun SearchScreen(viewModel: SearchFlowViewModel, viewState: SearchFlowViewModel.SearchState) {
     Scaffold(
+        modifier = Modifier.windowInsetsPadding(WindowInsets.statusBars),
         topBar = {
             SearchTopBar(
                 value = viewState.query,
@@ -52,9 +55,7 @@ fun SearchScreen(viewModel: SearchFlowViewModel, viewState: SearchFlowViewModel.
                         imagePainter = if (uiState.image.isEmpty()) {
                             painterResource(id = R.drawable.pic_search)
                         } else {
-                            rememberAsyncImagePainter(
-                                model = uiState.image
-                            )
+                            rememberAsyncImagePainter(model = uiState.image)
                         },
                         description = uiState.description
                     )

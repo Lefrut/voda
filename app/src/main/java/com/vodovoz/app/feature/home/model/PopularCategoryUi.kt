@@ -57,3 +57,7 @@ fun CategoryModel.toUi(): CategoryUi {
     return CategoryUi(name = name, id = id, depthLevel = depthLevel)
 }
 
+fun List<CategoryModel>.mapToUi(): List<CategoryUi> {
+    return map { it.toUi() }
+}
+

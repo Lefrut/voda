@@ -255,11 +255,7 @@ class SearchFlowViewModel @Inject constructor(
         if (currentQuery.isBlank()) return@launch
 
         launch { searchManager.addQueryToHistory(currentQuery) }
-        eventListener.emit(
-            SearchEvents.GoToProductList(
-                PaginatedProductsCatalogWithoutFiltersFragment.DataSource.Search(currentQuery)
-            )
-        )
+        eventListener.emit(SearchEvents.GoToSearchProductList(currentQuery))
     }
 
     fun firstLoad() {
@@ -801,8 +797,7 @@ class SearchFlowViewModel @Inject constructor(
         data class GoToWebView(val url: String, val title: String) : SearchEvents()
 
         data class GoToService(val id: String) : SearchEvents()
-        data class GoToProductList(val searchDataSource: PaginatedProductsCatalogWithoutFiltersFragment.DataSource.Search) :
-            SearchEvents()
+        data class GoToSearchProductList(val query: String) : SearchEvents()
 
         data class GoToProductDetails(val productId: Long) : SearchEvents()
         data class GoToProductAnalogs(val productId: Long) : SearchEvents()

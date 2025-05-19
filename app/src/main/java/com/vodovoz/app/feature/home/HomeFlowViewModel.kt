@@ -756,6 +756,10 @@ class HomeFlowViewModel @Inject constructor(
         eventListener.emit(HomeEvents.GoToProductAnalogs(product.id))
     }
 
+    fun navigateToQrCode() = viewModelScope.launch {
+        eventListener.emit(HomeEvents.GoToQrCode)
+    }
+
     data class PositionItem(
         val position: Int,
         val item: Item,
@@ -774,6 +778,7 @@ class HomeFlowViewModel @Inject constructor(
         data object ScrollTopProductsToStart : HomeEvents()
         data object ShowSpeechRecognizer : HomeEvents()
         data object GoToOrdersHistory : HomeEvents()
+        data object GoToQrCode : HomeEvents()
 
         data class GoToStories(val storyId: Long) : HomeEvents()
         data class GoToProductDetails(val productId: Long) : HomeEvents()

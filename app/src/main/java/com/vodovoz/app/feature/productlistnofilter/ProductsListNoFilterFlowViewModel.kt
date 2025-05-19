@@ -50,8 +50,6 @@ import com.vodovoz.app.ui.paging.emptyCombinedLoadStates
 import com.vodovoz.app.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
@@ -61,8 +59,6 @@ import javax.inject.Inject
 @HiltViewModel
 class ProductsListNoFilterFlowViewModel @Inject constructor(
     savedState: SavedStateHandle,
-    private val repository: MainRepository,
-    private val accountManager: AccountManager,
     private val cartManager: CartManager,
     private val likeManager: LikeManager,
     private val ratingProductManager: RatingProductManager,
@@ -73,9 +69,6 @@ class ProductsListNoFilterFlowViewModel @Inject constructor(
 ) {
 
     val dataSource = savedState.get<DataSource>("dataSource") ?: DataSource.Missing
-
-    private val changeLayoutManager = MutableStateFlow(LINEAR)
-    fun observeChangeLayoutManager() = changeLayoutManager.asStateFlow()
 
     private val pagingProductsListener = PagingDataListener(
         onUpdateItems = { itemSnapshotList ->
@@ -401,7 +394,7 @@ class ProductsListNoFilterFlowViewModel @Inject constructor(
         }
     }
 
-    suspend fun listProductLoadings() = uiStateListener.map { state -> state.data.products }
+    suspend fun listenProductLoadings() = uiStateListener.map { state -> state.data.products }
         .combine(cartManager.blockedProductsState) { _, blockedProducts ->
             blockedProducts
         }.collectLatest { blockedProducts ->
@@ -638,6 +631,14 @@ class ProductsListNoFilterFlowViewModel @Inject constructor(
         eventListener.emit(ProductListNoFilterEvent.GoToProductAnalogs(product.id))
     }
 
+    fun navigateToSpeech() = viewModelScope.launch {
+        eventListener.emit(ProductListNoFilterEvent.GoToSpeech)
+    }
+
+    fun navigateToQrCode() = viewModelScope.launch {
+        eventListener.emit(ProductListNoFilterEvent.GoToQrCode)
+    }
+
     @Immutable
     data class ProductListNoFilterState(
         val categoryId: Long = -1,
@@ -680,6 +681,8 @@ class ProductsListNoFilterFlowViewModel @Inject constructor(
     sealed class ProductListNoFilterEvent : Event {
         data object GoBack : ProductListNoFilterEvent()
         data object ScrollToTop : ProductListNoFilterEvent()
+        data object GoToSpeech : ProductListNoFilterEvent()
+        data object GoToQrCode : ProductListNoFilterEvent()
 
         data class GoToSearch(val query: String) : ProductListNoFilterEvent()
         data class GoToCategories(

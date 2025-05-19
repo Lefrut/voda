@@ -68,7 +68,6 @@ import com.vodovoz.app.feature.home.viewholders.hometitle.HomeTitle.Companion.SL
 import com.vodovoz.app.feature.home.viewholders.hometitle.HomeTitle.Companion.VIEWED_TITLE
 import com.vodovoz.app.feature.home.viewholders.hometitle.HomeTitleClickListener
 import com.vodovoz.app.feature.onlyproducts.ProductsCatalogFragment
-import com.vodovoz.app.feature.productdetail.sendcomment.SendCommentAboutProductBottomDialog
 import com.vodovoz.app.feature.productlist.adapter.ProductsClickListener
 import com.vodovoz.app.feature.productlistnofilter.PaginatedProductsCatalogWithoutFiltersFragment
 import com.vodovoz.app.feature.sitestate.SiteStateManager
@@ -117,8 +116,7 @@ class HomeFragment1 : BaseFragment() {
             }
 
             override fun rateProduct(id: Long, ratingCount: Int) {
-                SendCommentAboutProductBottomDialog.newInstance(id, ratingCount)
-                    .show(childFragmentManager, "TAG")
+
             }
 
         })
@@ -185,7 +183,6 @@ class HomeFragment1 : BaseFragment() {
         observeTabReselect()
         observeEvents()
         observeDeepLinkFromSiteState()
-        observeMediaManager()
         observePushFromSiteState()
         observeRateBottom()
     }
@@ -1189,29 +1186,6 @@ class HomeFragment1 : BaseFragment() {
 
             SpeechDialogFragment().show(childFragmentManager, "TAG")
 
-        }
-    }
-
-    private fun observeMediaManager() {
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                mediaManager
-                    .observeCommentData()
-                    .collect {
-                        if (it != null && it.show) {
-                            mediaManager.dontShow()
-                            if (findNavController().currentBackStackEntry?.destination?.id == R.id.sendCommentAboutProductFragment) {
-                                findNavController().popBackStack()
-                            }
-                            findNavController().navigate(
-                                HomeFragmentDirections.actionToSendCommentAboutProductFragment(
-                                    it.productId,
-                                    it.rate
-                                )
-                            )
-                        }
-                    }
-            }
         }
     }
 

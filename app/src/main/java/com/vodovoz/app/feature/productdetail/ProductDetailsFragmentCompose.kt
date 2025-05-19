@@ -11,10 +11,7 @@ import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.stringResource
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.vodovoz.app.R
@@ -39,11 +36,9 @@ import com.vodovoz.app.design_system.composables.placeholders.EmptyResultPlaceho
 import com.vodovoz.app.design_system.composables.placeholders.EmptyResultPlaceholderItem
 import com.vodovoz.app.design_system.composables.placeholders.LoadingPlaceholder
 import com.vodovoz.app.design_system.effects.LifecycleEffect
-import com.vodovoz.app.feature.replacement.ReplacementProductsSelectionBS
 import com.vodovoz.app.util.extensions.copyText
 import com.vodovoz.app.util.extensions.shareText
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -71,7 +66,7 @@ class ProductDetailsFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        viewModel.loadProductDetails(args.productId)
+        viewModel.setupProductDetails(args.productId)
     }
 
     override fun onCreateView(

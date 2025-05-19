@@ -465,6 +465,68 @@ class VodovozServiceRepositoryImpl @Inject constructor(
         )
     }
 
+    override fun getPastPurchasesDetails(
+        sort: SortModel,
+        categoryId: Int,
+    ): Flow<Result<ProductsSectionModel>> {
+        return executeRequest(
+            request = {
+                vodovozService.getPastPurchasesDetails(
+                    userId = 1,
+                    page = 1,
+                    sort = sort.value,
+                    order = sort.order,
+                    categoryId = categoryId.takeIf { id -> id > 0 }
+                )
+            },
+            mapper = {
+                it.data!!.toDomain()
+            },
+            onFail = { response ->
+                val placeholder =
+                    moshi.fromJson<VodovozResponseDTO<VodovozPlaceholderDTO>>(
+                        response.stringBody()
+                    ).data!!.toDomain()
+                throw EmptyResultException(placeholder = placeholder)
+            }
+        )
+    }
+
+    override fun getPastPurchasesPaged(
+        sort: SortModel,
+        categoryId: Int,
+    ): Flow<PagingData<ProductModel>> {
+        val accountId = accountManager.fetchAccountId()
+        return Pager(
+            config = PagingConfig(pageSize = 5),
+            pagingSourceFactory = {
+                VodovozPagingSource(
+                    clazz = ProductsSectionDTO::class,
+                    request = { page, _ ->
+                        vodovozService.getPastPurchasesDetails(
+                            userId = 1, //todo - change
+                            page = page,
+                            sort = sort.value,
+                            order = sort.order,
+                            categoryId = categoryId.takeIf { id -> id > -1 }
+                        )
+                    },
+                    mapper = { response ->
+                        response.data?.DATA?.mapToDomain()
+                            ?: throw IllegalArgumentException("Past purchases can't be null")
+                    },
+                    onFail = { response ->
+                        val placeholder =
+                            moshi.fromJson<VodovozResponseDTO<VodovozPlaceholderDTO>>(
+                                response.stringBody()
+                            ).data!!.toDomain()
+                        throw EmptyResultException(placeholder = placeholder)
+                    }
+                )
+            }
+        ).flow
+    }
+
     override fun getBrands(
         searchQuery: String,
     ): Flow<Result<BrandSectionModel>> {

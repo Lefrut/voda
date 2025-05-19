@@ -1,29 +1,22 @@
 package com.vodovoz.app.feature.productlistnofilter
 
-import android.Manifest
-import android.content.Intent
-import android.content.pm.PackageManager
+import android.content.Context
 import android.os.Bundle
 import android.os.Parcelable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.activity.OnBackPressedCallback
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
-import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.fragment.findNavController
-import com.vodovoz.app.R
 import com.vodovoz.app.common.cart.CartManager
 import com.vodovoz.app.common.like.LikeManager
-import com.vodovoz.app.common.permissions.PermissionsController
 import com.vodovoz.app.common.product.rating.RatingProductManager
-import com.vodovoz.app.common.speechrecognizer.SpeechDialogFragment
 import com.vodovoz.app.core.navigation.navigateToAnalogs
 import com.vodovoz.app.core.navigation.navigateToCategories
 import com.vodovoz.app.core.navigation.navigateToProductDetails
@@ -33,7 +26,7 @@ import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.effects.LifecycleEffect
 import com.vodovoz.app.design_system.model.filters.FiltersUi
 import com.vodovoz.app.feature.home.model.CategoryUi
-import com.vodovoz.app.ui.model.CategoryUI
+import com.vodovoz.app.feature.profile.core.ContentSearchNavigator
 import com.vodovoz.app.util.extensions.shareText
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.parcelize.Parcelize
@@ -53,6 +46,18 @@ class PaginatedProductsCatalogWithoutFiltersFragment : Fragment() {
     @Inject
     lateinit var ratingProductManager: RatingProductManager
 
+    @Inject
+    lateinit var navigatorFactory: ContentSearchNavigator.Factory
+
+    private lateinit var searchNavigator: ContentSearchNavigator
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        searchNavigator = navigatorFactory.create(
+            findNavController(), this
+        )
+    }
+
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -70,7 +75,8 @@ class PaginatedProductsCatalogWithoutFiltersFragment : Fragment() {
             }
 
         return ComposeView(requireContext()).apply {
-            setViewCompositionStrategy(ViewCompositionStrategy.Default)
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+
             setContent {
                 VodovozTheme {
                     val pagingState by viewModel.observeUiState().collectAsStateWithLifecycle()
@@ -88,7 +94,7 @@ class PaginatedProductsCatalogWithoutFiltersFragment : Fragment() {
                     }
 
                     LifecycleEffect {
-                        viewModel.listProductLoadings()
+                        viewModel.listenProductLoadings()
                     }
 
                     LifecycleEffect {
@@ -131,6 +137,14 @@ class PaginatedProductsCatalogWithoutFiltersFragment : Fragment() {
                                 is ProductsListNoFilterFlowViewModel.ProductListNoFilterEvent.GoToProductAnalogs -> {
                                     findNavController().navigateToAnalogs(event.productId)
                                 }
+
+                                ProductsListNoFilterFlowViewModel.ProductListNoFilterEvent.GoToQrCode -> {
+                                    searchNavigator.navigateToImageSearch()
+                                }
+
+                                ProductsListNoFilterFlowViewModel.ProductListNoFilterEvent.GoToSpeech -> {
+                                    searchNavigator.navigateToVoiceSearch()
+                                }
                             }
                         }
                     }
@@ -139,73 +153,6 @@ class PaginatedProductsCatalogWithoutFiltersFragment : Fragment() {
         }
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        initBackButton()
-    }
-
-
-    private fun initBackButton() {
-        requireActivity().onBackPressedDispatcher.addCallback(
-            viewLifecycleOwner,
-            object : OnBackPressedCallback(true) {
-                override fun handleOnBackPressed() {
-                    findNavController().popBackStack()
-                }
-            }
-        )
-    }
-
-
-    private fun shapeProductsCatalog(categoryUI: CategoryUI?) {
-        if (categoryUI == null || categoryUI.shareUrl.isEmpty()) return
-
-        runCatching {
-            val intent = Intent.createChooser(
-                Intent(Intent.ACTION_SEND).apply {
-                    type = "text/plain"
-                    putExtra(Intent.EXTRA_TEXT, categoryUI.shareUrl)
-                },
-                "Shearing Option"
-            )
-            startActivity(intent)
-        }
-    }
-
-
-    @Inject
-    lateinit var permissionsControllerFactory: PermissionsController.Factory
-    private val permissionsController by lazy { permissionsControllerFactory.create(requireActivity()) }
-
-    private fun navigateToQrCodeFragment() {
-        permissionsController.methodRequiresCameraPermission {
-            if (ActivityCompat.checkSelfPermission(
-                    requireContext(),
-                    Manifest.permission.CAMERA
-                ) != PackageManager.PERMISSION_GRANTED
-            ) {
-                return@methodRequiresCameraPermission
-            }
-
-            findNavController().navigate(R.id.qrCodeFragment)
-
-        }
-    }
-
-    private fun startSpeechRecognizer() {
-        permissionsController.methodRequiresRecordAudioPermission {
-            if (ActivityCompat.checkSelfPermission(
-                    requireContext(),
-                    Manifest.permission.RECORD_AUDIO
-                ) != PackageManager.PERMISSION_GRANTED
-            ) {
-                return@methodRequiresRecordAudioPermission
-            }
-
-            SpeechDialogFragment().show(childFragmentManager, "TAG")
-
-        }
-    }
 
     sealed class DataSource : Parcelable {
         @Parcelize

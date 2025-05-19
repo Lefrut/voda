@@ -6,13 +6,11 @@ import androidx.lifecycle.viewModelScope
 import com.vodovoz.app.common.about_product.AboutProductManager
 import com.vodovoz.app.common.account.data.AccountManager
 import com.vodovoz.app.common.cart.CartManager
-import com.vodovoz.app.common.content.ErrorState
 import com.vodovoz.app.common.content.Event
 import com.vodovoz.app.common.content.State
 import com.vodovoz.app.common.like.LikeManager
 import com.vodovoz.app.common.product.rating.RatingProductManager
 import com.vodovoz.app.data.MainRepository
-import com.vodovoz.app.data.model.common.ResponseEntity
 import com.vodovoz.app.design_system.model.BrandCategoryItemUi
 import com.vodovoz.app.design_system.model.BuyButtonUi
 import com.vodovoz.app.design_system.model.CommentUi
@@ -29,43 +27,18 @@ import com.vodovoz.app.design_system.model.withUpdatedCart
 import com.vodovoz.app.design_system.model.withUpdatedFavorites
 import com.vodovoz.app.design_system.model.withUpdatedLoading
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
-import com.vodovoz.app.feature.home.viewholders.homeproducts.HomeProducts
-import com.vodovoz.app.feature.home.viewholders.homepromotions.HomePromotions
 import com.vodovoz.app.feature.productdetail.model.PresentInfoUi
 import com.vodovoz.app.feature.productdetail.model.toUi
-import com.vodovoz.app.feature.productdetail.present.model.PresentInfoData
-import com.vodovoz.app.feature.productdetail.viewholders.detailblocks.DetailBlocks
-import com.vodovoz.app.feature.productdetail.viewholders.detailbrandproductlist.DetailBrandList
-import com.vodovoz.app.feature.productdetail.viewholders.detailcatandbrand.DetailCatAndBrand
-import com.vodovoz.app.feature.productdetail.viewholders.detailcomments.DetailComments
-import com.vodovoz.app.feature.productdetail.viewholders.detailheader.DetailHeader
-import com.vodovoz.app.feature.productdetail.viewholders.detailprices.DetailPrices
-import com.vodovoz.app.feature.productdetail.viewholders.detailproductmaybelike.DetailMaybeLike
-import com.vodovoz.app.feature.productdetail.viewholders.detailsearchword.DetailSearchWord
-import com.vodovoz.app.feature.productdetail.viewholders.detailservices.DetailServices
-import com.vodovoz.app.feature.productdetail.viewholders.detailslisttitles.DetailsTitle
-import com.vodovoz.app.feature.productdetail.viewholders.detailtabs.DetailTabs
-import com.vodovoz.app.mapper.PaginatedProductListMapper.mapToUI
-import com.vodovoz.app.ui.model.CategoryDetailUI
-import com.vodovoz.app.ui.model.CategoryUI
-import com.vodovoz.app.ui.model.CommentUI
-import com.vodovoz.app.ui.model.ProductDetailUI
-import com.vodovoz.app.ui.model.ProductUI
 import com.vodovoz.app.util.calculateProductPrice
-import com.vodovoz.app.util.extensions.debugLog
 import com.vodovoz.app.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -92,9 +65,6 @@ class ProductDetailsFlowViewModel @Inject constructor(
     fun observeEvent() = eventListener.asSharedFlow()
 
     fun observeUiState() = uiStateListener.asStateFlow()
-
-    private val updateFabListener = MutableSharedFlow<Int>()
-    fun observeUpdateFab() = updateFabListener.asSharedFlow()
 
     suspend fun listenLoadingsProduct() = uiStateListener.combine(
         cartManager.blockedProductsState
@@ -232,132 +202,7 @@ class ProductDetailsFlowViewModel @Inject constructor(
     }
 
     private fun fetchPresentInfo() {
-
-    }
-
-    private fun fetchBrandProducts(productId: Long, brandId: Long) {
-        viewModelScope.launch {
-            flow {
-                emit(
-                    mainRepository.fetchProductsByBrandResponse(
-                        productId = productId,
-                        brandId = brandId,
-                        page = state.detailBrandList.pageIndex
-                    )
-                )
-            }
-                .onEach { response ->
-                    if (response is ResponseEntity.Success) {
-                        uiStateListener.value = state.copy(
-                            detailBrandList = state.detailBrandList.copy(
-                                productUiList = response.data.mapToUI().productUIList,
-                                pageAmount = if (!state.detailBrandList.loadMore) {
-                                    response.data.pageAmount
-                                } else {
-                                    if (state.detailBrandList.pageIndex == state.detailBrandList.pageAmount) {
-                                        1
-                                    } else {
-                                        state.detailBrandList.pageAmount
-                                    }
-                                }
-                            ),
-                            error = null,
-                            loadingPage = false
-                        )
-                    } else {
-                        uiStateListener.value = state.copy(
-                            loadingPage = false
-                        )
-                    }
-                }
-                .flowOn(Dispatchers.Default)
-                .catch { debugLog { "fetch brands error ${it.localizedMessage}" } }
-                .collect()
-        }
-    }
-
-    private fun fetchMaybeLikeProducts() {
-        viewModelScope.launch {
-            flow { emit(mainRepository.fetchMaybeLikeProductsResponse(page = state.detailMaybeLikeProducts.pageIndex)) }
-                .onEach { response ->
-                    if (response is ResponseEntity.Success) {
-                        uiStateListener.value = state.copy(
-                            detailMaybeLikeProducts = state.detailMaybeLikeProducts.copy(
-                                productUiList = response.data.mapToUI().productUIList.map { pr ->
-                                    pr.copy(
-                                        linear = false
-                                    )
-                                },
-                                pageAmount = if (!state.detailMaybeLikeProducts.loadMore) {
-                                    response.data.pageAmount
-                                } else {
-                                    if (state.detailMaybeLikeProducts.pageIndex == state.detailMaybeLikeProducts.pageAmount) {
-                                        1
-                                    } else {
-                                        state.detailMaybeLikeProducts.pageAmount
-                                    }
-                                }
-                            ),
-                            error = null,
-                            loadingPage = false
-                        )
-                    } else {
-                        uiStateListener.value = state.copy(
-                            loadingPage = false
-                        )
-                    }
-                }
-                .flowOn(Dispatchers.Default)
-                .catch { debugLog { "fetch maybe like products error ${it.localizedMessage}" } }
-                .collect()
-        }
-    }
-
-    fun nextPageMaybeLikeProducts() {
-        uiStateListener.value = state.copy(loadingPage = true)
-        val newPage = state.detailMaybeLikeProducts.pageIndex + 1
-        if (newPage > state.detailMaybeLikeProducts.pageAmount) {
-            uiStateListener.value = state.copy(
-                detailMaybeLikeProducts = state.detailMaybeLikeProducts.copy(
-                    pageAmount = 1,
-                    pageIndex = 1
-                ),
-                loadingPage = false
-            )
-        } else {
-            uiStateListener.value = state.copy(
-                detailMaybeLikeProducts = state.detailMaybeLikeProducts.copy(
-                    pageIndex = newPage,
-                    loadMore = true
-                )
-            )
-            fetchMaybeLikeProducts()
-        }
-    }
-
-    fun nextPageBrandProducts() {
-        uiStateListener.value = state.copy(loadingPage = true)
-        val brandId = state.productDetailUI?.brandUI?.id
-        val productId = state.productDetailUI?.id
-        if (brandId != null && productId != null) {
-            val newPage = state.detailBrandList.pageIndex + 1
-            if (newPage > state.detailBrandList.pageAmount) {
-                uiStateListener.value = state.copy(
-                    detailBrandList = state.detailBrandList.copy(pageAmount = 1, pageIndex = 1),
-                    loadingPage = false
-                )
-            } else {
-                uiStateListener.value = state.copy(
-                    detailBrandList = state.detailBrandList.copy(
-                        pageIndex = newPage,
-                        loadMore = true
-                    )
-                )
-                fetchBrandProducts(productId, brandId)
-            }
-        } else {
-            uiStateListener.value = state.copy(loadingPage = false)
-        }
+        //todo - fetch present info
     }
 
     fun isLoginAlready() = accountManager.isAlreadyLogin()
@@ -400,52 +245,10 @@ class ProductDetailsFlowViewModel @Inject constructor(
         likeManager.changeFavorite(productId, !isFavorite)
     }
 
-    fun changeRating(productId: Long, rating: Float, oldRating: Float) {
-        viewModelScope.launch {
-            ratingProductManager.rate(productId, rating = rating, oldRating = oldRating)
-        }
+    fun changeRating(productId: Long, rating: Float, oldRating: Float) = viewModelScope.launch {
+        ratingProductManager.rate(productId, rating = rating, oldRating = oldRating)
     }
 
-    fun onPreOrderClick(id: Long, name: String, detailPicture: String) {
-        viewModelScope.launch {
-            val accountId = accountManager.fetchAccountId()
-            if (accountId == null) {
-                //     eventListener.emit(ProductDetailsEvents.GoToProfile)
-                eventListener.emit(ProductDetailsEvents.GoToPreOrder(id))
-            } else {
-                eventListener.emit(ProductDetailsEvents.GoToPreOrder(id))
-            }
-        }
-    }
-
-    fun onSendCommentClick(id: Long) {
-        viewModelScope.launch {
-            val accountId = accountManager.fetchAccountId()
-            if (accountId == null) {
-                eventListener.emit(ProductDetailsEvents.GoToProfile)
-            } else {
-                eventListener.emit(ProductDetailsEvents.SendComment(id))
-            }
-        }
-    }
-
-    fun onPresentInfoClick() {
-        viewModelScope.launch {
-            val goToCart = state.presentInfoOld?.moveTo == "korzina"
-            if (goToCart) {
-                eventListener.emit(ProductDetailsEvents.GoToCart)
-            } else {
-                eventListener.emit(
-                    ProductDetailsEvents.GoToPresentInfo(
-                        presentText = state.presentInfoOld?.text ?: "",
-                        progress = state.presentInfoOld?.progress ?: 0,
-                        showText = state.presentInfoOld?.showProgressText ?: false,
-                        progressBackground = state.presentInfoOld?.progressBackground ?: "",
-                    )
-                )
-            }
-        }
-    }
 
     fun showOrHideDetailText() = viewModelScope.launch {
         uiStateListener.update { s ->
@@ -523,7 +326,7 @@ class ProductDetailsFlowViewModel @Inject constructor(
         eventListener.emit(ProductDetailsEvents.GoToAboutProduct)
     }
 
-    fun loadProductDetails(productId: Long) = viewModelScope.launch {
+    fun setupProductDetails(productId: Long) = viewModelScope.launch {
         uiStateListener.update { s ->
             s.copy(
                 productDetails = s.productDetails.copy(id = productId),
@@ -664,39 +467,17 @@ class ProductDetailsFlowViewModel @Inject constructor(
 
         data class GoToRutubeVideo(val video: ProductVideoUi) : ProductDetailsEvents()
         data class GoToBrandProducts(val brandId: Long) : ProductDetailsEvents()
-        data class GoToWriteComment(val id: Long, val detailPicture: String, val name: String, val rating: Int) : ProductDetailsEvents()
+        data class GoToWriteComment(
+            val id: Long,
+            val detailPicture: String,
+            val name: String,
+            val rating: Int,
+        ) : ProductDetailsEvents()
     }
 
 
     @Immutable
     data class ProductDetailsState(
-        val productDetailUI: ProductDetailUI? = null,
-        val detailHeader: DetailHeader? = null,
-        val detailPrices: DetailPrices? = null,
-        val detailBlocks: DetailBlocks? = null,
-        val detailServices: DetailServices? = null,
-        val detailTabs: DetailTabs? = null,
-        val detailCatAndBrand: DetailCatAndBrand? = null,
-        val detailBrandList: DetailBrandList = DetailBrandList(6),
-        val detailMaybeLikeProducts: DetailMaybeLike = DetailMaybeLike(9),
-        val detailRecommendsProductsTitle: DetailsTitle? = null,
-        val detailRecommendsProducts: HomeProducts? = null,
-        val detailPromotionsTitle: DetailsTitle? = null,
-        val detailPromotions: HomePromotions? = null,
-        val detailSearchWord: DetailSearchWord? = null,
-        val detailBuyWithTitle: DetailsTitle? = null,
-        val detailBuyWith: HomeProducts? = null,
-        val detailComments: DetailComments? = null,
-        val viewedProductsTitle: DetailsTitle? = null,
-        val viewedProducts: CategoryDetailUI? = null,
-        val presentInfoOld: PresentInfoData? = null,
-        val error: ErrorState? = null,
-        val loadingPage: Boolean = false,
-        val categoryUI: CategoryUI = CategoryUI(name = ""),
-        val commentsUI: List<CommentUI> = emptyList(),
-        val buyWithProductUIList: List<ProductUI> = emptyList(),
-
-
         val showDetailText: Boolean = false,
         val showAllProperties: Boolean = false,
         val buttonIsLoading: Boolean = false,

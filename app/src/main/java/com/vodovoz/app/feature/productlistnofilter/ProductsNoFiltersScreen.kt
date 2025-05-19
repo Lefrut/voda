@@ -49,10 +49,10 @@ fun ProductsNoFiltersScreen(
                 viewModel.navigateToSearch(searchQuery)
             },
             onMicClick = {
-                //todo - implement realization
+                viewModel.navigateToSpeech()
             },
             onScanClick = {
-                //todo - implement realization
+                viewModel.navigateToQrCode()
             },
             onNavigationClick = {
                 viewModel.navigateBack()

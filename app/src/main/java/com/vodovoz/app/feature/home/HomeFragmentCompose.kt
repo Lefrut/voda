@@ -1,9 +1,6 @@
 package com.vodovoz.app.feature.home
 
-import android.Manifest
-import android.content.Intent
-import android.content.pm.PackageManager
-import android.net.Uri
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -16,44 +13,44 @@ import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
-import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import com.vodovoz.app.R
 import com.vodovoz.app.common.account.data.AccountManager
 import com.vodovoz.app.common.cart.CartManager
 import com.vodovoz.app.common.like.LikeManager
 import com.vodovoz.app.common.media.MediaManager
-import com.vodovoz.app.common.permissions.PermissionsController
 import com.vodovoz.app.common.product.rating.RatingProductManager
-import com.vodovoz.app.common.speechrecognizer.SpeechDialogFragment
 import com.vodovoz.app.common.tab.TabManager
 import com.vodovoz.app.core.android.activate
+import com.vodovoz.app.core.navigation.navigateToAboutApp
+import com.vodovoz.app.core.navigation.navigateToAllBrands
 import com.vodovoz.app.core.navigation.navigateToAnalogs
+import com.vodovoz.app.core.navigation.navigateToBrandProductList
+import com.vodovoz.app.core.navigation.navigateToBuyCertificate
 import com.vodovoz.app.core.navigation.navigateToCategoryProductList
+import com.vodovoz.app.core.navigation.navigateToHurryBuyUpProducts
+import com.vodovoz.app.core.navigation.navigateToNewProducts
 import com.vodovoz.app.core.navigation.navigateToOrderDetails
 import com.vodovoz.app.core.navigation.navigateToOrdersHistory
+import com.vodovoz.app.core.navigation.navigateToPreOrder
 import com.vodovoz.app.core.navigation.navigateToProductDetails
 import com.vodovoz.app.core.navigation.navigateToPromotionDetails
+import com.vodovoz.app.core.navigation.navigateToPromotions
 import com.vodovoz.app.core.navigation.navigateToSearch
 import com.vodovoz.app.core.navigation.navigateToStories
+import com.vodovoz.app.core.navigation.navigateToWaterApp
 import com.vodovoz.app.core.navigation.navigateToWebView
 import com.vodovoz.app.core.network.ApiConfig
-import com.vodovoz.app.data.model.common.ActionEntity
 import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.composables.placeholders.NetworkErrorPlaceholder
 import com.vodovoz.app.design_system.effects.LifecycleEffect
-import com.vodovoz.app.feature.all.promotions.AllPromotionsFragment
-import com.vodovoz.app.feature.home.popup.NewsClickListener
-import com.vodovoz.app.feature.onlyproducts.ProductsCatalogFragment
-import com.vodovoz.app.feature.productlistnofilter.PaginatedProductsCatalogWithoutFiltersFragment
+import com.vodovoz.app.feature.profile.core.ContentSearchNavigator
 import com.vodovoz.app.feature.sitestate.SiteStateManager
 import com.vodovoz.app.util.extensions.debugLog
 import dagger.hilt.android.AndroidEntryPoint
@@ -63,7 +60,7 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class HomeFragment : Fragment() {
 
-    private val flowViewModel: HomeFlowViewModel by activityViewModels()
+    private val viewModel: HomeFlowViewModel by activityViewModels()
 
     @Inject
     lateinit var ratingProductManager: RatingProductManager
@@ -90,13 +87,20 @@ class HomeFragment : Fragment() {
     lateinit var cookieManager: com.vodovoz.app.common.cookie.CookieManager
 
     @Inject
-    lateinit var permissionsControllerFactory: PermissionsController.Factory
-    private val permissionsController by lazy { permissionsControllerFactory.create(requireActivity()) }
+    lateinit var navigatorFactory: ContentSearchNavigator.Factory
+
+    private lateinit var searchNavigator: ContentSearchNavigator
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        searchNavigator = navigatorFactory.create(
+            findNavController(), this
+        )
+    }
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        observeMediaManager()
         observePushFromSiteState()
         observeDeepLinkFromSiteState()
         observeTabReselect()
@@ -108,47 +112,47 @@ class HomeFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View {
+
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.Default)
 
             setContent {
                 VodovozTheme {
-                    val viewState by flowViewModel.observeUiState().collectAsStateWithLifecycle()
+                    val viewState by viewModel.observeUiState().collectAsStateWithLifecycle()
                     val topProductLazyListState = rememberLazyListState()
                     val pullRefreshState = rememberPullToRefreshState()
 
                     when (viewState.data.uiState) {
                         HomeFlowViewModel.HomeUiState.NetworkError -> {
-                            NetworkErrorPlaceholder(onTryAgainClick = { flowViewModel.refresh() })
+                            NetworkErrorPlaceholder(
+                                onTryAgainClick = { viewModel.refresh() }
+                            )
                         }
 
                         else -> {
                             HomeScreen(
                                 viewState = viewState.data,
-                                viewModel = flowViewModel,
+                                viewModel = viewModel,
                                 pullRefreshState = pullRefreshState,
-                                topProductsLazyListState = topProductLazyListState,
-                                onNavigateToQrCodeFragment = {
-                                    navigateToQrCodeFragment()
-                                }
+                                topProductsLazyListState = topProductLazyListState
                             )
                         }
                     }
 
                     LifecycleEffect {
-                        observeEvents(topProductLazyListState = topProductLazyListState)
+                        listenEvents(topProductLazyListState)
                     }
 
                     LifecycleEffect {
-                        flowViewModel.listenCart()
+                        viewModel.listenCart()
                     }
 
                     LifecycleEffect {
-                        flowViewModel.listenFavorites(this)
+                        viewModel.listenFavorites(this)
                     }
 
                     LifecycleEffect {
-                        flowViewModel.listenLoadingProducts()
+                        viewModel.listenLoadingProducts()
                     }
 
                 }
@@ -169,143 +173,12 @@ class HomeFragment : Fragment() {
         }
     }
 
-    private fun newsClickListener(): NewsClickListener {
-        return object : NewsClickListener {
-            override fun onClick(actionEntity: ActionEntity) {
-                if (actionEntity is ActionEntity.WaterApp) {
-                    val eventParameters = "\"source\":\"bottom_alert\""
-                    accountManager.reportEvent("trekervodi_zapysk", eventParameters)
-                }
-                actionEntity.activate()
-            }
-        }
-    }
 
-    private fun navigateToQrCodeFragment() {
-        permissionsController.methodRequiresCameraPermission {
-            if (ActivityCompat.checkSelfPermission(
-                    requireContext(),
-                    Manifest.permission.CAMERA
-                ) != PackageManager.PERMISSION_GRANTED
-            ) {
-                return@methodRequiresCameraPermission
-            }
-
-            findNavController().navigate(R.id.qrCodeFragment)
-
-        }
-    }
-
-
-    //delete - this
-    internal fun ActionEntity.activate(
-        navController: NavController = findNavController(),
-        activity: FragmentActivity = requireActivity(),
-    ) {
-        val navDirect = when (this) {
-            is ActionEntity.Brand ->
-                HomeFragmentDirections.actionToPaginatedProductsCatalogWithoutFiltersFragment(
-                    PaginatedProductsCatalogWithoutFiltersFragment.DataSource.Brand(brandId = this.brandId)
-                )
-
-            is ActionEntity.Brands -> {
-                HomeFragmentDirections.actionToAllBrandsFragment(this.brandIdList.toLongArray())
-            }
-
-            is ActionEntity.Product ->
-                HomeFragmentDirections.actionToProductDetailFragment(this.productId)
-
-            is ActionEntity.Products ->
-                HomeFragmentDirections.actionToProductsCatalogFragment(
-                    ProductsCatalogFragment.DataSource.BannerProducts(categoryId = this.categoryId)
-                )
-
-            is ActionEntity.Promotion ->
-                HomeFragmentDirections.actionToPromotionDetailFragment(this.promotionId)
-
-            is ActionEntity.Promotions -> HomeFragmentDirections.actionToAllPromotionsFragment(
-                AllPromotionsFragment.DataSource.ByBanner(-1, -1) //todo - put actual realization
-            )
-
-            is ActionEntity.AllPromotions -> HomeFragmentDirections.actionToAllPromotionsFragment(
-                AllPromotionsFragment.DataSource.All
-            )
-
-            is ActionEntity.Link -> {
-                val openLinkIntent = Intent(Intent.ACTION_VIEW, Uri.parse(this.url))
-                activity.startActivity(openLinkIntent)
-                null
-            }
-
-            is ActionEntity.LinkWithCookies -> {
-                setCookie()
-                HomeFragmentDirections.actionToWebViewFragment(
-                    url,
-                    "",
-                )
-                null
-            }
-
-            is ActionEntity.Category ->
-                HomeFragmentDirections.actionToPaginatedProductsCatalogFragment(this.categoryId)
-
-            is ActionEntity.Discount -> HomeFragmentDirections.actionToPaginatedProductsCatalogWithoutFiltersFragment(
-                PaginatedProductsCatalogWithoutFiltersFragment.DataSource.HurryBuyUpProducts
-            )
-
-            is ActionEntity.Novelties -> HomeFragmentDirections.actionToPaginatedProductsCatalogWithoutFiltersFragment(
-                PaginatedProductsCatalogWithoutFiltersFragment.DataSource.NewProducts
-            )
-
-            is ActionEntity.WaterApp -> {
-                HomeFragmentDirections.actionToWaterAppFragment()
-            }
-
-            is ActionEntity.Delivery -> HomeFragmentDirections.actionToWebViewFragment(
-                ApiConfig.ABOUT_DELIVERY_URL,
-                "О доставке"
-            )
-
-            is ActionEntity.Profile -> {
-                flowViewModel.goToProfile()
-                null
-            }
-
-            is ActionEntity.BuyCertificate -> {
-                HomeFragmentDirections.actionToBuyCertificateFragment()
-            }
-        }
-        navDirect?.let { navController.navigate(navDirect) }
-    }
-
-    private fun startSpeechRecognizer() {
-        permissionsController.methodRequiresRecordAudioPermission {
-            if (ActivityCompat.checkSelfPermission(
-                    requireContext(),
-                    Manifest.permission.RECORD_AUDIO
-                ) != PackageManager.PERMISSION_GRANTED
-            ) {
-                return@methodRequiresRecordAudioPermission
-            }
-            SpeechDialogFragment().show(childFragmentManager, "TAG")
-        }
-    }
-
-    private suspend fun observeEvents(topProductLazyListState: LazyListState) {
-        flowViewModel.observeEvent().collect { event ->
+    private suspend fun listenEvents(topProductLazyListState: LazyListState): Unit =
+        viewModel.observeEvent().collect { event ->
             when (event) {
                 is HomeFlowViewModel.HomeEvents.GoToPreOrder -> {
-                    if (findNavController().currentBackStackEntry?.destination?.id == R.id.preOrderBS) {
-                        findNavController().popBackStack()
-                    }
-
-                    findNavController().navigate(
-                        HomeFragmentDirections.actionToPreOrderBS(
-                            event.id,
-                            event.name,
-                            event.detailPicture
-                        )
-                    )
+                    findNavController().navigateToPreOrder(event.id)
                 }
 
                 is HomeFlowViewModel.HomeEvents.GoToProfile -> {
@@ -317,6 +190,8 @@ class HomeFragment : Fragment() {
                     if (findNavController().currentBackStackEntry?.destination?.id == R.id.sendCommentAboutShopBottomDialog) {
                         findNavController().popBackStack()
                     }
+
+
                     findNavController().navigate(HomeFragmentDirections.actionToSendCommentAboutShopBottomDialog())
                 }
 
@@ -356,7 +231,7 @@ class HomeFragment : Fragment() {
                 }
 
                 HomeFlowViewModel.HomeEvents.ShowSpeechRecognizer -> {
-                    startSpeechRecognizer()
+                    searchNavigator.navigateToVoiceSearch()
                 }
 
                 is HomeFlowViewModel.HomeEvents.ActivateDataAllAction -> {
@@ -387,19 +262,19 @@ class HomeFragment : Fragment() {
                 is HomeFlowViewModel.HomeEvents.GoToWebView -> {
                     findNavController().navigateToWebView(
                         event.url,
-                        event.title.ifEmpty {
-                            requireContext().getString(R.string.space)
-                        }
+                        event.title.ifEmpty { requireContext().getString(R.string.space) }
                     )
                 }
 
                 is HomeFlowViewModel.HomeEvents.GoToProductAnalogs -> {
                     findNavController().navigateToAnalogs(event.productId)
                 }
+
+                HomeFlowViewModel.HomeEvents.GoToQrCode -> {
+                    searchNavigator.navigateToImageSearch()
+                }
             }
         }
-    }
-
 
 
     //todo - change actions to nav functions
@@ -411,7 +286,7 @@ class HomeFragment : Fragment() {
                     .collect { path ->
                         when (path) {
                             "mobile_app/" -> {
-                                findNavController().navigate(HomeFragmentDirections.actionToAboutAppDialogFragment())
+                                findNavController().navigateToAboutApp()
                             }
 
                             "gl/" -> {
@@ -420,7 +295,7 @@ class HomeFragment : Fragment() {
                             "kalkulyator_vody/" -> {
                                 val eventName = "trekervodi_ssilka"
                                 accountManager.reportEvent(eventName)
-                                findNavController().navigate(HomeFragmentDirections.actionToWaterAppFragment())
+                                findNavController().navigateToWaterApp()
                             }
                         }
 
@@ -430,29 +305,6 @@ class HomeFragment : Fragment() {
         }
     }
 
-
-    private fun observeMediaManager() {
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                mediaManager
-                    .observeCommentData()
-                    .collect {
-                        if (it != null && it.show) {
-                            mediaManager.dontShow()
-                            if (findNavController().currentBackStackEntry?.destination?.id == R.id.sendCommentAboutProductFragment) {
-                                findNavController().popBackStack()
-                            }
-                            findNavController().navigate(
-                                HomeFragmentDirections.actionToSendCommentAboutProductFragment(
-                                    it.productId,
-                                    it.rate
-                                )
-                            )
-                        }
-                    }
-            }
-        }
-    }
 
     //todo - change navigation functions
     private fun observePushFromSiteState() {
@@ -465,19 +317,19 @@ class HomeFragment : Fragment() {
                         when (it?.path) {
                             "AKCII" -> {
                                 val promotionId = it.id
-                                if (!promotionId.isNullOrEmpty()) {
-                                    val eventParameters = "\"ID_AKCII\": \"$promotionId\""
-                                    accountManager.reportEvent(
-                                        "Зашел в акцию (push)",
-                                        eventParameters
-                                    )
 
-                                    findNavController().navigate(
-                                        HomeFragmentDirections.actionToPromotionDetailFragment(
-                                            promotionId.toLong()
-                                        )
-                                    )
-                                }
+
+                                if (promotionId.isNullOrEmpty()) return@collect
+
+
+                                val eventParameters = "\"ID_AKCII\": \"$promotionId\""
+                                accountManager.reportEvent(
+                                    "Зашел в акцию (push)",
+                                    eventParameters
+                                )
+
+                                findNavController().navigateToPromotionDetails(promotionId.toLong())
+
                             }
 
                             "TOVAR" -> {
@@ -489,11 +341,8 @@ class HomeFragment : Fragment() {
                                         eventParameters
                                     )
 
-                                    findNavController().navigate(
-                                        HomeFragmentDirections.actionToProductDetailFragment(
-                                            productId.toLong()
-                                        )
-                                    )
+
+                                    findNavController().navigateToProductDetails(productId.toLong())
                                 }
                             }
 
@@ -506,10 +355,8 @@ class HomeFragment : Fragment() {
                                         eventParameters
                                     )
 
-                                    findNavController().navigate(
-                                        HomeFragmentDirections.actionToPaginatedProductsCatalogFragment(
-                                            sectionId.toLong()
-                                        )
+                                    findNavController().navigateToCategoryProductList(
+                                        sectionId.toLong()
                                     )
                                 }
                             }
@@ -523,47 +370,29 @@ class HomeFragment : Fragment() {
                                         eventParameters
                                     )
 
-                                    findNavController().navigate(
-                                        HomeFragmentDirections.actionToOrderDetailsFragment(
-                                            orderId.toLong()
-                                        )
-                                    )
+                                    findNavController().navigateToOrderDetails(orderId.toLong())
                                 }
                             }
 
                             "vsenovinki" -> {
-                                findNavController().navigate(
-                                    HomeFragmentDirections.actionToPaginatedProductsCatalogWithoutFiltersFragment(
-                                        PaginatedProductsCatalogWithoutFiltersFragment.DataSource.NewProducts
-                                    )
-                                )
+                                findNavController().navigateToNewProducts()
                             }
 
                             "vseskidki" -> {
-                                findNavController().navigate(
-                                    HomeFragmentDirections.actionToPaginatedProductsCatalogWithoutFiltersFragment(
-                                        PaginatedProductsCatalogWithoutFiltersFragment.DataSource.HurryBuyUpProducts
-                                    )
-                                )
+                                findNavController().navigateToHurryBuyUpProducts()
                             }
 
                             "BRAND" -> {
                                 val brandId = it.id
                                 if (!brandId.isNullOrEmpty()) {
-                                    findNavController().navigate(
-                                        HomeFragmentDirections.actionToPaginatedProductsCatalogWithoutFiltersFragment(
-                                            PaginatedProductsCatalogWithoutFiltersFragment.DataSource.Brand(
-                                                brandId.toLong()
-                                            )
-                                        )
-                                    )
+                                    findNavController().navigateToBrandProductList(brandId.toLong())
                                 } else {
-                                    findNavController().navigate(HomeFragmentDirections.actionToAllBrandsFragment())
+                                    findNavController().navigateToAllBrands()
                                 }
                             }
 
                             "BRANDY" -> {
-                                findNavController().navigate(HomeFragmentDirections.actionToAllBrandsFragment())
+                                findNavController().navigateToAllBrands()
                                 siteStateManager.clearPushListener()
                             }
 
@@ -612,36 +441,31 @@ class HomeFragment : Fragment() {
                             }
 
                             "vseakcii" -> {
-                                findNavController().navigate(
-                                    HomeFragmentDirections.actionToAllPromotionsFragment(
-                                        AllPromotionsFragment.DataSource.All
-                                    )
-                                )
+                                findNavController().navigateToPromotions()
                             }
 
                             "URL" -> {
                                 val url = it.id ?: return@collect
-                                findNavController().navigate(
-                                    HomeFragmentDirections.actionToWebViewFragment(
-                                        url,
-                                        ""
-                                    )
+
+                                findNavController().navigateToWebView(
+                                    url,
+                                    requireContext().getString(R.string.space)
                                 )
                             }
 
                             "trekervodi" -> {
                                 val eventName = "trekervodi_push"
                                 accountManager.reportEvent(eventName)
-                                findNavController().navigate(HomeFragmentDirections.actionToWaterAppFragment())
+                                findNavController().navigateToWaterApp()
                             }
 
                             "profil" -> {
-                                flowViewModel.goToProfile()
+                                viewModel.goToProfile()
                             }
 
                             "pokypkasertificat" -> {
                                 debugLog { "pokypkasertificat push" }
-                                findNavController().navigate(HomeFragmentDirections.actionToBuyCertificateFragment())
+                                findNavController().navigateToBuyCertificate()
                             }
 
                             null -> {}
