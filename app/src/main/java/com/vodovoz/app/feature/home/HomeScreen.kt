@@ -30,7 +30,6 @@ fun HomeScreen(
     viewModel: HomeFlowViewModel,
     pullRefreshState: PullToRefreshState,
     topProductsLazyListState: LazyListState,
-    onNavigateToQrCodeFragment: () -> Unit,
 ) {
     Scaffold(
         topBar = {
@@ -42,7 +41,7 @@ fun HomeScreen(
                     viewModel.showSpeechRecognizer()
                 },
                 onScanClick = {
-                    onNavigateToQrCodeFragment()
+                    viewModel.navigateToQrCode()
                 },
                 onSearchClick = {
                     viewModel.navigateToSearch()

@@ -95,7 +95,6 @@ import com.vodovoz.app.data.parser.response.user.UserDataResponseJsonParser.pars
 import com.vodovoz.app.data.parser.response.viewed.ViewedProductSliderResponseJsonParser.parseViewedProductsSliderResponse
 import com.vodovoz.app.feature.bottom.services.detail.model.ServicesDetailParser.parseServiceDetail
 import com.vodovoz.app.feature.map.api.MapKitFlowApi
-import com.vodovoz.app.feature.productdetail.present.model.PresentInfo
 import com.vodovoz.app.feature.sitestate.model.SiteStateResponse
 import kotlinx.coroutines.coroutineScope
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
@@ -211,15 +210,6 @@ class MainRepository @Inject constructor(
         )
     }
 
-    // "newmobile/details/podarki.php?action=podarki&userid=" + User.getInstance().getuser_id() + "&id=" + ID_products
-    //Информация о подарках на детальном экране
-    suspend fun fetchPresentInfo(userid: Long, productId: Long): PresentInfo {
-        return api.fetchPresentInfo(
-            action = "podarki",
-            userId = userid,
-            productId = productId
-        )
-    }
 
     //Основная информация об избранных продуктах
     suspend fun fetchFavoriteProducts(

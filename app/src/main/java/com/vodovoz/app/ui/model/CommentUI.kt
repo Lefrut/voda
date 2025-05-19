@@ -2,7 +2,6 @@ package com.vodovoz.app.ui.model
 
 import androidx.compose.runtime.Immutable
 import com.vodovoz.app.common.content.itemadapter.Item
-import com.vodovoz.app.feature.product_comments.model.CommentImage
 
 @Immutable
 data class CommentUI(
@@ -13,7 +12,6 @@ data class CommentUI(
     val date: String? = null,
     val rating: Int? = null,
     val ratingComment: String = "",
-    val commentImages: List<CommentImage>? = null,
     val forDetailPage: Boolean = false,
 ) : Item {
 

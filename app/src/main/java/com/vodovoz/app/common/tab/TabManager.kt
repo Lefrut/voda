@@ -53,6 +53,9 @@ class TabManager @Inject constructor(
     private val tabVisibilityListener = MutableStateFlow(true)
     fun observeTabVisibility() = tabVisibilityListener.asStateFlow()
 
+    private val tabWindowInsetsListener = MutableStateFlow(false)
+    fun observeTabWindowInsets() = tabWindowInsetsListener.asStateFlow()
+
     fun setAddressesRefreshState(refresh: Boolean) {
         addressesRefreshListener.value = refresh
     }
@@ -101,6 +104,10 @@ class TabManager @Inject constructor(
 
     fun changeTabVisibility(vis: Boolean) {
         tabVisibilityListener.value = vis
+    }
+
+    fun changeTabWindowInsets(have: Boolean) {
+        tabWindowInsetsListener.value = have
     }
 
     fun clearBottomNavCartState() {

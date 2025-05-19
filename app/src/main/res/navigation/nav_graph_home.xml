@@ -6,6 +6,12 @@
     app:startDestination="@id/homeFragment">
 
     <fragment
+        android:id="@+id/aboutAppFragment"
+        android:name="com.vodovoz.app.feature.about_app.AboutAppFragment"
+        android:label="AboutAppFragment" />
+
+
+    <fragment
         android:id="@+id/writeCommentFragment"
         android:name="com.vodovoz.app.feature.write_comment.WriteCommentFragment"
         android:label="WriteCommentFragment">

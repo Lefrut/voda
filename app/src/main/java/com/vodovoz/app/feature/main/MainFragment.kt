@@ -11,8 +11,10 @@ import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsCompat.CONSUMED
 import androidx.core.view.isVisible
+import androidx.core.view.updatePadding
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -79,9 +81,7 @@ class MainFragment : BaseFragment() {
     override fun layout(): Int = R.layout.fragment_main
 
     private val binding: FragmentMainBinding by viewBinding {
-        FragmentMainBinding.bind(
-            contentView
-        )
+        FragmentMainBinding.bind(contentView)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -92,6 +92,7 @@ class MainFragment : BaseFragment() {
         observeProfileState()
 
         observeTabVisibility()
+        observeTabWindowInsets()
 
         checkForUpdate()
 
@@ -100,11 +101,18 @@ class MainFragment : BaseFragment() {
         ) { _, _ ->
             return@setOnApplyWindowInsetsListener CONSUMED
         }
+
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { rootView, insets ->
+            val navBarInsets = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
+            rootView.updatePadding(bottom = navBarInsets.bottom)
+            return@setOnApplyWindowInsetsListener insets
+        }
     }
 
     private fun checkForUpdate() {
         appUpdateController.checkForUpdate(registerForActivityResult<IntentSenderRequest, ActivityResult>(
-            ActivityResultContracts.StartIntentSenderForResult(), object : ActivityResultCallback<ActivityResult?> {
+            ActivityResultContracts.StartIntentSenderForResult(),
+            object : ActivityResultCallback<ActivityResult?> {
 
                 override fun onActivityResult(result: ActivityResult?) {
                     if (result == null) return
@@ -131,27 +139,31 @@ class MainFragment : BaseFragment() {
         viewModel.isBottomBarInitialized = false
     }
 
-    private fun observeTabVisibility() {
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                tabManager
-                    .observeTabVisibility()
-                    .collect { isVisible ->
-                        binding.nvNavigation.isVisible = isVisible
-                    }
-            }
+    private fun observeTabVisibility() = lifecycleScope.launch {
+        repeatOnLifecycle(Lifecycle.State.STARTED) {
+            tabManager
+                .observeTabVisibility()
+                .collect { isVisible ->
+                    binding.nvNavigation.isVisible = isVisible
+                }
+        }
+
+    }
+
+    private fun observeTabWindowInsets() = lifecycleScope.launch {
+        repeatOnLifecycle(Lifecycle.State.STARTED) {
+            tabManager
+                .observeTabWindowInsets()
+                .collect { has ->
+                    val insets = ViewCompat.getRootWindowInsets(binding.root)
+                    val bottomPadding = insets?.getInsets(
+                        WindowInsetsCompat.Type.navigationBars()
+                    )?.bottom ?: 0
+                    binding.root.updatePadding(bottom = if (has) bottomPadding else 0)
+                }
         }
     }
 
-    private fun View.animateTabVisibility(visible: Boolean, duration: Long = 200) {
-        if (visible) {
-            alpha = 0f
-            isVisible = true
-            animate().alpha(1f).setDuration(duration).start()
-        } else {
-            isVisible = false
-        }
-    }
 
     private fun observeCartState() {
         lifecycleScope.launch {

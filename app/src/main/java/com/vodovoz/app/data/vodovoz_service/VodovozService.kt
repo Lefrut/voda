@@ -65,6 +65,18 @@ interface VodovozService {
 
 
     /**
+    * Past purchases requests
+    * */
+    @GET("profile/historyorder/proshlpokipki.php?action=getLastFifty")
+    suspend fun getPastPurchasesDetails(
+        @Query("userid") userId: Long?,
+        @Query("nav") page: Int = 1,
+        @Query("sort") sort: String?= null,
+        @Query("ascdesc") order: String? = null,
+        @Query("sect") categoryId: Int? = null,
+    ): Response<VodovozResponseDTO<ProductsSectionDTO>>
+
+    /**
      * Push requests
      * */
 
@@ -143,7 +155,6 @@ interface VodovozService {
     /**
      * OrdersHistory requests
      * */
-    //todo - check this
     @GET("profile/historyorder/spisokzakazov.php?action=spisok")
     suspend fun getOrdersHistoryDetails(
         @Query("userid") userId: Long?,

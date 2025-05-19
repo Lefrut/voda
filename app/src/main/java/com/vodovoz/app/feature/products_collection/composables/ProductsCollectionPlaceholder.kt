@@ -21,7 +21,6 @@ import com.valentinilk.shimmer.ShimmerBounds
 import com.valentinilk.shimmer.rememberShimmer
 import com.vodovoz.app.design_system.composables.decoration.SkeletonBox
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun ProductsCollectionPlaceholder(modifier: Modifier = Modifier) {
     val shimmerState = rememberShimmer(shimmerBounds = ShimmerBounds.View)

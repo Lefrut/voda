@@ -53,6 +53,10 @@ fun SortModel.toUi(): SortUi {
     )
 }
 
+fun List<SortModel>.mapToUi(): List<SortUi>{
+    return map { it.toUi() }
+}
+
 fun SortUi.toDomain(): SortModel {
     return SortModel(
         name = name,

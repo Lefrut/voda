@@ -1,6 +1,5 @@
 package com.vodovoz.app.ui.model.custom
 
-import com.vodovoz.app.feature.product_comments.model.CommentImage
 import com.vodovoz.app.ui.model.CategoryDetailUI
 import com.vodovoz.app.ui.model.CategoryUI
 import com.vodovoz.app.ui.model.CommentUI
@@ -13,7 +12,6 @@ class ProductDetailBundleUI(
     val serviceUIList: List<ServiceUI> = listOf(),
     val categoryUI: CategoryUI,
     val commentUIList: List<CommentUI> = listOf(),
-    val commentImages: List<CommentImage> = listOf(),
     val searchWordList: List<String> = listOf(),
     val maybeLikeProductUIList: List<ProductUI> = listOf(),
     val promotionsAction: PromotionsActionUI? = null,

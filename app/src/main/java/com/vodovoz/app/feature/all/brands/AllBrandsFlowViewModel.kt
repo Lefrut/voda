@@ -32,15 +32,13 @@ import javax.inject.Inject
 @HiltViewModel
 class AllBrandsFlowViewModel @Inject constructor(
     savedState: SavedStateHandle,
-    private val repository: MainRepository,
-//    private val dataRepository: DataRepository,
     private val accountManager: AccountManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
 ) : PagingContractViewModel<AllBrandsFlowViewModel.AllBrandsState, AllBrandsFlowViewModel.AllBrandsEvents>(
     AllBrandsState()
 ) {
 
-    private var dataSource = savedState.get<LongArray>("brandIdList")
+    private var dataSource= savedState.get<LongArray>("brandIdList")
 
     private fun fetchBrands() = viewModelScope.launch {
 
@@ -82,27 +80,6 @@ class AllBrandsFlowViewModel @Inject constructor(
         uiStateListener.value =
             state.copy(loadingPage = true, page = 1, loadMore = false, bottomItem = null)
         fetchBrands()
-    }
-
-    fun filterByQuery(query: String) {
-        val newList = if (query.isNotBlank()) {
-            state.data.items.filter { it.name.contains(query, ignoreCase = true) }
-        } else {
-            state.data.items
-        }
-        if (newList == state.data.filteredItems) return
-        uiStateListener.value = state.copy(
-            data = state.data.copy(
-                filteredItems = newList,
-                scrollToTop = true
-            )
-        )
-    }
-
-    fun updateScrollToTop() {
-        if (state.data.scrollToTop) {
-            uiStateListener.value = state.copy(data = state.data.copy(scrollToTop = false))
-        }
     }
 
     fun isLoginAlready() = accountManager.isAlreadyLogin()

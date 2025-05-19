@@ -39,7 +39,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class PastPurchasesFragment : BaseFragment() {
+class PastPurchasesFragment1 : BaseFragment() {
 
     override fun layout(): Int = R.layout.fragment_past_purchases_flow
 
@@ -127,6 +127,7 @@ class PastPurchasesFragment : BaseFragment() {
                                 tabManager.setAuthRedirect(findNavController().graph.id)
                                 tabManager.selectTab(R.id.graph_profile)
                             }
+                            else -> {}
                         }
                     }
             }
