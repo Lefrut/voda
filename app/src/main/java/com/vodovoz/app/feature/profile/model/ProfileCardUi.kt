@@ -13,6 +13,7 @@ data class ProfileCardUi(
     val descriptionColor: Color,
     val imageUrl: String,
     val id: String,
+    val popupWindow: ProfilePopupWindowUi?
 )
 
 fun List<ProfileCardModel>.mapToUi(): List<ProfileCardUi>{
@@ -26,6 +27,7 @@ fun ProfileCardModel.toUi(): ProfileCardUi{
         description = description,
         descriptionColor = Color.fromHexOrUnspecified(descriptionColor),
         imageUrl = imageUrl,
-        id = id
+        id = id,
+        popupWindow = popupWindow?.toUi()
     )
 }

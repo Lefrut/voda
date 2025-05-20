@@ -33,7 +33,7 @@ import com.vodovoz.app.feature.profile.model.ProfileChatItemUi
 import com.vodovoz.app.feature.profile.model.ProfileChatsPopupWindowUi
 import com.vodovoz.app.feature.profile.model.ProfileMenuItemUi
 import com.vodovoz.app.feature.profile.model.ProfileWalletItemUi
-import com.vodovoz.app.feature.profile.model.ProfileWalletPopupWindowUi
+import com.vodovoz.app.feature.profile.model.ProfilePopupWindowUi
 import com.vodovoz.app.feature.profile.model.UserInfoBlockUi
 import com.vodovoz.app.feature.profile.model.mapToUi
 import com.vodovoz.app.feature.profile.model.toUi
@@ -425,29 +425,29 @@ class ProfileFlowViewModel @Inject constructor(
     fun activateWalletItem(walletItem: ProfileWalletItemUi) = viewModelScope.launch {
         when (walletItem.id) {
             "balance" -> {
-                showBalanceBottomSheet(walletItem)
+                showTextBottomSheet(walletItem.popupWindow ?: return@launch)
             }
 
             "bonus" -> {
-
+                showTextBottomSheet(walletItem.popupWindow ?: return@launch)
             }
 
             else -> {}
         }
     }
 
-    private fun showBalanceBottomSheet(walletItem: ProfileWalletItemUi) = viewModelScope.launch {
+    private fun showTextBottomSheet(data: ProfilePopupWindowUi) = viewModelScope.launch {
         uiStateListener.updateData { s ->
             s.copy(
-                showBalanceBS = true,
-                currentBalanceBSData = walletItem.popupWindow
+                showTextBS = true,
+                currentTextBSData = data
             )
         }
     }
 
-    fun closeBalanceBottomSheet() = viewModelScope.launch {
+    fun closeTextBottomSheet() = viewModelScope.launch {
         uiStateListener.updateData { s ->
-            s.copy(showBalanceBS = false)
+            s.copy(showTextBS = false)
         }
     }
 
@@ -459,8 +459,8 @@ class ProfileFlowViewModel @Inject constructor(
             "treker" -> {
                 eventListener.emit(ProfileEvents.GoToWaterApp)
             }
-            "anketa" -> {
-
+            "" -> {
+                showTextBottomSheet(profileCard.popupWindow ?: return@launch)
             }
         }
     }
@@ -482,10 +482,10 @@ class ProfileFlowViewModel @Inject constructor(
         val normalMenu: List<ProfileMenuItemUi> = emptyList(),
         val showAdvertisingBS: Boolean = false,
         val showSupportingBS: Boolean = false,
-        val showBalanceBS: Boolean = false,
+        val showTextBS: Boolean = false,
         val showRefreshIndicator: Boolean =false,
 
-        val currentBalanceBSData: ProfileWalletPopupWindowUi? = null,
+        val currentTextBSData: ProfilePopupWindowUi? = null,
         val currentSupportingBSData: ProfileChatsPopupWindowUi = ProfileChatsPopupWindowUi.Empty,
         val currentAdvertising: AboutAdvertisingUi = AboutAdvertisingUi.Empty,
 

@@ -3,6 +3,7 @@ package com.vodovoz.app.feature.bottom.services.detail.composables
 import android.annotation.SuppressLint
 import android.view.View
 import android.view.ViewGroup
+import android.webkit.WebSettings
 import android.webkit.WebView
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -26,12 +27,14 @@ import androidx.compose.ui.viewinterop.AndroidView
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
+import com.vodovoz.app.core.network.ApiConfig
 import com.vodovoz.app.core.network.VodovozWebConfig
 import com.vodovoz.app.design_system.composables.button.VodovozButtonsColumn
 import com.vodovoz.app.design_system.composables.card.GridProductCard
 import com.vodovoz.app.design_system.model.ColorfulButtonUi
 import com.vodovoz.app.design_system.model.ProductUi
 import com.vodovoz.app.feature.bottom.services.detail.model.ServiceProductsUi
+import com.vodovoz.app.util.extensions.prepareServiceHtml
 
 @SuppressLint("SetJavaScriptEnabled")
 @Suppress("NonSkippableComposable")
@@ -82,25 +85,33 @@ fun ServiceDetailBody(
             }
 
             AndroidView(
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
                 factory = { context ->
                     WebView(context).apply {
                         layoutParams = ViewGroup.LayoutParams(
                             ViewGroup.LayoutParams.MATCH_PARENT,
                             ViewGroup.LayoutParams.WRAP_CONTENT
                         )
-                        scrollBarStyle = View.SCROLLBARS_INSIDE_OVERLAY
                         isVerticalScrollBarEnabled = false
-                        settings.javaScriptEnabled = true
-                        settings.blockNetworkImage = false
-                        settings.loadsImagesAutomatically = true
+                        isHorizontalScrollBarEnabled = false
+
+                        settings.apply {
+                            javaScriptEnabled = true
+                            blockNetworkImage = false
+                            loadsImagesAutomatically = true
+
+                            useWideViewPort = true
+                            loadWithOverviewMode = true
+
+                            layoutAlgorithm = WebSettings.LayoutAlgorithm.TEXT_AUTOSIZING
+                        }
                     }
 
                 },
                 update = { webView ->
                     webView.loadDataWithBaseURL(
-                        VodovozWebConfig.VODOVOZ_URL,
-                        html,
+                        ApiConfig.VODOVOZ_URL,
+                        html.prepareServiceHtml(),
                         "text/html",
                         "utf-8",
                         null

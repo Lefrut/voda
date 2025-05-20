@@ -21,7 +21,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
-class ServiceOrderFragment : BaseFragment() {
+class ServiceOrderFragment1 : BaseFragment() {
 
     override fun layout() = R.layout.fragment_service_order
 

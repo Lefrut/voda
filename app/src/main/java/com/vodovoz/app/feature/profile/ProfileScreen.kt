@@ -16,7 +16,6 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.Indicator
 import androidx.compose.material3.pulltorefresh.PullToRefreshState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -169,16 +168,16 @@ fun ProfileScreen(
         )
     }
 
-    val currentBalanceBSData = viewState.currentBalanceBSData
-    if(viewState.showBalanceBS && currentBalanceBSData !=null){
+    val currentBalanceBSData = viewState.currentTextBSData
+    if(viewState.showTextBS && currentBalanceBSData !=null){
         InfoBottomSheet(
             title = currentBalanceBSData.title,
             text = currentBalanceBSData.text,
             onDismissRequest = {
-                viewModel.closeBalanceBottomSheet()
+                viewModel.closeTextBottomSheet()
             },
             onApply = {
-                viewModel.closeBalanceBottomSheet()
+                viewModel.closeTextBottomSheet()
             }
         )
     }

@@ -13,5 +13,7 @@ data class PROFILE_BLOCK_DTO(
     @Json(name = "IMAGE")
     val IMAGE: String?,
     @Json(name = "ID")
-    val ID: String?
+    val ID: String?,
+    @Json(name = "TEXT_OKNO")
+    val TEXT_OKNO: PROFILE_TEXT_OKNO_DTO?
 )

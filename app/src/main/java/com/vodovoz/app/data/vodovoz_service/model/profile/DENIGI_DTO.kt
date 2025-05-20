@@ -17,5 +17,5 @@ data class DENIGI_DTO(
     @Json(name = "ID")
     val ID: String?,
     @Json(name = "TEXT_OKNO")
-    val TEXT_OKNO: DENIGI_TEXT_OKNO_DTO?
+    val TEXT_OKNO: PROFILE_TEXT_OKNO_DTO?
 )

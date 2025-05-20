@@ -3,7 +3,7 @@ package com.vodovoz.app.feature.profile.model
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
 import com.vodovoz.app.domain.general.model.ProfileWalletItemModel
-import com.vodovoz.app.domain.general.model.ProfileWalletPopupWindowModel
+import com.vodovoz.app.domain.general.model.ProfilePopupWindowModel
 import com.vodovoz.app.util.fromHexOrUnspecified
 
 @Immutable
@@ -15,7 +15,7 @@ data class ProfileWalletItemUi(
     val descriptionColor: Color,
     val imageUrl: String,
     val id: String,
-    val popupWindow: ProfileWalletPopupWindowUi? = null,
+    val popupWindow: ProfilePopupWindowUi? = null,
 )
 
 fun List<ProfileWalletItemModel>.mapToUi(): List<ProfileWalletItemUi>{
@@ -36,13 +36,13 @@ fun ProfileWalletItemModel.toUi(): ProfileWalletItemUi {
 }
 
 @Immutable
-data class ProfileWalletPopupWindowUi(
+data class ProfilePopupWindowUi(
     val title: String,
     val text: String,
 )
 
-fun ProfileWalletPopupWindowModel.toUi(): ProfileWalletPopupWindowUi {
-    return ProfileWalletPopupWindowUi(
+fun ProfilePopupWindowModel.toUi(): ProfilePopupWindowUi {
+    return ProfilePopupWindowUi(
         title = title,
         text = text
     )
