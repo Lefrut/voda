@@ -14,13 +14,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -30,11 +31,14 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.fromHtml
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -60,6 +64,7 @@ fun OrdersHistoryBody(
     searchMode: Boolean,
     currentFilters: List<OrderFilterUi>,
     items: List<OrdersHistoryItemUi>,
+    appendItems: Boolean,
     filters: List<OrderFilterUi>,
     onProductSee: (Int) -> Unit,
     onFilterSelect: (OrderFilterUi) -> Unit,
@@ -129,6 +134,17 @@ fun OrdersHistoryBody(
                 onButtonClick = onItemButtonClick
             )
         }
+
+        if (appendItems) {
+            item {
+                CircularProgressIndicator(
+                    color = MaterialTheme.colorScheme.primary,
+                    strokeWidth = 3.dp,
+                    modifier = Modifier.padding(vertical = 2.dp).fillParentMaxWidth().wrapContentWidth().size(26.dp),
+                    trackColor = Color.Transparent
+                )
+            }
+        }
     }
 }
 
@@ -152,8 +168,7 @@ fun OrdersHistoryItemCard(
         Row(modifier = Modifier, horizontalArrangement = Arrangement.SpaceBetween) {
             Row(Modifier.weight(1f)) {
                 Text(
-                    text = orderHistoryItem.description,
-                    modifier = Modifier.width(112.dp),
+                    text = AnnotatedString.fromHtml(orderHistoryItem.description),
                     color = MaterialTheme.colorScheme.surfaceTint,
                     style = MaterialTheme.typography.bodySmall
                 )
@@ -167,13 +182,13 @@ fun OrdersHistoryItemCard(
 
             orderHistoryItem.status?.let {
                 OrderStatusChip(
-                    modifier = Modifier.padding(start = 4.dp),
+                    modifier = Modifier.padding(start = 12.dp),
                     status = orderHistoryItem.status
                 )
             }
         }
 
-        if(orderHistoryItem.address.isNotEmpty()){
+        if (orderHistoryItem.address.isNotEmpty()) {
             Text(
                 modifier = Modifier.padding(top = 8.dp),
                 text = orderHistoryItem.address,

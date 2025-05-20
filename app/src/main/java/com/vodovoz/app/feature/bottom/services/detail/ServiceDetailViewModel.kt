@@ -140,6 +140,7 @@ class ServiceDetailViewModel @Inject constructor(
             (count + 1) * coefficient
         }
 
+        //todo - add gift
         cartManager.change(product.id, newQuantity)
     }
 
@@ -151,10 +152,12 @@ class ServiceDetailViewModel @Inject constructor(
             (count - 1).coerceAtLeast(0) * coefficient
         }
 
+        //todo - add gift
         cartManager.change(product.id, newQuantity)
     }
 
     fun navigateToServiceOrder(button: ColorfulButtonUi) = viewModelScope.launch {
+        _events.emit(ServiceDetailEvent.GoToServiceOrder(button.id))
     }
 
 }

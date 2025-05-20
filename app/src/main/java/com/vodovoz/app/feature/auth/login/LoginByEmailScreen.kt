@@ -2,8 +2,11 @@ package com.vodovoz.app.feature.auth.login
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
@@ -22,7 +25,7 @@ fun LoginByEmailScreen(
         modifier = Modifier
             .background(MaterialTheme.colorScheme.background)
             .fillMaxSize()
-            .systemBarsPadding()
+            .windowInsetsPadding(WindowInsets.statusBars)
     ) {
         VodovozTopBar(
             onBack = { viewModel.navigateBack() },

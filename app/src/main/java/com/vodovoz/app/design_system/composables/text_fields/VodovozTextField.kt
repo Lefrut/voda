@@ -61,7 +61,7 @@ fun VodovozTextField(
         MutableInteractionSource()
     }
     val isFocused by interactionSource.collectIsFocusedAsState()
-    val isMessage = field.id.contains("message", true) || field.id == "dr127"
+    val isMessage = field.id.contains("message", true) || field.id == "dr127" || field.id == "dr53"
     val visualTransformation = when (field.keyboardType) {
         KeyboardType.Phone -> PhoneNumberVisualTransformation()
         KeyboardType.Password -> if (!field.isValueVisible) {

@@ -18,6 +18,7 @@ import com.vodovoz.app.core.navigation.navigateToNewProducts
 import com.vodovoz.app.core.navigation.navigateToProductDetails
 import com.vodovoz.app.core.navigation.navigateToPromotionDetails
 import com.vodovoz.app.core.navigation.navigateToPromotions
+import com.vodovoz.app.core.navigation.navigateToServiceDetails
 import com.vodovoz.app.core.navigation.navigateToWaterApp
 import com.vodovoz.app.core.navigation.navigateToWebView
 import com.vodovoz.app.core.network.VODOVOZ_URL
@@ -52,7 +53,7 @@ fun DataAllAction.activate(
         }
 
         DataAllAction.Delivery -> {
-            navController.navigateToWebView(VodovozWebConfig.ABOUT_PAYMENT_URL, " ")
+            navController.navigateToWebView(VodovozWebConfig.ABOUT_DELIVERY_URL, " ")
         }
 
         DataAllAction.Profile -> {
@@ -70,6 +71,23 @@ fun DataAllAction.activate(
 
         DataAllAction.AllServices -> {
             navController.navigateToAllServices()
+        }
+
+        DataAllAction.CoolerRental -> {
+            navController.navigateToServiceDetails(98121)
+        }
+
+        DataAllAction.FreeCoolerRental -> {
+            navController.navigateToServiceDetails(98123)
+        }
+
+        DataAllAction.CoolerRepair -> {
+            navController.navigateToServiceDetails(98886)
+
+        }
+
+        DataAllAction.SanitaryMaintenance -> {
+            navController.navigateToServiceDetails(98887)
         }
 
         DataAllAction.Unknown -> {

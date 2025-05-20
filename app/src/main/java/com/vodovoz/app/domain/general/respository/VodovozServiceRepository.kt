@@ -53,12 +53,16 @@ import com.vodovoz.app.domain.general.model.order.OrdersHistoryDetailsModel
 import com.vodovoz.app.domain.general.model.order.OrdersHistoryItemModel
 import com.vodovoz.app.domain.general.model.service.AllServicesDetailsModel
 import com.vodovoz.app.domain.general.model.service.ServiceDetailsModel
+import com.vodovoz.app.domain.general.model.service.ServiceOrderDetailsModel
 import com.vodovoz.app.feature.preorder.model.FieldUi
 import kotlinx.coroutines.flow.Flow
 import java.io.File
 
 interface VodovozServiceRepository {
 
+    fun orderService(serviceType: String, fields: List<FieldModel>): Flow<Result<VodovozPlaceholderModel>>
+
+    fun getServiceOrderDetails(serviceType: String): Flow<Result<ServiceOrderDetailsModel>>
 
     fun removeFirebaseToken(token: String): Flow<Result<String>>
 

@@ -136,7 +136,7 @@ val KeyboardTypeValidator = FieldValidator { field ->
 val NameValidator = FieldValidator { field ->
     val value = field.value
     when {
-        field.id == "name" || field.id == "lastname" -> {
+        field.id == "name" || field.id == "lastname" || field.id == "dr49"-> {
             FieldValidationResult.from(value.length in 3..30 && value.isNotBlank())
         }
 
@@ -147,7 +147,7 @@ val NameValidator = FieldValidator { field ->
 val MessageValidator = FieldValidator { field ->
     val value = field.value
     when {
-        field.id == "dr127" || field.id.contains("message") -> {
+        field.id == "dr127" || field.id.contains("message") || field.id == "dr53" -> {
             FieldValidationResult.from(value.length in 15..1000 && value.isNotBlank())
         }
 
@@ -189,7 +189,7 @@ fun FieldUi.getErrorText(getStringResource: (Int) -> String): String {
             getStringResource(R.string.supporting_text_email)
         }
 
-        id == "name" || id == "dr123" -> {
+        id == "name" || id == "dr123" || id == "dr49" -> {
             getStringResource(R.string.supporting_text_name)
         }
 
@@ -201,7 +201,7 @@ fun FieldUi.getErrorText(getStringResource: (Int) -> String): String {
             getStringResource(R.string.supporting_text_password)
         }
 
-        id == "message" || id == "dr127" -> {
+        id == "message" || id == "dr127" || id == "dr53" -> {
             getStringResource(R.string.supporting_text_message)
         }
 
@@ -251,8 +251,8 @@ fun List<FieldModel>.mapToUi(): List<FieldUi> {
 fun FieldModel.toUi(): FieldUi {
 
     val keyboardType = when (id.lowercase()) {
-        "email", "emaildryg", "dr125" -> KeyboardType.Email
-        "tel", "dr124", "phone" -> KeyboardType.Phone
+        "email", "emaildryg", "dr125", "dr51" -> KeyboardType.Email
+        "tel", "dr124", "phone", "dr50" -> KeyboardType.Phone
         "pass", "parol" -> KeyboardType.Password
         "data", "date" -> KeyboardType.Decimal
         else -> when (valueType.lowercase()) {

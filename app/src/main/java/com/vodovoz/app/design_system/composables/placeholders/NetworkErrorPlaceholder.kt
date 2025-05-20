@@ -26,8 +26,7 @@ fun NetworkErrorPlaceholder(modifier: Modifier = Modifier, onTryAgainClick: () -
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-            .systemBarsPadding(),
+            .background(MaterialTheme.colorScheme.background),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 

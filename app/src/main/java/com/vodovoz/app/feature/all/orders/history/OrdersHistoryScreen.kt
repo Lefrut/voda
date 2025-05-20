@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.paging.LoadState
 import com.vodovoz.app.design_system.composables.placeholders.LoadingPlaceholder
 import com.vodovoz.app.design_system.composables.placeholders.NetworkErrorPlaceholder
 import com.vodovoz.app.design_system.composables.placeholders.VodovozPlaceholder
@@ -58,6 +59,7 @@ fun OrdersHistoryScreen(
             AllOrdersFlowViewModel.AllOrdersUiState.Body -> {
                 OrdersHistoryBody(
                     items = viewState.items,
+                    appendItems = viewState.loadStates.append is LoadState.Loading,
                     searchMode = viewState.searchMode,
                     currentFilters = viewState.currentFilters,
                     filters = viewState.filters,

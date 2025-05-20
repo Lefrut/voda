@@ -13,6 +13,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.fragment.findNavController
 import com.vodovoz.app.core.navigation.navigateToAnalogs
 import com.vodovoz.app.core.navigation.navigateToProductDetails
+import com.vodovoz.app.core.navigation.navigateToServiceDetails
+import com.vodovoz.app.core.navigation.navigateToServiceOrder
 import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.effects.LifecycleEffect
 import com.vodovoz.app.feature.bottom.services.detail.model.ServiceDetailEvent
@@ -69,6 +71,10 @@ class ServiceDetailFragment : Fragment() {
 
                                 is ServiceDetailEvent.GoToProductDetails -> {
                                     findNavController().navigateToProductDetails(event.productId)
+                                }
+
+                                is ServiceDetailEvent.GoToServiceOrder -> {
+                                    findNavController().navigateToServiceOrder(event.serviceType)
                                 }
                             }
                         }

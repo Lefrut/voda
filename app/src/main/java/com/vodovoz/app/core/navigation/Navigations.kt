@@ -63,6 +63,13 @@ fun NavController.navigateToWaitFeedbackProducts() {
     )
 }
 
+fun NavController.navigateToServiceOrder(serviceType: String) {
+    navigate(
+        R.id.serviceOrderFragment, bundleOf("serviceType" to serviceType),
+    )
+}
+
+
 fun NavController.navigateToServiceDetails(serviceId: Int) {
     navigate(
         R.id.serviceDetailFragment,

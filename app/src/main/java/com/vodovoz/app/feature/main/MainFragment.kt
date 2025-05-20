@@ -101,12 +101,6 @@ class MainFragment : BaseFragment() {
         ) { _, _ ->
             return@setOnApplyWindowInsetsListener CONSUMED
         }
-
-        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { rootView, insets ->
-            val navBarInsets = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
-            rootView.updatePadding(bottom = navBarInsets.bottom)
-            return@setOnApplyWindowInsetsListener insets
-        }
     }
 
     private fun checkForUpdate() {

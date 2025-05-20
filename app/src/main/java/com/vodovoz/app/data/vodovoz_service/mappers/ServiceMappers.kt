@@ -5,12 +5,24 @@ import com.vodovoz.app.data.vodovoz_service.model.services.AllServicesDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.services.SERVICE_DETAILS_BUTTON_DTO
 import com.vodovoz.app.data.vodovoz_service.model.services.SERVICE_DTO
 import com.vodovoz.app.data.vodovoz_service.model.services.ServiceDetailsDTO
+import com.vodovoz.app.data.vodovoz_service.model.services.ServiceOrderDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.services.ServiceProductsDTO
 import com.vodovoz.app.domain.general.model.ColorfulButtonModel
 import com.vodovoz.app.domain.general.model.service.AllServicesDetailsModel
 import com.vodovoz.app.domain.general.model.service.ServiceDetailsModel
 import com.vodovoz.app.domain.general.model.service.ServiceModel
+import com.vodovoz.app.domain.general.model.service.ServiceOrderDetailsModel
 import com.vodovoz.app.domain.general.model.service.ServiceProductsModel
+
+
+fun ServiceOrderDetailsDTO.toDomain(): ServiceOrderDetailsModel{
+    return ServiceOrderDetailsModel(
+        title = TITLE ?: "",
+        subtitle = INFORMIROVANIE ?: "",
+        fields = LISTADATA?.mapToDomain() ?: throw IllegalArgumentException("ServiceOrderDetails fields can't be null"),
+        button =  KNOPKA?.toDomain() ?: throw IllegalArgumentException("ServiceOrderDetails button can't be null")
+    )
+}
 
 fun AllServicesDetailsDTO.toDomain(): AllServicesDetailsModel{
     return AllServicesDetailsModel(
