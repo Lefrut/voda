@@ -13,7 +13,6 @@ import android.view.ViewTreeObserver
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
-import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat.Type
 import androidx.fragment.app.Fragment
@@ -156,10 +155,36 @@ fun String.toUnderline(): SpannableString {
     return s
 }
 
-fun String.prepareServiceHtml() : String {
-    return "<style>img{display: inline;height: auto;max-width: 100%;} .ordered-block,.order_sale {\n" +
-            "    display: none;\n" +
-            "}</style>$this"
+fun String.prepareServiceHtml(): String {
+    return "<style>\n" +
+            "    img {\n" +
+            "        display: inline;\n" +
+            "        height: auto;\n" +
+            "        max-width: 100%;\n" +
+            "    }\n" +
+            "    .ordered-block,\n" +
+            "    .order_sale {\n" +
+            "        display: none;\n" +
+            "    }\n" +
+            "    .tables-responsive {\n" +
+            "        overflow-x: auto;\n" +
+            "        width: 100%;\n" +
+            "    }\n" +
+            "    table {\n" +
+            "        width: 100%;\n" +
+            "        border-collapse: collapse;\n" +
+            "    }\n" +
+            "    .colored_table {\n" +
+            "        font-size: 3em;\n" +
+            "        line-height: inherit;\n" +
+            "    }\n" +
+            "    .colored_table th,\n" +
+            "    .colored_table td {\n" +
+            "        padding: 8px;\n" +
+            "        border: 1px solid #ccc;\n" +
+            "        text-align: left;\n" +
+            "    }" +
+            "</style>$this"
 }
 
 

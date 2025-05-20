@@ -3,8 +3,11 @@ package com.vodovoz.app.feature.auth.login_by_phone_code
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -23,7 +26,7 @@ fun LoginByPhoneCodeScreen(viewState: LoginByPhoneCodeState, viewModel: LoginByP
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
-            .systemBarsPadding(),
+            .windowInsetsPadding(WindowInsets.statusBars),
     ) {
         VodovozTopBar(
             onBack = { viewModel.navigateBack() },

@@ -139,7 +139,6 @@ class AllOrdersFlowViewModel @Inject constructor(
                 s.copy(
                     title = ordersHistoryDetails.title,
                     filters = ordersHistoryDetails.filters.mapToUi(),
-                    items = ordersHistoryDetails.items.mapToUi(),
                     uiState = AllOrdersUiState.Body
                 )
             }

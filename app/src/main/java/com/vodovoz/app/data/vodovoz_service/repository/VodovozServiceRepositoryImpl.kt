@@ -86,6 +86,7 @@ import com.vodovoz.app.domain.general.model.order.OrdersHistoryDetailsModel
 import com.vodovoz.app.domain.general.model.order.OrdersHistoryItemModel
 import com.vodovoz.app.domain.general.model.service.AllServicesDetailsModel
 import com.vodovoz.app.domain.general.model.service.ServiceDetailsModel
+import com.vodovoz.app.domain.general.model.service.ServiceOrderDetailsModel
 import com.vodovoz.app.domain.general.model.toQueries
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.feature.preorder.model.FieldUi
@@ -111,6 +112,31 @@ class VodovozServiceRepositoryImpl @Inject constructor(
     private val cookieManager: CookieManager,
     private val trackingManager: TrackingManager,
 ) : VodovozServiceRepository {
+
+    override fun orderService(
+        serviceType: String,
+        fields: List<FieldModel>,
+    ): Flow<Result<VodovozPlaceholderModel>> {
+        return executeRequest(
+            request = {
+                vodovozService.orderService(accountManager.fetchAccountId(), serviceType, fields.toQueries())
+            },
+            mapper = {
+                it.data!!.toDomain()
+            }
+        )
+    }
+
+    override fun getServiceOrderDetails(serviceType: String): Flow<Result<ServiceOrderDetailsModel>> {
+        return executeRequest(
+            request = {
+                vodovozService.getServiceOrderDetails(accountManager.fetchAccountId(), serviceType)
+            },
+            mapper = {
+                it.data!!.toDomain()
+            }
+        )
+    }
 
     override fun removeFirebaseToken(token: String): Flow<Result<String>> {
         return executeRequest(

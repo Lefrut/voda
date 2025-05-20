@@ -48,6 +48,7 @@ import com.vodovoz.app.data.vodovoz_service.model.product_details.ProductDetails
 import com.vodovoz.app.data.vodovoz_service.model.profile.ProfileDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.services.AllServicesDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.services.ServiceDetailsDTO
+import com.vodovoz.app.data.vodovoz_service.model.services.ServiceOrderDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.unrated_products.UnratedProductsSectionDTO
 import com.vodovoz.app.data.vodovoz_service.model.user_data.UserDataDTO
 import okhttp3.MultipartBody
@@ -100,12 +101,24 @@ interface VodovozService {
         @Query("userid") userId: Long?,
     ): Response<VodovozResponseDTO<AllServicesDetailsDTO>>
 
-
     @GET("glavnaya/uslygi/index.php?action=details")
     suspend fun getServiceDetails(
         @Query("userid") userId: Long?,
         @Query("id") serviceId: Int?,
     ): Response<VodovozResponseDTO<ServiceDetailsDTO>>
+
+    @GET("osnova/form/yslygiform.php?action=detail")
+    suspend fun getServiceOrderDetails(
+        @Query("userid") userId: Long?,
+        @Query("tip") serviceType: String
+    ): Response<VodovozResponseDTO<ServiceOrderDetailsDTO>>
+
+    @GET("osnova/form/yslygiform.php?action=otpravka")
+    suspend fun orderService(
+        @Query("userid") userId: Long?,
+        @Query("tip") serviceType: String,
+        @QueryMap queries: Map<String, String>
+    ): Response<VodovozResponseDTO<VodovozPlaceholderDTO>>
 
 
     /**
