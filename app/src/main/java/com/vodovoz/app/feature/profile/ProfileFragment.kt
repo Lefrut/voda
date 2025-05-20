@@ -221,7 +221,7 @@ class ProfileFragment1 : BaseFragment() {
             }
 
             override fun logout() {
-                viewModel.logout()
+                viewModel.logoutAndRefreshScreens()
             }
 
             override fun onAddressesClick() {

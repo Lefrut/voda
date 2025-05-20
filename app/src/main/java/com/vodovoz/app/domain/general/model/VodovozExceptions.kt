@@ -39,6 +39,15 @@ class UserNotLoginException(
     message, cause, placeholder
 )
 
+class UserBlockedException(
+    message: String = "",
+    cause: Throwable? = null,
+    placeholder: VodovozPlaceholderModel? = null,
+) : RequestException(
+    message, cause, placeholder
+)
+
+
 class TooManyRequestsException(
     message: String = "",
     cause: Throwable? = null,

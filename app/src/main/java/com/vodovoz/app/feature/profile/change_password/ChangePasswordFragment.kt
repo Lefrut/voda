@@ -86,7 +86,7 @@ class ChangePasswordFragment : Fragment() {
                             when (event) {
                                 ChangePasswordEvent.GoBack -> findNavController().popBackStack()
                                 ChangePasswordEvent.Logout -> {
-                                    profileViewModel.logout()
+                                    profileViewModel.logoutAndRefreshScreens()
                                     findNavController().popBackStack()
                                 }
 

@@ -216,6 +216,11 @@ class ProfileFlowViewModel @Inject constructor(
         }
     }
 
+    fun logoutAndRefreshScreens() = viewModelScope.launch {
+        logout().join()
+        refreshAllScreens().join()
+    }
+
     fun logout() = viewModelScope.launch {
         val userId = accountManager.fetchAccountId() ?: return@launch
         flow { emit(repository.logout(userId)) }
@@ -223,12 +228,17 @@ class ProfileFlowViewModel @Inject constructor(
                 cookieManager.removeCookieSessionId()
             }.firstOrNull()
 
+
+
         accountManager.removeUserId()
         accountManager.removeUserToken()
         tabManager.clearBottomNavProfileState()
         cartManager.clearCart()
-        eventListener.emit(ProfileEvents.Logout)
         waterAppHelper.clearData()
+    }
+
+    private fun refreshAllScreens()  = viewModelScope.launch {
+        eventListener.emit(ProfileEvents.Logout)
     }
 
     fun checkLogin() {

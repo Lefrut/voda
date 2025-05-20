@@ -1,21 +1,14 @@
 package com.vodovoz.app.ui.base
 
-import android.annotation.TargetApi
-import android.content.Context
 import android.content.Intent
-import android.content.res.Configuration
-import android.content.res.Resources
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import com.google.firebase.messaging.RemoteMessage
 import com.vodovoz.app.common.account.data.ReloginManager
 import com.vodovoz.app.common.permissions.PermissionsManager
@@ -23,13 +16,12 @@ import com.vodovoz.app.common.product.rating.RatingProductManager
 import com.vodovoz.app.databinding.ActivityMainBinding
 import com.vodovoz.app.feature.sitestate.SiteStateManager
 import com.vodovoz.app.util.extensions.debugLog
-import com.vodovoz.app.util.extensions.snack
 import com.yandex.mapkit.MapKitFactory
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.json.JSONObject
 import pub.devrel.easypermissions.EasyPermissions
-import java.util.Locale
 import javax.inject.Inject
 
 
@@ -57,33 +49,40 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks,
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        val appLocale: LocaleListCompat = LocaleListCompat.forLanguageTags("ru")
-        AppCompatDelegate.setApplicationLocales(appLocale)
+        AppCompatDelegate.setApplicationLocales(
+            LocaleListCompat.forLanguageTags("ru")
+        )
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
 
         super.onCreate(savedInstanceState)
 
-        installSplashScreen().apply {
-            setKeepOnScreenCondition { splashFileViewModel.fileLoading.value }
+        installSplashScreen().setKeepOnScreenCondition {
+            viewModel.androidSplash.value
         }
-        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
 
         supportActionBar?.hide()
-        MapKitFactory.initialize(this)
         splashFileViewModel.downloadSplashFile()
+
         viewModel.checkAppState()
 
-        observeRatingSnackbar()
+        MapKitFactory.initialize(this)
 
-        binding = ActivityMainBinding.inflate(layoutInflater).apply { setContentView(root) }
 
-        handleIntent(intent)
-        handlePushIntent(intent)
+        binding = ActivityMainBinding.inflate(layoutInflater).apply {
+            setContentView(root)
+        }
+
+        processIntent(intent)
     }
 
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
 
+        processIntent(intent)
+    }
+
+    private fun processIntent(intent: Intent) {
         handleIntent(intent)
         handlePushIntent(intent)
     }
@@ -102,9 +101,7 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks,
         debugLog { "jsonData $jsonData" }
 
         lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                if (jsonData != null) siteStateManager.savePushData(jsonData)
-            }
+            if (jsonData != null) siteStateManager.savePushData(jsonData)
         }
     }
 
@@ -118,18 +115,6 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks,
             siteStateManager.saveDeepLinkPath(path)
         }
 
-    }
-
-    private fun observeRatingSnackbar() {
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                ratingProductManager
-                    .observeRatingSnackbar()
-                    .collect { message ->
-                        snack(message)
-                    }
-            }
-        }
     }
 
     override fun onRequestPermissionsResult(
