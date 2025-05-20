@@ -39,10 +39,10 @@ data class ProfileWalletItemModel(
     val descriptionColor: String,
     val imageUrl: String,
     val id: String,
-    val popupWindow: ProfileWalletPopupWindowModel? = null,
+    val popupWindow: ProfilePopupWindowModel? = null,
 )
 
-data class ProfileWalletPopupWindowModel(
+data class ProfilePopupWindowModel(
     val title: String,
     val text: String,
 )
@@ -54,7 +54,10 @@ data class ProfileCardModel(
     val descriptionColor: String,
     val imageUrl: String,
     val id: String,
+    val popupWindow: ProfilePopupWindowModel?
 )
+
+
 
 data class UserInfoBlockModel(
     val phoneNumber: String,

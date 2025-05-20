@@ -1,15 +1,14 @@
 package com.vodovoz.app.data.vodovoz_service.mappers
 
-import com.vodovoz.app.core.network.ApiConfig
 import com.vodovoz.app.core.network.VodovozWebConfig
 import com.vodovoz.app.data.vodovoz_service.di.toFullUrl
 import com.vodovoz.app.data.vodovoz_service.model.profile.CHAT_MENU_DTO
 import com.vodovoz.app.data.vodovoz_service.model.profile.DENIGI_DTO
-import com.vodovoz.app.data.vodovoz_service.model.profile.DENIGI_TEXT_OKNO_DTO
 import com.vodovoz.app.data.vodovoz_service.model.profile.PROFILE_BLOCK_DTO
 import com.vodovoz.app.data.vodovoz_service.model.profile.PROFILE_MENO_OKNO_DTO
 import com.vodovoz.app.data.vodovoz_service.model.profile.PROFILE_MINI_MENU_DTO
 import com.vodovoz.app.data.vodovoz_service.model.profile.PROFILE_NORMAL_MENU_DTO
+import com.vodovoz.app.data.vodovoz_service.model.profile.PROFILE_TEXT_OKNO_DTO
 import com.vodovoz.app.data.vodovoz_service.model.profile.PROFIL_DTO
 import com.vodovoz.app.data.vodovoz_service.model.profile.ProfileDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.profile.TEXT_KNOPKA_DTO
@@ -18,8 +17,8 @@ import com.vodovoz.app.domain.general.model.ProfileChatItemModel
 import com.vodovoz.app.domain.general.model.ProfileChatsPopupWindowModel
 import com.vodovoz.app.domain.general.model.ProfileDetailsModel
 import com.vodovoz.app.domain.general.model.ProfileMenuItemModel
+import com.vodovoz.app.domain.general.model.ProfilePopupWindowModel
 import com.vodovoz.app.domain.general.model.ProfileWalletItemModel
-import com.vodovoz.app.domain.general.model.ProfileWalletPopupWindowModel
 import com.vodovoz.app.domain.general.model.SectionModel
 import com.vodovoz.app.domain.general.model.TextButtonModel
 import com.vodovoz.app.domain.general.model.UserInfoBlockModel
@@ -51,8 +50,8 @@ fun DENIGI_DTO.toDomain(): ProfileWalletItemModel {
     )
 }
 
-fun DENIGI_TEXT_OKNO_DTO.toDomain(): ProfileWalletPopupWindowModel {
-    return ProfileWalletPopupWindowModel(
+fun PROFILE_TEXT_OKNO_DTO.toDomain(): ProfilePopupWindowModel {
+    return ProfilePopupWindowModel(
         title = TITLE ?: "",
         text = TEXT ?: ""
     )
@@ -66,7 +65,8 @@ fun PROFILE_BLOCK_DTO.toDomain(): ProfileCardModel {
         description = OPISANIE?.TITLE ?: "",
         descriptionColor = OPISANIE?.TEXTCOLOR ?: "",
         imageUrl = IMAGE?.toFullUrl() ?: "",
-        id = ID ?: ""
+        id = ID ?: "",
+        popupWindow = TEXT_OKNO?.toDomain()
     )
 }
 
