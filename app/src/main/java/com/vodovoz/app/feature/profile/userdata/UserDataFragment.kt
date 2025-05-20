@@ -322,7 +322,7 @@ class UserDataFragment1 : BaseFragment() {
             negativeText = getString(R.string.cancel),
             onPositiveClick = {
                 lifecycleScope.launch {
-                    profileViewModel.logout().join()
+                    profileViewModel.logoutAndRefreshScreens().join()
                     //findNavController().navigate(UserDataFragmentDirections.actionBackToProfile())
                 }
             }

@@ -67,6 +67,7 @@ import com.vodovoz.app.domain.general.model.StoryModel
 import com.vodovoz.app.domain.general.model.TooManyRequestsException
 import com.vodovoz.app.domain.general.model.TopAndBottomSectionsModel
 import com.vodovoz.app.domain.general.model.UnratedProductsSectionModel
+import com.vodovoz.app.domain.general.model.UserBlockedException
 import com.vodovoz.app.domain.general.model.UserDataModel
 import com.vodovoz.app.domain.general.model.UserNotLoginException
 import com.vodovoz.app.domain.general.model.ValidationException
@@ -982,6 +983,19 @@ class VodovozServiceRepositoryImpl @Inject constructor(
                 val cookies = response.headers().values("Set-Cookie")
                 val sessionId = cookies.firstOrNull { s -> s.startsWith("PHPSESSID=") }
                 cookieManager.updateCookieSessionId(sessionId)
+            },
+            onFail = { response ->
+                val code = response.code()
+
+                when (code) {
+                    402, 404 -> {
+                        throw UserBlockedException(message = response.messageWithCode())
+                    }
+
+                    else -> {
+                        throw RequestException()
+                    }
+                }
             }
         )
     }
@@ -1221,6 +1235,13 @@ class VodovozServiceRepositoryImpl @Inject constructor(
                 trackingManager.setEnableTracking(siteState.tracking.trackingIsEnabled)
                 trackingManager.setSessionIdTime(siteState.tracking.time)
                 siteState
+            },
+            onFail = onFail@{ response ->
+                val code = response.code()
+                return@onFail when (code) {
+                    402 -> Result.success(SiteState.Blocked)
+                    else -> Result.failure(RequestException(response.messageWithCode()))
+                }
             }
         )
     }

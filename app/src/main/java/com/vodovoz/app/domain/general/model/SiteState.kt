@@ -10,7 +10,20 @@ data class SiteState(
     val tracking: TrackingConfig,
     val agreement: AgreementModel,
     val data: SiteStateDataModel? = null
-)
+){
+    companion object{
+        val Blocked = SiteState(
+            isActive = false,
+            testUrl = "",
+            smsUrl = "",
+            isSmsEnabled = false,
+            showComments = false,
+            jivoChat = JivoChatModel(false, ""),
+            tracking = TrackingConfig(false, 30),
+            agreement = AgreementModel("", emptyList())
+        )
+    }
+}
 
 data class JivoChatModel(
     val isActive: Boolean,

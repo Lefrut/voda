@@ -46,6 +46,7 @@ class OrderDetailsFragment : Fragment() {
     @Inject
     lateinit var ratingProductManager: RatingProductManager
 
+
     override fun onResume() {
         super.onResume()
         viewModel.fetchOrderDetails()

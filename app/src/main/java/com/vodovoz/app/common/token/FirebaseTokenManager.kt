@@ -5,6 +5,7 @@ import com.vodovoz.app.common.account.data.AccountManager
 import com.vodovoz.app.data.MainRepository
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.util.extensions.debugLog
+import com.vodovoz.app.util.extensions.singleResult
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.coroutines.resume
@@ -21,7 +22,7 @@ class FirebaseTokenManager @Inject constructor(
         val userId = accountManager.fetchAccountId()
         debugLog { "firebase token $token" }
         if (token != null && userId != null) {
-            vodovozServiceRepository.sendFirebaseToken(token)
+            vodovozServiceRepository.sendFirebaseToken(token).singleResult()
         }
     }
 

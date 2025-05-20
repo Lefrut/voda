@@ -25,7 +25,6 @@ import com.vodovoz.app.feature.home.HomeFlowViewModel
 import com.vodovoz.app.feature.profile.ProfileFlowViewModel
 import com.vodovoz.app.feature.sitestate.SiteStateManager
 import com.vodovoz.app.ui.base.MainActivityViewModel
-import com.vodovoz.app.ui.base.SplashFileViewModel
 import com.vodovoz.app.ui.base.model.AppState
 import com.vodovoz.app.ui.extensions.ContextExtensions.isTablet
 import com.vodovoz.app.util.SplashFileConfig
@@ -35,8 +34,6 @@ import com.vodovoz.app.util.extensions.enableFullScreen
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
 import org.json.JSONObject
@@ -46,7 +43,7 @@ import javax.inject.Inject
 
 
 @AndroidEntryPoint
-class SplashFragment : BaseFragment() {
+class SplashFragment1 : BaseFragment() {
 
     override fun layout(): Int = R.layout.fragment_splash
 
@@ -83,78 +80,15 @@ class SplashFragment : BaseFragment() {
     }
 
 
-    @OptIn(FlowPreview::class)
-    private fun listenAppState() = viewLifecycleOwner.lifecycleScope.launch {
-        repeatOnLifecycle(Lifecycle.State.STARTED) {
-            activityViewModel.appState.debounce(30L).collect { appState ->
-
-                val navController = findNavController()
-
-                when (appState) {
-                    AppState.App -> {
-                        if (splashViewModel.isLoading.value) {
-                            fetchDataForScreens().join()
-                        }
-                        navController.navigateToScreen(
-                            R.id.mainFragment,
-                        )
-                    }
-
-                    AppState.Blocked -> {
-                        navController.navigateToScreen(
-                            R.id.blockAppFragment,
-                        )
-                    }
-
-                    AppState.ErrorLoading -> {
-                        showError(ErrorState.NetworkError())
-                    }
-
-                    AppState.Loading -> {
-                        if (navController.currentDestination?.id != R.id.splashFragment) {
-                            navController.navigateToScreen(R.id.splashFragment)
-                        }
-                    }
-                }
-            }
-
-        }
-    }
-
-    private fun NavController.navigateToScreen(@IdRes screenId: Int){
-        navigate(
-            screenId,
-            null,
-            navOptions { launchSingleTop = true }
-        )
-
-    }
-
-
-    private fun refreshApp() = lifecycleScope.launch {
-        activityViewModel.checkAppState()
-        fetchDataForScreens()
-    }
-
-    private fun fetchDataForScreens() = lifecycleScope.launch {
-        splashViewModel.sendFirebaseToken()
-
-        favoriteViewModel.fetchFavoriteProducts()
-        homeViewModel.fetchHomeDetails()
-        catalogViewModel.fetchCatalogDetails()
-        cartFlowViewModel.fetchCartDetails()
-        profileViewModel.fetchProfileDetails()
-        delay(200)
-        splashViewModel.finishLoading()
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
         listenAppState()
+
         accountManager.reportEvent("Зашел в приложение")
 
         bindErrorRefresh {
-            refreshApp()
+            activityViewModel.checkAppState()
         }
 
         val lottieSplashView = binding.lottieSplashView
@@ -162,10 +96,7 @@ class SplashFragment : BaseFragment() {
         lottieSplashView.addAnimatorListener(object : Animator.AnimatorListener {
 
             override fun onAnimationStart(animation: Animator) {
-                kotlin.runCatching {
-                    val fileViewModel: SplashFileViewModel by activityViewModels()
-                    fileViewModel.finishFileLoading()
-                }
+
             }
 
             override fun onAnimationEnd(animation: Animator) = Unit
@@ -190,7 +121,7 @@ class SplashFragment : BaseFragment() {
                     debugLog { it.message.toString() }
                     lottieSplashView.clearAnimation()
                 }
-                lottieSplashView.setAnimationFromUrl(SplashFileConfig.DAFAULT_LINK)
+                lottieSplashView.setAnimationFromUrl(SplashFileConfig.DEFAULT_LINK)
                 lottieSplashView.playAnimation()
             } else {
                 initAnimation()
@@ -201,6 +132,68 @@ class SplashFragment : BaseFragment() {
 
         handlePushData()
     }
+
+
+    @OptIn(FlowPreview::class)
+    private fun listenAppState() = viewLifecycleOwner.lifecycleScope.launch {
+        repeatOnLifecycle(Lifecycle.State.STARTED) {
+            activityViewModel.appState.debounce(35L).collect { appState ->
+
+                val navController = findNavController()
+
+                when (appState) {
+                    AppState.App -> {
+                        fetchDataForScreens().join()
+                        navController.navigateToScreen(
+                            R.id.mainFragment,
+                        )
+                    }
+
+                    AppState.Blocked -> {
+                        navController.navigateToScreen(
+                            R.id.blockAppFragment,
+                        )
+                    }
+
+                    AppState.ErrorLoading -> {
+                        showError(ErrorState.NetworkError())
+                    }
+
+                    AppState.Loading -> {
+                        if (navController.currentDestination?.id != R.id.splashFragment) {
+                            navController.navigateToScreen(R.id.splashFragment)
+                        }
+                    }
+
+                    AppState.UserError -> {
+                        profileViewModel.logoutAndRefreshScreens().join()
+                        activityViewModel.setAppState()
+                    }
+                }
+            }
+
+        }
+    }
+
+    private fun NavController.navigateToScreen(@IdRes screenId: Int) = navigate(
+        screenId,
+        null,
+        navOptions { launchSingleTop = true }
+    )
+
+
+
+    private fun fetchDataForScreens() = lifecycleScope.launch {
+        splashViewModel.sendFirebaseToken()
+
+        favoriteViewModel.fetchFavoriteProducts()
+        homeViewModel.fetchHomeDetails()
+        catalogViewModel.fetchCatalogDetails()
+        cartFlowViewModel.fetchCartDetails()
+        profileViewModel.fetchProfileDetails()
+        delay(200)
+    }
+
 
     private fun initAnimation() {
         val localFile = SplashFileConfig.getSplashFile(requireContext())

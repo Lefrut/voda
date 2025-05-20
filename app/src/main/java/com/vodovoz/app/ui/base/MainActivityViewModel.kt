@@ -2,16 +2,15 @@ package com.vodovoz.app.ui.base
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.vodovoz.app.common.account.data.ReloginManager
-import com.vodovoz.app.common.cookie.CookieManager
+import com.vodovoz.app.domain.general.model.UserBlockedException
 import com.vodovoz.app.domain.general.model.UserNotLoginException
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.feature.sitestate.SiteStateManager
 import com.vodovoz.app.ui.base.model.AppState
-import com.vodovoz.app.util.extensions.debugLog
 import com.vodovoz.app.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -27,18 +26,21 @@ class MainActivityViewModel @Inject constructor(
     private val _appState = MutableStateFlow<AppState>(AppState.Loading)
     val appState = _appState.asStateFlow()
 
+    private val _androidSplash = MutableStateFlow<Boolean>(true)
+    val androidSplash = _androidSplash.asStateFlow()
+
     fun checkAppState() = viewModelScope.launch {
         val siteStateDeferred = async { siteStateManager.requestSiteState() }
         val reloginResultDeferred = async { vodovozServiceRepository.relogin().singleResult() }
 
         siteStateDeferred.await()
 
-        if(siteStateManager.siteStateSnapshot == null){
-            //todo - replace to error loading
-            _appState.update { AppState.App }
+
+
+        if (siteStateManager.siteStateSnapshot == null) {
+            _appState.update { AppState.ErrorLoading }
             return@launch
-        }
-        else if(!siteStateManager.siteActive()){
+        } else if (!siteStateManager.siteActive()) {
             _appState.update { AppState.Blocked }
             return@launch
         }
@@ -51,15 +53,24 @@ class MainActivityViewModel @Inject constructor(
                     _appState.update { AppState.App }
                 }
 
-                //todo - add logout when relogin user error
+                is UserBlockedException -> {
+                    _appState.update { AppState.UserError }
+                }
 
                 else -> {
-                    //todo - change to _appState.update { AppState.ErrorLoading }
                     _appState.update { AppState.ErrorLoading }
                 }
             }
         }.onSuccess {
             _appState.update { AppState.App }
         }
+    }
+
+    fun setAppState() = viewModelScope.launch {
+        _appState.update { AppState.App }
+    }
+
+    fun finishAndroidSplash() = viewModelScope.launch {
+        _androidSplash.update { false }
     }
 }
