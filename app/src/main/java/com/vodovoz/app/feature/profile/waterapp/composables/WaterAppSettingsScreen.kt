@@ -40,6 +40,7 @@ import com.vodovoz.app.R
 import com.vodovoz.app.design_system.composables.button.VodovozButton
 import com.vodovoz.app.design_system.composables.swich.vodovozColors
 import com.vodovoz.app.design_system.composables.top_bar.ClosingTopBar
+import com.vodovoz.app.design_system.effects.SystemBarsEffect
 import com.vodovoz.app.design_system.robotoFontFamily
 import com.vodovoz.app.feature.profile.waterapp.WaterAppHelper
 import com.vodovoz.app.feature.profile.waterapp.model.ReminderIntervalUi

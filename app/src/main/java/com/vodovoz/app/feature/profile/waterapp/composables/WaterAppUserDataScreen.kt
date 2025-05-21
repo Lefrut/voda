@@ -1,5 +1,6 @@
 package com.vodovoz.app.feature.profile.waterapp.composables
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
@@ -131,6 +132,10 @@ fun WaterAppUserDataScreen(
                 }
             }
         }
+    }
+
+    BackHandler {
+        onBackClick()
     }
 }
 

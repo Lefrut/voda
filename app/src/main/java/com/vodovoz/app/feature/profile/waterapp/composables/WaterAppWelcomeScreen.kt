@@ -1,39 +1,29 @@
 package com.vodovoz.app.feature.profile.waterapp.composables
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.systemBars
-import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.geometry.center
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.RadialGradientShader
-import androidx.compose.ui.graphics.Shader
-import androidx.compose.ui.graphics.ShaderBrush
 import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -49,6 +39,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.vodovoz.app.R
 import com.vodovoz.app.design_system.composables.button.VodovozButton
+import com.vodovoz.app.design_system.effects.SystemBarsEffect
+import radialGradientBackground
 
 @Composable
 fun WaterAppWelcomeScreen(
@@ -57,17 +49,29 @@ fun WaterAppWelcomeScreen(
     onStartClick: () -> Unit,
 ) {
 
+    SystemBarsEffect(
+        statusBarColor = Color.Transparent,
+        navigationBarColor = Color.Transparent
+    )
 
     Column(
         modifier = modifier
             .fillMaxSize()
-            .windowInsetsPadding(WindowInsets.systemBars)
-            .consumeWindowInsets(WindowInsets.systemBars),
+            .radialGradientBackground(
+                centerFractionX = 0.5f,
+                centerFractionY = 0.6719f,
+                radiusFractionX = 0.3281f,
+                radiusFractionY = 0.3281f,
+                colorsAndStops = arrayOf(
+                    0.0f to Color(0xFF2DB2FF),
+                    1.0f to Color(0xFF018EDF)
+                )
+            )
+            .systemBarsPadding(),
     ) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(MaterialTheme.colorScheme.primary)
                 .height(56.dp)
                 .padding(horizontal = 16.dp),
         ) {
@@ -81,22 +85,6 @@ fun WaterAppWelcomeScreen(
                     .clickable { onCloseClick() },
                 tint = MaterialTheme.colorScheme.background.copy(0.8f)
             )
-        }
-
-        val primaryColor = MaterialTheme.colorScheme.primary
-
-        val largeRadialGradient = remember {
-            object : ShaderBrush() {
-                override fun createShader(size: Size): Shader {
-                    val biggerDimension = maxOf(size.height, size.width)
-                    return RadialGradientShader(
-                        colors = listOf(primaryColor.copy(0.65f), primaryColor),
-                        center = size.center,
-                        radius = biggerDimension / 4f,
-                        colorStops = listOf(0f, 0.90f)
-                    )
-                }
-            }
         }
 
         val waveImage = ImageBitmap.imageResource(id = R.drawable.water_app_wave)
@@ -122,9 +110,6 @@ fun WaterAppWelcomeScreen(
                     )
 
                     onDrawWithContent {
-                        drawRect(largeRadialGradient)
-
-
                         drawImage(
                             image = waveImage,
                             srcOffset = IntOffset(0, 0),
