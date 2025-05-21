@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -16,18 +17,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.vodovoz.app.R
 import com.vodovoz.app.feature.profile.waterapp.WaterAppHelper
-import com.vodovoz.app.feature.profile.waterapp.composables.VodovozWheelCore
 import com.vodovoz.app.feature.profile.waterapp.composables.VodovozWheelPicker
-import com.vodovoz.app.util.extensions.debugLog
 import com.vodovoz.app.util.extensions.indexOfOrNull
-import com.vodovoz.app.util.toExactIntOrNull
 import kotlin.math.roundToInt
 
 @Composable
 fun WaterAppWeightStage(
     modifier: Modifier = Modifier,
     weight: Float,
-    onWeightChange: (Float) -> Unit
+    onWeightChange: (Float) -> Unit,
 ) {
     Column(modifier = modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
 
@@ -55,10 +53,14 @@ fun WaterAppWeightStage(
 
         Spacer(modifier = Modifier.weight(0.71f))
 
+        val weights = remember {
+            WaterAppHelper.weights
+        }
+
         VodovozWheelPicker(
             modifier = Modifier.padding(horizontal = 20.dp),
-            items = WaterAppHelper.weights,
-            initialIndex = WaterAppHelper.weights.indexOfOrNull(weight) ?: 0,
+            items = weights,
+            initialIndex = weights.indexOfOrNull(weight) ?: 0,
             itemText = { item ->
                 item.roundToInt().toString()
             },

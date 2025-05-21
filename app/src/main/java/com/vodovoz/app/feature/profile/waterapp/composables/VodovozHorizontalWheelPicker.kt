@@ -55,7 +55,6 @@ import com.vodovoz.app.R
 import com.vodovoz.app.design_system.VodovozTheme
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
@@ -70,6 +69,7 @@ data class HorizontalLineUi(
 )
 
 
+@Suppress("NonSkippableComposable")
 @Composable
 fun <T : Any> VodovozWheelPicker(
     modifier: Modifier = Modifier,
@@ -96,7 +96,7 @@ fun <T : Any> VodovozWheelPicker(
             colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.surfaceVariant.copy(0.5f))
         )
 
-        VodovozWheelCore(
+        VodovozHorizontalWheelCore(
             modifier = Modifier.padding(bottom = 38.dp),
             items = items,
             itemText = itemText,
@@ -114,9 +114,9 @@ fun <T : Any> VodovozWheelPicker(
     }
 }
 
-@OptIn(FlowPreview::class)
+@Suppress("NonSkippableComposable")
 @Composable
-internal fun <T : Any> VodovozWheelCore(
+internal fun <T : Any> VodovozHorizontalWheelCore(
     modifier: Modifier = Modifier,
     items: List<T>,
     initialIndex: Int = 0,
@@ -204,8 +204,9 @@ internal fun <T : Any> VodovozWheelCore(
 
     LaunchedEffect(scrollState) {
         snapshotFlow { scrollState.isScrollInProgress to scrollState.value }
-            .filter { (isScrolling, _) -> !isScrolling && initialScrolled }
-            .debounce(35)
+            .filter { (isScrolling, _) ->
+                !isScrolling && initialScrolled
+            }
             .map { (_, offset) -> offset + middleLineOffset }
             .collectLatest { target ->
                 val targetInt = target.toInt()
@@ -343,6 +344,7 @@ data object VodovozWheelPickerDefaults {
     val space = 15.dp
 
     val textRectHeight = 45.dp
+    val textRectWidth = 45.dp
 
 }
 

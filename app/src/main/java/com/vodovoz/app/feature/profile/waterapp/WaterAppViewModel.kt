@@ -101,11 +101,13 @@ class WaterAppViewModel @Inject constructor(
     fun goToPreviousStage() = viewModelScope.launch {
         val prevUiState = when (val currentUiState = dataState.uiState) {
             is WaterAppUiState.UserData -> currentUiState.previous() ?: WaterAppUiState.Welcome
-            else ->
-                currentUiState
+            else -> currentUiState
         }
         uiStateListener.updateData { s ->
-            s.copy(uiState = prevUiState)
+            s.copy(
+                uiState = if (dataState.notificationData.started) WaterAppUiState.Settings
+                else prevUiState
+            )
         }
     }
 

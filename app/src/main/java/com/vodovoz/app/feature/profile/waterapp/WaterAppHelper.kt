@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
+import java.util.Locale
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -49,11 +50,11 @@ class WaterAppHelper @Inject constructor(
         @SuppressLint("DefaultLocale")
         val weights: List<Float> = (0..((300f - 20f) / 0.2f).toInt())
             .map { i ->
-                val a = String.format("%.1f", 20f + i * 0.2f)
+                val a = String.format(Locale("en"),"%.1f", 20f + i * 0.2f)
                 a.toFloatOrNull() ?: 0f
             }
 
-        val heights = (50..240).toList()
+        val heights get() = (50..240).toList()
 
         val times = (0 until 1440 step 15).map { formatTime(it.toString()) }
 
