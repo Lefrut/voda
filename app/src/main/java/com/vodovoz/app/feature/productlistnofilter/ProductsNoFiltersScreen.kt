@@ -27,8 +27,8 @@ import com.vodovoz.app.feature.productlistnofilter.composables.ProductsNoFilterB
 @Suppress("NonSkippableComposable")
 @Composable
 fun ProductsNoFiltersScreen(
-    viewModel: ProductsListNoFilterFlowViewModel,
-    viewState: ProductsListNoFilterFlowViewModel.ProductListNoFilterState,
+    viewModel: ProductCatalogViewModel,
+    viewState: ProductCatalogViewModel.ProductListNoFilterState,
     lazyGridState: LazyGridState,
 ) {
     val productsSection = viewState.productsSection
@@ -40,7 +40,7 @@ fun ProductsNoFiltersScreen(
         modifier = Modifier.fillMaxSize()
     ) {
         val searchQuery =
-            (viewModel.dataSource as? PaginatedProductsCatalogWithoutFiltersFragment.DataSource.Search)?.query
+            (viewModel.dataSource as? ProductCatalogFragment.DataSource.Search)?.query
                 ?: ""
 
         VodovozSearchTopBar(
@@ -77,15 +77,15 @@ fun ProductsNoFiltersScreen(
         ) {
 
             when (val uiState = viewState.uiState) {
-                ProductsListNoFilterFlowViewModel.UiState.Error -> {
+                ProductCatalogViewModel.UiState.Error -> {
                     NetworkErrorPlaceholder { viewModel.refresh() }
                 }
 
-                ProductsListNoFilterFlowViewModel.UiState.Loading -> {
+                ProductCatalogViewModel.UiState.Loading -> {
                     LoadingPlaceholder()
                 }
 
-                ProductsListNoFilterFlowViewModel.UiState.Body -> {
+                ProductCatalogViewModel.UiState.Body -> {
                     ProductsNoFilterBody(
                         lazyGridState = lazyGridState,
                         title = productsSection.title,
@@ -139,7 +139,7 @@ fun ProductsNoFiltersScreen(
 
                 }
 
-                is ProductsListNoFilterFlowViewModel.UiState.Empty -> {
+                is ProductCatalogViewModel.UiState.Empty -> {
                     EmptyResultPlaceholder(
                         title = uiState.title,
                         description = uiState.description,

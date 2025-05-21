@@ -152,7 +152,7 @@ class QuestionnairesFlowFragment1 : BaseFragment() {
             delay(1000)
             homeViewModel.refresh()
             cartFlowViewModel.refreshIdle()
-            favoriteViewModel.refreshIdle()
+            //favoriteViewModel.refreshIdle()
             catalogFlowViewModel.refresh()
             profileViewModel.refresh()
             tabManager.selectTab(R.id.graph_home)

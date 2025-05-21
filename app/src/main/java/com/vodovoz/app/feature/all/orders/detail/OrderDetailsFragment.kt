@@ -344,11 +344,7 @@ class OrderDetailsFragment1 : BaseFragment() {
             }
 
             override fun onNotifyWhenBeAvailable(id: Long, name: String, detailPicture: String) {
-                findNavController().navigate(
-                    OrderDetailsFragmentDirections.actionToPreOrderBS(
-                        id, name, detailPicture
-                    )
-                )
+
             }
 
             override fun onChangeProductQuantity(id: Long, cartQuantity: Int, oldQuantity: Int) {

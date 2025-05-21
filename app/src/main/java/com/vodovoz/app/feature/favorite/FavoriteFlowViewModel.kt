@@ -73,14 +73,10 @@ class FavoriteFlowViewModel @Inject constructor(
     FavoriteState()
 ) {
 
-    private val changeLayoutManager = MutableStateFlow(LINEAR)
-    fun observeChangeLayoutManager() = changeLayoutManager.asStateFlow()
 
     private val pagingProductsListener = PagingDataListener(
         onUpdateItems = { itemSnapshotList ->
-
             val pagedProducts = itemSnapshotList.mapNotNull { product -> product }
-            //pagedProducts.map { product -> product. }
 
             uiStateListener.updateData { s ->
                 s.copy(products = pagedProducts)
@@ -254,14 +250,6 @@ class FavoriteFlowViewModel @Inject constructor(
     }
 
 
-    fun firstLoad() {
-        fetchFavoriteProducts()
-//        if (!state.isFirstLoad) {
-//            uiStateListener.value = state.copy(isFirstLoad = true, loadingPage = true)
-//            fetchFavoriteProductsHeader()
-//        }
-    }
-
     fun refresh() = viewModelScope.launch {
         if (dataState.uiState !is FavoriteUiState.Loading) {
             uiStateListener.updateData { s ->
@@ -271,208 +259,6 @@ class FavoriteFlowViewModel @Inject constructor(
         }
     }
 
-    fun refreshIdle() {
-        changeLayoutManager.value = LINEAR
-        uiStateListener.value = state.copy(
-            loadingPage = true,
-            page = 1,
-            loadMore = false,
-            bottomItem = null,
-            data = FavoriteState()
-        )
-        fetchFavoriteProductsHeader()
-        fetchFavoriteProductsSorted()
-    }
-
-    private fun fetchFavoriteProductsHeader() {
-        val userId = accountManager.fetchAccountId()
-        val productIdListStr = likeManager.fetchLikeLocalStr()
-
-        viewModelScope.launch {
-            flow {
-                emit(
-                    repository.fetchFavoriteProducts(
-                        userId = userId,
-                        productIdListStr = productIdListStr
-                    )
-                )
-            }
-                .onEach { responseEntity ->
-                    val response = responseEntity
-                    if (response is ResponseEntity.Success) {
-                        val data = response.data.mapToUI()
-                        uiStateListener.value = state.copy(
-                            data = state.data.copy(
-                                favoriteCategory = checkSelectedFilter(data.favoriteCategoryUI),
-                                bestForYouCategoryDetailUI = data.bestForYouCategoryDetailUI,
-                                availableTitle = data.availableTitle,
-                                notAvailableTitle = data.notAvailableTitle,
-                                sortType = data.favoriteCategoryUI?.sortTypeList?.sortTypeList?.firstOrNull { it.value == "default" }
-                                    ?: SortTypeUI(sortName = "По популярности"),
-                                emptyTitle = data.title,
-                                emptyMessage = data.message,
-                            ),
-                            loadingPage = false,
-                            error = null
-                        )
-                    } else {
-                        uiStateListener.value =
-                            state.copy(loadingPage = false, error = ErrorState.Error())
-                    }
-                }
-                .flowOn(Dispatchers.Default)
-                .catch {
-                    debugLog { "fetch favorite products error ${it.localizedMessage}" }
-                    uiStateListener.value =
-                        state.copy(error = it.toErrorState(), loadingPage = false)
-                }
-                .collect()
-        }
-    }
-
-    fun clearScrollState() {
-        uiStateListener.value = state.copy(data = state.data.copy(scrollToTop = false))
-    }
-
-    fun firstLoadSorted() {
-        if (!state.data.isFirstLoadSorted) {
-            uiStateListener.value =
-                state.copy(data = state.data.copy(isFirstLoadSorted = true), loadingPage = true)
-            fetchFavoriteProductsSorted()
-        }
-    }
-
-    fun refreshSorted() {
-        uiStateListener.value = state.copy(
-            loadingPage = true,
-            page = 1,
-            loadMore = false,
-            bottomItem = null,
-            data = state.data.copy(selectedCategoryId = -1, scrollToTop = true)
-        )
-        fetchFavoriteProductsHeader()
-        fetchFavoriteProductsSorted()
-    }
-
-    fun loadMoreSorted() {
-        if (state.bottomItem == null && state.page != null) {
-            uiStateListener.value = state.copy(
-                loadMore = true,
-                bottomItem = BottomProgressItem(),
-                data = state.data.copy(scrollToTop = false)
-            )
-            fetchFavoriteProductsSorted()
-        }
-    }
-
-    fun changeLayoutManager() {
-        val manager = if (state.data.layoutManager == LINEAR) GRID else LINEAR
-        uiStateListener.value = state.copy(
-            data = state.data.copy(
-                layoutManager = manager, itemsList = FavoritesMapper.mapFavoritesListByManager(
-                    manager,
-                    state.data.itemsList.filterIsInstance<ProductUI>()
-                )
-            )
-        )
-        changeLayoutManager.value = manager
-    }
-
-    private fun fetchFavoriteProductsSorted() {
-        val userId = accountManager.fetchAccountId()
-        val productIdListStr = likeManager.fetchLikeLocalStr()
-
-        viewModelScope.launch {
-            flow {
-                emit(
-                    repository.fetchFavoriteProductsSorted(
-                        userId = userId,
-                        categoryId = when (state.data.selectedCategoryId) {
-                            -1L -> null
-                            else -> state.data.selectedCategoryId
-                        },
-                        sort = state.data.sortType.value,
-                        orientation = state.data.sortType.orientation,
-                        isAvailable = state.data.isAvailable,
-                        page = state.page,
-                        productIdListStr = productIdListStr
-                    )
-                )
-            }
-                .onEach {
-                    val response = it
-                    if (response is ResponseEntity.Success) {
-                        val data = response.data.mapToUI()
-                        val mappedFeed = FavoritesMapper.mapFavoritesListByManager(
-                            state.data.layoutManager,
-                            data
-                        )
-
-                        uiStateListener.value = if (data.isEmpty() && !state.loadMore) {
-                            state.copy(
-                                error = ErrorState.Empty(),
-                                loadingPage = false,
-                                loadMore = false,
-                                bottomItem = null,
-                                page = 1
-                            )
-                        } else {
-
-                            val itemsList = if (state.loadMore) {
-                                state.data.itemsList + mappedFeed
-                            } else {
-                                mappedFeed
-                            }
-
-                            state.copy(
-                                page = if (mappedFeed.isEmpty()) null else state.page?.plus(1),
-                                loadingPage = false,
-                                data = state.data.copy(
-                                    itemsList = itemsList,
-                                    scrollToTop = state.page == 1
-                                ),
-                                error = null,
-                                loadMore = false,
-                                bottomItem = null
-                            )
-                        }
-
-                    } else {
-                        uiStateListener.value =
-                            state.copy(
-                                loadingPage = false,
-                                error = ErrorState.Error(),
-                                page = 1,
-                                loadMore = false
-                            )
-                    }
-                }
-                .flowOn(Dispatchers.Default)
-                .catch {
-                    debugLog { "fetch favorite products sorted error ${it.localizedMessage}" }
-                    uiStateListener.value =
-                        state.copy(error = it.toErrorState(), loadingPage = false)
-                }
-                .collect()
-        }
-    }
-
-    private fun checkSelectedFilter(categoryUI: CategoryUI?): CategoryUI? {
-        if (categoryUI == null) return null
-
-        if (categoryUI.categoryUIList.isNotEmpty()) {
-            categoryUI.categoryUIList = categoryUI.categoryUIList.toMutableList().apply {
-                add(
-                    0, CategoryUI(
-                        id = -1,
-                        name = "Все",
-                        isSelected = true
-                    )
-                )
-            }
-        }
-        return categoryUI
-    }
 
     fun isLoginAlready() = accountManager.isAlreadyLogin()
 
@@ -491,79 +277,6 @@ class FavoriteFlowViewModel @Inject constructor(
     fun changeRating(productId: Long, rating: Float, oldRating: Float) {
         viewModelScope.launch {
             ratingProductManager.rate(productId, rating = rating, oldRating = oldRating)
-        }
-    }
-
-    fun updateByIsAvailable(bool: Boolean) {
-        if (state.data.isAvailable == bool) return
-        uiStateListener.value = state.copy(
-            data = state.data.copy(isAvailable = bool),
-            page = 1,
-            loadMore = false,
-            loadingPage = true
-        )
-        fetchFavoriteProductsHeader()
-        fetchFavoriteProductsSorted()
-    }
-
-    fun onTabClick(id: Long) {
-        val categoryUI = state.data.favoriteCategory ?: return
-
-        uiStateListener.value = state.copy(
-            data = state.data.copy(
-                favoriteCategory = categoryUI.copy(
-                    categoryUIList = categoryUI.categoryUIList.map { it.copy(isSelected = it.id == id) }
-                ),
-                selectedCategoryId = id
-            ),
-            page = 1,
-            loadMore = false
-        )
-        fetchFavoriteProductsSorted()
-    }
-
-//    fun updateByCategory(categoryId: Long?) {
-//        if (state.data.selectedCategoryId == categoryId) return
-//        uiStateListener.value = state.copy(
-//            data = state.data.copy(
-//                selectedCategoryId = categoryId ?: -1,
-//                sortType = SortTypeUI(),
-//            ),
-//            page = 1,
-//            loadMore = false,
-//            loadingPage = true
-//        )
-//        fetchFavoriteProductsSorted()
-//    }
-
-    fun updateBySortType(sortType: SortTypeUI) {
-        if (state.data.sortType == sortType) return
-        val categoryUI = state.data.favoriteCategory
-        uiStateListener.value = state.copy(
-            data = state.data.copy(
-                sortType = sortType,
-                selectedCategoryId = -1,
-                favoriteCategory = categoryUI?.copy(
-                    categoryUIList = categoryUI.categoryUIList.map { it.copy(isSelected = it.id == -1L) }
-                ),
-                scrollToTop = true
-            ),
-            page = 1,
-            loadMore = false,
-            loadingPage = true
-        )
-        fetchFavoriteProductsSorted()
-    }
-
-    fun onPreOrderClick(id: Long, name: String, detailPicture: String) {
-        viewModelScope.launch {
-            val accountId = accountManager.fetchAccountId()
-            if (accountId == null) {
-                //eventListener.emit(FavoriteEvents.GoToProfile)
-                eventListener.emit(FavoriteEvents.GoToPreOrder(id, name, detailPicture))
-            } else {
-                eventListener.emit(FavoriteEvents.GoToPreOrder(id, name, detailPicture))
-            }
         }
     }
 
@@ -643,9 +356,6 @@ class FavoriteFlowViewModel @Inject constructor(
 
 
     sealed class FavoriteEvents : Event {
-        data class GoToPreOrder(val id: Long, val name: String, val detailPicture: String) :
-            FavoriteEvents()
-
         data object GoToProfile : FavoriteEvents()
         data object ScrollToTop : FavoriteEvents()
         data object GoToSearch : FavoriteEvents()

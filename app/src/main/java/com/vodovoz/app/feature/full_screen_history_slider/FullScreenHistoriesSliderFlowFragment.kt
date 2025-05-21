@@ -20,8 +20,7 @@ import com.vodovoz.app.data.model.common.ActionEntity
 import com.vodovoz.app.databinding.FragmentFullscreenHistorySliderBinding
 import com.vodovoz.app.feature.all.promotions.AllPromotionsFragment
 import com.vodovoz.app.feature.full_screen_history_slider.adapter.HistoriesDetailStateAdapter
-import com.vodovoz.app.feature.onlyproducts.ProductsCatalogFragment
-import com.vodovoz.app.feature.productlistnofilter.PaginatedProductsCatalogWithoutFiltersFragment
+import com.vodovoz.app.feature.productlistnofilter.ProductCatalogFragment
 import com.vodovoz.app.ui.interfaces.IOnChangeHistory
 import com.vodovoz.app.ui.interfaces.IOnInvokeAction
 import dagger.hilt.android.AndroidEntryPoint
@@ -141,82 +140,7 @@ class FullScreenHistoriesSliderFlowFragment1 : BaseFragment(),
     }
 
     override fun onInvokeAction(actionEntity: ActionEntity) {
-        actionEntity.invoke(findNavController(), requireActivity())
+
     }
 
-    private fun ActionEntity.invoke(navController: NavController, activity: FragmentActivity) {
-        val navDirect = when (this) {
-            is ActionEntity.Brand ->
-                FullScreenHistoriesSliderFlowFragmentDirections.actionToPaginatedProductsCatalogWithoutFiltersFragment(
-                    PaginatedProductsCatalogWithoutFiltersFragment.DataSource.Brand(brandId = this.brandId)
-                )
-
-            is ActionEntity.Brands -> {
-                FullScreenHistoriesSliderFlowFragmentDirections.actionToAllBrandsFragment(this.brandIdList.toLongArray())
-            }
-
-            is ActionEntity.Product ->
-                FullScreenHistoriesSliderFlowFragmentDirections.actionToProductDetailFragment(this.productId)
-
-            is ActionEntity.Products ->
-                FullScreenHistoriesSliderFlowFragmentDirections.actionToProductsCatalogFragment(
-                    ProductsCatalogFragment.DataSource.BannerProducts(categoryId = this.categoryId)
-                )
-
-            is ActionEntity.Promotion ->
-                FullScreenHistoriesSliderFlowFragmentDirections.actionToPromotionDetailFragment(this.promotionId)
-
-            is ActionEntity.Promotions -> FullScreenHistoriesSliderFlowFragmentDirections.actionToAllPromotionsFragment(
-                AllPromotionsFragment.DataSource.ByBanner(-1, -1) // todo - put actual banner id
-            )
-
-            is ActionEntity.AllPromotions -> FullScreenHistoriesSliderFlowFragmentDirections.actionToAllPromotionsFragment(
-                AllPromotionsFragment.DataSource.All
-            )
-
-            is ActionEntity.Link -> {
-                val openLinkIntent = Intent(Intent.ACTION_VIEW, Uri.parse(this.url))
-                activity.startActivity(openLinkIntent)
-                null
-            }
-
-            is ActionEntity.Category ->
-                FullScreenHistoriesSliderFlowFragmentDirections.actionToPaginatedProductsCatalogFragment(
-                    this.categoryId
-                )
-
-            is ActionEntity.Discount -> FullScreenHistoriesSliderFlowFragmentDirections.actionToPaginatedProductsCatalogWithoutFiltersFragment(
-                PaginatedProductsCatalogWithoutFiltersFragment.DataSource.HurryBuyUpProducts
-            )
-
-            is ActionEntity.Novelties -> FullScreenHistoriesSliderFlowFragmentDirections.actionToPaginatedProductsCatalogWithoutFiltersFragment(
-                PaginatedProductsCatalogWithoutFiltersFragment.DataSource.NewProducts
-            )
-
-            is ActionEntity.WaterApp -> {
-                val eventParameters = "\"source\":\"stories\""
-                accountManager.reportEvent("trekervodi_zapysk", eventParameters)
-                FullScreenHistoriesSliderFlowFragmentDirections.actionToWaterAppFragment()
-            }
-
-            is ActionEntity.Delivery -> FullScreenHistoriesSliderFlowFragmentDirections.actionToWebViewFragment(
-                ApiConfig.ABOUT_DELIVERY_URL,
-                "О доставке"
-            )
-
-            is ActionEntity.Profile -> {
-                viewModel.goToProfile()
-                null
-            }
-
-            is ActionEntity.BuyCertificate -> {
-                FullScreenHistoriesSliderFlowFragmentDirections.actionToBuyCertificateFragment()
-            }
-
-            is ActionEntity.LinkWithCookies -> {
-                null
-            }
-        }
-        navDirect?.let { navController.navigate(navDirect) }
-    }
 }

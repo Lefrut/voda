@@ -208,19 +208,6 @@ class CartFragment : Fragment() {
                         tabManager.selectTab(R.id.graph_profile)
                     }
 
-                    is CartFlowViewModel.CartEvents.GoToPreOrder -> {
-                        if (findNavController().currentBackStackEntry?.destination?.id == R.id.preOrderBS) {
-                            findNavController().popBackStack()
-                        }
-                        findNavController().navigate(
-                            CartFragmentDirections.actionToPreOrderBS(
-                                event.id,
-                                event.name,
-                                event.detailPicture
-                            )
-                        )
-                    }
-
                     is CartFlowViewModel.CartEvents.GoToProductDetails -> {
                         findNavController().navigateToProductDetails(event.productId)
                     }

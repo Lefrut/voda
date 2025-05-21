@@ -186,15 +186,6 @@ class HomeFragment : Fragment() {
                     tabManager.selectTab(R.id.graph_profile)
                 }
 
-                is HomeFlowViewModel.HomeEvents.SendComment -> {
-                    if (findNavController().currentBackStackEntry?.destination?.id == R.id.sendCommentAboutShopBottomDialog) {
-                        findNavController().popBackStack()
-                    }
-
-
-                    findNavController().navigate(HomeFragmentDirections.actionToSendCommentAboutShopBottomDialog())
-                }
-
                 is HomeFlowViewModel.HomeEvents.GoToCart -> {
 
                 }
@@ -290,11 +281,11 @@ class HomeFragment : Fragment() {
                             }
 
                             "gl/" -> {
+
                             }
 
                             "kalkulyator_vody/" -> {
-                                val eventName = "trekervodi_ssilka"
-                                accountManager.reportEvent(eventName)
+                                accountManager.reportEvent("trekervodi_ssilka")
                                 findNavController().navigateToWaterApp()
                             }
                         }

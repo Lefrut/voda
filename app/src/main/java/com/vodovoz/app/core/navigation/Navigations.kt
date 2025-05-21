@@ -15,7 +15,7 @@ import com.vodovoz.app.feature.buy_certificate.model.FAQUi
 import com.vodovoz.app.feature.cart.model.CartPresentPopupWindowUi
 import com.vodovoz.app.feature.cart.model.CartPresentUi
 import com.vodovoz.app.feature.home.model.CategoryUi
-import com.vodovoz.app.feature.productlistnofilter.PaginatedProductsCatalogWithoutFiltersFragment
+import com.vodovoz.app.feature.productlistnofilter.ProductCatalogFragment
 
 
 private val SlideNavOptions = NavOptions.Builder()
@@ -177,7 +177,7 @@ fun NavController.navigateToButtonProductList(buttonId: Int) {
     navigate(
         R.id.paginatedProductsCatalogWithoutFiltersFragment,
         bundleOf(
-            "dataSource" to PaginatedProductsCatalogWithoutFiltersFragment.DataSource.ButtonProducts(
+            "dataSource" to ProductCatalogFragment.DataSource.ButtonProducts(
                 buttonId
             )
         )
@@ -379,7 +379,7 @@ fun NavController.navigateToBrandProductList(brandId: Long) {
     navigate(
         R.id.paginatedProductsCatalogWithoutFiltersFragment,
         bundleOf(
-            "dataSource" to PaginatedProductsCatalogWithoutFiltersFragment.DataSource.Brand(
+            "dataSource" to ProductCatalogFragment.DataSource.Brand(
                 brandId
             )
         )
@@ -390,7 +390,7 @@ fun NavController.navigateToSearchProductList(query: String) {
     navigate(
         R.id.paginatedProductsCatalogWithoutFiltersFragment,
         bundleOf(
-            "dataSource" to PaginatedProductsCatalogWithoutFiltersFragment.DataSource.Search(
+            "dataSource" to ProductCatalogFragment.DataSource.Search(
                 query
             )
         )
@@ -402,7 +402,7 @@ fun NavController.navigateToCategoryProductList(categoryId: Long) {
     navigate(
         R.id.paginatedProductsCatalogWithoutFiltersFragment,
         bundleOf(
-            "dataSource" to PaginatedProductsCatalogWithoutFiltersFragment.DataSource.Category(
+            "dataSource" to ProductCatalogFragment.DataSource.Category(
                 categoryId
             )
         )
@@ -413,7 +413,7 @@ fun NavController.navigateToBannerProductList(bannerId: Long, blockId: Long) {
     navigate(
         R.id.paginatedProductsCatalogWithoutFiltersFragment,
         bundleOf(
-            "dataSource" to PaginatedProductsCatalogWithoutFiltersFragment.DataSource.Products(
+            "dataSource" to ProductCatalogFragment.DataSource.Products(
                 bannerId, blockId
             )
         )
@@ -451,14 +451,14 @@ fun NavController.navigateToSearch(query: String = "") {
 fun NavController.navigateToHurryBuyUpProducts() {
     navigate(
         R.id.paginatedProductsCatalogWithoutFiltersFragment,
-        bundleOf("dataSource" to PaginatedProductsCatalogWithoutFiltersFragment.DataSource.HurryBuyUpProducts)
+        bundleOf("dataSource" to ProductCatalogFragment.DataSource.HurryBuyUpProducts)
     )
 }
 
 fun NavController.navigateToNewProducts() {
     navigate(
         R.id.paginatedProductsCatalogWithoutFiltersFragment,
-        bundleOf("dataSource" to PaginatedProductsCatalogWithoutFiltersFragment.DataSource.NewProducts)
+        bundleOf("dataSource" to ProductCatalogFragment.DataSource.NewProducts)
     )
 }
 

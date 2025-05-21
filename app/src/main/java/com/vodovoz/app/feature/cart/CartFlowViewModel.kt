@@ -373,18 +373,6 @@ class CartFlowViewModel @Inject constructor(
         }
     }
 
-    fun onPreOrderClick(id: Long, name: String, detailPicture: String) {
-        viewModelScope.launch {
-            val accountId = accountManager.fetchAccountId()
-            if (accountId == null) {
-                //eventListener.emit(CartEvents.NavigateToProfile)
-                eventListener.emit(CartEvents.GoToPreOrder(id, name, detailPicture))
-            } else {
-                eventListener.emit(CartEvents.GoToPreOrder(id, name, detailPicture))
-            }
-        }
-    }
-
     private fun getCart(): String {
         val cart = state.data.availableProducts?.items?.map { Pair(it.id, it.cartQuantity) }
         val result = StringBuilder()
@@ -582,9 +570,6 @@ class CartFlowViewModel @Inject constructor(
         data object NavigateToProfile : CartEvents()
         data object GoToCatalog : CartEvents()
         data object GoToAllBottles : CartEvents()
-
-        data class GoToPreOrder(val id: Long, val name: String, val detailPicture: String) :
-            CartEvents()
 
         data class GoToProductDetails(val productId: Long) : CartEvents()
     }

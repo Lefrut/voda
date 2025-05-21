@@ -156,12 +156,6 @@ class FullScreenHistoriesSliderFlowViewModel @Inject constructor(
         }
     }
 
-    fun goToProfile() {
-        viewModelScope.launch {
-            eventListener.emit(HistoriesSliderEvents.GoToProfile)
-        }
-    }
-
     fun changeStoryIndex(currentStoryPage: Int) = viewModelScope.launch {
         if (currentStoryPage == state.data.currentStoryIndex) return@launch
 

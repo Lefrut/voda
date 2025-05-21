@@ -33,9 +33,9 @@ import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class PaginatedProductsCatalogWithoutFiltersFragment : Fragment() {
+class ProductCatalogFragment : Fragment() {
 
-    internal val viewModel: ProductsListNoFilterFlowViewModel by viewModels()
+    internal val viewModel: ProductCatalogViewModel by viewModels()
 
     @Inject
     lateinit var cartManager: CartManager
@@ -100,49 +100,49 @@ class PaginatedProductsCatalogWithoutFiltersFragment : Fragment() {
                     LifecycleEffect {
                         viewModel.observeEvent().collect { event ->
                             when (event) {
-                                ProductsListNoFilterFlowViewModel.ProductListNoFilterEvent.GoBack -> {
+                                ProductCatalogViewModel.ProductListNoFilterEvent.GoBack -> {
                                     findNavController().popBackStack()
                                 }
 
-                                is ProductsListNoFilterFlowViewModel.ProductListNoFilterEvent.GoToSearch -> {
+                                is ProductCatalogViewModel.ProductListNoFilterEvent.GoToSearch -> {
                                     findNavController().navigateToSearch(event.query)
                                 }
 
-                                is ProductsListNoFilterFlowViewModel.ProductListNoFilterEvent.GoToCategories -> {
+                                is ProductCatalogViewModel.ProductListNoFilterEvent.GoToCategories -> {
                                     findNavController().navigateToCategories(
                                         category = event.currentCategory,
                                         categories = event.categories
                                     )
                                 }
 
-                                is ProductsListNoFilterFlowViewModel.ProductListNoFilterEvent.GoToProductDetails -> {
+                                is ProductCatalogViewModel.ProductListNoFilterEvent.GoToProductDetails -> {
                                     findNavController().navigateToProductDetails(event.productId)
                                 }
 
-                                ProductsListNoFilterFlowViewModel.ProductListNoFilterEvent.ScrollToTop -> {
+                                ProductCatalogViewModel.ProductListNoFilterEvent.ScrollToTop -> {
                                     lazyGridState.animateScrollToItem(0);
                                 }
 
-                                is ProductsListNoFilterFlowViewModel.ProductListNoFilterEvent.GoToProductFilters -> {
+                                is ProductCatalogViewModel.ProductListNoFilterEvent.GoToProductFilters -> {
                                     findNavController().navigateToProductFilters(
                                         event.categoryId,
                                         event.filters
                                     )
                                 }
 
-                                is ProductsListNoFilterFlowViewModel.ProductListNoFilterEvent.Share -> {
+                                is ProductCatalogViewModel.ProductListNoFilterEvent.Share -> {
                                     shareText(event.text)
                                 }
 
-                                is ProductsListNoFilterFlowViewModel.ProductListNoFilterEvent.GoToProductAnalogs -> {
+                                is ProductCatalogViewModel.ProductListNoFilterEvent.GoToProductAnalogs -> {
                                     findNavController().navigateToProductAnalogs(event.productId)
                                 }
 
-                                ProductsListNoFilterFlowViewModel.ProductListNoFilterEvent.GoToQrCode -> {
+                                ProductCatalogViewModel.ProductListNoFilterEvent.GoToQrCode -> {
                                     searchNavigator.navigateToImageSearch()
                                 }
 
-                                ProductsListNoFilterFlowViewModel.ProductListNoFilterEvent.GoToSpeech -> {
+                                ProductCatalogViewModel.ProductListNoFilterEvent.GoToSpeech -> {
                                     searchNavigator.navigateToVoiceSearch()
                                 }
                             }

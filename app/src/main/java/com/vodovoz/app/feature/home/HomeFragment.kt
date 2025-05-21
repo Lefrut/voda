@@ -35,7 +35,6 @@ import com.vodovoz.app.common.permissions.PermissionsController
 import com.vodovoz.app.common.product.rating.RatingProductManager
 import com.vodovoz.app.common.speechrecognizer.SpeechDialogFragment
 import com.vodovoz.app.common.tab.TabManager
-import com.vodovoz.app.core.navigation.navigateToBrandProductList
 import com.vodovoz.app.core.network.ApiConfig
 import com.vodovoz.app.data.model.common.ActionEntity
 import com.vodovoz.app.databinding.FragmentMainHomeFlowBinding
@@ -60,18 +59,15 @@ import com.vodovoz.app.feature.home.viewholders.hometitle.HomeTitle.Companion.PR
 import com.vodovoz.app.feature.home.viewholders.hometitle.HomeTitle.Companion.SLIDER_TITLE
 import com.vodovoz.app.feature.home.viewholders.hometitle.HomeTitle.Companion.VIEWED_TITLE
 import com.vodovoz.app.feature.home.viewholders.hometitle.HomeTitleClickListener
-import com.vodovoz.app.feature.onlyproducts.ProductsCatalogFragment
 import com.vodovoz.app.feature.productlist.adapter.ProductsClickListener
-import com.vodovoz.app.feature.productlistnofilter.PaginatedProductsCatalogWithoutFiltersFragment
+import com.vodovoz.app.feature.productlistnofilter.ProductCatalogFragment
 import com.vodovoz.app.feature.sitestate.SiteStateManager
 import com.vodovoz.app.ui.model.CommentUI
-import com.vodovoz.app.ui.model.PopupNewsUI
 import com.vodovoz.app.ui.model.SectionDataUI
 import com.vodovoz.app.util.extensions.addOnBackPressedCallback
 import com.vodovoz.app.util.extensions.debugLog
 import com.vodovoz.app.util.extensions.snack
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -280,11 +276,11 @@ class HomeFragment1 : BaseFragment() {
                                         eventParameters
                                     )
 
-                                    findNavController().navigate(
-                                        HomeFragmentDirections.actionToPaginatedProductsCatalogFragment(
-                                            sectionId.toLong()
-                                        )
-                                    )
+//                                    findNavController().navigate(
+//                                        HomeFragmentDirections.actionToPaginatedProductsCatalogFragment(
+//                                            sectionId.toLong()
+//                                        )
+//                                    )
                                 }
                             }
 
@@ -308,7 +304,7 @@ class HomeFragment1 : BaseFragment() {
                             "vsenovinki" -> {
                                 findNavController().navigate(
                                     HomeFragmentDirections.actionToPaginatedProductsCatalogWithoutFiltersFragment(
-                                        PaginatedProductsCatalogWithoutFiltersFragment.DataSource.NewProducts
+                                        ProductCatalogFragment.DataSource.NewProducts
                                     )
                                 )
                             }
@@ -316,7 +312,7 @@ class HomeFragment1 : BaseFragment() {
                             "vseskidki" -> {
                                 findNavController().navigate(
                                     HomeFragmentDirections.actionToPaginatedProductsCatalogWithoutFiltersFragment(
-                                        PaginatedProductsCatalogWithoutFiltersFragment.DataSource.HurryBuyUpProducts
+                                        ProductCatalogFragment.DataSource.HurryBuyUpProducts
                                     )
                                 )
                             }
@@ -326,7 +322,7 @@ class HomeFragment1 : BaseFragment() {
                                 if (!brandId.isNullOrEmpty()) {
                                     findNavController().navigate(
                                         HomeFragmentDirections.actionToPaginatedProductsCatalogWithoutFiltersFragment(
-                                            PaginatedProductsCatalogWithoutFiltersFragment.DataSource.Brand(
+                                            ProductCatalogFragment.DataSource.Brand(
                                                 brandId.toLong()
                                             )
                                         )
@@ -521,28 +517,12 @@ class HomeFragment1 : BaseFragment() {
                     .collect {
                         when (it) {
                             is HomeFlowViewModel.HomeEvents.GoToPreOrder -> {
-                                if (findNavController().currentBackStackEntry?.destination?.id == R.id.preOrderBS) {
-                                    findNavController().popBackStack()
-                                }
-                                findNavController().navigate(
-                                    HomeFragmentDirections.actionToPreOrderBS(
-                                        it.id,
-                                        it.name,
-                                        it.detailPicture
-                                    )
-                                )
+//
                             }
 
                             is HomeFlowViewModel.HomeEvents.GoToProfile -> {
                                 tabManager.setAuthRedirect(findNavController().graph.id)
                                 tabManager.selectTab(R.id.graph_profile)
-                            }
-
-                            is HomeFlowViewModel.HomeEvents.SendComment -> {
-                                if (findNavController().currentBackStackEntry?.destination?.id == R.id.sendCommentAboutShopBottomDialog) {
-                                    findNavController().popBackStack()
-                                }
-                                findNavController().navigate(HomeFragmentDirections.actionToSendCommentAboutShopBottomDialog())
                             }
 
                             is HomeFlowViewModel.HomeEvents.GoToCart -> {
@@ -637,7 +617,7 @@ class HomeFragment1 : BaseFragment() {
             override fun showAllDiscountProducts(id: Long) {
                 findNavController().navigate(
                     HomeFragmentDirections.actionToPaginatedProductsCatalogWithoutFiltersFragment(
-                        PaginatedProductsCatalogWithoutFiltersFragment.DataSource.HurryBuyUpProducts
+                        ProductCatalogFragment.DataSource.HurryBuyUpProducts
                     )
                 )
             }
@@ -653,7 +633,7 @@ class HomeFragment1 : BaseFragment() {
             override fun showAllNoveltiesProducts(id: Long) {
                 findNavController().navigate(
                     HomeFragmentDirections.actionToPaginatedProductsCatalogWithoutFiltersFragment(
-                        PaginatedProductsCatalogWithoutFiltersFragment.DataSource.NewProducts
+                        ProductCatalogFragment.DataSource.NewProducts
                     )
                 )
             }
@@ -699,7 +679,7 @@ class HomeFragment1 : BaseFragment() {
                     DISCOUNT_TITLE -> {
                         findNavController().navigate(
                             HomeFragmentDirections.actionToPaginatedProductsCatalogWithoutFiltersFragment(
-                                PaginatedProductsCatalogWithoutFiltersFragment.DataSource.HurryBuyUpProducts
+                                ProductCatalogFragment.DataSource.HurryBuyUpProducts
                             )
                         )
                     }
@@ -711,7 +691,7 @@ class HomeFragment1 : BaseFragment() {
                     NOVELTIES_TITLE -> {
                         findNavController().navigate(
                             HomeFragmentDirections.actionToPaginatedProductsCatalogWithoutFiltersFragment(
-                                PaginatedProductsCatalogWithoutFiltersFragment.DataSource.NewProducts
+                                ProductCatalogFragment.DataSource.NewProducts
                             )
                         )
                     }
@@ -830,7 +810,7 @@ class HomeFragment1 : BaseFragment() {
             override fun onBrandClick(id: Long) {
                 findNavController().navigate(
                     HomeFragmentDirections.actionToPaginatedProductsCatalogWithoutFiltersFragment(
-                        PaginatedProductsCatalogWithoutFiltersFragment.DataSource.Brand(id)
+                        ProductCatalogFragment.DataSource.Brand(id)
                     )
                 )
             }
@@ -897,23 +877,13 @@ class HomeFragment1 : BaseFragment() {
 
             //POSITION_3
             override fun onCategoryClick(id: Long?) {
-                id?.let {
-                    findNavController().navigate(
-                        HomeFragmentDirections.actionToPaginatedProductsCatalogFragment(
-                            id
-                        )
-                    )
-                }
+
             }
 
             override fun onSectionClick(item: SectionDataUI) {
-                if (item.id != 0)
-                    findNavController().navigate(
-                        HomeFragmentDirections.actionToPaginatedProductsCatalogFragment(
-                            item.id.toLong()
-                        )
-                    )
+                if (item.id != 0){
 
+                }
                 if (item.promotionId != 0)
                     findNavController().navigate(
                         HomeFragmentDirections.actionToPromotionDetailFragment(
@@ -945,7 +915,7 @@ class HomeFragment1 : BaseFragment() {
         val navDirect = when (this) {
             is ActionEntity.Brand ->
                 HomeFragmentDirections.actionToPaginatedProductsCatalogWithoutFiltersFragment(
-                    PaginatedProductsCatalogWithoutFiltersFragment.DataSource.Brand(brandId = this.brandId)
+                    ProductCatalogFragment.DataSource.Brand(brandId = this.brandId)
                 )
 
             is ActionEntity.Brands -> {
@@ -955,10 +925,10 @@ class HomeFragment1 : BaseFragment() {
             is ActionEntity.Product ->
                 HomeFragmentDirections.actionToProductDetailFragment(this.productId)
 
-            is ActionEntity.Products ->
-                HomeFragmentDirections.actionToProductsCatalogFragment(
-                    ProductsCatalogFragment.DataSource.BannerProducts(categoryId = this.categoryId)
-                )
+            is ActionEntity.Products -> HomeFragmentDirections.actionToPaginatedProductsCatalogWithoutFiltersFragment(
+                ProductCatalogFragment.DataSource.HurryBuyUpProducts
+            )
+
 
             is ActionEntity.Promotion ->
                 HomeFragmentDirections.actionToPromotionDetailFragment(this.promotionId)
@@ -986,15 +956,17 @@ class HomeFragment1 : BaseFragment() {
                 null
             }
 
-            is ActionEntity.Category ->
-                HomeFragmentDirections.actionToPaginatedProductsCatalogFragment(this.categoryId)
+            is ActionEntity.Category -> HomeFragmentDirections.actionToPaginatedProductsCatalogWithoutFiltersFragment(
+                ProductCatalogFragment.DataSource.HurryBuyUpProducts
+            )
+
 
             is ActionEntity.Discount -> HomeFragmentDirections.actionToPaginatedProductsCatalogWithoutFiltersFragment(
-                PaginatedProductsCatalogWithoutFiltersFragment.DataSource.HurryBuyUpProducts
+                ProductCatalogFragment.DataSource.HurryBuyUpProducts
             )
 
             is ActionEntity.Novelties -> HomeFragmentDirections.actionToPaginatedProductsCatalogWithoutFiltersFragment(
-                PaginatedProductsCatalogWithoutFiltersFragment.DataSource.NewProducts
+                ProductCatalogFragment.DataSource.NewProducts
             )
 
             is ActionEntity.WaterApp -> {

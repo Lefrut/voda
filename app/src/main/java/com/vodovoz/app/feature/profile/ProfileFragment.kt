@@ -139,7 +139,7 @@ class ProfileFragment1 : BaseFragment() {
 
                                 flowViewModel.refresh()
                                 cartFlowViewModel.refreshIdle()
-                                favoriteViewModel.refreshIdle()
+                                //favoriteViewModel.refreshIdle()
                             }
 
                             is ProfileFlowViewModel.ProfileEvents.GoToCart -> {
@@ -328,7 +328,7 @@ class ProfileFragment1 : BaseFragment() {
             }
 
             override fun onFetchDiscount() {
-                findNavController().navigate(ProfileFragmentDirections.actionToDiscountCardFragment())
+                //findNavController().navigate(ProfileFragmentDirections.actionToDiscountCardFragment())
             }
 
             override fun onActiveCertificate() {
@@ -390,11 +390,11 @@ class ProfileFragment1 : BaseFragment() {
             }
 
             override fun onNotifyWhenBeAvailable(id: Long, name: String, detailPicture: String) {
-                findNavController().navigate(
-                    ProfileFragmentDirections.actionToPreOrderBS(
-                        id, name, detailPicture
-                    )
-                )
+//                findNavController().navigate(
+//                    ProfileFragmentDirections.actionToPreOrderBS(
+//                        id, name, detailPicture
+//                    )
+//                )
             }
 
             override fun onChangeProductQuantity(id: Long, cartQuantity: Int, oldQuantity: Int) {

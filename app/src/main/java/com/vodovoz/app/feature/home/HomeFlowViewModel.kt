@@ -524,7 +524,7 @@ class HomeFlowViewModel @Inject constructor(
             if (accountId == null) {
                 eventListener.emit(HomeEvents.GoToProfile)
             } else {
-                eventListener.emit(HomeEvents.SendComment)
+                //eventListener.emit(HomeEvents.SendComment)
             }
         }
     }
@@ -773,7 +773,6 @@ class HomeFlowViewModel @Inject constructor(
         data object GoToSearch : HomeEvents()
 
         data object GoToProfile : HomeEvents()
-        data object SendComment : HomeEvents()
         data object GoToCart : HomeEvents()
         data object ScrollTopProductsToStart : HomeEvents()
         data object ShowSpeechRecognizer : HomeEvents()

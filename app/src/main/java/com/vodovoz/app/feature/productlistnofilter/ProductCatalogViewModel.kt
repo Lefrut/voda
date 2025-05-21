@@ -8,7 +8,6 @@ import androidx.paging.LoadState
 import androidx.paging.PagingData
 import androidx.paging.map
 import com.vodovoz.app.R
-import com.vodovoz.app.common.account.data.AccountManager
 import com.vodovoz.app.common.cart.CartManager
 import com.vodovoz.app.common.content.Event
 import com.vodovoz.app.common.content.PagingContractViewModel
@@ -18,7 +17,6 @@ import com.vodovoz.app.common.content.updateData
 import com.vodovoz.app.common.like.LikeManager
 import com.vodovoz.app.common.product.rating.RatingProductManager
 import com.vodovoz.app.common.resources.ResourcesProvider
-import com.vodovoz.app.data.MainRepository
 import com.vodovoz.app.design_system.model.ParentCategoryUi
 import com.vodovoz.app.design_system.model.ProductUi
 import com.vodovoz.app.design_system.model.allCategories
@@ -41,7 +39,7 @@ import com.vodovoz.app.feature.home.model.CategoryUi
 import com.vodovoz.app.feature.home.model.toParentCategory
 import com.vodovoz.app.feature.product_comments.model.SortUi
 import com.vodovoz.app.feature.product_comments.model.toDomain
-import com.vodovoz.app.feature.productlistnofilter.PaginatedProductsCatalogWithoutFiltersFragment.DataSource
+import com.vodovoz.app.feature.productlistnofilter.ProductCatalogFragment.DataSource
 import com.vodovoz.app.ui.model.CategoryUI
 import com.vodovoz.app.ui.model.SortTypeUI
 import com.vodovoz.app.ui.paging.PagingDataListener
@@ -57,14 +55,14 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class ProductsListNoFilterFlowViewModel @Inject constructor(
+class ProductCatalogViewModel @Inject constructor(
     savedState: SavedStateHandle,
     private val cartManager: CartManager,
     private val likeManager: LikeManager,
     private val ratingProductManager: RatingProductManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val resourcesProvider: ResourcesProvider,
-) : PagingContractViewModel<ProductsListNoFilterFlowViewModel.ProductListNoFilterState, ProductsListNoFilterFlowViewModel.ProductListNoFilterEvent>(
+) : PagingContractViewModel<ProductCatalogViewModel.ProductListNoFilterState, ProductCatalogViewModel.ProductListNoFilterEvent>(
     ProductListNoFilterState()
 ) {
 
