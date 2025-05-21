@@ -58,12 +58,8 @@ class ProductCatalogFragment : Fragment() {
         )
     }
 
-
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?,
-    ): View {
+    override fun onStart() {
+        super.onStart()
         findNavController().currentBackStackEntry?.savedStateHandle?.remove<CategoryUi>("category")
             ?.let { category ->
                 viewModel.selectCategory(category)
@@ -73,6 +69,15 @@ class ProductCatalogFragment : Fragment() {
             ?.let { filters ->
                 viewModel.changeFilters(filters)
             }
+    }
+
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?,
+    ): View {
+
 
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
@@ -83,7 +88,7 @@ class ProductCatalogFragment : Fragment() {
                     val viewState = pagingState.data
                     val lazyGridState = rememberLazyGridState()
 
-                    ProductsNoFiltersScreen(
+                    ProductCatalogScreen(
                         viewModel = viewModel,
                         viewState = viewState,
                         lazyGridState = lazyGridState

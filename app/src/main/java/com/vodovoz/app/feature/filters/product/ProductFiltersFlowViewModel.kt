@@ -156,8 +156,15 @@ class ProductFiltersFlowViewModel @Inject constructor(
                                 if (currentValue == filterValue && currentValue.selected && currentFilter.values.size > 6) null
                                 else if (currentValue == filterValue) currentValue.copy(selected = !currentValue.selected)
                                 else currentValue
-                            }.sortedWith(filterValueComparator)
-                            currentFilter.copy(values = updatedValues)
+                            }
+
+                            val sortedUpdatedValues = try {
+                                updatedValues.sortedWith(filterValueComparator)
+                            } catch (_: Throwable) {
+                                updatedValues
+                            }
+
+                            currentFilter.copy(values = sortedUpdatedValues)
                         } else currentFilter
                     }
                 ),
@@ -202,32 +209,36 @@ class ProductFiltersFlowViewModel @Inject constructor(
     }
 
     private val filterValueComparator: Comparator<FilterValueUi> =
-        compareByDescending<FilterValueUi> { it -> it.selected }.thenBy {
-            if (!it.selected) it.name.toDoubleOrNull() ?: it.name else ""
+        compareByDescending<FilterValueUi> { it -> it.selected }.thenBy { filterValue ->
+            if (!filterValue.selected) {
+                filterValue.name.replaceFirst(',', '.').toDoubleOrNull()
+                    ?: filterValue.name
+            } else ""
         }
 
 
     private fun mergeFilters(
-        filters: FiltersUi,
-        secondFilters: FiltersUi,
+        userFilters: FiltersUi,
+        baseFilters: FiltersUi,
     ): FiltersUi {
-        val price = filters.price
-        val secondPrice = secondFilters.price
-        val newMin = min(price.min, secondPrice.min)
-        val newMax = max(price.max, secondPrice.max)
+        val basePrice = baseFilters.price
+        val userPrice = userFilters.price
 
-        val newCurrentMin = listOf(price.currentMin, secondPrice.currentMin)
-            .filter { it -> it in newMin..newMax && it != newMin }.maxOrNull() ?: newMin
-        val newCurrentMax = listOf(price.currentMax, secondPrice.currentMax)
-            .filter { it -> it in newMin..newMax && it != newMax }.maxOrNull() ?: newMax
+        val newMin = min(basePrice.min, basePrice.max)
+        val newMax = max(basePrice.min, basePrice.max)
 
-        return filters.copy(
-            filters = mergeFilters(filters.filters, secondFilters.filters),
+        val newCurrentMin =
+            if (userPrice.currentMin in newMin..newMax) userPrice.currentMin else basePrice.currentMin
+        val newCurrentMax =
+            if (userPrice.currentMax in newMin..newMax) userPrice.currentMax else basePrice.currentMax
+
+        return userFilters.copy(
+            filters = mergeFilters(userFilters.filters, baseFilters.filters),
             price = FiltersPriceUi(
                 min = newMin,
-                max = newMax,
+                max = newMax.coerceAtLeast(newMin),
                 currentMin = newCurrentMin,
-                currentMax = newCurrentMax
+                currentMax = newCurrentMax.coerceAtLeast(newCurrentMin)
             )
         )
     }
@@ -239,11 +250,17 @@ class ProductFiltersFlowViewModel @Inject constructor(
         val allFilters = originalFilters + newFilters
         return allFilters.groupBy { filter -> filter.id }.mapNotNull { idAndFilters ->
             val currentFilter = idAndFilters.value.firstOrNull() ?: return@mapNotNull null
+
             val filterValues = idAndFilters.value.map { it -> it.values }.flatten()
-                .sortedWith(filterValueComparator).distinctBy { it -> it.id }
+
+            val sortedFilterValues = try {
+                filterValues.sortedWith(filterValueComparator)
+            } catch (_: Throwable) {
+                filterValues
+            }.distinctBy { it -> it.id }
 
             currentFilter.copy(
-                values = filterValues.filterIndexed { index, filterValue ->
+                values = sortedFilterValues.filterIndexed { index, filterValue ->
                     filterValue.selected || index < 6
                 }
 
@@ -306,6 +323,6 @@ class ProductFiltersFlowViewModel @Inject constructor(
         data class GoToProductList(val filters: FiltersUi) :
             ProductFiltersEvent
 
-        data object ResetSlider: ProductFiltersEvent
+        data object ResetSlider : ProductFiltersEvent
     }
 }

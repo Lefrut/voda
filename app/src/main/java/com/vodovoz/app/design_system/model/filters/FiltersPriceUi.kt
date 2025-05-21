@@ -13,6 +13,6 @@ data class FiltersPriceUi(
     val currentMax: Int = max
 ): Parcelable {
     companion object {
-        val Empty = FiltersPriceUi(min = Int.MAX_VALUE, max = Int.MIN_VALUE)
+        val Empty = FiltersPriceUi(min = 0, max = Int.MAX_VALUE)
     }
 }
