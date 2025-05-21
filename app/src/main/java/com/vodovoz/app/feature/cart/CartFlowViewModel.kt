@@ -50,6 +50,7 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
@@ -69,13 +70,13 @@ class CartFlowViewModel @Inject constructor(
 
     init {
         viewModelScope.launch { listenCart() }
-        viewModelScope.launch {
-            cartManager.observeUpdateCartList().collectLatest { newCart ->
-                if (newCart) {
-                    refresh()
-                    cartManager.updateCartListState(false)
-                }
-            }
+        viewModelScope.launch { listenCartUpdates() }
+    }
+
+    private suspend fun listenCartUpdates() {
+        cartManager.observeUpdateCartList().filter { update -> update }.collect {
+            refresh()
+            cartManager.updateCartListState(false)
         }
     }
 
@@ -281,26 +282,6 @@ class CartFlowViewModel @Inject constructor(
         uiStateListener.updateData { s ->
             s.copy(blockCart = false)
         }
-
-//        viewModelScope.launch {
-//            flow { emit(repository.fetchClearCartResponse(action = "delkorzina")) }
-//                .onEach { response ->
-//                    if (response is ResponseEntity.Success) {
-//                        uiStateListener.value = state.copy(data = CartState(), false)
-//                        cartManager.clearCart()
-//                        fetchCart(state.data.coupon) //todo
-//                    } else {
-//                        uiStateListener.value = state.copy(loadingPage = false)
-//                    }
-//                }
-//                .flowOn(Dispatchers.Default)
-//                .catch {
-//                    debugLog { "clear cart error ${it.localizedMessage}" }
-//                    uiStateListener.value =
-//                        state.copy(error = it.toErrorState(), loadingPage = false)
-//                }
-//                .collect()
-//        }
     }
 
     fun isLoginAlready() = accountManager.isAlreadyLogin()

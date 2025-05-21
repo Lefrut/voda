@@ -442,7 +442,7 @@ interface VodovozService {
     ): Response<VodovozResponseDTO<String>>
 
     @GET("korzina/index.php?action=delbasket")
-    suspend fun clearCart(): Response<Unit>
+    suspend fun clearCart(): Response<VodovozResponseDTO<String>>
 
     @GET("korzina/brand.php?iblock_id=90")
     suspend fun getAllBottles(): Response<VodovozResponseDTO<AllBottlesDetailsDTO>>
