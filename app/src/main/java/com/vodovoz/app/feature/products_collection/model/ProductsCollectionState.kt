@@ -19,5 +19,7 @@ sealed interface ProductsCollectionUiState{
 
     data object Success: ProductsCollectionUiState
 
+    data object Error: ProductsCollectionUiState
+
 
 }

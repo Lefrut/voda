@@ -20,7 +20,7 @@ fun CharacteristicsTabContent(
     modifier: Modifier = Modifier,
     characteristics: ContentBlockUi<List<CharacteristicsBlockUi>>,
 ) {
-    Column(modifier = modifier.padding(vertical = 16.dp)) {
+    Column(modifier = modifier.padding(top = 16.dp, bottom = 22.dp)) {
         characteristics.content.forEach { block ->
             Text(
                 modifier = Modifier.padding(horizontal = 16.dp),

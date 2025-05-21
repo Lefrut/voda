@@ -3,8 +3,8 @@ package com.vodovoz.app.common.tab
 import com.vodovoz.app.R
 import com.vodovoz.app.data.MainRepository
 import com.vodovoz.app.data.model.common.ResponseEntity
+import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.mapper.BottomCartMapper.mapToUI
-import com.vodovoz.app.util.extensions.debugLog
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -12,9 +12,9 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -22,7 +22,7 @@ import javax.inject.Singleton
 
 @Singleton
 class TabManager @Inject constructor(
-    private val repository: MainRepository,
+    private val vodovozServiceRepository: VodovozServiceRepository,
 ) {
 
     private val tabStateListener = MutableSharedFlow<Int>()
@@ -78,25 +78,15 @@ class TabManager @Inject constructor(
         tabReselectListener.value = id
     }
 
-    fun saveBottomNavCartState() {
-        scope.launch {
-            flow {
-                emit(repository.fetchBottomCart())
-            }.onEach { response ->
-                if (response is ResponseEntity.Success) {
-                    val bottomCartUI = response.data.mapToUI()
-                    bottomNavCartStateListener.value = BottomNavCartState(
-                        count = bottomCartUI.productCount,
-                        total = bottomCartUI.totalSum.toInt()
-                    )
-                } else if (response is ResponseEntity.Error) {
-                    debugLog { "Error while fetching bottom cart state: ${response.errorMessage}" }
-                }
-            }.catch {
-                debugLog { "Error while fetching bottom cart state: $it" }
-            }.collect()
+    suspend fun updateBottomNavCartState() = vodovozServiceRepository.getBottomCart().onEach { result ->
+        result.onSuccess { bottomCartModel ->
+            bottomNavCartStateListener.value = BottomNavCartState(
+                count = bottomCartModel.count,
+                total = bottomCartModel.total
+            )
         }
-    }
+    }.launchIn(scope)
+
 
     fun saveBottomNavProfileState(amount: Int?) {
         bottomNavProfileStateListener.value = amount

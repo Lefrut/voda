@@ -37,6 +37,7 @@ import com.vodovoz.app.data.vodovoz_service.model.auth.AuthDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.auth.LoginByPhoneDTO
 import com.vodovoz.app.data.vodovoz_service.model.auth.RequestCodeDTO
 import com.vodovoz.app.data.vodovoz_service.model.auth.UserAuthInfoDTO
+import com.vodovoz.app.data.vodovoz_service.model.cart.BottomCartDTO
 import com.vodovoz.app.data.vodovoz_service.model.cart.CartDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.catalog.CatalogDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.certificate.BuyCertificateDetailsDTO
@@ -409,7 +410,8 @@ interface VodovozService {
      * Cart requests
      * */
 
-    //todo - https://vodovoz.net/newmobile_new/korzina/minikorzina.php?action=getbasketuser
+    @GET("https://vodovoz.net/newmobile_new/korzina/minikorzina.php?action=getbasketuser")
+    suspend fun getBottomCart(): Response<VodovozResponseDTO<BottomCartDTO>>
 
     @GET("korzina/index.php?action=getbasket")
     suspend fun getCartDetails(

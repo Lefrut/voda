@@ -5,7 +5,9 @@ import androidx.core.os.bundleOf
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
 import com.vodovoz.app.R
+import com.vodovoz.app.design_system.model.ColorfulButtonUi
 import com.vodovoz.app.design_system.model.ParentCategoryUi
+import com.vodovoz.app.design_system.model.PriceUi
 import com.vodovoz.app.design_system.model.filters.FilterUi
 import com.vodovoz.app.design_system.model.filters.FiltersUi
 import com.vodovoz.app.feature.all.promotions.AllPromotionsFragment
@@ -23,21 +25,43 @@ private val SlideNavOptions = NavOptions.Builder()
     .build()
 
 
-fun NavController.navigateToSpeechDialog(){
+fun NavController.navigateToAboutProduct(
+    productId: Long,
+    prices: List<PriceUi>,
+    analogButton: ColorfulButtonUi?,
+    isAvailable: Boolean
+) {
+    navigate(
+        R.id.aboutProductFragment,
+        bundleOf(
+            "productId" to productId,
+            "prices" to prices,
+            "analogButton" to analogButton,
+            "isAvailable" to isAvailable
+        ),
+        SlideNavOptions
+    )
+}
+
+fun NavController.navigateToSpeechDialog() {
     navigate(R.id.speechDialogFragment)
 }
 
-fun NavController.navigateToQrCode(){
+fun NavController.navigateToQrCode() {
     navigate(R.id.qrCodeFragment, null)
 }
 
 
-fun NavController.navigateToAllBrands(){
+fun NavController.navigateToAllBrands() {
     navigate(R.id.allBrandsFragment, null)
 }
 
-fun NavController.navigateToTraceOrder(dividerId: String, orderId: Long){
-    navigate(R.id.traceOrderFragment, bundleOf("driverId" to dividerId, "orderId" to orderId), SlideNavOptions)
+fun NavController.navigateToTraceOrder(dividerId: String, orderId: Long) {
+    navigate(
+        R.id.traceOrderFragment,
+        bundleOf("driverId" to dividerId, "orderId" to orderId),
+        SlideNavOptions
+    )
 }
 
 fun NavController.navigateToWriteComment(
@@ -310,7 +334,7 @@ fun NavController.navigateToPreOrder(productId: Long) {
 
 }
 
-fun NavController.navigateToAnalogs(productId: Long) {
+fun NavController.navigateToProductAnalogs(productId: Long) {
     navigate(
         R.id.productsCollectionFragment,
         bundleOf("productId" to productId)

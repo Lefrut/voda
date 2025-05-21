@@ -194,9 +194,7 @@ class AllBottlesFlowViewModel @Inject constructor(
             cartManager.updateCartListState(true)
             cartManager.observeUpdateCartList().collectLatest { hasUpdates ->
                 if (!hasUpdates) {
-                    uiStateListener.updateData { s ->
-                        s.copy(buttonIsLoading = false)
-                    }
+                    uiStateListener.updateData { s -> s.copy(buttonIsLoading = false) }
                     eventListener.emit(BottlesEvent.GoBack)
                 }
             }

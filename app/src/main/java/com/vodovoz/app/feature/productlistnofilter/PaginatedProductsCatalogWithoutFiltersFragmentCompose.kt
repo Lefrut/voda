@@ -17,7 +17,7 @@ import androidx.navigation.fragment.findNavController
 import com.vodovoz.app.common.cart.CartManager
 import com.vodovoz.app.common.like.LikeManager
 import com.vodovoz.app.common.product.rating.RatingProductManager
-import com.vodovoz.app.core.navigation.navigateToAnalogs
+import com.vodovoz.app.core.navigation.navigateToProductAnalogs
 import com.vodovoz.app.core.navigation.navigateToCategories
 import com.vodovoz.app.core.navigation.navigateToProductDetails
 import com.vodovoz.app.core.navigation.navigateToProductFilters
@@ -135,7 +135,7 @@ class PaginatedProductsCatalogWithoutFiltersFragment : Fragment() {
                                 }
 
                                 is ProductsListNoFilterFlowViewModel.ProductListNoFilterEvent.GoToProductAnalogs -> {
-                                    findNavController().navigateToAnalogs(event.productId)
+                                    findNavController().navigateToProductAnalogs(event.productId)
                                 }
 
                                 ProductsListNoFilterFlowViewModel.ProductListNoFilterEvent.GoToQrCode -> {

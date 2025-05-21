@@ -21,7 +21,7 @@ import com.vodovoz.app.common.cart.CartManager
 import com.vodovoz.app.common.like.LikeManager
 import com.vodovoz.app.common.product.rating.RatingProductManager
 import com.vodovoz.app.common.tab.TabManager
-import com.vodovoz.app.core.navigation.navigateToAnalogs
+import com.vodovoz.app.core.navigation.navigateToProductAnalogs
 import com.vodovoz.app.core.navigation.navigateToPreOrder
 import com.vodovoz.app.core.navigation.navigateToProductDetails
 import com.vodovoz.app.core.navigation.navigateToPromotions
@@ -177,7 +177,7 @@ class SearchFragment : Fragment() {
                 }
 
                 is SearchFlowViewModel.SearchEvents.GoToProductAnalogs -> {
-                    findNavController().navigateToAnalogs(event.productId)
+                    findNavController().navigateToProductAnalogs(event.productId)
                 }
             }
         }

@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.vodovoz.app.design_system.composables.list.ProductLazyList
 import com.vodovoz.app.design_system.composables.list.ProductListOptionsRow
+import com.vodovoz.app.design_system.composables.placeholders.NetworkErrorPlaceholder
 import com.vodovoz.app.design_system.composables.top_bar.VodovozTopBar
 import com.vodovoz.app.feature.products_collection.composables.ProductsCollectionPlaceholder
 import com.vodovoz.app.feature.products_collection.model.ProductsCollectionState
@@ -76,6 +77,12 @@ fun ProductAnalogsScreen(
                         viewModel.decrementProductToCart(product)
                     },
                 )
+            }
+
+            ProductsCollectionUiState.Error -> {
+                NetworkErrorPlaceholder {
+                    viewModel.fetchProductAnalogs()
+                }
             }
         }
 

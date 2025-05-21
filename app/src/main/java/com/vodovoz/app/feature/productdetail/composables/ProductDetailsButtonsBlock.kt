@@ -24,6 +24,7 @@ import com.vodovoz.app.R
 import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.composables.button.ProductQuantityButton
 import com.vodovoz.app.design_system.composables.button.VodovozButton
+import com.vodovoz.app.design_system.composables.button.VodovozButtonDefaults
 import com.vodovoz.app.design_system.composables.button.VodovozButtonSmall
 import com.vodovoz.app.design_system.composables.card.VodovozOutlinedCard
 import com.vodovoz.app.design_system.composables.isElementVisible
@@ -123,9 +124,17 @@ fun ProductDetailsButtonsBlock(
                         contentColor = analogButton.textColor,
                         containerColor = analogButton.backgroundColor
                     ),
-                    modifier = Modifier.isElementVisible(onFloatingButtonChange),
+                    modifier = Modifier.isElementVisible(onFloatingButtonChange)
+                )
+            }
 
-                    )
+            else -> {
+                VodovozButton(
+                    text = stringResource(id = R.string.analogs),
+                    onClick = onAnalogButtonClick,
+                    colors = VodovozButtonDefaults.secondaryColors(),
+                    modifier = Modifier.isElementVisible(onFloatingButtonChange)
+                )
             }
         }
 

@@ -18,7 +18,6 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.supervisorScope
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withTimeout
@@ -58,8 +57,9 @@ class CartManager @Inject constructor(
     suspend fun change(productId: Long, count: Int) = coroutineScope.launch {
         val currentCartVersion = cartMutex.withLock {
             if (_blockedProductsState.value.contains(productId) || count < 0) return@launch
+
             val cartBeforeUpdate = carts.toMap()
-            updateCarts(productId, count)
+            updateCartItem(productId, count)
             if (firstCart.isEmpty()) {
                 firstCart.putAll(cartBeforeUpdate)
             }
@@ -91,7 +91,6 @@ class CartManager @Inject constructor(
         kotlin.runCatching {
             withTimeout(4000) {
                 updateCartOnline(cartChanges, currentFirstCart)
-                updateCartListState(true)
             }
         }.onFailure {
             cartMutex.withLock {
@@ -106,6 +105,7 @@ class CartManager @Inject constructor(
 
         cartMutex.withLock {
             _blockedProductsState.update { productIds -> productIds - cartChanges.keys }
+            updateCartListState(true)
         }
     }
 
@@ -119,14 +119,14 @@ class CartManager @Inject constructor(
 
         //val plus = newCount >= oldCount
 
-        updateCarts(id, newCount)
+        updateCartItem(id, newCount)
 
         runCatching {
             action(id = id, count = newCount, isInCart = isInCart/*, plus*/)
             updateCartListState(withUpdate)
         }.onFailure {
             //tabManager.loadingAddToCart(false, plus = true)
-            updateCarts(id, oldCount)
+            updateCartItem(id, oldCount)
         }
     }
 
@@ -146,14 +146,15 @@ class CartManager @Inject constructor(
             return@withLock
         }
         updateCart(newCart)
-        tabManager.saveBottomNavCartState()
+
+        tabManager.updateBottomNavCartState()
     }
 
     suspend fun syncCart(list: List<ProductUI>) {
         list.forEach { product ->
             carts[product.id] = product.cartQuantity
         }
-        tabManager.saveBottomNavCartState()
+        tabManager.updateBottomNavCartState()
         cartsStateListener.emit(carts)
     }
 
@@ -164,24 +165,21 @@ class CartManager @Inject constructor(
         needUpdate.map { (productId, quantity) ->
             async {
                 val exists = (firstCart[productId] ?: 0) > 0
-                val call = if (exists) {
+                val flow = if (exists) {
                     vodovozServiceRepository.updateProductInCart(productId, quantity)
                 } else {
                     vodovozServiceRepository.addProductToCart(productId, quantity)
                 }
-                call.singleResult().getOrThrow()
+                flow.singleResult().getOrThrow()
             }
         }.awaitAll()
     }
 
-    private suspend fun action(id: Long, count: Int, isInCart: Boolean/*, plus: Boolean*/) {
+    private suspend fun action(id: Long, count: Int, isInCart: Boolean) {
         if (!isInCart) {
-            //tabManager.loadingAddToCart(true, plus = plus)
             repository.addProductToCart(id, count)
-
         } else {
             repository.changeProductsQuantityInCart(id, count)
-            //tabManager.loadingAddToCart(true, plus = true)
 
         }
     }
@@ -193,22 +191,30 @@ class CartManager @Inject constructor(
     }
 
 
-    private suspend fun updateCarts(id: Long, count: Int) {
+    private suspend fun updateCartItem(id: Long, count: Int) {
         carts[id] = count
         cartsStateListener.emit(carts)
     }
 
-    suspend fun addProductWithGift(
-        productId: String,
-        giftId: String,
+    suspend fun add(
+        productsIdsWithQuantity: String
     ) = coroutineScope.launch {
-        vodovozServiceRepository
-            .addMultipleProductsToCart("$productId;$giftId")
-            .singleResult()
+        val productsMap = parseCart(productsIdsWithQuantity)
+
+
+        runCatching {
+            vodovozServiceRepository
+                .addMultipleProductsToCart(productsIdsWithQuantity)
+                .singleResult()
+        }
+
+        cartMutex.withLock {
+            updateCartListState(true)
+        }
     }
 
     //Service Details Products
-    suspend fun addWithGift(
+    suspend fun add(
         id: Long,
         newCount: Int,
         withUpdate: Boolean = true,
@@ -216,7 +222,7 @@ class CartManager @Inject constructor(
     ) {
         //val plus = newCount >= oldCount
 
-        updateCarts(id, newCount)
+        updateCartItem(id, newCount)
 
         runCatching {
             debugLog { "add with gift" }
@@ -225,7 +231,7 @@ class CartManager @Inject constructor(
         }.onFailure {
             debugLog { "add with gift error ${it.localizedMessage}" }
             // tabManager.loadingAddToCart(false, plus = true)
-            updateCarts(id, newCount)
+            updateCartItem(id, newCount)
         }
     }
 
@@ -234,11 +240,23 @@ class CartManager @Inject constructor(
         debugLog { "action add with gift $idWithGift" }
         //tabManager.loadingAddToCart(true, plus = plus)
         repository.addProductFromServiceDetails(idWithGift)
-        updateCarts(id, count)
+        updateCartItem(id, count)
     }
 
     fun formatCart(cart: Map<Long, Int>): String {
         return cart.entries.joinToString(";") { "${it.key}-${it.value}" }
     }
 
+    private fun formatCart(vararg productIdWithQuantity: String): String {
+        return productIdWithQuantity.toList().joinToString(";")
+    }
+
+    private fun parseCart(productsIdsWithQuantity: String): Map<Long, Int> {
+        return productsIdsWithQuantity
+            .split(";")
+            .filter { it.isNotBlank() }.associate {
+                val (id, count) = it.split("-")
+                id.toLong() to count.toInt()
+            }
+    }
 }

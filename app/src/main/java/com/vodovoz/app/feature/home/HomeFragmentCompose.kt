@@ -30,7 +30,7 @@ import com.vodovoz.app.common.tab.TabManager
 import com.vodovoz.app.core.ui.activate
 import com.vodovoz.app.core.navigation.navigateToAboutApp
 import com.vodovoz.app.core.navigation.navigateToAllBrands
-import com.vodovoz.app.core.navigation.navigateToAnalogs
+import com.vodovoz.app.core.navigation.navigateToProductAnalogs
 import com.vodovoz.app.core.navigation.navigateToBrandProductList
 import com.vodovoz.app.core.navigation.navigateToBuyCertificate
 import com.vodovoz.app.core.navigation.navigateToCategoryProductList
@@ -267,7 +267,7 @@ class HomeFragment : Fragment() {
                 }
 
                 is HomeFlowViewModel.HomeEvents.GoToProductAnalogs -> {
-                    findNavController().navigateToAnalogs(event.productId)
+                    findNavController().navigateToProductAnalogs(event.productId)
                 }
 
                 HomeFlowViewModel.HomeEvents.GoToQrCode -> {

@@ -24,7 +24,7 @@ import com.vodovoz.app.common.like.LikeManager
 import com.vodovoz.app.common.permissions.PermissionsController
 import com.vodovoz.app.common.product.rating.RatingProductManager
 import com.vodovoz.app.common.speechrecognizer.SpeechDialogFragment
-import com.vodovoz.app.core.navigation.navigateToAnalogs
+import com.vodovoz.app.core.navigation.navigateToProductAnalogs
 import com.vodovoz.app.core.navigation.navigateToProductDetails
 import com.vodovoz.app.core.navigation.navigateToWebView
 import com.vodovoz.app.design_system.VodovozTheme
@@ -114,7 +114,7 @@ class PromotionDetailsFragment : Fragment() {
                                 }
 
                                 is PromotionDetailFlowViewModel.PromotionDetailEvent.GoToProductAnalogs -> {
-                                    findNavController().navigateToAnalogs(event.productId)
+                                    findNavController().navigateToProductAnalogs(event.productId)
                                 }
 
                                 is PromotionDetailFlowViewModel.PromotionDetailEvent.GoToProductDetails -> {
