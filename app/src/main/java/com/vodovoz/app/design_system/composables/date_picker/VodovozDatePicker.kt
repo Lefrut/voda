@@ -1,3 +1,5 @@
+package com.vodovoz.app.design_system.composables.date_picker
+
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.shrinkVertically

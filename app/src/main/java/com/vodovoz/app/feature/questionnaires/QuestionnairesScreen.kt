@@ -1,6 +1,6 @@
 package com.vodovoz.app.feature.questionnaires
 
-import VodovozCalendarDialog
+import com.vodovoz.app.design_system.composables.date_picker.VodovozCalendarDialog
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column

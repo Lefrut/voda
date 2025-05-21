@@ -35,8 +35,8 @@ import com.yandex.runtime.image.ImageProvider
 fun TraceOrderBody(
     modifier: Modifier = Modifier,
     mapView: () -> MapView,
-    deliveryPoint: MapPointUi,
-    carPoint: MapPointUi,
+    deliveryPoint: MapPointUi?,
+    carPoint: MapPointUi?,
     onZoomPlus: () -> Unit,
     onZoomMinus: () -> Unit,
     onGeoClick: () -> Unit,
@@ -61,24 +61,28 @@ fun TraceOrderBody(
 
                 mapObjects.clear()
 
-                mapObjects.addPlacemark(Point(deliveryPoint.lat, deliveryPoint.lon)).apply {
-                    setIcon(deliveryImageProvider)
-                    setIconStyle(
-                        IconStyle().apply {
-                            anchor = PointF(0.5f, 1.0f)
-                            scale = 1f
-                        }
-                    )
+                deliveryPoint?.let {
+                    mapObjects.addPlacemark(Point(deliveryPoint.lat, deliveryPoint.lon)).apply {
+                        setIcon(deliveryImageProvider)
+                        setIconStyle(
+                            IconStyle().apply {
+                                anchor = PointF(0.5f, 1.0f)
+                                scale = 1f
+                            }
+                        )
+                    }
                 }
 
-                mapObjects.addPlacemark(Point(carPoint.lat, carPoint.lon)).apply {
-                    setIcon(carImageProvider)
-                    setIconStyle(
-                        IconStyle().apply {
-                            anchor = PointF(0.5f, 1.0f)
-                            scale = 1f
-                        }
-                    )
+                carPoint?.let {
+                    mapObjects.addPlacemark(Point(carPoint.lat, carPoint.lon)).apply {
+                        setIcon(carImageProvider)
+                        setIconStyle(
+                            IconStyle().apply {
+                                anchor = PointF(0.5f, 1.0f)
+                                scale = 1f
+                            }
+                        )
+                    }
                 }
 
             }

@@ -415,7 +415,6 @@
                 android:visibility="gone" />
 
             <androidx.appcompat.widget.AppCompatTextView
-                android:id="@+id/tvOrderComment"
                 style="@style/TextViewNormalBlackBold"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/field_height"

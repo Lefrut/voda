@@ -72,12 +72,12 @@ class ContactsFragment : BaseFragment() {
             text = AgreementController.getText(),
             textView = binding.writeUsContainer.personalData
         ) { url, index ->
-            findNavController().navigate(
-                ContactsFragmentDirections.actionToWebViewFragment(
-                    url = url ?: "",
-                    title = AgreementController.getTitle(index) ?: "",
-                )
-            )
+//            findNavController().navigate(
+//                ContactsFragmentDirections.actionToWebViewFragment(
+//                    url = url ?: "",
+//                    title = AgreementController.getTitle(index) ?: "",
+//                )
+//            )
 
         }
     }
@@ -188,12 +188,12 @@ class ContactsFragment : BaseFragment() {
                     }
 
                     CHAT_TYPE -> {
-                        findNavController().navigate(
-                            ContactsFragmentDirections.actionToWebViewFragment(
-                                "http://jivo.chat/mk31km1IlP",
-                                "Чат"
-                            )
-                        )
+//                        findNavController().navigate(
+//                            ContactsFragmentDirections.actionToWebViewFragment(
+//                                "http://jivo.chat/mk31km1IlP",
+//                                "Чат"
+//                            )
+//                        )
                     }
                 }
             }

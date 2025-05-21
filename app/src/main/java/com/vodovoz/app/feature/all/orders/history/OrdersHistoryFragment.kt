@@ -130,11 +130,11 @@ class OrdersHistoryFragment1 : BaseFragment() {
                         when (it) {
                             is AllOrdersFlowViewModel.AllOrdersEvent.GoToFilter -> {
                                 if (findNavController().currentBackStackEntry?.destination?.id == R.id.allOrdersFragment) {
-                                    findNavController().navigate(
-                                        OrdersHistoryFragmentDirections.actionToOrdersFiltersDialog(
-                                            it.bundle
-                                        )
-                                    )
+//                                    findNavController().navigate(
+//                                        OrdersHistoryFragmentDirections.actionToOrdersFiltersDialog(
+//                                            it.bundle
+//                                        )
+//                                    )
                                 }
                             }
 

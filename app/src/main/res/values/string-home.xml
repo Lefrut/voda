@@ -15,14 +15,10 @@
     <string name="how_order_title" translatable="false">Как заказать</string>
 
     //Histories
-    <string name="histories_title" translatable="false">Истории</string>
 
     //Popular
-    <string name="popular_categories_slider_title" translatable="false">Популярные разделы</string>
 
     //Promotions
-    <string name="promotions_slider_title" translatable="false">Акции</string>
 
     //Orders
-    <string name="orders_slider_title" translatable="false">Мои заказы</string>
 </resources>

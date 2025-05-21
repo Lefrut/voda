@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="bluePrimary">#05A4FF</color>
-    <color name="bluePrimaryOld">#05a4ff</color>
     <color name="blueLight">#85d4ff</color>
     <color name="blueDark">#0075c4</color>
     <color name="accentPrimary">#ffa700</color>
@@ -12,19 +11,15 @@
 
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="whiteHalfTransparency">#50FFFFFF</color>
     <color name="gray">#E1E1E1</color>
 
     <color name="dark_white">#EFF1F3</color>
     <color name="light_gray">#F2F2F2</color>
     <color name="light_bg">#F3F3F3</color>
-    <color name="transparent_white">#80FFFFFF</color>
-    <color name="transparent_light_gray">#80EFF1F3</color>
     <color name="color_transparent">#00000000</color>
     <color name="transparent_half">#88000000</color>
 
     <color name="orange">#FF8D00</color>
-    <color name="green_new">#179500</color>
     <color name="green">#7CBA00</color>
     <color name="micro">#889295</color>
     <color name="red">#ED4842</color>
@@ -49,7 +44,6 @@
     <color name="divider_gray_color">@color/light_gray</color>
     <color name="divider_light_gray_color">#F5F5F5</color>
 
-    <color name="old_gray_bk">#F5F5F5</color>
     <color name="color_search">#889295</color>
 
     <color name="gray_unselected">#f1f1f1</color>

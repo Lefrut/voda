@@ -16,7 +16,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -31,7 +30,7 @@ import com.vodovoz.app.R
 import com.vodovoz.app.design_system.effects.SystemBarsEffect
 import com.vodovoz.app.design_system.robotoFontFamily
 import com.vodovoz.app.feature.profile.waterapp.WaterAppHelper
-import radialGradientBackground
+import com.vodovoz.app.design_system.modifiers.radialGradientBackground
 
 @Composable
 fun WaterAppGoalCompletedScreen(goal: Int, onCloseClick: () -> Unit) {

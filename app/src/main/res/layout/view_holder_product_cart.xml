@@ -75,7 +75,6 @@
                 android:visibility="gone"
                 tools:visibility="visible">
                 <androidx.appcompat.widget.AppCompatTextView
-                    android:id="@+id/tvDepositPriceTitle"
                     style="@style/TextViewSmallGray"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -94,7 +93,6 @@
             </LinearLayout>
 
             <androidx.appcompat.widget.AppCompatTextView
-                android:id="@+id/tvProductAbsent"
                 style="@style/TextViewNormalBlack"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

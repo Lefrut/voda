@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="categories_title" translatable="false">Категории</string>
     <string name="choose_category_btn_text" translatable="false">Выбрать</string>
 </resources>

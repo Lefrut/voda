@@ -6,18 +6,7 @@
     <string name="add_address_btn_text" translatable="false">Добавить адрес</string>
     <string name="bring_here_btn_text" translatable="false">Доставить сюда</string>
 
-    <string name="new_address_title" translatable="false">Новый адрес</string>
-    <string name="locality_hint_text" translatable="false">Город</string>
-    <string name="street_hint_text" translatable="false">Улица</string>
-    <string name="house_hint_text" translatable="false">Дом/к/стр</string>
-    <string name="entrance_hint_text" translatable="false">Подъезд</string>
-    <string name="floor_hint_text">Этаж</string>
-    <string name="flat_hint_text">Квартира</string>
-    <string name="office_hint_text">Офис</string>
-    <string name="intercom_hint_text">Домофон</string>
     <string name="personal_house_delivery_text">Доставка в частный дом</string>
     <string name="company_office_delivery_text">Доставка в офис</string>
-    <string name="courier_comment_hint_text">Комментарий для курьера</string>
-    <string name="submit_address_btn_text">Подтвердить</string>
 
 </resources>

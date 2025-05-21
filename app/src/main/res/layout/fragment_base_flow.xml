@@ -94,7 +94,6 @@
         android:visibility="gone" />
 
     <ProgressBar
-        android:id="@+id/container_progress"
         style="@style/Widget.Material3.CircularProgressIndicator.Medium"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

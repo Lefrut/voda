@@ -33,8 +33,6 @@ abstract class BaseFragment : Fragment() {
     protected val composeView: ComposeView
         get() = requireView().findViewById(R.id.composeView)
 
-    private val loader: View
-        get() = viewBinding.containerProgress
 
     private val progressBg: View
         get() = viewBinding.progressBg
@@ -70,15 +68,12 @@ abstract class BaseFragment : Fragment() {
     }
 
     protected fun showLoader() {
-        loader.isVisible = true
     }
 
     protected fun hideLoader() {
-        loader.isVisible = false
     }
 
     protected fun showLoaderWithBg(boolean: Boolean) {
-        loader.isVisible = boolean
         progressBg.isVisible = boolean
     }
 

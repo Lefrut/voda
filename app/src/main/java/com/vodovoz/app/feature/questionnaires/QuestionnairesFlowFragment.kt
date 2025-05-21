@@ -54,12 +54,12 @@ class QuestionnairesFlowFragment1 : BaseFragment() {
     }
     private val questionsAdapter = QuestionsAdapter(
         onLinkClick = {
-            findNavController().navigate(
-                QuestionnairesFlowFragmentDirections.actionToWebViewFragment(
-                    url = it.link,
-                    title = it.name,
-                )
-            )
+//            findNavController().navigate(
+//                QuestionnairesFlowFragmentDirections.actionToWebViewFragment(
+//                    url = it.link,
+//                    title = it.name,
+//                )
+//            )
         }
     )
 

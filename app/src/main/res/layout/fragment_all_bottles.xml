@@ -17,7 +17,6 @@
         app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior"/>
 
     <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/tvNotFountLabel"
         style="@style/TextViewNormalGray"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

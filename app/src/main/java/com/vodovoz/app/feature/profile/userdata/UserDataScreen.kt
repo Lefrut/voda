@@ -1,6 +1,6 @@
 package com.vodovoz.app.feature.profile.userdata
 
-import VodovozCalendarDialog
+import com.vodovoz.app.design_system.composables.date_picker.VodovozCalendarDialog
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.padding

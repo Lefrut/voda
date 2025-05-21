@@ -17,9 +17,6 @@ import com.vodovoz.app.core.navigation.navigateToPromotionDetails
 import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.composables.placeholders.NetworkErrorPlaceholder
 import com.vodovoz.app.design_system.effects.LifecycleEffect
-import com.vodovoz.app.feature.all.AllClickListener
-import com.vodovoz.app.feature.home.banneradvinfo.BannerAdvInfoBottomSheetFragment
-import com.vodovoz.app.feature.home.viewholders.homepromotions.model.PromotionAdvEntity
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.parcelize.Parcelize
 

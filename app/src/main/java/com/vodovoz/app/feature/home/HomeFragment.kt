@@ -42,13 +42,6 @@ import com.vodovoz.app.databinding.FragmentMainHomeFlowBinding
 import com.vodovoz.app.feature.all.promotions.AllPromotionsFragment
 import com.vodovoz.app.feature.catalog.CatalogFragmentDirections
 import com.vodovoz.app.feature.home.adapter.HomeMainClickListener
-import com.vodovoz.app.feature.home.banneradvinfo.BannerAdvInfoBottomSheetFragment
-import com.vodovoz.app.feature.home.popup.NewsClickListener
-import com.vodovoz.app.feature.home.popup.PopupNewsBottomFragment
-import com.vodovoz.app.feature.home.ratebottom.RateBottomViewModel
-import com.vodovoz.app.feature.home.ratebottom.adapter.RateBottomClickListener
-import com.vodovoz.app.feature.home.ratebottom.adapter.RateBottomImageAdapter
-import com.vodovoz.app.feature.home.ratebottom.adapter.RateBottomViewPagerAdapter
 import com.vodovoz.app.feature.home.viewholders.homebanners.BottomBannerManager
 import com.vodovoz.app.feature.home.viewholders.homebanners.TopBannerManager
 import com.vodovoz.app.feature.home.viewholders.homebanners.model.BannerAdvEntity
@@ -97,29 +90,9 @@ class HomeFragment1 : BaseFragment() {
     }
 
     internal val flowViewModel: HomeFlowViewModel by activityViewModels()
-    private val rateBottomViewModel: RateBottomViewModel by activityViewModels()
 
     @Inject
     lateinit var ratingProductManager: RatingProductManager
-
-    private val collapsedImagesAdapter = RateBottomImageAdapter()
-    private val rateBottomViewPagerAdapter =
-        RateBottomViewPagerAdapter(object : RateBottomClickListener {
-
-            override fun dontCommentProduct(id: Long) {
-                ratingProductManager.dontCommentProduct(id) {
-                    rateBottomViewModel.refresh()
-                }
-//                rateBottomViewModel.refresh()
-//                binding.rateBottom.visibility = View.GONE
-//            dialog?.dismiss()
-            }
-
-            override fun rateProduct(id: Long, ratingCount: Int) {
-
-            }
-
-        })
 
     @Inject
     lateinit var cartManager: CartManager
@@ -162,14 +135,7 @@ class HomeFragment1 : BaseFragment() {
             topBannerManager = topBannerManager,
             bottomBannerManager = bottomBannerManager,
             showRateBottomSheetFragment = {
-                if (siteStateManager.showRateBottom != null) {
-                    if (!siteStateManager.showRateBottom!!) {
-                        siteStateManager.showRateBottom = true
-                        binding.rateBottom.visibility = View.VISIBLE
-//                        val rateBottomSheet =  RateBottomFragment()
-//                        rateBottomSheet.show(childFragmentManager, "TAG")
-                    }
-                }
+
             }
         ) {
             flowViewModel.repeatOrder(it)
@@ -178,13 +144,11 @@ class HomeFragment1 : BaseFragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        rateBottomViewModel.firstLoad()
         observeUiState()
         observeTabReselect()
         observeEvents()
         observeDeepLinkFromSiteState()
         observePushFromSiteState()
-        observeRateBottom()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -221,13 +185,11 @@ class HomeFragment1 : BaseFragment() {
 
     private fun initViewPager() {
         binding.rateViewPager.orientation = ViewPager2.ORIENTATION_HORIZONTAL
-        binding.rateViewPager.adapter = rateBottomViewPagerAdapter
         binding.dotsIndicator.attachTo(binding.rateViewPager)
     }
 
     private fun initImageRv() {
         with(binding.collapsedRv) {
-            adapter = collapsedImagesAdapter
             layoutManager = LinearLayoutManager(
                 requireContext(),
                 LinearLayoutManager.HORIZONTAL,
@@ -265,41 +227,6 @@ class HomeFragment1 : BaseFragment() {
                 }
             }
         })
-    }
-
-    private fun observeRateBottom() {
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-
-                rateBottomViewModel
-                    .observeUiState()
-                    .collect { state ->
-                        if (state.data.item != null) {
-                            binding.expandedHeaderTv.text =
-                                state.data.item.rateBottomData?.titleProduct
-                            val prList = state.data.item.rateBottomData?.productsList
-                            if (!prList.isNullOrEmpty()) {
-                                rateBottomViewPagerAdapter.submitList(prList)
-                                binding.dotsIndicator.isVisible = prList.size > 1
-                            }
-                        } else {
-                            binding.rateBottom.visibility = View.GONE
-                        }
-
-                        if (state.data.collapsedData != null) {
-                            binding.collapsedBodyTv.text = state.data.collapsedData.body
-                            binding.collapsedHeaderTv.text = state.data.collapsedData.title
-                            if (!state.data.collapsedData.imageList.isNullOrEmpty()) {
-                                collapsedImagesAdapter.submitList(state.data.collapsedData.imageList)
-                            }
-                        }
-
-                        showError(state.error)
-
-                        delay(2000)
-                    }
-            }
-        }
     }
 
     private fun observePushFromSiteState() {
@@ -658,12 +585,10 @@ class HomeFragment1 : BaseFragment() {
 
                         if (homeState.data.news?.androidVersion.isNullOrEmpty()) {
                             if (homeState.data.news != null && !homeState.data.hasShow) {
-                                showPopUpNews(homeState.data.news)
                             }
                         } else {
                             if (homeState.data.news?.androidVersion != null) {
                                 if (homeState.data.news.androidVersion > BuildConfig.VERSION_NAME) {
-                                    showPopUpNews(homeState.data.news)
                                 }
                             }
                         }
@@ -762,13 +687,7 @@ class HomeFragment1 : BaseFragment() {
             }
 
             override fun onPromotionAdvClick(promotionAdvEntity: PromotionAdvEntity?) {
-                BannerAdvInfoBottomSheetFragment
-                    .newInstance(
-                        promotionAdvEntity?.titleAdv ?: "",
-                        promotionAdvEntity?.bodyAdv ?: "",
-                        promotionAdvEntity?.dataAdv ?: ""
-                    )
-                    .show(childFragmentManager, "TAG")
+
             }
         }
     }
@@ -860,13 +779,7 @@ class HomeFragment1 : BaseFragment() {
             }
 
             override fun onBannerAdvClick(entity: BannerAdvEntity?) {
-                BannerAdvInfoBottomSheetFragment
-                    .newInstance(
-                        entity?.titleAdv ?: "",
-                        entity?.bodyAdv ?: "",
-                        entity?.dataAdv ?: ""
-                    )
-                    .show(childFragmentManager, "TAG")
+
             }
 
             //POSITION_16
@@ -1105,27 +1018,6 @@ class HomeFragment1 : BaseFragment() {
         navDirect?.let { navController.navigate(navDirect) }
     }
 
-    private fun showPopUpNews(data: PopupNewsUI) {
-        val dialog = PopupNewsBottomFragment.newInstance(
-            data,
-            clickListener = newsClickListener()
-        )
-
-        dialog.show(childFragmentManager, dialog::class.simpleName)
-        flowViewModel.hasShown()
-    }
-
-    private fun newsClickListener(): NewsClickListener {
-        return object : NewsClickListener {
-            override fun onClick(actionEntity: ActionEntity) {
-                if (actionEntity is ActionEntity.WaterApp) {
-                    val eventParameters = "\"source\":\"bottom_alert\""
-                    accountManager.reportEvent("trekervodi_zapysk", eventParameters)
-                }
-                actionEntity.invoke()
-            }
-        }
-    }
 
     private fun observeTabReselect() {
         lifecycleScope.launch {

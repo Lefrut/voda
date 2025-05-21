@@ -43,7 +43,6 @@
                 tools:ignore="ContentDescription" />
 
             <TextView
-                android:id="@+id/appCompatTextView2"
                 style="@style/TextViewNormalGray"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -98,7 +97,6 @@
                 tools:ignore="ContentDescription" />
 
             <TextView
-                android:id="@+id/appCompatTextView3"
                 style="@style/TextViewNormalGray"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -152,7 +150,6 @@
                 tools:ignore="ContentDescription" />
 
             <TextView
-                android:id="@+id/appCompatTextView4"
                 style="@style/TextViewNormalGray"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

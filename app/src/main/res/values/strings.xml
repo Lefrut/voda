@@ -3,12 +3,8 @@
 
     <string name="new_app">vodovoz.ru</string>
     <string name="new_app_ssl_not">http</string>
-    <string name="new_app_ssl" translatable="false">https</string>
 
     <string name="app_name" translatable="false">Vodovoz</string>
-    <string name="title_home" translatable="false">Home</string>
-    <string name="title_dashboard" translatable="false">Dashboard</string>
-    <string name="title_notifications" translatable="false">Notifications</string>
 
     //BottomNavMenu
     <string name="home" translatable="false">Главный</string>
@@ -17,13 +13,9 @@
     <string name="favorite" translatable="false">Избранное</string>
     <string name="account" translatable="false">Профиль</string>
     <string name="search_hint" translatable="false">Искать в Vodovoz</string>
-    <string name="load_label" translatable="false">Загрузка</string>
     <string name="update_label" translatable="false">Обновить</string>
 
     //Section
-    <string name="discount" translatable="false">Самое выгодное</string>
-    <string name="history_label" translatable="false">Истории</string>
-    <string name="popular_label" translatable="false">Популярное</string>
 
     //Additional Info
     <string name="about_shop" translatable="false">О магазине</string>
@@ -37,12 +29,7 @@
     <string name="last_purchases" translatable="false">Прошлые покупки</string>
     <string name="additional_navigation_favorite" translatable="false">Избранное</string>
     <string name="additional_navigation_order_history" translatable="false">История заказов</string>
-    <string name="brands" translatable="false">Бренды</string>
-    <string name="novelty" translatable="false">Новинка</string>
-    <string name="novelties" translatable="false">Новинки</string>
     <string name="not_available" translatable="false">Нет в наличии</string>
-    <string name="resizable_text_read_more" translatable="false"> подробнее</string>
-    <string name="resizable_text_read_less" translatable="false"> свернуть</string>
     <string name="cancel" translatable="false">Отмена</string>
     <string name="confirm" translatable="false">Подтвердить</string>
 
@@ -54,9 +41,7 @@
     <string name="article" translatable="false">Артикул:</string>
     <string name="depose_price" translatable="false">Залоговая стоимость за бутыль</string>
     <string name="product_absent" translatable="false">Товар закончился</string>
-    <string name="default_text" translatable="false">Заглушка для превью</string>
     <string name="price_text" translatable="false">%d ₽</string>
-    <string name="telephone" translatable="false">Телефон</string>
     <string name="email" translatable="false">Войти через почту</string>
     <string name="enter_your_phone_number" translatable="false">Укажите номер телефона, чтобы войти или зарегистрироваться, если у вас нет аккаунта.</string>
     <string name="enter_code" translatable="false">Введите код из SMS, отправленный на номер</string>
@@ -76,7 +61,6 @@
     <string name="data_text" translatable="false">Дата</string>
     <string name="vremya_text" translatable="false">Время</string>
     <string name="oplata_text" translatable="false">Оплата</string>
-    <string name="choose_pay_system_title" translatable="false">Способ оплаты</string>
     <string name="choose_pay_system_hint" translatable="false">Выберите способ оплаты</string>
     <string name="sdacha_text" translatable="false">С какой суммы нужна сдача?</string>
     <string name="call_title" translatable="false">Вам позвонить?</string>
@@ -95,8 +79,6 @@
     <string name="itogo_text" translatable="false">Итого</string>
     <string name="spasibo_za_zakaz" translatable="false">Спасибо за заказ</string>
     <string name="oplatit_text" translatable="false">Оплатить</string>
-    <string name="vozmozhno_vam_ponravitsya" translatable="false">Возможно, вам понравится</string>
-    <string name="pokazat_escho" translatable="false">Показать еще</string>
     <string name="kategorii" translatable="false">Категории</string>
     <string name="nastroiki" translatable="false">Настройки</string>
     <string name="sbrosit_dannye" translatable="false">Сбросить данные</string>
@@ -118,54 +100,33 @@
     <string name="target_daily" translatable="false">Цель ежедневного потребления</string>
     <string name="_200ml" translatable="false">200 мл</string>
     <string name="enter_for_add_water" translatable="false">Нажмите, чтобы добавить воду</string>
-    <string name="description" translatable="false">ОПИСАНИЕ</string>
-    <string name="characteristics" translatable="false">ХАРАКТЕРИСТИКИ</string>
-    <string name="all_characteristics" translatable="false">Все характеристики</string>
-    <string name="consumer_information" translatable="false">Потребительская информация</string>
     <string name="do_cancel" translatable="false">Отменить</string>
     <string name="do_repeat" translatable="false">Повторить</string>
     <string name="do_pay" translatable="false">Оплатить</string>
     <string name="info_about_order" translatable="false">Информация о заказе</string>
     <string name="recipient" translatable="false">Получатель</string>
-    <string name="load_photo" translatable="false">Загрузить фото</string>
-    <string name="personal_data" translatable="false">Личные данные</string>
     <string name="name" translatable="false">Имя</string>
     <string name="last_name" translatable="false">Фамилия</string>
     <string name="name_hint" translatable="false">Введите имя</string>
     <string name="family_hint" translatable="false">Введите фамилию</string>
-    <string name="sex_hint" translatable="false">Пол</string>
-    <string name="sex_male" translatable="false">Мужской</string>
-    <string name="bithday_hint" translatable="false">Дата рождения</string>
-    <string name="phone_hint" translatable="false">Телефон</string>
-    <string name="change_password" translatable="false">Изменение пароля</string>
-    <string name="new_password_hint" translatable="false">Новый пароль</string>
     <string name="save" translatable="false">Сохранить</string>
     <string name="example_mail_com" translatable="false">example@mail.com</string>
     <string name="fill_value" translatable="false">Заполнить</string>
     <string name="send" translatable="false">Отправить</string>
-    <string name="buy" translatable="false">Купить</string>
-    <string name="logout" translatable="false">Выйти из аккаунта</string>
     <string name="repeat" translatable="false">Повторить</string>
     <string name="details" translatable="false">Подробнее</string>
-    <string name="choose_sort" translatable="false">Выбрать сортировку</string>
     <string name="confirm_personal_data" translatable="false">Я подтверждаю свое согласие на <a href="#">обработку персональных данных </a></string>
     <string name="order_history" translatable="false">История заказов</string>
     <string name="categories" translatable="false">Категории</string>
-    <string name="choose_sort_type" translatable="false">Выбрать сортировку</string>
     <string name="no_products_available" translatable="false">Товары в заказе отсутствуют</string>
-    <string name="goods_of_promotion" translatable="false">Товары участвующие в акции:</string>
     <string name="search_" translatable="false">Поиск...</string>
-    <string name="clear_search" translatable="false">Clear search</string>
     <string name="enter_phone" translatable="false">Введите телефон</string>
     <string name="phone" translatable="false">Телефон</string>
     <string name="phone_" translatable="false">Телефон*</string>
     <string name="enter_email" translatable="false">Введите E-mail</string>
-    <string name="email_title" translatable="false">E-mail</string>
     <string name="address_title" translatable="false">Адрес</string>
     <string name="fio_" translatable="false">ФИО*</string>
-    <string name="email_title_" translatable="false">Почта*</string>
     <string name="fill_field" translatable="false">Заполнить</string>
-    <string name="menu_promotions" translatable="false">Акции</string>
     <string name="email_" translatable="false">Почта*</string>
     <string name="jivo_chat" translatable="false">Чат с поддержкой</string>
     <string name="call_me_for_confirm" translatable="false">Позвоните мне для подтверждения заказа</string>
@@ -174,14 +135,12 @@
     <string name="payed" translatable="false">Оплачен</string>
     <string name="not_payed" translatable="false">Не оплачен</string>
     <string name="comments" translatable="false">Отзывы</string>
-    <string name="leave_comment" translatable="false">Оставить отзыв о товаре</string>
     <string name="wrong_code" translatable="false">Неверный код</string>
     <string name="wrong_email" translatable="false">Неправильно указан email</string>
     <string name="error_repeat" translatable="false">Ошибка. Попробуйте снова.</string>
     <string name="password_recover_success" translatable="false">Пароль упешно изменен и выслан вам на почту: %1$s</string>
     <string name="resend_code" translatable="false">Запросить код повторно</string>
     <string name="wrong_phone" translatable="false">Неверный формат телефона</string>
-    <string name="personal_data_nesessary" translatable="false">Необходимо согласие на обработку персональных данных</string>
     <string name="enter" translatable="false">Войти</string>
     <string name="choose" translatable="false">Выбрать</string>
     <string name="ok" translatable="false">Ок</string>
@@ -195,7 +154,6 @@
     <string name="exit">Выйти</string>
     <string name="exit_confirmation">Вы уверены что хотите выйте из аккаунта?</string>
     <string name="article_number">Артикул: %1$s</string>
-    <string name="zero">0</string>
     <string name="leave_feedback">Оставить отзыв</string>
     <string name="price">%1$s ₽</string>
 
@@ -203,34 +161,18 @@
     <string name="deposit_end_text">&#160;за оборотную тару</string>
     <string name="to_cart">В корзину</string>
     <string name="about_product">О товаре</string>
-    <string name="Characteristic">Характеристики</string>
-
-    <string name="category">Категория</string>
-    <string name="brand">Бренд</string>
 
     <string name="all">Все</string>
 
-    <string name="anonymous">Аноним</string>
     <string name="no_comments">По данному товару нет отзывов.\n Будьте первым.</string>
     <string name="leave_rate">Оставить отзыв</string>
-    <string name="you_viewed">Вы смотрели</string>
-    <string name="buy_with_this_product">С этим товаром покупают</string>
-    <string name="search_by_queries">Ищут по запросам</string>
     <string name="count_with_x">%1$s ×&#160;</string>
 
     <string name="space">&#160;</string>
-    <string name="left_to_gift">До получения подарка %1$s ₽</string>
     <string name="search_product">Поиск товара</string>
     <string name="number_and_text">№ %1$s</string>
-    <string name="popular_sections">Популярные разделы</string>
-    <string name="best_offers">Лучшие предложения</string>
-    <string name="hurry_up_buy">Успей купить</string>
-    <string name="new_products">Новинки</string>
     <string name="promotions">Акции</string>
-    <string name="bottled_water">Бутылированная вода</string>
-    <string name="viewed_products">Просмотренные товары</string>
     <string name="advertising">Реклама</string>
-    <string name="promotion_is_over">Акция завершена</string>
     <string name="connection_error">Ошибка соединения</string>
     <string name="check_intenet_connection">Проверьте соединение с интернетом</string>
     <string name="try_again">Попробовать снова</string>
@@ -239,7 +181,6 @@
     <string name="from_quantity">От %1$s шт</string>
     <string name="saving_price">Экономия %1$s ₽</string>
 
-    <string name="pdfView_page_no"> </string>
     <string name="rating_value">Оценка %1$s</string>
     <string name="unit_of_measurement">%1$s/%2$s</string>
 
@@ -258,12 +199,10 @@
 
     <string name="registration">Регистрация</string>
     <string name="error_registration">Не удалось зарегистрироваться, попробуйте позже!</string>
-    <string name="register_button_text">Зарегистрироваться</string>
     <string name="its_clear">Понятно</string>
     <string name="do_not_rate_this_product">Не оценивать этот товар</string>
     <string name="filter">Фильтр</string>
     <string name="price_and_currency">Цена, ₽</string>
-    <string name="see_more">Смотреть еще</string>
     <string name="from">от</string>
     <string name="to">до</string>
     <string name="reset">Сбросить</string>
@@ -288,7 +227,6 @@
 
     <string name="change">Изменить</string>
 
-    <string name="error_password_validation">Пароль не соответствует требованиям. Проверьте введенные данные.</string>
     <string name="error_password_unknown">Не удалось изменить пароль. Попробуйте еще раз позже.</string>
     <string name="success_password_change">Пароль успешно\n изменен!</string>
     <string name="error_login">Не удалось войти. Неизвестная ошибка, попробуйте еще раз.</string>

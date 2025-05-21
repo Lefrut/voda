@@ -126,14 +126,7 @@ class ProductDetailsFragment : Fragment() {
             }
 
             is ProductDetailsFlowViewModel.ProductDetailsEvents.SendComment -> {
-                if (findNavController().currentBackStackEntry?.destination?.id == R.id.sendCommentAboutProductFragment) {
-                    findNavController().popBackStack()
-                }
-                findNavController().navigate(
-                    ProductDetailsFragmentDirections.actionToSendCommentAboutProductFragment(
-                        event.id
-                    )
-                )
+
             }
 
             is ProductDetailsFlowViewModel.ProductDetailsEvents.GoToCart -> {
@@ -142,14 +135,6 @@ class ProductDetailsFragment : Fragment() {
             }
 
             is ProductDetailsFlowViewModel.ProductDetailsEvents.GoToPresentInfo -> {
-                findNavController().navigate(
-                    ProductDetailsFragmentDirections.actionProductDetailFragmentToPresentInfoBottomSheetFragment(
-                        presentText = event.presentText,
-                        progressBackground = event.progressBackground,
-                        percent = event.progress,
-                        showProgress = event.showText
-                    )
-                )
             }
 
             ProductDetailsFlowViewModel.ProductDetailsEvents.GoToAboutProduct -> {
