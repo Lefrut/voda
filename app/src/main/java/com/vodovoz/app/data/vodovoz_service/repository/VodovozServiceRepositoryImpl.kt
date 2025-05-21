@@ -1465,7 +1465,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
 
     override suspend fun clearCart(): Flow<Result<String>> = executeRequest(
         request = { vodovozService.clearCart() },
-        mapper = { "" },
+        mapper = { it.data ?: "" },
     )
 
     override fun getProductAnalogs(

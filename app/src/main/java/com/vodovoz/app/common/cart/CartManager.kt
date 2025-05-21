@@ -130,11 +130,14 @@ class CartManager @Inject constructor(
         }
     }
 
-    suspend fun clearCart() = cartMutex.withLock {
-        cartVersion++
-        carts.clear()
-        cartsStateListener.emit(carts)
-        updateCartListState(true)
+    suspend fun clearCart() {
+        cartMutex.withLock {
+            cartVersion++
+            carts.clear()
+            cartsStateListener.emit(emptyMap())
+            _blockedProductsState.update { emptySet() }
+            updateCartListState(true)
+        }
         tabManager.clearBottomNavCartState()
     }
 
