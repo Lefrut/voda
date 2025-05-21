@@ -30,7 +30,6 @@ import com.vodovoz.app.design_system.model.withUpdatedLoading
 import com.vodovoz.app.domain.general.model.EmptyResultException
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.feature.favorite.mapper.FavoritesMapper
-import com.vodovoz.app.feature.productlistnofilter.PaginatedProductsCatalogWithoutFiltersFragment
 import com.vodovoz.app.mapper.CategoryMapper.mapToUI
 import com.vodovoz.app.mapper.DefaultSearchDataBundleMapper.mapToUI
 import com.vodovoz.app.mapper.ProductMapper.mapToUI

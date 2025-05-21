@@ -115,7 +115,7 @@ class LoginByPhoneCodeFragment1 : BaseFragment() {
                                 profileViewModel.refresh()
                                 flowViewModel.refresh()
                                 cartFlowViewModel.refreshIdle()
-                                favoriteViewModel.refreshIdle()
+                                //favoriteViewModel.refreshIdle()
                                 val redirect = tabManager.fetchAuthRedirect()
                                 if (redirect == TabManager.DEFAULT_AUTH_REDIRECT) {
                                     repeat(2){

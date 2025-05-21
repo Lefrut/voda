@@ -160,13 +160,13 @@ class PromotionDetailsFragment : Fragment() {
                 name: String,
                 detailPicture: String,
             ) {
-                findNavController().navigate(
-                    PromotionDetailsFragmentDirections.actionToPreOrderBS(
-                        id,
-                        name,
-                        detailPicture
-                    )
-                )
+//                findNavController().navigate(
+//                    PromotionDetailsFragmentDirections.actionToPreOrderBS(
+//                        id,
+//                        name,
+//                        detailPicture
+//                    )
+//                )
             }
 
             override fun onChangeProductQuantity(

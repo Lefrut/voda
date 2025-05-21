@@ -142,7 +142,7 @@ class RegisterFragment : Fragment() {
                     profileViewModel.refresh()
                     homeViewModel.refresh()
                     cartFlowViewModel.refreshIdle()
-                    favoriteViewModel.refreshIdle()
+                    //favoriteViewModel.refreshIdle()
 
                     val redirect = tabManager.fetchAuthRedirect()
                     if (redirect == TabManager.DEFAULT_AUTH_REDIRECT) {

@@ -159,7 +159,7 @@ class ProfileFragment : Fragment() {
                         is ProfileFlowViewModel.ProfileEvents.Logout -> {
                             flowViewModel.refresh()
                             cartFlowViewModel.refreshIdle()
-                            favoriteViewModel.refreshIdle()
+                            //favoriteViewModel.refreshIdle()
                         }
 
                         is ProfileFlowViewModel.ProfileEvents.GoToCart -> {

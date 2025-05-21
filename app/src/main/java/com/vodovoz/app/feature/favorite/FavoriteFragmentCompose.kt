@@ -123,19 +123,6 @@ class FavoriteFragment : Fragment() {
                         tabManager.selectTab(R.id.graph_profile)
                     }
 
-                    is FavoriteFlowViewModel.FavoriteEvents.GoToPreOrder -> {
-                        if (findNavController().currentBackStackEntry?.destination?.id == R.id.preOrderBS) {
-                            findNavController().popBackStack()
-                        }
-                        findNavController().navigate(
-                            FavoriteFragmentDirections.actionToPreOrderBS(
-                                event.id,
-                                event.name,
-                                event.detailPicture
-                            )
-                        )
-                    }
-
                     is FavoriteFlowViewModel.FavoriteEvents.GoToCategories -> {
                         findNavController().navigateToCategories(
                             categories = event.categories,
@@ -167,40 +154,6 @@ class FavoriteFragment : Fragment() {
             }
 
 
-    }
-
-
-    @Inject
-    lateinit var permissionsControllerFactory: PermissionsController.Factory
-    private val permissionsController by lazy { permissionsControllerFactory.create(requireActivity()) }
-
-    private fun navigateToQrCodeFragment() {
-        permissionsController.methodRequiresCameraPermission {
-            if (ActivityCompat.checkSelfPermission(
-                    requireContext(),
-                    Manifest.permission.CAMERA
-                ) != PackageManager.PERMISSION_GRANTED
-            ) {
-                return@methodRequiresCameraPermission
-            }
-
-            findNavController().navigate(R.id.qrCodeFragment)
-
-        }
-    }
-
-    private fun startSpeechRecognizer() {
-        permissionsController.methodRequiresRecordAudioPermission {
-            if (ActivityCompat.checkSelfPermission(
-                    requireContext(),
-                    Manifest.permission.RECORD_AUDIO
-                ) != PackageManager.PERMISSION_GRANTED
-            ) {
-                return@methodRequiresRecordAudioPermission
-            }
-
-            SpeechDialogFragment().show(childFragmentManager, "TAG")
-        }
     }
 
 }

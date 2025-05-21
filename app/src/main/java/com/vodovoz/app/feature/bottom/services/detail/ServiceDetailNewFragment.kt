@@ -140,16 +140,7 @@ class ServiceDetailNewFragment : BaseFragment() {
             }
 
             override fun onNotifyWhenBeAvailable(id: Long, name: String, detailPicture: String) {
-                when (viewModel.isLoginAlready()) {
-                    true -> findNavController().navigate(
-                        ServiceDetailNewFragmentDirections.actionToPreOrderBS(
-                            id,
-                            name,
-                            detailPicture
-                        )
-                    )
-                    false -> findNavController().navigate(ServiceDetailNewFragmentDirections.actionToProfileFragment())
-                }
+
             }
 
             override fun onChangeProductQuantity(id: Long, cartQuantity: Int, oldQuantity: Int) {
