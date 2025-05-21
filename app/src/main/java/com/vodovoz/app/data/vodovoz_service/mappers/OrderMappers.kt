@@ -6,6 +6,7 @@ import com.vodovoz.app.data.vodovoz_service.model.KNOPKA_ORDER_DTO
 import com.vodovoz.app.data.vodovoz_service.model.OPLATA_DTO
 import com.vodovoz.app.data.vodovoz_service.model.OrderPlaceholderDTO
 import com.vodovoz.app.data.vodovoz_service.model.OrderQuestionDetailsDTO
+import com.vodovoz.app.data.vodovoz_service.model.cart.BottomCartDTO
 import com.vodovoz.app.data.vodovoz_service.model.order_details.ABOUT_ORDER_ITEM_DTO
 import com.vodovoz.app.data.vodovoz_service.model.order_details.ABOUT_ORDER_OKNO_DTO
 import com.vodovoz.app.data.vodovoz_service.model.order_details.ORDER_DETAILS_ITOG_DTO
@@ -23,6 +24,7 @@ import com.vodovoz.app.domain.general.model.CancelOrderDetailsModel
 import com.vodovoz.app.domain.general.model.ColorfulButtonModel
 import com.vodovoz.app.domain.general.model.PaymentInfoModel
 import com.vodovoz.app.domain.general.model.VodovozPlaceholderModel
+import com.vodovoz.app.domain.general.model.cart.BottomCartModel
 import com.vodovoz.app.domain.general.model.certificate.BuyCertificateModel
 import com.vodovoz.app.domain.general.model.order.AboutOrderItemModel
 import com.vodovoz.app.domain.general.model.order.AboutOrderPopupWindowModel
@@ -39,6 +41,13 @@ import com.vodovoz.app.domain.general.model.order.OrdersHistoryDetailsModel
 import com.vodovoz.app.domain.general.model.order.OrdersHistoryItemModel
 import com.vodovoz.app.domain.general.model.order.OrdersHistoryProductModel
 
+
+fun BottomCartDTO.toDomain(): BottomCartModel {
+    return BottomCartModel(
+        total = ALLSUMA ?: 0,
+        count = TOVAROV ?: 0
+    )
+}
 
 fun OrderPlaceholderDTO.toDomain(): BuyCertificateModel {
 
@@ -115,7 +124,8 @@ fun CancelOrderDetailsDTO.toDomain(): CancelOrderDetailsModel {
         description = OPISANIE ?: "",
         warningText = DOPOPISANIE ?: "",
         checkboxesNames = STATYS?.ZNACHWNIYA?.mapNotNull { it.VALUE } ?: emptyList(),
-        checkboxesGroupId = STATYS?.ZNACHWNIYA?.firstOrNull { it.GROUP_ID != null }?.GROUP_ID ?: "statys",
+        checkboxesGroupId = STATYS?.ZNACHWNIYA?.firstOrNull { it.GROUP_ID != null }?.GROUP_ID
+            ?: "statys",
         field = SOOBSHENIE?.toDomain(),
         button = KNOPKA?.toDomain()
             ?: throw IllegalArgumentException("CancelOrderDetails button can't be null")

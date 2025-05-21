@@ -73,6 +73,7 @@ import com.vodovoz.app.domain.general.model.UserNotLoginException
 import com.vodovoz.app.domain.general.model.ValidationException
 import com.vodovoz.app.domain.general.model.VodovozPlaceholderModel
 import com.vodovoz.app.domain.general.model.WaitFeedbackProductModel
+import com.vodovoz.app.domain.general.model.cart.BottomCartModel
 import com.vodovoz.app.domain.general.model.cart.CartDetailsModel
 import com.vodovoz.app.domain.general.model.certificate.BuyCertificateDetailsModel
 import com.vodovoz.app.domain.general.model.certificate.BuyCertificateModel
@@ -119,7 +120,11 @@ class VodovozServiceRepositoryImpl @Inject constructor(
     ): Flow<Result<VodovozPlaceholderModel>> {
         return executeRequest(
             request = {
-                vodovozService.orderService(accountManager.fetchAccountId(), serviceType, fields.toQueries())
+                vodovozService.orderService(
+                    accountManager.fetchAccountId(),
+                    serviceType,
+                    fields.toQueries()
+                )
             },
             mapper = {
                 it.data!!.toDomain()
@@ -1393,6 +1398,17 @@ class VodovozServiceRepositoryImpl @Inject constructor(
             },
             mapper = {
                 it.message ?: ""
+            }
+        )
+    }
+
+    override suspend fun getBottomCart(): Flow<Result<BottomCartModel>> {
+        return executeRequest(
+            request = {
+                vodovozService.getBottomCart()
+            },
+            mapper = {
+                it.data!!.toDomain()
             }
         )
     }

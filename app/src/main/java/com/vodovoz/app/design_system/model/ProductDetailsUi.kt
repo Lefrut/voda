@@ -188,7 +188,7 @@ fun ProductDetailsModel.toUi(): ProductDetailsUi {
         isFavorite = isFavorite,
         isAvailable = isAvailable,
         quantity = productQuantity,
-        labels = labels.mapNotNull { label -> label.toUi() },
+        labels = labels.map { label -> label.toUi() },
         rating = rating,
         deposit = deposit?.toUi(),
 
@@ -242,12 +242,13 @@ data class DocumentUi(
 ) : Parcelable
 
 @Immutable
+@Parcelize
 data class PriceUi(
     val price: Float,
     val oldPrice: Float,
     val quantityFrom: Int,
     val quantityTo: Int,
-)
+): Parcelable
 
 fun PriceModel.toUi(): PriceUi {
     return PriceUi(price, oldPrice, quantityFrom, quantityTo)

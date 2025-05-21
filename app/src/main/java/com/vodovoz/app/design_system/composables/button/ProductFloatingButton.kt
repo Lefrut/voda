@@ -2,6 +2,7 @@ package com.vodovoz.app.design_system.composables.button
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -15,6 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.fromHtml
 import androidx.compose.ui.tooling.preview.Preview
@@ -28,20 +30,21 @@ import com.vodovoz.app.design_system.model.ColorfulButtonUi
 @Composable
 fun ProductBottomFloatingButton(
     modifier: Modifier = Modifier,
-    isLoading: Boolean,
     cartQuantity: Int,
     totalPrice: Int,
     oldPrice: Int,
     price: Int,
     giftText: String,
-    analogButton: ColorfulButtonUi?,
+    isLoading: Boolean,
     isAvailable: Boolean,
+    analogButton: ColorfulButtonUi?,
+    contentPadding: PaddingValues = PaddingValues(top = 10.dp, bottom = 8.dp),
     onIncrementProduct: () -> Unit,
     onDecrementProduct: () -> Unit,
     onAnalogClick: () -> Unit,
 ) {
 
-    BottomFloatingContainer(modifier = modifier) {
+    BottomFloatingContainer(modifier = modifier, contentPadding = contentPadding) {
         if (isAvailable && giftText.isNotBlank()) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -96,6 +99,15 @@ fun ProductBottomFloatingButton(
                         contentColor = analogButton.textColor,
                         containerColor = analogButton.backgroundColor
                     )
+                )
+            }
+
+            else -> {
+                VodovozButton(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    text = stringResource(id = R.string.analogs),
+                    onClick = onAnalogClick,
+                    colors = VodovozButtonDefaults.secondaryColors()
                 )
             }
         }

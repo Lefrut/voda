@@ -12,7 +12,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.fragment.findNavController
-import com.vodovoz.app.core.navigation.navigateToAnalogs
+import com.vodovoz.app.core.navigation.navigateToProductAnalogs
 import com.vodovoz.app.core.navigation.navigateToProductDetails
 import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.composables.bottom_sheet.SortOptionsBottomSheet
@@ -27,7 +27,7 @@ class ProductsCollectionFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        viewModel.fetchProducts()
+        viewModel.fetchProductAnalogs()
     }
 
     @OptIn(ExperimentalMaterial3Api::class)
@@ -81,7 +81,7 @@ class ProductsCollectionFragment : Fragment() {
                             }
 
                             is ProductsCollectionEvent.GoToProductDetails -> {
-                                findNavController().navigateToAnalogs(event.productId)
+                                findNavController().navigateToProductAnalogs(event.productId)
                             }
                         }
                     }

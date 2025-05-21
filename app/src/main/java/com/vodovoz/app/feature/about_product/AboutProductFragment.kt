@@ -14,6 +14,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.fragment.findNavController
 import com.vodovoz.app.R
 import com.vodovoz.app.common.tab.TabManager
+import com.vodovoz.app.core.navigation.navigateToProductAnalogs
 import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.effects.LifecycleEffect
 import com.vodovoz.app.feature.about_product.model.AboutProductEvent
@@ -56,6 +57,18 @@ class AboutProductFragment : Fragment() {
                     )
 
                     LifecycleEffect {
+                        viewModel.listenCart()
+                    }
+
+                    LifecycleEffect {
+                        viewModel.listenLoadingsProduct()
+                    }
+
+                    LifecycleEffect {
+                        viewModel.listenCartUpdates()
+                    }
+
+                    LifecycleEffect {
                         viewModel.events.collect { event ->
                             when (event) {
                                 AboutProductEvent.GoBack -> {
@@ -67,6 +80,10 @@ class AboutProductFragment : Fragment() {
                                         R.id.documentViewerFragment,
                                         bundleOf("documentId" to event.document)
                                     )
+                                }
+
+                                is AboutProductEvent.GoToProductAnalogs -> {
+                                    findNavController().navigateToProductAnalogs(event.productId)
                                 }
                             }
                         }

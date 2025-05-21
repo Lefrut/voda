@@ -13,7 +13,9 @@ import com.vodovoz.app.common.product.rating.RatingProductManager
 import com.vodovoz.app.data.MainRepository
 import com.vodovoz.app.design_system.model.BrandCategoryItemUi
 import com.vodovoz.app.design_system.model.BuyButtonUi
+import com.vodovoz.app.design_system.model.ColorfulButtonUi
 import com.vodovoz.app.design_system.model.CommentUi
+import com.vodovoz.app.design_system.model.PriceUi
 import com.vodovoz.app.design_system.model.ProductDetailsButtonsUi
 import com.vodovoz.app.design_system.model.ProductDetailsTabUi
 import com.vodovoz.app.design_system.model.ProductDetailsUi
@@ -144,18 +146,15 @@ class ProductDetailsFlowViewModel @Inject constructor(
 
     suspend fun listenCartUpdates() = cartManager.observeUpdateCartList().onEach { update ->
         if (update) {
-            val result = vodovozServiceRepository.getPresentInfo().singleResult()
-            result.onSuccess { presentInfo ->
+            vodovozServiceRepository.getPresentInfo().singleResult().onSuccess { presentInfo ->
                 uiStateListener.update { s ->
-                    s.copy(
-                        presentInfo = presentInfo.toUi()
-                    )
+                    s.copy(presentInfo = presentInfo.toUi())
                 }
             }
         }
     }.collect()
 
-    fun fetchProductDetails() = viewModelScope.launch {
+    private fun fetchProductDetails() = viewModelScope.launch {
         vodovozServiceRepository.getProductDetails(state.productDetails.id)
             .combine(vodovozServiceRepository.getPresentInfo()) { p1, p2 ->
                 p1 to p2
@@ -229,7 +228,7 @@ class ProductDetailsFlowViewModel @Inject constructor(
                 s.copy(buttonIsLoading = true)
             }
             val (id, count) = productId.trim().split("-")
-            cartManager.addWithGift(
+            cartManager.add(
                 id = id.toLong(),
                 newCount = count.toInt(),
                 giftId = giftId
@@ -323,7 +322,17 @@ class ProductDetailsFlowViewModel @Inject constructor(
     }
 
     fun navigateToAboutProduct() = viewModelScope.launch {
-        eventListener.emit(ProductDetailsEvents.GoToAboutProduct)
+
+        val viewState = uiStateListener.value
+
+        eventListener.emit(
+            ProductDetailsEvents.GoToAboutProduct(
+                viewState.productDetails.id,
+                viewState.productDetails.prices,
+                viewState.buttons.analogButton,
+                viewState.productDetails.isAvailable
+            )
+        )
     }
 
     fun setupProductDetails(productId: Long) = viewModelScope.launch {
@@ -420,6 +429,10 @@ class ProductDetailsFlowViewModel @Inject constructor(
 
     fun addProductWithGift(buyButton: BuyButtonUi) = viewModelScope.launch {
         //todo - update realization
+
+
+        //buyButton.moreProductId
+        //cartManager.addWithGift()
         //cartManager.addProductWithGift(buyButton.productId, buyButton.moreProductId)
     }
 
@@ -440,16 +453,16 @@ class ProductDetailsFlowViewModel @Inject constructor(
         data class GoToPreOrder(val id: Long) : ProductDetailsEvents()
 
         data object GoToProfile : ProductDetailsEvents()
-        data class SendComment(val id: Long) : ProductDetailsEvents()
-        data class GoToPresentInfo(
-            val presentText: String,
-            val progress: Int,
-            val progressBackground: String,
-            val showText: Boolean,
-        ) : ProductDetailsEvents()
 
         data object GoToCart : ProductDetailsEvents()
-        data object GoToAboutProduct : ProductDetailsEvents()
+        data class GoToAboutProduct(
+            val productId: Long,
+            val prices: List<PriceUi>,
+            val analogButton: ColorfulButtonUi?,
+            val isAvailable: Boolean,
+        ) :
+            ProductDetailsEvents()
+
         data object GoBack : ProductDetailsEvents()
         data class Share(val text: String) : ProductDetailsEvents()
 

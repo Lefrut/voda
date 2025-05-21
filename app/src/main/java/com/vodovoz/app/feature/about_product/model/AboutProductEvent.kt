@@ -7,6 +7,8 @@ sealed class AboutProductEvent {
 
     }
 
+    data class GoToProductAnalogs(val productId: Long) : AboutProductEvent()
+
     data object GoBack: AboutProductEvent()
 
 }

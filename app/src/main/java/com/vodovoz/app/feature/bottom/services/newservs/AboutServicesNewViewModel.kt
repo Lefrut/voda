@@ -20,7 +20,6 @@ import com.vodovoz.app.feature.bottom.services.newservs.model.AboutServicesNew
 import com.vodovoz.app.util.extensions.debugLog
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flow
@@ -116,7 +115,7 @@ class AboutServicesNewViewModel @Inject constructor(
 
     fun changeCart(productId: Long, quantity: Int, giftId: String) {
         viewModelScope.launch {
-            cartManager.addWithGift(
+            cartManager.add(
                 id = productId,
                 newCount = quantity,
                 giftId = giftId

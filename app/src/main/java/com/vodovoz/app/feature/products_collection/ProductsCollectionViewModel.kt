@@ -17,6 +17,7 @@ import com.vodovoz.app.feature.products_collection.model.ProductsCollectionState
 import com.vodovoz.app.feature.products_collection.model.ProductsCollectionUiState
 import com.vodovoz.app.ui.mvi.MviViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -86,11 +87,12 @@ class ProductsCollectionViewModel @Inject constructor(
             }
         }
 
-    fun fetchProducts() =
+    fun fetchProductAnalogs() =
         vodovozServiceRepository.getProductAnalogs(productId, stateSnapshot.currentSort.toDomain())
             .onStart {
                 _state.update { s -> s.copy(uiState = ProductsCollectionUiState.Loading) }
             }.onEach { result ->
+                delay(100)
                 result.onSuccess { productsSectionModel ->
                     val productsSectionUi = productsSectionModel.toUi()
                     _state.update { s ->
@@ -99,6 +101,12 @@ class ProductsCollectionViewModel @Inject constructor(
                             currentSort = if (s.currentSort == SortUi.Empty) productsSectionUi.sorting.firstOrNull()
                                 ?: SortUi.Empty.copy(name = productsSectionUi.sortingTitle) else s.currentSort,
                             uiState = ProductsCollectionUiState.Success
+                        )
+                    }
+                }.onFailure {
+                    _state.update { s ->
+                        s.copy(
+                            uiState = ProductsCollectionUiState.Error
                         )
                     }
                 }
@@ -127,7 +135,7 @@ class ProductsCollectionViewModel @Inject constructor(
                 currentSort = sort,
             )
         }
-        fetchProducts()
+        fetchProductAnalogs()
         closeSortOptionsBottomSheet()
     }
 

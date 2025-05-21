@@ -20,10 +20,11 @@ import com.vodovoz.app.common.like.LikeManager
 import com.vodovoz.app.common.media.MediaManager
 import com.vodovoz.app.common.product.rating.RatingProductManager
 import com.vodovoz.app.common.tab.TabManager
-import com.vodovoz.app.core.navigation.navigateToAnalogs
+import com.vodovoz.app.core.navigation.navigateToAboutProduct
 import com.vodovoz.app.core.navigation.navigateToBrandProductList
 import com.vodovoz.app.core.navigation.navigateToCategoryProductList
 import com.vodovoz.app.core.navigation.navigateToPreOrder
+import com.vodovoz.app.core.navigation.navigateToProductAnalogs
 import com.vodovoz.app.core.navigation.navigateToProductComments
 import com.vodovoz.app.core.navigation.navigateToProductDetails
 import com.vodovoz.app.core.navigation.navigateToProductImages
@@ -125,20 +126,18 @@ class ProductDetailsFragment : Fragment() {
                 tabManager.selectTab(R.id.graph_profile)
             }
 
-            is ProductDetailsFlowViewModel.ProductDetailsEvents.SendComment -> {
-
-            }
-
             is ProductDetailsFlowViewModel.ProductDetailsEvents.GoToCart -> {
                 tabManager.setAuthRedirect(findNavController().graph.id)
                 tabManager.selectTab(R.id.graph_cart)
             }
 
-            is ProductDetailsFlowViewModel.ProductDetailsEvents.GoToPresentInfo -> {
-            }
-
-            ProductDetailsFlowViewModel.ProductDetailsEvents.GoToAboutProduct -> {
-                findNavController().navigate(R.id.aboutProductFragment)
+            is ProductDetailsFlowViewModel.ProductDetailsEvents.GoToAboutProduct -> {
+                findNavController().navigateToAboutProduct(
+                    productId = event.productId,
+                    prices = event.prices,
+                    analogButton = event.analogButton,
+                    isAvailable = event.isAvailable
+                )
             }
 
             is ProductDetailsFlowViewModel.ProductDetailsEvents.GoToProductComments -> {
@@ -146,7 +145,7 @@ class ProductDetailsFragment : Fragment() {
             }
 
             is ProductDetailsFlowViewModel.ProductDetailsEvents.GoToProductAnalogs -> {
-                findNavController().navigateToAnalogs(event.productId)
+                findNavController().navigateToProductAnalogs(event.productId)
             }
 
             ProductDetailsFlowViewModel.ProductDetailsEvents.GoBack -> {
