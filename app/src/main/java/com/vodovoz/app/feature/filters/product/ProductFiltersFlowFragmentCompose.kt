@@ -62,11 +62,26 @@ class ProductFiltersFlowFragment : Fragment() {
                     val viewState by rememberUpdatedState(newValue = pagingState.data)
 
                     val filterPrice = viewState.filters.price
-                    val sliderState = remember(viewState.uiState) {
+                    val sliderState = remember(
+                        viewState.uiState,
+                        filterPrice.max,
+                        filterPrice.min
+                    ) {
+                        val range =
+                            (filterPrice.max.toFloat() - filterPrice.min).takeIf { it != 0f }
+                                ?: return@remember RangeSliderState(
+                                    activeRangeStart = 0f,
+                                    activeRangeEnd = 1f,
+                                    valueRange = 0f..1f
+                                )
+
+                        val start = (filterPrice.currentMin - filterPrice.min) / range
+                        val end =
+                            ((filterPrice.currentMax - filterPrice.min) / range).coerceAtLeast(start)
                         RangeSliderState(
-                            activeRangeStart = (filterPrice.currentMin.toFloat() - filterPrice.min) / (filterPrice.max - filterPrice.min),
-                            activeRangeEnd = (filterPrice.currentMax.toFloat() - filterPrice.min) / (filterPrice.max - filterPrice.min),
-                            valueRange = 0f..1f,
+                            activeRangeStart = start,
+                            activeRangeEnd = end,
+                            valueRange = 0f..1f
                         )
                     }
 
@@ -80,7 +95,11 @@ class ProductFiltersFlowFragment : Fragment() {
                         }
 
                         ProductFiltersFlowViewModel.ProductFiltersUiState.Success -> {
-                            ProductFiltersScreen(viewModel = viewModel, viewState = viewState, sliderState = sliderState)
+                            ProductFiltersScreen(
+                                viewModel = viewModel,
+                                viewState = viewState,
+                                sliderState = sliderState
+                            )
                         }
                     }
 

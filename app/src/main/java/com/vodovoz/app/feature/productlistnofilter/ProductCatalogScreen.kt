@@ -11,22 +11,20 @@ import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import coil3.compose.rememberAsyncImagePainter
-import com.vodovoz.app.R
 import com.vodovoz.app.design_system.composables.bottom_sheet.SortOptionsBottomSheet
 import com.vodovoz.app.design_system.composables.placeholders.EmptyResultPlaceholder
 import com.vodovoz.app.design_system.composables.placeholders.LoadingPlaceholder
 import com.vodovoz.app.design_system.composables.placeholders.NetworkErrorPlaceholder
 import com.vodovoz.app.design_system.composables.top_bar.VodovozSearchTopBar
 import com.vodovoz.app.feature.productlistnofilter.composables.CategoriesBottomSheet
-import com.vodovoz.app.feature.productlistnofilter.composables.ProductsNoFilterBody
+import com.vodovoz.app.feature.productlistnofilter.composables.ProductCatalogBody
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Suppress("NonSkippableComposable")
 @Composable
-fun ProductsNoFiltersScreen(
+fun ProductCatalogScreen(
     viewModel: ProductCatalogViewModel,
     viewState: ProductCatalogViewModel.ProductListNoFilterState,
     lazyGridState: LazyGridState,
@@ -86,7 +84,7 @@ fun ProductsNoFiltersScreen(
                 }
 
                 ProductCatalogViewModel.UiState.Body -> {
-                    ProductsNoFilterBody(
+                    ProductCatalogBody(
                         lazyGridState = lazyGridState,
                         title = productsSection.title,
                         productsQuantity = productsSection.productsQuantityText,
@@ -140,12 +138,11 @@ fun ProductsNoFiltersScreen(
                 }
 
                 is ProductCatalogViewModel.UiState.Empty -> {
+                    val placeholder = uiState.placeholder
                     EmptyResultPlaceholder(
-                        title = uiState.title,
-                        description = uiState.description,
-                        imagePainter = if (uiState.image.isNotBlank()) {
-                            rememberAsyncImagePainter(uiState.image)
-                        } else painterResource(id = R.drawable.pic_search)
+                        title = placeholder.headerHtml,
+                        description = placeholder.descriptionHtml,
+                        imagePainter = rememberAsyncImagePainter(placeholder.imageUrl)
                     )
                 }
             }

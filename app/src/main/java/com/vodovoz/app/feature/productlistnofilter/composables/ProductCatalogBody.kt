@@ -31,7 +31,7 @@ import com.vodovoz.app.feature.product_comments.model.SortUi
 
 @Suppress("NonSkippableComposable")
 @Composable
-fun ProductsNoFilterBody(
+fun ProductCatalogBody(
     modifier: Modifier = Modifier,
     lazyGridState: LazyGridState,
     title: String,

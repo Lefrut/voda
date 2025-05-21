@@ -19,6 +19,7 @@ import com.vodovoz.app.common.product.rating.RatingProductManager
 import com.vodovoz.app.common.resources.ResourcesProvider
 import com.vodovoz.app.design_system.model.ParentCategoryUi
 import com.vodovoz.app.design_system.model.ProductUi
+import com.vodovoz.app.design_system.model.VodovozPlaceholderUi
 import com.vodovoz.app.design_system.model.allCategories
 import com.vodovoz.app.design_system.model.filters.FiltersPriceUi
 import com.vodovoz.app.design_system.model.filters.FiltersUi
@@ -353,16 +354,8 @@ class ProductCatalogViewModel @Inject constructor(
 
         }.onFailure { t ->
             val uiState = when (t) {
-                is EmptyResultException -> with(t.placeholder) {
-                    UiState.Empty(
-                        image = this?.imageUrl ?: "",
-                        title = this?.headerHtml ?: resourcesProvider.getString(
-                            R.string.empty_products_title
-                        ),
-                        description = this?.descriptionHtml
-                            ?: resourcesProvider.getString(R.string.empty_products_description)
-                    )
-                }
+                is EmptyResultException -> UiState.Empty(t.placeholder?.toUi() ?: VodovozPlaceholderUi.Empty)
+
 
                 else -> UiState.Error
             }
@@ -670,7 +663,7 @@ class ProductCatalogViewModel @Inject constructor(
     ) : State
 
     sealed interface UiState {
-        data class Empty(val image: String, val title: String, val description: String) : UiState
+        data class Empty(val placeholder: VodovozPlaceholderUi) : UiState
         data object Error : UiState
         data object Loading : UiState
         data object Body : UiState

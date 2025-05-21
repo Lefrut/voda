@@ -5,7 +5,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.ComposeView
@@ -85,7 +84,7 @@ class RegisterFragment : Fragment() {
     }
 
     private suspend fun observeEvents(
-        coroutineScope: CoroutineScope,
+        uiCoroutinesScope: CoroutineScope,
         snackbarHostState: SnackbarHostState,
     ) {
         viewModel.observeEvent().collect { event ->
@@ -100,7 +99,7 @@ class RegisterFragment : Fragment() {
                 }
 
                 is RegFlowViewModel.RegEvents.ShowSnackbar -> {
-                    coroutineScope.launch {
+                    uiCoroutinesScope.launch {
                         snackbarHostState.currentSnackbarData?.dismiss()
                         snackbarHostState.showSnackbar(event.message)
                     }
@@ -141,8 +140,8 @@ class RegisterFragment : Fragment() {
                 RegFlowViewModel.RegEvents.RefreshAll -> {
                     profileViewModel.refresh()
                     homeViewModel.refresh()
-                    cartFlowViewModel.refreshIdle()
-                    //favoriteViewModel.refreshIdle()
+                    cartFlowViewModel.refresh()
+                    favoriteViewModel.refresh()
 
                     val redirect = tabManager.fetchAuthRedirect()
                     if (redirect == TabManager.DEFAULT_AUTH_REDIRECT) {
