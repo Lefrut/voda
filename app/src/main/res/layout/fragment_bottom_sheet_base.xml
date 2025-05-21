@@ -45,7 +45,6 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         style="@style/Widget.Material3.CircularProgressIndicator.Medium"
-        android:id="@+id/container_progress_bottom"
         app:indicatorSize="60dp"
         app:indicatorColor="@color/bluePrimary"
         app:trackColor="#CC63616A"

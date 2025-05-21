@@ -35,7 +35,7 @@ class FullScreenDetailPicturesSliderFragment : DialogFragment(R.layout.dialog_pr
         binding.vpImages.orientation = ViewPager2.ORIENTATION_HORIZONTAL
         binding.vpImages.adapter = FullScreenDetailPicturesAdapter(args.detailPictureList.toList())
         binding.vpImages.currentItem = args.startPosition
-        binding.dotsIndicator.attachTo(binding.vpImages)
+        //binding.dotsIndicator.attachTo(binding.vpImages)
 
         binding.imgClose.setOnClickListener { findNavController().popBackStack() }
     }

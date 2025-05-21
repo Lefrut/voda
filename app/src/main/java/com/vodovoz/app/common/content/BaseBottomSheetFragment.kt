@@ -23,9 +23,6 @@ abstract class BaseBottomSheetFragment : BottomSheetDialogFragment() {
     protected val contentView: View
         get() = requireView().findViewById(R.id.container_base_bottom)
 
-    private val loader: View
-        get() = viewBinding.containerProgressBottom
-
     private val progressBg: View
         get() = viewBinding.progressBgBottom
 
@@ -67,12 +64,10 @@ abstract class BaseBottomSheetFragment : BottomSheetDialogFragment() {
     }
 
     protected fun showLoader() {
-        loader.isVisible = true
         progressBg.isVisible = true
     }
 
     protected fun hideLoader() {
-        loader.isVisible = false
         progressBg.isVisible = false
     }
 

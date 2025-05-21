@@ -18,11 +18,8 @@ import javax.inject.Singleton
 
 @Singleton
 class SiteStateManager @Inject constructor(
-    private val repository: MainRepository,
     private val vodovozServiceRepository: VodovozServiceRepository,
 ) {
-    var showRateBottom: Boolean? = null
-
     private val _siteStateFlow = MutableStateFlow<SiteState?>(null)
     val siteStateFlow = _siteStateFlow.asStateFlow()
 
@@ -62,7 +59,6 @@ class SiteStateManager @Inject constructor(
 
 
     fun siteActive(): Boolean = siteStateSnapshot?.isActive == true
-
     fun smsEnabled(): Boolean = siteStateSnapshot?.isSmsEnabled == true
 
     fun saveDeepLinkPath(path: String?) {

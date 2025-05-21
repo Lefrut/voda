@@ -40,7 +40,7 @@ import androidx.compose.ui.unit.sp
 import com.vodovoz.app.R
 import com.vodovoz.app.design_system.composables.button.VodovozButton
 import com.vodovoz.app.design_system.effects.SystemBarsEffect
-import radialGradientBackground
+import com.vodovoz.app.design_system.modifiers.radialGradientBackground
 
 @Composable
 fun WaterAppWelcomeScreen(

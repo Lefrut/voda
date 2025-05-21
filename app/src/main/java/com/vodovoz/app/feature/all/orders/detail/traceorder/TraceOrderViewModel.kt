@@ -83,6 +83,12 @@ class TraceOrderViewModel @Inject constructor(
         }
     }
 
+    fun fetchWhereOrderDetails() = viewModelScope.launch {
+
+
+
+    }
+
     fun fetchDriverData(driverId: String?, orderId: String?) {
         viewModelScope.launch(Dispatchers.IO) {
             debugLog { "driverId $driverId" }
@@ -219,17 +225,23 @@ class TraceOrderViewModel @Inject constructor(
         val driverPointsEntity: DriverPointsEntity? = null,
 
         val showSettingDialog: Boolean = false,
-        val carPoint: MapPointUi = MapPointUi(55.740117, 37.565874),
-        val deliveryPoint: MapPointUi = MapPointUi(55.729210, 37.574360)
+        val carPoint: MapPointUi? = MapPointUi(55.740117, 37.565874),
+        val deliveryPoint: MapPointUi? = MapPointUi(55.729210, 37.574360),
+        val uiState: TraceOrderUiState = TraceOrderUiState.NotLoading
     ) : State
 
-    sealed class TraceOrderEvents : Event{
+    sealed interface TraceOrderUiState {
+        data object NotLoading: TraceOrderUiState
+        data object Error: TraceOrderUiState
+    }
 
-        data object GoBack: TraceOrderEvents()
+    sealed class TraceOrderEvents : Event {
 
-        data object MoveCameraPlus: TraceOrderEvents()
+        data object GoBack : TraceOrderEvents()
 
-        data object MoveCameraMinus: TraceOrderEvents()
+        data object MoveCameraPlus : TraceOrderEvents()
+
+        data object MoveCameraMinus : TraceOrderEvents()
 
         data object CheckGeo : TraceOrderEvents()
         data object MoveToGeo : TraceOrderEvents()

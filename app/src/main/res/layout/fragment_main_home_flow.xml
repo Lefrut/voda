@@ -73,7 +73,6 @@
                     android:orientation="vertical">
 
                     <com.google.android.material.textview.MaterialTextView
-                        android:id="@+id/collapsedHeaderTv"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="@dimen/space_16"
@@ -86,7 +85,6 @@
 
 
                     <com.google.android.material.textview.MaterialTextView
-                        android:id="@+id/collapsedBodyTv"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="@dimen/space_8"
@@ -119,7 +117,6 @@
                     tools:visibility="visible">
 
                     <com.google.android.material.textview.MaterialTextView
-                        android:id="@+id/expandedHeaderTv"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="@dimen/space_16"

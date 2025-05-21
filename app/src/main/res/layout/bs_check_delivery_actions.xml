@@ -30,7 +30,6 @@
             android:padding="16dp">
 
             <TextView
-                android:id="@+id/callMeChangeHeaderTv"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="start"
@@ -42,7 +41,6 @@
                 app:fontFamily="@font/rotondac" />
 
             <TextView
-                android:id="@+id/callMeChangeDescTv"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
@@ -69,7 +67,6 @@
             android:padding="16dp">
 
             <TextView
-                android:id="@+id/callMeDontChangeHeaderTv"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="start"
@@ -81,7 +78,6 @@
                 app:fontFamily="@font/rotondac" />
 
             <TextView
-                android:id="@+id/callMeDontChangeDescTv"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
@@ -108,7 +104,6 @@
             android:padding="16dp">
 
             <TextView
-                android:id="@+id/dontCallMeChangeHeaderTv"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="start"
@@ -120,7 +115,6 @@
                 app:fontFamily="@font/rotondac" />
 
             <TextView
-                android:id="@+id/dontCallMeChangeDescTv"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
@@ -147,7 +141,6 @@
             android:padding="16dp">
 
             <TextView
-                android:id="@+id/dontCallMeDontChangeHeaderTv"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="start"
@@ -159,7 +152,6 @@
                 app:fontFamily="@font/rotondac" />
 
             <TextView
-                android:id="@+id/dontCallMeDontChangeDescTv"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
@@ -186,7 +178,6 @@
             android:padding="16dp">
 
             <TextView
-                android:id="@+id/callMeNewHeaderTv"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="start"
@@ -198,7 +189,6 @@
                 app:fontFamily="@font/rotondac" />
 
             <TextView
-                android:id="@+id/callMeNewDescTv"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"

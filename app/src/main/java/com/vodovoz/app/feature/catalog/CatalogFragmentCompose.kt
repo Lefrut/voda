@@ -16,13 +16,13 @@ import com.vodovoz.app.R
 import com.vodovoz.app.common.account.data.AccountManager
 import com.vodovoz.app.common.cookie.CookieManager
 import com.vodovoz.app.common.tab.TabManager
-import com.vodovoz.app.core.android.activate
+import com.vodovoz.app.core.ui.activate
 import com.vodovoz.app.core.navigation.navigateToCategoryProductList
 import com.vodovoz.app.core.navigation.navigateToSubCategories
 import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.composables.placeholders.NetworkErrorPlaceholder
 import com.vodovoz.app.design_system.effects.LifecycleEffect
-import com.vodovoz.app.feature.profile.core.ContentSearchNavigator
+import com.vodovoz.app.core.navigation.ContentSearchNavigator
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 

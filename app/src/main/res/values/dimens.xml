@@ -16,20 +16,15 @@
     <dimen name="space_24">@dimen/_24sdp</dimen>
     <dimen name="space_32">@dimen/_32sdp</dimen>
     <dimen name="last_item_bottom_normal_space">@dimen/_72sdp</dimen>
-    <dimen name="last_item_bottom_small_space">@dimen/_62sdp</dimen>
 
     //Elevation
     <dimen name="elevation_1">@dimen/_1sdp</dimen>
     <dimen name="elevation_3">@dimen/_3sdp</dimen>
-    <dimen name="elevation_5">@dimen/_5sdp</dimen>
-    <dimen name="elevation_10">@dimen/_10sdp</dimen>
 
     //Text
     <dimen name="header_text_size">@dimen/_16ssp</dimen>
     <dimen name="large_text_size">@dimen/_15ssp</dimen>
-    <dimen name="medium_text_size">@dimen/_12ssp</dimen>
     <dimen name="normal_text_size">@dimen/_12ssp</dimen>
-    <dimen name="small_text_size">@dimen/_11ssp</dimen>
 
     //Buttons
     <dimen name="button_small_height">@dimen/_30sdp</dimen>
@@ -39,17 +34,10 @@
     <dimen name="field_super_ex_height">68dp</dimen>
 
     //Action image
-    <dimen name="action_image_size">@dimen/_20sdp</dimen>
-    <dimen name="action_image_size_with_padding_8">@dimen/_36sdp</dimen>
 
     //Card size
-    <dimen name="history_slider_card_width">@dimen/_80sdp</dimen>
-    <dimen name="history_slider_card_height">@dimen/_125sdp</dimen>
-    <dimen name="product_slider_card_width">160dp</dimen>
-    <dimen name="product_slider_card_height">170dp</dimen>
     <dimen name="brand_slider_card_width">@dimen/_94sdp</dimen>
     <dimen name="brand_slider_card_height">@dimen/_50sdp</dimen>
-    <dimen name="comment_slider_text_height">@dimen/_45sdp</dimen>
 
     //Text
     <dimen name="line_spacing_multiplier">1.3</dimen>

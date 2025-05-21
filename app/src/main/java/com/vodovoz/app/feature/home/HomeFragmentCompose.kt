@@ -27,7 +27,7 @@ import com.vodovoz.app.common.like.LikeManager
 import com.vodovoz.app.common.media.MediaManager
 import com.vodovoz.app.common.product.rating.RatingProductManager
 import com.vodovoz.app.common.tab.TabManager
-import com.vodovoz.app.core.android.activate
+import com.vodovoz.app.core.ui.activate
 import com.vodovoz.app.core.navigation.navigateToAboutApp
 import com.vodovoz.app.core.navigation.navigateToAllBrands
 import com.vodovoz.app.core.navigation.navigateToAnalogs
@@ -50,7 +50,7 @@ import com.vodovoz.app.core.network.ApiConfig
 import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.composables.placeholders.NetworkErrorPlaceholder
 import com.vodovoz.app.design_system.effects.LifecycleEffect
-import com.vodovoz.app.feature.profile.core.ContentSearchNavigator
+import com.vodovoz.app.core.navigation.ContentSearchNavigator
 import com.vodovoz.app.feature.sitestate.SiteStateManager
 import com.vodovoz.app.util.extensions.debugLog
 import dagger.hilt.android.AndroidEntryPoint

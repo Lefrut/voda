@@ -30,7 +30,7 @@ import com.vodovoz.app.core.navigation.navigateToWebView
 import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.composables.placeholders.NetworkErrorPlaceholder
 import com.vodovoz.app.design_system.effects.LifecycleEffect
-import com.vodovoz.app.feature.profile.core.ContentSearchNavigator
+import com.vodovoz.app.core.navigation.ContentSearchNavigator
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 

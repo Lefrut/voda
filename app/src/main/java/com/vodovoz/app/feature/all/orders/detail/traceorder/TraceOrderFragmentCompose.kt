@@ -15,6 +15,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.graphics.Color
@@ -30,6 +31,7 @@ import com.google.android.gms.location.LocationServices
 import com.vodovoz.app.R
 import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.effects.LifecycleEffect
+import com.yandex.mapkit.Animation
 import com.yandex.mapkit.MapKit
 import com.yandex.mapkit.MapKitFactory
 import com.yandex.mapkit.geometry.Point
@@ -165,6 +167,10 @@ class TraceOrderFragment : Fragment() {
                         mapView = { mapView }
                     )
 
+                    LaunchedEffect(Unit) {
+
+                    }
+
 
                     LifecycleEffect {
                         viewModel.observeEvent().collect { event ->
@@ -184,6 +190,8 @@ class TraceOrderFragment : Fragment() {
                                             cameraPosition.azimuth,
                                             cameraPosition.tilt
                                         ),
+                                        Animation(Animation.Type.LINEAR, 0.25f),
+                                        null
                                     )
                                 }
 
@@ -197,6 +205,8 @@ class TraceOrderFragment : Fragment() {
                                             cameraPosition.azimuth,
                                             cameraPosition.tilt
                                         ),
+                                        Animation(Animation.Type.LINEAR, 0.25f),
+                                        null
                                     )
                                 }
 
@@ -259,6 +269,8 @@ class TraceOrderFragment : Fragment() {
                                                 0f,
                                                 0f
                                             ),
+                                            Animation(Animation.Type.LINEAR, 0.25f),
+                                            null
                                         )
                                     }
                                 }

@@ -26,7 +26,7 @@ import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.effects.LifecycleEffect
 import com.vodovoz.app.design_system.model.filters.FiltersUi
 import com.vodovoz.app.feature.home.model.CategoryUi
-import com.vodovoz.app.feature.profile.core.ContentSearchNavigator
+import com.vodovoz.app.core.navigation.ContentSearchNavigator
 import com.vodovoz.app.util.extensions.shareText
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.parcelize.Parcelize

@@ -4,7 +4,6 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/emailContainer"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -47,7 +46,6 @@
             android:paddingHorizontal="16dp" />
 
         <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/tvWrongNumber"
             style="@style/TextViewNormalBlack"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -79,7 +77,6 @@
             android:text="Активировать" />
 
         <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/btnActivateDisabled"
             android:layout_width="match_parent"
             android:layout_height="48dp"
             android:textSize="17sp"
@@ -91,7 +88,6 @@
     </FrameLayout>
 
     <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/tvControlLine"
         style="@style/TextViewNormalBlack"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -116,7 +112,6 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/closeImage"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/icon_close"
@@ -165,7 +160,6 @@
             app:layout_constraintTop_toBottomOf="@+id/tvTitle" />
 
         <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/btnDone"
             style="@style/BlueButton"
             android:layout_width="match_parent"
             android:layout_height="@dimen/button_normal_height"

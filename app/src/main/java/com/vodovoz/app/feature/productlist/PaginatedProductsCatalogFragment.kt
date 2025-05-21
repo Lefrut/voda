@@ -313,12 +313,12 @@ class PaginatedProductsCatalogFragment : BaseFragment() {
         sortType: SortTypeUI,
         sortTypeList: SortTypeListUI?,
     ) = sortTypeList?.let {
-        findNavController().navigate(
-            PaginatedProductsCatalogFragmentDirections.actionToSortProductsSettingsBottomFragment(
-                sortType,
-                it
-            )
-        )
+//        findNavController().navigate(
+//            PaginatedProductsCatalogFragmentDirections.actionToSortProductsSettingsBottomFragment(
+//                sortType,
+//                it
+//            )
+//        )
     }
 
     private fun observeResultLiveData() {

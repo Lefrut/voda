@@ -1,16 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="cart_title" translatable="false">Корзина</string>
-    <string name="comments_about_product" translatable="false">Отзывы о товаре</string>
 
     //Gifts
-    <string name="gift_selection_title" translatable="false">Забрать подарок</string>
     <string name="take_gift_btn_text" translatable="false">Забрать подарок</string>
 
     //Replacement Products
-    <string name="not_available_product_title" translatable="false">Нет в наличии</string>
     <string name="replacement_text" translatable="false">Предлагаем замену</string>
     <string name="all_products_of_this_category_btn_text" translatable="false">Все продукты категории</string>
-    <string name="price_condition" translatable="false">При условии покупки от %d шт</string>
 
 </resources>
