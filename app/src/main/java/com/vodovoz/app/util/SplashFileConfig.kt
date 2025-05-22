@@ -20,12 +20,17 @@ object SplashFileConfig {
         context: Context,
         link: String = DEFAULT_LINK,
     ): Result<Unit> = runCatching {
+        val file = getSplashFile(context)
+        if (file.exists()) return@runCatching Unit
+
         withContext(Dispatchers.IO){
             withTimeout(5000L) {
+
                 val url = URL(link)
                 url.openStream().use { input ->
-                    val file = getSplashFile(context)
-                    file.outputStream().use { output -> input.copyTo(output) }
+                    file.outputStream().use { output ->
+                        input.copyTo(output)
+                    }
                 }
             }
         }

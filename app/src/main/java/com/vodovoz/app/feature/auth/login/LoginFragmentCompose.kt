@@ -17,12 +17,8 @@ import androidx.core.view.WindowCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.vodovoz.app.R
 import com.vodovoz.app.common.account.data.AccountManager
 import com.vodovoz.app.common.tab.TabManager
@@ -33,15 +29,13 @@ import com.vodovoz.app.core.navigation.navigateToWebView
 import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.composables.placeholders.LoadingPlaceholder
 import com.vodovoz.app.design_system.composables.placeholders.NetworkErrorPlaceholder
-import com.vodovoz.app.feature.auth.login.LoginFlowViewModel.MessageType.Message
+import com.vodovoz.app.design_system.effects.LifecycleEffect
 import com.vodovoz.app.feature.cart.CartFlowViewModel
 import com.vodovoz.app.feature.favorite.FavoriteFlowViewModel
 import com.vodovoz.app.feature.home.HomeFlowViewModel
 import com.vodovoz.app.feature.profile.ProfileFlowViewModel
-import com.vodovoz.app.util.extensions.debugLog
 import com.vodovoz.app.util.extensions.snack
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
 import java.util.concurrent.Executor
 import javax.inject.Inject
 
@@ -54,9 +48,9 @@ class LoginFragment : Fragment() {
     @Inject
     lateinit var accountManager: AccountManager
 
-    private val biometricManager by lazy { BiometricManager.from(requireContext()) }
-
     private val executor: Executor by lazy { ContextCompat.getMainExecutor(requireContext()) }
+
+    private val biometricManager by lazy { BiometricManager.from(requireContext()) }
     private val biometricPrompt: BiometricPrompt by lazy {
         BiometricPrompt(this, executor,
             object : BiometricPrompt.AuthenticationCallback() {
@@ -121,7 +115,8 @@ class LoginFragment : Fragment() {
         savedInstanceState: Bundle?,
     ): View {
         return ComposeView(requireContext()).apply {
-            setViewCompositionStrategy(ViewCompositionStrategy.Default)
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+
             setContent {
                 VodovozTheme {
                     val pagingState by viewModel.observeUiState().collectAsStateWithLifecycle()
@@ -140,23 +135,21 @@ class LoginFragment : Fragment() {
                             LoginScreen(viewModel = viewModel, viewState = viewState)
                         }
                     }
+
+                    LifecycleEffect {
+                        observeEvents()
+                    }
                 }
             }
         }
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        observeEvents()
-        checkShowFingerPrint()
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        viewModel.checkIfLoginAlready()
-        viewModel.setupByPhone()
+        checkShowFingerPrint()
+        biometricResultLauncher
     }
+
 
     internal fun authByUserSettings() {
         val userSettings = accountManager.fetchUserSettings()
@@ -173,113 +166,47 @@ class LoginFragment : Fragment() {
         if (isSettingsCorrect) checkBiometric()
     }
 
-    private fun observeEvents() {
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel
-                    .observeEvent()
-                    .collect { events ->
-                        when (events) {
-                            LoginFlowViewModel.LoginEvents.AuthByPhone -> {
+    private suspend fun observeEvents(): Unit = viewModel.observeEvent().collect { events ->
+        when (events) {
+            LoginFlowViewModel.LoginEvents.AuthSuccess -> {
+                profileViewModel.refresh()
+                flowViewModel.refresh()
+                cartFlowViewModel.refresh()
+                favoriteViewModel.refresh()
 
-                            }
+                val redirect = tabManager.fetchAuthRedirect()
+                if (redirect == TabManager.DEFAULT_AUTH_REDIRECT) {
+                    findNavController().popBackStack()
+                } else {
+                    tabManager.selectTab(redirect)
+                    tabManager.setDefaultAuthRedirect()
+                }
+            }
 
-                            LoginFlowViewModel.LoginEvents.AuthByEmail -> {
+            LoginFlowViewModel.LoginEvents.GoBack -> {
+                findNavController().popBackStack()
+            }
 
-                            }
+            is LoginFlowViewModel.LoginEvents.GoToWebView -> {
+                findNavController().navigateToWebView(
+                    url = events.url,
+                    title = events.title,
+                )
+            }
 
-                            is LoginFlowViewModel.LoginEvents.AuthError -> {
-                                debugLog { "AuthError" }
-                                val message = when (events.message) {
-                                    is Message -> events.message.param
-                                    is LoginFlowViewModel.MessageType.WrongCode -> getString(R.string.wrong_code)
-                                    else -> ""
-                                }
-                            }
+            LoginFlowViewModel.LoginEvents.GoToLoginByEmail -> {
+                findNavController().navigateToLoginByEmail()
+            }
 
-                            LoginFlowViewModel.LoginEvents.AuthSuccess -> {
-                                debugLog { "AuthSuccess" }
-                                profileViewModel.refresh()
-                                flowViewModel.refresh()
-                                cartFlowViewModel.refreshIdle()
-                                //favoriteViewModel.refreshIdle()
-                                val redirect = tabManager.fetchAuthRedirect()
-                                if (redirect == TabManager.DEFAULT_AUTH_REDIRECT) {
-                                    findNavController().popBackStack()
-                                } else {
-                                    tabManager.selectTab(redirect)
-                                    tabManager.setDefaultAuthRedirect()
-                                }
-                            }
+            LoginFlowViewModel.LoginEvents.GoToRegister -> {
+                findNavController().navigateToRegister()
+            }
 
-                            LoginFlowViewModel.LoginEvents.CodeComplete -> {
-                                debugLog { "CodeComplete" }
-                            }
-
-                            is LoginFlowViewModel.LoginEvents.PasswordRecoverError -> {
-                                debugLog { "PasswordRecoverError" }
-                                val message = when (events.message) {
-                                    is LoginFlowViewModel.MessageType.WrongEmail -> getString(R.string.wrong_email)
-                                    is LoginFlowViewModel.MessageType.RepeatError -> getString(R.string.error_repeat)
-                                    else -> ""
-                                }
-                            }
-
-                            is LoginFlowViewModel.LoginEvents.PasswordRecoverSuccess -> {
-                                debugLog { "PasswordRecoverSuccess" }
-                                val param = when (events.message) {
-                                    is Message -> events.message.param
-                                    else -> ""
-                                }
-                                MaterialAlertDialogBuilder(requireContext())
-                                    .setMessage(getString(R.string.password_recover_success, param))
-                                    .setPositiveButton(getString(R.string.ok)) { dialog, _ ->
-                                        dialog.dismiss()
-                                    }
-                                    .show()
-                            }
-
-                            LoginFlowViewModel.LoginEvents.TimerFinished -> {
-                                debugLog { "TimerFinished" }
-
-                            }
-
-                            is LoginFlowViewModel.LoginEvents.TimerTick -> {
-                                debugLog { "TimerTick" }
-
-                            }
-
-                            is LoginFlowViewModel.LoginEvents.SetupByPhone -> {
-                                debugLog { "SetupByPhone" }
-
-                            }
-
-                            LoginFlowViewModel.LoginEvents.GoBack -> {
-                                findNavController().popBackStack()
-                            }
-
-                            is LoginFlowViewModel.LoginEvents.GoToWebView -> {
-                                findNavController().navigateToWebView(
-                                    url = events.url,
-                                    title = events.title,
-                                )
-                            }
-
-                            LoginFlowViewModel.LoginEvents.GoToLoginByEmail -> {
-                                findNavController().navigateToLoginByEmail()
-                            }
-
-                            LoginFlowViewModel.LoginEvents.GoToRegister -> {
-                                findNavController().navigateToRegister()
-                            }
-
-                            is LoginFlowViewModel.LoginEvents.GoToLoginByPhone -> {
-                                findNavController().navigateToLoginByPhone(events.phone, events.waitSeconds)
-                            }
-                        }
-                    }
+            is LoginFlowViewModel.LoginEvents.GoToLoginByPhone -> {
+                findNavController().navigateToLoginByPhone(events.phone, events.waitSeconds)
             }
         }
+
     }
 
 

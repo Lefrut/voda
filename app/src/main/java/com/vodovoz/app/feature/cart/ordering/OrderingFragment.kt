@@ -23,10 +23,8 @@ import com.vodovoz.app.databinding.FragmentOrderingFlowBinding
 import com.vodovoz.app.feature.addresses.AddressesFragment
 import com.vodovoz.app.feature.addresses.OpenMode
 import com.vodovoz.app.feature.cart.ordering.intervals.CheckDeliveryUI
-import com.vodovoz.app.ui.extensions.Date
 import com.vodovoz.app.ui.extensions.TextBuilderExtensions.setPriceText
 import com.vodovoz.app.ui.extensions.TextViewExtensions.setPhoneValidator
-import com.vodovoz.app.ui.extensions.ViewExtensions.openLink
 import com.vodovoz.app.ui.model.AddressUI
 import com.vodovoz.app.ui.model.PayMethodUI
 import com.vodovoz.app.ui.model.ShippingIntervalUI
@@ -40,6 +38,9 @@ import com.vodovoz.app.util.extensions.snack
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
+import java.time.Instant
+import java.time.LocalDate
+import java.time.ZonedDateTime
 import java.util.Calendar
 import java.util.Locale
 import javax.inject.Inject
@@ -232,9 +233,9 @@ class OrderingFragment : BaseFragment() {
             true -> {
                 binding.btnGoToPayment.visibility = View.VISIBLE
                 binding.btnGoToPayment.setOnClickListener {
-                    binding.root.openLink(
-                        orderingCompletedInfoBundleUI.paymentURL
-                    )
+//                    binding.root.openLink(
+//                        orderingCompletedInfoBundleUI.paymentURL
+//                    )
                 }
             }
 
@@ -304,7 +305,9 @@ class OrderingFragment : BaseFragment() {
                         }
 
                         is OrderingFlowViewModel.OrderingEvents.ShowShippingIntervals -> {
-                            showShippingIntervalSelectionPopup(it.list, it.selectedDate)
+
+                            val date = java.util.Date.from(Instant.from(it.selectedDate))
+                            showShippingIntervalSelectionPopup(it.list, date)
                         }
 
                         is OrderingFlowViewModel.OrderingEvents.TodayShippingMessage -> {
@@ -600,7 +603,7 @@ class OrderingFragment : BaseFragment() {
         val currentDay = calendar[Calendar.DAY_OF_MONTH]
 
         val datePickerListener = DatePickerDialog.OnDateSetListener { _, year, month, day ->
-            val date = Date.from(day, month, year)
+            val date = LocalDate.of(year, month, day)
             binding.tvDate.text = dateFormatter.format(date)
 
             viewModel.setSelectedDate(date)

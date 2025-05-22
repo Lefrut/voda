@@ -14,7 +14,6 @@ import com.vodovoz.app.data.model.common.ResponseEntity
 import com.vodovoz.app.data.parser.response.service.AboutServicesResponseJsonParser.parseAboutServicesResponse
 import com.vodovoz.app.data.parser.response.service.ServiceByIdResponseJsonParser.parseServiceByIdResponse
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
-import com.vodovoz.app.feature.bottom.services.detail.bottom.adapter.ServiceNameItem
 import com.vodovoz.app.feature.bottom.services.model.ServiceUi
 import com.vodovoz.app.feature.bottom.services.model.mapToUi
 import com.vodovoz.app.mapper.AboutServicesBundleMapper.mapToUI
@@ -40,19 +39,11 @@ import javax.inject.Inject
 @HiltViewModel
 @Stable
 class AboutServicesFlowViewModel @Inject constructor(
-    private val repository: MainRepository,
     private val vodovozServiceRepository: VodovozServiceRepository,
 ) : PagingContractViewModel<AboutServicesFlowViewModel.AboutServicesState, AboutServicesFlowViewModel.AboutServicesEvents>(
     AboutServicesState()
 ) {
 
-    private val aboutServicesEventListener = MutableSharedFlow<AboutServicesEvents>(
-        replay = 0,
-        extraBufferCapacity = 1,
-        BufferOverflow.DROP_OLDEST
-    )
-
-    fun observeAboutServicesEvents() = aboutServicesEventListener.asSharedFlow()
 
     init {
         viewModelScope.launch { delay(250L) }.invokeOnCompletion {
@@ -86,162 +77,6 @@ class AboutServicesFlowViewModel @Inject constructor(
         }
     }
 
-    fun firstLoadSorted() {
-        if (!state.isFirstLoad) {
-            uiStateListener.value =
-                state.copy(isFirstLoad = true, loadingPage = true)
-            fetchServicesData()
-        }
-    }
-
-    fun refreshSorted() {
-        uiStateListener.value =
-            state.copy(loadingPage = true)
-        fetchServicesData()
-    }
-
-    private fun fetchServicesData() {
-        viewModelScope.launch {
-            flow { emit(repository.fetchAboutServices("glav")) }
-                .onEach {
-                    val response = it.parseAboutServicesResponse()
-                    if (response is ResponseEntity.Success) {
-                        val data = response.data.mapToUI()
-
-                        uiStateListener.value = state.copy(
-                            data = state.data.copy(
-                                item = data
-                            ),
-                            loadingPage = false,
-                            error = null
-                        )
-
-                    } else {
-                        uiStateListener.value =
-                            state.copy(
-                                loadingPage = false,
-                                error = ErrorState.Error()
-                            )
-                    }
-                }
-                .flowOn(Dispatchers.Default)
-                .catch {
-                    debugLog { "fetch about services error ${it.localizedMessage}" }
-                    uiStateListener.value =
-                        state.copy(error = it.toErrorState(), loadingPage = false)
-                }
-                .collect()
-        }
-    }
-
-    fun navigateToDetails(type: String) {
-        viewModelScope.launch {
-            val typeList = state.data.item?.serviceUIList?.map { it.type } ?: return@launch
-            uiStateListener.value = state.copy(
-                data = state.data.copy(
-                    selectedType = type
-                )
-            )
-            aboutServicesEventListener.emit(AboutServicesEvents.NavigateToDetails(typeList, type))
-        }
-    }
-
-    private fun fetchServiceByType(type: String) {
-        uiStateListener.value = state.copy(loadingPage = true)
-
-        viewModelScope.launch {
-            flow { emit(repository.fetchAboutServices(type)) }
-                .onEach {
-                    val response = it.parseServiceByIdResponse(type)
-                    if (response is ResponseEntity.Success) {
-                        val data = response.data.mapToUI()
-
-                        uiStateListener.value = state.copy(
-                            data = state.data.copy(
-                                selectedService = data,
-                                itemsWithFullText = state.data.itemsWithFullText + listOf(data),
-                                selectedType = data.type
-                            ),
-                            loadingPage = false,
-                            error = null
-                        )
-
-                    } else {
-                        uiStateListener.value =
-                            state.copy(
-                                loadingPage = false,
-                                error = ErrorState.Error()
-                            )
-                    }
-                }
-                .flowOn(Dispatchers.Default)
-                .catch {
-                    debugLog { "fetch service by type error ${it.localizedMessage}" }
-                    uiStateListener.value =
-                        state.copy(error = it.toErrorState(), loadingPage = false)
-                }
-                .collect()
-        }
-    }
-
-    fun selectService(type: String) {
-        val service = state.data.itemsWithFullText.find { it.type == type }
-        if (service == null) {
-            fetchServiceByType(type)
-        } else {
-            val list = state.data.item?.serviceUIList
-
-            val namedList = list?.map {
-                ServiceNameItem(
-                    it.name,
-                    it.type,
-                    isSelected = it.type == type
-                )
-            } ?: emptyList()
-            uiStateListener.value = state.copy(
-                data = state.data.copy(
-                    selectedType = type,
-                    selectedService = service,
-                    nameItemList = namedList
-                )
-            )
-        }
-    }
-
-    fun onTitleClick() {
-        viewModelScope.launch {
-            val list = state.data.item?.serviceUIList
-            if (list.isNullOrEmpty()) return@launch
-            if (state.data.selectedType == null) return@launch
-
-            val namedList = list.map {
-                ServiceNameItem(
-                    it.name,
-                    it.type,
-                    isSelected = it.type == state.data.selectedType
-                )
-            }
-
-            uiStateListener.value = state.copy(
-                data = state.data.copy(
-                    nameItemList = namedList
-                )
-            )
-            aboutServicesEventListener.emit(AboutServicesEvents.OnTitleClick(state.data.nameItemList))
-        }
-    }
-
-    fun navigateToOrder() {
-        val service: ServiceUI = state.data.selectedService ?: return
-        viewModelScope.launch {
-            aboutServicesEventListener.emit(
-                AboutServicesEvents.NavigateToOrder(
-                    service.name,
-                    service.type
-                )
-            )
-        }
-    }
 
     fun navigateBack() = viewModelScope.launch {
         eventListener.emit(AboutServicesEvents.GoBack)
@@ -252,24 +87,12 @@ class AboutServicesFlowViewModel @Inject constructor(
     }
 
     sealed class AboutServicesEvents : Event {
-        data class NavigateToDetails(val typeList: List<String>, val type: String) :
-            AboutServicesEvents()
-
-        data class OnTitleClick(val nameItemList: List<ServiceNameItem>) : AboutServicesEvents()
-        data class NavigateToOrder(val name: String, val type: String) : AboutServicesEvents()
-
         data class GoToServiceDetails(val serviceId: Int): AboutServicesEvents()
         data object GoBack : AboutServicesEvents()
     }
 
     @Immutable
     data class AboutServicesState(
-        val item: AboutServicesBundleUI? = null,
-        val nameItemList: List<ServiceNameItem> = emptyList(),
-        val selectedType: String? = null,
-        val selectedService: ServiceUI? = null,
-        val itemsWithFullText: List<ServiceUI> = emptyList(),
-
         val title: String = "",
         val descriptionHtml: String = "",
         val uiState: AboutServicesUiState = AboutServicesUiState.Loading,

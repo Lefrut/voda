@@ -1,7 +1,7 @@
 package com.vodovoz.app.feature.cart.bottles.model
 
 import androidx.compose.runtime.Immutable
-import com.vodovoz.app.domain.general.BottleModel
+import com.vodovoz.app.domain.general.model.BottleModel
 
 @Immutable
 data class BottleUi(

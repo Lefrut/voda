@@ -16,12 +16,6 @@ import com.vodovoz.app.R
 
 object TextViewExtensions {
 
-    fun TextView.setDrawableColor(@ColorRes color: Int) {
-        compoundDrawables.filterNotNull().forEach {
-            it.colorFilter =
-                PorterDuffColorFilter(getColor(context, R.color.green), PorterDuff.Mode.SRC_IN)
-        }
-    }
 
     fun EditText.setPhoneValidator(afterTextChange: (Editable?) -> Unit) {
         inputType = InputType.TYPE_CLASS_PHONE

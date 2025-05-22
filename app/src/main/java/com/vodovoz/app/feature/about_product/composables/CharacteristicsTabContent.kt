@@ -13,7 +13,7 @@ import androidx.compose.ui.unit.dp
 import com.vodovoz.app.design_system.model.CharacteristicsBlockUi
 import com.vodovoz.app.design_system.model.ContentBlockUi
 import com.vodovoz.app.design_system.composables.decoration.VodovozHorizontalDivider
-import com.vodovoz.app.feature.productdetail.composables.CharacteristicItem
+import com.vodovoz.app.feature.product_details.composables.CharacteristicItem
 
 @Composable
 fun CharacteristicsTabContent(

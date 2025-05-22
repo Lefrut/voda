@@ -60,18 +60,6 @@ class AboutServicesFragment : Fragment() {
                                     findNavController().popBackStack()
                                 }
 
-                                is AboutServicesFlowViewModel.AboutServicesEvents.NavigateToDetails -> {
-
-                                }
-
-                                is AboutServicesFlowViewModel.AboutServicesEvents.NavigateToOrder -> {
-
-                                }
-
-                                is AboutServicesFlowViewModel.AboutServicesEvents.OnTitleClick -> {
-
-                                }
-
                                 is AboutServicesFlowViewModel.AboutServicesEvents.GoToServiceDetails -> {
                                     findNavController().navigateToServiceDetails(event.serviceId)
                                 }

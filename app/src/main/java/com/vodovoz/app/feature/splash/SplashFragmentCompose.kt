@@ -20,7 +20,6 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.navOptions
 import com.vodovoz.app.R
 import com.vodovoz.app.common.account.data.AccountManager
-import com.vodovoz.app.common.account.data.ReloginManager
 import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.effects.LifecycleEffect
 import com.vodovoz.app.feature.cart.CartFlowViewModel
@@ -67,9 +66,6 @@ class SplashFragment : Fragment() {
 
     @Inject
     lateinit var siteStateManager: SiteStateManager
-
-    @Inject
-    lateinit var reloginManager: ReloginManager
 
     override fun onStart() {
         super.onStart()
@@ -208,7 +204,7 @@ class SplashFragment : Fragment() {
         catalogViewModel.fetchCatalogDetails()
         cartFlowViewModel.fetchCartDetails()
         profileViewModel.fetchProfileDetails()
-        delay(120)
+        delay(200)
     }
 
 

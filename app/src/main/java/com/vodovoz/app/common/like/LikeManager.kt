@@ -18,7 +18,6 @@ import javax.inject.Singleton
 
 @Singleton
 class LikeManager @Inject constructor(
-    private val repository: LikeRepository,
     private val dataStoreRepository: DataStoreRepository,
     private val accountManager: AccountManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
@@ -58,6 +57,7 @@ class LikeManager @Inject constructor(
     suspend fun changeFavorite(productId: Long, newValue: Boolean, categoryId: Long? = null) {
 
         val (likeVersion, userId) = mutex.withLock {
+            //todo - need finish
             if(selectedCategoryId == null && categoryId != selectedCategoryId){
                 //implement realization
             }
@@ -227,8 +227,6 @@ class LikeManager @Inject constructor(
 
         runCatching {
             vodovozServiceRepository.addFavoriteProducts(localLikesListString).singleResult()
-            //TODO - delete old repository
-            //repository.like(productIdListStr = localLikesListString, userId = userId)
             dataStoreRepository.remove(FAV_IDS)
         }
     }

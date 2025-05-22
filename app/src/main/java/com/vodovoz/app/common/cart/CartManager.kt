@@ -67,7 +67,7 @@ class CartManager @Inject constructor(
             return@withLock ++cartVersion
         }
 
-        delay(300L)
+        delay(350L)
 
 
 

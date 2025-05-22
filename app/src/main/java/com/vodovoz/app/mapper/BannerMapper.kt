@@ -11,7 +11,6 @@ object BannerMapper {
         id = id,
         detailPicture = detailPicture,
         actionEntity = actionEntity,
-        advEntity = bannerAdvEntity
     )
 
 }

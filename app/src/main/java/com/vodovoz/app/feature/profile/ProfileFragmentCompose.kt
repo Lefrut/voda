@@ -29,7 +29,6 @@ import com.vodovoz.app.R
 import com.vodovoz.app.common.account.data.AccountManager
 import com.vodovoz.app.common.cart.CartManager
 import com.vodovoz.app.common.like.LikeManager
-import com.vodovoz.app.common.product.rating.RatingProductManager
 import com.vodovoz.app.common.tab.TabManager
 import com.vodovoz.app.core.ui.activate
 import com.vodovoz.app.core.navigation.ProfileMainNavigator
@@ -73,9 +72,6 @@ class ProfileFragment : Fragment() {
 
     @Inject
     lateinit var cookieManager: com.vodovoz.app.common.cookie.CookieManager
-
-    @Inject
-    lateinit var ratingProductManager: RatingProductManager
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -146,11 +142,6 @@ class ProfileFragment : Fragment() {
     }
 
 
-    override fun onResume() {
-        super.onResume()
-        viewModel.checkLogin()
-    }
-
     private fun observeEvents() = lifecycleScope.launch {
         repeatOnLifecycle(Lifecycle.State.STARTED) {
             viewModel.observeEvent()
@@ -158,8 +149,8 @@ class ProfileFragment : Fragment() {
                     when (events) {
                         is ProfileFlowViewModel.ProfileEvents.Logout -> {
                             flowViewModel.refresh()
-                            cartFlowViewModel.refreshIdle()
-                            //favoriteViewModel.refreshIdle()
+                            cartFlowViewModel.refresh()
+                            favoriteViewModel.refresh()
                         }
 
                         is ProfileFlowViewModel.ProfileEvents.GoToCart -> {
@@ -229,16 +220,15 @@ class ProfileFragment : Fragment() {
     }
 
 
-    private fun observeTabReselect() {
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                tabManager.observeTabReselect()
-                    .collect {
-                        if (it != TabManager.DEFAULT_STATE && it == R.id.profileFragment) {
-                            tabManager.setDefaultState()
-                        }
+    private fun observeTabReselect() = lifecycleScope.launch {
+        repeatOnLifecycle(Lifecycle.State.STARTED) {
+            tabManager.observeTabReselect()
+                .collect {
+                    if (it != TabManager.DEFAULT_STATE && it == R.id.profileFragment) {
+                        tabManager.setDefaultState()
                     }
-            }
+                }
+
         }
     }
 

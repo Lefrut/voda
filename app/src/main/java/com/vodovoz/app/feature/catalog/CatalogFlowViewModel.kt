@@ -1,7 +1,6 @@
 package com.vodovoz.app.feature.catalog
 
 import androidx.lifecycle.viewModelScope
-import com.vodovoz.app.common.catalog.CatalogManager
 import com.vodovoz.app.common.content.Event
 import com.vodovoz.app.common.content.PagingContractViewModel
 import com.vodovoz.app.common.content.State
@@ -33,7 +32,6 @@ import javax.inject.Inject
 @HiltViewModel
 class CatalogFlowViewModel @Inject constructor(
     private val mainRepository: MainRepository,
-    private val catalogManager: CatalogManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
 ) : PagingContractViewModel<CatalogFlowViewModel.CatalogState, CatalogFlowViewModel.CatalogEvents>(
     CatalogState()
@@ -96,7 +94,6 @@ class CatalogFlowViewModel @Inject constructor(
                                 ),
                                 error = null
                             )
-                            catalogManager.saveCatalog(catalog.categoryEntityList)
                         }
                     }
                 }

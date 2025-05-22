@@ -774,17 +774,6 @@ class MainRepository @Inject constructor(
         userId = userId
     ).parseUserDataResponse()
 
-    //Информация о пользователе
-    suspend fun fetchProfileCategories(
-        userId: Long,
-        isTablet: Boolean,
-    ) = api.fetchProfileCategoriesResponse(
-        action = "glav",
-        userId = userId,
-        appVersion = BuildConfig.VERSION_NAME,
-        isTablet = if (isTablet) "ipad" else "phone"
-    )
-
     suspend fun fetchPersonalProducts(
         userId: Long,
         page: Int?,

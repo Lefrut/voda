@@ -10,7 +10,7 @@ import com.vodovoz.app.design_system.model.PriceUi
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.feature.about_product.model.AboutProductEvent
 import com.vodovoz.app.feature.about_product.model.AboutProductState
-import com.vodovoz.app.feature.productdetail.model.toUi
+import com.vodovoz.app.feature.product_details.model.toUi
 import com.vodovoz.app.ui.mvi.MviViewModel
 import com.vodovoz.app.util.calculateProductPrice
 import com.vodovoz.app.util.extensions.singleResult

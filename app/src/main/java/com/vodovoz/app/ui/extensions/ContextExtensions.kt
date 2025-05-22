@@ -32,25 +32,4 @@ object ContextExtensions {
         return builder.toString()
     }
 
-//    fun openURL(url: String) {
-//
-//    }
-
-    fun Context.showSimpleMessageDialog(
-        title: String? = null,
-        message: String,
-        okButtonText: String = "Ок",
-        isCancelable: Boolean = true,
-        themeId: Int = R.style.AlertDialog,
-        onOkClick: ((DialogInterface) -> Unit)? = null,
-    ) {
-        val builder = MaterialAlertDialogBuilder(this, themeId)
-            .setMessage(message)
-            .setCancelable(isCancelable)
-            .setPositiveButton(okButtonText) { dialog, _ -> onOkClick?.invoke(dialog) }
-        title?.let { builder.setTitle(it) }
-        builder.show()
-    }
-
-
 }

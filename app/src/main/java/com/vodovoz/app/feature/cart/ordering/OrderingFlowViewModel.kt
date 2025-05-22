@@ -37,6 +37,7 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
+import java.time.LocalDate
 import java.util.Date
 import java.util.Locale
 import javax.inject.Inject
@@ -214,7 +215,7 @@ class OrderingFlowViewModel @Inject constructor(
         }
     }
 
-    fun setSelectedDate(date: Date) {
+    fun setSelectedDate(date: LocalDate) {
         uiStateListener.value = state.copy(
             data = state.data.copy(
                 selectedDate = date
@@ -489,7 +490,7 @@ class OrderingFlowViewModel @Inject constructor(
         val discount: Int? = null,
         val total: Int? = null,
         val selectedAddressUI: AddressUI? = null,
-        val selectedDate: Date? = null,
+        val selectedDate: LocalDate? = null,
         val selectedOrderType: OrderType = OrderType.PERSONAL,
         val selectedPayMethodUI: PayMethodUI? = null,
         val selectedShippingIntervalUI: ShippingIntervalUI? = null,
@@ -522,7 +523,7 @@ class OrderingFlowViewModel @Inject constructor(
 
         data class ShowShippingIntervals(
             val list: List<ShippingIntervalUI>,
-            val selectedDate: Date?,
+            val selectedDate: LocalDate?,
         ) : OrderingEvents()
 
         data class TodayShippingMessage(val message: String) : OrderingEvents()

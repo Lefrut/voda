@@ -41,6 +41,10 @@ class BuyCertificateFragment : Fragment() {
     override fun onStart() {
         super.onStart()
         tabManager.changeTabVisibility(false)
+
+        viewModel.viewModelScope.launch { delay(200L) }.invokeOnCompletion {
+            viewModel.fetchBuyCertificateDetails()
+        }
     }
 
     override fun onStop() {
@@ -53,12 +57,9 @@ class BuyCertificateFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View {
-        viewModel.viewModelScope.launch { delay(200L) }.invokeOnCompletion {
-            viewModel.fetchBuyCertificateDetails()
-        }
 
         return ComposeView(requireContext()).apply {
-            setViewCompositionStrategy(ViewCompositionStrategy.Default)
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
 
             setContent {
                 VodovozTheme {
@@ -96,13 +97,9 @@ class BuyCertificateFragment : Fragment() {
                         }
                     }
 
-                    LifecycleEffect {
+                    LifecycleEffect(snackbarHostState) {
                         viewModel.observeEvent().collect { event ->
                             when (event) {
-                                BuyCertificateViewModel.BuyCertificateEvents.AuthError -> {
-
-                                }
-
                                 BuyCertificateViewModel.BuyCertificateEvents.GoBack -> {
                                     findNavController().popBackStack()
                                 }
@@ -111,13 +108,8 @@ class BuyCertificateFragment : Fragment() {
 
                                 }
 
-                                is BuyCertificateViewModel.BuyCertificateEvents.OrderSuccess -> {
 
-                                }
 
-                                is BuyCertificateViewModel.BuyCertificateEvents.ShowPaymentMethod -> {
-
-                                }
 
                                 is BuyCertificateViewModel.BuyCertificateEvents.GoToFAQ -> {
                                     findNavController().navigateToFAQ(event.faq)

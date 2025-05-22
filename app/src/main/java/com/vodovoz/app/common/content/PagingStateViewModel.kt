@@ -15,18 +15,6 @@ import java.net.SocketTimeoutException
 import java.net.UnknownHostException
 import javax.net.ssl.SSLException
 
-abstract class PagingStateViewModel<S : State>(
-    idleState: S,
-) : ViewModel() {
-
-    protected val uiStateListener = MutableStateFlow(PagingState.idle(idleState))
-    protected val state
-        get() = uiStateListener.value
-
-    protected val dataState get() = state.data
-
-    fun observeUiState() = uiStateListener.asStateFlow()
-}
 
 abstract class PagingContractViewModel<S : State, E : Event>(
     idleState: S,

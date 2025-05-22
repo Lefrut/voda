@@ -4,7 +4,6 @@ import android.os.Parcelable
 import androidx.compose.runtime.Immutable
 import com.vodovoz.app.common.content.itemadapter.Item
 import com.vodovoz.app.data.model.common.LabelEntity
-import com.vodovoz.app.feature.cart.viewholders.cartavailableproducts.detail.DetailPicturePager
 import kotlinx.parcelize.Parcelize
 
 @Immutable
@@ -39,7 +38,6 @@ data class ProductUI(
     val haveDiscount: Boolean = false,
     val priceConditionStringBuilder: String = "",
     val discountPercentStringBuilder: String = "",
-    val detailPictureListPager: List<DetailPicturePager> = emptyList(),
     val serviceDetailCoef: Int? = null,
     val serviceGiftId: String? = null,
     val chipsBan: Int? = null,
