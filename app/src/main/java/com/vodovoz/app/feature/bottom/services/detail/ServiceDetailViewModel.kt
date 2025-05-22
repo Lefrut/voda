@@ -46,7 +46,7 @@ class ServiceDetailViewModel @Inject constructor(
     }
 
     suspend fun listenLoadings() {
-        cartManager.blockedProductsState.combine(state){ loadings, _   -> loadings }
+        cartManager.blockedProductsState.combine(state) { loadings, _ -> loadings }
             .collectLatest { loadings ->
                 _state.update { s ->
                     val productSection = s.productsSection
@@ -133,15 +133,12 @@ class ServiceDetailViewModel @Inject constructor(
     }
 
     fun incrementProductToCard(product: ProductUi) = viewModelScope.launch {
-        val coefficient = stateSnapshot.productsSection?.coefficient ?: return@launch
+        val productSection = stateSnapshot.productsSection ?: return@launch
+        val coefficient = productSection.coefficient
 
-        val newQuantity = product.cartQuantity.run {
-            val count = div(coefficient)
-            (count + 1) * coefficient
-        }
-
-        //todo - add gift
-        cartManager.change(product.id, newQuantity)
+        val (first, second) = productSection.additionalProductId.split("-")
+            .mapNotNull { it.toLongOrNull() }
+        cartManager.add(mapOf(product.id to coefficient, first to second.toInt()))
     }
 
     fun decrementProductToCard(product: ProductUi) = viewModelScope.launch {
@@ -152,8 +149,7 @@ class ServiceDetailViewModel @Inject constructor(
             (count - 1).coerceAtLeast(0) * coefficient
         }
 
-        //todo - add gift
-        cartManager.change(product.id, newQuantity)
+        cartManager.change(product.id, newQuantity.coerceAtLeast(0))
     }
 
     fun navigateToServiceOrder(button: ColorfulButtonUi) = viewModelScope.launch {

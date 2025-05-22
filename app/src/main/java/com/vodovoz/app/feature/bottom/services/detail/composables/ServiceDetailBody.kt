@@ -4,6 +4,8 @@ import android.annotation.SuppressLint
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.WebSettings
+import android.webkit.WebSettings.LOAD_CACHE_ELSE_NETWORK
+import android.webkit.WebSettings.LOAD_CACHE_ONLY
 import android.webkit.WebView
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -106,7 +108,9 @@ fun ServiceDetailBody(
                             loadWithOverviewMode = true
 
                             layoutAlgorithm = WebSettings.LayoutAlgorithm.TEXT_AUTOSIZING
+                            cacheMode = LOAD_CACHE_ONLY
                         }
+
                     }
 
                 },

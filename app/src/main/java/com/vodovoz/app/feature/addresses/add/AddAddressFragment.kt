@@ -24,10 +24,7 @@ import com.vodovoz.app.feature.map.MapFlowViewModel
 import com.vodovoz.app.feature.map.adapter.AddressResult
 import com.vodovoz.app.feature.map.adapter.AddressResultClickListener
 import com.vodovoz.app.ui.model.AddressUI
-import com.vodovoz.app.util.FieldValidationsSettings
 import com.vodovoz.app.util.extensions.snack
-import com.vodovoz.app.util.extensions.textOrError
-import com.vodovoz.app.util.extensions.updateText
 import com.yandex.mapkit.MapKit
 import com.yandex.mapkit.MapKitFactory
 import com.yandex.mapkit.user_location.UserLocationLayer

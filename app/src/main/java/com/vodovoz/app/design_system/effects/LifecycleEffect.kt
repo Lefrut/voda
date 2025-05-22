@@ -27,3 +27,19 @@ fun LifecycleEffect(
         }
     }
 }
+
+@Suppress("NonSkippableComposable")
+@Composable
+fun LifecycleEffect(
+    vararg keys: Any?,
+    lifecycleState: Lifecycle.State = Lifecycle.State.STARTED,
+    block: suspend CoroutineScope.() -> Unit,
+) {
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    LaunchedEffect(*keys, lifecycleOwner) {
+        lifecycleOwner.repeatOnLifecycle(lifecycleState) {
+            block()
+        }
+    }
+}

@@ -200,10 +200,6 @@ class ProductDetailsFlowViewModel @Inject constructor(
             }.collect()
     }
 
-    private fun fetchPresentInfo() {
-        //todo - fetch present info
-    }
-
     fun isLoginAlready() = accountManager.isAlreadyLogin()
 
     fun incrementCart() = viewModelScope.launch {
@@ -214,11 +210,6 @@ class ProductDetailsFlowViewModel @Inject constructor(
     fun decrementCart() = viewModelScope.launch {
         val productDetails = state.productDetails
         cartManager.change(productDetails.id, productDetails.cartQuantity - 1)
-    }
-
-    fun changeToCart(cartQuantity: Int) = viewModelScope.launch {
-        val productDetails = state.productDetails
-        cartManager.change(productDetails.id, cartQuantity)
     }
 
 
@@ -233,7 +224,6 @@ class ProductDetailsFlowViewModel @Inject constructor(
                 newCount = count.toInt(),
                 giftId = giftId
             )
-            fetchPresentInfo()
             uiStateListener.update { s ->
                 s.copy(buttonIsLoading = false)
             }
@@ -283,8 +273,14 @@ class ProductDetailsFlowViewModel @Inject constructor(
 
     fun showMultiBottomSheet() = viewModelScope.launch {
         uiStateListener.update { s ->
+            val cartQuantity = s.productDetails.cartQuantity
             s.copy(
-                showMultiBottomSheet = true
+                showMultiBottomSheet = true,
+                multiProductQuantity = cartQuantity.coerceAtLeast(1),
+                multiProductTotalPrice = calculateProductPrice(
+                    cartQuantity.coerceAtLeast(1),
+                    s.productDetails.prices
+                ).toInt()
             )
         }
     }
@@ -428,12 +424,13 @@ class ProductDetailsFlowViewModel @Inject constructor(
     }
 
     fun addProductWithGift(buyButton: BuyButtonUi) = viewModelScope.launch {
-        //todo - update realization
-
-
-        //buyButton.moreProductId
-        //cartManager.addWithGift()
-        //cartManager.addProductWithGift(buyButton.productId, buyButton.moreProductId)
+        cartManager.add(buyButton.productId, buyButton.moreProductId)
+        uiStateListener.update { s ->
+            s.copy(
+                showPresentBottomSheet = false,
+                showPresentBlockBottomSheet = false
+            )
+        }
     }
 
     fun navigateToWriteComment() = viewModelScope.launch {
@@ -446,6 +443,54 @@ class ProductDetailsFlowViewModel @Inject constructor(
                 0
             )
         )
+    }
+
+    fun saveMultiProductChoice() = viewModelScope.launch {
+        val state = uiStateListener.value
+        val productDetails = state.productDetails
+        cartManager.change(productDetails.id, state.multiProductQuantity)
+        uiStateListener.update { s ->
+            s.copy(showMultiBottomSheet = false)
+        }
+    }
+
+    fun changeMultiProductQuantity(newMultiProductQuantity: Int) = viewModelScope.launch {
+        uiStateListener.update { s ->
+            s.copy(
+                multiProductQuantity = newMultiProductQuantity,
+                multiProductTotalPrice = calculateProductPrice(
+                    newMultiProductQuantity,
+                    s.productDetails.prices
+                ).toInt()
+            )
+        }
+    }
+
+    fun decrementMultiProduct() = viewModelScope.launch {
+        uiStateListener.update { s ->
+            val newMultiProductQuantity = (s.multiProductQuantity - 1).coerceAtLeast(1)
+            s.copy(
+                multiProductQuantity = newMultiProductQuantity,
+                multiProductTotalPrice = calculateProductPrice(
+                    newMultiProductQuantity,
+                    s.productDetails.prices
+                ).toInt()
+            )
+        }
+    }
+
+    fun incrementMultiProduct() = viewModelScope.launch {
+        uiStateListener.update { s ->
+            val newMultiProductQuantity = s.multiProductQuantity + 1
+
+            s.copy(
+                multiProductQuantity = newMultiProductQuantity,
+                multiProductTotalPrice = calculateProductPrice(
+                    newMultiProductQuantity,
+                    s.productDetails.prices
+                ).toInt()
+            )
+        }
     }
 
 
@@ -508,6 +553,9 @@ class ProductDetailsFlowViewModel @Inject constructor(
         val showPresentBottomSheet: Boolean = false,
         val showPresentBlockBottomSheet: Boolean = false,
         val presentInfo: PresentInfoUi = PresentInfoUi.Empty,
+
+        val multiProductQuantity: Int = 1,
+        val multiProductTotalPrice: Int = productDetails.firstPrice.price.toInt(),
     ) : State
 
     sealed class UiState {

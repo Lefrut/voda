@@ -339,4 +339,6 @@
     <string name="click_on_bottle">Нажмите на бутылку, если\nвыпили воду</string>
     <string name="quantity_ml">%1$s мл</string>
 
+    <string name="vpn_warning">Отключите VPN, если работа приложения замедляется</string>
+
 </resources>
