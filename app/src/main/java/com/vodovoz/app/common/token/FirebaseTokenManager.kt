@@ -26,6 +26,8 @@ class FirebaseTokenManager @Inject constructor(
         }
     }
 
+    //todo - removeFirebaseToken
+
     private suspend fun fetchFirebaseToken(): String? {
         return suspendCoroutine { continuation ->
             FirebaseMessaging.getInstance().token

@@ -76,7 +76,7 @@
 
     <fragment
         android:id="@+id/productsCollectionFragment"
-        android:name="com.vodovoz.app.feature.products_collection.ProductsCollectionFragment"
+        android:name="com.vodovoz.app.feature.product_analogs.ProductsCollectionFragment"
         android:label="fragment_product_collection">
 
         <argument
@@ -220,7 +220,7 @@
 
     <fragment
         android:id="@+id/productDetailFragment"
-        android:name="com.vodovoz.app.feature.productdetail.ProductDetailsFragment"
+        android:name="com.vodovoz.app.feature.product_details.ProductDetailsFragment"
         android:label="ProductDetailFragment">
         <argument
             android:name="productId"
@@ -507,7 +507,7 @@
     </fragment>
     <dialog
         android:id="@+id/fullScreenDetailPicturesSliderFragment"
-        android:name="com.vodovoz.app.feature.productdetail.fullscreen.FullScreenDetailPicturesSliderFragment"
+        android:name="com.vodovoz.app.feature.product_details.fullscreen.FullScreenDetailPicturesSliderFragment"
         android:label="FullScreenDetailPicturesSliderFragment">
         <argument
             android:name="startPosition"
@@ -672,7 +672,7 @@
     </fragment>
     <fragment
         android:id="@+id/pastPurchasesFragment"
-        android:name="com.vodovoz.app.feature.pastpurchases.PastPurchasesFragment"
+        android:name="com.vodovoz.app.feature.past_purchases.PastPurchasesFragment"
         android:label="PastPurchasesFragment">
         <action
             android:id="@+id/action_to_miniCatalogBottomFragment"
@@ -986,6 +986,6 @@
 
     <fragment
         android:id="@+id/loginByEmailFragment"
-        android:name="com.vodovoz.app.feature.auth.login.LoginByEmailFragment"
+        android:name="com.vodovoz.app.feature.auth.login_by_email.LoginByEmailFragment"
         android:label="LoginByEmailFragment" />
 </navigation>

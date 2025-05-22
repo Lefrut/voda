@@ -44,9 +44,6 @@ import com.vodovoz.app.feature.home.model.PopularCategoryUi
 import com.vodovoz.app.feature.home.model.UnratedProductUi
 import com.vodovoz.app.feature.home.model.UnratedProductsSectionUi
 import com.vodovoz.app.feature.home.model.toUi
-import com.vodovoz.app.feature.home.viewholders.homeproducts.HomeProducts
-import com.vodovoz.app.feature.home.viewholders.homeproductstabs.HomeProductsTabs
-import com.vodovoz.app.feature.home.viewholders.homesections.HomeSections
 import com.vodovoz.app.mapper.PopupNewsMapper.mapToUI
 import com.vodovoz.app.ui.model.PopupNewsUI
 import com.vodovoz.app.util.extensions.debugLog
@@ -81,7 +78,7 @@ class HomeFlowViewModel @Inject constructor(
     private val accountManager: AccountManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val resourcesProvider: ResourcesProvider,
-) : PagingContractViewModel<HomeFlowViewModel.HomeState, HomeFlowViewModel.HomeEvents>(HomeState.idle()) {
+) : PagingContractViewModel<HomeFlowViewModel.HomeState, HomeFlowViewModel.HomeEvents>(HomeState()) {
 
     suspend fun listenLoadingProducts() =
         uiStateListener.map { pagingState -> pagingState.data.uiState }.combine(
@@ -309,66 +306,6 @@ class HomeFlowViewModel @Inject constructor(
         }
     }
 
-    fun firstLoad() {
-        fetchHomeDetails()
-        if (!state.isFirstLoad) {
-            //uiStateListener.value = state.copy(loadingPage = true)
-
-            viewModelScope.launch(Dispatchers.IO) {
-                //updatePopupNews()
-                val tasks = firstLoadTasks()
-                val start = System.currentTimeMillis()
-                val result = awaitAll(*tasks).flatten()
-                debugLog { "first load task ${System.currentTimeMillis() - start} result size ${result.size}" }
-                val positionItemsSorted =
-                    (state.data.positionItems + result).toSet().sortedBy { it.position }
-                uiStateListener.value = state.copy(
-                    loadingPage = false,
-                    data = state.data.copy(
-                        positionItems = positionItemsSorted,
-                        items = positionItemsSorted.map { it.item }),
-                    isFirstLoad = true,
-                    error = if (result.isNotEmpty()) {
-                        null
-                    } else {
-                        state.error
-                    }
-                )
-                //secondLoad()
-            }
-        }
-    }
-
-    private fun secondLoad() {
-        viewModelScope.launch(Dispatchers.IO) {
-//            val userId = accountManager.fetchAccountId()
-//            val tasks = secondLoadTasks(userId)
-//            val start = System.currentTimeMillis()
-//            val result = awaitAll(*tasks).flatten()
-//            val mappedResult = if (result.isNotEmpty()) {
-//                result + HomeState.fetchStaticItems()
-//            } else {
-//                result
-//            }
-//            debugLog { "second load task ${System.currentTimeMillis() - start} result size ${mappedResult.size}" }
-//            val positionItemsSorted =
-//                (state.data.positionItems + mappedResult).toSet().sortedBy { it.position }
-            uiStateListener.value = state.copy(
-                loadingPage = false,
-                data = state.data.copy(
-//                    positionItems = positionItemsSorted,
-//                    items = positionItemsSorted.map { it.item },
-                    isSecondLoad = true
-                ),
-//                error = if (mappedResult.isNotEmpty()) {
-//                    null
-//                } else {
-//                    state.error
-//                }
-            )
-        }
-    }
-
     fun refresh() = viewModelScope.launch {
         if (dataState.uiState is HomeUiState.Loading) return@launch
 
@@ -381,160 +318,11 @@ class HomeFlowViewModel @Inject constructor(
         uiStateListener.updateData { s ->
             s.copy(showRefreshIndicator = false)
         }
-
-
-//        if (!state.loadingPage) {
-//            uiStateListener.value =
-//                state.copy(
-//                    loadingPage = true,
-//                    data = state.data.copy(
-//                        items = HomeState.idle().items,
-//                        positionItems = HomeState.idle().positionItems,
-//                        isSecondLoad = false
-//                    ),
-//                    isFirstLoad = false
-//                )
-//            viewModelScope.launch {
-//                val userId = accountManager.fetchAccountId()
-//                val tasks = firstLoadTasks() + secondLoadTasks(userId)
-//                val start = System.currentTimeMillis()
-//                val result = awaitAll(*tasks).flatten()
-//                debugLog { "refresh load task ${System.currentTimeMillis() - start} result size ${result.size}" }
-//                val mappedResult = if (result.isNotEmpty()) {
-//                    result + HomeState.fetchStaticItems()
-//                } else {
-//                    result
-//                }
-//                val positionItemsSorted =
-//                    (state.data.positionItems + mappedResult).toSet().sortedBy { it.position }
-//                uiStateListener.value = state.copy(
-//                    loadingPage = false,
-//                    data = state.data.copy(
-//                        positionItems = positionItemsSorted,
-//                        items = positionItemsSorted.map { it.item },
-//                        isSecondLoad = true
-//                    ),
-//                    error = if (mappedResult.isNotEmpty()) {
-//                        null
-//                    } else {
-//                        state.error
-//                    },
-//                    isFirstLoad = true
-//                )
-//            }
-//        }
     }
 
-    private fun CoroutineScope.firstLoadTasks() = arrayOf<Deferred<List<PositionItem>>>()
 
-    private fun CoroutineScope.secondLoadTasks(userId: Long?) =
-        arrayOf<Deferred<List<PositionItem>>>()
 
-    private inline fun CoroutineScope.homeRequestAsync(crossinline request: suspend () -> List<PositionItem>): Deferred<List<PositionItem>> {
-        return async(Dispatchers.IO) {
-            runCatching { request.invoke() }
-                .onFailure { showNetworkError(it) }
-                .getOrDefault(emptyList())
-        }
-    }
 
-    private fun showNetworkError(throwable: Throwable) {
-        val error = throwable.toErrorState()
-        if (error is ErrorState.NetworkError) {
-            uiStateListener.value = state.copy(error = error)
-        }
-    }
-
-    private fun updatePopupNews() {
-        viewModelScope.launch {
-            val userId = accountManager.fetchAccountId()
-            flow { emit(repository.fetchPopupNews(userId)) }
-                .onEach { response ->
-                    if (response is ResponseEntity.Success) {
-                        uiStateListener.value = state.copy(
-                            data = state.data.copy(
-                                news = response.data.mapToUI()
-                            )
-                        )
-                    }
-                }
-                .catch { debugLog { "fetch popup news error ${it.localizedMessage}" } }
-                .collect()
-        }
-    }
-
-    private fun updateStateByTabAndProductPositions(
-        positionTab: Int,
-        position: Int,
-        categoryId: Long,
-    ) {
-        val positionItems = state.data.positionItems.map {
-            when (it.position) {
-                position -> {
-                    it.copy(
-                        item = (it.item as HomeProducts).copy(
-                            prodList = it.item.items.find { it.id == categoryId }?.productUIList
-                                ?: it.item.prodList
-                        )
-                    )
-                }
-
-                positionTab -> {
-                    it.copy(
-                        item = (it.item as HomeProductsTabs).copy(
-                            tabsNames = it.item.tabsNames.map { cat ->
-                                cat.copy(isSelected = cat.id == categoryId)
-                            }
-                        )
-                    )
-                }
-
-                else -> {
-                    it
-                }
-            }
-        }
-
-        uiStateListener.value = state.copy(
-            data = state.data.copy(
-                items = positionItems.map { it.item },
-                positionItems = positionItems
-            )
-        )
-    }
-
-    fun updateProductsSliderByCategory(position: Int, categoryId: Long) {
-        when (position) {
-            POSITION_90_TAB -> updateStateByTabAndProductPositions(
-                POSITION_90_TAB,
-                POSITION_100,
-                categoryId
-            )
-
-            POSITION_180_TAB -> updateStateByTabAndProductPositions(
-                POSITION_180_TAB,
-                POSITION_190,
-                categoryId
-            )
-        }
-    }
-
-    fun onPreOrderClick(id: Long, name: String, detailPicture: String) {
-        viewModelScope.launch {
-            eventListener.emit(HomeEvents.GoToPreOrder(id, name, detailPicture))
-        }
-    }
-
-    fun onSendCommentClick() {
-        viewModelScope.launch {
-            val accountId = accountManager.fetchAccountId()
-            if (accountId == null) {
-                eventListener.emit(HomeEvents.GoToProfile)
-            } else {
-                //eventListener.emit(HomeEvents.SendComment)
-            }
-        }
-    }
 
     fun goToProfile() {
         viewModelScope.launch {
@@ -542,30 +330,11 @@ class HomeFlowViewModel @Inject constructor(
         }
     }
 
-    fun changeCart(productId: Long, quantity: Int, oldQuan: Int) {
-        viewModelScope.launch {
-            cartManager.add(id = productId, oldCount = oldQuan, newCount = quantity)
-        }
-    }
-
-    fun changeFavoriteStatus(productId: Long, isFavorite: Boolean) {
-        viewModelScope.launch {
-            likeManager.like(productId, !isFavorite)
-        }
-    }
 
     fun changeRating(productId: Long, rating: Float, oldRating: Float) {
         viewModelScope.launch {
             ratingProductManager.rate(productId, rating = rating, oldRating = oldRating)
         }
-    }
-
-    fun hasShown() {
-        uiStateListener.value = state.copy(
-            data = state.data.copy(
-                hasShow = true
-            )
-        )
     }
 
     fun repeatOrder(orderId: Long) {
@@ -603,36 +372,6 @@ class HomeFlowViewModel @Inject constructor(
         }
     }
 
-    fun onSectionsTabClick(title: String) {
-        val positionItems = state.data.positionItems.map { positionItem ->
-            when (positionItem.position) {
-                POSITION_15 -> {
-                    positionItem.copy(
-                        item = (positionItem.item as HomeSections).copy(
-                            items = positionItem.item.items.copy(
-                                parentSectionDataUIList = positionItem.item.items.parentSectionDataUIList.map {
-                                    it.copy(
-                                        isSelected = it.title == title
-                                    )
-                                }
-                            )
-                        )
-                    )
-                }
-
-                else -> {
-                    positionItem
-                }
-            }
-        }
-
-        uiStateListener.value = state.copy(
-            data = state.data.copy(
-                items = positionItems.map { it.item },
-                positionItems = positionItems
-            )
-        )
-    }
 
     fun selectCategory(categoryWithProductsUi: CategoryWithProductsUi) = viewModelScope.launch {
         uiStateListener.updateData { s ->
@@ -836,11 +575,6 @@ class HomeFlowViewModel @Inject constructor(
 
     @Immutable
     data class HomeState(
-        val positionItems: List<PositionItem> = emptyList(),
-        val items: List<Item> = emptyList(),
-        val news: PopupNewsUI? = null,
-        val hasShow: Boolean = false,
-        val isSecondLoad: Boolean = false,
 
         val banners: List<BannerUi> = emptyList(),
         val stories: List<StoryUi> = emptyList(),
@@ -865,47 +599,6 @@ class HomeFlowViewModel @Inject constructor(
         val showRefreshIndicator: Boolean = false,
 
         val showedVpnWarning: Boolean = false,
-    ) : State {
-        companion object {
-            fun idle(): HomeState {
+    ) : State
 
-                return HomeState(
-                    positionItems = emptyList(),
-                    items = emptyList()
-                )
-            }
-
-        }
-    }
-
-    companion object {
-        const val POSITION_10 = 10
-        const val POSITION_15 = 15
-        const val POSITION_20_TITLE = 20
-        const val POSITION_30 = 30
-        const val POSITION_40_TITLE = 40
-        const val POSITION_50 = 50
-        const val POSITION_60_TITLE = 60
-        const val POSITION_70 = 70
-        const val POSITION_80 = 80
-        const val POSITION_90_TAB = 90
-        const val POSITION_100 = 100
-        const val POSITION_110_TITLE = 110
-        const val POSITION_120 = 120
-        const val POSITION_130 = 130
-        const val POSITION_140_TITLE = 140
-        const val POSITION_150 = 150
-        const val POSITION_160_TITLE = 160
-        const val POSITION_170 = 170
-        const val POSITION_180_TAB = 180
-        const val POSITION_190 = 190
-        const val POSITION_200_TITLE = 200
-        const val POSITION_210 = 210
-        const val POSITION_220 = 220
-        const val POSITION_230_TITLE = 230
-        const val POSITION_240 = 240
-        const val POSITION_250_TITLE = 250
-        const val POSITION_260 = 260
-        const val POSITION_270 = 270
-    }
 }

@@ -1,7 +1,7 @@
 package com.vodovoz.app.domain.general.respository
 
 import androidx.paging.PagingData
-import com.vodovoz.app.domain.general.AllBottlesDetailsModel
+import com.vodovoz.app.domain.general.model.AllBottlesDetailsModel
 import com.vodovoz.app.domain.general.model.BannerModel
 import com.vodovoz.app.domain.general.model.BrandModel
 import com.vodovoz.app.domain.general.model.BrandSectionModel

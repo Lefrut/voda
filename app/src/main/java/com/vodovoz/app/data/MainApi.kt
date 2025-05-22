@@ -3,7 +3,6 @@ package com.vodovoz.app.data
 import com.vodovoz.app.BuildConfig
 import com.vodovoz.app.data.model.common.UserReloginEntity
 import com.vodovoz.app.feature.bottom.services.newservs.model.AboutServicesNew
-import com.vodovoz.app.feature.profile.cats.ProfileCategoriesModel
 import com.vodovoz.app.feature.profile.notificationsettings.model.NotificationSettingsModel
 import com.vodovoz.app.feature.search.qrcode.model.QrCodeModel
 import okhttp3.MultipartBody
@@ -429,14 +428,6 @@ interface MainApi {
     @GET("newmobile/user.php?action=logout")
     suspend fun logout(@Query("userid") userId: Long? = null): Response<ResponseBody>
 
-    //Профиль категории
-    @GET("/newmobile/profile/index.php")
-    suspend fun fetchProfileCategoriesResponse(
-        @Query("action") action: String? = null,
-        @Query("userid") userId: Long? = null,
-        @Query("versiyaan") appVersion: String? = null,
-        @Query("device_type_android") isTablet: String = "phone",
-    ): ProfileCategoriesModel
 
     @GET("newmobile/profile/tovary.php")
     suspend fun fetchPersonalProducts(

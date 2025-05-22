@@ -1,7 +1,6 @@
 package com.vodovoz.app.mapper
 
 import com.vodovoz.app.data.model.common.ProductEntity
-import com.vodovoz.app.feature.cart.viewholders.cartavailableproducts.detail.DetailPicturePager
 import com.vodovoz.app.mapper.PriceMapper.mapToUI
 import com.vodovoz.app.ui.model.PriceUI
 import com.vodovoz.app.ui.model.ProductUI
@@ -40,7 +39,6 @@ object ProductMapper {
         haveDiscount = checkHaveDiscount(priceList.mapToUI(), isGift),
         priceConditionStringBuilder = getPriceCondition(priceList.mapToUI()),
         discountPercentStringBuilder = getDiscountPercent(priceList.mapToUI()),
-        detailPictureListPager = detailPictureList.map { DetailPicturePager(it) },
         chipsBan = chipsBan,
         totalDisc = totalDisc,
         conditionPrice = conditionalPrice,
@@ -49,17 +47,6 @@ object ProductMapper {
         forCart = forCart,
         giftText = giftText,
     )
-
-//    private fun getPricePerUnitStringBuilder(pricePerUnit: Int): String {
-//        return if (pricePerUnit == 0) {
-//            ""
-//        } else {
-//            StringBuilder()
-//                .append(pricePerUnit)
-//                .append(" ₽/кг")
-//                .toString()
-//        }
-//    }
 
     private fun getCurrentPrice(
         list: List<PriceUI>,

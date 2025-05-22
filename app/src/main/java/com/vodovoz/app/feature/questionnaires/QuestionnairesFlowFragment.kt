@@ -28,7 +28,6 @@ import com.vodovoz.app.feature.questionnaires.adapters.QuestionnaireTypesFlowAda
 import com.vodovoz.app.feature.questionnaires.adapters.QuestionsAdapter
 import com.vodovoz.app.feature.sitestate.SiteStateManager
 import com.vodovoz.app.ui.extensions.RecyclerViewExtensions.addMarginDecoration
-import com.vodovoz.app.ui.extensions.ScrollViewExtensions.setScrollElevation
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -151,8 +150,8 @@ class QuestionnairesFlowFragment1 : BaseFragment() {
         lifecycleScope.launch {
             delay(1000)
             homeViewModel.refresh()
-            cartFlowViewModel.refreshIdle()
-            //favoriteViewModel.refreshIdle()
+            cartFlowViewModel.refresh()
+            favoriteViewModel.refresh()
             catalogFlowViewModel.refresh()
             profileViewModel.refresh()
             tabManager.selectTab(R.id.graph_home)
@@ -185,7 +184,6 @@ class QuestionnairesFlowFragment1 : BaseFragment() {
     }
 
     private fun initQuestionsRecycler() {
-        binding.questionsContainer.setScrollElevation(binding.appBar)
         binding.questionsRecycler.layoutManager = LinearLayoutManager(requireContext())
         binding.questionsRecycler.adapter = questionsAdapter
     }

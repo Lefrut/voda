@@ -1,7 +1,6 @@
 package com.vodovoz.app.ui.model
 
 import com.vodovoz.app.common.content.itemadapter.Item
-import com.vodovoz.app.feature.home.viewholders.homepromotions.model.PromotionAdvEntity
 
 data class PromotionUI(
     val id: Long,
@@ -11,7 +10,6 @@ data class PromotionUI(
     val statusColor: String? = null,
     val timeLeft: String,
     val productUIList: List<ProductUI>,
-    val promotionAdvEntity: PromotionAdvEntity? = null
 ) : Item {
 
     override fun getItemViewType(): Int {

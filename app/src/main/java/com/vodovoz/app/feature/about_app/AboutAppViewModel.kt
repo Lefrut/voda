@@ -10,7 +10,6 @@ import com.vodovoz.app.common.resources.ResourcesProvider
 import com.vodovoz.app.feature.about_app.model.AboutAppEvent
 import com.vodovoz.app.feature.about_app.model.AboutAppOption
 import com.vodovoz.app.feature.about_app.model.AboutAppState
-import com.vodovoz.app.feature.bottom.aboutapp.adapter.AboutApp
 import com.vodovoz.app.ui.mvi.MviViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -28,26 +27,6 @@ class AboutAppViewModel @Inject constructor(
 
     fun fetchUserId() = accountManager.fetchAccountId()
 
-    private val aboutAppActionsList = listOf(
-        AboutApp(
-            id = 0,
-            actionImgResId = R.drawable.png_share_app,
-            actionNameResId = R.string.share_app_text
-        ),
-        AboutApp(
-            id = 1,
-            actionImgResId = R.drawable.png_ic_favorite,
-            actionNameResId = R.string.rate_app_text
-        ),
-        AboutApp(
-            id = 2,
-            actionImgResId = R.drawable.png_letter,
-            actionNameResId = R.string.write_to_developers
-        )
-    )
-
-    fun observeAboutAppList() = MutableStateFlow(aboutAppActionsList).asStateFlow()
-
     fun navigateBack() = viewModelScope.launch {
         _events.emit(AboutAppEvent.GoBack)
     }
@@ -57,7 +36,6 @@ class AboutAppViewModel @Inject constructor(
     }
 
     fun activateOption(aboutAppOption: AboutAppOption) = viewModelScope.launch {
-
         when (aboutAppOption) {
             AboutAppOption.ContactDevelopers -> {
                 _events.emit(AboutAppEvent.WriteToDevelopers(accountManager.fetchAccountId() ?: -1))

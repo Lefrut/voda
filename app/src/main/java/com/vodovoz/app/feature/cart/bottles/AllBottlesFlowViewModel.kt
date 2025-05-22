@@ -30,16 +30,12 @@ import javax.inject.Inject
 
 @HiltViewModel
 class AllBottlesFlowViewModel @Inject constructor(
-    private val mainRepository: MainRepository,
     private val cartManager: CartManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
 ) : PagingContractViewModel<AllBottlesFlowViewModel.BottlesState, AllBottlesFlowViewModel.BottlesEvent>(
     BottlesState()
 ) {
 
-    private val addBottleCompletedMLD = MutableLiveData(false)
-
-    val addBottleCompletedLD: LiveData<Boolean> = addBottleCompletedMLD
 
     init {
         fetchAllBottlesDetails()
@@ -51,34 +47,6 @@ class AllBottlesFlowViewModel @Inject constructor(
             uiStateListener.updateData { s ->
                 s.copy(hideButton = !s.bottles.any { bottle -> bottle.cartQuantity > 0 } || s.isSingleBottleMode)
             }
-        }
-    }
-
-    fun updateData() {
-        viewModelScope.launch {
-
-            uiStateListener.value = state.copy(isFirstLoad = true, loadingPage = true)
-            flow { emit(mainRepository.fetchBottles()) }
-                .onEach { response ->
-                    when (response) {
-                        is ResponseEntity.Hide -> {}
-                        is ResponseEntity.Error -> state.copy(
-                            error = response.errorMessage.stringToErrorState(),
-                            loadingPage = false
-                        )
-
-                        is ResponseEntity.Success -> {
-                            val bottleList = response.data.mapToUI()
-                            uiStateListener.value = state.copy(
-                                loadingPage = false,
-                                data = state.data.copy(itemsList = bottleList),
-                                error = null
-                            )
-
-                        }
-                    }
-                }
-                .collect()
         }
     }
 
@@ -105,20 +73,6 @@ class AllBottlesFlowViewModel @Inject constructor(
         }
     }
 
-    fun addBottleToCart(bottleId: Long) {
-        viewModelScope.launch {
-            runCatching { cartManager.add(bottleId, 0, 1) }
-                .onSuccess { addBottleCompletedMLD.value = true }
-                .onFailure {
-                    uiStateListener.value = state.copy(
-                        error = it.message?.stringToErrorState()
-                            ?: "Неизвестная ошибка".stringToErrorState(),
-                        loadingPage = false
-                    )
-                }
-        }
-    }
-
     fun changeSearchMode(searchMode: Boolean) = viewModelScope.launch {
         uiStateListener.updateData { s ->
             s.copy(isSearchMode = searchMode, searchQuery = "")
@@ -141,7 +95,6 @@ class AllBottlesFlowViewModel @Inject constructor(
                 bottles = s.bottles.map { b -> if (b.id == bottle.id) b.copy(cartQuantity = 1) else b }
             )
         }
-
 
         if (dataState.isSingleBottleMode) {
             addBottlesToCart()
@@ -213,8 +166,6 @@ class AllBottlesFlowViewModel @Inject constructor(
 
     @Immutable
     data class BottlesState(
-        val itemsList: List<BottleUI> = emptyList(),
-
         val description: String = "",
         val bottles: List<BottleUi> = emptyList(),
         val isSingleBottleMode: Boolean = false,

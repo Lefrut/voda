@@ -96,7 +96,7 @@ private fun SplashPlaceholder(modifier: Modifier = Modifier) {
     val infiniteTransition = rememberInfiniteTransition(label = "infiniteTransition")
     val scale by infiniteTransition.animateFloat(
         initialValue = 1f,
-        targetValue = 1.05f,
+        targetValue = 1.3f,
         animationSpec = infiniteRepeatable(
             animation = tween(durationMillis = 2500, easing = LinearEasing),
             repeatMode = RepeatMode.Reverse

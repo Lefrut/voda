@@ -116,12 +116,6 @@ class AllOrdersFlowViewModel @Inject constructor(
     }
 
 
-    fun goToFilter() {
-        viewModelScope.launch {
-            eventListener.emit(AllOrdersEvent.GoToFilter(state.data.ordersFiltersBundleUI))
-        }
-    }
-
     fun fetchOrdersHistoryDetails() = viewModelScope.launch {
         if (dataState.uiState !is AllOrdersUiState.Body) {
             uiStateListener.updateData { s ->
@@ -415,7 +409,6 @@ class AllOrdersFlowViewModel @Inject constructor(
         data object GoBack : AllOrdersEvent()
         data object GoToCatalog : AllOrdersEvent()
 
-        data class GoToFilter(val bundle: OrdersFiltersBundleUI) : AllOrdersEvent()
         data class GoToOrderDetails(val id: Long) : AllOrdersEvent()
     }
 

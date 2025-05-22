@@ -2,10 +2,10 @@ package com.vodovoz.app.data.vodovoz_service.mappers
 
 import com.vodovoz.app.data.vodovoz_service.model.AllBottlesDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.TARA_DTO
-import com.vodovoz.app.domain.general.AllBottlesDetailsModel
-import com.vodovoz.app.domain.general.BottleModel
+import com.vodovoz.app.domain.general.model.AllBottlesDetailsModel
+import com.vodovoz.app.domain.general.model.BottleModel
 
-fun AllBottlesDetailsDTO.toDomain(): AllBottlesDetailsModel{
+fun AllBottlesDetailsDTO.toDomain(): AllBottlesDetailsModel {
     return AllBottlesDetailsModel(
         description = OPISANIE ?: "",
         isSingleBottleMode = KPOPKAPLUS != "Y",

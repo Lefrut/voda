@@ -3,7 +3,6 @@ package com.vodovoz.app.data.parser.common
 import com.vodovoz.app.data.model.common.ActionEntity
 import com.vodovoz.app.data.model.common.BannerEntity
 import com.vodovoz.app.data.util.ImagePathParser.parseImagePath
-import com.vodovoz.app.feature.home.viewholders.homebanners.model.BannerAdvEntity
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -28,7 +27,6 @@ object BannerJsonParser {
         name = getString("NAME"),
         detailPicture = parseDetailImage(),
         actionEntity = getJSONObject("HARAKTERISTIK").parseBannerActionEntity(),
-        bannerAdvEntity = parseAdvEntity()
     )
 
     private fun JSONObject.parseVodovozBannerEntity() = BannerEntity(
@@ -36,7 +34,6 @@ object BannerJsonParser {
         name = getString("NAME"),
         detailPicture = parseDetailImage(),
         actionEntity = getJSONObject("HARAKTERISTIK").parseVodovozBannerActionEntity(),
-        bannerAdvEntity = parseAdvEntity()
     )
 
     private fun JSONObject.parseDetailImage() =
@@ -77,24 +74,6 @@ object BannerJsonParser {
             "DANNYEVSE" -> parseCustomBannerActionEntity()
             else -> null
         }
-    }
-
-    private fun JSONObject.parseAdvEntity() = when (has("OREKLAME")) {
-        true -> {
-            when (isNull("OREKLAME")) {
-                true -> null
-                else -> {
-                    BannerAdvEntity(
-                        titleHeader = getJSONObject("OREKLAME").safeString("NAME"),
-                        titleAdv = getJSONObject("OREKLAME").safeString("ZAGOLOVOK"),
-                        bodyAdv = getJSONObject("OREKLAME").safeString("NAMEVNUTRI"),
-                        dataAdv = getJSONObject("OREKLAME").safeString("DANNYE"),
-                    )
-                }
-            }
-        }
-
-        false -> null
     }
 
     private fun JSONObject.parseAction() = when (has("KNOPKA")) {

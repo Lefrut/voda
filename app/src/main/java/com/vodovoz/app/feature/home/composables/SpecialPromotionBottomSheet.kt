@@ -54,7 +54,7 @@ fun SpecialPromotionBottomSheet(
             val painter = rememberAsyncImagePainter(specialPromotionUi.picture)
             val imageState by painter.state.collectAsStateWithLifecycle()
 
-            if (imageState is AsyncImagePainter.State.Success) {
+            if (imageState !is AsyncImagePainter.State.Error && imageState !is AsyncImagePainter.State.Loading) {
                 Image(
                     painter = painter,
                     contentDescription = null,
@@ -64,7 +64,7 @@ fun SpecialPromotionBottomSheet(
                         .height(220.dp)
                         .clip(MaterialTheme.shapes.large),
                     contentScale = ContentScale.Crop,
-                    alignment = Alignment.Center
+                    alignment = Alignment.TopStart
                 )
             }
 

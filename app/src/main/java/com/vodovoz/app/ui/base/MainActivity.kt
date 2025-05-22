@@ -10,7 +10,6 @@ import androidx.core.os.LocaleListCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
 import com.google.firebase.messaging.RemoteMessage
-import com.vodovoz.app.common.account.data.ReloginManager
 import com.vodovoz.app.common.permissions.PermissionsManager
 import com.vodovoz.app.common.product.rating.RatingProductManager
 import com.vodovoz.app.databinding.ActivityMainBinding
@@ -18,7 +17,6 @@ import com.vodovoz.app.feature.sitestate.SiteStateManager
 import com.vodovoz.app.util.extensions.debugLog
 import com.yandex.mapkit.MapKitFactory
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.json.JSONObject
 import pub.devrel.easypermissions.EasyPermissions
@@ -36,9 +34,6 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks,
 
     @Inject
     lateinit var siteStateManager: SiteStateManager
-
-    @Inject
-    lateinit var reloginManager: ReloginManager
 
     @Inject
     lateinit var permissionsManager: PermissionsManager

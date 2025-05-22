@@ -18,7 +18,6 @@ import com.vodovoz.app.data.model.common.ResponseEntity
 import com.vodovoz.app.data.model.common.ServiceEntity
 import com.vodovoz.app.data.parser.common.BrandJsonParser.parserBrandEntity
 import com.vodovoz.app.data.parser.common.ProductJsonParser.parseProductEntityList
-import com.vodovoz.app.data.parser.common.PromotionJsonParser.parseAdvEntity
 import com.vodovoz.app.data.parser.common.safeDouble
 import com.vodovoz.app.data.parser.common.safeInt
 import com.vodovoz.app.data.parser.common.safeString
@@ -326,7 +325,6 @@ object ProductDetailsResponseJsonParser {
         timeLeft = getString("DATAOUT"),
         statusColor = getString("CVET"),
         customerCategory = getString("NAMERAZDEL"),
-        promotionAdvEntity = parseAdvEntity()
     )
 
     //SearchWord

@@ -130,6 +130,7 @@ class RegFlowViewModel @Inject constructor(
             val password = dataState.fields.firstOrNull { it.id == "pass" }?.value ?: ""
 
 
+            //todo - mb connect this
             accountManager.updateUserToken(authInfo.token)
             accountManager.updateUserId(authInfo.userId)
             likeManager.updateLikesAfterLogin(authInfo.userId)

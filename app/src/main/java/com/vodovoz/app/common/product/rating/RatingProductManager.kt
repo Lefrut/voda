@@ -31,41 +31,10 @@ class RatingProductManager @Inject constructor(
     fun observeRatingSnackbar() = showRatingSnackbarListener.asSharedFlow()
 
     suspend fun rate(id: Long, oldRating: Float, rating: Float) {
-        /*updateRates(id, rating)
 
-        runCatching {
-            action(id, rating)
-        }.onFailure {
-            updateRates(id, oldRating)
-        }*/
     }
 
-//    private suspend fun action(productId: Long, rating: Float) {
-//        val response = repository.rateProduct(productId, rating)
-//        showRatingSnackbarListener.emit(response.message ?: "Вы успешно проголосовали")
-//        updateRates(productId, rating)
-//    }
 
-//    private suspend fun updateRates(id: Long, rating: Float) {
-//        ratings[id] = rating
-//        ratingsStateListener.emit(ratings)
-//    }
-
-    fun dontCommentProduct(id: Long, afterCallback: () -> Unit) {
-        val userId = accountManager.fetchAccountId() ?: return
-        runCatching {
-            scope.launch {
-                repository.dontCommentProduct(productId = id, userId = userId)
-                afterCallback()
-            }
-        }
-    }
 
 }
 
-@JsonClass(generateAdapter = true)
-data class RatingResponse(
-    val status: String?,
-    val message: String?,
-    val data: Float?,
-)
