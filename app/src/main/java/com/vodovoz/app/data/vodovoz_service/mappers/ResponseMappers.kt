@@ -36,7 +36,9 @@ fun String.jsonToResponseBody(): ResponseBody {
 val moshiWithJsonAdapter: Moshi =
     Moshi.Builder()
         .add(LocalDateTime::class.java, LocalDateTimeJsonAdapter().nullSafe())
-        .add(KotlinJsonAdapterFactory()).build()
+        .add(KotlinJsonAdapterFactory())
+        .build()
+
 
 inline fun <reified T, R> executeRequest(
     crossinline request: suspend () -> Response<T>,
@@ -50,12 +52,17 @@ inline fun <reified T, R> executeRequest(
 ): Flow<Result<R>> {
     return flow {
         val response = request()
+
         onResponse(response)
 
-        val adapter = moshiWithJsonAdapter.adapter<T>(type)
+        val adapter = moshiWithJsonAdapter.adapter<T>(type).lenient()
 
         val stringBody = (response.body() as? String) ?: ""
-        val bodyResult = kotlin.runCatching { adapter.fromJson(stringBody) }
+        //todo - remove after fix backend
+        val jsonStartIndex = stringBody.indexOf("{\"")
+
+        val bodyResult = kotlin.runCatching {
+            adapter.fromJson(stringBody.substring(jsonStartIndex)) }
         val body = bodyResult.getOrNull()
         val responseCode = response.code()
 
@@ -67,7 +74,7 @@ inline fun <reified T, R> executeRequest(
                 if (result.isFailure) {
                     emit(onFail(Response.error(1100, stringBody.jsonToResponseBody())))
                 } else {
-                    debugLog { result.onFailure { t -> t.toString() + t.stackTraceToString() } }
+                    debugLog { result.onFailure { t -> t.message + t.suppressed + t.stackTraceToString() } }
 
                     emit(result)
                 }
@@ -78,7 +85,7 @@ inline fun <reified T, R> executeRequest(
         }.onFailure {
             debugLog {
                 bodyResult.onFailure { t ->
-                    t.toString() + t.stackTraceToString()
+                    t.message + t.suppressed + t.stackTraceToString()
                 }
             }
 

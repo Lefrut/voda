@@ -58,20 +58,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.ClipOp
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.DefaultShadowColor
 import androidx.compose.ui.graphics.Paint
-import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.graphics.addOutline
 import androidx.compose.ui.graphics.drawOutline
-import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -116,6 +108,10 @@ fun UnratedProductsBottomSheet(
         120.dp.toPx()
     }
 
+    val expandedPaddingTopPx = with(density) {
+        14.dp.toPx()
+    }
+
     BoxWithConstraints(
         modifier = modifier.fillMaxSize()
     ) {
@@ -127,7 +123,7 @@ fun UnratedProductsBottomSheet(
                 anchors = DraggableAnchors {
                     SheetValue.Hidden at layoutHeight
                     SheetValue.PartiallyExpanded at layoutHeight - partiallyExpandedHeight
-                    SheetValue.Expanded at 0f
+                    SheetValue.Expanded at expandedPaddingTopPx
                 },
             )
         }
@@ -144,6 +140,7 @@ fun UnratedProductsBottomSheet(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .height(with(density) { (layoutHeight - expandedPaddingTopPx).toDp() })
                 .offset {
                     val sheetOffsetY = state.requireOffset()
                     IntOffset(x = 0, y = sheetOffsetY.toInt())

@@ -5,12 +5,17 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.webkit.CookieManager
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
@@ -27,10 +32,10 @@ import com.vodovoz.app.common.like.LikeManager
 import com.vodovoz.app.common.media.MediaManager
 import com.vodovoz.app.common.product.rating.RatingProductManager
 import com.vodovoz.app.common.tab.TabManager
-import com.vodovoz.app.core.ui.activate
+import com.vodovoz.app.core.navigation.ContentSearchNavigator
 import com.vodovoz.app.core.navigation.navigateToAboutApp
 import com.vodovoz.app.core.navigation.navigateToAllBrands
-import com.vodovoz.app.core.navigation.navigateToProductAnalogs
+import com.vodovoz.app.core.navigation.navigateToAllServices
 import com.vodovoz.app.core.navigation.navigateToBrandProductList
 import com.vodovoz.app.core.navigation.navigateToBuyCertificate
 import com.vodovoz.app.core.navigation.navigateToCategoryProductList
@@ -39,6 +44,7 @@ import com.vodovoz.app.core.navigation.navigateToNewProducts
 import com.vodovoz.app.core.navigation.navigateToOrderDetails
 import com.vodovoz.app.core.navigation.navigateToOrdersHistory
 import com.vodovoz.app.core.navigation.navigateToPreOrder
+import com.vodovoz.app.core.navigation.navigateToProductAnalogs
 import com.vodovoz.app.core.navigation.navigateToProductDetails
 import com.vodovoz.app.core.navigation.navigateToPromotionDetails
 import com.vodovoz.app.core.navigation.navigateToPromotions
@@ -46,14 +52,20 @@ import com.vodovoz.app.core.navigation.navigateToSearch
 import com.vodovoz.app.core.navigation.navigateToStories
 import com.vodovoz.app.core.navigation.navigateToWaterApp
 import com.vodovoz.app.core.navigation.navigateToWebView
+import com.vodovoz.app.core.navigation.navigateToWriteComment
 import com.vodovoz.app.core.network.ApiConfig
+import com.vodovoz.app.core.network.VodovozWebConfig
+import com.vodovoz.app.core.ui.activate
 import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.composables.placeholders.NetworkErrorPlaceholder
+import com.vodovoz.app.design_system.composables.snackbar.VodovozSnackbarHost
 import com.vodovoz.app.design_system.effects.LifecycleEffect
-import com.vodovoz.app.core.navigation.ContentSearchNavigator
 import com.vodovoz.app.feature.sitestate.SiteStateManager
 import com.vodovoz.app.util.extensions.debugLog
+import com.vodovoz.app.util.extensions.isVpnActive
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.onSubscription
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -114,13 +126,15 @@ class HomeFragment : Fragment() {
     ): View {
 
         return ComposeView(requireContext()).apply {
-            setViewCompositionStrategy(ViewCompositionStrategy.Default)
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
 
             setContent {
+
                 VodovozTheme {
                     val viewState by viewModel.observeUiState().collectAsStateWithLifecycle()
                     val topProductLazyListState = rememberLazyListState()
                     val pullRefreshState = rememberPullToRefreshState()
+                    val snackbarHostState = remember { SnackbarHostState() }
 
                     when (viewState.data.uiState) {
                         HomeFlowViewModel.HomeUiState.NetworkError -> {
@@ -134,13 +148,25 @@ class HomeFragment : Fragment() {
                                 viewState = viewState.data,
                                 viewModel = viewModel,
                                 pullRefreshState = pullRefreshState,
-                                topProductsLazyListState = topProductLazyListState
+                                topProductsLazyListState = topProductLazyListState,
                             )
                         }
                     }
 
-                    LifecycleEffect {
-                        listenEvents(topProductLazyListState)
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.BottomCenter
+                    ) {
+                        VodovozSnackbarHost(hostState = snackbarHostState)
+                    }
+
+                    LifecycleEffect(topProductLazyListState, snackbarHostState) {
+                        listenEvents(
+                            this,
+                            topProductLazyListState,
+                            snackbarHostState,
+                            context
+                        )
                     }
 
                     LifecycleEffect {
@@ -148,7 +174,9 @@ class HomeFragment : Fragment() {
                     }
 
                     LifecycleEffect {
-                        viewModel.listenFavorites(this)
+                        viewModel.listenFavorites(
+                            this
+                        )
                     }
 
                     LifecycleEffect {
@@ -174,8 +202,18 @@ class HomeFragment : Fragment() {
     }
 
 
-    private suspend fun listenEvents(topProductLazyListState: LazyListState): Unit =
-        viewModel.observeEvent().collect { event ->
+    private suspend fun listenEvents(
+        mainCoroutineScope: CoroutineScope,
+        topProductLazyListState: LazyListState,
+        snackbarHostState: SnackbarHostState,
+        context: Context,
+    ): Unit =
+        viewModel.observeEvent().onSubscription {
+            val showedVpnWarning = viewModel.observeUiState().value.data.showedVpnWarning
+            if (context.isVpnActive() && !showedVpnWarning) {
+                viewModel.showVpnWaring()
+            }
+        }.collect { event ->
             when (event) {
                 is HomeFlowViewModel.HomeEvents.GoToPreOrder -> {
                     findNavController().navigateToPreOrder(event.id)
@@ -263,6 +301,22 @@ class HomeFragment : Fragment() {
 
                 HomeFlowViewModel.HomeEvents.GoToQrCode -> {
                     searchNavigator.navigateToImageSearch()
+                }
+
+                is HomeFlowViewModel.HomeEvents.ShowSnackbar -> {
+                    mainCoroutineScope.launch {
+                        snackbarHostState.currentSnackbarData?.dismiss()
+                        snackbarHostState.showSnackbar(event.message)
+                    }
+                }
+
+                is HomeFlowViewModel.HomeEvents.WriteComment -> {
+                    findNavController().navigateToWriteComment(
+                        event.productId,
+                        event.productName,
+                        event.productImage,
+                        event.rating
+                    )
                 }
             }
         }
@@ -390,11 +444,9 @@ class HomeFragment : Fragment() {
                             "about" -> {
                                 val section = it.section ?: return@collect
                                 if (section == "О магазине") {
-                                    findNavController().navigate(
-                                        HomeFragmentDirections.actionToWebViewFragment(
-                                            ApiConfig.ABOUT_SHOP_URL,
-                                            "О магазине"
-                                        )
+                                    findNavController().navigateToWebView(
+                                        VodovozWebConfig.ABOUT_SHOP_URL,
+                                        "О магазине"
                                     )
                                 }
                                 if (section == "Связаться с нами") {
@@ -412,11 +464,11 @@ class HomeFragment : Fragment() {
                             }
 
                             "service" -> {
-                                findNavController().navigate(HomeFragmentDirections.actionToAboutServicesDialogFragment())
+                                findNavController().navigateToAllServices()
                             }
 
                             "remont_kulerov" -> {
-                                findNavController().navigate(HomeFragmentDirections.actionToAboutServicesDialogFragment())
+                                findNavController().navigateToAllServices()
                             }
 
                             "feedback" -> {
@@ -475,15 +527,5 @@ class HomeFragment : Fragment() {
                     }
             }
         }
-    }
-
-
-    private fun setCookie() {
-        val webkitCookieManager = CookieManager.getInstance()
-        webkitCookieManager.acceptCookie()
-        webkitCookieManager.setCookie(
-            ApiConfig.VODOVOZ_URL,
-            cookieManager.fetchCookieSessionId()
-        )
     }
 }

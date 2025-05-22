@@ -5,10 +5,8 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -18,7 +16,6 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.vodovoz.app.R
@@ -29,7 +26,6 @@ import com.vodovoz.app.design_system.composables.button.VodovozButton
 import com.vodovoz.app.design_system.composables.chip.VodovozChip
 import com.vodovoz.app.design_system.composables.tab_row.VodovozScrollableTabRow
 import com.vodovoz.app.design_system.model.PriceUi
-import com.vodovoz.app.util.calculateProductPrice
 import com.vodovoz.app.util.extensions.indexOfOrNull
 import kotlin.math.roundToInt
 
@@ -42,9 +38,9 @@ fun MultiProductBottomSheet(
     firstPrice: PriceUi,
     prices: List<PriceUi>,
     totalPrice: Int,
-    buttonIsLoading: Boolean,
     onDismissRequest: () -> Unit,
-    onCartQuantityChange: (Int) -> Unit,
+    onSaveClick: () -> Unit,
+    onMultiProductQuantity: (Int) -> Unit,
     onPlus: () -> Unit,
     onMinus: () -> Unit,
 ) {
@@ -85,7 +81,7 @@ fun MultiProductBottomSheet(
                             text = stringResource(R.string.from_quantity, price.quantityFrom),
                             selected = index == selectedPriceIndex,
                             onSelect = {
-                                onCartQuantityChange(price.quantityFrom.coerceAtLeast(1))
+                                onMultiProductQuantity(price.quantityFrom.coerceAtLeast(1))
                             }
                         )
                     }
@@ -101,20 +97,19 @@ fun MultiProductBottomSheet(
                     R.string.price,
                     totalPrice
                 ),
-                color = if (!buttonIsLoading) MaterialTheme.colorScheme.onBackground else Color.Transparent,
+                color = MaterialTheme.colorScheme.onBackground,
                 style = MaterialTheme.typography.headlineMedium
             )
 
             val savingPrice = ((firstPrice.price * cartQuantity) - totalPrice).roundToInt()
-                    .coerceAtLeast(0)
+                .coerceAtLeast(0)
             Text(
                 modifier = Modifier
                     .padding(top = 4.dp)
                     .align(Alignment.CenterHorizontally),
                 text = stringResource(R.string.saving_price, savingPrice),
                 color = if (savingPrice > 0) MaterialTheme.colorScheme.secondary
-                        else if (buttonIsLoading) Color.Transparent
-                        else MaterialTheme.colorScheme.surfaceTint,
+                else MaterialTheme.colorScheme.surfaceTint,
                 style = MaterialTheme.typography.labelSmall
             )
 
@@ -122,7 +117,7 @@ fun MultiProductBottomSheet(
                 modifier = Modifier
                     .padding(top = 20.dp)
                     .height(48.dp),
-                isLoading = buttonIsLoading,
+                isLoading = false,
                 onPlus = onPlus,
                 onMinus = onMinus,
                 colors = ButtonDefaults.buttonColors(
@@ -134,26 +129,17 @@ fun MultiProductBottomSheet(
                 iconSize = 24.dp,
                 iconPadding = PaddingValues(horizontal = 16.dp)
             ) {
-                if (buttonIsLoading) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(24.dp),
-                        color = MaterialTheme.colorScheme.primary,
-                        trackColor = Color.Transparent,
-                        strokeWidth = 2.dp
-                    )
-                } else {
-                    Text(
-                        text = cartQuantity.toString(),
-                        color = MaterialTheme.colorScheme.primary,
-                        style = ExtendedTheme.typography.buttonMedium
-                    )
-                }
+                Text(
+                    text = cartQuantity.toString(),
+                    color = MaterialTheme.colorScheme.primary,
+                    style = ExtendedTheme.typography.buttonMedium
+                )
             }
 
             VodovozButton(
                 modifier = Modifier.padding(vertical = 16.dp),
                 text = stringResource(id = R.string.to_cart),
-                onClick = onDismissRequest
+                onClick = onSaveClick
             )
         }
     }

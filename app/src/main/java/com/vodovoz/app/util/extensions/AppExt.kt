@@ -9,32 +9,24 @@ import android.graphics.Bitmap
 import android.graphics.Bitmap.createBitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
-import android.graphics.Color
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.VectorDrawable
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.os.Build
-import android.os.Parcelable
 import android.provider.Settings
 import android.text.Html
-import android.text.SpannableString
 import android.text.Spanned
-import android.text.TextPaint
-import android.text.style.ClickableSpan
-import android.util.Base64
 import android.view.ContextThemeWrapper
-import android.view.Gravity
 import android.view.View
 import android.view.ViewTreeObserver
 import android.view.Window
-import android.widget.EditText
-import android.widget.FrameLayout
 import androidx.activity.OnBackPressedCallback
 import androidx.annotation.ColorRes
 import androidx.annotation.DimenRes
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.core.content.ContextCompat
-import androidx.core.graphics.ColorUtils
 import androidx.core.net.toUri
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
@@ -42,27 +34,29 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.core.widget.NestedScrollView
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.LifecycleOwner
 import com.google.android.material.snackbar.Snackbar
-import com.vodovoz.app.R
-import java.io.File
-import java.io.FileInputStream
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 import kotlin.properties.ReadOnlyProperty
 
 
-fun getBitmap(context: Context, drawableId: Int): Bitmap {
-    return when (val drawable = ContextCompat.getDrawable(context, drawableId)) {
+fun Context.isVpnActive(): Boolean {
+    val connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+    val network = connectivityManager.activeNetwork ?: return false
+    val capabilities = connectivityManager.getNetworkCapabilities(network) ?: return false
+
+    return capabilities.hasTransport(NetworkCapabilities.TRANSPORT_VPN)
+}
+
+fun Context.getBitmap(drawableId: Int): Bitmap {
+    return when (val drawable = drawable(drawableId)) {
         is BitmapDrawable -> {
-            BitmapFactory.decodeResource(context.resources, drawableId);
+            BitmapFactory.decodeResource(resources, drawableId);
         }
 
         is VectorDrawable -> {
-            getBitmap(drawable)
+            drawable.toBitmap()
         }
 
         else -> {
@@ -71,15 +65,17 @@ fun getBitmap(context: Context, drawableId: Int): Bitmap {
     }
 }
 
+
 @SuppressLint("UseKtx")
-private fun getBitmap(vectorDrawable: VectorDrawable): Bitmap {
+private fun VectorDrawable.toBitmap(): Bitmap {
     val bitmap = createBitmap(
-        vectorDrawable.intrinsicWidth,
-        vectorDrawable.intrinsicHeight, Bitmap.Config.ARGB_8888
+        intrinsicWidth,
+        intrinsicHeight,
+        Bitmap.Config.ARGB_8888
     )
     val canvas = Canvas(bitmap)
-    vectorDrawable.setBounds(0, 0, canvas.width, canvas.height)
-    vectorDrawable.draw(canvas)
+    setBounds(0, 0, canvas.width, canvas.height)
+    draw(canvas)
     return bitmap
 }
 
@@ -118,64 +114,12 @@ fun Context.string(@StringRes resId: Int, vararg formatArgs: Any): String {
 
 fun Context.drawable(@DrawableRes drawableRes: Int) = ContextCompat.getDrawable(this, drawableRes)
 
-fun String.isEmailCorrect(): Boolean {
-    return android.util.Patterns.EMAIL_ADDRESS.matcher(this.trim()).matches()
-}
-
-fun String.makeLink(context: Context, @ColorRes colorRes: Int, foo: () -> Unit): SpannableString {
-    val spannableString = SpannableString(this)
-    val clickableSpan = object : ClickableSpan() {
-        override fun updateDrawState(ds: TextPaint) {
-            ds.color = ContextCompat.getColor(context, colorRes)
-            ds.isUnderlineText = false
-        }
-
-        override fun onClick(view: View) {
-            foo.invoke()
-        }
-    }
-    val start = 0
-    val end = this.length
-    spannableString.setSpan(
-        clickableSpan,
-        start,
-        end,
-        Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
-    )
-    return spannableString
-}
 
 fun Activity.snack(
     message: String,
     length: Int = Snackbar.LENGTH_SHORT,
 ) {
-    /*val snack = Snackbar.make(findViewById(android.R.id.content), message, length)
-    val view = snack.view
-    view.background = this.drawable(R.drawable.bg_custom_snackbar)
-    val params = view.layoutParams as FrameLayout.LayoutParams
-    params.gravity = Gravity.TOP
-    view.layoutParams = params
-    snack.setTextColor(this.color(R.color.text_black))
-    snack.f()
-    snack.show()*/
-
     Snackbar.make(findViewById(android.R.id.content), message, length).show()
-}
-
-inline fun Activity.snackTop(
-    message: String,
-    length: Int = Snackbar.LENGTH_SHORT,
-    f: Snackbar.() -> Unit = {},
-) {
-    val snack = Snackbar.make(findViewById(android.R.id.content), message.fromHtml(), length)
-    val view = snack.view
-    view.background = this.drawable(R.drawable.bg_custom_snackbar)
-    val params = view.layoutParams as FrameLayout.LayoutParams
-    params.gravity = Gravity.TOP
-    view.layoutParams = params
-//    snack.setTextColor(this.color(R.color.text_black))
-    snack.f()
-    snack.show()
 }
 
 fun Snackbar.action(action: String, color: Int? = null, listener: (View) -> Unit) {
@@ -183,15 +127,7 @@ fun Snackbar.action(action: String, color: Int? = null, listener: (View) -> Unit
     color?.let { setActionTextColor(color) }
 }
 
-fun View.hideKeyboard() {
-    if (isKeyboardOpen()) {
-        val activity = context?.unwrap() ?: return
-        val window = activity.window
 
-        WindowInsetsControllerCompat(window, this)
-            .hide(WindowInsetsCompat.Type.ime())
-    }
-}
 
 fun View.isKeyboardOpen(): Boolean {
     return ViewCompat.getRootWindowInsets(this)
@@ -207,34 +143,10 @@ fun Context.unwrap(): Activity? {
     }
 }
 
-fun Activity.hideKeyboard() {
-    var view = currentFocus
-    if (view == null) {
-        view = window.decorView
-    }
-
-    view.hideKeyboard()
-}
-
-fun File.toBase64(): String {
-    FileInputStream(this.path).use {
-        val bytes = it.readBytes()
-        return Base64.encodeToString(bytes, Base64.DEFAULT)
-    }
-}
-
 fun NestedScrollView.scrollViewToTop() {
     this.post {
         this.fling(0)
         this.smoothScrollTo(0, 0)
-    }
-}
-
-fun intArgs(key: String): ReadOnlyProperty<Fragment, Int> {
-    return ReadOnlyProperty { thisRef, _ ->
-        val args = thisRef.requireArguments()
-        require(args.containsKey(key)) { "Arguments don't contain key $key" }
-        requireNotNull(args.getInt(key))
     }
 }
 
@@ -246,30 +158,6 @@ fun longArgs(key: String): ReadOnlyProperty<Fragment, Long> {
     }
 }
 
-fun stringArgs(key: String): ReadOnlyProperty<Fragment, String> {
-    return ReadOnlyProperty { thisRef, _ ->
-        val args = thisRef.requireArguments()
-        require(args.containsKey(key)) { "Arguments don't contain key $key" }
-        requireNotNull(args.getString(key))
-    }
-}
-
-fun booleanArgs(key: String): ReadOnlyProperty<Fragment, Boolean> {
-    return ReadOnlyProperty { thisRef, _ ->
-        val args = thisRef.requireArguments()
-        require(args.containsKey(key)) { "Arguments don't contain key $key" }
-        requireNotNull(args.getBoolean(key))
-    }
-}
-
-fun <T : Parcelable> parcelableArgs(key: String): ReadOnlyProperty<Fragment, T> {
-    return ReadOnlyProperty { thisRef, _ ->
-        val args = thisRef.requireArguments()
-        require(args.containsKey(key)) { "Arguments don't contain key $key" }
-        @Suppress("UNCHECKED_CAST", "DEPRECATION")
-        requireNotNull(args.getParcelable(key)) as T
-    }
-}
 
 fun String.fromHtml(): Spanned {
     val result: Spanned = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
@@ -281,23 +169,23 @@ fun String.fromHtml(): Spanned {
     return result
 }
 
-fun openNotificationSettingsForApp(context: Context) {
+fun Context.openAppNotificationSettings() {
     val intent = Intent().apply {
         when {
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.O -> {
                 action = Settings.ACTION_APP_NOTIFICATION_SETTINGS
-                putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+                putExtra(Settings.EXTRA_APP_PACKAGE, packageName)
             }
 
             else -> {
                 action = "android.settings.APP_NOTIFICATION_SETTINGS"
-                putExtra("app_package", context.packageName)
-                putExtra("app_uid", context.applicationInfo.uid)
+                putExtra("app_package", packageName)
+                putExtra("app_uid", applicationInfo.uid)
             }
         }
     }
 
-    context.startActivity(intent)
+    kotlin.runCatching { startActivity(intent) }
 }
 
 fun Long.millisToItemDate(): String {
@@ -305,48 +193,6 @@ fun Long.millisToItemDate(): String {
     return targetFormat.format(this)
 }
 
-inline fun LifecycleOwner.whenCreated(crossinline block: () -> Unit) {
-    lifecycle.whenAtLeast(Lifecycle.State.CREATED, block)
-}
-
-inline fun LifecycleOwner.whenStarted(crossinline block: () -> Unit) {
-    lifecycle.whenAtLeast(Lifecycle.State.STARTED, block)
-}
-
-inline fun Lifecycle.whenAtLeast(state: Lifecycle.State, crossinline block: () -> Unit) {
-    if (currentState.isAtLeast(state)) {
-        block.invoke()
-    } else {
-        val observer = object : LifecycleEventObserver {
-
-            override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
-                when {
-                    source.lifecycle.currentState.isAtLeast(state) -> {
-                        block.invoke()
-                        removeObserver(this)
-                    }
-
-                    source.lifecycle.currentState == Lifecycle.State.DESTROYED -> {
-                        removeObserver(this)
-                    }
-                }
-            }
-        }
-
-        addObserver(observer)
-    }
-}
-
-fun EditText.updateText(text: String) {
-    val focussed = hasFocus()
-    if (focussed) {
-        clearFocus()
-    }
-    setText(text)
-    if (focussed) {
-        requestFocus()
-    }
-}
 
 fun fetchCurrentDayInTimeMillis(): Long {
     return Calendar.getInstance().apply {
@@ -355,13 +201,6 @@ fun fetchCurrentDayInTimeMillis(): Long {
         set(Calendar.SECOND, 0)
         set(Calendar.MILLISECOND, 0)
     }.timeInMillis
-}
-
-fun String.getColorWithAlpha(): Int {
-    return ColorUtils.setAlphaComponent(
-        Color.parseColor(this),
-        (50f / 100 * 255).toInt()
-    )
 }
 
 fun Activity.enableFullScreen() {
@@ -411,20 +250,3 @@ fun Context.window(): Window? =
         is ContextWrapper -> baseContext.window()
         else -> null
     }
-
-/*
- * <item name="android:statusBarColor">@android:color/transparent</item>
- * <item name="android:navigationBarColor">@android:color/transparent</item>
- * <item name="android:enforceNavigationBarContrast">false</item>
- * <item name="android:enforceStatusBarContrast">false</item>
-*
- *
- *  systemUiController.setSystemBarsColor(
- *            color = Color.Transparent,
- *            darkIcons = useDarkIcons,
- *            isNavigationBarContrastEnforced = false,
- *            transformColorForLightContent = { original ->
- *                BlackScrim.compositeOver(original)
- *            }
- *        )
-* */

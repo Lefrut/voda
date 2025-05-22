@@ -166,22 +166,24 @@ fun ProductDetailsScreen(
 
     if (viewState.showMultiBottomSheet) {
         MultiProductBottomSheet(
-            cartQuantity = productDetails.cartQuantity,
+            cartQuantity = viewState.multiProductQuantity,
+            totalPrice = viewState.multiProductTotalPrice,
             firstPrice = productDetails.firstPrice,
             prices = productDetails.prices,
-            buttonIsLoading = viewState.buttonIsLoading,
-            totalPrice = viewState.totalPrice,
             onDismissRequest = {
                 viewModel.hideMultiBottomSheet()
             },
-            onCartQuantityChange = { newCartQuantity ->
-                viewModel.changeToCart(newCartQuantity)
+            onMultiProductQuantity = { newMultiProductQuantity ->
+                viewModel.changeMultiProductQuantity(newMultiProductQuantity)
             },
             onPlus = {
-                viewModel.incrementCart()
+                viewModel.incrementMultiProduct()
             },
             onMinus = {
-                viewModel.decrementCart()
+                viewModel.decrementMultiProduct()
+            },
+            onSaveClick = {
+                viewModel.saveMultiProductChoice()
             }
         )
     }

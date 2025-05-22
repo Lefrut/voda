@@ -106,6 +106,7 @@ class CartFlowViewModel @Inject constructor(
             uiStateListener.updateData { s -> s.copy(uiState = CartUiState.Loading) }
         }
 
+        val currentCartVersion = cartManager.cartVersion
         val cartDetailsResult = vodovozServiceRepository.getCartDetails(
             dataState.promoCode
         ).singleResult()
@@ -127,11 +128,16 @@ class CartFlowViewModel @Inject constructor(
             }
 
 
-            cartManager.syncCart(
-                cartItems.associate { item ->
-                    item.productId to item.quantity
-                }
-            )
+            if(currentCartVersion >= cartManager.cartVersion){
+                cartManager.syncCart(
+                    cartItems.associate { item -> item.productId to item.quantity }
+                )
+            }
+            debugLog {
+                "CartManager: cartManager.syncCart(\n" +
+                        "                ${cartItems.associate { item -> item.productId to item.quantity }}\n" +
+                        "            )"
+            }
 
         }.onFailure { t ->
             val uiState = when (t) {

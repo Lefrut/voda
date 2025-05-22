@@ -44,11 +44,11 @@ fun TraceOrderBody(
     val context = LocalContext.current
 
     val deliveryImageProvider = remember {
-        ImageProvider.fromBitmap(getBitmap(context, R.drawable.ic_delivery))
+        ImageProvider.fromBitmap(context.getBitmap(R.drawable.ic_delivery))
     }
 
     val carImageProvider = remember {
-        ImageProvider.fromBitmap(getBitmap(context, R.drawable.ic_car))
+        ImageProvider.fromBitmap(context.getBitmap(R.drawable.ic_car))
     }
 
     Box(modifier = modifier.fillMaxSize()) {

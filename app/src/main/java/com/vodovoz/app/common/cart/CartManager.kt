@@ -49,7 +49,8 @@ class CartManager @Inject constructor(
     private val cartsStateListener = MutableSharedFlow<Map<Long, Int>>(replay = 1)
     private val _blockedProductsState = MutableStateFlow(emptySet<Long>())
     val blockedProductsState = _blockedProductsState.asStateFlow()
-    private var cartVersion = 0
+    var cartVersion = 0
+        private set
 
 
     fun observeCarts() = cartsStateListener.asSharedFlow()
@@ -68,15 +69,15 @@ class CartManager @Inject constructor(
 
         delay(300L)
 
-        val (currentFirstCart, cartChanges) = cartMutex.withLock {
-            val currentCart: Map<Long, Int> = carts
 
+
+        val (currentFirstCart, cartChanges) = cartMutex.withLock {
             if (currentCartVersion < cartVersion) return@launch
 
             val firstCartCopy = firstCart.toMap()
             firstCart.clear()
 
-            val cartChanges = currentCart.filter { (key, value) ->
+            val cartChanges = carts.filter { (key, value) ->
                 val oldValue = firstCartCopy[key]
                 value != oldValue
             }
@@ -84,6 +85,7 @@ class CartManager @Inject constructor(
             if (cartChanges.isEmpty()) return@launch
 
             _blockedProductsState.update { s -> s + cartChanges.keys }
+
             firstCartCopy to cartChanges
         }
 
@@ -105,7 +107,9 @@ class CartManager @Inject constructor(
 
         cartMutex.withLock {
             _blockedProductsState.update { productIds -> productIds - cartChanges.keys }
-            updateCartListState(true)
+            if (currentCartVersion >= cartVersion) {
+                updateCartListState(true)
+            }
         }
     }
 
@@ -199,22 +203,76 @@ class CartManager @Inject constructor(
         cartsStateListener.emit(carts)
     }
 
+
     suspend fun add(
-        productsIdsWithQuantity: String
+        productIdWithQuantity: Map<Long, Int>,
+    ) {
+        val productIdsWithQuantity = formatCart(productIdWithQuantity)
+        add(productIdsWithQuantity)
+    }
+
+
+    suspend fun add(
+        vararg productIdWithQuantity: String,
+    ) {
+        val productIdsWithQuantity = formatCart(*productIdWithQuantity)
+        add(productIdsWithQuantity)
+    }
+
+
+    suspend fun add(
+        productIdsWithQuantity: String,
     ) = coroutineScope.launch {
-        val productsMap = parseCart(productsIdsWithQuantity)
-
-
-        runCatching {
-            vodovozServiceRepository
-                .addMultipleProductsToCart(productsIdsWithQuantity)
-                .singleResult()
-        }
-
+        if (cartMutex.isLocked) return@launch
         cartMutex.withLock {
-            updateCartListState(true)
+
+            val addInCart = parseCart(productIdsWithQuantity)
+
+
+            if (blockedProductsState.value.any { id -> addInCart.contains(id) }) return@launch
+
+            val currentCartVersion = ++cartVersion
+
+            val firstCartCopy = firstCart.toMap().ifEmpty { carts }
+            val cartChanges = carts.filter { (key, value) ->
+                val oldValue = firstCartCopy[key]
+                value != oldValue
+            }
+            firstCart.clear()
+            _blockedProductsState.update { s -> s + addInCart.keys + cartChanges.keys }
+
+
+            for ((key, value) in addInCart) {
+                updateCartItem(key, (carts[key] ?: 0) + value)
+                debugLog { "CartManager: updateCartItem($key, ${(carts[key] ?: 0) + value})" }
+            }
+
+
+            runCatching {
+                if (cartChanges.isNotEmpty()) {
+                    updateCartOnline(cartChanges, firstCartCopy)
+                }
+
+                vodovozServiceRepository.addMultipleProductsToCart(
+                    productIdsWithQuantity
+                ).singleResult()
+            }.onFailure {
+                for ((key, value) in addInCart) {
+                    updateCartItem(key, ((carts[key] ?: 0) - value).coerceAtLeast(0))
+                }
+            }
+
+
+            _blockedProductsState.update { s -> s - addInCart.keys - cartChanges.keys }
+
+            if (currentCartVersion >= cartVersion) {
+                updateCartListState(true)
+                debugLog { "CartManager: updateCartListState(true)" }
+            }
+
         }
     }
+
 
     //Service Details Products
     suspend fun add(

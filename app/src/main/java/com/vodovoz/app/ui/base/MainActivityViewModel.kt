@@ -30,6 +30,8 @@ class MainActivityViewModel @Inject constructor(
     val androidSplash = _androidSplash.asStateFlow()
 
     fun checkAppState() = viewModelScope.launch {
+        _appState.update { AppState.Loading }
+
         val siteStateDeferred = async { siteStateManager.requestSiteState() }
         val reloginResultDeferred = async { vodovozServiceRepository.relogin().singleResult() }
 

@@ -36,9 +36,9 @@ import com.vodovoz.app.domain.general.model.DataAllAction
 import com.vodovoz.app.domain.general.model.VodovozAction
 import com.vodovoz.app.domain.general.model.toUi
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
+import com.vodovoz.app.feature.home.model.HomeOrderUi
 import com.vodovoz.app.feature.home.model.MenuItemTypeUi
 import com.vodovoz.app.feature.home.model.MenuItemUi
-import com.vodovoz.app.feature.home.model.HomeOrderUi
 import com.vodovoz.app.feature.home.model.OrderWithMenuUi
 import com.vodovoz.app.feature.home.model.PopularCategoryUi
 import com.vodovoz.app.feature.home.model.UnratedProductUi
@@ -70,6 +70,7 @@ import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.math.roundToInt
 
 @HiltViewModel
 class HomeFlowViewModel @Inject constructor(
@@ -79,7 +80,7 @@ class HomeFlowViewModel @Inject constructor(
     private val ratingProductManager: RatingProductManager,
     private val accountManager: AccountManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
-    private val resourcesProvider: ResourcesProvider
+    private val resourcesProvider: ResourcesProvider,
 ) : PagingContractViewModel<HomeFlowViewModel.HomeState, HomeFlowViewModel.HomeEvents>(HomeState.idle()) {
 
     suspend fun listenLoadingProducts() =
@@ -131,7 +132,7 @@ class HomeFlowViewModel @Inject constructor(
     }.collect()
 
 
-    suspend fun listenFavorites(uiScope: CoroutineScope) = uiScope.launch {
+    suspend fun listenFavorites(mainScope: CoroutineScope) = mainScope.launch {
         uiStateListener.map { pagingState -> pagingState.data.uiState }
             .combine(likeManager.observeLikes()) { uiState, favorites ->
                 uiState to favorites
@@ -281,6 +282,13 @@ class HomeFlowViewModel @Inject constructor(
                 sectionViewedProducts = sectionViewedProducts ?: s.sectionViewedProducts,
                 specialPromotion = specialPromotion ?: s.specialPromotion,
                 showSpecialPromotionBS = specialPromotion != null,
+
+                )
+        }
+        delay(500)
+
+        uiStateListener.updateData { s ->
+            s.copy(
                 sectionUnratedProducts = sectionUnratedProducts?.toUi() ?: s.sectionUnratedProducts,
                 showUnratedProductsBS = sectionUnratedProducts != null
             )
@@ -295,8 +303,7 @@ class HomeFlowViewModel @Inject constructor(
         fetchPrimaryDetails()
         fetchSecondaryDetails()
         if (
-            accountManager.isAlreadyLogin()
-            && dataState.specialPromotion == SpecialPromotionUi.Empty
+            accountManager.isAlreadyLogin() && dataState.specialPromotion == SpecialPromotionUi.Empty
         ) {
             fetchOptionalDetails()
         }
@@ -674,18 +681,33 @@ class HomeFlowViewModel @Inject constructor(
                 showUnratedProductsBS = false
             )
         }
-
-        //todo - remove it
-        delay(10000L)
-        uiStateListener.updateData { s ->
-            s.copy(
-                showUnratedProductsBS = true
-            )
-        }
     }
 
-    fun changeUnratedProductRating(product: UnratedProductUi, rating: Float) {
-        //todo - finish method(when the rate product method is completed)
+    fun changeUnratedProductRating(
+        product: UnratedProductUi,
+        rating: Float,
+    ) = viewModelScope.launch {
+        val accountId = accountManager.fetchAccountId()
+        if (accountId == null) {
+            eventListener.emit(HomeEvents.GoToProfile)
+        } else {
+            eventListener.emit(
+                HomeEvents.WriteComment(
+                    product.id,
+                    product.name,
+                    product.detailPicture,
+                    rating.roundToInt()
+                )
+            )
+            uiStateListener.updateData { s ->
+                val sectionUnratedProducts = s.sectionUnratedProducts
+                s.copy(
+                    sectionUnratedProducts = sectionUnratedProducts.copy(
+                        products = sectionUnratedProducts.products - product
+                    )
+                )
+            }
+        }
     }
 
     fun navigateToPopularCategory(popularCategory: PopularCategoryUi) = viewModelScope.launch {
@@ -760,6 +782,13 @@ class HomeFlowViewModel @Inject constructor(
         eventListener.emit(HomeEvents.GoToQrCode)
     }
 
+    fun showVpnWaring() = viewModelScope.launch {
+        eventListener.emit(HomeEvents.ShowSnackbar(resourcesProvider.getString(R.string.vpn_warning)))
+        uiStateListener.updateData { s ->
+            s.copy(showedVpnWarning = true)
+        }
+    }
+
     data class PositionItem(
         val position: Int,
         val item: Item,
@@ -778,6 +807,12 @@ class HomeFlowViewModel @Inject constructor(
         data object ShowSpeechRecognizer : HomeEvents()
         data object GoToOrdersHistory : HomeEvents()
         data object GoToQrCode : HomeEvents()
+        data class WriteComment(
+            val productId: Long,
+            val productName: String,
+            val productImage: String,
+            val rating: Int,
+        ) : HomeEvents()
 
         data class GoToStories(val storyId: Long) : HomeEvents()
         data class GoToProductDetails(val productId: Long) : HomeEvents()
@@ -789,6 +824,7 @@ class HomeFlowViewModel @Inject constructor(
         data class GoToOrderDetails(val orderId: Long) : HomeEvents()
         data class GoToWebView(val url: String, val title: String) : HomeEvents()
         data class GoToProductAnalogs(val productId: Long) : HomeEvents()
+        data class ShowSnackbar(val message: String) : HomeEvents()
     }
 
     @Immutable
@@ -827,6 +863,8 @@ class HomeFlowViewModel @Inject constructor(
         val showUnratedProductsBS: Boolean = false,
         val showAdvertisingBS: Boolean = false,
         val showRefreshIndicator: Boolean = false,
+
+        val showedVpnWarning: Boolean = false,
     ) : State {
         companion object {
             fun idle(): HomeState {
