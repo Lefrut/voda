@@ -30,7 +30,6 @@ import javax.inject.Inject
 class ChangePasswordFragment : Fragment() {
 
     val viewModel: ChangePasswordViewModel by viewModels()
-    private val profileViewModel: ProfileFlowViewModel by activityViewModels()
 
     @Inject
     lateinit var tabManager: TabManager
@@ -52,7 +51,7 @@ class ChangePasswordFragment : Fragment() {
     ): View {
 
         return ComposeView(requireContext()).apply {
-            setViewCompositionStrategy(ViewCompositionStrategy.Default)
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
 
             setContent {
                 VodovozTheme {
@@ -85,11 +84,6 @@ class ChangePasswordFragment : Fragment() {
                         viewModel.events.collect { event ->
                             when (event) {
                                 ChangePasswordEvent.GoBack -> findNavController().popBackStack()
-                                ChangePasswordEvent.Logout -> {
-                                    profileViewModel.logoutAndRefreshScreens()
-                                    findNavController().popBackStack()
-                                }
-
                                 is ChangePasswordEvent.ShowSnackbar -> {
                                     launch {
                                         snackbarHostState.currentSnackbarData?.dismiss()

@@ -373,11 +373,11 @@ interface VodovozServiceRepository {
     fun getSuperTop(): Flow<Result<TopAndBottomSectionsModel>>
 
     fun getAllSuperTop(
-        id: Int,
+        buttonId: Int,
     ): Flow<Result<ProductsSectionModel>>
 
     fun getAllSuperTopPaged(
-        id: Int,
+        buttonId: Int,
         categoryId: Int = -1,
         sort: SortModel = SortModel.Empty,
     ): Flow<PagingData<ProductModel>>

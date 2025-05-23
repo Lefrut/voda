@@ -3,11 +3,13 @@ package com.vodovoz.app.feature.splash
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.viewModelScope
 import com.vodovoz.app.common.like.LikeManager
+import com.vodovoz.app.common.logout.LogoutManager
 import com.vodovoz.app.common.token.FirebaseTokenManager
 import com.vodovoz.app.feature.splash.model.SplashEvent
 import com.vodovoz.app.feature.splash.model.SplashState
 import com.vodovoz.app.feature.splash.model.SplashUiState
 import com.vodovoz.app.ui.mvi.MviViewModel
+import com.vodovoz.app.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -19,6 +21,7 @@ import javax.inject.Inject
 class SplashViewModel @Inject constructor(
     private val likeManager: LikeManager,
     private val firebaseTokenManager: FirebaseTokenManager,
+    private val logoutManager: LogoutManager
 ) : MviViewModel<SplashState, SplashEvent>(SplashState()) {
 
     init {
@@ -55,6 +58,10 @@ class SplashViewModel @Inject constructor(
 
     fun hideAndroidSplash() = viewModelScope.launch {
         _events.emit(SplashEvent.HideAndroidSplash)
+    }
+
+    fun logout() = viewModelScope.launch {
+        logoutManager.logout().singleResult()
     }
 
 }

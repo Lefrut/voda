@@ -341,4 +341,6 @@
 
     <string name="vpn_warning">Отключите VPN, если работа приложения замедляется</string>
 
+    <string name="logout_error">Не удалось выйти из аккаунта, попробойте снова.</string>
+
 </resources>

@@ -20,19 +20,26 @@ class FirebaseTokenManager @Inject constructor(
     suspend fun sendFirebaseToken() {
         val token = fetchFirebaseToken()
         val userId = accountManager.fetchAccountId()
-        debugLog { "firebase token $token" }
+        debugLog { "sendFirebaseToken: token $token" }
         if (token != null && userId != null) {
             vodovozServiceRepository.sendFirebaseToken(token).singleResult()
         }
     }
 
-    //todo - removeFirebaseToken
+    suspend fun removeFirebaseToken() {
+        val token = fetchFirebaseToken()
+        val userId = accountManager.fetchAccountId()
+        debugLog { "removeFirebaseToken: token $token" }
+        if (token != null && userId != null) {
+            vodovozServiceRepository.sendFirebaseToken(token).singleResult()
+        }
+    }
 
     private suspend fun fetchFirebaseToken(): String? {
         return suspendCoroutine { continuation ->
             FirebaseMessaging.getInstance().token
-                .addOnSuccessListener {
-                    continuation.resume(it)
+                .addOnSuccessListener { token ->
+                    continuation.resume(token)
                 }
                 .addOnFailureListener {
                     continuation.resume(null)

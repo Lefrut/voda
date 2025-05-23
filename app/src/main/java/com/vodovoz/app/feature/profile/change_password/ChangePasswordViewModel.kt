@@ -30,7 +30,9 @@ class ChangePasswordViewModel @Inject constructor(
     ChangePasswordState()
 ) {
     init {
-        fetchChangePasswordDetails()
+        viewModelScope.launch { delay(200) }.invokeOnCompletion {
+            fetchChangePasswordDetails()
+        }
     }
 
     fun navigateBack() = viewModelScope.launch {
@@ -44,8 +46,7 @@ class ChangePasswordViewModel @Inject constructor(
         }
         val changePasswordDetailsResult =
             vodovozServiceRepository.getChangePasswordDetails().singleResult()
-        //todo - mb remove
-        delay(150L)
+
         changePasswordDetailsResult.onSuccess { model ->
             _state.update { s ->
                 s.copy(
@@ -54,16 +55,8 @@ class ChangePasswordViewModel @Inject constructor(
                     uiState = ChangePasswordUiState.ChangePassword
                 )
             }
-        }.onFailure { t ->
-            when (t) {
-                is UserNotLoginException -> {
-                    _events.emit(ChangePasswordEvent.Logout)
-                }
-
-                else -> {
-                    _events.emit(ChangePasswordEvent.GoBack)
-                }
-            }
+        }.onFailure {
+            _events.emit(ChangePasswordEvent.GoBack)
         }
     }
 
@@ -82,7 +75,7 @@ class ChangePasswordViewModel @Inject constructor(
         val fields = stateSnapshot.fields.mapToDomain()
         val passwordField = fields.firstOrNull()
 
-        if(passwordField == null || !stateSnapshot.buttonEnabled) return@launch
+        if (passwordField == null || !stateSnapshot.buttonEnabled) return@launch
 
         _state.update { s ->
             s.copy(buttonLoading = true)
@@ -96,10 +89,6 @@ class ChangePasswordViewModel @Inject constructor(
             }
         }.onFailure { t ->
             when (t) {
-                is UserNotLoginException -> {
-                    _events.emit(ChangePasswordEvent.Logout)
-                }
-
                 is ValidationException -> {
                     _events.emit(
                         ChangePasswordEvent.ShowSnackbar(
@@ -118,18 +107,4 @@ class ChangePasswordViewModel @Inject constructor(
         }
         _state.update { s -> s.copy(buttonLoading = false, buttonEnabled = false) }
     }
-
-    fun changeFieldValueVisibility(field: FieldUi, newValueIsVisible: Boolean) =
-        viewModelScope.launch {
-            _state.update { s ->
-                s.copy(
-                    fields = s.fields.updateFieldAndResetError(
-                        field,
-                        field.copy(isValueVisible = newValueIsVisible)
-                    )
-                )
-            }
-        }
-
-
 }
