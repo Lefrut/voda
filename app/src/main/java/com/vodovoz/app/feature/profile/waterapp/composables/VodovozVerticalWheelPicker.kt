@@ -53,6 +53,7 @@ import androidx.compose.ui.util.lerp
 import com.vodovoz.app.R
 import com.vodovoz.app.design_system.VodovozTheme
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.filter
@@ -189,6 +190,7 @@ internal fun <T : Any> VodovozVerticalWheelCore(
     }
 
     LaunchedEffect(scrollState) {
+        delay(100L)
         snapshotFlow { scrollState.isScrollInProgress to scrollState.value }
             .filter { (isScrolling, _) ->
                 !isScrolling && initialScrolled

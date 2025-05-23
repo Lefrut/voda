@@ -86,7 +86,7 @@ class WaterAppHelper @Inject constructor(
         }
 
 
-        const val TIME_FORMAT = "HH:mm"
+        private const val TIME_FORMAT = "HH:mm"
 
     }
 
@@ -104,20 +104,13 @@ class WaterAppHelper @Inject constructor(
     fun observeWaterAppRateData() = waterAppRateDataListener.asStateFlow()
 
     fun fetchWaterAppUserData() {
-        if (dataStoreRepository.contains(WATER_APP_USER_DATA)) {
-            val json = dataStoreRepository.getString(WATER_APP_USER_DATA)
-            debugLog { "json contains $json" }
-            if (!json.isNullOrEmpty()) {
-                val data = adapter.fromJson(json) ?: return
-                debugLog { "data contains $json" }
-                waterAppUserDataListener.value = data
-            } else {
-                waterAppUserDataListener.value = WaterAppUserData()
-            }
-        } else {
-            waterAppUserDataListener.value = WaterAppUserData()
-        }
+        val json = dataStoreRepository.getString(WATER_APP_USER_DATA)
+
+        val data = json?.takeIf { it.isNotEmpty() }?.let { adapter.fromJson(it) }
+
+        waterAppUserDataListener.value = data ?: WaterAppUserData()
     }
+
 
     fun saveWaterAppUserData() {
 
@@ -181,37 +174,22 @@ class WaterAppHelper @Inject constructor(
 
     fun fetchWaterAppRateData() {
         val currentDate = fetchCurrentDayInTimeMillis()
-        if (dataStoreRepository.contains(WATER_APP_RATE)) {
-            val json = dataStoreRepository.getString(WATER_APP_RATE)
-            debugLog { "json contains $json" }
-            if (!json.isNullOrEmpty()) {
-                val data = adapterRate.fromJson(json) ?: return
-                debugLog { "data contains $json" }
+        val json = dataStoreRepository.getString(WATER_APP_RATE)
 
-                if (data.lastSavedDate == 0L) {
-                    waterAppRateDataListener.value = data.copy(
-                        lastSavedDate = currentDate
-                    )
-                } else if (data.lastSavedDate != currentDate) {
-                    waterAppRateDataListener.value = data.copy(
-                        lastSavedDate = currentDate,
-                        currentLevel = 0
-                    )
-                } else {
-                    waterAppRateDataListener.value = data
-                }
-            } else {
-                waterAppRateDataListener.value = WaterAppRateData(lastSavedDate = currentDate)
-            }
-        } else {
-            waterAppRateDataListener.value = WaterAppRateData(lastSavedDate = currentDate)
+        val data = json?.takeIf { it.isNotEmpty() }?.let { adapterRate.fromJson(it) }
+
+        val result = when {
+            data == null -> WaterAppRateData(lastSavedDate = currentDate)
+            data.lastSavedDate == 0L -> data.copy(lastSavedDate = currentDate)
+            data.lastSavedDate != currentDate -> data.copy(lastSavedDate = currentDate, currentLevel = 0)
+            else -> data
         }
+
+        waterAppRateDataListener.value = result
     }
 
     fun startCalculate() {
-
         accountManager.reportEvent("trekervodi_vhod")
-
     }
 
     fun tryToChangeWaterLevel(levelChange: Int) {
@@ -220,10 +198,6 @@ class WaterAppHelper @Inject constructor(
         val rateState = waterAppRateDataListener.value ?: return
         val current = rateState.currentLevel
         val max = rateState.rate
-
-        debugLog {
-            "try to change $levelChange rateState $rateState currentLevel $current canFill ${rateState.canFill}"
-        }
 
         val newLevel = (current + levelChange).coerceAtMost(max)
         val canFill = newLevel < max
@@ -250,20 +224,14 @@ class WaterAppHelper @Inject constructor(
 
 
     fun saveWaterAppRateData() {
-
         val data = waterAppRateDataListener.value
-
         val json = adapterRate.toJson(data)
-
-        debugLog { "json $json" }
-
         dataStoreRepository.putString(WATER_APP_RATE, json)
     }
 
     private fun calculateRate(): Int {
         val weight = waterAppUserDataListener.value?.weight?.toDouble() ?: 50.0
         val sport = waterAppUserDataListener.value?.sport?.toDouble() ?: 0.25
-        debugLog { "calculate rate weight $weight sport $sport" }
         return ((1.5 + (weight - 20) * 0.02 + sport) * 1000).toInt()
     }
 
@@ -286,20 +254,17 @@ class WaterAppHelper @Inject constructor(
     }
 
     fun fetchWaterAppNotificationData() {
-        if (dataStoreRepository.contains(WATER_APP_NOTIFICATION_DATA)) {
-            val json = dataStoreRepository.getString(WATER_APP_NOTIFICATION_DATA)
-            debugLog { "json contains $json" }
-            if (!json.isNullOrEmpty()) {
-                val data = adapterNotification.fromJson(json) ?: return
-                debugLog { "data contains $json" }
-                waterAppNotificationDataListener.value = data
-            } else {
-                waterAppNotificationDataListener.value = WaterAppNotificationData()
-            }
+        val json = dataStoreRepository.getString(WATER_APP_NOTIFICATION_DATA)
+
+        val data = if (!json.isNullOrEmpty()) {
+            adapterNotification.fromJson(json)
         } else {
-            waterAppNotificationDataListener.value = WaterAppNotificationData()
+            null
         }
+
+        waterAppNotificationDataListener.value = data ?: WaterAppNotificationData()
     }
+
 
     fun saveWaterAppNotificationData() {
 
@@ -328,26 +293,18 @@ class WaterAppHelper @Inject constructor(
 
         val json = adapterNotification.toJson(data)
 
-        debugLog { "json $json" }
-
         dataStoreRepository.putString(WATER_APP_NOTIFICATION_DATA, json)
     }
 
     fun fetchAppNotificationData(): WaterAppNotificationData {
-        if (dataStoreRepository.contains(WATER_APP_NOTIFICATION_DATA)) {
-            val json = dataStoreRepository.getString(WATER_APP_NOTIFICATION_DATA)
-            debugLog { "json contains $json" }
-            if (!json.isNullOrEmpty()) {
-                val data = adapterNotification.fromJson(json) ?: return WaterAppNotificationData()
-                debugLog { "data contains $json" }
-                return data
-            } else {
-                return WaterAppNotificationData()
-            }
-        } else {
-            return WaterAppNotificationData()
-        }
+        val json = dataStoreRepository.getString(WATER_APP_NOTIFICATION_DATA)
+        debugLog { "json contains $json" }
+
+        return json?.takeIf { it.isNotEmpty() }
+            ?.let { adapterNotification.fromJson(it) }
+            ?: WaterAppNotificationData()
     }
+
 
     fun clearData() {
         dataStoreRepository.remove(WATER_APP_NOTIFICATION_DATA)

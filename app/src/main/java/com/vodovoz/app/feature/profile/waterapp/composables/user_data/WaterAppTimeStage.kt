@@ -33,7 +33,7 @@ fun WaterAppTimeStage(
     Column(modifier = modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
 
         Image(
-            painter = painterResource(id = if (isSleepTime) R.drawable.pic_moon else R.drawable.pic_sun),
+            painter = painterResource(id = if (isSleepTime) R.drawable.pic_night else R.drawable.pic_morning),
             contentDescription = null,
             modifier = Modifier
                 .padding(start = 16.dp, end = 16.dp, top = 24.dp)

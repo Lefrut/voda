@@ -5,16 +5,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.SizeTransform
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.spring
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
-import androidx.compose.animation.togetherWith
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.ComposeView
@@ -88,42 +78,8 @@ class WaterAppFragment : Fragment() {
                             if (targetState is WaterAppUiState.UserData) {
                                 "UserData"
                             } else targetState.toString()
-                        },
-                        transitionSpec = {
-                            val bouncySpring = spring<Float>(
-                                dampingRatio = 0.2f,
-                                stiffness = 50f
-                            )
-
-                            val enter = scaleIn(
-                                initialScale = 0.7f,
-                                animationSpec = bouncySpring
-                            ) + slideInVertically(
-                                initialOffsetY = { it / 2 },
-                            ) + fadeIn(
-                                animationSpec = spring(
-                                    dampingRatio = Spring.DampingRatioNoBouncy,
-                                    stiffness = Spring.StiffnessVeryLow
-                                ),
-                                initialAlpha = 0.3f
-                            )
-
-                            val exit = scaleOut(
-                                targetScale = 1.2f,
-                                animationSpec = bouncySpring
-                            ) + slideOutVertically(
-                                targetOffsetY = { -it / 3 },
-                            ) + fadeOut(
-                                animationSpec = spring(
-                                    dampingRatio = Spring.DampingRatioNoBouncy,
-                                    stiffness = Spring.StiffnessVeryLow
-                                ),
-                                targetAlpha = 0.0f
-                            )
-
-                            enter togetherWith  exit using SizeTransform(clip = false)
-
-                        }) { uiState ->
+                        }
+                    ) { uiState ->
                         when (uiState) {
                             WaterAppUiState.GoalCompleted -> {
                                 WaterAppGoalCompletedScreen(
@@ -149,10 +105,10 @@ class WaterAppFragment : Fragment() {
                                         viewModel.changeWaterLevel(progress)
                                     },
                                     onMinusClick = {
-
+                                        viewModel.subtractChangeWaterStep()
                                     },
                                     onPlusClick = {
-
+                                        viewModel.addChangeWaterStep()
                                     },
                                     onBottleClick = {
                                         viewModel.addWater()
@@ -164,6 +120,7 @@ class WaterAppFragment : Fragment() {
                                 WaterAppSettingsScreen(
                                     haveNotifications = viewState.notificationData.switch,
                                     intervals = viewState.reminderIntervals,
+                                    userData = viewState.userData,
                                     showParameters = viewState.notificationData.firstShow,
                                     onReminderIntervalClick = { reminderInterval ->
                                         viewModel.selectReminderInterval(reminderInterval)
@@ -171,11 +128,14 @@ class WaterAppFragment : Fragment() {
                                     onHaveNotificationsChange = {
                                         viewModel.changeHaveNotification()
                                     },
-                                    onNotificationsSaveClick = {
-                                        viewModel.saveNotifications()
+                                    onSettingsSaveClick = {
+                                        viewModel.saveSettingsNotifications()
                                     },
                                     onCloseClick = {
                                         viewModel.goToWaterApp()
+                                    },
+                                    onEditUserData = { stage ->
+                                        viewModel.goToUserDataStage(stage)
                                     }
                                 )
                             }
@@ -184,6 +144,7 @@ class WaterAppFragment : Fragment() {
                                 WaterAppUserDataScreen(
                                     userDataStage = uiState,
                                     userData = viewState.userData,
+                                    started = viewState.notificationData.started,
                                     onGenderSelect = { isMan ->
                                         viewModel.selectGender(isMan)
                                     },
