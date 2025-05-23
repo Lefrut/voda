@@ -1,7 +1,6 @@
 package com.vodovoz.app.feature.profile.waterapp
 
 import androidx.lifecycle.viewModelScope
-import com.squareup.moshi.Moshi
 import com.vodovoz.app.common.content.Event
 import com.vodovoz.app.common.content.PagingContractViewModel
 import com.vodovoz.app.common.content.State
@@ -18,7 +17,6 @@ import javax.inject.Inject
 @HiltViewModel
 class WaterAppViewModel @Inject constructor(
     private val waterAppHelper: WaterAppHelper,
-    private val moshi: Moshi,
 ) : PagingContractViewModel<WaterAppViewModel.WaterAppState, WaterAppViewModel.WaterAppEvents>(
     WaterAppState()
 ) {
@@ -127,7 +125,10 @@ class WaterAppViewModel @Inject constructor(
 
 
         uiStateListener.updateData { s ->
-            s.copy(uiState = nextUiState)
+            s.copy(
+                uiState = if (dataState.notificationData.started) WaterAppUiState.Settings
+                else nextUiState
+            )
         }
     }
 
@@ -144,13 +145,17 @@ class WaterAppViewModel @Inject constructor(
         waterAppHelper.saveNotificationSwitch(!dataState.notificationData.switch)
     }
 
-    fun saveNotifications() = viewModelScope.launch {
+    fun saveSettingsNotifications() = viewModelScope.launch {
         waterAppHelper.saveNotificationFirstShow()
         waterAppHelper.saveWaterAppNotificationData()
+        waterAppHelper.saveWaterAppUserData()
+        waterAppHelper.saveRate()
         uiStateListener.updateData { s -> s.copy(uiState = WaterAppUiState.Main) }
     }
 
     fun goToWaterApp() = viewModelScope.launch {
+        waterAppHelper.fetchWaterAppUserData()
+
         if (!dataState.notificationData.firstShow) {
             waterAppHelper.saveNotificationFirstShow()
             waterAppHelper.saveWaterAppNotificationData()
@@ -191,6 +196,20 @@ class WaterAppViewModel @Inject constructor(
 
     fun addWater() = viewModelScope.launch {
         waterAppHelper.tryToChangeWaterLevel(dataState.changeWaterStep)
+    }
+
+    fun goToUserDataStage(stage: WaterAppUiState.UserData) = viewModelScope.launch {
+        uiStateListener.updateData { s -> s.copy(uiState = stage) }
+    }
+
+    fun addChangeWaterStep() = viewModelScope.launch {
+        val newStep = (dataState.changeWaterStep + 50).coerceAtMost(750)
+        uiStateListener.updateData { it.copy(changeWaterStep = newStep) }
+    }
+
+    fun subtractChangeWaterStep() = viewModelScope.launch {
+        val newStep = (dataState.changeWaterStep - 50).coerceAtLeast(50)
+        uiStateListener.updateData { it.copy(changeWaterStep = newStep) }
     }
 
 

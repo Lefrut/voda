@@ -338,9 +338,14 @@
     <string name="splash">" / "</string>
     <string name="click_on_bottle">Нажмите на бутылку, если\nвыпили воду</string>
     <string name="quantity_ml">%1$s мл</string>
+    <string name="quantity_cm">%1$s см</string>
+    <string name="quantity_kg">%1$s кг</string>
+
+
 
     <string name="vpn_warning">Отключите VPN, если работа приложения замедляется</string>
 
     <string name="logout_error">Не удалось выйти из аккаунта, попробойте снова.</string>
+    <string name="setting_params">Настроить параметры</string>
 
 </resources>
