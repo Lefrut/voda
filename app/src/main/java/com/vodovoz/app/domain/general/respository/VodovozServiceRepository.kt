@@ -52,6 +52,7 @@ import com.vodovoz.app.domain.general.model.order.OrderDetailsModel
 import com.vodovoz.app.domain.general.model.order.OrderQuestionDetailsModel
 import com.vodovoz.app.domain.general.model.order.OrdersHistoryDetailsModel
 import com.vodovoz.app.domain.general.model.order.OrdersHistoryItemModel
+import com.vodovoz.app.domain.general.model.order.WhereOrderDetailsModel
 import com.vodovoz.app.domain.general.model.service.AllServicesDetailsModel
 import com.vodovoz.app.domain.general.model.service.ServiceDetailsModel
 import com.vodovoz.app.domain.general.model.service.ServiceOrderDetailsModel
@@ -120,6 +121,11 @@ interface VodovozServiceRepository {
     fun getOrderDetails(orderId: Long): Flow<Result<OrderDetailsModel>>
 
     fun getAllBottles(): Flow<Result<AllBottlesDetailsModel>>
+
+    fun getWhereMyOrderDetails(
+        orderId: Long,
+        driverId: String
+    ): Flow<Result<WhereOrderDetailsModel>>
 
 
     fun getPastPurchasesDetails(

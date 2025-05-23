@@ -44,6 +44,7 @@ import com.vodovoz.app.data.vodovoz_service.model.certificate.BuyCertificateDeta
 import com.vodovoz.app.data.vodovoz_service.model.filters.FiltersDTO
 import com.vodovoz.app.data.vodovoz_service.model.notification_settings.NotificationSettingsDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.order_details.OrderDetailsDTO
+import com.vodovoz.app.data.vodovoz_service.model.order_details.WhereMyOrderDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.order_history.OrdersHistoryDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.product_details.ProductDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.profile.ProfileDetailsDTO
@@ -131,7 +132,7 @@ interface VodovozService {
         @Query("userid") userId: Long?,
         @Query("id") orderId: Long,
         @Query("vodila") driverId: String,
-    ): Response<VodovozResponseDTO<String>>
+    ): Response<VodovozResponseDTO<WhereMyOrderDetailsDTO>>
 
     @GET("osnova/form/otmenazakaz.php?action=detail")
     suspend fun getCancelOrderDetails(

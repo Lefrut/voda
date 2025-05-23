@@ -85,6 +85,7 @@ import com.vodovoz.app.domain.general.model.order.OrderDetailsModel
 import com.vodovoz.app.domain.general.model.order.OrderQuestionDetailsModel
 import com.vodovoz.app.domain.general.model.order.OrdersHistoryDetailsModel
 import com.vodovoz.app.domain.general.model.order.OrdersHistoryItemModel
+import com.vodovoz.app.domain.general.model.order.WhereOrderDetailsModel
 import com.vodovoz.app.domain.general.model.service.AllServicesDetailsModel
 import com.vodovoz.app.domain.general.model.service.ServiceDetailsModel
 import com.vodovoz.app.domain.general.model.service.ServiceOrderDetailsModel
@@ -490,6 +491,24 @@ class VodovozServiceRepositoryImpl @Inject constructor(
         return executeRequest(
             request = {
                 vodovozService.getAllBottles()
+            },
+            mapper = {
+                it.data!!.toDomain()
+            }
+        )
+    }
+
+    override fun getWhereMyOrderDetails(
+        orderId: Long,
+        driverId: String,
+    ): Flow<Result<WhereOrderDetailsModel>> {
+        return executeRequest(
+            request = {
+                vodovozService.getWhereMyOrderDetails(
+                    accountManager.fetchAccountId(),
+                    orderId,
+                    driverId
+                )
             },
             mapper = {
                 it.data!!.toDomain()

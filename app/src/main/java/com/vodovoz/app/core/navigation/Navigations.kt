@@ -474,7 +474,7 @@ fun NavController.navigateToBuyCertificate() {
     navigate(R.id.buyCertificateFragment)
 }
 
-fun NavController.navigateToWebView(url: String, title: String) {
+fun NavController.navigateToWebView(url: String, title: String = "") {
     navigate(R.id.webViewFragment, bundleOf("url" to url, "title" to title))
 
 }

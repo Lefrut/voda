@@ -1,0 +1,56 @@
+package com.vodovoz.app.data.vodovoz_service.mappers
+
+import com.vodovoz.app.data.vodovoz_service.di.toFullUrl
+import com.vodovoz.app.data.vodovoz_service.model.order_details.IMAGE_AND_TEXT_DTO
+import com.vodovoz.app.data.vodovoz_service.model.order_details.TOCHKA_DTO
+import com.vodovoz.app.data.vodovoz_service.model.order_details.WHERE_ORDER_BUTTON_DTO
+import com.vodovoz.app.data.vodovoz_service.model.order_details.WhereMyOrderDetailsDTO
+import com.vodovoz.app.domain.general.ImageAndTextModel
+import com.vodovoz.app.domain.general.model.ImageButtonModel
+import com.vodovoz.app.domain.general.model.MapPointModel
+import com.vodovoz.app.domain.general.model.order.WhereOrderDetailsModel
+
+fun WhereMyOrderDetailsDTO.toDomain(): WhereOrderDetailsModel {
+    return WhereOrderDetailsModel(
+        title = TITLE ?: "",
+        secondTitle = VODITEL?.TITLE ?: "",
+        finishPoint = KLIENT?.TOCHKA?.toDomain(),
+        driverPont = VODITEL?.TOCHKA?.toDomain(),
+        buttons = VODITEL?.KNOPKI?.mapToDomain() ?: emptyList(),
+        items = VODITEL?.DANNYE?.mapToDomain() ?: emptyList(),
+    )
+}
+
+@JvmName("mapToImageAndTextModelList")
+fun List<IMAGE_AND_TEXT_DTO>.mapToDomain(): List<ImageAndTextModel> {
+    return mapNotNull { it.toDomain() }
+}
+
+fun IMAGE_AND_TEXT_DTO.toDomain(): ImageAndTextModel? {
+    return ImageAndTextModel(
+        text = POLE ?: return null,
+        image = KARTINKA?.toFullUrl() ?: return null
+    )
+}
+
+@JvmName("mapToImageButtonModelList")
+fun List<WHERE_ORDER_BUTTON_DTO>.mapToDomain(): List<ImageButtonModel> {
+    return mapNotNull { it.toDomain() }
+}
+
+fun WHERE_ORDER_BUTTON_DTO.toDomain(): ImageButtonModel? {
+    return ImageButtonModel(
+        name = NAME ?: "",
+        backgroundColor = BACKGROUND ?: "",
+        textColor = COLOR ?: "",
+        id = ID ?: return null,
+        image = IMAGE?.toFullUrl() ?: ""
+    )
+}
+
+fun TOCHKA_DTO.toDomain(): MapPointModel? {
+    return MapPointModel(
+        lat = Latitude ?: return null,
+        lon = Longitude ?: return null
+    )
+}

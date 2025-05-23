@@ -19,7 +19,8 @@ fun SiteStateResponseDTO.toDomain(): SiteState {
         jivoChat = CHATJIVO?.toJivoChatModel() ?: JivoChatModel(isActive = false, url = ""),
         tracking = GENERATION?.toTrackingConfig() ?: TrackingConfig(trackingIsEnabled = false, time = 0),
         agreement = SOGLASHENIE?.toAgreementModel() ?: throw IllegalArgumentException("Agreement can't be null"),
-        showComments = COMMENTFILES ?: false
+        showComments = COMMENTFILES ?: false,
+        callPhoneNumber = CALL ?: ""
     )
 }
 

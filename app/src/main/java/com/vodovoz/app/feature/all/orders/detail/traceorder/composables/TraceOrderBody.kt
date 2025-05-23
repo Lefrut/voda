@@ -1,8 +1,15 @@
 package com.vodovoz.app.feature.all.orders.detail.traceorder.composables
 
+import android.annotation.SuppressLint
 import android.graphics.PointF
+import androidx.compose.animation.core.AnimationVector2D
+import androidx.compose.animation.core.TwoWayConverter
+import androidx.compose.animation.core.animateValueAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -12,12 +19,15 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -31,6 +41,7 @@ import com.yandex.mapkit.map.IconStyle
 import com.yandex.mapkit.mapview.MapView
 import com.yandex.runtime.image.ImageProvider
 
+@SuppressLint("ClickableViewAccessibility")
 @Composable
 fun TraceOrderBody(
     modifier: Modifier = Modifier,
@@ -40,6 +51,8 @@ fun TraceOrderBody(
     onZoomPlus: () -> Unit,
     onZoomMinus: () -> Unit,
     onGeoClick: () -> Unit,
+    onDragStop: () -> Unit,
+    onDragStart: () -> Unit,
 ) {
     val context = LocalContext.current
 
@@ -51,10 +64,45 @@ fun TraceOrderBody(
         ImageProvider.fromBitmap(context.getBitmap(R.drawable.ic_car))
     }
 
-    Box(modifier = modifier.fillMaxSize()) {
+    val animatedCartPoint by animateValueAsState(
+        targetValue = carPoint,
+        typeConverter = TwoWayConverter(
+            convertToVector = { point ->
+                point?.lat?.toFloat() ?: 0f
+                AnimationVector2D(
+                    point?.lat?.toFloat() ?: 0f,
+                    point?.lon?.toFloat() ?: 0f
+                )
+            },
+            convertFromVector = { vector ->
+                MapPointUi(vector.v1.toDouble(), vector.v2.toDouble())
+            }
+        ),
+        label = "animatedCarLat"
+    )
+
+
+
+
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+    ) {
         AndroidView(
-            modifier = Modifier.fillMaxSize(),
-            factory = { mapView() },
+            modifier = Modifier
+                .fillMaxSize()
+                .pointerInput(Unit) {
+                    awaitEachGesture {
+                        awaitFirstDown(pass = PointerEventPass.Initial)
+                        onDragStart()
+                        waitForUpOrCancellation(pass = PointerEventPass.Initial)
+                        onDragStop()
+                    }
+                },
+            factory = {
+                val view = mapView()
+                view
+            },
             update = { view ->
                 val map = view.mapWindow.map
                 val mapObjects = map.mapObjects
@@ -68,18 +116,20 @@ fun TraceOrderBody(
                             IconStyle().apply {
                                 anchor = PointF(0.5f, 1.0f)
                                 scale = 1f
+                                zIndex = 10f
                             }
                         )
                     }
                 }
 
-                carPoint?.let {
-                    mapObjects.addPlacemark(Point(carPoint.lat, carPoint.lon)).apply {
+                animatedCartPoint?.let { point ->
+                    mapObjects.addPlacemark(Point(point.lat, point.lon)).apply {
                         setIcon(carImageProvider)
                         setIconStyle(
                             IconStyle().apply {
                                 anchor = PointF(0.5f, 1.0f)
                                 scale = 1f
+                                zIndex = 5f
                             }
                         )
                     }

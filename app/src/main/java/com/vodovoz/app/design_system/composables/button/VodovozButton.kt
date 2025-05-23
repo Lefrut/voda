@@ -62,6 +62,7 @@ fun VodovozButtonSmall(
     onClick: () -> Unit,
     enabled: Boolean = true,
     colors: ButtonColors = VodovozButtonDefaults.primaryColors(),
+    contentPadding: PaddingValues = PaddingValues(horizontal = 16.dp),
     content: @Composable () -> Unit
 ) {
     FilledTonalButton(
@@ -73,7 +74,7 @@ fun VodovozButtonSmall(
         },
         colors = colors,
         shape = MaterialTheme.shapes.large,
-        contentPadding = PaddingValues(horizontal = 16.dp),
+        contentPadding = contentPadding,
         enabled = enabled,
         elevation = null
     ) {
