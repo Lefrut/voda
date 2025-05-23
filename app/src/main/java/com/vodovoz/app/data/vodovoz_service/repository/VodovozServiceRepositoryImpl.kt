@@ -26,8 +26,8 @@ import com.vodovoz.app.data.vodovoz_service.model.VodovozResponseDTO
 import com.vodovoz.app.data.vodovoz_service.model.WaitFeedbackProductsDTO
 import com.vodovoz.app.data.vodovoz_service.model.order_details.OrderDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.order_history.OrdersHistoryDetailsDTO
-import com.vodovoz.app.domain.general.model.AllBottlesDetailsModel
 import com.vodovoz.app.data.vodovoz_service.paging.VodovozPagingSource
+import com.vodovoz.app.domain.general.model.AllBottlesDetailsModel
 import com.vodovoz.app.domain.general.model.BannerModel
 import com.vodovoz.app.domain.general.model.BrandModel
 import com.vodovoz.app.domain.general.model.BrandSectionModel
@@ -1771,9 +1771,9 @@ class VodovozServiceRepositoryImpl @Inject constructor(
     )
 
 
-    override fun getAllSuperTop(id: Int): Flow<Result<ProductsSectionModel>> = executeRequest(
+    override fun getAllSuperTop(buttonId: Int): Flow<Result<ProductsSectionModel>> = executeRequest(
         request = {
-            vodovozService.getAllSuperTop(id.toLong())
+            vodovozService.getAllSuperTop(buttonId.toLong())
         },
         mapper = { superTopResponse ->
             superTopResponse.data!!.toDomain()
@@ -1786,7 +1786,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
     )
 
     override fun getAllSuperTopPaged(
-        id: Int,
+        buttonId: Int,
         categoryId: Int,
         sort: SortModel,
     ): Flow<PagingData<ProductModel>> {
@@ -1797,9 +1797,9 @@ class VodovozServiceRepositoryImpl @Inject constructor(
                     clazz = ProductsSectionDTO::class,
                     request = { page, _ ->
                         vodovozService.getAllSuperTop(
-                            id = id.toLong(),
+                            id = buttonId.toLong(),
                             page = page,
-                            categoryId = categoryId,
+                            categoryId = categoryId.takeIf { it > 0 },
                             sort = sort.value,
                             order = sort.order
                         )

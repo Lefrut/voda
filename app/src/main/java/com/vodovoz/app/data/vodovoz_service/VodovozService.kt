@@ -599,7 +599,7 @@ interface VodovozService {
     suspend fun getAllSuperTop(
         @Query("id") id: Long,
         @Query("nav") page: Int = 1,
-        @Query("sect") categoryId: Int = -1,
+        @Query("sect") categoryId: Int? = null,
         @Query("sort") sort: String = "",
         @Query("ascdesc") order: String = "",
     ): Response<VodovozResponseDTO<ProductsSectionDTO>>

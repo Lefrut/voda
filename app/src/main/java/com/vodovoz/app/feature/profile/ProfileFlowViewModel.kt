@@ -32,6 +32,7 @@ import com.vodovoz.app.feature.profile.waterapp.WaterAppHelper
 import com.vodovoz.app.feature.sitestate.SiteStateManager
 import com.vodovoz.app.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.onEach
@@ -53,11 +54,9 @@ class ProfileFlowViewModel @Inject constructor(
 ) {
 
     init {
-        viewModelScope.launch {
-            siteStateManager.requestSiteState()
+        viewModelScope.launch { delay(150) }.invokeOnCompletion {
+            fetchProfileDetails()
         }
-        //todo - check user auth else logout
-        fetchProfileDetails()
     }
 
     fun fetchProfileDetails() = viewModelScope.launch {
@@ -90,7 +89,7 @@ class ProfileFlowViewModel @Inject constructor(
             }
 
             uiStateListener.updateData { s ->
-                s.copy(uiState = uiState, )
+                s.copy(uiState = uiState)
             }
         }
     }
@@ -107,32 +106,6 @@ class ProfileFlowViewModel @Inject constructor(
             s.copy(showRefreshIndicator = false)
         }
     }
-
-    fun logoutAndRefreshScreens() = viewModelScope.launch {
-        logout().join()
-        refreshAllScreens().join()
-    }
-
-    fun logout() = viewModelScope.launch {
-        val userId = accountManager.fetchAccountId() ?: return@launch
-        flow { emit(repository.logout(userId)) }
-            .onEach {
-                cookieManager.removeCookieSessionId()
-            }.firstOrNull()
-
-        accountManager.removeUserId()
-        accountManager.removeUserToken()
-        tabManager.clearBottomNavProfileState()
-        cartManager.clearCart()
-        waterAppHelper.clearData()
-    }
-
-    private fun refreshAllScreens()  = viewModelScope.launch {
-        eventListener.emit(ProfileEvents.Logout)
-    }
-
-
-    fun isLoginAlready() = accountManager.isAlreadyLogin()
 
     fun navigateToLoginOrRegister() = viewModelScope.launch {
         if (!siteStateManager.smsEnabled()) {
@@ -260,9 +233,7 @@ class ProfileFlowViewModel @Inject constructor(
         val currentTextBSData: ProfilePopupWindowUi? = null,
         val currentSupportingBSData: ProfileChatsPopupWindowUi = ProfileChatsPopupWindowUi.Empty,
         val currentAdvertising: AboutAdvertisingUi = AboutAdvertisingUi.Empty,
-
-        ) : State {
-    }
+        ) : State
 
     @Immutable
     sealed interface ProfileUiState {
@@ -276,8 +247,6 @@ class ProfileFlowViewModel @Inject constructor(
     }
 
     sealed class ProfileEvents : Event {
-        data object Logout : ProfileEvents()
-        data object GoToCart : ProfileEvents()
         data object GoToLogin : ProfileEvents()
         data object GoToUserData : ProfileEvents()
         data object GoToRegister : ProfileEvents()

@@ -146,7 +146,7 @@ class ProductCatalogViewModel @Inject constructor(
                     },
                     fetchPagedProductsFlow = {
                         vodovozServiceRepository.getAllSuperTopPaged(
-                            id = dataSource.buttonId,
+                            buttonId = dataSource.buttonId,
                             categoryId = categoryId,
                             sort = sortModel
                         )

@@ -54,21 +54,9 @@ import javax.inject.Inject
 class ProfileFragment : Fragment() {
 
     internal val viewModel: ProfileFlowViewModel by activityViewModels()
-    private val flowViewModel: HomeFlowViewModel by activityViewModels()
-    private val cartFlowViewModel: CartFlowViewModel by activityViewModels()
-    private val favoriteViewModel: FavoriteFlowViewModel by activityViewModels()
-
-    @Inject
-    lateinit var cartManager: CartManager
-
-    @Inject
-    lateinit var likeManager: LikeManager
 
     @Inject
     lateinit var tabManager: TabManager
-
-    @Inject
-    lateinit var accountManager: AccountManager
 
     @Inject
     lateinit var cookieManager: com.vodovoz.app.common.cookie.CookieManager
@@ -147,24 +135,6 @@ class ProfileFragment : Fragment() {
             viewModel.observeEvent()
                 .collect { events ->
                     when (events) {
-                        is ProfileFlowViewModel.ProfileEvents.Logout -> {
-                            flowViewModel.refresh()
-                            cartFlowViewModel.refresh()
-                            favoriteViewModel.refresh()
-                        }
-
-                        is ProfileFlowViewModel.ProfileEvents.GoToCart -> {
-                            MaterialAlertDialogBuilder(requireContext())
-                                .setTitle("Товары добавлены в корзину")
-                                .setMessage("Перейти в корзину?")
-                                .setPositiveButton("Да") { dialog, _ ->
-                                    dialog.dismiss()
-                                    tabManager.selectTab(R.id.graph_cart)
-                                }
-                                .setNegativeButton("Нет") { dialog, _ -> dialog.dismiss() }
-                                .show()
-                        }
-
                         ProfileFlowViewModel.ProfileEvents.GoToLogin -> {
                             findNavController().navigateToLogin()
                         }

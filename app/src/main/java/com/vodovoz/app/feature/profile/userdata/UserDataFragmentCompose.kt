@@ -1,16 +1,9 @@
 package com.vodovoz.app.feature.profile.userdata
 
-import android.app.Activity
-import android.content.ContentResolver
-import android.content.Context
-import android.net.Uri
 import android.os.Bundle
-import android.provider.MediaStore.MediaColumns
-import android.provider.OpenableColumns
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -25,36 +18,27 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.fragment.findNavController
 import com.vodovoz.app.R
 import com.vodovoz.app.common.media.ImagePickerFragment
-import com.vodovoz.app.common.permissions.PermissionsController
 import com.vodovoz.app.common.tab.TabManager
 import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.composables.placeholders.LoadingPlaceholder
 import com.vodovoz.app.design_system.composables.placeholders.NetworkErrorPlaceholder
 import com.vodovoz.app.design_system.effects.LifecycleEffect
+import com.vodovoz.app.feature.cart.CartFlowViewModel
+import com.vodovoz.app.feature.catalog.CatalogFlowViewModel
+import com.vodovoz.app.feature.home.HomeFlowViewModel
 import com.vodovoz.app.feature.profile.ProfileFlowViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
-import java.io.File
 import javax.inject.Inject
-
-
-enum class Gender1(
-    val genderName: String,
-) {
-    MALE("Мужской"),
-    FEMALE("Женский")
-}
 
 @AndroidEntryPoint
 class UserDataFragment : Fragment() {
 
     private val viewModel: UserDataFlowViewModel by viewModels()
     private val profileViewModel: ProfileFlowViewModel by activityViewModels()
-
-
-    @Inject
-    lateinit var permissionsControllerFactory: PermissionsController.Factory
-    private val permissionsController by lazy { permissionsControllerFactory.create(requireActivity()) }
+    private val homeViewModel: HomeFlowViewModel by activityViewModels()
+    private val cartViewModel: CartFlowViewModel by activityViewModels()
+    private val catalogViewModel: CatalogFlowViewModel by activityViewModels()
 
     @Inject
     lateinit var tabManager: TabManager
@@ -80,7 +64,8 @@ class UserDataFragment : Fragment() {
         savedInstanceState: Bundle?,
     ): View {
         return ComposeView(requireContext()).apply {
-            setViewCompositionStrategy(ViewCompositionStrategy.Default)
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+
             setContent {
                 VodovozTheme {
                     val pagingState by viewModel.observeUiState().collectAsStateWithLifecycle()
@@ -109,24 +94,17 @@ class UserDataFragment : Fragment() {
                     LifecycleEffect {
                         viewModel.observeEvent().collect { event ->
                             when (event) {
-                                UserDataFlowViewModel.UserDataEvents.Logout -> {
+                                UserDataFlowViewModel.UserDataEvents.RefreshAllAndGoBack -> {
+                                    homeViewModel.refresh()
+                                    cartViewModel.refresh()
+                                    catalogViewModel.refresh()
+                                    profileViewModel.refresh()
 
-                                }
-
-                                is UserDataFlowViewModel.UserDataEvents.NavigateToGenderChoose -> {
-
-                                }
-
-                                UserDataFlowViewModel.UserDataEvents.ShowDatePicker -> {
-
+                                    findNavController().popBackStack(R.id.profileFragment, false)
                                 }
 
                                 UserDataFlowViewModel.UserDataEvents.UpdateProfile -> {
                                     profileViewModel.fetchProfileDetails()
-                                }
-
-                                is UserDataFlowViewModel.UserDataEvents.UpdateUserDataEvent -> {
-
                                 }
 
                                 UserDataFlowViewModel.UserDataEvents.GoBack -> {

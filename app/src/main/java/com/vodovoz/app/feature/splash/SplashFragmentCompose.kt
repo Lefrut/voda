@@ -184,7 +184,7 @@ class SplashFragment : Fragment() {
                 }
 
                 AppState.UserError -> {
-                    profileViewModel.logout().join()
+                    splashViewModel.logout().join()
                     activityViewModel.setAppState()
                 }
             }

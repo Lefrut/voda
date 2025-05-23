@@ -2,7 +2,15 @@ package com.vodovoz.app.feature.profile.waterapp.composables
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -26,6 +34,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.vodovoz.app.R
 import com.vodovoz.app.feature.profile.waterapp.WaterAppHelper
@@ -53,13 +62,37 @@ fun WaterAppUserDataScreen(
     onCloseClick: () -> Unit,
     onNextClick: () -> Unit,
 ) {
+
     Column(modifier = modifier.fillMaxSize()) {
         WaterAppUserDataTopBar(
             currentStage = userDataStage,
             onBackClick = onBackClick,
             onCloseClick = onCloseClick
         )
-        AnimatedContent(targetState = userDataStage, label = "Animated UserDataStages") { state ->
+        AnimatedContent(
+            targetState = userDataStage,
+            label = "Animated UserDataStages",
+            transitionSpec = {
+                val animationSpec = tween<IntOffset>(
+                    durationMillis = 200,
+                    easing = FastOutSlowInEasing
+                )
+
+                if (targetState > initialState) {
+                    (slideInHorizontally(animationSpec) { it } +
+                            scaleIn(initialScale = 0.35f)) togetherWith (slideOutHorizontally(
+                        animationSpec
+                    ) { -it } + scaleOut(
+                        targetScale = 1.00f
+                    ))
+                } else {
+                    (slideInHorizontally(animationSpec) { -it } +
+                            scaleIn(initialScale = 0.35f)) togetherWith
+                            (slideOutHorizontally(animationSpec) { it } +
+                                    scaleOut(targetScale = 1.0f))
+                }.using(SizeTransform(clip = false))
+            }
+        ) { state ->
             when (state) {
                 WaterAppUiState.UserData.Gender -> {
                     WaterAppStageBox(
