@@ -15,11 +15,20 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.gestures.AnchoredDraggableState
+import androidx.compose.foundation.gestures.animateTo
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.SheetValue.Hidden
+import androidx.compose.material3.SheetValue.PartiallyExpanded
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -29,8 +38,14 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.fragment.findNavController
 import com.google.android.gms.location.LocationServices
 import com.vodovoz.app.R
+import com.vodovoz.app.core.navigation.navigateToWebView
 import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.effects.LifecycleEffect
+import com.vodovoz.app.design_system.model.toPoint
+import com.vodovoz.app.ui.yandex_map.calculateBounds
+import com.vodovoz.app.ui.yandex_map.minusZoom
+import com.vodovoz.app.ui.yandex_map.plusZoom
+import com.vodovoz.app.util.extensions.dialPhoneNumber
 import com.yandex.mapkit.Animation
 import com.yandex.mapkit.MapKit
 import com.yandex.mapkit.MapKitFactory
@@ -45,6 +60,10 @@ import com.yandex.mapkit.user_location.UserLocationObjectListener
 import com.yandex.mapkit.user_location.UserLocationView
 import com.yandex.runtime.image.ImageProvider
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @AndroidEntryPoint
 class TraceOrderFragment : Fragment() {
@@ -137,6 +156,7 @@ class TraceOrderFragment : Fragment() {
         userLocationLayer.setObjectListener(userLocationListener)
     }
 
+    @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -148,8 +168,10 @@ class TraceOrderFragment : Fragment() {
             setContent {
                 VodovozTheme {
 
+                    val context = LocalContext.current
                     val pagingState by viewModel.observeUiState().collectAsStateWithLifecycle()
                     val viewState by rememberUpdatedState(newValue = pagingState.data)
+
                     val locationPermissionLauncher = rememberLauncherForActivityResult(
                         contract = ActivityResultContracts.RequestMultiplePermissions()
                     ) { result ->
@@ -157,22 +179,34 @@ class TraceOrderFragment : Fragment() {
                                 result[Manifest.permission.ACCESS_COARSE_LOCATION] == true
 
                         if (granted) {
-                            viewModel.moveToGeo()
+                            viewModel.moveToUserGeo()
                         }
+                    }
+
+                    val anchoredDraggableState = remember {
+                        AnchoredDraggableState(initialValue = PartiallyExpanded)
                     }
 
                     TraceOrderScreen(
                         viewModel = viewModel,
                         viewState = viewState,
+                        anchoredDraggableState = anchoredDraggableState,
                         mapView = { mapView }
                     )
 
                     LaunchedEffect(Unit) {
+                        if (locationPermissionsGranted) return@LaunchedEffect
 
+                        locationPermissionLauncher.launch(locationPermissions)
                     }
 
-
                     LifecycleEffect {
+                        withContext(Dispatchers.Default) {
+                            viewModel.orderDetailsCallbackFlow().collect()
+                        }
+                    }
+
+                    LifecycleEffect(anchoredDraggableState) {
                         viewModel.observeEvent().collect { event ->
                             when (event) {
                                 TraceOrderViewModel.TraceOrderEvents.GoBack -> {
@@ -180,37 +214,14 @@ class TraceOrderFragment : Fragment() {
                                 }
 
                                 TraceOrderViewModel.TraceOrderEvents.MoveCameraMinus -> {
-                                    val cameraPosition = map.cameraPosition
-                                    val newZoom = cameraPosition.zoom - 1f
-
-                                    mapView.map.move(
-                                        CameraPosition(
-                                            cameraPosition.target,
-                                            newZoom,
-                                            cameraPosition.azimuth,
-                                            cameraPosition.tilt
-                                        ),
-                                        Animation(Animation.Type.LINEAR, 0.25f),
-                                        null
-                                    )
+                                    map.minusZoom()
                                 }
 
                                 TraceOrderViewModel.TraceOrderEvents.MoveCameraPlus -> {
-                                    val cameraPosition = map.cameraPosition
-                                    val newZoom = cameraPosition.zoom + 1f
-                                    mapView.map.move(
-                                        CameraPosition(
-                                            cameraPosition.target,
-                                            newZoom,
-                                            cameraPosition.azimuth,
-                                            cameraPosition.tilt
-                                        ),
-                                        Animation(Animation.Type.LINEAR, 0.25f),
-                                        null
-                                    )
+                                    map.plusZoom()
                                 }
 
-                                TraceOrderViewModel.TraceOrderEvents.CheckGeo -> {
+                                TraceOrderViewModel.TraceOrderEvents.CheckUserGeo -> {
                                     val showSettingDialog =
                                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                                             !locationPermissions.any { perm ->
@@ -223,7 +234,7 @@ class TraceOrderFragment : Fragment() {
 
                                     when {
                                         locationPermissionsGranted -> {
-                                            viewModel.moveToGeo()
+                                            viewModel.moveToUserGeo()
                                         }
 
 
@@ -244,8 +255,40 @@ class TraceOrderFragment : Fragment() {
                                     }
                                 }
 
-                                TraceOrderViewModel.TraceOrderEvents.MoveToGeo -> {
-                                    val context = requireContext()
+                                is TraceOrderViewModel.TraceOrderEvents.MoveToDeliveryGeo -> {
+                                    val bounds = calculateBounds(
+                                        event.finishPoint?.toPoint() ?: return@collect,
+                                        event.driverPoint?.toPoint() ?: return@collect
+                                    )
+
+                                    val (tilt, azimuth) = map.cameraPosition.let { it.tilt to it.azimuth }
+
+
+                                    val cP = map.cameraPosition(bounds)
+
+                                    val cameraPosition = CameraPosition(
+                                        cP.target,
+                                        cP.zoom - 2f,
+                                        azimuth,
+                                        tilt
+                                    )
+
+                                    map.move(
+                                        cameraPosition,
+                                        Animation(Animation.Type.LINEAR, 0.25f),
+                                        null
+                                    )
+                                }
+
+                                TraceOrderViewModel.TraceOrderEvents.GoToLocationSettings -> {
+                                    Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).also { intent ->
+                                        intent.data =
+                                            Uri.fromParts("package", context.packageName, null)
+                                        context.startActivity(intent)
+                                    }
+                                }
+
+                                TraceOrderViewModel.TraceOrderEvents.MoveToUserGeo -> {
                                     if (ActivityCompat.checkSelfPermission(
                                             context,
                                             Manifest.permission.ACCESS_FINE_LOCATION
@@ -260,9 +303,9 @@ class TraceOrderFragment : Fragment() {
 
 
                                     fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
-                                        location ?: return@addOnSuccessListener
+                                        if (location == null) return@addOnSuccessListener
 
-                                        mapView.mapWindow.map.move(
+                                        map.move(
                                             CameraPosition(
                                                 Point(location.latitude, location.longitude),
                                                 14f,
@@ -273,14 +316,35 @@ class TraceOrderFragment : Fragment() {
                                             null
                                         )
                                     }
+
                                 }
 
-                                TraceOrderViewModel.TraceOrderEvents.GoToLocationSettings -> {
-                                    Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).also { intent ->
-                                        intent.data =
-                                            Uri.fromParts("package", context.packageName, null)
-                                        context.startActivity(intent)
+                                TraceOrderViewModel.TraceOrderEvents.HideBottomSheet -> {
+                                    launch {
+                                        anchoredDraggableState.animateTo(
+                                            Hidden,
+                                            tween(150, 0, LinearEasing)
+                                        )
                                     }
+                                }
+
+                                TraceOrderViewModel.TraceOrderEvents.ShowBottomSheet -> {
+                                    launch {
+                                        if (anchoredDraggableState.isAnimationRunning) return@launch
+
+                                        anchoredDraggableState.animateTo(
+                                            PartiallyExpanded,
+                                            tween(250, 600, LinearEasing)
+                                        )
+                                    }
+                                }
+
+                                is TraceOrderViewModel.TraceOrderEvents.Phone -> {
+                                    context.dialPhoneNumber(event.phone)
+                                }
+
+                                is TraceOrderViewModel.TraceOrderEvents.GoToJivoChat -> {
+                                    findNavController().navigateToWebView(event.link)
                                 }
                             }
                         }

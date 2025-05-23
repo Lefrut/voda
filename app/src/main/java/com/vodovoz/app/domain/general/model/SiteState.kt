@@ -9,7 +9,8 @@ data class SiteState(
     val jivoChat: JivoChatModel,
     val tracking: TrackingConfig,
     val agreement: AgreementModel,
-    val data: SiteStateDataModel? = null
+    val data: SiteStateDataModel? = null,
+    val callPhoneNumber: String
 ){
     companion object{
         val Blocked = SiteState(
@@ -20,7 +21,8 @@ data class SiteState(
             showComments = false,
             jivoChat = JivoChatModel(false, ""),
             tracking = TrackingConfig(false, 30),
-            agreement = AgreementModel("", emptyList())
+            agreement = AgreementModel("", emptyList()),
+            callPhoneNumber = ""
         )
     }
 }

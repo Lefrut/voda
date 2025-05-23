@@ -8,39 +8,58 @@ import androidx.compose.foundation.gestures.anchoredDraggable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.SheetValue.Hidden
 import androidx.compose.material3.SheetValue.PartiallyExpanded
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import coil3.compose.AsyncImage
+import coil3.request.ImageRequest
+import coil3.request.crossfade
 import com.vodovoz.app.R
 import com.vodovoz.app.design_system.composables.bottom_sheet.VodovozDragHandle
+import com.vodovoz.app.design_system.composables.button.VodovozButtonDefaults
+import com.vodovoz.app.design_system.composables.button.VodovozButtonSmall
 import com.vodovoz.app.design_system.composables.dialogs.VodovozDialog
 import com.vodovoz.app.design_system.composables.top_bar.VodovozTopBar
+import com.vodovoz.app.design_system.model.ImageAndTextUi
+import com.vodovoz.app.design_system.model.ImageButtonUi
 import com.vodovoz.app.feature.all.orders.detail.traceorder.composables.TraceOrderBody
 import com.vodovoz.app.feature.home.composables.dropShadow
 import com.yandex.mapkit.mapview.MapView
 import kotlin.math.roundToInt
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TraceOrderScreen(
     viewModel: TraceOrderViewModel,
     viewState: TraceOrderViewModel.TraceOrderState,
+    anchoredDraggableState: AnchoredDraggableState<SheetValue>,
     mapView: () -> MapView,
 ) {
     Column(
@@ -58,20 +77,33 @@ fun TraceOrderScreen(
             TraceOrderBody(
                 mapView = mapView,
                 carPoint = viewState.carPoint,
-                deliveryPoint = viewState.deliveryPoint,
+                deliveryPoint = viewState.finishPoint,
                 onGeoClick = {
-                    viewModel.checkGeo()
+                    viewModel.moveToAvailableGeo()
                 },
                 onZoomPlus = {
                     viewModel.plusZoom()
                 },
                 onZoomMinus = {
                     viewModel.minusZoom()
+                },
+                onDragStart = {
+                    viewModel.hideBottomSheet()
+                },
+                onDragStop = {
+                    viewModel.showBottomSheet()
                 }
             )
 
             TraceOrderBottomSheet(
-                modifier = Modifier
+                modifier = Modifier,
+                state = anchoredDraggableState,
+                title = viewState.bottomSheetTitle,
+                buttons = viewState.bottomSheetButtons,
+                items = viewState.bottomSheetItems,
+                onButtonClick = { imageButton ->
+                    viewModel.activateButton(imageButton)
+                }
             )
         }
     }
@@ -93,34 +125,41 @@ fun TraceOrderScreen(
 }
 
 
+@Suppress("NonSkippableComposable")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TraceOrderBottomSheet(modifier: Modifier = Modifier) {
+fun TraceOrderBottomSheet(
+    modifier: Modifier = Modifier,
+    state: AnchoredDraggableState<SheetValue>,
+    title: String,
+    buttons: List<ImageButtonUi>,
+    items: List<ImageAndTextUi>,
+    onButtonClick: (ImageButtonUi) -> Unit,
+) {
     val density = LocalDensity.current
 
     val partiallyExpandedDp = 262.dp
     val partiallyExpandedPx = with(density) { partiallyExpandedDp.toPx() }
     val hiddenPx = with(density) { 100.dp.toPx() }
 
-    val state = remember {
-        AnchoredDraggableState(
-            initialValue = PartiallyExpanded,
-            anchors = DraggableAnchors {
+
+    LaunchedEffect(Unit) {
+        state.updateAnchors(
+            DraggableAnchors {
                 Hidden at partiallyExpandedPx - hiddenPx
                 PartiallyExpanded at 0f
-            },
+            }
         )
     }
 
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .height(partiallyExpandedDp)
+            .heightIn(max = partiallyExpandedDp + (partiallyExpandedDp / 2))
             .offset {
                 IntOffset(
                     x = 0,
-                    y = state
-                        .requireOffset()
+                    y = state.requireOffset()
                         .roundToInt()
                 )
             }
@@ -146,20 +185,110 @@ fun TraceOrderBottomSheet(modifier: Modifier = Modifier) {
                 blur = 5.dp,
                 offsetY = 5.dp
             )
-            .background(MaterialTheme.colorScheme.background, MaterialTheme.shapes.medium)
-            .padding(16.dp),
+            .background(
+                color = MaterialTheme.colorScheme.background,
+                shape = MaterialTheme.shapes.medium.copy(
+                    bottomEnd = CornerSize(0.dp),
+                    bottomStart = CornerSize(0.dp)
+                )
+            ),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         VodovozDragHandle()
+
         Spacer(Modifier.height(20.dp))
 
-        Column(
+        Text(
             modifier = Modifier
-                .verticalScroll(rememberScrollState())
-                .padding(vertical = 8.dp, horizontal = 16.dp),
-            verticalArrangement = Arrangement.Center
-        ) {
+                .align(Alignment.Start)
+                .padding(start = 16.dp, end = 16.dp, top = 8.dp),
+            text = title,
+            color = MaterialTheme.colorScheme.onBackground,
+            style = MaterialTheme.typography.headlineSmall
+        )
 
+        if (items.isNotEmpty()) {
+            Column(modifier = Modifier.padding(vertical = 16.dp)) {
+                items.forEach { item ->
+                    TraceOrderBottomSheetItem(
+                        image = item.image,
+                        name = item.text
+                    )
+                }
+            }
         }
+
+        FlowRow(
+            modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 24.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            maxItemsInEachRow = 2,
+        ) {
+            buttons.forEach { button ->
+                VodovozButtonSmall(
+                    modifier = Modifier.weight(1f),
+                    onClick = { onButtonClick(button) },
+                    colors = VodovozButtonDefaults.secondaryColors().copy(
+                        containerColor = button.containerColor,
+                        contentColor = button.contentColor
+                    ),
+                    contentPadding = PaddingValues(horizontal = 8.dp)
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        AsyncImage(
+                            model = ImageRequest.Builder(LocalContext.current)
+                                .crossfade(true)
+                                .data(button.image)
+                                .build(),
+                            contentDescription = null,
+                            modifier = Modifier
+                                .padding(end = 4.dp)
+                                .size(18.dp),
+                            contentScale = ContentScale.FillBounds
+                        )
+
+                        Text(
+                            text = button.name,
+                            style = MaterialTheme.typography.bodySmall.copy(
+                                letterSpacing = 0.1.sp
+                            ),
+                            maxLines = 1
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun TraceOrderBottomSheetItem(modifier: Modifier = Modifier, image: String, name: String) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        AsyncImage(
+            model = ImageRequest.Builder(LocalContext.current)
+                .crossfade(true)
+                .data(image)
+                .build(),
+            contentDescription = null,
+            modifier = Modifier.size(24.dp),
+            contentScale = ContentScale.FillBounds
+        )
+
+        if (image.isNotEmpty()) {
+            Spacer(modifier = Modifier.width(24.dp))
+        }
+
+        Text(
+            modifier = Modifier.weight(1f),
+            text = name,
+            color = MaterialTheme.colorScheme.onBackground,
+            style = MaterialTheme.typography.bodyMedium
+        )
+
     }
 }

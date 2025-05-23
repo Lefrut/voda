@@ -43,7 +43,11 @@ import kotlin.properties.ReadOnlyProperty
 
 fun Context.isVpnActive(): Boolean {
     val connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-    val network = connectivityManager.activeNetwork ?: return false
+    val network = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        connectivityManager.activeNetwork ?: return false
+    } else {
+        return false
+    }
     val capabilities = connectivityManager.getNetworkCapabilities(network) ?: return false
 
     return capabilities.hasTransport(NetworkCapabilities.TRANSPORT_VPN)

@@ -2,6 +2,7 @@ package com.vodovoz.app.feature.profile.navigation
 
 import android.content.Context
 import androidx.navigation.NavController
+import com.vodovoz.app.common.jivochat.JivoChatController
 import com.vodovoz.app.core.navigation.navigateToWebView
 import com.vodovoz.app.util.extensions.dialPhoneNumber
 import com.vodovoz.app.util.extensions.startTelegram
@@ -14,7 +15,7 @@ object ProfileChatsNavigator {
         when (chatId) {
             "chat" -> {
                 navController.navigateToWebView(
-                    "http://jivo.chat/mk31km1IlP", ""
+                    JivoChatController.getLink(), ""
                 )
             }
 

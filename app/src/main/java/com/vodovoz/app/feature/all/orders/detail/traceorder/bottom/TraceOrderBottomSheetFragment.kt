@@ -15,6 +15,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.vodovoz.app.R
 import com.vodovoz.app.common.content.BaseBottomSheetFragment
+import com.vodovoz.app.common.jivochat.JivoChatController
 import com.vodovoz.app.databinding.FragmentTraceOrderBottomBinding
 import com.vodovoz.app.feature.all.orders.detail.traceorder.TraceOrderViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -55,7 +56,7 @@ class TraceOrderBottomSheetFragment : BaseBottomSheetFragment() {
         binding.chatUsBtn.setOnClickListener {
             findNavController().navigate(
                 TraceOrderBottomSheetFragmentDirections.actionToWebViewFragment(
-                "http://jivo.chat/mk31km1IlP",
+                JivoChatController.getLink(),
                 "Чат"
             ))
         }

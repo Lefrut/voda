@@ -207,31 +207,6 @@ class OrderDetailsFlowViewModel @Inject constructor(
         }
     }
 
-    fun cancelOrder() {
-        val id = orderId ?: return
-        uiStateListener.value = state.copy(loadingPage = true)
-        viewModelScope.launch {
-            flow { emit(repository.cancelOrder(id)) }
-                .flowOn(Dispatchers.IO)
-                .onEach { response ->
-                    if (response is ResponseEntity.Success) {
-                        uiStateListener.value = state.copy(loadingPage = false)
-                        cancelResultListener.emit(response.data)
-                    } else {
-                        uiStateListener.value = state.copy(loadingPage = false)
-                        cancelResultListener.emit("")
-                    }
-                }
-                .flowOn(Dispatchers.Default)
-                .catch {
-                    debugLog { "repeat order error ${it.localizedMessage}" }
-                    uiStateListener.value =
-                        state.copy(error = it.toErrorState(), loadingPage = false)
-                }
-                .collect()
-        }
-    }
-
     fun firstLoadSorted() {
         if (!state.isFirstLoad) {
             uiStateListener.value =
@@ -244,18 +219,6 @@ class OrderDetailsFlowViewModel @Inject constructor(
         uiStateListener.value =
             state.copy(loadingPage = true)
         fetchOrderDetailsOld()
-    }
-
-    fun changeCart(productId: Long, quantity: Int, oldQuan: Int) {
-        viewModelScope.launch {
-            cartManager.add(id = productId, oldCount = oldQuan, newCount = quantity)
-        }
-    }
-
-    fun changeFavoriteStatus(productId: Long, isFavorite: Boolean) {
-        viewModelScope.launch {
-            likeManager.like(productId, !isFavorite)
-        }
     }
 
     private fun checkIfDriverExists(driverId: String) {
@@ -289,23 +252,6 @@ class OrderDetailsFlowViewModel @Inject constructor(
                 debugLog { "checkIfDriverExists error $it" }
                 accountManager.reportError("checkIfDriverExists error", it)
             }
-        }
-    }
-
-    fun repeatOrderFlagReset() {
-        uiStateListener.value = state.copy(
-            data = state.data.copy(
-                ifRepeatOrder = false
-            )
-        )
-    }
-
-    fun postUrl(url: String?) {
-        if (url.isNullOrEmpty()) {
-            return
-        }
-        viewModelScope.launch {
-            repository.postUrl(url)
         }
     }
 

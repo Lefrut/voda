@@ -371,7 +371,7 @@ class AllOrdersFlowViewModel @Inject constructor(
             val currentFilters = s.currentFilters
             s.copy(
                 currentFilters = if (currentFilters.contains(filter)) currentFilters.minus(filter)
-                else listOf(filter) + currentFilters
+                else listOf(filter)
             )
         }
 

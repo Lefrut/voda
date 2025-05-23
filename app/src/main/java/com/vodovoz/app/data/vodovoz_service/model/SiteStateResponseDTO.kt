@@ -26,5 +26,7 @@ data class SiteStateResponseDTO(
     @Json(name = "SOGLASHENIE")
     val SOGLASHENIE: SOGLASHENIE_DTO?,
     @Json(name = "TESTSAITSSILKA")
-    val TESTSAITSSILKA: String?
+    val TESTSAITSSILKA: String?,
+    @Json(name = "CALL")
+    val CALL: String?
 )

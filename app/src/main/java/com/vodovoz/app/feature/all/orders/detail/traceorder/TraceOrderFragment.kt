@@ -26,6 +26,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.vodovoz.app.R
 import com.vodovoz.app.common.content.BaseFragment
+import com.vodovoz.app.common.jivochat.JivoChatController
 import com.vodovoz.app.common.permissions.PermissionsController
 import com.vodovoz.app.databinding.FragmentTraceOrderBinding
 import com.vodovoz.app.util.extensions.debugLog
@@ -140,7 +141,7 @@ class TraceOrderFragment1 : BaseFragment(), InputListener,
         binding.traceOrderBs.chatUsBtn.setOnClickListener {
             findNavController().navigate(
                 TraceOrderFragmentDirections.actionToWebViewFragment(
-                    "http://jivo.chat/mk31km1IlP",
+                    JivoChatController.getLink(),
                     "Чат"
                 )
             )
