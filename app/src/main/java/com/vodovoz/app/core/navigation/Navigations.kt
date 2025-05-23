@@ -29,7 +29,7 @@ fun NavController.navigateToAboutProduct(
     productId: Long,
     prices: List<PriceUi>,
     analogButton: ColorfulButtonUi?,
-    isAvailable: Boolean
+    isAvailable: Boolean,
 ) {
     navigate(
         R.id.aboutProductFragment,
@@ -76,7 +76,7 @@ fun NavController.navigateToWriteComment(
         "product_image" to productImage,
         "rating" to rating
     )
-    navigate(R.id.writeCommentFragment, args)
+    navigate(R.id.writeCommentFragment, args, SlideNavOptions)
 }
 
 fun NavController.navigateToWaitFeedbackProducts() {
