@@ -53,7 +53,6 @@ import androidx.compose.ui.util.lerp
 import androidx.compose.ui.unit.sp
 import com.vodovoz.app.R
 import com.vodovoz.app.design_system.VodovozTheme
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.drop
@@ -80,6 +79,9 @@ fun <T : Any> VodovozWheelPicker(
     itemText: (T) -> String = { item -> item.toString() },
     onMiddleItemChange: (T) -> Unit,
 ) {
+
+    val initIndex = remember { initialIndex }
+
     Box(
         modifier = modifier
             .fillMaxWidth()
@@ -102,7 +104,7 @@ fun <T : Any> VodovozWheelPicker(
             items = items,
             itemText = itemText,
             markedNumber = markedNumber,
-            initialIndex = initialIndex,
+            initialIndex = initIndex,
             onMiddleItemChange = onMiddleItemChange
         )
 
@@ -130,15 +132,6 @@ internal fun <T : Any> VodovozHorizontalWheelCore(
     val style: TextStyle = MaterialTheme.typography.headlineSmall
     val resolver: FontFamily.Resolver = LocalFontFamilyResolver.current
 
-    val typeface: Typeface = remember(resolver, style) {
-        resolver.resolve(
-            fontFamily = style.fontFamily,
-            fontWeight = style.fontWeight ?: FontWeight.Normal,
-            fontStyle = style.fontStyle ?: FontStyle.Normal,
-            fontSynthesis = style.fontSynthesis ?: FontSynthesis.All,
-        )
-    }.value as Typeface
-
     val primaryColor = MaterialTheme.colorScheme.primary
     val surfaceTintColor = MaterialTheme.colorScheme.surfaceTint
     val onBackgroundColor = MaterialTheme.colorScheme.onBackground
@@ -164,11 +157,22 @@ internal fun <T : Any> VodovozHorizontalWheelCore(
         }
     }
 
-    val textPaint = remember {
+    val textPaint = remember(resolver, style) {
+        val typeface = resolver.resolve(
+            fontFamily = style.fontFamily,
+            fontWeight = style.fontWeight ?: FontWeight.Normal,
+            fontStyle = style.fontStyle ?: FontStyle.Normal,
+            fontSynthesis = style.fontSynthesis ?: FontSynthesis.All,
+        ) as? Typeface
+
         android.graphics.Paint().apply {
             textAlign = android.graphics.Paint.Align.CENTER
             color = onBackgroundColor.toArgb()
-            setTypeface(typeface)
+
+            typeface?.let {
+                setTypeface(typeface)
+            }
+
         }
     }
 
@@ -222,7 +226,7 @@ internal fun <T : Any> VodovozHorizontalWheelCore(
             }
     }
 
-    val contentWidth = remember(lineDataList) {
+    val contentWidth = remember(lineDataList.size) {
         with(density) {
             val offsetX = lineDataList.lastOrNull()?.offsetX?.toDp() ?: 0.dp
             val width = lineDataList.lastOrNull()?.width?.toDp() ?: 0.dp
@@ -236,7 +240,10 @@ internal fun <T : Any> VodovozHorizontalWheelCore(
         modifier = modifier
             .fillMaxWidth()
             .onGloballyPositioned { coords ->
-                viewportWidthPx = coords.size.width.toFloat()
+                val currentWidthPx = coords.size.width.toFloat()
+                if(viewportWidthPx != currentWidthPx){
+                    viewportWidthPx = currentWidthPx
+                }
             }
             .height(120.dp)
             .horizontalScroll(scrollState)

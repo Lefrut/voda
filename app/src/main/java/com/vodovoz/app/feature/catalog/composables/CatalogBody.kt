@@ -35,7 +35,6 @@ import com.vodovoz.app.design_system.model.BannerUi
 import com.vodovoz.app.design_system.model.ParentCategoryUi
 import com.vodovoz.app.feature.home.composables.AuthScrollImagePager
 
-@OptIn(ExperimentalLayoutApi::class)
 @Suppress("NonSkippableComposable")
 @Composable
 fun CatalogBody(

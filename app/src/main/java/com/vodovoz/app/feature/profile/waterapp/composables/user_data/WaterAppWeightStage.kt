@@ -56,11 +56,14 @@ fun WaterAppWeightStage(
         val weights = remember {
             WaterAppHelper.weights
         }
+        val initialIndex = remember(weights) {
+            weights.indexOfOrNull(weight) ?: 0
+        }
 
         VodovozWheelPicker(
             modifier = Modifier.padding(horizontal = 20.dp),
             items = weights,
-            initialIndex = weights.indexOfOrNull(weight) ?: 0,
+            initialIndex = initialIndex,
             itemText = { item ->
                 item.roundToInt().toString()
             },

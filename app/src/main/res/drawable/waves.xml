@@ -7,9 +7,9 @@
     android:viewportHeight="478"
     tools:ignore="VectorRaster">
   <path
-      android:pathData="M361,28.46C361,28.46 274,56.77 171,16.1C68,-24.57 0,28.46 0,28.46V478H361V28.46Z">
+      android:pathData="M360,28.46C360,28.46 274,56.77 171,16.1C68,-24.57 0,28.46 0,28.46V478H360V28.46Z">
     <aapt:attr name="android:fillColor">
-      <gradient 
+      <gradient
           android:startX="180.5"
           android:startY="5.45"
           android:endX="180.5"
@@ -21,10 +21,10 @@
     </aapt:attr>
   </path>
   <path
-      android:pathData="M0,28.46C0,28.46 50,28.46 181,10.48C312,-7.5 361,28.46 361,28.46V478H0V28.46Z"
+      android:pathData="M0,28.46C0,28.46 50,28.46 181,10.48C312,-7.5 360,28.46 360,28.46V478H0V28.46Z"
       android:fillAlpha="0.5">
     <aapt:attr name="android:fillColor">
-      <gradient 
+      <gradient
           android:startX="180.5"
           android:startY="5.45"
           android:endX="180.5"

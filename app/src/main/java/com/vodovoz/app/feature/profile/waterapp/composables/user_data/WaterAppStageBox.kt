@@ -15,13 +15,16 @@ import androidx.compose.ui.unit.dp
 import com.vodovoz.app.feature.profile.waterapp.composables.WaterAppButton
 
 @Composable
-inline fun WaterAppStageBox(
+fun WaterAppStageBox(
     modifier: Modifier = Modifier,
     title: String,
-    noinline onNextClick: () -> Unit,
+    onNextClick: () -> Unit,
     content: @Composable () -> Unit,
 ) {
-    Column(modifier = modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
+    Column(
+        modifier = modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
         Text(
             text = title,
             modifier = Modifier.padding(top = 16.dp),

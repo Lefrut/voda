@@ -3,6 +3,7 @@ package com.vodovoz.app.feature.profile.waterapp
 import android.annotation.SuppressLint
 import android.app.Application
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.Stable
 import androidx.compose.ui.graphics.Color
 import androidx.work.Constraints
 import androidx.work.ExistingPeriodicWorkPolicy
@@ -24,6 +25,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
+@Stable
 class WaterAppHelper @Inject constructor(
     private val dataStoreRepository: DataStoreRepository,
     private val applicationContext: Application,

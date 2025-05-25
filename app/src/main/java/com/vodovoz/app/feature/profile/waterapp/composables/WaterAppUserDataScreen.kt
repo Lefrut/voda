@@ -29,6 +29,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -182,7 +184,7 @@ fun WaterAppUserDataTopBar(
     onBackClick: () -> Unit,
     onCloseClick: () -> Unit,
 ) {
-    val stages = WaterAppUiState.UserData.entries
+    val stages = remember { WaterAppUiState.UserData.entries }
 
     Row(
         modifier = modifier
@@ -197,9 +199,7 @@ fun WaterAppUserDataTopBar(
             modifier = Modifier
                 .size(24.dp)
                 .clip(CircleShape)
-                .clickable {
-                    onBackClick()
-                },
+                .clickable(onClick = onBackClick),
             contentDescription = null,
             tint = MaterialTheme.colorScheme.onBackground
         )
@@ -210,21 +210,22 @@ fun WaterAppUserDataTopBar(
             horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterHorizontally)
         ) {
 
-            stages.forEachIndexed { index, _ ->
+            stages.forEachIndexed { index, stage ->
                 val stageIndicatorColor by
                 animateColorAsState(
                     targetValue = if (index <= currentStage.ordinal) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
-                    label = " IndicatorColorAnimation"
+                    label = "IndicatorColorAnimation"
                 )
 
-                Box(
-                    modifier = Modifier
-                        .width(24.dp)
-                        .height(4.dp)
-                        .clip(RoundedCornerShape(20.dp))
-                        .background(stageIndicatorColor),
-                )
-
+                key(stage) {
+                    Box(
+                        modifier = Modifier
+                            .width(24.dp)
+                            .height(4.dp)
+                            .clip(RoundedCornerShape(20.dp))
+                            .background(stageIndicatorColor),
+                    )
+                }
             }
         }
         Icon(
@@ -232,9 +233,7 @@ fun WaterAppUserDataTopBar(
             modifier = Modifier
                 .size(24.dp)
                 .clip(CircleShape)
-                .clickable {
-                    onCloseClick()
-                },
+                .clickable(onClick = onCloseClick),
             contentDescription = null,
             tint = MaterialTheme.colorScheme.onBackground
         )
