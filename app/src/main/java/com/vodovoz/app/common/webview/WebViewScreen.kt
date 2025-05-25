@@ -105,7 +105,7 @@ private fun WebView(
 
     AndroidView(
         factory = { webView },
-        modifier = modifier
+        modifier = modifier.fillMaxSize()
     )
 
     LaunchedEffect(url) {

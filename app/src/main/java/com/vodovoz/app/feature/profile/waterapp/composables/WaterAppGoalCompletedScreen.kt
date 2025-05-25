@@ -53,7 +53,8 @@ fun WaterAppGoalCompletedScreen(goal: Int, onCloseClick: () -> Unit) {
                 0f to WaterAppHelper.Colors.lightBlue,
                 1f to WaterAppHelper.Colors.darkBlue
             )
-            .systemBarsPadding(),
+            .systemBarsPadding()
+            .clickable(onClick = onCloseClick),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Spacer(Modifier.weight(0.5f))

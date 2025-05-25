@@ -128,14 +128,7 @@ internal fun <T : Any> VodovozVerticalWheelCore(
     val density = LocalDensity.current
     val style: TextStyle = MaterialTheme.typography.headlineSmall
     val resolver = LocalFontFamilyResolver.current
-    val typeface = remember(resolver, style) {
-        resolver.resolve(
-            fontFamily = style.fontFamily,
-            fontWeight = style.fontWeight ?: FontWeight.Normal,
-            fontStyle = style.fontStyle ?: FontStyle.Normal,
-            fontSynthesis = style.fontSynthesis ?: FontSynthesis.All,
-        ).value as Typeface
-    }
+
     val primaryColor = MaterialTheme.colorScheme.primary
     val surfaceTint = MaterialTheme.colorScheme.surfaceTint
     val onBg = MaterialTheme.colorScheme.onBackground
@@ -159,10 +152,20 @@ internal fun <T : Any> VodovozVerticalWheelCore(
 
     }
 
-    val textPaint = remember {
+    val textPaint = remember(resolver, style) {
+        val typeface = resolver.resolve(
+            fontFamily = style.fontFamily,
+            fontWeight = style.fontWeight ?: FontWeight.Normal,
+            fontStyle = style.fontStyle ?: FontStyle.Normal,
+            fontSynthesis = style.fontSynthesis ?: FontSynthesis.All,
+        ).value as? Typeface
+
         Paint().apply {
             color = onBg.toArgb()
-            setTypeface(typeface)
+            typeface?.let {
+                setTypeface(typeface)
+            }
+
         }
     }
     val textMarginPx = with(density) { (20.dp).toPx() }
@@ -219,7 +222,9 @@ internal fun <T : Any> VodovozVerticalWheelCore(
     Box(
         modifier = modifier
             .fillMaxHeight()
-            .onGloballyPositioned { viewportHeightPx = it.size.height.toFloat() }
+            .onGloballyPositioned {
+                viewportHeightPx = it.size.height.toFloat()
+            }
             .width(130.dp)
             .verticalScroll(
                 state = scrollState

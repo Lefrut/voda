@@ -25,10 +25,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -68,7 +71,6 @@ fun TraceOrderBody(
         targetValue = carPoint,
         typeConverter = TwoWayConverter(
             convertToVector = { point ->
-                point?.lat?.toFloat() ?: 0f
                 AnimationVector2D(
                     point?.lat?.toFloat() ?: 0f,
                     point?.lon?.toFloat() ?: 0f

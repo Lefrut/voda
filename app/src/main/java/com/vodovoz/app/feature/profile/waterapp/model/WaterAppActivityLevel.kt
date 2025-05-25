@@ -2,8 +2,10 @@ package com.vodovoz.app.feature.profile.waterapp.model
 
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
+import androidx.compose.runtime.Immutable
 import com.vodovoz.app.R
 
+@Immutable
 enum class WaterAppActivityLevel(
     @StringRes
     val titleId: Int,

@@ -1,9 +1,10 @@
 package com.vodovoz.app.feature.profile.waterapp.composables
 
-import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
@@ -12,11 +13,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -24,12 +23,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -37,36 +34,32 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.ClipOp
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.PathFillType
 import androidx.compose.ui.graphics.PathOperation
+import androidx.compose.ui.graphics.asAndroidPath
 import androidx.compose.ui.graphics.asComposePath
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.clipPath
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.VectorGroup
 import androidx.compose.ui.graphics.vector.VectorPath
 import androidx.compose.ui.graphics.vector.toPath
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.vodovoz.app.R
 import com.vodovoz.app.design_system.composables.button.VodovozButton
-import kotlinx.coroutines.launch
-import java.math.BigInteger
+import com.vodovoz.app.ui.canvas.mergeToSinglePath
+import com.vodovoz.app.ui.canvas.toAndroidPaths
 import kotlin.random.Random
 import android.graphics.Matrix as AndroidMatrix
 import android.graphics.Path as AndroidPath
 
-
-//TODO - complete this
 @Composable
 fun WaterAppGoalScreen(
     modifier: Modifier = Modifier,
@@ -80,18 +73,46 @@ fun WaterAppGoalScreen(
                 .padding(top = 140.dp)
                 .matchParentSize()
         ) {
-            val vector = ImageVector.vectorResource(id = R.drawable.wawes)
+            val vector = ImageVector.vectorResource(id = R.drawable.waves)
 
-            Image(
-                painter = painterResource(id = R.drawable.wawes),
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier.matchParentSize()
+            val infiniteTransition = rememberInfiniteTransition(label = "waves")
 
+            val offsetX by infiniteTransition.animateFloat(
+                initialValue = -20f,
+                targetValue = 20f,
+                animationSpec = infiniteRepeatable(
+                    animation = tween(durationMillis = 2000, easing = LinearEasing),
+                    repeatMode = RepeatMode.Reverse
+                ),
+                label = "offsetX"
             )
 
-            BubblesUnderGround(
-                imageVector = vector,
+            val scale by infiniteTransition.animateFloat(
+                initialValue = 1f,
+                targetValue = 1.05f,
+                animationSpec = infiniteRepeatable(
+                    animation = tween(durationMillis = 3200, easing = LinearEasing),
+                    repeatMode = RepeatMode.Reverse
+                ),
+                label = "scale"
+            )
+
+            Image(
+                painter = painterResource(id = R.drawable.waves),
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .matchParentSize()
+                    .graphicsLayer {
+                        translationX = offsetX
+                        scaleX = scale
+                        scaleY = scale
+                    }
+            )
+
+
+            BubblesClipped(
+                clipVector = vector,
                 modifier = Modifier.matchParentSize()
             )
         }
@@ -163,173 +184,113 @@ fun WaterAppGoalScreen(
 @Preview
 @Composable
 fun Demo() {
-    val svgPaths = ImageVector.vectorResource(id = R.drawable.wawes)
+    val svgPaths = ImageVector.vectorResource(id = R.drawable.waves)
 
-    BubblesUnderGround(
-        imageVector = svgPaths,
-        bubbleCount = 40,
+    BubblesClipped(
+        clipVector = svgPaths,
         modifier = Modifier.fillMaxSize()
     )
 }
 
 
 @Composable
-fun BubblesUnderGround(
-    imageVector: ImageVector,
+fun BubblesClipped(
+    clipVector: ImageVector,
     modifier: Modifier = Modifier,
-    bubbleCount: Int = 100,
+    bubbleCount: Int = 65,
 ) {
     val density = LocalDensity.current
     var canvasSize by remember { mutableStateOf(Size.Zero) }
 
-    val svgComposePaths = remember(imageVector, canvasSize) {
-        imageVector.toAndroidPaths(
-            canvasSize.width,
-            canvasSize.height
-        ).map { it.asComposePath() }
-
+    val svgComposePaths = remember(clipVector, canvasSize) {
+        clipVector.toAndroidPaths(
+            targetWidthPx = canvasSize.width,
+            targetHeightPx = canvasSize.height,
+            contentScale = ContentScale.Crop
+        ).map { path -> path.asComposePath() }
     }
 
     val clipPath = remember(svgComposePaths, canvasSize) {
-        svgComposePaths.reduceOrNull { acc, path ->
-            Path().apply {
-                op(acc, path, PathOperation.Union)
-            }
-        } ?: svgComposePaths.firstOrNull()?.let { first ->
-            Path().apply { addPath(first) }
-        }
-        ?: Path()
+        svgComposePaths.mergeToSinglePath()
     }
 
     @Immutable
-    data class Bubble(var x: Float, var y: Float, val r: Float, val speed: Float, val color: Color)
+    data class Bubble(
+        val startX: Float,
+        val baseSizePx: Float,
+        val startYOffset: Float,
+        val durationMillis: Int,
+        val delayMillis: Int,
+        val color: Color
+    )
 
-    val bubbles = remember(bubbleCount) {
+    val bubbles = remember(canvasSize, bubbleCount) {
+        val minWhiteSize = with(density) { 4.dp.toPx() }
+        val maxWhiteSize = with(density) { 12.dp.toPx() }
+        val minBlueSize = with(density) { 6.dp.toPx() }
+        val maxBlueSize = with(density) { 14.dp.toPx() }
+
         List(bubbleCount) {
-            val rDp = Random.nextFloat() * (25f - 6f) + 6f
-            val speedDp = Random.nextFloat() * (100f - 30f) + 30f
+            val isBlue = Random.nextFloat() < 0.2f
+            val color = if (isBlue) {
+                Color(0xFF05A4FF)
+            } else {
+                Color.White
+            }.copy(alpha = 0.5f)
+
+            val size = if (isBlue) {
+                Random.nextFloat() * (maxBlueSize - minBlueSize) + minBlueSize
+            } else {
+                Random.nextFloat() * (maxWhiteSize - minWhiteSize) + minWhiteSize
+            }
+
             Bubble(
-                x = Random.nextFloat(),
-                y = 1f + Random.nextFloat(),
-                r = with(density) { rDp.dp.toPx() },
-                speed = with(density) { speedDp.dp.toPx() },
-                color = if (Random.nextBoolean())
-                    Color.Black
-                else
-                    Color.Blue
+                startX = Random.nextFloat() * canvasSize.width,
+                baseSizePx = size,
+                startYOffset = with(density) { 20.dp.toPx() },
+                durationMillis = Random.nextInt(3000, 6000),
+                delayMillis = Random.nextInt(0, 3000),
+                color = color
             )
         }
     }
 
-    LaunchedEffect(canvasSize) {
-        if (canvasSize == Size.Zero) return@LaunchedEffect
-        var last = withFrameNanos { it }
-        while (true) {
-            val now = withFrameNanos { it }
-            val dt = (now - last) / 1_000_000_000f
-            last = now
-            val h = canvasSize.height
-            val w = canvasSize.width
-            bubbles.forEach { b ->
-                b.y -= b.speed * dt
-                if (b.y * h + b.r < 0f) {
-                    b.y = 1f + Random.nextFloat()
-                    b.x = Random.nextFloat()
-                }
-            }
-        }
+    val transition = rememberInfiniteTransition(label = "bubbles")
+
+    val animatedProgress = bubbles.mapIndexed { index, bubble ->
+        transition.animateFloat(
+            initialValue = 0f,
+            targetValue = 1f,
+            animationSpec = infiniteRepeatable(
+                animation = tween(
+                    durationMillis = bubble.durationMillis,
+                    delayMillis = bubble.delayMillis,
+                    easing = LinearEasing
+                ),
+                repeatMode = RepeatMode.Restart
+            ),
+            label = "bubble-progress-$index"
+        )
     }
 
-    Canvas(modifier = modifier) {
+    Canvas(modifier = modifier.fillMaxSize()) {
         canvasSize = size
-        drawPath(
-            path = clipPath,
-            color = Color.Red,
-            style = Stroke(width = 2.dp.toPx())
-        )
 
         clipPath(path = clipPath, clipOp = ClipOp.Intersect) {
+            bubbles.forEachIndexed { index, bubble ->
+                val progress = animatedProgress[index].value
 
-        }
+                val y =
+                    canvasSize.height + bubble.startYOffset - (canvasSize.height + bubble.startYOffset + bubble.baseSizePx) * progress
+                val radius = bubble.baseSizePx * (1f - 0.6f * progress)
+                val alpha = 0.5f * (1f - progress)
 
-        bubbles.forEach { b ->
-            drawCircle(
-                color = b.color,
-                radius = b.r,
-                center = Offset(b.x * size.width, b.y * size.height)
-            )
-        }
-    }
-}
-
-
-fun ImageVector.toAndroidPaths(): List<AndroidPath> {
-    val result = mutableListOf<AndroidPath>()
-
-    fun traverse(group: VectorGroup, currentMatrix: AndroidMatrix) {
-
-        val matrix = AndroidMatrix(currentMatrix).apply {
-            preScale(group.scaleX, group.scaleY)
-            preTranslate(group.translationX, group.translationY)
-            preRotate(group.rotation, group.pivotX, group.pivotY)
-        }
-
-        group.forEach { node ->
-            when (node) {
-                is VectorGroup -> traverse(node, matrix)
-                is VectorPath -> {
-                    val ap = AndroidPath().apply {
-                        node.pathData.toPath(asComposePath())
-                        transform(matrix)
-                    }
-                    result += ap
-                }
-            }
-
-        }
-    }
-    traverse(this.root, AndroidMatrix())
-    return result
-}
-
-
-fun ImageVector.toAndroidPaths(
-    targetWidth: Float,
-    targetHeight: Float
-): List<AndroidPath> {
-
-
-
-
-    val scaleX = targetWidth.toBigDecimal().divide(viewportWidth.toBigDecimal()).toFloat()
-    val scaleY = (targetHeight.toBigDecimal() / viewportHeight.toBigDecimal()).toFloat()
-
-    val result = mutableListOf<AndroidPath>()
-
-    fun traverse(group: VectorGroup, currentMatrix: AndroidMatrix) {
-        val groupMatrix = AndroidMatrix(currentMatrix).apply {
-            preScale(group.scaleX, group.scaleY)
-            preRotate(group.rotation, group.pivotX, group.pivotY)
-            preTranslate(group.translationX, group.translationY)
-        }
-
-        group.forEach { node ->
-            when (node) {
-                is VectorGroup -> traverse(node, groupMatrix)
-                is VectorPath -> {
-                    val ap = AndroidPath().apply {
-                        node.pathData.toPath(asComposePath())
-                        transform(groupMatrix)
-                    }
-                    result += ap
-                }
+                drawCircle(
+                    color = bubble.color.copy(alpha = alpha),
+                    radius = radius,
+                    center = Offset(bubble.startX, y)
+                )
             }
         }
     }
-
-    val initialMatrix = AndroidMatrix().apply {
-        preScale(scaleX, scaleY)
-    }
-    traverse(root, initialMatrix)
-    return result
 }

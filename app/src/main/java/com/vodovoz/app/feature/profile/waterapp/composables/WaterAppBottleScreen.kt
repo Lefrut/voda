@@ -2,8 +2,12 @@ package com.vodovoz.app.feature.profile.waterapp.composables
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.keyframes
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -36,18 +40,28 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Matrix
+import androidx.compose.ui.graphics.Outline
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.addSvg
+import androidx.compose.ui.graphics.asComposePath
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
@@ -56,13 +70,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.vodovoz.app.R
 import com.vodovoz.app.design_system.robotoFontFamily
 import com.vodovoz.app.feature.profile.waterapp.WaterAppHelper
-import kotlinx.coroutines.launch
+import com.vodovoz.app.ui.canvas.mergeToSinglePath
+import com.vodovoz.app.ui.canvas.toAndroidPaths
 import kotlin.math.roundToInt
 
 @Composable
@@ -134,6 +151,7 @@ fun WaterAppBottleScreen(
         WaterAppBottle(
             modifier = Modifier,
             currentLevel = currentLevel,
+            maxLevel = maxLevel,
             onClick = onBottleClick
         )
 
@@ -191,42 +209,123 @@ fun WaterAppBottleScreen(
 
 
 @Composable
-private fun WaterAppBottle(modifier: Modifier = Modifier, currentLevel: Int, onClick: () -> Unit) {
+private fun WaterAppBottle(
+    modifier: Modifier = Modifier,
+    currentLevel: Int,
+    maxLevel: Int,
+    onClick: () -> Unit
+) {
+    val density = LocalDensity.current
 
-    val scope = rememberCoroutineScope()
-    val shakeOffset = remember { Animatable(0f) }
+    val bottleBoundsHeightDp = 305.dp
+    val bottleWidthDp = 128.dp
+    val bottleHeightDp = 320.dp
 
+
+    val levelFraction = currentLevel.coerceAtMost(maxLevel).toFloat() / maxLevel.coerceAtLeast(1)
+    val animatedWaveHeight by animateDpAsState(
+        targetValue = (bottleBoundsHeightDp * 0.85f) * levelFraction,
+        label = "waveHeight",
+        animationSpec = tween(250, 0, easing = LinearEasing)
+    )
+
+    val infiniteTransition = rememberInfiniteTransition(label = "waveMotion")
+
+    val waveOffsetX by infiniteTransition.animateFloat(
+        initialValue = -10f,
+        targetValue = 10f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1200, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "waveOffsetX"
+    )
+    val waveScale by infiniteTransition.animateFloat(
+        initialValue = 1f,
+        targetValue = 1.1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(2000, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "waveScale"
+    )
 
     Box(
         modifier = modifier
-            .width(128.dp)
-            .height(320.dp)
-            .offset { IntOffset(shakeOffset.value.roundToInt(), 0) }
-            .clickable(interactionSource = null, indication = null) {
-                onClick()
-                scope.launch {
-                    shakeOffset.animateTo(
-                        targetValue = 0f,
-                        animationSpec = keyframes {
-                            durationMillis = 200
-                            0f at 0
-                            10f at 100
-                            (-10f) at 200
-                            10f at 300
-                            (-10f) at 400
-                            0f at 500
-                        }
-                    )
+            .width(bottleWidthDp)
+            .height(bottleHeightDp)
+            .clickable(interactionSource = null, indication = null, onClick = onClick)
+    ) {
+
+        val bottleBoundsVector = ImageVector.vectorResource(R.drawable.bottle_bounds)
+
+        val waveShape = remember(bottleBoundsVector) {
+            val bottlePath = bottleBoundsVector.toAndroidPaths(
+                targetWidthPx = with(density) { bottleWidthDp.toPx() },
+                targetHeightPx = with(density) { bottleBoundsHeightDp.toPx() },
+                contentScale = ContentScale.FillBounds
+            ).map { androidPath ->
+                androidPath.asComposePath()
+            }.mergeToSinglePath()
+
+            val leftTrimPx = with(density) { 10.dp.toPx() }
+            val rightTrimPx = with(density) { 5.dp.toPx() }
+
+            val bounds = bottlePath.getBounds()
+            val originalWidth = bounds.width
+            val targetWidth = originalWidth - leftTrimPx - rightTrimPx
+            val scaleX = targetWidth / originalWidth
+
+            val matrix = Matrix().apply {
+                translate(-bounds.left, 0f)
+                scale(scaleX, 1f)
+                translate(bounds.left + leftTrimPx, 0f)
+            }
+
+            val squeezedPath = bottlePath.apply { transform(matrix) }
+
+            object : Shape {
+                override fun createOutline(
+                    size: Size,
+                    layoutDirection: LayoutDirection,
+                    density: Density
+                ): Outline {
+                    return Outline.Generic(squeezedPath)
                 }
             }
-    ) {
+        }
+
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(bottleBoundsHeightDp)
+                .align(Alignment.BottomCenter)
+                .clip(waveShape)
+
+        ) {
+            Image(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .fillMaxWidth()
+                    .height(animatedWaveHeight)
+                    .graphicsLayer {
+                        translationX = waveOffsetX
+                        scaleX = waveScale
+                        scaleY = waveScale
+                        alpha = 0.8f
+                    },
+                painter = painterResource(R.drawable.waves),
+                contentDescription = null,
+                contentScale = ContentScale.FillBounds
+            )
+        }
+
         Image(
             painter = painterResource(R.drawable.empty_bottle),
             contentDescription = null,
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.FillBounds
         )
-
 
 
         Column(
@@ -245,13 +344,10 @@ private fun WaterAppBottle(modifier: Modifier = Modifier, currentLevel: Int, onC
                         LineHeightStyle.Alignment.Center,
                         LineHeightStyle.Trim.None
                     ),
-                    platformStyle = PlatformTextStyle(
-                        includeFontPadding = false
-                    ),
+                    platformStyle = PlatformTextStyle(includeFontPadding = false),
                     fontWeight = FontWeight.Medium
                 )
             )
-
             val bodySmall = MaterialTheme.typography.bodySmall
             Text(
                 modifier = Modifier
@@ -260,16 +356,13 @@ private fun WaterAppBottle(modifier: Modifier = Modifier, currentLevel: Int, onC
                     .height(25.dp),
                 text = stringResource(R.string.ml),
                 color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f),
-                style = MaterialTheme.typography.bodySmall.copy(
+                style = bodySmall.copy(
                     lineHeight = bodySmall.fontSize,
                     textAlign = TextAlign.Center
                 )
             )
-
             Spacer(Modifier.weight(1.2f))
         }
-
-
     }
 }
 

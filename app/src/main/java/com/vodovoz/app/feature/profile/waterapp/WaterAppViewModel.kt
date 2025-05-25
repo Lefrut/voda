@@ -1,5 +1,7 @@
 package com.vodovoz.app.feature.profile.waterapp
 
+import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.Stable
 import androidx.lifecycle.viewModelScope
 import com.vodovoz.app.common.content.Event
 import com.vodovoz.app.common.content.PagingContractViewModel
@@ -10,11 +12,13 @@ import com.vodovoz.app.feature.profile.waterapp.model.WaterAppActivityLevel
 import com.vodovoz.app.feature.profile.waterapp.model.WaterAppUiState
 import com.vodovoz.app.feature.profile.waterapp.model.mapToReminderIntervalUi
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
+@Stable
 class WaterAppViewModel @Inject constructor(
     private val waterAppHelper: WaterAppHelper,
 ) : PagingContractViewModel<WaterAppViewModel.WaterAppState, WaterAppViewModel.WaterAppEvents>(
@@ -27,7 +31,6 @@ class WaterAppViewModel @Inject constructor(
     }
 
     private fun setupScreen() = viewModelScope.launch {
-
         waterAppHelper.fetchWaterAppRateData()
         waterAppHelper.fetchWaterAppUserData()
         waterAppHelper.fetchWaterAppNotificationData()
@@ -141,7 +144,6 @@ class WaterAppViewModel @Inject constructor(
     }
 
     fun changeHaveNotification() = viewModelScope.launch {
-        //todo - check notification permission
         waterAppHelper.saveNotificationSwitch(!dataState.notificationData.switch)
     }
 
@@ -189,13 +191,32 @@ class WaterAppViewModel @Inject constructor(
     }
 
     fun changeWaterLevel(progress: Float) = viewModelScope.launch {
+
+
         val rateData = dataState.rateData
         val currentLevel = (progress * rateData.rate).toInt()
         waterAppHelper.setWaterLevel(currentLevel)
+
+        if(!rateData.canFill) return@launch
+
+        goToGoalCompleted()
     }
 
     fun addWater() = viewModelScope.launch {
+        if(!dataState.rateData.canFill) return@launch
+
         waterAppHelper.tryToChangeWaterLevel(dataState.changeWaterStep)
+
+        goToGoalCompleted()
+    }
+
+    private fun goToGoalCompleted() = viewModelScope.launch {
+        delay(1000)
+        if (waterAppHelper.observeWaterAppRateData().value?.canFill == false) {
+            uiStateListener.updateData { s ->
+                s.copy(uiState = WaterAppUiState.GoalCompleted)
+            }
+        }
     }
 
     fun goToUserDataStage(stage: WaterAppUiState.UserData) = viewModelScope.launch {
@@ -203,16 +224,17 @@ class WaterAppViewModel @Inject constructor(
     }
 
     fun addChangeWaterStep() = viewModelScope.launch {
-        val newStep = (dataState.changeWaterStep + 50).coerceAtMost(750)
+        val newStep = (dataState.changeWaterStep + 100).coerceAtMost(750)
         uiStateListener.updateData { it.copy(changeWaterStep = newStep) }
     }
 
     fun subtractChangeWaterStep() = viewModelScope.launch {
-        val newStep = (dataState.changeWaterStep - 50).coerceAtLeast(50)
+        val newStep = (dataState.changeWaterStep - 100).coerceAtLeast(100)
         uiStateListener.updateData { it.copy(changeWaterStep = newStep) }
     }
 
 
+    @Immutable
     data class WaterAppState(
         val userData: WaterAppHelper.WaterAppUserData = WaterAppHelper.WaterAppUserData(),
         val notificationData: WaterAppHelper.WaterAppNotificationData = WaterAppHelper.WaterAppNotificationData(),
@@ -222,6 +244,7 @@ class WaterAppViewModel @Inject constructor(
         val changeWaterStep: Int = 250,
     ) : State
 
+    @Immutable
     sealed class WaterAppEvents : Event {
 
         data object GoBack : WaterAppEvents()
