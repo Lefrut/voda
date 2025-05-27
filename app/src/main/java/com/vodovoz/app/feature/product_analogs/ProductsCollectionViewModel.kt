@@ -13,8 +13,8 @@ import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.feature.product_comments.model.SortUi
 import com.vodovoz.app.feature.product_comments.model.toDomain
 import com.vodovoz.app.feature.product_analogs.model.ProductsCollectionEvent
-import com.vodovoz.app.feature.product_analogs.model.ProductsCollectionState
-import com.vodovoz.app.feature.product_analogs.model.ProductsCollectionUiState
+import com.vodovoz.app.feature.product_analogs.model.ProductAnalogsState
+import com.vodovoz.app.feature.product_analogs.model.ProductAnalogsUiState
 import com.vodovoz.app.ui.mvi.MviViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
@@ -36,8 +36,8 @@ class ProductsCollectionViewModel @Inject constructor(
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val cartManager: CartManager,
     private val favoritesManager: LikeManager,
-) : MviViewModel<ProductsCollectionState, ProductsCollectionEvent>(
-    ProductsCollectionState()
+) : MviViewModel<ProductAnalogsState, ProductsCollectionEvent>(
+    ProductAnalogsState()
 ) {
     private val productId = savedStateHandle.get<Long>("productId") ?: -1
 
@@ -90,7 +90,7 @@ class ProductsCollectionViewModel @Inject constructor(
     fun fetchProductAnalogs() =
         vodovozServiceRepository.getProductAnalogs(productId, stateSnapshot.currentSort.toDomain())
             .onStart {
-                _state.update { s -> s.copy(uiState = ProductsCollectionUiState.Loading) }
+                _state.update { s -> s.copy(uiState = ProductAnalogsUiState.Loading) }
             }.onEach { result ->
                 delay(100)
                 result.onSuccess { productsSectionModel ->
@@ -100,13 +100,13 @@ class ProductsCollectionViewModel @Inject constructor(
                             productsSection = productsSectionUi,
                             currentSort = if (s.currentSort == SortUi.Empty) productsSectionUi.sorting.firstOrNull()
                                 ?: SortUi.Empty.copy(name = productsSectionUi.sortingTitle) else s.currentSort,
-                            uiState = ProductsCollectionUiState.Success
+                            uiState = ProductAnalogsUiState.Success
                         )
                     }
                 }.onFailure {
                     _state.update { s ->
                         s.copy(
-                            uiState = ProductsCollectionUiState.Error
+                            uiState = ProductAnalogsUiState.Error
                         )
                     }
                 }

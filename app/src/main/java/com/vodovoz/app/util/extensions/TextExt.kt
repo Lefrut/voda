@@ -175,7 +175,7 @@ fun String.prepareServiceHtml(): String {
             "        border-collapse: collapse;\n" +
             "    }\n" +
             "    .colored_table {\n" +
-            "        font-size: 3em;\n" +
+            "        font-size: 2em;\n" +
             "        line-height: inherit;\n" +
             "    }\n" +
             "    .colored_table th,\n" +

@@ -15,14 +15,14 @@ import com.vodovoz.app.design_system.composables.list.ProductListOptionsRow
 import com.vodovoz.app.design_system.composables.placeholders.NetworkErrorPlaceholder
 import com.vodovoz.app.design_system.composables.top_bar.VodovozTopBar
 import com.vodovoz.app.feature.product_analogs.composables.ProductsCollectionPlaceholder
-import com.vodovoz.app.feature.product_analogs.model.ProductsCollectionState
-import com.vodovoz.app.feature.product_analogs.model.ProductsCollectionUiState
+import com.vodovoz.app.feature.product_analogs.model.ProductAnalogsState
+import com.vodovoz.app.feature.product_analogs.model.ProductAnalogsUiState
 
 @Suppress("NonSkippableComposable")
 @Composable
 fun ProductAnalogsScreen(
     viewModel: ProductsCollectionViewModel,
-    viewState: ProductsCollectionState,
+    viewState: ProductAnalogsState,
 ) {
     val productsSection = viewState.productsSection
     Column(
@@ -39,10 +39,10 @@ fun ProductAnalogsScreen(
         )
 
         when(viewState.uiState){
-            ProductsCollectionUiState.Loading -> {
+            ProductAnalogsUiState.Loading -> {
                 ProductsCollectionPlaceholder()
             }
-            ProductsCollectionUiState.Success -> {
+            ProductAnalogsUiState.Success -> {
                 ProductListOptionsRow(
                     modifier = Modifier.padding(top = 8.dp),
                     sortName = viewState.currentSort.name,
@@ -79,7 +79,7 @@ fun ProductAnalogsScreen(
                 )
             }
 
-            ProductsCollectionUiState.Error -> {
+            ProductAnalogsUiState.Error -> {
                 NetworkErrorPlaceholder {
                     viewModel.fetchProductAnalogs()
                 }

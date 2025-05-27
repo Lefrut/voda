@@ -1,6 +1,7 @@
 package com.vodovoz.app.feature.home
 
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.Stable
 import androidx.lifecycle.viewModelScope
 import com.vodovoz.app.R
 import com.vodovoz.app.common.account.data.AccountManager
@@ -70,6 +71,7 @@ import javax.inject.Inject
 import kotlin.math.roundToInt
 
 @HiltViewModel
+@Stable
 class HomeFlowViewModel @Inject constructor(
     private val repository: MainRepository,
     private val cartManager: CartManager,
@@ -279,16 +281,8 @@ class HomeFlowViewModel @Inject constructor(
                 sectionViewedProducts = sectionViewedProducts ?: s.sectionViewedProducts,
                 specialPromotion = specialPromotion ?: s.specialPromotion,
                 showSpecialPromotionBS = specialPromotion != null,
-
-                )
-        }
-        delay(500)
-
-        uiStateListener.updateData { s ->
-            s.copy(
                 sectionUnratedProducts = sectionUnratedProducts?.toUi() ?: s.sectionUnratedProducts,
-                showUnratedProductsBS = sectionUnratedProducts != null
-            )
+                )
         }
 
         return sectionViewedProducts != null

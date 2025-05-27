@@ -94,11 +94,8 @@ class RuTubeVideoFragmentDialog : DialogFragment() {
         val rutubePlayerView = binding.rutubePlayerView
         rutubePlayerView.layoutParams = rutubePlayerView.layoutParams.apply {
             width = windowWidth
-            height = if (landscapeOrientation) {
-                windowHeight
-            } else {
-                windowWidth * videoInfo.height / videoInfo.width
-            }
+            height = if (landscapeOrientation) { windowHeight
+            } else { windowWidth * videoInfo.height / videoInfo.width }
         }
     }
 

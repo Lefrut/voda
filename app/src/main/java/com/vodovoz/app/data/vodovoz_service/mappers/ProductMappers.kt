@@ -7,8 +7,10 @@ import com.vodovoz.app.data.vodovoz_service.model.EXTENDED_PRICE_DTO
 import com.vodovoz.app.data.vodovoz_service.model.NALICHIE_MORE_DTO
 import com.vodovoz.app.data.vodovoz_service.model.PODELITCA_DTO
 import com.vodovoz.app.data.vodovoz_service.model.ProductsSectionDTO
+import com.vodovoz.app.data.vodovoz_service.model.TOVAR_18_DTO
 import com.vodovoz.app.data.vodovoz_service.model.TOVAR_DATA_DTO
 import com.vodovoz.app.domain.general.model.CategoryModel
+import com.vodovoz.app.domain.general.model.ForAdultsModel
 import com.vodovoz.app.domain.general.model.LabelModel
 import com.vodovoz.app.domain.general.model.PriceModel
 import com.vodovoz.app.domain.general.model.ProductModel
@@ -31,7 +33,17 @@ fun ProductsSectionDTO.toDomain(): ProductsSectionModel {
         sorting = sorting,
         products = products,
         categories = RAZDEL?.LISTRAZDEL?.mapNotNull { it?.toDomain() } ?: emptyList(),
-        share = PODELITCA?.toDomain() ?: ShareModel.Empty
+        share = PODELITCA?.toDomain() ?: ShareModel.Empty,
+        forAdults = TOVAR18?.toDomain()
+    )
+}
+
+fun TOVAR_18_DTO.toDomain(): ForAdultsModel {
+    return ForAdultsModel(
+        title = TITLE ?: "",
+        textBlur = TEXTBLUR ?: "",
+        description = OPISANIE ?: "",
+        button = KNOPKA?.toDomain() ?: throw IllegalArgumentException("TOVAR18 button can't be null")
     )
 }
 
@@ -47,8 +59,9 @@ fun PODELITCA_DTO.toDomain(): ShareModel? {
 }
 
 fun AnalogsSectionDTO.toDomain(): ProductsSectionModel {
-    val sorting =
-        SORTIROVKA?.DANNIESORT?.mapNotNull { sortDto -> sortDto?.toDomain() } ?: emptyList()
+    val sorting = SORTIROVKA?.DANNIESORT?.mapNotNull { sortDto ->
+            sortDto?.toDomain()
+        } ?: emptyList()
 
     val products = TOVAR?.mapNotNull { tovarDto ->
         tovarDto.toDomain()
@@ -61,7 +74,8 @@ fun AnalogsSectionDTO.toDomain(): ProductsSectionModel {
         products = products,
         categories = emptyList(),
         productsQuantityText = "",
-        share = ShareModel.Empty
+        share = ShareModel.Empty,
+        forAdults = TOVAR18?.toDomain()
     )
 }
 
@@ -86,7 +100,8 @@ fun TOVAR_DATA_DTO.toDomain(): ProductModel? {
         firstPrice = EXTENDED_PRICE?.firstOrNull()?.toDomain() ?: return null,
         prices = EXTENDED_PRICE.mapNotNull { it?.toDomain() },
         labels = NALICHIE_MORE?.mapToDomain() ?: emptyList(),
-        cartQuantity = 0
+        cartQuantity = 0,
+        forAdults = TOVAR18?.toDomain()
     )
 }
 

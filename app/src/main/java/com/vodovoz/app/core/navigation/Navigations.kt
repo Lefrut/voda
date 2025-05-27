@@ -8,6 +8,7 @@ import com.vodovoz.app.R
 import com.vodovoz.app.design_system.model.ColorfulButtonUi
 import com.vodovoz.app.design_system.model.ParentCategoryUi
 import com.vodovoz.app.design_system.model.PriceUi
+import com.vodovoz.app.design_system.model.ProductMediaUi
 import com.vodovoz.app.design_system.model.filters.FilterUi
 import com.vodovoz.app.design_system.model.filters.FiltersUi
 import com.vodovoz.app.feature.all.promotions.AllPromotionsFragment
@@ -16,6 +17,7 @@ import com.vodovoz.app.feature.cart.model.CartPresentPopupWindowUi
 import com.vodovoz.app.feature.cart.model.CartPresentUi
 import com.vodovoz.app.feature.home.model.CategoryUi
 import com.vodovoz.app.feature.productlistnofilter.ProductCatalogFragment
+import com.vodovoz.app.util.extensions.indexOfOrNull
 
 
 private val SlideNavOptions = NavOptions.Builder()
@@ -76,7 +78,7 @@ fun NavController.navigateToWriteComment(
         "product_image" to productImage,
         "rating" to rating
     )
-    navigate(R.id.writeCommentFragment, args, SlideNavOptions)
+    navigate(R.id.writeCommentFragment, args)
 }
 
 fun NavController.navigateToWaitFeedbackProducts() {
@@ -212,12 +214,28 @@ fun NavController.navigateToOrderDetails(orderId: Long) {
     navigate(R.id.orderDetailsFragment, bundleOf("orderId" to orderId))
 }
 
+fun NavController.navigateToDetailMedia(media: ProductMediaUi, mediaList: List<ProductMediaUi>) {
+    navigate(
+        R.id.detailMedia,
+        bundleOf(
+            "media" to media,
+            "mediaList" to mediaList
+        ),
+    )
+
+}
+
 fun NavController.navigateToProductImages(image: String, images: List<String>) {
     val array = images.toTypedArray()
-    val currentImageIndex = images.indexOf(image)
-    val bundle = bundleOf("startPosition" to currentImageIndex, "detailPictureList" to array)
+    val currentImageIndex = images.indexOfOrNull(image) ?: 0
+    val bundle = bundleOf(
+        "startPosition" to currentImageIndex,
+        "detailPictureList" to array
+    )
     navigate(
-        R.id.fullScreenDetailPicturesSliderFragment, bundle, NavOptions.Builder()
+        R.id.detailMedia,
+        bundle,
+        NavOptions.Builder()
             .setEnterAnim(R.anim.fade_in)
             .setPopExitAnim(R.anim.fade_out)
             .build()

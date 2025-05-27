@@ -41,7 +41,6 @@ fun ProductDetailsMediaPager(
 
         HorizontalPager(
             state = pagerState,
-            //contentPadding = PaddingValues(horizontal = 16.dp),
             beyondViewportPageCount = productMediaList.size,
             pageSpacing = 16.dp,
             snapPosition = SnapPosition.Start,
@@ -54,7 +53,8 @@ fun ProductDetailsMediaPager(
                 AsyncImage(
                     model = when (media) {
                         is ProductMediaUi.Picture -> media.url
-                        is ProductMediaUi.Video -> media.video.previewImage
+                        is ProductMediaUi.YoutubeVideo -> media.previewImage
+                        is ProductMediaUi.RutubeVideo -> media.previewImage
                     },
                     contentDescription = null,
                     modifier = Modifier
@@ -65,13 +65,13 @@ fun ProductDetailsMediaPager(
                         },
                     contentScale = when (media) {
                         is ProductMediaUi.Picture -> ContentScale.FillHeight
-                        is ProductMediaUi.Video -> ContentScale.Crop
+                        is ProductMediaUi.YoutubeVideo, is ProductMediaUi.RutubeVideo -> ContentScale.Crop
                     }
                 )
 
                 when (media) {
                     is ProductMediaUi.Picture -> {}
-                    is ProductMediaUi.Video -> Image(
+                    is ProductMediaUi.YoutubeVideo, is ProductMediaUi.RutubeVideo -> Image(
                         modifier = Modifier
                             .align(Alignment.Center)
                             .size(42.dp)
@@ -99,8 +99,4 @@ fun ProductDetailsMediaPager(
         }
 
     }
-}
-
-enum class ProductDetailsPagerElement {
-
 }

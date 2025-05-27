@@ -11,12 +11,16 @@ data class AnalogsSectionDTO(
     val SORTIROVKA: SORTIROVKA_DTO?,
     @Json(name = "TOVAR")
     val TOVAR: List<TOVAR_DATA_DTO>?,
+    @Json(name = "TOVAR18")
+    val TOVAR18: TOVAR_18_DTO?
 )
 
 @Keep
 data class ProductsSectionDTO(
     @Json(name = "COUNT")
     val COUNT: String? = null,
+    @Json(name = "TOVAR18")
+    val TOVAR18: TOVAR_18_DTO? = null,
     @Json(name = "TOVARVSEGO")
     val TOVARVSEGO: String? = null,
     @Json(name = "STRANIC")

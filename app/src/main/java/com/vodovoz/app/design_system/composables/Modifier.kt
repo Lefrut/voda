@@ -12,11 +12,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 
 fun Modifier.isElementVisible(onVisibilityChanged: (Boolean) -> Unit) = composed {
     val isVisible by remember { derivedStateOf { mutableStateOf(false) } }
@@ -42,3 +46,16 @@ fun Modifier.vodovozSurface(
     .then(if (border != null) Modifier.border(border, shape) else Modifier)
     .background(color = backgroundColor, shape = shape)
     .clip(shape)
+
+
+fun Modifier.bottomLine(color: Color, thickness: Dp = 1.dp): Modifier = this.then(
+    Modifier.drawBehind {
+        val y = size.height - thickness.toPx() / 2
+        drawLine(
+            color = color,
+            start = Offset(0f, y),
+            end = Offset(size.width, y),
+            strokeWidth = thickness.toPx()
+        )
+    }
+)

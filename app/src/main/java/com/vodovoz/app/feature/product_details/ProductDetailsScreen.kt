@@ -21,7 +21,6 @@ import com.vodovoz.app.feature.product_details.composables.ProductDetailsBody
 import com.vodovoz.app.feature.product_details.composables.ProductDetailsTopBar
 
 @OptIn(ExperimentalMaterial3Api::class)
-@Suppress("NonSkippableComposable")
 @Composable
 fun ProductDetailsScreen(
     viewState: ProductDetailsFlowViewModel.ProductDetailsState,
@@ -70,7 +69,7 @@ fun ProductDetailsScreen(
                     viewModel.decrementCart()
                 },
                 onAnalogClick = {
-                    viewModel.navigateToProductsCollection()
+                    viewModel.navigateToProductAnalogs()
                 }
             )
         },
@@ -101,7 +100,7 @@ fun ProductDetailsScreen(
                 viewModel.showOrHideDetailText()
             },
             onProductMediaClick = { media ->
-                viewModel.navigateByMedia(media)
+                viewModel.navigateToDetailMedia(media)
             },
             onIncrementProduct = {
                 viewModel.incrementCart()
@@ -110,7 +109,7 @@ fun ProductDetailsScreen(
                 viewModel.decrementCart()
             },
             onAnalogButtonClick = {
-                viewModel.navigateToProductsCollection()
+                viewModel.navigateToProductAnalogs()
             },
             onPreOrderButtonClick = {
                 viewModel.navigateToPreOrder()

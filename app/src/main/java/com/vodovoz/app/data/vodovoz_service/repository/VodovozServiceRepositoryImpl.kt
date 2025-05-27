@@ -12,6 +12,7 @@ import com.vodovoz.app.core.network.messageWithCode
 import com.vodovoz.app.core.network.serialization.fromJson
 import com.vodovoz.app.core.network.stringBody
 import com.vodovoz.app.data.vodovoz_service.VodovozService
+import com.vodovoz.app.data.vodovoz_service.datastore.ForAdultsDataStore
 import com.vodovoz.app.data.vodovoz_service.mappers.executeRequest
 import com.vodovoz.app.data.vodovoz_service.mappers.mapToDomain
 import com.vodovoz.app.data.vodovoz_service.mappers.toDomain
@@ -110,10 +111,11 @@ import javax.inject.Singleton
 class VodovozServiceRepositoryImpl @Inject constructor(
     private val vodovozService: VodovozService,
     private val accountManager: AccountManager,
-    private val moshi: Moshi,
     private val cookieManager: CookieManager,
-    private val trackingManager: TrackingManager,
+    private val moshi: Moshi,
 ) : VodovozServiceRepository {
+
+
 
     override fun orderService(
         serviceType: String,
@@ -1282,8 +1284,6 @@ class VodovozServiceRepositoryImpl @Inject constructor(
             },
             mapper = { response ->
                 val siteState = response!!.toDomain()
-                trackingManager.setEnableTracking(siteState.tracking.trackingIsEnabled)
-                trackingManager.setSessionIdTime(siteState.tracking.time)
                 siteState
             },
             onFail = onFail@{ response ->
@@ -1848,4 +1848,56 @@ class VodovozServiceRepositoryImpl @Inject constructor(
             }
         )
     }
+
+    override fun getAllViewedProducts(): Flow<Result<ProductsSectionModel>> {
+        return executeRequest(
+            request = {
+                val userId = accountManager.fetchAccountId()
+                vodovozService.getAllViewedProducts(userId)
+            },
+            mapper = {
+                it.data?.toDomain()
+                    ?: throw IllegalArgumentException("All Viewed products can't be null")
+            },
+            onFail = { response ->
+                val placeholder =
+                    moshi.fromJson<VodovozResponseDTO<VodovozPlaceholderDTO>>(response.stringBody()).data!!.toDomain()
+                throw EmptyResultException(placeholder = placeholder)
+            }
+        )
+    }
+
+    override fun getAllViewedProductsPaged(
+        categoryId: Int,
+        sort: SortModel,
+    ): Flow<PagingData<ProductModel>> {
+        val userId = accountManager.fetchAccountId()
+        return Pager(
+            config = PagingConfig(4, 4),
+            pagingSourceFactory = {
+                VodovozPagingSource(
+                    clazz = ProductsSectionDTO::class,
+                    request = { page, _ ->
+                        vodovozService.getAllViewedProducts(
+                            page = page,
+                            categoryId = categoryId.takeIf { it > 0 },
+                            sort = sort.value,
+                            order = sort.order,
+                            userId = userId
+                        )
+                    },
+                    mapper = { response ->
+                        response.data?.DATA?.mapToDomain() ?: emptyList()
+                    },
+                    onFail = { response ->
+                        val placeholder =
+                            moshi.fromJson<VodovozResponseDTO<VodovozPlaceholderDTO>>(response.stringBody()).data!!.toDomain()
+                        throw EmptyResultException(placeholder = placeholder)
+                    }
+                )
+            }
+        ).flow
+    }
+
+
 }

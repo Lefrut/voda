@@ -6,17 +6,18 @@ import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.view.View
+import android.view.WindowInsetsController
 import android.webkit.WebChromeClient
 import android.widget.FrameLayout
+import androidx.core.view.WindowInsetsControllerCompat
 
- class VodovozChromeClient(
+class VodovozChromeClient(
      private val getDecorView: () -> View?,
      private val getActivity: () -> Activity,
      private val getResources: () -> Resources,
 ) : WebChromeClient() {
     private var mCustomView: View? = null
     private var mCustomViewCallback: CustomViewCallback? = null
-    protected var mFullscreenContainer: FrameLayout? = null
     private var mOriginalOrientation = 0
     private var mOriginalSystemUiVisibility = 0
 

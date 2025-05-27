@@ -30,9 +30,6 @@ class RecoverPasswordFragment : Fragment() {
     @Inject
     lateinit var tabManager: TabManager
 
-    @Inject
-    lateinit var accountManager: AccountManager
-
     private val viewModel by viewModels<RecoverPasswordViewModel>()
 
     override fun onStart() {

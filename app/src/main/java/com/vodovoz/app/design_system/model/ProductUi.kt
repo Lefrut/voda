@@ -186,8 +186,10 @@ data class ProductUi(
     val labels: List<LabelUi>,
     val isAvailable: Boolean,
     val pricePerUnit: Int?,
-    val unitOfMeasurement: String?
+    val unitOfMeasurement: String?,
+    val forAdults: ForAdultsUi?
 )
+
 
 fun List<ProductModel>.mapToUi(): List<ProductUi>{
     return mapNotNull { it.toUi() }
@@ -207,7 +209,8 @@ fun ProductModel.toUi(): ProductUi {
         labels = labels.toUi(),
         isAvailable = quantity > 0,
         pricePerUnit = pricePerUnit,
-        unitOfMeasurement = unitOfMeasurement
+        unitOfMeasurement = unitOfMeasurement,
+        forAdults = forAdults?.toUi()
     )
 }
 

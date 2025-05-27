@@ -19,6 +19,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -32,10 +33,13 @@ import coil3.compose.AsyncImage
 import com.vodovoz.app.R
 import com.vodovoz.app.design_system.ExtendedTheme
 import com.vodovoz.app.design_system.VodovozTheme
+import com.vodovoz.app.design_system.composables.blur.VodovozBlur
 import com.vodovoz.app.design_system.composables.button.QuantityButtonSmall
 import com.vodovoz.app.design_system.composables.button.VodovozButtonDefaults
 import com.vodovoz.app.design_system.composables.button.VodovozButtonSmall
 import com.vodovoz.app.design_system.composables.chip.VodovozColorChipSmall
+import com.vodovoz.app.design_system.model.ColorfulButtonUi
+import com.vodovoz.app.design_system.model.ForAdultsUi
 import com.vodovoz.app.design_system.model.LabelUi
 import com.vodovoz.app.design_system.model.ProductUi
 import com.vodovoz.app.util.formatPrice
@@ -55,6 +59,7 @@ fun LinearProductCard(
     val percentLabels =
         product.labels.filter { labelEntity -> labelEntity.name.any { s -> s == '%' } }
     val otherLabels = product.labels - percentLabels.toSet()
+    val forAdults = product.forAdults
 
     VodovozOutlinedCard(
         modifier = modifier,
@@ -62,48 +67,21 @@ fun LinearProductCard(
         onClick = { onClick(product) }
     ) {
         Row(modifier = Modifier.height(IntrinsicSize.Max)) {
-            Box(
+            VodovozBlur(
                 modifier = Modifier
-                    .height(132.dp)
+                    .clip(MaterialTheme.shapes.small)
                     .width(144.dp)
+                    .height(132.dp),
+                showBlur = forAdults != null,
+                text = forAdults?.textBlur ?: ""
             ) {
-                AsyncImage(
-                    model = product.image,
-                    contentDescription = null,
-                    modifier = Modifier.matchParentSize(),
-                    contentScale = ContentScale.Inside
+                ImageSection(
+                    image = product.image,
+                    percentLabels = percentLabels,
+                    otherLabels = otherLabels,
+                    isFavorite = product.isFavorite,
+                    onLike = { onLike(product) }
                 )
-
-                Row(verticalAlignment = Alignment.Top) {
-                    Icon(
-                        painter = painterResource(id = if (product.isFavorite) R.drawable.ic_filled_like else R.drawable.ic_like),
-                        contentDescription = null,
-                        tint = if (product.isFavorite) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.surfaceTint,
-                        modifier = Modifier
-                            .size(18.dp)
-                            .clickable(
-                                onClick = { onLike(product) },
-                                indication = null,
-                                interactionSource = null
-                            )
-                    )
-
-                    Spacer(modifier = Modifier.weight(1f))
-
-                    percentLabels.forEach { label ->
-                        VodovozColorChipSmall(color = label.color, text = label.name)
-                    }
-                }
-
-                FlowRow(
-                    modifier = Modifier.align(Alignment.BottomStart),
-                    verticalArrangement = Arrangement.spacedBy(2.dp),
-                    horizontalArrangement = Arrangement.spacedBy(2.dp)
-                ) {
-                    otherLabels.forEach { label ->
-                        VodovozColorChipSmall(color = label.color, text = label.name)
-                    }
-                }
             }
 
             Column(
@@ -238,7 +216,63 @@ fun LinearProductCard(
     }
 }
 
-@Preview
+@Suppress("NonSkippableComposable")
+@Composable
+private fun ImageSection(
+    modifier: Modifier = Modifier,
+    image: String,
+    percentLabels: List<LabelUi>,
+    otherLabels: List<LabelUi>,
+    isFavorite: Boolean,
+    onLike: () -> Unit,
+) {
+    Box(
+        modifier = modifier
+            .height(132.dp)
+            .width(144.dp),
+    ) {
+        AsyncImage(
+            model = image,
+            contentDescription = null,
+            modifier = Modifier.matchParentSize(),
+            contentScale = ContentScale.Inside
+        )
+
+        Row(verticalAlignment = Alignment.Top) {
+            Icon(
+                painter = painterResource(id = if (isFavorite) R.drawable.ic_filled_like else R.drawable.ic_like),
+                contentDescription = null,
+                tint = if (isFavorite) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.surfaceTint,
+                modifier = Modifier
+                    .size(18.dp)
+                    .clickable(
+                        onClick = onLike,
+                        indication = null,
+                        interactionSource = null
+                    )
+            )
+
+            Spacer(modifier = Modifier.weight(1f))
+
+            percentLabels.forEach { label ->
+                VodovozColorChipSmall(color = label.color, text = label.name)
+            }
+        }
+
+        FlowRow(
+            modifier = Modifier.align(Alignment.BottomStart),
+            verticalArrangement = Arrangement.spacedBy(2.dp),
+            horizontalArrangement = Arrangement.spacedBy(2.dp)
+        ) {
+            otherLabels.forEach { label ->
+                VodovozColorChipSmall(color = label.color, text = label.name)
+            }
+        }
+    }
+
+}
+
+@Preview(apiLevel = 34)
 @Composable
 private fun LinearProductCardPreview() {
     VodovozTheme {
@@ -258,7 +292,8 @@ private fun LinearProductCardPreview() {
             ),
             isAvailable = true,
             pricePerUnit = null,
-            unitOfMeasurement = null
+            unitOfMeasurement = null,
+            ForAdultsUi("eqweq", "dqwdqw", "dwqdwq", ColorfulButtonUi.Empty)
         )
 
 

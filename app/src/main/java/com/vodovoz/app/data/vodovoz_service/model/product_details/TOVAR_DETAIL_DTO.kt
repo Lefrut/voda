@@ -5,6 +5,7 @@ import com.squareup.moshi.Json
 import androidx.annotation.Keep
 import com.vodovoz.app.data.vodovoz_service.model.EXTENDED_PRICE_DTO
 import com.vodovoz.app.data.vodovoz_service.model.NALICHIE_MORE_DTO
+import com.vodovoz.app.data.vodovoz_service.model.TOVAR_18_DTO
 
 @Keep
 data class TOVAR_DETAIL_DTO(
@@ -57,5 +58,7 @@ data class TOVAR_DETAIL_DTO(
     @Json(name = "TAGS")
     val TAGS: TAGS_DTO?,
     @Json(name = "ZALOG")
-    val ZALOG: ZALOG_DTO?
+    val ZALOG: ZALOG_DTO?,
+    @Json(name = "TOVAR18")
+    val TOVAR18: TOVAR_18_DTO?
 )

@@ -1,6 +1,7 @@
 package com.vodovoz.app.feature.product_details
 
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.Stable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.vodovoz.app.common.about_product.AboutProductManager
@@ -10,24 +11,24 @@ import com.vodovoz.app.common.content.Event
 import com.vodovoz.app.common.content.State
 import com.vodovoz.app.common.like.LikeManager
 import com.vodovoz.app.common.product.rating.RatingProductManager
-import com.vodovoz.app.data.MainRepository
 import com.vodovoz.app.design_system.model.BrandCategoryItemUi
 import com.vodovoz.app.design_system.model.BuyButtonUi
 import com.vodovoz.app.design_system.model.ColorfulButtonUi
 import com.vodovoz.app.design_system.model.CommentUi
+import com.vodovoz.app.design_system.model.ForAdultsUi
 import com.vodovoz.app.design_system.model.PriceUi
 import com.vodovoz.app.design_system.model.ProductDetailsButtonsUi
 import com.vodovoz.app.design_system.model.ProductDetailsTabUi
 import com.vodovoz.app.design_system.model.ProductDetailsUi
 import com.vodovoz.app.design_system.model.ProductMediaUi
 import com.vodovoz.app.design_system.model.ProductUi
-import com.vodovoz.app.design_system.model.ProductVideoUi
 import com.vodovoz.app.design_system.model.SectionUi
 import com.vodovoz.app.design_system.model.mapToUi
 import com.vodovoz.app.design_system.model.toUi
 import com.vodovoz.app.design_system.model.withUpdatedCart
 import com.vodovoz.app.design_system.model.withUpdatedFavorites
 import com.vodovoz.app.design_system.model.withUpdatedLoading
+import com.vodovoz.app.domain.general.respository.UserPreferencesRepository
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.feature.product_details.model.PresentInfoUi
 import com.vodovoz.app.feature.product_details.model.toUi
@@ -41,6 +42,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -48,14 +50,15 @@ import javax.inject.Inject
 import kotlin.math.roundToInt
 
 @HiltViewModel
+@Stable
 class ProductDetailsFlowViewModel @Inject constructor(
-    private val mainRepository: MainRepository,
     private val cartManager: CartManager,
     private val likeManager: LikeManager,
     private val ratingProductManager: RatingProductManager,
     private val accountManager: AccountManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val aboutProductManager: AboutProductManager,
+    private val userPreferencesRepository: UserPreferencesRepository,
 ) : ViewModel() {
 
     private val uiStateListener = MutableStateFlow(ProductDetailsState())
@@ -154,7 +157,7 @@ class ProductDetailsFlowViewModel @Inject constructor(
         }
     }.collect()
 
-    private fun fetchProductDetails() = viewModelScope.launch {
+    private fun fetchProductDetails() =
         vodovozServiceRepository.getProductDetails(state.productDetails.id)
             .combine(vodovozServiceRepository.getPresentInfo()) { p1, p2 ->
                 p1 to p2
@@ -162,11 +165,13 @@ class ProductDetailsFlowViewModel @Inject constructor(
             .onEach { (productDetailsScreenResult, presentInfoResult) ->
                 productDetailsScreenResult.onSuccess { productDetailsScreenModel ->
                     val moreProducts = productDetailsScreenModel.moreProducts
+                    val canViewAdultProducts = userPreferencesRepository.getCanViewAdultProducts()
+                    val forAdults = productDetailsScreenModel.details.forAdultsModel?.toUi()
 
                     uiStateListener.update { s ->
                         s.copy(
                             comments = productDetailsScreenModel.comments.mapToUi(),
-                            productDetails = productDetailsScreenModel.productDetails.toUi(),
+                            productDetails = productDetailsScreenModel.details.toUi(),
                             sectionAccessory = moreProducts.sectionAccessory.toUi { list ->
                                 val uiList = list.map { productModel -> productModel.toUi() }
                                 uiList.take(list.size - (list.size % 2))
@@ -178,7 +183,9 @@ class ProductDetailsFlowViewModel @Inject constructor(
                             },
                             buttons = productDetailsScreenModel.buttons.toUi(),
                             tabs = productDetailsScreenModel.tabs.map { it.toUi() },
-                            uiState = UiState.Success,
+                            uiState = if (forAdults != null && !canViewAdultProducts) ProductDetailsUiState.ForAdults(
+                                forAdults
+                            ) else ProductDetailsUiState.Success,
                             presentInfo = presentInfoResult.getOrNull()?.toUi() ?: s.presentInfo
                         )
                     }
@@ -194,11 +201,10 @@ class ProductDetailsFlowViewModel @Inject constructor(
 
                 }.onFailure {
                     uiStateListener.update { s ->
-                        s.copy(uiState = UiState.ProductNotFound)
+                        s.copy(uiState = ProductDetailsUiState.ProductNotFound)
                     }
                 }
-            }.collect()
-    }
+            }.launchIn(viewModelScope)
 
     fun isLoginAlready() = accountManager.isAlreadyLogin()
 
@@ -210,28 +216,6 @@ class ProductDetailsFlowViewModel @Inject constructor(
     fun decrementCart() = viewModelScope.launch {
         val productDetails = state.productDetails
         cartManager.change(productDetails.id, productDetails.cartQuantity - 1)
-    }
-
-
-    fun changeCart(productId: String, giftId: String) {
-        viewModelScope.launch {
-            uiStateListener.update { s ->
-                s.copy(buttonIsLoading = true)
-            }
-            val (id, count) = productId.trim().split("-")
-            cartManager.add(
-                id = id.toLong(),
-                newCount = count.toInt(),
-                giftId = giftId
-            )
-            uiStateListener.update { s ->
-                s.copy(buttonIsLoading = false)
-            }
-        }
-    }
-
-    fun changeFavoriteStatus(productId: Long, isFavorite: Boolean) = viewModelScope.launch {
-        likeManager.changeFavorite(productId, !isFavorite)
     }
 
     fun changeRating(productId: Long, rating: Float, oldRating: Float) = viewModelScope.launch {
@@ -335,7 +319,7 @@ class ProductDetailsFlowViewModel @Inject constructor(
         uiStateListener.update { s ->
             s.copy(
                 productDetails = s.productDetails.copy(id = productId),
-                uiState = UiState.Loading
+                uiState = ProductDetailsUiState.Loading
             )
         }
         fetchProductDetails()
@@ -345,7 +329,7 @@ class ProductDetailsFlowViewModel @Inject constructor(
         eventListener.emit(ProductDetailsEvents.GoToProductComments(state.productDetails.id))
     }
 
-    fun navigateToProductsCollection() = viewModelScope.launch {
+    fun navigateToProductAnalogs() = viewModelScope.launch {
         eventListener.emit(ProductDetailsEvents.GoToProductAnalogs(state.productDetails.id))
     }
 
@@ -387,24 +371,13 @@ class ProductDetailsFlowViewModel @Inject constructor(
         eventListener.emit(ProductDetailsEvents.Copy(uiStateListener.value.productDetails.articleNumber))
     }
 
-    fun navigateByMedia(media: ProductMediaUi) = viewModelScope.launch {
+    fun navigateToDetailMedia(media: ProductMediaUi) = viewModelScope.launch {
         val productDetails = uiStateListener.value.productDetails
-        when (media) {
-            is ProductMediaUi.Picture -> {
-                eventListener.emit(
-                    ProductDetailsEvents.GoToProductImages(
-                        image = media.url,
-                        images = productDetails.mediaList.mapNotNull {
-                            (it as? ProductMediaUi.Picture)?.url
-                        }
-                    )
-                )
-            }
+        val mediaList = productDetails.mediaList
 
-            is ProductMediaUi.Video -> {
-                eventListener.emit(ProductDetailsEvents.GoToRutubeVideo(media.video))
-            }
-        }
+        eventListener.emit(
+            ProductDetailsEvents.GoToDetailMedia(media, mediaList)
+        )
     }
 
     fun navigateToBrandProducts(brandItem: BrandCategoryItemUi) = viewModelScope.launch {
@@ -493,6 +466,13 @@ class ProductDetailsFlowViewModel @Inject constructor(
         }
     }
 
+    fun setCanViewAdultProducts() = viewModelScope.launch {
+        uiStateListener.update { s ->
+            s.copy(uiState = ProductDetailsUiState.Success)
+        }
+        userPreferencesRepository.setCanViewAdultProducts(true)
+    }
+
 
     sealed class ProductDetailsEvents : Event {
         data class GoToPreOrder(val id: Long) : ProductDetailsEvents()
@@ -518,13 +498,11 @@ class ProductDetailsFlowViewModel @Inject constructor(
         data class GoToCategoryProductList(val categoryId: Long) : ProductDetailsEvents()
         data class GoToSearchProductList(val query: String) : ProductDetailsEvents()
         data class Copy(val text: String) : ProductDetailsEvents()
-        data class GoToProductImages(val image: String, val images: List<String>) :
-            ProductDetailsEvents() {
+        data class GoToDetailMedia(val media: ProductMediaUi, val mediaList: List<ProductMediaUi>) :
+            ProductDetailsEvents()
 
-        }
-
-        data class GoToRutubeVideo(val video: ProductVideoUi) : ProductDetailsEvents()
         data class GoToBrandProducts(val brandId: Long) : ProductDetailsEvents()
+
         data class GoToWriteComment(
             val id: Long,
             val detailPicture: String,
@@ -547,7 +525,7 @@ class ProductDetailsFlowViewModel @Inject constructor(
         val tabs: List<ProductDetailsTabUi> = emptyList(),
         val sectionSimilarProducts: SectionUi<ProductUi> = SectionUi.empty(),
         val sectionAccessory: SectionUi<ProductUi> = SectionUi.empty(),
-        val uiState: UiState = UiState.Loading,
+        val uiState: ProductDetailsUiState = ProductDetailsUiState.Loading,
         val totalPrice: Int = 0,
         val showMultiBottomSheet: Boolean = false,
         val showPresentBottomSheet: Boolean = false,
@@ -558,9 +536,10 @@ class ProductDetailsFlowViewModel @Inject constructor(
         val multiProductTotalPrice: Int = productDetails.firstPrice.price.toInt(),
     ) : State
 
-    sealed class UiState {
-        data object Loading : UiState()
-        data object Success : UiState()
-        data object ProductNotFound : UiState()
+    sealed class ProductDetailsUiState {
+        data object Loading : ProductDetailsUiState()
+        data object Success : ProductDetailsUiState()
+        data object ProductNotFound : ProductDetailsUiState()
+        data class ForAdults(val forAdultsUi: ForAdultsUi) : ProductDetailsUiState()
     }
 }

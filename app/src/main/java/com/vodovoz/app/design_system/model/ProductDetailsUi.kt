@@ -143,28 +143,30 @@ data class ProductDetailsUi(
 }
 
 @Immutable
-sealed interface ProductMediaUi {
+@Parcelize
+sealed interface ProductMediaUi : Parcelable {
     @Immutable
-    data class Picture(val url: String) : ProductMediaUi
+    @Parcelize
+    data class Picture(val url: String) : ProductMediaUi, Parcelable
+
     @Immutable
-    data class Video(val video: ProductVideoUi) : ProductMediaUi
+    @Parcelize
+    data class YoutubeVideo(
+        val previewImage: String,
+        val code: String,
+    ) : ProductMediaUi, Parcelable
+
+    @Immutable
+    @Parcelize
+    data class RutubeVideo(
+        val previewImage: String,
+        val code: String,
+    ) : ProductMediaUi, Parcelable
+
 }
 
-data class ProductVideoUi(
-    val previewImage: String,
-    val code: String,
-) {
-    companion object {
-        val Empty = ProductVideoUi("", "")
-    }
-}
-
-fun ProductVideoModel.toUi(): ProductVideoUi {
-    return ProductVideoUi(previewImage, code)
-}
-
-fun ProductVideoUi.toProductMedia(): ProductMediaUi.Video {
-    return ProductMediaUi.Video(this)
+fun ProductVideoModel.toUi(): ProductMediaUi.YoutubeVideo {
+    return ProductMediaUi.YoutubeVideo(previewImage, code)
 }
 
 fun ProductDetailsModel.toUi(): ProductDetailsUi {
@@ -183,7 +185,7 @@ fun ProductDetailsModel.toUi(): ProductDetailsUi {
         mediaList = pictures.map { ProductMediaUi.Picture(it) } + listOf(
             rutubeVideo,
             youtubeVideo
-        ).mapNotNull { videoModel -> videoModel?.toUi()?.toProductMedia() },
+        ).mapNotNull { videoModel -> videoModel?.toUi() },
         sectionQueries = sectionTags.toUi { tag -> tag },
         isFavorite = isFavorite,
         isAvailable = isAvailable,
@@ -248,7 +250,7 @@ data class PriceUi(
     val oldPrice: Float,
     val quantityFrom: Int,
     val quantityTo: Int,
-): Parcelable
+) : Parcelable
 
 fun PriceModel.toUi(): PriceUi {
     return PriceUi(price, oldPrice, quantityFrom, quantityTo)

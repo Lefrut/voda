@@ -1,6 +1,7 @@
 package com.vodovoz.app.domain.general.model
 
 import androidx.compose.runtime.Immutable
+import com.vodovoz.app.design_system.model.ForAdultsUi
 import com.vodovoz.app.design_system.model.ProductUi
 import com.vodovoz.app.design_system.model.toUi
 import com.vodovoz.app.feature.home.model.CategoryUi
@@ -17,10 +18,11 @@ data class ProductsSectionUi(
     val sorting: List<SortUi>,
     val categories: List<CategoryUi>,
     val share: ShareUi,
+    val forAdults: ForAdultsUi?
 ) {
     companion object {
         val Empty =
-            ProductsSectionUi("", "", "", emptyList(), emptyList(), emptyList(), ShareUi.Empty)
+            ProductsSectionUi("", "", "", emptyList(), emptyList(), emptyList(), ShareUi.Empty, null)
     }
 }
 
@@ -49,6 +51,7 @@ fun ProductsSectionModel.toUi(): ProductsSectionUi {
         products.map { it.toUi() },
         sorting.map { it.toUi() },
         categories.map { it.toUi() },
-        share.toUi()
+        share.toUi(),
+        forAdults?.toUi()
     )
 }

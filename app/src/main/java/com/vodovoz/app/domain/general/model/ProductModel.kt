@@ -15,6 +15,7 @@ data class ProductModel(
     val firstPrice: PriceModel,
     val prices: List<PriceModel>,
     val labels: List<LabelModel>,
+    val forAdults: ForAdultsModel?
 )
 
 data class PriceModel(

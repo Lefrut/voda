@@ -15,26 +15,22 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.vodovoz.app.R
-import com.vodovoz.app.common.cart.CartManager
-import com.vodovoz.app.common.like.LikeManager
-import com.vodovoz.app.common.media.MediaManager
-import com.vodovoz.app.common.product.rating.RatingProductManager
 import com.vodovoz.app.common.tab.TabManager
 import com.vodovoz.app.core.navigation.navigateToAboutProduct
 import com.vodovoz.app.core.navigation.navigateToBrandProductList
 import com.vodovoz.app.core.navigation.navigateToCategoryProductList
+import com.vodovoz.app.core.navigation.navigateToDetailMedia
 import com.vodovoz.app.core.navigation.navigateToPreOrder
 import com.vodovoz.app.core.navigation.navigateToProductAnalogs
 import com.vodovoz.app.core.navigation.navigateToProductComments
 import com.vodovoz.app.core.navigation.navigateToProductDetails
-import com.vodovoz.app.core.navigation.navigateToProductImages
-import com.vodovoz.app.core.navigation.navigateToRutubeVideo
 import com.vodovoz.app.core.navigation.navigateToSearch
 import com.vodovoz.app.core.navigation.navigateToSearchProductList
 import com.vodovoz.app.core.navigation.navigateToWriteComment
 import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.composables.placeholders.EmptyResultPlaceholder
 import com.vodovoz.app.design_system.composables.placeholders.EmptyResultPlaceholderItem
+import com.vodovoz.app.design_system.composables.placeholders.ForAdultsPlaceholder
 import com.vodovoz.app.design_system.composables.placeholders.LoadingPlaceholder
 import com.vodovoz.app.design_system.effects.LifecycleEffect
 import com.vodovoz.app.util.extensions.copyText
@@ -49,19 +45,7 @@ class ProductDetailsFragment : Fragment() {
     internal val viewModel: ProductDetailsFlowViewModel by viewModels()
 
     @Inject
-    lateinit var cartManager: CartManager
-
-    @Inject
-    lateinit var likeManager: LikeManager
-
-    @Inject
-    lateinit var ratingProductManager: RatingProductManager
-
-    @Inject
     lateinit var tabManager: TabManager
-
-    @Inject
-    lateinit var mediaManager: MediaManager
 
     val args: ProductDetailsFragmentArgs by navArgs()
 
@@ -77,17 +61,18 @@ class ProductDetailsFragment : Fragment() {
     ): View {
 
         return ComposeView(requireContext()).apply {
-            setViewCompositionStrategy(ViewCompositionStrategy.Default)
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+
             setContent {
                 VodovozTheme {
                     val viewState by viewModel.observeUiState().collectAsStateWithLifecycle()
 
-                    when (viewState.uiState) {
-                        ProductDetailsFlowViewModel.UiState.Loading -> {
+                    when (val uiState = viewState.uiState) {
+                        ProductDetailsFlowViewModel.ProductDetailsUiState.Loading -> {
                             LoadingPlaceholder()
                         }
 
-                        ProductDetailsFlowViewModel.UiState.ProductNotFound -> {
+                        ProductDetailsFlowViewModel.ProductDetailsUiState.ProductNotFound -> {
                             EmptyResultPlaceholder(
                                 title = stringResource(R.string.product_not_found),
                                 description = stringResource(R.string.product_not_found_details),
@@ -96,10 +81,22 @@ class ProductDetailsFragment : Fragment() {
                             )
                         }
 
-                        ProductDetailsFlowViewModel.UiState.Success -> {
+                        ProductDetailsFlowViewModel.ProductDetailsUiState.Success -> {
                             ProductDetailsScreen(
                                 viewState = viewState,
                                 viewModel = viewModel,
+                            )
+                        }
+
+                        is ProductDetailsFlowViewModel.ProductDetailsUiState.ForAdults -> {
+                            ForAdultsPlaceholder(
+                                forAdults = uiState.forAdultsUi,
+                                onBackClick = {
+                                    viewModel.navigateBack()
+                                },
+                                onApplyClick = {
+                                    viewModel.setCanViewAdultProducts()
+                                }
                             )
                         }
                     }
@@ -176,14 +173,6 @@ class ProductDetailsFragment : Fragment() {
                 requireContext().copyText(event.text)
             }
 
-            is ProductDetailsFlowViewModel.ProductDetailsEvents.GoToProductImages -> {
-                findNavController().navigateToProductImages(event.image, event.images)
-            }
-
-            is ProductDetailsFlowViewModel.ProductDetailsEvents.GoToRutubeVideo -> {
-                findNavController().navigateToRutubeVideo(event.video.code)
-            }
-
             is ProductDetailsFlowViewModel.ProductDetailsEvents.GoToBrandProducts -> {
                 findNavController().navigateToBrandProductList(event.brandId)
             }
@@ -197,6 +186,9 @@ class ProductDetailsFragment : Fragment() {
                 )
             }
 
+            is ProductDetailsFlowViewModel.ProductDetailsEvents.GoToDetailMedia -> {
+                findNavController().navigateToDetailMedia(event.media, event.mediaList)
+            }
         }
     }
 }

@@ -2,7 +2,7 @@ package com.vodovoz.app.domain.general.model
 
 
 data class ProductDetailsScreenModel(
-    val productDetails: ProductDetailsModel,
+    val details: ProductDetailsModel,
     val buttons: ProductDetailsButtonsModel,
     val moreProducts: ProductDetailsMoreProducts,
     val comments: List<CommentModel>,
@@ -63,7 +63,8 @@ data class ProductDetailsModel(
     val firstPrice: PriceModel,
     val prices: List<PriceModel>,
 
-    val commentsCount: Int
+    val commentsCount: Int,
+    val forAdultsModel: ForAdultsModel?
 )
 
 data class ProductVideoModel(

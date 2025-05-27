@@ -159,7 +159,8 @@ fun TraceOrderBottomSheet(
             .offset {
                 IntOffset(
                     x = 0,
-                    y = state.requireOffset()
+                    y = state
+                        .requireOffset()
                         .roundToInt()
                 )
             }
@@ -198,14 +199,16 @@ fun TraceOrderBottomSheet(
 
         Spacer(Modifier.height(20.dp))
 
-        Text(
-            modifier = Modifier
-                .align(Alignment.Start)
-                .padding(start = 16.dp, end = 16.dp, top = 8.dp),
-            text = title,
-            color = MaterialTheme.colorScheme.onBackground,
-            style = MaterialTheme.typography.headlineSmall
-        )
+        if (title.isNotEmpty()) {
+            Text(
+                modifier = Modifier
+                    .align(Alignment.Start)
+                    .padding(start = 16.dp, end = 16.dp, top = 8.dp),
+                text = title,
+                color = MaterialTheme.colorScheme.onBackground,
+                style = MaterialTheme.typography.headlineSmall
+            )
+        }
 
         if (items.isNotEmpty()) {
             Column(modifier = Modifier.padding(vertical = 16.dp)) {
@@ -218,42 +221,44 @@ fun TraceOrderBottomSheet(
             }
         }
 
-        FlowRow(
-            modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 24.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-            maxItemsInEachRow = 2,
-        ) {
-            buttons.forEach { button ->
-                VodovozButtonSmall(
-                    modifier = Modifier.weight(1f),
-                    onClick = { onButtonClick(button) },
-                    colors = VodovozButtonDefaults.secondaryColors().copy(
-                        containerColor = button.containerColor,
-                        contentColor = button.contentColor
-                    ),
-                    contentPadding = PaddingValues(horizontal = 8.dp)
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        AsyncImage(
-                            model = ImageRequest.Builder(LocalContext.current)
-                                .crossfade(true)
-                                .data(button.image)
-                                .build(),
-                            contentDescription = null,
-                            modifier = Modifier
-                                .padding(end = 4.dp)
-                                .size(18.dp),
-                            contentScale = ContentScale.FillBounds
-                        )
+        if (buttons.isNotEmpty()) {
+            FlowRow(
+                modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 24.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                maxItemsInEachRow = 2,
+            ) {
+                buttons.forEach { button ->
+                    VodovozButtonSmall(
+                        modifier = Modifier.weight(1f),
+                        onClick = { onButtonClick(button) },
+                        colors = VodovozButtonDefaults.secondaryColors().copy(
+                            containerColor = button.containerColor,
+                            contentColor = button.contentColor
+                        ),
+                        contentPadding = PaddingValues(horizontal = 8.dp)
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            AsyncImage(
+                                model = ImageRequest.Builder(LocalContext.current)
+                                    .crossfade(true)
+                                    .data(button.image)
+                                    .build(),
+                                contentDescription = null,
+                                modifier = Modifier
+                                    .padding(end = 4.dp)
+                                    .size(18.dp),
+                                contentScale = ContentScale.FillBounds
+                            )
 
-                        Text(
-                            text = button.name,
-                            style = MaterialTheme.typography.bodySmall.copy(
-                                letterSpacing = 0.1.sp
-                            ),
-                            maxLines = 1
-                        )
+                            Text(
+                                text = button.name,
+                                style = MaterialTheme.typography.bodySmall.copy(
+                                    letterSpacing = 0.1.sp
+                                ),
+                                maxLines = 1
+                            )
+                        }
                     }
                 }
             }

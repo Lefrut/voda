@@ -2,7 +2,6 @@ package com.vodovoz.app.data
 
 import com.vodovoz.app.BuildConfig
 import com.vodovoz.app.data.model.common.UserReloginEntity
-import com.vodovoz.app.feature.bottom.services.newservs.model.AboutServicesNew
 import com.vodovoz.app.feature.profile.notificationsettings.model.NotificationSettingsModel
 import com.vodovoz.app.feature.search.qrcode.model.QrCodeModel
 import okhttp3.MultipartBody
@@ -514,11 +513,6 @@ interface MainApi {
     suspend fun fetchServicesResponse(
         @Query("action") action: String? = null,
     ): ResponseBody
-
-    @GET("/newmobile/glavnaya/uslygi/uslygi_new.php")
-    suspend fun fetchServicesNewResponse(
-        @Query("action") action: String? = null,
-    ): AboutServicesNew
 
     @GET("/newmobile/glavnaya/uslygi/uslygi_new.php")
     suspend fun fetchServicesNewDetailsResponse(

@@ -30,4 +30,6 @@ data class TOVAR_DATA_DTO(
     val PROPERTY_TSENA_ZA_EDINITSU_TOVARA_VALUE: Int?,
     @Json(name = "PROPERTY_ZALOG_VALUE")
     val PROPERTY_ZALOG_VALUE: Int?,
+    @Json(name = "TOVAR18")
+    val TOVAR18: TOVAR_18_DTO?
 )

@@ -929,11 +929,6 @@ class MainRepository @Inject constructor(
         action = action
     )
 
-    //Общая информация о предоставляемых услугах
-    suspend fun fetchAboutServicesNew(action: String) = api.fetchServicesNewResponse(
-        action = action
-    )
-
     //Детальная информация о предоставляемых услугах
     suspend fun fetchServicesNewDetails(action: String, id: String) =
         api.fetchServicesNewDetailsResponse(
