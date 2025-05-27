@@ -24,16 +24,9 @@ class VodovozApplication : Application() {
         MapKitFactory.setApiKey(Keys.MAPKIT_API_KEY)
         Timber.plant(Timber.DebugTree())
         NotificationChannels.create(this)
-
-//        val file = SplashFileConfig.getSplashFile(this)
-//        if (!file.exists()) {
-//            debugLog { "splash file is not exist" }
-//            coroutineScope.launch(Dispatchers.IO) {
-//                downloadSplashFile(this@VodovozApplication)
-//            }
-//        }
     }
 
+    //todo - need review
     private fun initYandexMetrica() {
         if(!BuildConfig.DEBUG) {
             val config: YandexMetricaConfig =

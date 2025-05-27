@@ -22,10 +22,6 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class ServiceDetailFragment : Fragment() {
 
-    companion object {
-        const val SERVICE_TYPE = "SERVICE_TYPE"
-    }
-
     private val viewModel: ServiceDetailViewModel by viewModels()
 
     override fun onCreateView(

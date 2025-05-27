@@ -125,7 +125,7 @@ class SearchFragment : Fragment() {
         ViewCompat.setOnApplyWindowInsetsListener(view) { _, insets ->
             val imeVisible = insets.isVisible(WindowInsetsCompat.Type.ime())
             tabManager.changeTabVisibility(!imeVisible)
-            return@setOnApplyWindowInsetsListener CONSUMED
+            return@setOnApplyWindowInsetsListener insets
         }
 
     }

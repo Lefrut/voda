@@ -4,10 +4,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.activity.SystemBarStyle
-import androidx.activity.enableEdgeToEdge
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
@@ -17,9 +15,9 @@ import androidx.navigation.fragment.findNavController
 import com.vodovoz.app.common.tab.TabManager
 import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.effects.LifecycleEffect
+import com.vodovoz.app.design_system.effects.SystemBarsEffect
 import com.vodovoz.app.design_system.model.DocumentUi
 import com.vodovoz.app.feature.document_viewer.model.DocumentViewerEvent
-import com.vodovoz.app.util.extensions.disableFullScreen
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -31,21 +29,17 @@ class DocumentViewerFragment : Fragment() {
     @Inject
     lateinit var tabManager: TabManager
 
-    override fun onStop() {
-        super.onStop()
-        requireActivity().disableFullScreen()
-        tabManager.changeTabVisibility(true)
-    }
 
     override fun onStart() {
         super.onStart()
-        val colorWhite = Color.White.hashCode()
-        requireActivity().enableEdgeToEdge(
-            navigationBarStyle = SystemBarStyle.auto(colorWhite, colorWhite),
-            statusBarStyle = SystemBarStyle.auto(colorWhite, colorWhite)
-        )
         tabManager.changeTabVisibility(false)
     }
+
+    override fun onStop() {
+        super.onStop()
+        tabManager.changeTabVisibility(true)
+    }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -65,6 +59,11 @@ class DocumentViewerFragment : Fragment() {
             setViewCompositionStrategy(ViewCompositionStrategy.Default)
             setContent {
                 val viewState by viewModel.state.collectAsStateWithLifecycle()
+
+                SystemBarsEffect(
+                    statusBarColor = MaterialTheme.colorScheme.background,
+                    navigationBarColor = MaterialTheme.colorScheme.background
+                )
 
                 VodovozTheme {
                     DocumentViewerScreen(

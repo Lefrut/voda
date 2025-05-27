@@ -7,7 +7,8 @@ data class ProductsSectionModel(
     val sorting: List<SortModel>,
     val products: List<ProductModel>,
     val categories: List<CategoryModel>,
-    val share: ShareModel
+    val share: ShareModel,
+    val forAdults: ForAdultsModel?
 )
 
 data class ShareModel(

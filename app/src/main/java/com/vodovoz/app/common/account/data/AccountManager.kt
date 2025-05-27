@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 import javax.inject.Singleton
 
+//todo - migrate to UserPreferencesRepository
 @Singleton
 class AccountManager @Inject constructor(
     private val dataStoreRepository: DataStoreRepository,

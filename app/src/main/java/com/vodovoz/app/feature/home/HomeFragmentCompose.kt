@@ -12,8 +12,10 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
@@ -39,6 +41,7 @@ import com.vodovoz.app.core.navigation.navigateToAllServices
 import com.vodovoz.app.core.navigation.navigateToBrandProductList
 import com.vodovoz.app.core.navigation.navigateToBuyCertificate
 import com.vodovoz.app.core.navigation.navigateToCategoryProductList
+import com.vodovoz.app.core.navigation.navigateToDetailMedia
 import com.vodovoz.app.core.navigation.navigateToHurryBuyUpProducts
 import com.vodovoz.app.core.navigation.navigateToNewProducts
 import com.vodovoz.app.core.navigation.navigateToOrderDetails
@@ -60,11 +63,13 @@ import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.composables.placeholders.NetworkErrorPlaceholder
 import com.vodovoz.app.design_system.composables.snackbar.VodovozSnackbarHost
 import com.vodovoz.app.design_system.effects.LifecycleEffect
+import com.vodovoz.app.design_system.model.ProductMediaUi
 import com.vodovoz.app.feature.sitestate.SiteStateManager
 import com.vodovoz.app.util.extensions.debugLog
 import com.vodovoz.app.util.extensions.isVpnActive
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.onSubscription
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -129,14 +134,38 @@ class HomeFragment : Fragment() {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
 
             setContent {
+                //todo - do something :D
+//                LaunchedEffect(Unit) {
+//                    val currentMedia =
+//                        ProductMediaUi.RutubeVideo(
+//                            "https://pic.rutubelist.ru/video/dd/45/dd459545e1c2c36443a8caa077170f1f.jpg",
+//                            "9636fe05d26c912a39f785f3bb59a049"
+//                        )
+//                    val mediaList = listOf(
+//                        ProductMediaUi.Picture("https://vodovoz.net/upload/iblock/002/k7srdloaq0tvlgkebfjgyiwwdfb0inn3.jpg"),
+//                        ProductMediaUi.Picture("https://vodovoz.net/upload/iblock/73d/97sqy8mdagcc6e4uoixekhx8m54j8lv6.jpg"),
+//                        ProductMediaUi.RutubeVideo(
+//                            "https://pic.rutubelist.ru/video/dd/45/dd459545e1c2c36443a8caa077170f1f.jpg",
+//                            "9636fe05d26c912a39f785f3bb59a049"
+//                        ),
+//                        ProductMediaUi.YoutubeVideo(
+//                            "https://pic.rutubelist.ru/video/dd/45/dd459545e1c2c36443a8caa077170f1f.jpg",
+//                            "TTgWyzXI0EY"
+//                        ),
+//
+//                        )
+//                    delay(1000L)
+//                    findNavController().navigateToDetailMedia(currentMedia, mediaList)
+//                }
 
                 VodovozTheme {
-                    val viewState by viewModel.observeUiState().collectAsStateWithLifecycle()
+                    val pagingState by viewModel.observeUiState().collectAsStateWithLifecycle()
+                    val viewState by rememberUpdatedState(newValue = pagingState.data)
                     val topProductLazyListState = rememberLazyListState()
                     val pullRefreshState = rememberPullToRefreshState()
                     val snackbarHostState = remember { SnackbarHostState() }
 
-                    when (viewState.data.uiState) {
+                    when (pagingState.data.uiState) {
                         HomeFlowViewModel.HomeUiState.NetworkError -> {
                             NetworkErrorPlaceholder(
                                 onTryAgainClick = { viewModel.refresh() }
@@ -145,13 +174,14 @@ class HomeFragment : Fragment() {
 
                         else -> {
                             HomeScreen(
-                                viewState = viewState.data,
+                                viewState = viewState,
                                 viewModel = viewModel,
                                 pullRefreshState = pullRefreshState,
                                 topProductsLazyListState = topProductLazyListState,
                             )
                         }
                     }
+
 
                     Box(
                         modifier = Modifier.fillMaxSize(),

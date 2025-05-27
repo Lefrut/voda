@@ -224,7 +224,7 @@ private fun WaterAppBottle(
 
     val levelFraction = currentLevel.coerceAtMost(maxLevel).toFloat() / maxLevel.coerceAtLeast(1)
     val animatedWaveHeight by animateDpAsState(
-        targetValue = (bottleBoundsHeightDp * 0.85f) * levelFraction,
+        targetValue = (bottleBoundsHeightDp * 0.82f) * levelFraction,
         label = "waveHeight",
         animationSpec = tween(250, 0, easing = LinearEasing)
     )
@@ -235,7 +235,7 @@ private fun WaterAppBottle(
         initialValue = -10f,
         targetValue = 10f,
         animationSpec = infiniteRepeatable(
-            animation = tween(1200, easing = LinearEasing),
+            animation = tween(1000, easing = LinearEasing),
             repeatMode = RepeatMode.Reverse
         ),
         label = "waveOffsetX"
@@ -244,7 +244,7 @@ private fun WaterAppBottle(
         initialValue = 1f,
         targetValue = 1.1f,
         animationSpec = infiniteRepeatable(
-            animation = tween(2000, easing = LinearEasing),
+            animation = tween(1500, easing = LinearEasing),
             repeatMode = RepeatMode.Reverse
         ),
         label = "waveScale"

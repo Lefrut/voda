@@ -115,6 +115,7 @@ class WaterAppViewModel @Inject constructor(
     fun goToNextStage() = viewModelScope.launch {
         val nextUiState = when (val currentUiState = dataState.uiState) {
             is WaterAppUiState.UserData -> currentUiState.next() ?: run {
+
                 waterAppHelper.saveWaterAppUserData()
                 waterAppHelper.saveRate()
                 waterAppHelper.saveStart(true)
@@ -127,10 +128,15 @@ class WaterAppViewModel @Inject constructor(
         }
 
 
+
+
         uiStateListener.updateData { s ->
             s.copy(
-                uiState = if (dataState.notificationData.started) WaterAppUiState.Settings
-                else nextUiState
+                uiState = if (dataState.notificationData.firstShow) {
+                    WaterAppUiState.Settings
+                } else {
+                    nextUiState
+                }
             )
         }
     }
@@ -157,15 +163,15 @@ class WaterAppViewModel @Inject constructor(
 
     fun goToWaterApp() = viewModelScope.launch {
         waterAppHelper.fetchWaterAppUserData()
+        uiStateListener.updateData { s ->
+            s.copy(uiState = WaterAppUiState.Main)
+        }
 
         if (!dataState.notificationData.firstShow) {
             waterAppHelper.saveNotificationFirstShow()
             waterAppHelper.saveWaterAppNotificationData()
         }
 
-        uiStateListener.updateData { s ->
-            s.copy(uiState = WaterAppUiState.Main)
-        }
     }
 
     fun goToSettings() = viewModelScope.launch {
@@ -197,13 +203,13 @@ class WaterAppViewModel @Inject constructor(
         val currentLevel = (progress * rateData.rate).toInt()
         waterAppHelper.setWaterLevel(currentLevel)
 
-        if(!rateData.canFill) return@launch
+        if (!rateData.canFill) return@launch
 
         goToGoalCompleted()
     }
 
     fun addWater() = viewModelScope.launch {
-        if(!dataState.rateData.canFill) return@launch
+        if (!dataState.rateData.canFill) return@launch
 
         waterAppHelper.tryToChangeWaterLevel(dataState.changeWaterStep)
 

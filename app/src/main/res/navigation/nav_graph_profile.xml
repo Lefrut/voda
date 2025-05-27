@@ -278,7 +278,7 @@
             app:destination="@id/paginatedProductsCatalogWithoutFiltersFragment" />
         <action
             android:id="@+id/action_to_fullScreenDetailPicturesSliderFragment"
-            app:destination="@id/fullScreenDetailPicturesSliderFragment" />
+            app:destination="@id/detailMedia" />
         <action
             android:id="@+id/action_to_youTubeVideoFragmentDialog"
             app:destination="@id/youTubeVideoFragmentDialog" />
@@ -366,17 +366,7 @@
             android:id="@+id/action_to_searchFragment"
             app:destination="@id/searchFragment" />
     </fragment>
-    <dialog
-        android:id="@+id/miniCatalogBottomFragment"
-        android:name="com.vodovoz.app.feature.mini_catalog.MiniCatalogBottomFragment"
-        android:label="MiniCatalogBottomFragment">
-        <argument
-            android:name="categoryList"
-            app:argType="com.vodovoz.app.ui.model.CategoryUI[]" />
-        <argument
-            android:name="categoryId"
-            app:argType="long" />
-    </dialog>
+
     <fragment
         android:id="@+id/allBrandsFragment"
         android:name="com.vodovoz.app.feature.all.brands.AllBrandsFragment"
@@ -429,16 +419,6 @@
             android:id="@+id/action_to_profileFragment"
             app:destination="@id/profileFragment" />
     </fragment>
-    <dialog
-        android:id="@+id/giftsBottomFragment"
-        android:name="com.vodovoz.app.feature.cart.gifts.GiftsBottomFragment"
-        android:label="GiftsBottomFragment">
-        <argument
-            android:name="giftBundle"
-            android:defaultValue="@null"
-            app:argType="com.vodovoz.app.ui.model.custom.GiftProductUI"
-            app:nullable="true" />
-    </dialog>
 
     <fragment
         android:id="@+id/profileFragment"
@@ -487,7 +467,7 @@
 
     <fragment
         android:id="@+id/fullScreenHistorySliderFragment"
-        android:name="com.vodovoz.app.feature.full_screen_history_slider.FullScreenHistoriesSliderFlowFragment"
+        android:name="com.vodovoz.app.feature.stories_fragment.StoriesFragment"
         android:label="FullScreenHistorySliderFragment">
         <argument
             android:name="startHistoryId"
@@ -545,17 +525,11 @@
 
 
     </fragment>
-    <dialog
-        android:id="@+id/fullScreenDetailPicturesSliderFragment"
-        android:name="com.vodovoz.app.feature.product_details.fullscreen.FullScreenDetailPicturesSliderFragment"
-        android:label="FullScreenDetailPicturesSliderFragment">
-        <argument
-            android:name="startPosition"
-            app:argType="integer" />
-        <argument
-            android:name="detailPictureList"
-            app:argType="string[]" />
-    </dialog>
+    <fragment
+        android:id="@+id/detailMedia"
+        android:name="com.vodovoz.app.feature.product_details.detail_media.DetailMediaFragment"
+        android:label="FullScreenDetailPicturesSliderFragment"/>
+
     <dialog
         android:id="@+id/youTubeVideoFragmentDialog"
         android:name="com.vodovoz.app.feature.player_dialog.YouTubeVideoFragmentDialog"
@@ -679,7 +653,7 @@
     </fragment>
     <fragment
         android:id="@+id/howToOrderFragment"
-        android:name="com.vodovoz.app.feature.bottom.howtoorder.HowToOrderFragment"
+        android:name="com.vodovoz.app.feature.bottom.how_to_order.HowToOrderFragment"
         android:label="HowToOrderFragment" />
 
     <fragment
@@ -770,17 +744,7 @@
             android:id="@+id/action_to_serviceOrderFragment"
             app:destination="@id/serviceOrderFragment" />
     </fragment>
-    <dialog
-        android:id="@+id/serviceSelectionBS"
-        android:name="com.vodovoz.app.feature.bottom.services.detail.bottom.ServiceSelectionBS"
-        android:label="ServiceSelectionBS">
-        <argument
-            android:name="serviceList"
-            app:argType="com.vodovoz.app.ui.model.ServiceUI[]" />
-        <argument
-            android:name="selectedService"
-            app:argType="string" />
-    </dialog>
+
     <fragment
         android:id="@+id/serviceOrderFragment"
         android:name="com.vodovoz.app.feature.service_order.ServiceOrderFragment"
@@ -836,18 +800,7 @@
             android:name="coupon"
             app:argType="string" />
     </fragment>
-    <fragment
-        android:id="@+id/aboutAppDialogFragment"
-        android:name="com.vodovoz.app.feature.bottom.aboutapp.AboutAppDialogFragment"
-        android:label="AboutAppDialogFragment" />
-    <dialog
-        android:id="@+id/genderSelectionBS"
-        android:name="com.vodovoz.app.feature.profile.userdata.GenderSelectionBS"
-        android:label="GenderSelectionBS">
-        <argument
-            android:name="selectedGender"
-            app:argType="string" />
-    </dialog>
+
     <dialog
         android:id="@+id/freeShippingSaysBS"
         android:name="com.vodovoz.app.feature.cart.ordering.intervals.FreeShippingSaysBS"
@@ -891,27 +844,6 @@
         android:name="com.vodovoz.app.feature.cart.bottles.AllBottlesFlowFragment"
         android:label="AllBottlesFragment" />
 
-    <dialog
-        android:id="@+id/replacementProductsSelectionBS"
-        android:name="com.vodovoz.app.feature.replacement.ReplacementProductsSelectionBS"
-        android:label="ReplacementProductsSelectionBS">
-        <argument
-            android:name="notAvailableProductDetailPicture"
-            app:argType="string" />
-        <argument
-            android:name="productList"
-            app:argType="com.vodovoz.app.ui.model.ProductUI[]" />
-        <argument
-            android:name="productId"
-            app:argType="long" />
-        <argument
-            android:name="productName"
-            app:argType="string" />
-        <argument
-            android:name="categoryId"
-            android:defaultValue="-1L"
-            app:argType="long" />
-    </dialog>
 
     <dialog
         android:id="@+id/webViewFlowBottomSheetFragment"
@@ -926,21 +858,6 @@
             app:argType="long" />
     </fragment>
 
-
-    <fragment
-        android:id="@+id/serviceDetailNewFragment"
-        android:name="com.vodovoz.app.feature.bottom.services.detail.ServiceDetailNewFragment"
-        android:label="ServiceDetailNewFragment">
-        <argument
-            android:name="serviceId"
-            app:argType="string" />
-        <action
-            android:id="@+id/action_to_productDetailFragment"
-            app:destination="@id/productDetailFragment" />
-        <action
-            android:id="@+id/action_to_profileFragment"
-            app:destination="@id/profileFragment" />
-    </fragment>
     <fragment
         android:id="@+id/qrCodeFragment"
         android:name="com.vodovoz.app.feature.search.qrcode.QrCodeFragment"

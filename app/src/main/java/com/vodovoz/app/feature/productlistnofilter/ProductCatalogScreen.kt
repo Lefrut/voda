@@ -26,7 +26,7 @@ import com.vodovoz.app.feature.productlistnofilter.composables.ProductCatalogBod
 @Composable
 fun ProductCatalogScreen(
     viewModel: ProductCatalogViewModel,
-    viewState: ProductCatalogViewModel.ProductListNoFilterState,
+    viewState: ProductCatalogViewModel.ProductCatalogState,
     lazyGridState: LazyGridState,
 ) {
     val productsSection = viewState.productsSection
@@ -75,15 +75,15 @@ fun ProductCatalogScreen(
         ) {
 
             when (val uiState = viewState.uiState) {
-                ProductCatalogViewModel.UiState.Error -> {
+                ProductCatalogViewModel.ProductCatalogUiState.Error -> {
                     NetworkErrorPlaceholder { viewModel.refresh() }
                 }
 
-                ProductCatalogViewModel.UiState.Loading -> {
+                ProductCatalogViewModel.ProductCatalogUiState.Loading -> {
                     LoadingPlaceholder()
                 }
 
-                ProductCatalogViewModel.UiState.Body -> {
+                ProductCatalogViewModel.ProductCatalogUiState.Body -> {
                     ProductCatalogBody(
                         lazyGridState = lazyGridState,
                         title = productsSection.title,
@@ -137,7 +137,7 @@ fun ProductCatalogScreen(
 
                 }
 
-                is ProductCatalogViewModel.UiState.Empty -> {
+                is ProductCatalogViewModel.ProductCatalogUiState.Empty -> {
                     val placeholder = uiState.placeholder
                     EmptyResultPlaceholder(
                         title = placeholder.headerHtml,
@@ -145,6 +145,11 @@ fun ProductCatalogScreen(
                         imagePainter = rememberAsyncImagePainter(placeholder.imageUrl)
                     )
                 }
+
+                is ProductCatalogViewModel.ProductCatalogUiState.ForAdults -> {
+
+                }
+
             }
         }
     }

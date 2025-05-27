@@ -1,32 +1,31 @@
 package com.vodovoz.app.feature.home
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.Indicator
 import androidx.compose.material3.pulltorefresh.PullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import com.vodovoz.app.design_system.composables.snackbar.VodovozSnackbarHost
 import com.vodovoz.app.feature.all.promotions.composables.AdvertisingInfoBottomSheet
 import com.vodovoz.app.feature.home.composables.HomeBody
 import com.vodovoz.app.feature.home.composables.HomeLoadingPlaceholder
 import com.vodovoz.app.feature.home.composables.HomeTopBar
 import com.vodovoz.app.feature.home.composables.SpecialPromotionBottomSheet
 import com.vodovoz.app.feature.home.composables.UnratedProductsBottomSheet
+import dev.chrisbanes.haze.hazeEffect
+import dev.chrisbanes.haze.hazeSource
+import dev.chrisbanes.haze.materials.ExperimentalHazeMaterialsApi
+import dev.chrisbanes.haze.materials.HazeMaterials
 
 @OptIn(ExperimentalMaterial3Api::class)
-@Suppress("NonSkippableComposable")
 @Composable
 fun HomeScreen(
     viewState: HomeFlowViewModel.HomeState,
@@ -34,6 +33,8 @@ fun HomeScreen(
     pullRefreshState: PullToRefreshState,
     topProductsLazyListState: LazyListState,
 ) {
+
+
     Scaffold(
         topBar = {
             HomeTopBar(
@@ -57,11 +58,8 @@ fun HomeScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues),
-            isRefreshing = viewState.showRefreshIndicator,
-            onRefresh = {
-                viewModel.refresh()
-            },
             state = pullRefreshState,
+            isRefreshing = viewState.showRefreshIndicator,
             indicator = {
                 Indicator(
                     modifier = Modifier.align(Alignment.TopCenter),
@@ -70,9 +68,10 @@ fun HomeScreen(
                     containerColor = MaterialTheme.colorScheme.background,
                     color = MaterialTheme.colorScheme.primary
                 )
-
+            },
+            onRefresh = {
+                viewModel.refresh()
             }
-
         ) {
             when (viewState.uiState) {
                 HomeFlowViewModel.HomeUiState.Loading -> {
@@ -85,6 +84,7 @@ fun HomeScreen(
 
                 HomeFlowViewModel.HomeUiState.Success -> {
                     HomeBody(
+                        modifier = Modifier,
                         topProductsLazyListState = topProductsLazyListState,
                         banners = viewState.banners,
                         stories = viewState.stories,
@@ -146,6 +146,7 @@ fun HomeScreen(
         }
     }
 
+
     if (viewState.showAdvertisingBS) {
         AdvertisingInfoBottomSheet(
             advertising = viewState.currentAdvertising,
@@ -175,5 +176,4 @@ fun HomeScreen(
             }
         )
     }
-
 }

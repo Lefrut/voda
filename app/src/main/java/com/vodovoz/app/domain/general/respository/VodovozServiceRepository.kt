@@ -390,4 +390,11 @@ interface VodovozServiceRepository {
 
     fun getViewedProducts(): Flow<Result<SectionModel<ProductModel>>>
 
+    fun getAllViewedProducts(): Flow<Result<ProductsSectionModel>>
+
+    fun getAllViewedProductsPaged(
+        categoryId: Int = -1,
+        sort: SortModel = SortModel.Empty,
+    ): Flow<PagingData<ProductModel>>
+
 }

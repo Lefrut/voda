@@ -5,7 +5,11 @@ import com.vodovoz.app.core.network.VodovozWebConfig
 import com.vodovoz.app.core.network.interceptor.BaseUrlInterceptor
 import com.vodovoz.app.core.network.interceptor.CookieHandlerInterceptor
 import com.vodovoz.app.data.vodovoz_service.VodovozService
+import com.vodovoz.app.data.vodovoz_service.datastore.ForAdultsDataStore
+import com.vodovoz.app.data.vodovoz_service.datastore.ForAdultsDataStoreImpl
+import com.vodovoz.app.data.vodovoz_service.repository.UserPreferencesRepositoryImpl
 import com.vodovoz.app.data.vodovoz_service.repository.VodovozServiceRepositoryImpl
+import com.vodovoz.app.domain.general.respository.UserPreferencesRepository
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import dagger.Binds
 import dagger.Module
@@ -42,11 +46,24 @@ abstract class VodovozServiceModule {
         baseUrlInterceptor: BaseUrlInterceptor,
     ): Interceptor
 
+    @Binds
+    @Singleton
+    abstract fun bindForAdultsDataStore(
+        impl: ForAdultsDataStoreImpl
+    ): ForAdultsDataStore
+
+    @Binds
+    @Singleton
+    abstract fun bindUserPreferencesRepository(
+        impl: UserPreferencesRepositoryImpl
+    ): UserPreferencesRepository
+
 
     companion object {
 
         const val BASE_URL = "https://vodovoz.net/"
         const val URL = "https://vodovoz.net/newmobile_new/"
+
 
         @Provides
         @Singleton
@@ -88,7 +105,7 @@ abstract class VodovozServiceModule {
 }
 
 fun String.toFullUrl(): String {
-    return VodovozServiceModule.BASE_URL.removePrefix("/") + this
+    return VodovozWebConfig.VODOVOZ_URL.removeSuffix("/") + this
 }
 
 class NoOpCallAdapterFactory private constructor() : CallAdapter.Factory() {

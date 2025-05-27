@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
@@ -14,19 +15,18 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.fragment.findNavController
-import com.vodovoz.app.common.cart.CartManager
-import com.vodovoz.app.common.like.LikeManager
-import com.vodovoz.app.common.product.rating.RatingProductManager
-import com.vodovoz.app.core.navigation.navigateToProductAnalogs
+import com.vodovoz.app.common.tab.TabManager
+import com.vodovoz.app.core.navigation.ContentSearchNavigator
 import com.vodovoz.app.core.navigation.navigateToCategories
+import com.vodovoz.app.core.navigation.navigateToProductAnalogs
 import com.vodovoz.app.core.navigation.navigateToProductDetails
 import com.vodovoz.app.core.navigation.navigateToProductFilters
 import com.vodovoz.app.core.navigation.navigateToSearch
 import com.vodovoz.app.design_system.VodovozTheme
+import com.vodovoz.app.design_system.composables.placeholders.ForAdultsPlaceholder
 import com.vodovoz.app.design_system.effects.LifecycleEffect
 import com.vodovoz.app.design_system.model.filters.FiltersUi
 import com.vodovoz.app.feature.home.model.CategoryUi
-import com.vodovoz.app.core.navigation.ContentSearchNavigator
 import com.vodovoz.app.util.extensions.shareText
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.parcelize.Parcelize
@@ -38,13 +38,7 @@ class ProductCatalogFragment : Fragment() {
     internal val viewModel: ProductCatalogViewModel by viewModels()
 
     @Inject
-    lateinit var cartManager: CartManager
-
-    @Inject
-    lateinit var likeManager: LikeManager
-
-    @Inject
-    lateinit var ratingProductManager: RatingProductManager
+    lateinit var tabManager: TabManager
 
     @Inject
     lateinit var navigatorFactory: ContentSearchNavigator.Factory
@@ -88,11 +82,39 @@ class ProductCatalogFragment : Fragment() {
                     val viewState = pagingState.data
                     val lazyGridState = rememberLazyGridState()
 
-                    ProductCatalogScreen(
-                        viewModel = viewModel,
-                        viewState = viewState,
-                        lazyGridState = lazyGridState
-                    )
+
+                    when (val uiState = viewState.uiState) {
+                        is ProductCatalogViewModel.ProductCatalogUiState.ForAdults -> {
+                            ForAdultsPlaceholder(
+                                forAdults = uiState.forAdultsUi,
+                                onBackClick = {
+                                    viewModel.navigateBack()
+                                },
+                                onApplyClick = {
+                                    viewModel.setCanViewAdultProducts()
+                                }
+                            )
+
+                            DisposableEffect(Unit) {
+                                tabManager.changeTabVisibility(false)
+                                onDispose {
+                                    tabManager.changeTabVisibility(true)
+                                }
+                            }
+                        }
+
+                        else -> {
+                            ProductCatalogScreen(
+                                viewModel = viewModel,
+                                viewState = viewState,
+                                lazyGridState = lazyGridState
+                            )
+                        }
+                    }
+
+                    LifecycleEffect {
+                        viewModel.listenCanViewAdultProducts()
+                    }
 
                     LifecycleEffect {
                         viewModel.listenCart()
@@ -105,49 +127,49 @@ class ProductCatalogFragment : Fragment() {
                     LifecycleEffect {
                         viewModel.observeEvent().collect { event ->
                             when (event) {
-                                ProductCatalogViewModel.ProductListNoFilterEvent.GoBack -> {
+                                ProductCatalogViewModel.ProductCatalogEvent.GoBack -> {
                                     findNavController().popBackStack()
                                 }
 
-                                is ProductCatalogViewModel.ProductListNoFilterEvent.GoToSearch -> {
+                                is ProductCatalogViewModel.ProductCatalogEvent.GoToSearch -> {
                                     findNavController().navigateToSearch(event.query)
                                 }
 
-                                is ProductCatalogViewModel.ProductListNoFilterEvent.GoToCategories -> {
+                                is ProductCatalogViewModel.ProductCatalogEvent.GoToCategories -> {
                                     findNavController().navigateToCategories(
                                         category = event.currentCategory,
                                         categories = event.categories
                                     )
                                 }
 
-                                is ProductCatalogViewModel.ProductListNoFilterEvent.GoToProductDetails -> {
+                                is ProductCatalogViewModel.ProductCatalogEvent.GoToProductDetails -> {
                                     findNavController().navigateToProductDetails(event.productId)
                                 }
 
-                                ProductCatalogViewModel.ProductListNoFilterEvent.ScrollToTop -> {
+                                ProductCatalogViewModel.ProductCatalogEvent.ScrollToTop -> {
                                     lazyGridState.animateScrollToItem(0);
                                 }
 
-                                is ProductCatalogViewModel.ProductListNoFilterEvent.GoToProductFilters -> {
+                                is ProductCatalogViewModel.ProductCatalogEvent.GoToProductFilters -> {
                                     findNavController().navigateToProductFilters(
                                         event.categoryId,
                                         event.filters
                                     )
                                 }
 
-                                is ProductCatalogViewModel.ProductListNoFilterEvent.Share -> {
+                                is ProductCatalogViewModel.ProductCatalogEvent.Share -> {
                                     shareText(event.text)
                                 }
 
-                                is ProductCatalogViewModel.ProductListNoFilterEvent.GoToProductAnalogs -> {
+                                is ProductCatalogViewModel.ProductCatalogEvent.GoToProductAnalogs -> {
                                     findNavController().navigateToProductAnalogs(event.productId)
                                 }
 
-                                ProductCatalogViewModel.ProductListNoFilterEvent.GoToQrCode -> {
+                                ProductCatalogViewModel.ProductCatalogEvent.GoToQrCode -> {
                                     searchNavigator.navigateToImageSearch()
                                 }
 
-                                ProductCatalogViewModel.ProductListNoFilterEvent.GoToSpeech -> {
+                                ProductCatalogViewModel.ProductCatalogEvent.GoToSpeech -> {
                                     searchNavigator.navigateToVoiceSearch()
                                 }
                             }

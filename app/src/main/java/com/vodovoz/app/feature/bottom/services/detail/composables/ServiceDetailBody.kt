@@ -108,7 +108,6 @@ fun ServiceDetailBody(
                             loadWithOverviewMode = true
 
                             layoutAlgorithm = WebSettings.LayoutAlgorithm.TEXT_AUTOSIZING
-                            cacheMode = LOAD_CACHE_ONLY
                         }
 
                     }

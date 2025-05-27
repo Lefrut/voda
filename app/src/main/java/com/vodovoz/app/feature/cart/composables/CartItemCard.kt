@@ -133,8 +133,8 @@ fun CartItemCard(
                     }
                 }
                 if (
-                    !isAvailable
-                    && restriction != ProductRestrictionUi.FULL_RESTRICTION
+                    !cartItem.canBuy &&
+                    restriction != ProductRestrictionUi.FULL_RESTRICTION
                     && restriction != ProductRestrictionUi.NO_DELETE
                 ) {
                     TrashButton(modifier = Modifier.padding(start = 4.dp)) { onRemove(cartItem) }
@@ -175,7 +175,7 @@ fun CartItemCard(
 
 
                     if (
-                        !isPresent && isAvailable
+                        !isPresent
                         && restriction != ProductRestrictionUi.NO_QUANTITY
                         && restriction != ProductRestrictionUi.NO_FAVORITES_QUANTITY
                         && restriction != ProductRestrictionUi.FULL_RESTRICTION

@@ -17,8 +17,6 @@ import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.composables.placeholders.LoadingPlaceholder
 import com.vodovoz.app.design_system.composables.placeholders.NetworkErrorPlaceholder
 import com.vodovoz.app.design_system.effects.LifecycleEffect
-import com.vodovoz.app.feature.bottom.services.adapter.ServicesClickListener
-import com.vodovoz.app.feature.bottom.services.newservs.model.ServiceNew
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -71,19 +69,5 @@ class AboutServicesFragment : Fragment() {
             }
         }
     }
-
-    private fun getServicesClickListener(): ServicesClickListener {
-        return object : ServicesClickListener {
-            override fun onItemClick(item: ServiceNew) {
-                val id = item.id ?: return
-                findNavController().navigate(
-                    AboutServicesFragmentDirections.actionToServiceDetailNewFragment(
-                        id
-                    )
-                )
-            }
-        }
-    }
-
 
 }

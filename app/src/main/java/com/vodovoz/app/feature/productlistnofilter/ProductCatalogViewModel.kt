@@ -7,7 +7,6 @@ import androidx.paging.CombinedLoadStates
 import androidx.paging.LoadState
 import androidx.paging.PagingData
 import androidx.paging.map
-import com.vodovoz.app.R
 import com.vodovoz.app.common.cart.CartManager
 import com.vodovoz.app.common.content.Event
 import com.vodovoz.app.common.content.PagingContractViewModel
@@ -17,6 +16,7 @@ import com.vodovoz.app.common.content.updateData
 import com.vodovoz.app.common.like.LikeManager
 import com.vodovoz.app.common.product.rating.RatingProductManager
 import com.vodovoz.app.common.resources.ResourcesProvider
+import com.vodovoz.app.design_system.model.ForAdultsUi
 import com.vodovoz.app.design_system.model.ParentCategoryUi
 import com.vodovoz.app.design_system.model.ProductUi
 import com.vodovoz.app.design_system.model.VodovozPlaceholderUi
@@ -35,6 +35,7 @@ import com.vodovoz.app.domain.general.model.ProductModel
 import com.vodovoz.app.domain.general.model.ProductsSectionModel
 import com.vodovoz.app.domain.general.model.ProductsSectionUi
 import com.vodovoz.app.domain.general.model.toUi
+import com.vodovoz.app.domain.general.respository.UserPreferencesRepository
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.feature.home.model.CategoryUi
 import com.vodovoz.app.feature.home.model.toParentCategory
@@ -51,6 +52,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -63,8 +65,9 @@ class ProductCatalogViewModel @Inject constructor(
     private val ratingProductManager: RatingProductManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val resourcesProvider: ResourcesProvider,
-) : PagingContractViewModel<ProductCatalogViewModel.ProductListNoFilterState, ProductCatalogViewModel.ProductListNoFilterEvent>(
-    ProductListNoFilterState()
+    private val userPreferencesRepository: UserPreferencesRepository,
+) : PagingContractViewModel<ProductCatalogViewModel.ProductCatalogState, ProductCatalogViewModel.ProductCatalogEvent>(
+    ProductCatalogState()
 ) {
 
     val dataSource = savedState.get<DataSource>("dataSource") ?: DataSource.Missing
@@ -85,6 +88,23 @@ class ProductCatalogViewModel @Inject constructor(
         configureScreen().invokeOnCompletion {
             fetchProductListData()
         }
+    }
+
+    suspend fun listenCanViewAdultProducts() {
+        uiStateListener.map { it.data.products }
+            .combine(userPreferencesRepository.canViewAdultProducts) { _, p2 ->
+                p2
+            }.collectLatest { canView ->
+                if (!canView) return@collectLatest
+
+                uiStateListener.updateData { s ->
+                    s.copy(
+                        products = s.products.map { product ->
+                            product.copy(forAdults = null)
+                        }
+                    )
+                }
+            }
     }
 
 
@@ -112,7 +132,7 @@ class ProductCatalogViewModel @Inject constructor(
     private fun fetchProductListData() = viewModelScope.launch {
         if (dataState.productsSection == ProductsSectionUi.Empty) {
             uiStateListener.updateData { s ->
-                s.copy(uiState = UiState.Loading)
+                s.copy(uiState = ProductCatalogUiState.Loading)
             }
         }
 
@@ -183,7 +203,16 @@ class ProductCatalogViewModel @Inject constructor(
             }
 
             DataSource.ViewedProducts -> {
-                TODO()
+                fetchProductsData(
+                    fetchProductsSection = {
+                        vodovozServiceRepository.getAllViewedProducts().singleResult()
+                    },
+                    fetchPagedProductsFlow = {
+                        vodovozServiceRepository.getAllViewedProductsPaged(
+                            categoryId, sortModel
+                        )
+                    }
+                )
             }
 
             is DataSource.Products -> {
@@ -274,7 +303,7 @@ class ProductCatalogViewModel @Inject constructor(
 
 
     fun refresh() = viewModelScope.launch {
-        if (dataState.uiState is UiState.Loading) return@launch
+        if (dataState.uiState is ProductCatalogUiState.Loading) return@launch
         uiStateListener.updateData { s ->
             s.copy(showRefreshIndicator = true)
         }
@@ -309,6 +338,8 @@ class ProductCatalogViewModel @Inject constructor(
     ) {
 
 
+        val canViewAdultProducts =
+            userPreferencesRepository.canViewAdultProducts.firstOrNull() ?: false
         val categoriesTreeJob = fetchCategoriesTree(dataState.currentCategory.id.toLong())
         val productsSectionResult =
             fetchProductsSection().map { productsSectionModel ->
@@ -333,7 +364,11 @@ class ProductCatalogViewModel @Inject constructor(
 
                 state.copy(
                     productsSection = productsSection.copy(categories = categories),
-                    uiState = UiState.Body,
+                    uiState = if (productsSection.forAdults != null && !canViewAdultProducts) {
+                        ProductCatalogUiState.ForAdults(productsSection.forAdults)
+                    } else {
+                        ProductCatalogUiState.Body
+                    },
                     currentSort = state.currentSort.takeIf { sort ->
                         sort != SortUi.Empty
                     } ?: productsSection.sorting.firstOrNull() ?: SortUi.Empty,
@@ -354,14 +389,16 @@ class ProductCatalogViewModel @Inject constructor(
 
         }.onFailure { t ->
             val uiState = when (t) {
-                is EmptyResultException -> UiState.Empty(t.placeholder?.toUi() ?: VodovozPlaceholderUi.Empty)
+                is EmptyResultException -> ProductCatalogUiState.Empty(
+                    t.placeholder?.toUi() ?: VodovozPlaceholderUi.Empty
+                )
 
 
-                else -> UiState.Error
+                else -> ProductCatalogUiState.Error
             }
 
 
-            if (uiState is UiState.Empty && dataState.productsSection == ProductsSectionUi.Empty) {
+            if (uiState is ProductCatalogUiState.Empty && dataState.productsSection == ProductsSectionUi.Empty) {
                 uiStateListener.updateData { s ->
                     s.copy(uiState = uiState)
                 }
@@ -371,7 +408,7 @@ class ProductCatalogViewModel @Inject constructor(
                         productsLoadStates = s.productsLoadStates.copy(
                             refresh = LoadState.Error(t)
                         ),
-                        uiState = UiState.Body,
+                        uiState = ProductCatalogUiState.Body,
                         productsSection = s.productsSection.copy(
                             productsQuantityText = ""
                         )
@@ -443,19 +480,6 @@ class ProductCatalogViewModel @Inject constructor(
 
     }
 
-
-    fun changeCart(productId: Long, quantity: Int, oldQuan: Int) {
-        viewModelScope.launch {
-            cartManager.add(id = productId, oldCount = oldQuan, newCount = quantity)
-        }
-    }
-
-    fun changeFavoriteStatus(productId: Long, isFavorite: Boolean) {
-        viewModelScope.launch {
-            likeManager.like(productId, !isFavorite)
-        }
-    }
-
     fun changeRating(productId: Long, rating: Float, oldRating: Float) {
         viewModelScope.launch {
             ratingProductManager.rate(productId, rating = rating, oldRating = oldRating)
@@ -470,7 +494,7 @@ class ProductCatalogViewModel @Inject constructor(
                 products = emptyList()
             )
         }
-        eventListener.emit(ProductListNoFilterEvent.ScrollToTop)
+        eventListener.emit(ProductCatalogEvent.ScrollToTop)
         fetchProductListData()
     }
 
@@ -535,20 +559,20 @@ class ProductCatalogViewModel @Inject constructor(
                 currentBottomSheetCategory = newCategory.toParentCategory()
             )
         }
-        eventListener.emit(ProductListNoFilterEvent.ScrollToTop)
+        eventListener.emit(ProductCatalogEvent.ScrollToTop)
         fetchProductListData()
     }
 
     fun navigateBack() = viewModelScope.launch {
-        eventListener.emit(ProductListNoFilterEvent.GoBack)
+        eventListener.emit(ProductCatalogEvent.GoBack)
     }
 
     fun navigateToSearch(query: String) = viewModelScope.launch {
-        eventListener.emit(ProductListNoFilterEvent.GoToSearch(query))
+        eventListener.emit(ProductCatalogEvent.GoToSearch(query))
     }
 
     fun navigateToProductDetails(product: ProductUi) = viewModelScope.launch {
-        eventListener.emit(ProductListNoFilterEvent.GoToProductDetails(product.id))
+        eventListener.emit(ProductCatalogEvent.GoToProductDetails(product.id))
     }
 
     fun changeFavorite(product: ProductUi) = viewModelScope.launch {
@@ -564,7 +588,7 @@ class ProductCatalogViewModel @Inject constructor(
     fun navigateToProductFilters() = viewModelScope.launch {
         with(dataState) {
             eventListener.emit(
-                ProductListNoFilterEvent.GoToProductFilters(
+                ProductCatalogEvent.GoToProductFilters(
                     currentCategory.id.toLong(),
                     currentFilters
                 )
@@ -580,12 +604,12 @@ class ProductCatalogViewModel @Inject constructor(
                 products = emptyList()
             )
         }
-        eventListener.emit(ProductListNoFilterEvent.ScrollToTop)
+        eventListener.emit(ProductCatalogEvent.ScrollToTop)
         fetchProductListData()
     }
 
     fun shareProducts() = viewModelScope.launch {
-        eventListener.emit(ProductListNoFilterEvent.Share(dataState.productsSection.share.text))
+        eventListener.emit(ProductCatalogEvent.Share(dataState.productsSection.share.text))
     }
 
     fun showCategoriesBottomSheet() = viewModelScope.launch {
@@ -619,19 +643,26 @@ class ProductCatalogViewModel @Inject constructor(
     }
 
     fun navigateToProductAnalogs(product: ProductUi) = viewModelScope.launch {
-        eventListener.emit(ProductListNoFilterEvent.GoToProductAnalogs(product.id))
+        eventListener.emit(ProductCatalogEvent.GoToProductAnalogs(product.id))
     }
 
     fun navigateToSpeech() = viewModelScope.launch {
-        eventListener.emit(ProductListNoFilterEvent.GoToSpeech)
+        eventListener.emit(ProductCatalogEvent.GoToSpeech)
     }
 
     fun navigateToQrCode() = viewModelScope.launch {
-        eventListener.emit(ProductListNoFilterEvent.GoToQrCode)
+        eventListener.emit(ProductCatalogEvent.GoToQrCode)
+    }
+
+    fun setCanViewAdultProducts() = viewModelScope.launch {
+        uiStateListener.updateData { s ->
+            s.copy(uiState = ProductCatalogUiState.Body)
+        }
+        userPreferencesRepository.setCanViewAdultProducts(true)
     }
 
     @Immutable
-    data class ProductListNoFilterState(
+    data class ProductCatalogState(
         val categoryId: Long = -1,
         val categoryHeader: CategoryUI? = null,
         val sortType: SortTypeUI = SortTypeUI(),
@@ -651,7 +682,7 @@ class ProductCatalogViewModel @Inject constructor(
         val currentFilters: FiltersUi = FiltersUi.Empty,
         val currentSort: SortUi = SortUi.Empty,
 
-        val uiState: UiState = UiState.Loading,
+        val uiState: ProductCatalogUiState = ProductCatalogUiState.Loading,
 
         val isGridView: Boolean = true,
         val showFilters: Boolean = false,
@@ -662,31 +693,32 @@ class ProductCatalogViewModel @Inject constructor(
         val showEmptyCategory: Boolean = false,
     ) : State
 
-    sealed interface UiState {
-        data class Empty(val placeholder: VodovozPlaceholderUi) : UiState
-        data object Error : UiState
-        data object Loading : UiState
-        data object Body : UiState
+    sealed interface ProductCatalogUiState {
+        data class Empty(val placeholder: VodovozPlaceholderUi) : ProductCatalogUiState
+        data object Error : ProductCatalogUiState
+        data object Loading : ProductCatalogUiState
+        data object Body : ProductCatalogUiState
+        data class ForAdults(val forAdultsUi: ForAdultsUi) : ProductCatalogUiState
     }
 
-    sealed class ProductListNoFilterEvent : Event {
-        data object GoBack : ProductListNoFilterEvent()
-        data object ScrollToTop : ProductListNoFilterEvent()
-        data object GoToSpeech : ProductListNoFilterEvent()
-        data object GoToQrCode : ProductListNoFilterEvent()
+    sealed class ProductCatalogEvent : Event {
+        data object GoBack : ProductCatalogEvent()
+        data object ScrollToTop : ProductCatalogEvent()
+        data object GoToSpeech : ProductCatalogEvent()
+        data object GoToQrCode : ProductCatalogEvent()
 
-        data class GoToSearch(val query: String) : ProductListNoFilterEvent()
+        data class GoToSearch(val query: String) : ProductCatalogEvent()
         data class GoToCategories(
             val categories: List<CategoryUi>,
             val currentCategory: CategoryUi,
-        ) : ProductListNoFilterEvent()
+        ) : ProductCatalogEvent()
 
-        data class GoToProductDetails(val productId: Long) : ProductListNoFilterEvent()
+        data class GoToProductDetails(val productId: Long) : ProductCatalogEvent()
         data class GoToProductFilters(val categoryId: Long, val filters: FiltersUi) :
-            ProductListNoFilterEvent()
+            ProductCatalogEvent()
 
-        data class Share(val text: String) : ProductListNoFilterEvent()
-        data class GoToProductAnalogs(val productId: Long) : ProductListNoFilterEvent()
+        data class Share(val text: String) : ProductCatalogEvent()
+        data class GoToProductAnalogs(val productId: Long) : ProductCatalogEvent()
     }
 
     companion object {

@@ -313,11 +313,10 @@ interface VodovozService {
     /**
      * Search requests
      * */
-    //todo - mb put tracking
+
     @GET("searching/index.php?action=glav")
     suspend fun getSearchRecommendations(): Response<VodovozResponseDTO<SearchRecommendationsDTO>>
 
-    //todo - mb put tracking
     @GET("searching/minipoisk.php?action=glav")
     suspend fun getMiniSearchRecommendations(
         @Query("search") query: String,
@@ -575,9 +574,9 @@ interface VodovozService {
 
     @GET("glavnaya/viewedproduct/index.php?action=details")
     suspend fun getAllViewedProducts(
-        @Query("userid") userId: Long,
+        @Query("userid") userId: Long?,
         @Query("nav") page: Int = 1,
-        @Query("sect") categoryId: Int = -1,
+        @Query("sect") categoryId: Int? = null,
         @Query("sort") sort: String = "",
         @Query("ascdesc") order: String = "",
     ): Response<VodovozResponseDTO<ProductsSectionDTO>>
