@@ -2,16 +2,10 @@ package com.vodovoz.app.feature.home.composables
 
 import android.graphics.BlurMaskFilter
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.AnimatedVisibilityScope
-import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.SharedTransitionLayout
-import androidx.compose.animation.SharedTransitionScope
-import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -20,6 +14,7 @@ import androidx.compose.foundation.gestures.DraggableAnchors
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.anchoredDraggable
 import androidx.compose.foundation.gestures.animateTo
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -31,7 +26,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -91,10 +85,7 @@ private val shape = RoundedCornerShape(
     bottomStart = 0.dp
 )
 
-@OptIn(
-    ExperimentalMaterial3Api::class,
-    ExperimentalSharedTransitionApi::class,
-)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UnratedProductsBottomSheet(
     modifier: Modifier = Modifier,
@@ -131,7 +122,6 @@ fun UnratedProductsBottomSheet(
         LaunchedEffect(state) {
             snapshotFlow { state.currentValue }.drop(1).collect { currentValue ->
                 if (currentValue == SheetValue.PartiallyExpanded || currentValue == SheetValue.Hidden) {
-                    state.animateTo(SheetValue.Hidden)
                     onDispose()
                 }
             }
@@ -161,50 +151,42 @@ fun UnratedProductsBottomSheet(
             VodovozDragHandle()
             Spacer(modifier = Modifier.height(8.dp))
 
-            SharedTransitionLayout {
+            AnimatedContent(
+                targetState = state.currentValue,
+                label = "UpdatedProductsTransition",
+                transitionSpec = {
+                    fadeIn(tween(250)) togetherWith fadeOut(tween(250))
+                }
+            ) { targetState ->
+                when (targetState) {
+                    SheetValue.Hidden -> {
+                        Box(modifier = Modifier.fillMaxSize())
+                    }
 
-                AnimatedContent(
-                    targetState = state.currentValue,
-                    label = "UpdatedProductsTransition",
-                    transitionSpec = {
-                        (scaleIn(tween(durationMillis = 100, easing = LinearEasing))).togetherWith(
-                            scaleOut(snap())
+                    SheetValue.Expanded -> {
+                        UpdatedProductsExpanded(
+                            modifier = Modifier.fillMaxHeight(),
+                            title = sectionUnratedProducts.productTitle,
+                            products = sectionUnratedProducts.products,
+                            onProductRatingChanged = onProductRatingChanged,
+                            onNoRateProductClick = {
+                                //TODO
+                            },
+                            onClose = {
+                                onDispose()
+                            }
                         )
                     }
-                ) { targetState ->
-                    when (targetState) {
-                        SheetValue.Hidden -> {
-                            Box(modifier = Modifier.fillMaxSize())
-                        }
 
-                        SheetValue.Expanded -> {
-                            UpdatedProductsExpanded(
-                                modifier = Modifier.fillMaxHeight(),
-                                animatedVisibilityScope = this@AnimatedContent,
-                                title = sectionUnratedProducts.productTitle,
-                                products = sectionUnratedProducts.products,
-                                onProductRatingChanged = onProductRatingChanged,
-                                onNoRateProductClick = {
-                                    //TODO
-                                },
-                                onClose = {
-                                    onDispose()
-                                }
-                            )
-                        }
-
-                        SheetValue.PartiallyExpanded -> {
-                            UnratedProductsPartially(
-                                modifier = Modifier.fillMaxHeight(),
-                                anchorDraggableState = state,
-                                animatedVisibilityScope = this@AnimatedContent,
-                                title = sectionUnratedProducts.title,
-                                countProductsText = sectionUnratedProducts.countProductsText,
-                                products = sectionUnratedProducts.products
-                            )
-                        }
+                    SheetValue.PartiallyExpanded -> {
+                        UnratedProductsPartially(
+                            modifier = Modifier.fillMaxHeight(),
+                            anchorDraggableState = state,
+                            title = sectionUnratedProducts.title,
+                            countProductsText = sectionUnratedProducts.countProductsText,
+                            products = sectionUnratedProducts.products
+                        )
                     }
-
                 }
             }
         }
@@ -240,12 +222,10 @@ fun Modifier.dropShadow(
     }
 }
 
-@OptIn(ExperimentalSharedTransitionApi::class)
 @Suppress("NonSkippableComposable")
 @Composable
-fun SharedTransitionScope.UpdatedProductsExpanded(
+fun UpdatedProductsExpanded(
     modifier: Modifier = Modifier,
-    animatedVisibilityScope: AnimatedVisibilityScope,
     title: String,
     products: List<UnratedProductUi>,
     onProductRatingChanged: (UnratedProductUi, Float) -> Unit,
@@ -304,11 +284,7 @@ fun SharedTransitionScope.UpdatedProductsExpanded(
             ) {
                 AsyncImage(
                     modifier = Modifier
-                        .size(300.dp)
-                        .sharedElement(
-                            sharedContentState = rememberSharedContentState(key = "image-key${product.id}"),
-                            animatedVisibilityScope = animatedVisibilityScope,
-                        ),
+                        .size(300.dp),
                     model = ImageRequest.Builder(LocalContext.current)
                         .data(product.detailPicture)
                         .placeholderMemoryCacheKey("image-key${product.id}")
@@ -336,7 +312,7 @@ fun SharedTransitionScope.UpdatedProductsExpanded(
                     painterEmpty = painterResource(id = R.drawable.ic_star_inactive),
                     painterFilled = painterResource(id = R.drawable.ic_star),
                     size = 48.dp,
-                    spaceBetween = 6.dp,
+                    spaceBetween = 8.dp,
                     onValueChange = { newRating ->
                         rating = newRating
                     },
@@ -377,19 +353,15 @@ fun SharedTransitionScope.UpdatedProductsExpanded(
     }
 }
 
-@OptIn(
-    ExperimentalSharedTransitionApi::class,
-    ExperimentalMaterial3Api::class
-)
+@OptIn(ExperimentalMaterial3Api::class)
 @Suppress("NonSkippableComposable")
 @Composable
-fun SharedTransitionScope.UnratedProductsPartially(
+fun UnratedProductsPartially(
     modifier: Modifier = Modifier,
     anchorDraggableState: AnchoredDraggableState<SheetValue>,
     title: String,
     countProductsText: String,
     products: List<UnratedProductUi>,
-    animatedVisibilityScope: AnimatedVisibilityScope,
 ) {
     Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
@@ -415,25 +387,19 @@ fun SharedTransitionScope.UnratedProductsPartially(
         }
 
 
-        LazyRow {
+        LazyRow(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
             items(products) { product ->
-
                 val animatedSize by animateDpAsState(
-                    targetValue = lerp(110.dp, 300.dp, progressToExpanded),
+                    targetValue = lerp(110.dp, 280.dp, progressToExpanded),
                     label = "imageSize"
                 )
 
                 AsyncImage(
                     modifier = Modifier
-                        .requiredSize(animatedSize)
-                        .sharedElement(
-                            sharedContentState = rememberSharedContentState(key = "image-key${product.id}"),
-                            animatedVisibilityScope = animatedVisibilityScope,
-                        ),
+                        .size(animatedSize)
+                        .animateItem(fadeInSpec = null, fadeOutSpec = null),
                     model = ImageRequest.Builder(LocalContext.current)
                         .data(product.detailPicture)
-                        .placeholderMemoryCacheKey("image-key${product.id}")
-                        .memoryCacheKey("image-key${product.id}")
                         .build(),
                     contentDescription = null,
                     contentScale = ContentScale.Crop,

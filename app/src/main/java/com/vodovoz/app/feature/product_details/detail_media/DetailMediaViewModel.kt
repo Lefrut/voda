@@ -36,12 +36,13 @@ class DetailMediaViewModel @Inject constructor(
     }
 
     fun makePortrait() = viewModelScope.launch {
+        _state.update{ s -> s.copy(portraitOrientation = true) }
         _events.emit(DetailMediaEvent.MakePortrait)
     }
 
     fun makeLandscape() = viewModelScope.launch {
+        _state.update{ s -> s.copy(portraitOrientation = false) }
         _events.emit(DetailMediaEvent.MakeLandscape)
-
     }
 
 }

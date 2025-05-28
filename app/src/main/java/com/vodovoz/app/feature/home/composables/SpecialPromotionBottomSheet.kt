@@ -14,15 +14,15 @@ import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import coil3.compose.AsyncImagePainter
 import coil3.compose.rememberAsyncImagePainter
+import coil3.request.ImageRequest
+import coil3.request.crossfade
 import com.vodovoz.app.design_system.composables.bottom_sheet.VodovozDragHandle
 import com.vodovoz.app.design_system.composables.button.VodovozButton
 import com.vodovoz.app.design_system.model.SpecialPromotionUi
@@ -51,10 +51,12 @@ fun SpecialPromotionBottomSheet(
                 color = MaterialTheme.colorScheme.onBackground,
                 style = MaterialTheme.typography.titleMedium
             )
-            val painter = rememberAsyncImagePainter(specialPromotionUi.picture)
-            val imageState by painter.state.collectAsStateWithLifecycle()
+            val painter = rememberAsyncImagePainter(
+                ImageRequest.Builder(LocalContext.current).data(specialPromotionUi.picture)
+                    .crossfade(true).build()
+            )
 
-            if (imageState !is AsyncImagePainter.State.Error && imageState !is AsyncImagePainter.State.Loading) {
+            if (specialPromotionUi.picture.isNotEmpty()) {
                 Image(
                     painter = painter,
                     contentDescription = null,

@@ -1,5 +1,6 @@
 package com.vodovoz.app.feature.profile.waterapp.composables
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -63,6 +64,11 @@ fun WaterAppSettingsScreen(
     onSettingsSaveClick: () -> Unit,
     onEditUserData: (WaterAppUiState.UserData) -> Unit
 ) {
+    BackHandler {
+        onCloseClick()
+    }
+
+
     Column(modifier = modifier.fillMaxSize()) {
         ClosingTopBar(
             title = stringResource(id = R.string.settings),

@@ -5,6 +5,9 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.interaction.DragInteraction
+import androidx.compose.foundation.interaction.Interaction
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyListState
@@ -16,6 +19,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
@@ -64,13 +68,18 @@ import com.vodovoz.app.design_system.composables.placeholders.NetworkErrorPlaceh
 import com.vodovoz.app.design_system.composables.snackbar.VodovozSnackbarHost
 import com.vodovoz.app.design_system.effects.LifecycleEffect
 import com.vodovoz.app.design_system.model.ProductMediaUi
+import com.vodovoz.app.feature.home.composables.UnratedProductsBottomSheet
 import com.vodovoz.app.feature.sitestate.SiteStateManager
 import com.vodovoz.app.util.extensions.debugLog
 import com.vodovoz.app.util.extensions.isVpnActive
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onSubscription
+import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -80,22 +89,10 @@ class HomeFragment : Fragment() {
     private val viewModel: HomeFlowViewModel by activityViewModels()
 
     @Inject
-    lateinit var ratingProductManager: RatingProductManager
-
-    @Inject
-    lateinit var cartManager: CartManager
-
-    @Inject
-    lateinit var likeManager: LikeManager
-
-    @Inject
     lateinit var tabManager: TabManager
 
     @Inject
     lateinit var siteStateManager: SiteStateManager
-
-    @Inject
-    lateinit var mediaManager: MediaManager
 
     @Inject
     lateinit var accountManager: AccountManager
@@ -134,29 +131,6 @@ class HomeFragment : Fragment() {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
 
             setContent {
-                //todo - do something :D
-//                LaunchedEffect(Unit) {
-//                    val currentMedia =
-//                        ProductMediaUi.RutubeVideo(
-//                            "https://pic.rutubelist.ru/video/dd/45/dd459545e1c2c36443a8caa077170f1f.jpg",
-//                            "9636fe05d26c912a39f785f3bb59a049"
-//                        )
-//                    val mediaList = listOf(
-//                        ProductMediaUi.Picture("https://vodovoz.net/upload/iblock/002/k7srdloaq0tvlgkebfjgyiwwdfb0inn3.jpg"),
-//                        ProductMediaUi.Picture("https://vodovoz.net/upload/iblock/73d/97sqy8mdagcc6e4uoixekhx8m54j8lv6.jpg"),
-//                        ProductMediaUi.RutubeVideo(
-//                            "https://pic.rutubelist.ru/video/dd/45/dd459545e1c2c36443a8caa077170f1f.jpg",
-//                            "9636fe05d26c912a39f785f3bb59a049"
-//                        ),
-//                        ProductMediaUi.YoutubeVideo(
-//                            "https://pic.rutubelist.ru/video/dd/45/dd459545e1c2c36443a8caa077170f1f.jpg",
-//                            "TTgWyzXI0EY"
-//                        ),
-//
-//                        )
-//                    delay(1000L)
-//                    findNavController().navigateToDetailMedia(currentMedia, mediaList)
-//                }
 
                 VodovozTheme {
                     val pagingState by viewModel.observeUiState().collectAsStateWithLifecycle()
@@ -180,6 +154,18 @@ class HomeFragment : Fragment() {
                                 topProductsLazyListState = topProductLazyListState,
                             )
                         }
+                    }
+
+                    if(viewState.showUnratedProductsBS && viewState.sectionUnratedProducts.products.isNotEmpty()) {
+                        UnratedProductsBottomSheet(
+                            sectionUnratedProducts = viewState.sectionUnratedProducts,
+                            onProductRatingChanged = { product, rating ->
+                                viewModel.changeUnratedProductRating(product, rating)
+                            },
+                            onDispose = {
+                                viewModel.closeUnratedProductsBottomSheet()
+                            }
+                        )
                     }
 
 

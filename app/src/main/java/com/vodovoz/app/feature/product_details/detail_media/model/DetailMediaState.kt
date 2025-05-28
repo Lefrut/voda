@@ -7,4 +7,5 @@ import com.vodovoz.app.design_system.model.ProductMediaUi
 data class DetailMediaState(
     val currentMedia: ProductMediaUi = ProductMediaUi.Picture(""),
     val mediaList: List<ProductMediaUi> = emptyList(),
+    val portraitOrientation: Boolean = true
 )

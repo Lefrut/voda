@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.core.os.bundleOf
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
+import androidx.navigation.navOptions
 import com.vodovoz.app.R
 import com.vodovoz.app.design_system.model.ColorfulButtonUi
 import com.vodovoz.app.design_system.model.ParentCategoryUi
@@ -221,37 +222,15 @@ fun NavController.navigateToDetailMedia(media: ProductMediaUi, mediaList: List<P
             "media" to media,
             "mediaList" to mediaList
         ),
+        navOptions {
+            anim {
+                enter = R.anim.fade_in
+                popExit = R.anim.fade_out
+            }
+        }
     )
 
 }
-
-fun NavController.navigateToProductImages(image: String, images: List<String>) {
-    val array = images.toTypedArray()
-    val currentImageIndex = images.indexOfOrNull(image) ?: 0
-    val bundle = bundleOf(
-        "startPosition" to currentImageIndex,
-        "detailPictureList" to array
-    )
-    navigate(
-        R.id.detailMedia,
-        bundle,
-        NavOptions.Builder()
-            .setEnterAnim(R.anim.fade_in)
-            .setPopExitAnim(R.anim.fade_out)
-            .build()
-    )
-}
-
-fun NavController.navigateToRutubeVideo(videoCode: String) {
-    val bundle = bundleOf("videoId" to videoCode)
-    navigate(
-        R.id.ruTubeVideoFragmentDialog, bundle, NavOptions.Builder()
-            .setEnterAnim(R.anim.fade_in)
-            .setPopExitAnim(R.anim.fade_out)
-            .build()
-    )
-}
-
 
 fun NavController.navigateToStories(storyId: Long) {
     val bundle = bundleOf("startHistoryId" to storyId)

@@ -149,9 +149,14 @@ class WaterAppViewModel @Inject constructor(
         waterAppHelper.saveNotificationTime(reminderInterval.minutes.toString())
     }
 
-    fun changeHaveNotification() = viewModelScope.launch {
-        waterAppHelper.saveNotificationSwitch(!dataState.notificationData.switch)
+    fun checkHaveNotifications() = viewModelScope.launch {
+        eventListener.emit(WaterAppEvents.SwitchNotifications(!dataState.notificationData.switch))
     }
+
+    fun changeHaveNotifications(haveNotifications: Boolean) = viewModelScope.launch {
+        waterAppHelper.saveNotificationSwitch(haveNotifications)
+    }
+
 
     fun saveSettingsNotifications() = viewModelScope.launch {
         waterAppHelper.saveNotificationFirstShow()
@@ -239,6 +244,23 @@ class WaterAppViewModel @Inject constructor(
         uiStateListener.updateData { it.copy(changeWaterStep = newStep) }
     }
 
+    fun showNotificationSettingsDialog() = viewModelScope.launch {
+        uiStateListener.updateData { s ->
+            s.copy(showNotificationSettingsDialog = true)
+        }
+    }
+
+    fun closeNotificationSettingsDialog() = viewModelScope.launch {
+        uiStateListener.updateData { s ->
+            s.copy(showNotificationSettingsDialog = false)
+        }
+    }
+
+    fun openNotificationSettings() = viewModelScope.launch {
+        uiStateListener.updateData { s -> s.copy(showNotificationSettingsDialog = false) }
+        eventListener.emit(WaterAppEvents.OpenNotificationSettings)
+    }
+
 
     @Immutable
     data class WaterAppState(
@@ -248,12 +270,15 @@ class WaterAppViewModel @Inject constructor(
         val uiState: WaterAppUiState = WaterAppUiState.Welcome,
         val reminderIntervals: List<ReminderIntervalUi> = emptyList(),
         val changeWaterStep: Int = 250,
+        val showNotificationSettingsDialog: Boolean = false
     ) : State
 
     @Immutable
     sealed class WaterAppEvents : Event {
+        data class SwitchNotifications(val haveNotifications: Boolean) : WaterAppEvents()
 
         data object GoBack : WaterAppEvents()
+        data object OpenNotificationSettings : WaterAppEvents()
 
     }
 

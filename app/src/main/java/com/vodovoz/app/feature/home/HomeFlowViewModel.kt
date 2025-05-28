@@ -10,7 +10,6 @@ import com.vodovoz.app.common.content.ErrorState
 import com.vodovoz.app.common.content.Event
 import com.vodovoz.app.common.content.PagingContractViewModel
 import com.vodovoz.app.common.content.State
-import com.vodovoz.app.common.content.itemadapter.Item
 import com.vodovoz.app.common.content.toErrorState
 import com.vodovoz.app.common.content.updateData
 import com.vodovoz.app.common.like.LikeManager
@@ -45,17 +44,13 @@ import com.vodovoz.app.feature.home.model.PopularCategoryUi
 import com.vodovoz.app.feature.home.model.UnratedProductUi
 import com.vodovoz.app.feature.home.model.UnratedProductsSectionUi
 import com.vodovoz.app.feature.home.model.toUi
-import com.vodovoz.app.mapper.PopupNewsMapper.mapToUI
-import com.vodovoz.app.ui.model.PopupNewsUI
 import com.vodovoz.app.util.extensions.debugLog
 import com.vodovoz.app.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
@@ -410,9 +405,7 @@ class HomeFlowViewModel @Inject constructor(
 
     fun closeUnratedProductsBottomSheet() = viewModelScope.launch {
         uiStateListener.updateData { s ->
-            s.copy(
-                showUnratedProductsBS = false
-            )
+            s.copy(showUnratedProductsBS = false)
         }
     }
 
@@ -432,6 +425,7 @@ class HomeFlowViewModel @Inject constructor(
                     rating.roundToInt()
                 )
             )
+            delay(300L)
             uiStateListener.updateData { s ->
                 val sectionUnratedProducts = s.sectionUnratedProducts
                 s.copy(
@@ -522,10 +516,11 @@ class HomeFlowViewModel @Inject constructor(
         }
     }
 
-    data class PositionItem(
-        val position: Int,
-        val item: Item,
-    )
+    fun showUnratedProducts() = viewModelScope.launch {
+        uiStateListener.updateData { s ->
+            s.copy(showUnratedProductsBS = true, showedUnratedProducts = true)
+        }
+    }
 
     @Immutable
     sealed class HomeEvents : Event {
@@ -593,6 +588,7 @@ class HomeFlowViewModel @Inject constructor(
         val showRefreshIndicator: Boolean = false,
 
         val showedVpnWarning: Boolean = false,
+        val showedUnratedProducts: Boolean = false,
     ) : State
 
 }

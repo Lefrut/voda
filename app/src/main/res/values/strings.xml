@@ -348,4 +348,11 @@
     <string name="logout_error">Не удалось выйти из аккаунта, попробойте снова.</string>
     <string name="setting_params">Настроить параметры</string>
 
+    <string name="notification_dialog_title">Уведомления</string>
+    <string name="notification_dialog_description">
+        Чтобы получать напоминания, пожалуйста, включите уведомления для этого приложения.
+    </string>
+    <string name="notification_dialog_accept">Настройки</string>
+    <string name="notification_dialog_cancel">Отмена</string>
+
 </resources>

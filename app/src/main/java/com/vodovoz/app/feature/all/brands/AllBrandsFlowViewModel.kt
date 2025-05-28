@@ -10,7 +10,6 @@ import com.vodovoz.app.common.content.Event
 import com.vodovoz.app.common.content.PagingContractViewModel
 import com.vodovoz.app.common.content.State
 import com.vodovoz.app.common.content.updateData
-import com.vodovoz.app.data.MainRepository
 import com.vodovoz.app.design_system.model.BrandUi
 import com.vodovoz.app.design_system.model.toUi
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository

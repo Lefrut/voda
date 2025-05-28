@@ -87,12 +87,11 @@ fun WriteCommentBody(
             )
         }
 
-        Box {
+        Box(Modifier.padding(top = 24.dp), contentAlignment = Alignment.Center) {
             VodovozRatingBar(
-                modifier = Modifier.padding(top = 24.dp),
                 rating = rating.toFloat(),
-                startSize = 24.dp,
-                spaceBetween = 16.dp,
+                startSize = 32.dp,
+                spaceBetween = 12.dp,
                 onRatingChange = onRatingChange
             )
         }
