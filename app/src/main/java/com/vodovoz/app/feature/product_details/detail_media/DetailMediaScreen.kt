@@ -1,7 +1,5 @@
 package com.vodovoz.app.feature.product_details.detail_media
 
-import android.content.pm.ActivityInfo
-import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -22,14 +20,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import com.vodovoz.app.R
 import com.vodovoz.app.design_system.model.ProductMediaUi
 import com.vodovoz.app.feature.product_details.detail_media.composable.DetailMediaImage
-import com.vodovoz.app.feature.product_details.detail_media.composable.DetailMediaRutubeVideo
-import com.vodovoz.app.feature.product_details.detail_media.composable.DetailMediaYoutubeVideo
+import com.vodovoz.app.feature.product_details.detail_media.composable.DetailMediaVideo
 import com.vodovoz.app.feature.product_details.detail_media.model.DetailMediaState
 import mx.platacard.pagerindicator.PagerIndicatorOrientation
 import mx.platacard.pagerindicator.PagerWormIndicator
@@ -46,17 +42,19 @@ fun DetailMediaScreen(
             .background(MaterialTheme.colorScheme.background),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Icon(
-            imageVector = ImageVector.vectorResource(id = R.drawable.icon_close),
-            contentDescription = null,
-            modifier = Modifier
-                .align(Alignment.End)
-                .clip(CircleShape)
-                .clickable { viewModel.navigateBack() }
-                .padding(16.dp)
-                .size(24.dp),
-            tint = MaterialTheme.colorScheme.onBackground
-        )
+        if (viewState.portraitOrientation) {
+            Icon(
+                imageVector = ImageVector.vectorResource(id = R.drawable.icon_close),
+                contentDescription = null,
+                modifier = Modifier
+                    .align(Alignment.End)
+                    .clip(CircleShape)
+                    .clickable { viewModel.navigateBack() }
+                    .padding(16.dp)
+                    .size(24.dp),
+                tint = MaterialTheme.colorScheme.onBackground
+            )
+        }
 
 
 
@@ -70,21 +68,17 @@ fun DetailMediaScreen(
             state = pagerState,
             key = { i -> mediaList.getOrElse(i) { i } },
             pageSpacing = 2.dp,
-            beyondViewportPageCount = 1,
-            userScrollEnabled = true
+            beyondViewportPageCount = viewState.mediaList.lastIndex,
+            userScrollEnabled = viewState.portraitOrientation
         ) { pageIndex ->
             val media = mediaList.getOrNull(pageIndex) ?: return@HorizontalPager
 
-            val videoModifier = when (Configuration.ORIENTATION_PORTRAIT) {
-                Configuration.ORIENTATION_PORTRAIT -> {
-                    Modifier
-                        .height(400.dp)
-                        .fillMaxWidth()
-                }
+            val videoModifier = when (viewState.portraitOrientation) {
+                true -> Modifier
+                    .height(400.dp)
+                    .fillMaxWidth()
 
-                else -> {
-                    Modifier.fillMaxSize()
-                }
+                else -> Modifier.fillMaxSize()
             }
 
             when (media) {
@@ -98,7 +92,7 @@ fun DetailMediaScreen(
                 }
 
                 is ProductMediaUi.YoutubeVideo -> {
-                    DetailMediaRutubeVideo(
+                    DetailMediaVideo(
                         modifier = videoModifier,
                         videoCode = media.code,
                         onPortrait = {
@@ -106,12 +100,13 @@ fun DetailMediaScreen(
                         },
                         onLandscape = {
                             viewModel.makeLandscape()
-                        }
+                        },
+                        isRutube = false
                     )
                 }
 
                 is ProductMediaUi.RutubeVideo -> {
-                    DetailMediaRutubeVideo(
+                    DetailMediaVideo(
                         modifier = videoModifier,
                         videoCode = media.code,
                         onPortrait = {
@@ -119,7 +114,8 @@ fun DetailMediaScreen(
                         },
                         onLandscape = {
                             viewModel.makeLandscape()
-                        }
+                        },
+                        isRutube = true
                     )
                 }
             }
@@ -128,22 +124,23 @@ fun DetailMediaScreen(
 
         Spacer(modifier = Modifier.weight(0.7f))
 
-        PagerWormIndicator(
-            modifier = Modifier
-                .padding(bottom = 45.dp)
-                .height(5.dp)
-                .graphicsLayer {
-                    alpha = if (mediaList.size > 1) 1f else 0f
-                },
-            pagerState = pagerState,
-            activeDotColor = MaterialTheme.colorScheme.primary,
-            dotColor = MaterialTheme.colorScheme.surfaceVariant,
-            dotCount = mediaList.size,
-            orientation = PagerIndicatorOrientation.Horizontal,
-            minDotSize = 5.dp,
-            activeDotSize = 5.dp,
-            space = 6.dp
-        )
-
+        if (viewState.portraitOrientation) {
+            PagerWormIndicator(
+                modifier = Modifier
+                    .padding(bottom = 45.dp)
+                    .height(5.dp)
+                    .graphicsLayer {
+                        alpha = if (mediaList.size > 1) 1f else 0f
+                    },
+                pagerState = pagerState,
+                activeDotColor = MaterialTheme.colorScheme.primary,
+                dotColor = MaterialTheme.colorScheme.surfaceVariant,
+                dotCount = mediaList.size,
+                orientation = PagerIndicatorOrientation.Horizontal,
+                minDotSize = 5.dp,
+                activeDotSize = 5.dp,
+                space = 6.dp
+            )
+        }
     }
 }

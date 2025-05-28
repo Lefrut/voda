@@ -165,8 +165,12 @@ sealed interface ProductMediaUi : Parcelable {
 
 }
 
-fun ProductVideoModel.toUi(): ProductMediaUi.YoutubeVideo {
+fun ProductVideoModel.toYoutubeVideoUi(): ProductMediaUi.YoutubeVideo {
     return ProductMediaUi.YoutubeVideo(previewImage, code)
+}
+
+fun ProductVideoModel.toRutubeVideoUi(): ProductMediaUi.RutubeVideo {
+    return ProductMediaUi.RutubeVideo(previewImage, code)
 }
 
 fun ProductDetailsModel.toUi(): ProductDetailsUi {
@@ -182,10 +186,17 @@ fun ProductDetailsModel.toUi(): ProductDetailsUi {
         documents = documents.toUi { value -> value.mapToUi() },
 
         detailPicture = detailPicture,
-        mediaList = pictures.map { ProductMediaUi.Picture(it) } + listOf(
-            rutubeVideo,
-            youtubeVideo
-        ).mapNotNull { videoModel -> videoModel?.toUi() },
+        mediaList = buildList {
+            addAll(pictures.map { ProductMediaUi.Picture(it) })
+
+            rutubeVideo?.toRutubeVideoUi()?.let { video ->
+                add(video)
+            }
+            youtubeVideo?.toYoutubeVideoUi()?.let { video ->
+                add(video)
+            }
+
+        },
         sectionQueries = sectionTags.toUi { tag -> tag },
         isFavorite = isFavorite,
         isAvailable = isAvailable,

@@ -1,6 +1,11 @@
 package com.vodovoz.app.feature.home
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.gestures.awaitDragOrCancellation
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.awaitVerticalDragOrCancellation
+import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -14,16 +19,15 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.PointerInputChange
+import androidx.compose.ui.input.pointer.pointerInput
 import com.vodovoz.app.feature.all.promotions.composables.AdvertisingInfoBottomSheet
 import com.vodovoz.app.feature.home.composables.HomeBody
 import com.vodovoz.app.feature.home.composables.HomeLoadingPlaceholder
 import com.vodovoz.app.feature.home.composables.HomeTopBar
 import com.vodovoz.app.feature.home.composables.SpecialPromotionBottomSheet
 import com.vodovoz.app.feature.home.composables.UnratedProductsBottomSheet
-import dev.chrisbanes.haze.hazeEffect
-import dev.chrisbanes.haze.hazeSource
-import dev.chrisbanes.haze.materials.ExperimentalHazeMaterialsApi
-import dev.chrisbanes.haze.materials.HazeMaterials
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -84,7 +88,22 @@ fun HomeScreen(
 
                 HomeFlowViewModel.HomeUiState.Success -> {
                     HomeBody(
-                        modifier = Modifier,
+                        modifier = Modifier.pointerInput(viewState.showedUnratedProducts) {
+                            if (viewState.showedUnratedProducts) return@pointerInput
+                            awaitEachGesture {
+                                val down = awaitFirstDown(pass = PointerEventPass.Initial)
+                                var drag: PointerInputChange? =
+                                    awaitVerticalDragOrCancellation(down.id)
+                                awaitDragOrCancellation(down.id)
+
+                                while (drag != null) {
+                                    drag = awaitVerticalDragOrCancellation(drag.id)
+                                }
+                                waitForUpOrCancellation(PointerEventPass.Initial)
+
+                                viewModel.showUnratedProducts()
+                            }
+                        },
                         topProductsLazyListState = topProductsLazyListState,
                         banners = viewState.banners,
                         stories = viewState.stories,
@@ -161,18 +180,6 @@ fun HomeScreen(
             onDismissRequest = { viewModel.closeSpecialPromotionBottomSheet() },
             onButtonClick = {
                 viewModel.activateAction(it.actionWithButton.action)
-            }
-        )
-    }
-
-    AnimatedVisibility(viewState.showUnratedProductsBS && viewState.sectionUnratedProducts.products.isNotEmpty()) {
-        UnratedProductsBottomSheet(
-            sectionUnratedProducts = viewState.sectionUnratedProducts,
-            onProductRatingChanged = { product, rating ->
-                viewModel.changeUnratedProductRating(product, rating)
-            },
-            onDispose = {
-                viewModel.closeUnratedProductsBottomSheet()
             }
         )
     }

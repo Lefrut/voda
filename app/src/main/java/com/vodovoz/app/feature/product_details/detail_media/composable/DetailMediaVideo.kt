@@ -8,13 +8,18 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
 import com.gapps.library.api.VideoService
@@ -25,13 +30,13 @@ import java.util.concurrent.TimeUnit
 
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
-fun DetailMediaRutubeVideo(
+fun DetailMediaVideo(
     modifier: Modifier = Modifier,
     videoCode: String,
+    isRutube: Boolean,
     onLandscape: () -> Unit,
     onPortrait: () -> Unit,
 ) {
-
     val context = LocalContext.current
 
     val videoService = remember {
@@ -47,22 +52,22 @@ fun DetailMediaRutubeVideo(
             enableLog(true)
         }
     }
-
-
     val webView = remember {
-        WebView(context).apply {
-            setBackgroundColor(Color.Transparent.hashCode())
-        }
+        WebView(context)
     }
+
+    var customView by remember { mutableStateOf<View?>(null) }
+
     val coroutineScope = rememberCoroutineScope()
 
 
     Box(modifier = modifier, contentAlignment = Alignment.Center) {
         AndroidView(
+            modifier = Modifier.background(MaterialTheme.colorScheme.onBackground),
             factory = {
                 webView.apply {
                     layoutParams = ViewGroup.LayoutParams(
-                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT,
                         ViewGroup.LayoutParams.WRAP_CONTENT
                     )
 
@@ -71,11 +76,7 @@ fun DetailMediaRutubeVideo(
                         override fun shouldOverrideUrlLoading(
                             view: WebView?,
                             request: WebResourceRequest?,
-                        ): Boolean = false
-
-                        override fun onPageFinished(view: WebView?, url: String?) {
-                            super.onPageFinished(view, url)
-                        }
+                        ): Boolean = true
                     }
 
 
@@ -83,13 +84,14 @@ fun DetailMediaRutubeVideo(
                     webChromeClient = object : WebChromeClient() {
 
                         override fun onShowCustomView(view: View?, callback: CustomViewCallback?) {
+                            customView = view
                             onLandscape()
                         }
 
                         override fun onHideCustomView() {
+                            customView = null
                             onPortrait()
                         }
-
                     }
 
 
@@ -97,49 +99,63 @@ fun DetailMediaRutubeVideo(
                         javaScriptEnabled = true
                         domStorageEnabled = true
                         allowFileAccess = true
-                        mediaPlaybackRequiresUserGesture = false
+                        mediaPlaybackRequiresUserGesture = true
                         cacheMode = WebSettings.LOAD_DEFAULT
                     }
 
                     setLayerType(View.LAYER_TYPE_HARDWARE, null)
                 }
+                webView
             },
-            update = { view ->
-                if(videoCode.isEmpty()) return@AndroidView
-
+            update = {
                 videoService.loadVideoPreview(
-                    url = ApiConfig.RUTUBE_URL + videoCode,
+                    url = (if (isRutube) ApiConfig.RUTUBE_URL else ApiConfig.YOUTUBE_URL) + videoCode,
                     onSuccess = { model ->
+
                         val linkToPlay = model.linkToPlay ?: return@loadVideoPreview
-                        view.updateWebViewSize(
+
+                        webView.updateVideoWebView(
                             false,
                             model.height,
                             model.width
                         )
+
+                        if (webView.url == linkToPlay) return@loadVideoPreview
+
                         coroutineScope.launch {
                             webView.loadUrl(linkToPlay)
                         }
                     }
                 )
+
             }
         )
+
+        customView?.let { view ->
+            AndroidView(
+                factory = { view },
+                modifier = Modifier.fillMaxSize()
+            )
+        }
     }
 }
 
 
-private fun View.updateWebViewSize(
+private fun View.updateVideoWebView(
     landscapeOrientation: Boolean,
     videoHeight: Int,
     videoWidth: Int,
 ) {
     val windowWidth = resources.displayMetrics.widthPixels
     val windowHeight = resources.displayMetrics.heightPixels
+
     layoutParams = layoutParams.apply {
         width = windowWidth
         height = if (landscapeOrientation) {
             windowHeight
         } else {
-            windowWidth * videoHeight / videoWidth
+            windowWidth * videoHeight / videoWidth.coerceAtLeast(1)
         }
     }
+    fitsSystemWindows = false
 }

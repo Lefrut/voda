@@ -29,20 +29,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.ClipOp
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.PathOperation
-import androidx.compose.ui.graphics.asAndroidPath
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.asComposePath
 import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.graphics.vector.VectorGroup
-import androidx.compose.ui.graphics.vector.VectorPath
-import androidx.compose.ui.graphics.vector.toPath
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
@@ -57,8 +53,6 @@ import com.vodovoz.app.design_system.composables.button.VodovozButton
 import com.vodovoz.app.ui.canvas.mergeToSinglePath
 import com.vodovoz.app.ui.canvas.toAndroidPaths
 import kotlin.random.Random
-import android.graphics.Matrix as AndroidMatrix
-import android.graphics.Path as AndroidPath
 
 @Composable
 fun WaterAppGoalScreen(
@@ -192,6 +186,15 @@ fun Demo() {
     )
 }
 
+@Immutable
+data class Bubble(
+    val startX: Float,
+    val baseSizePx: Float,
+    val startYOffset: Float,
+    val durationMillis: Int,
+    val delayMillis: Int,
+    val color: Color,
+)
 
 @Composable
 fun BubblesClipped(
@@ -214,15 +217,6 @@ fun BubblesClipped(
         svgComposePaths.mergeToSinglePath()
     }
 
-    @Immutable
-    data class Bubble(
-        val startX: Float,
-        val baseSizePx: Float,
-        val startYOffset: Float,
-        val durationMillis: Int,
-        val delayMillis: Int,
-        val color: Color
-    )
 
     val bubbles = remember(canvasSize, bubbleCount) {
         val minWhiteSize = with(density) { 4.dp.toPx() }
@@ -256,6 +250,7 @@ fun BubblesClipped(
     }
 
     val transition = rememberInfiniteTransition(label = "bubbles")
+
 
     val animatedProgress = bubbles.mapIndexed { index, bubble ->
         transition.animateFloat(
@@ -291,6 +286,78 @@ fun BubblesClipped(
                     center = Offset(bubble.startX, y)
                 )
             }
+        }
+    }
+}
+
+@Composable
+fun BubblesClipped(
+    shape: Shape,
+    modifier: Modifier = Modifier,
+    bubbleCount: Int = 30,
+) {
+    val density = LocalDensity.current
+    var canvasSize by remember { mutableStateOf(Size.Zero) }
+
+    val bubbles = remember(canvasSize, bubbleCount) {
+        val minSize = with(density) { 2.dp.toPx() }
+        val maxSize = with(density) { 6.dp.toPx() }
+
+        List(bubbleCount) {
+            val color = Color.White.copy(alpha = 0.5f)
+
+            val size = Random.nextFloat() * (maxSize - minSize) + minSize
+
+            Bubble(
+                startX = Random.nextFloat() * canvasSize.width,
+                baseSizePx = size,
+                startYOffset = with(density) { 20.dp.toPx() },
+                durationMillis = Random.nextInt(2000, 4000),
+                delayMillis = Random.nextInt(0, 2000),
+                color = color
+            )
+        }
+    }
+
+    val transition = rememberInfiniteTransition(label = "bubbles")
+
+
+    val animatedProgress = bubbles.mapIndexed { index, bubble ->
+        transition.animateFloat(
+            initialValue = 0f,
+            targetValue = 1f,
+            animationSpec = infiniteRepeatable(
+                animation = tween(
+                    durationMillis = bubble.durationMillis,
+                    delayMillis = bubble.delayMillis,
+                    easing = LinearEasing
+                ),
+                repeatMode = RepeatMode.Restart
+            ),
+            label = "bubble-progress-$index"
+        )
+    }
+
+    Canvas(
+        modifier = modifier
+            .fillMaxSize()
+            .clip(shape)
+    ) {
+        canvasSize = size
+
+        bubbles.forEachIndexed { index, bubble ->
+            val progress = animatedProgress[index].value
+
+            val y =
+                canvasSize.height + bubble.startYOffset - (canvasSize.height + bubble.startYOffset + bubble.baseSizePx) * progress
+            val radius = bubble.baseSizePx * (1f - 0.6f * progress)
+            val alpha = 0.5f * (1f - progress)
+
+            drawCircle(
+                color = bubble.color.copy(alpha = alpha),
+                radius = radius,
+                center = Offset(bubble.startX, y)
+            )
         }
     }
 }

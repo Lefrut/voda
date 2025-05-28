@@ -1,20 +1,30 @@
 package com.vodovoz.app.feature.profile.waterapp
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.res.stringResource
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.fragment.findNavController
+import com.vodovoz.app.R
 import com.vodovoz.app.common.tab.TabManager
 import com.vodovoz.app.design_system.VodovozTheme
+import com.vodovoz.app.design_system.composables.dialogs.VodovozDialog
 import com.vodovoz.app.design_system.effects.LifecycleEffect
 import com.vodovoz.app.feature.profile.waterapp.composables.WaterAppBottleScreen
 import com.vodovoz.app.feature.profile.waterapp.composables.WaterAppGoalCompletedScreen
@@ -24,6 +34,7 @@ import com.vodovoz.app.feature.profile.waterapp.composables.WaterAppUserDataScre
 import com.vodovoz.app.feature.profile.waterapp.composables.WaterAppWelcomeScreen
 import com.vodovoz.app.feature.profile.waterapp.model.WaterAppUiState
 import com.vodovoz.app.util.extensions.debugLog
+import com.vodovoz.app.util.extensions.openAppNotificationSettings
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import javax.inject.Inject
@@ -38,6 +49,25 @@ class WaterAppFragment : Fragment() {
 
     @Inject
     lateinit var waterAppHelper: WaterAppHelper
+
+    private fun haveNotificationPermission(): Boolean {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            val permission = Manifest.permission.POST_NOTIFICATIONS
+            context?.let { context ->
+                ContextCompat.checkSelfPermission(
+                    context,
+                    permission
+                ) == PackageManager.PERMISSION_GRANTED
+            } ?: false
+        } else {
+            true
+        }
+    }
+
+    private fun shouldShowNotificationRationale(): Boolean =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
+            activity?.shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS) == true
+        else false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -68,8 +98,16 @@ class WaterAppFragment : Fragment() {
 
             setContent {
                 VodovozTheme {
+                    val context = LocalContext.current
                     val pagingState by viewModel.observeUiState().collectAsStateWithLifecycle()
                     val viewState by rememberUpdatedState(newValue = pagingState.data)
+                    val notificationPermissionLauncher = rememberLauncherForActivityResult(
+                        contract = ActivityResultContracts.RequestPermission()
+                    ) { isGranted ->
+                        if (isGranted) {
+                            viewModel.changeHaveNotifications(true)
+                        }
+                    }
 
                     AnimatedContent(
                         targetState = viewState.uiState,
@@ -126,7 +164,7 @@ class WaterAppFragment : Fragment() {
                                         viewModel.selectReminderInterval(reminderInterval)
                                     },
                                     onHaveNotificationsChange = {
-                                        viewModel.changeHaveNotification()
+                                        viewModel.checkHaveNotifications()
                                     },
                                     onSettingsSaveClick = {
                                         viewModel.saveSettingsNotifications()
@@ -138,13 +176,28 @@ class WaterAppFragment : Fragment() {
                                         viewModel.goToUserDataStage(stage)
                                     }
                                 )
+
+                                if (viewState.showNotificationSettingsDialog) {
+                                    VodovozDialog(
+                                        title = stringResource(R.string.notification_dialog_title),
+                                        description = stringResource(R.string.notification_dialog_description),
+                                        acceptButtonText = stringResource(R.string.notification_dialog_accept),
+                                        cancelButtonText = stringResource(R.string.notification_dialog_cancel),
+                                        onDismiss = {
+                                            viewModel.closeNotificationSettingsDialog()
+                                        },
+                                        onAccept = {
+                                            viewModel.openNotificationSettings()
+                                        }
+                                    )
+                                }
                             }
 
                             is WaterAppUiState.UserData -> {
                                 WaterAppUserDataScreen(
                                     userDataStage = uiState,
                                     userData = viewState.userData,
-                                    started = viewState.notificationData.started,
+                                    showParameters = viewState.notificationData.started && viewState.notificationData.firstShow,
                                     onGenderSelect = { isMan ->
                                         viewModel.selectGender(isMan)
                                     },
@@ -206,6 +259,20 @@ class WaterAppFragment : Fragment() {
                             when (event) {
                                 WaterAppViewModel.WaterAppEvents.GoBack -> {
                                     findNavController().popBackStack()
+                                }
+
+                                is WaterAppViewModel.WaterAppEvents.SwitchNotifications -> {
+                                    if (haveNotificationPermission() || !event.haveNotifications) {
+                                        viewModel.changeHaveNotifications(event.haveNotifications)
+                                    } else if (shouldShowNotificationRationale() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                        notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                                    } else {
+                                        viewModel.showNotificationSettingsDialog()
+                                    }
+                                }
+
+                                WaterAppViewModel.WaterAppEvents.OpenNotificationSettings -> {
+                                    context.openAppNotificationSettings()
                                 }
                             }
                         }

@@ -54,7 +54,7 @@ fun WaterAppUserDataScreen(
     modifier: Modifier = Modifier,
     userDataStage: WaterAppUiState.UserData,
     userData: WaterAppHelper.WaterAppUserData,
-    started: Boolean,
+    showParameters: Boolean,
     onGenderSelect: (isMan: Boolean) -> Unit,
     onActivityLevelSelect: (WaterAppActivityLevel) -> Unit,
     onWeightSelect: (Float) -> Unit,
@@ -67,7 +67,7 @@ fun WaterAppUserDataScreen(
 ) {
 
     Column(modifier = modifier.fillMaxSize()) {
-        if(!started){
+        if(!showParameters){
             WaterAppUserDataTopBar(
                 currentStage = userDataStage,
                 onBackClick = onBackClick,

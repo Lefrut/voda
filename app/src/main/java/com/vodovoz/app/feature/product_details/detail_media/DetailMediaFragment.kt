@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.snapshotFlow
@@ -18,6 +19,7 @@ import androidx.navigation.fragment.findNavController
 import com.vodovoz.app.common.tab.TabManager
 import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.effects.LifecycleEffect
+import com.vodovoz.app.design_system.effects.SystemBarsEffect
 import com.vodovoz.app.feature.product_details.detail_media.model.DetailMediaEvent
 import com.vodovoz.app.util.extensions.disableFullScreen
 import com.vodovoz.app.util.extensions.enableFullScreen
@@ -80,11 +82,6 @@ class DetailMediaFragment : Fragment() {
                         }
                     }
 
-//                    SystemBarsEffect(
-//                        statusBarColor = MaterialTheme.colorScheme.background,
-//                        navigationBarColor = MaterialTheme.colorScheme.background
-//                    )
-
 
                     LifecycleEffect {
                         viewModel.events.collect { event ->
@@ -98,6 +95,7 @@ class DetailMediaFragment : Fragment() {
                                     activity.requestedOrientation =
                                         ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
                                     activity.enableFullScreen()
+
                                 }
 
                                 DetailMediaEvent.MakePortrait -> {
@@ -105,6 +103,7 @@ class DetailMediaFragment : Fragment() {
                                     activity.requestedOrientation =
                                         ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
                                     activity.disableFullScreen()
+
                                 }
                             }
                         }

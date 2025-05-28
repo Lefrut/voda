@@ -1,6 +1,5 @@
 package com.vodovoz.app.feature.profile.waterapp.composables
 
-import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateDpAsState
@@ -25,7 +24,6 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -43,16 +41,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Matrix
 import androidx.compose.ui.graphics.Outline
-import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.graphics.addSvg
 import androidx.compose.ui.graphics.asComposePath
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -71,7 +66,6 @@ import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Density
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -80,7 +74,6 @@ import com.vodovoz.app.design_system.robotoFontFamily
 import com.vodovoz.app.feature.profile.waterapp.WaterAppHelper
 import com.vodovoz.app.ui.canvas.mergeToSinglePath
 import com.vodovoz.app.ui.canvas.toAndroidPaths
-import kotlin.math.roundToInt
 
 @Composable
 fun WaterAppBottleScreen(
@@ -92,7 +85,7 @@ fun WaterAppBottleScreen(
     onProgressChanged: (Float) -> Unit,
     onMinusClick: () -> Unit,
     onPlusClick: () -> Unit,
-    onBottleClick: () -> Unit
+    onBottleClick: () -> Unit,
 ) {
     Column(modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
         Row(
@@ -213,7 +206,7 @@ private fun WaterAppBottle(
     modifier: Modifier = Modifier,
     currentLevel: Int,
     maxLevel: Int,
-    onClick: () -> Unit
+    onClick: () -> Unit,
 ) {
     val density = LocalDensity.current
 
@@ -288,7 +281,7 @@ private fun WaterAppBottle(
                 override fun createOutline(
                     size: Size,
                     layoutDirection: LayoutDirection,
-                    density: Density
+                    density: Density,
                 ): Outline {
                     return Outline.Generic(squeezedPath)
                 }
@@ -312,12 +305,14 @@ private fun WaterAppBottle(
                         translationX = waveOffsetX
                         scaleX = waveScale
                         scaleY = waveScale
-                        alpha = 0.8f
+                        alpha = 0.7f
                     },
                 painter = painterResource(R.drawable.waves),
                 contentDescription = null,
                 contentScale = ContentScale.FillBounds
             )
+
+            BubblesClipped(shape = waveShape)
         }
 
         Image(
@@ -371,7 +366,7 @@ private fun WaterAppBottle(
 private fun WaterProgressBar(
     modifier: Modifier = Modifier,
     progress: Float,
-    onProgressChanged: (Float) -> Unit
+    onProgressChanged: (Float) -> Unit,
 ) {
     val density = LocalDensity.current
     var barWidthPx by remember { mutableFloatStateOf(0f) }
