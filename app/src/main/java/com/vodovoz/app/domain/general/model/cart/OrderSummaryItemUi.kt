@@ -1,7 +1,7 @@
 package com.vodovoz.app.domain.general.model.cart
 
 import androidx.compose.ui.graphics.Color
-import com.vodovoz.app.util.fromHexOrUnspecified
+import com.vodovoz.app.ui.graphics.fromHexOrUnspecified
 
 data class OrderSummaryItemUi(
     val name: String,

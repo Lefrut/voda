@@ -20,9 +20,9 @@ data class BuyCertificatePropertyUI(
 ) : Item {
     override fun getItemViewType(): Int {
         return when (code) {
-            "buyMoney" -> R.layout.view_holder_choose_certificate
-            "email" -> R.layout.view_holder_email_certificate
-            "opisanie" -> R.layout.view_holder_message_certificate
+            "buyMoney" -> 5
+            "email" -> 0
+            "opisanie" -> 1
             else -> -1
         }
     }

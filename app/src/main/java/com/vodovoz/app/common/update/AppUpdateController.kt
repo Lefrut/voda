@@ -31,10 +31,8 @@ class AppUpdateController @AssistedInject constructor(
     }
 
     fun checkForUpdate(activityResultLauncher: ActivityResultLauncher<IntentSenderRequest>) {
-// Returns an intent object that you use to check for an update.
         val appUpdateInfoTask = appUpdateManager.appUpdateInfo
 
-// Checks that the platform will allow the specified type of update.
         appUpdateInfoTask.addOnSuccessListener { appUpdateInfo ->
             if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE
                 && (appUpdateInfo.clientVersionStalenessDays() ?: -1) >= DAYS_FOR_FLEXIBLE_UPDATE
@@ -42,12 +40,8 @@ class AppUpdateController @AssistedInject constructor(
             ) {
                 appUpdateManager.registerListener(listener)
                 appUpdateManager.startUpdateFlowForResult(
-                    // Pass the intent that is returned by 'getAppUpdateInfo()'.
                     appUpdateInfo,
-                    // an activity result launcher registered via registerForActivityResult
                     activityResultLauncher,
-                    // Or pass 'AppUpdateType.FLEXIBLE' to newBuilder() for
-                    // flexible updates.
                     AppUpdateOptions.newBuilder(AppUpdateType.FLEXIBLE).build()
                 )
             }
@@ -63,8 +57,6 @@ class AppUpdateController @AssistedInject constructor(
         appUpdateManager
             .appUpdateInfo
             .addOnSuccessListener { appUpdateInfo ->
-                // If the update is downloaded but not installed,
-                // notify the user to complete the update.
                 if (appUpdateInfo.installStatus() == InstallStatus.DOWNLOADED) {
                     onDownLoadComplete()
                 }

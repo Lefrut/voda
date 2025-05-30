@@ -6,7 +6,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.CombinedLoadStates
 import androidx.paging.LoadState
 import androidx.paging.map
-import com.vodovoz.app.common.account.data.AccountManager
+import com.vodovoz.app.common.account.AccountManager
 import com.vodovoz.app.common.cart.CartManager
 import com.vodovoz.app.common.content.Event
 import com.vodovoz.app.common.content.PagingContractViewModel
@@ -49,8 +49,6 @@ import javax.inject.Inject
 class FavoriteFlowViewModel @Inject constructor(
     private val cartManager: CartManager,
     private val likeManager: LikeManager,
-    private val ratingProductManager: RatingProductManager,
-    private val accountManager: AccountManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
 ) : PagingContractViewModel<FavoriteFlowViewModel.FavoriteState, FavoriteFlowViewModel.FavoriteEvents>(
     FavoriteState()
@@ -239,27 +237,6 @@ class FavoriteFlowViewModel @Inject constructor(
                 s.copy(showRefreshIndicator = true)
             }
             fetchFavoriteProducts()
-        }
-    }
-
-
-    fun isLoginAlready() = accountManager.isAlreadyLogin()
-
-    fun changeCart(productId: Long, quantity: Int, oldQuan: Int) {
-        viewModelScope.launch {
-            cartManager.add(id = productId, oldCount = oldQuan, newCount = quantity)
-        }
-    }
-
-    fun changeFavoriteStatus(productId: Long, isFavorite: Boolean) {
-        viewModelScope.launch {
-            likeManager.like(productId, !isFavorite)
-        }
-    }
-
-    fun changeRating(productId: Long, rating: Float, oldRating: Float) {
-        viewModelScope.launch {
-            ratingProductManager.rate(productId, rating = rating, oldRating = oldRating)
         }
     }
 

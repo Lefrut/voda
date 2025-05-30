@@ -9,7 +9,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.biometric.BiometricManager
 import by.kirich1409.viewbindingdelegate.viewBinding
 import com.vodovoz.app.R
-import com.vodovoz.app.common.account.data.AccountManager
+import com.vodovoz.app.common.account.AccountManager
 import com.vodovoz.app.common.content.BaseFragment
 import com.vodovoz.app.databinding.FragmentBiometricSettingsBinding
 import dagger.hilt.android.AndroidEntryPoint
@@ -73,6 +73,10 @@ class BiometricSettingsFragment : BaseFragment() {
                 }
                 biometricResultLauncher.launch(enrollIntent)
             }
+            else -> {
+
+            }
         }
+
     }
 }

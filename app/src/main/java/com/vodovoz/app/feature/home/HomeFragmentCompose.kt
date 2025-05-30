@@ -5,9 +5,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.interaction.DragInteraction
-import androidx.compose.foundation.interaction.Interaction
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyListState
@@ -15,11 +12,9 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
@@ -32,11 +27,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import com.vodovoz.app.R
-import com.vodovoz.app.common.account.data.AccountManager
-import com.vodovoz.app.common.cart.CartManager
-import com.vodovoz.app.common.like.LikeManager
-import com.vodovoz.app.common.media.MediaManager
-import com.vodovoz.app.common.product.rating.RatingProductManager
+import com.vodovoz.app.common.account.AccountManager
 import com.vodovoz.app.common.tab.TabManager
 import com.vodovoz.app.core.navigation.ContentSearchNavigator
 import com.vodovoz.app.core.navigation.navigateToAboutApp
@@ -45,7 +36,6 @@ import com.vodovoz.app.core.navigation.navigateToAllServices
 import com.vodovoz.app.core.navigation.navigateToBrandProductList
 import com.vodovoz.app.core.navigation.navigateToBuyCertificate
 import com.vodovoz.app.core.navigation.navigateToCategoryProductList
-import com.vodovoz.app.core.navigation.navigateToDetailMedia
 import com.vodovoz.app.core.navigation.navigateToHurryBuyUpProducts
 import com.vodovoz.app.core.navigation.navigateToNewProducts
 import com.vodovoz.app.core.navigation.navigateToOrderDetails
@@ -67,19 +57,13 @@ import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.composables.placeholders.NetworkErrorPlaceholder
 import com.vodovoz.app.design_system.composables.snackbar.VodovozSnackbarHost
 import com.vodovoz.app.design_system.effects.LifecycleEffect
-import com.vodovoz.app.design_system.model.ProductMediaUi
 import com.vodovoz.app.feature.home.composables.UnratedProductsBottomSheet
 import com.vodovoz.app.feature.sitestate.SiteStateManager
 import com.vodovoz.app.util.extensions.debugLog
 import com.vodovoz.app.util.extensions.isVpnActive
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onSubscription
-import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -466,7 +450,7 @@ class HomeFragment : Fragment() {
                                     )
                                 }
                                 if (section == "Связаться с нами") {
-                                    findNavController().navigate(HomeFragmentDirections.actionToContactsFragment())
+                                    //findNavController().navigate(HomeFragmentDirections.actionToContactsFragment())
                                 }
                             }
 
@@ -488,7 +472,7 @@ class HomeFragment : Fragment() {
                             }
 
                             "feedback" -> {
-                                findNavController().navigate(HomeFragmentDirections.actionToContactsFragment())
+                                //findNavController().navigate(HomeFragmentDirections.actionToContactsFragment())
                             }
 
                             "TOVARY" -> {

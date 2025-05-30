@@ -2,7 +2,6 @@ package com.vodovoz.app.data
 
 import com.vodovoz.app.BuildConfig
 import com.vodovoz.app.data.model.common.UserReloginEntity
-import com.vodovoz.app.feature.profile.notificationsettings.model.NotificationSettingsModel
 import com.vodovoz.app.feature.search.qrcode.model.QrCodeModel
 import okhttp3.MultipartBody
 import okhttp3.ResponseBody
@@ -651,10 +650,6 @@ interface MainApi {
         @Query("search") searchText: String? = null,
     ): QrCodeModel
 
-    @GET
-    suspend fun fetchNotificationSettingsData(
-        @Url url: String,
-    ): NotificationSettingsModel
 
     @GET("newmobile/el.php")
     suspend fun fetchBottles(
@@ -670,12 +665,4 @@ interface MainApi {
 
     @POST
     suspend fun postUrl(url: String)
-
-//    @GET("newmobile/details/podarki.php")
-//    suspend fun fetchPresentInfo(
-//        @Query("action") action: String = "podarki",
-//        @Query("userid") userId: Long? = null,
-//        @Query("id") productId: Long,
-//    ): PresentInfo
-
 }

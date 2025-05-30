@@ -1,15 +1,11 @@
 package com.vodovoz.app.feature.home
 
-import android.Manifest
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.CookieManager
-import androidx.core.app.ActivityCompat
-import androidx.core.view.isVisible
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
@@ -17,32 +13,25 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.viewpager2.widget.ViewPager2
 import by.kirich1409.viewbindingdelegate.viewBinding
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.vodovoz.app.BuildConfig
 import com.vodovoz.app.R
-import com.vodovoz.app.common.account.data.AccountManager
+import com.vodovoz.app.common.account.AccountManager
 import com.vodovoz.app.common.cart.CartManager
 import com.vodovoz.app.common.content.BaseFragment
-import com.vodovoz.app.common.content.itemadapter.bottomitem.BottomProgressItem
-import com.vodovoz.app.common.jivochat.JivoChatController
 import com.vodovoz.app.common.like.LikeManager
 import com.vodovoz.app.common.media.MediaManager
-import com.vodovoz.app.common.permissions.PermissionsController
 import com.vodovoz.app.common.product.rating.RatingProductManager
-import com.vodovoz.app.common.speechrecognizer.SpeechDialogFragment
 import com.vodovoz.app.common.tab.TabManager
+import com.vodovoz.app.core.navigation.navigateToAboutApp
 import com.vodovoz.app.core.network.ApiConfig
 import com.vodovoz.app.data.model.common.ActionEntity
 import com.vodovoz.app.databinding.FragmentMainHomeFlowBinding
 import com.vodovoz.app.feature.all.promotions.AllPromotionsFragment
-import com.vodovoz.app.feature.productlistnofilter.ProductCatalogFragment
+import com.vodovoz.app.feature.product_catalog.ProductCatalogFragment
 import com.vodovoz.app.feature.sitestate.SiteStateManager
-import com.vodovoz.app.ui.model.CommentUI
-import com.vodovoz.app.ui.model.SectionDataUI
 import com.vodovoz.app.util.extensions.addOnBackPressedCallback
 import com.vodovoz.app.util.extensions.debugLog
 import com.vodovoz.app.util.extensions.snack
@@ -104,24 +93,22 @@ class HomeFragment1 : BaseFragment() {
         super.onViewCreated(view, savedInstanceState)
 
         initViewPager()
-        initImageRv()
         initBottomSheetCallback()
         initJivoChatButton()
 
-        bindErrorRefresh { flowViewModel.refresh() }
+        //bindErrorRefresh { flowViewModel.refresh() }
         bindBackPressed()
     }
 
     private fun initJivoChatButton() {
-        binding.fabJivoSite.isVisible = JivoChatController.isActive()
-        binding.fabJivoSite.setOnClickListener {
-            findNavController().navigate(
-                HomeFragmentDirections.actionToWebViewFragment(
-                    JivoChatController.getLink(),
-                    ""
-                )
-            )
-        }
+//        binding.fabJivoSite.isVisible = JivoChatController.isActive()
+//        binding.fabJivoSite.setOnClickListener {
+//            findNavController().navigate(
+//                HomeFragmentDirections.actionToWebViewFragment(
+//                    JivoChatController.getLink(),
+//                    ""
+//                )
+//            )
     }
 
     private fun initViewPager() {
@@ -129,15 +116,7 @@ class HomeFragment1 : BaseFragment() {
         binding.dotsIndicator.attachTo(binding.rateViewPager)
     }
 
-    private fun initImageRv() {
-        with(binding.collapsedRv) {
-            layoutManager = LinearLayoutManager(
-                requireContext(),
-                LinearLayoutManager.HORIZONTAL,
-                false
-            )
-        }
-    }
+
 
     private fun initBottomSheetCallback() {
         val behavior = BottomSheetBehavior.from(binding.rateBottom)
@@ -294,7 +273,7 @@ class HomeFragment1 : BaseFragment() {
                                     )
                                 }
                                 if (section == "Связаться с нами") {
-                                    findNavController().navigate(HomeFragmentDirections.actionToContactsFragment())
+                                    //findNavController().navigate(HomeFragmentDirections.actionToContactsFragment())
                                 }
                             }
 
@@ -316,7 +295,7 @@ class HomeFragment1 : BaseFragment() {
                             }
 
                             "feedback" -> {
-                                findNavController().navigate(HomeFragmentDirections.actionToContactsFragment())
+                                //findNavController().navigate(HomeFragmentDirections.actionToContactsFragment())
                             }
 
                             "TOVARY" -> {
@@ -436,7 +415,7 @@ class HomeFragment1 : BaseFragment() {
                             tabManager.selectTab(R.id.graph_cart)
                         }*/
                             "mobile_app/" -> {
-                                findNavController().navigate(HomeFragmentDirections.actionToAboutAppDialogFragment())
+                                findNavController().navigateToAboutApp()
                             }
 
                             "gl/" -> {
@@ -608,40 +587,6 @@ class HomeFragment1 : BaseFragment() {
             } else {
                 requireActivity().finish()
             }
-        }
-    }
-
-    @Inject
-    lateinit var permissionsControllerFactory: PermissionsController.Factory
-    private val permissionsController by lazy { permissionsControllerFactory.create(requireActivity()) }
-
-    private fun navigateToQrCodeFragment() {
-        permissionsController.methodRequiresCameraPermission {
-            if (ActivityCompat.checkSelfPermission(
-                    requireContext(),
-                    Manifest.permission.CAMERA
-                ) != PackageManager.PERMISSION_GRANTED
-            ) {
-                return@methodRequiresCameraPermission
-            }
-
-            findNavController().navigate(R.id.qrCodeFragment)
-
-        }
-    }
-
-    private fun startSpeechRecognizer() {
-        permissionsController.methodRequiresRecordAudioPermission {
-            if (ActivityCompat.checkSelfPermission(
-                    requireContext(),
-                    Manifest.permission.RECORD_AUDIO
-                ) != PackageManager.PERMISSION_GRANTED
-            ) {
-                return@methodRequiresRecordAudioPermission
-            }
-
-            SpeechDialogFragment().show(childFragmentManager, "TAG")
-
         }
     }
 

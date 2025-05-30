@@ -18,20 +18,6 @@
 
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:visibility="gone"
-        android:id="@+id/fabJivoSite"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:layout_gravity="end|bottom"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="12dp"
-        app:fabCustomSize="40dp"
-        app:maxImageSize="40dp"
-        app:tint="@null"
-        app:srcCompat="@drawable/jivosite_floating"
-        android:contentDescription="@string/jivo_chat"/>
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -60,7 +46,6 @@
                 <View
                     android:layout_width="40dp"
                     android:layout_height="2dp"
-                    android:background="@drawable/bg_border_gray"
                     android:layout_gravity="center"
                     />
 
@@ -95,15 +80,6 @@
                         android:textStyle="normal"
                         app:fontFamily="@font/rotondac" />
 
-                    <androidx.recyclerview.widget.RecyclerView
-                        android:id="@+id/collapsedRv"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:orientation="horizontal"
-                        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                        tools:itemCount="1"
-                        tools:listitem="@layout/item_collapsed_rate_image" />
 
                 </LinearLayout>
 

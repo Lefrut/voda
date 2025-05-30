@@ -1,8 +1,7 @@
 package com.vodovoz.app.common.token
 
 import com.google.firebase.messaging.FirebaseMessaging
-import com.vodovoz.app.common.account.data.AccountManager
-import com.vodovoz.app.data.MainRepository
+import com.vodovoz.app.common.account.AccountManager
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.util.extensions.debugLog
 import com.vodovoz.app.util.extensions.singleResult

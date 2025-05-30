@@ -118,7 +118,7 @@ private fun OrderItem(modifier: Modifier = Modifier, order: HomeOrderUi, onClick
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Image(
-                    painter = painterResource(id = R.drawable.ic_status),
+                    painter = painterResource(id = R.drawable.svg_status),
                     contentDescription = null,
                     modifier = Modifier.size(14.dp)
                 )

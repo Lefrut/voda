@@ -12,7 +12,7 @@ data class ShippingAlertUI(
 ): Parcelable, Item {
 
     override fun getItemViewType(): Int {
-        return R.layout.view_holder_shipping_alert
+        return 0
     }
 
     override fun areItemsTheSame(item: Item): Boolean {

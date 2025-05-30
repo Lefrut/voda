@@ -13,7 +13,7 @@ data class CategoryDetailUI(
 ) : Item {
 
     override fun getItemViewType(): Int {
-        return R.layout.view_holder_slider_product_category
+        return 0
     }
 
     override fun areItemsTheSame(item: Item): Boolean {

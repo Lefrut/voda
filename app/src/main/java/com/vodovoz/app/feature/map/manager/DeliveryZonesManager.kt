@@ -6,7 +6,7 @@ import com.vodovoz.app.data.model.common.ResponseEntity
 import com.vodovoz.app.mapper.DeliveryZonesBundleMapper.mapToUI
 import com.vodovoz.app.ui.model.custom.DeliveryZonesBundleUI
 import com.vodovoz.app.util.extensions.debugLog
-import com.vodovoz.app.util.polygoncreator.Polygon
+import com.vodovoz.app.util.polygon_creator.Polygon
 import com.yandex.mapkit.geometry.Point
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -61,13 +61,13 @@ class DeliveryZonesManager @Inject constructor(
 
     fun containsInCenterPolygon(point: Point): Boolean {
         val centerPolygon = deliveryZonesStateListener.value?.centerPolygon ?: return false
-        val mappedPoint = com.vodovoz.app.util.polygoncreator.Point(point.latitude, point.longitude)
+        val mappedPoint = com.vodovoz.app.util.polygon_creator.Point(point.latitude, point.longitude)
         return centerPolygon.contains(mappedPoint)
     }
 
     fun containsInMoPolygon(point: Point): Boolean {
         val moPolygon = deliveryZonesStateListener.value?.moPolygon ?: return false
-        val mappedPoint = com.vodovoz.app.util.polygoncreator.Point(point.latitude, point.longitude)
+        val mappedPoint = com.vodovoz.app.util.polygon_creator.Point(point.latitude, point.longitude)
         return moPolygon.contains(mappedPoint)
     }
 
@@ -107,7 +107,7 @@ class DeliveryZonesManager @Inject constructor(
         return Polygon.Builder()
             .apply {
                 centerPoints.forEach {
-                    addVertex(com.vodovoz.app.util.polygoncreator.Point(it.latitude, it.longitude))
+                    addVertex(com.vodovoz.app.util.polygon_creator.Point(it.latitude, it.longitude))
                 }
             }
             .build()

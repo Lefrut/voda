@@ -19,7 +19,7 @@ import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.navOptions
 import com.vodovoz.app.R
-import com.vodovoz.app.common.account.data.AccountManager
+import com.vodovoz.app.common.account.AccountManager
 import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.effects.LifecycleEffect
 import com.vodovoz.app.feature.cart.CartFlowViewModel
@@ -75,6 +75,7 @@ class SplashFragment : Fragment() {
     override fun onStop() {
         super.onStop()
         requireActivity().disableFullScreen()
+        activityViewModel.finishAndroidSplash()
     }
 
     override fun onCreateView(
@@ -142,19 +143,14 @@ class SplashFragment : Fragment() {
 
     @OptIn(FlowPreview::class)
     private suspend fun listenAppState() =
-        activityViewModel.appState.debounce(5L).collect { appState ->
+        activityViewModel.appState.debounce(1L).collect { appState ->
 
             val navController = findNavController()
             val androidSplash = activityViewModel.androidSplash.value
 
             when (appState) {
                 AppState.App -> {
-                    if(androidSplash){
-                        splashViewModel.hideAndroidSplash()
-                    }
-
                     fetchDataForScreens().join()
-
                     navController.navigateToScreen(
                         R.id.mainFragment,
                     )
@@ -204,7 +200,7 @@ class SplashFragment : Fragment() {
         catalogViewModel.fetchCatalogDetails()
         cartFlowViewModel.fetchCartDetails()
         profileViewModel.fetchProfileDetails()
-        delay(200)
+        delay(400)
     }
 
 

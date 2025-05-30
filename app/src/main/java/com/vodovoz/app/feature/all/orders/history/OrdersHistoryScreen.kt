@@ -15,8 +15,8 @@ import com.vodovoz.app.feature.all.orders.history.composables.OrdersHistoryBody
 
 @Composable
 fun OrdersHistoryScreen(
-    viewModel: AllOrdersFlowViewModel,
-    viewState: AllOrdersFlowViewModel.AllOrdersState,
+    viewModel: OrdersHistoryViewModel,
+    viewState: OrdersHistoryViewModel.AllOrdersState,
 ) {
 
     val uiState = viewState.uiState
@@ -27,7 +27,7 @@ fun OrdersHistoryScreen(
             .background(MaterialTheme.colorScheme.background)
     ) {
         HybridSearchTopBar(
-            title = if (uiState is AllOrdersFlowViewModel.AllOrdersUiState.Empty) {
+            title = if (uiState is OrdersHistoryViewModel.AllOrdersUiState.Empty) {
                 uiState.placeholder.title
             } else {
                 viewState.title
@@ -45,18 +45,18 @@ fun OrdersHistoryScreen(
             }
         )
         when (uiState) {
-            is AllOrdersFlowViewModel.AllOrdersUiState.Empty -> {
+            is OrdersHistoryViewModel.AllOrdersUiState.Empty -> {
                 VodovozPlaceholder(
                     data = uiState.placeholder,
                     onButtonClick = { viewModel.navigateToCatalog() }
                 )
             }
 
-            AllOrdersFlowViewModel.AllOrdersUiState.Error -> {
+            OrdersHistoryViewModel.AllOrdersUiState.Error -> {
                 NetworkErrorPlaceholder { viewModel.fetchOrdersHistoryDetails() }
             }
 
-            AllOrdersFlowViewModel.AllOrdersUiState.Body -> {
+            OrdersHistoryViewModel.AllOrdersUiState.Body -> {
                 OrdersHistoryBody(
                     items = viewState.items,
                     appendItems = viewState.loadStates.append is LoadState.Loading,
@@ -81,7 +81,7 @@ fun OrdersHistoryScreen(
                 )
             }
 
-            AllOrdersFlowViewModel.AllOrdersUiState.Loading -> {
+            OrdersHistoryViewModel.AllOrdersUiState.Loading -> {
                 LoadingPlaceholder()
             }
         }

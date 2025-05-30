@@ -23,10 +23,6 @@ import kotlinx.parcelize.Parcelize
 @AndroidEntryPoint
 class AllPromotionsFragment : Fragment() {
 
-    companion object {
-        const val PROMOTION_FILTER = "PROMOTION_FILTER"
-    }
-
     private val viewModel: AllPromotionsFlowViewModel by viewModels()
 
 
@@ -40,9 +36,8 @@ class AllPromotionsFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View {
-        val navController = findNavController()
         return ComposeView(requireContext()).apply {
-            setViewCompositionStrategy(ViewCompositionStrategy.Default)
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
                 VodovozTheme {
                     val viewState by viewModel.observeUiState().collectAsStateWithLifecycle()
@@ -64,6 +59,7 @@ class AllPromotionsFragment : Fragment() {
 
                     LifecycleEffect {
                         viewModel.observeEvent().collect { event ->
+                            val navController = findNavController()
                             when (event) {
                                 AllPromotionsFlowViewModel.AllPromotionsEvent.ScrollTop -> {
                                     lazyListState.animateScrollToItem(0)

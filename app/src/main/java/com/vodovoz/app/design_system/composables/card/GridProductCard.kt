@@ -35,7 +35,6 @@ import coil3.compose.AsyncImage
 import com.vodovoz.app.R
 import com.vodovoz.app.design_system.ExtendedTheme
 import com.vodovoz.app.design_system.VodovozTheme
-import com.vodovoz.app.design_system.composables.blur.BlurBox
 import com.vodovoz.app.design_system.composables.blur.VodovozBlur
 import com.vodovoz.app.design_system.composables.button.QuantityButtonSmall
 import com.vodovoz.app.design_system.composables.button.VodovozButtonDefaults
@@ -46,8 +45,6 @@ import com.vodovoz.app.design_system.model.ForAdultsUi
 import com.vodovoz.app.design_system.model.LabelUi
 import com.vodovoz.app.design_system.model.ProductUi
 import com.vodovoz.app.util.formatPrice
-import dev.chrisbanes.haze.hazeEffect
-import dev.chrisbanes.haze.materials.ExperimentalHazeMaterialsApi
 import java.util.Locale
 import kotlin.math.roundToInt
 
@@ -229,7 +226,7 @@ fun PriceAndRating(modifier: Modifier = Modifier, product: ProductUi) {
 
 
         Icon(
-            painter = painterResource(id = R.drawable.ic_star),
+            painter = painterResource(id = R.drawable.ic_star_active),
             contentDescription = null,
             tint = if (product.rating <= 0.0f) MaterialTheme.colorScheme.surfaceVariant else MaterialTheme.colorScheme.tertiary,
             modifier = Modifier

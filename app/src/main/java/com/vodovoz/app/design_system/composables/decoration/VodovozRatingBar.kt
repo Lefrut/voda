@@ -1,6 +1,5 @@
 package com.vodovoz.app.design_system.composables.decoration
 
-import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -9,7 +8,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import com.gowtham.ratingbar.RatingBar
 import com.vodovoz.app.R
 
@@ -30,7 +28,7 @@ fun VodovozRatingBar(
         value = localRating,
         modifier = modifier,
         painterEmpty = painterResource(id = R.drawable.ic_star_inactive),
-        painterFilled = painterResource(id = R.drawable.ic_star),
+        painterFilled = painterResource(id = R.drawable.ic_star_active),
         size = startSize,
         spaceBetween = spaceBetween,
         onValueChange = { newRating ->

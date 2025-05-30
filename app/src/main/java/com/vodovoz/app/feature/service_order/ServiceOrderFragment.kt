@@ -1,142 +1,107 @@
 package com.vodovoz.app.feature.service_order
 
-import android.annotation.SuppressLint
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
-import androidx.appcompat.app.AppCompatActivity
+import android.view.ViewGroup
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.fragment.findNavController
-import androidx.navigation.fragment.navArgs
-import androidx.recyclerview.widget.LinearLayoutManager
-import by.kirich1409.viewbindingdelegate.viewBinding
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.vodovoz.app.R
-import com.vodovoz.app.common.agreement.AgreementController
-import com.vodovoz.app.common.content.BaseFragment
-import com.vodovoz.app.databinding.FragmentServiceOrderBinding
-import com.vodovoz.app.feature.service_order.adapter.ServiceOrderFormFieldsAdapter
-import com.vodovoz.app.util.SpanWithUrlHandler
+import com.vodovoz.app.common.tab.TabManager
+import com.vodovoz.app.design_system.VodovozTheme
+import com.vodovoz.app.design_system.composables.placeholders.VodovozLongPlaceholder
+import com.vodovoz.app.design_system.effects.LifecycleEffect
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @AndroidEntryPoint
-class ServiceOrderFragment1 : BaseFragment() {
-
-    override fun layout() = R.layout.fragment_service_order
-
-    private val binding: FragmentServiceOrderBinding by viewBinding {
-        FragmentServiceOrderBinding.bind(
-            contentView
-        )
-    }
+class ServiceOrderFragment : Fragment() {
 
     private val viewModel: ServiceOrderViewModel by viewModels()
 
-    private val serviceOrderFormFieldsAdapter = ServiceOrderFormFieldsAdapter()
+    @Inject
+    lateinit var tabManager: TabManager
 
-    private val args: ServiceOrderFragmentArgs by navArgs()
+    override fun onStart() {
+        super.onStart()
+        WindowCompat.setDecorFitsSystemWindows(requireActivity().window, false)
+        tabManager.changeTabVisibility(false)
+        tabManager.changeTabWindowInsets(true)
+    }
 
-//    private val serviceName =
-//        findNavController().currentBackStackEntry?.savedStateHandle?.get<String>("serviceName")
-//            ?: ""
+    override fun onStop() {
+        super.onStop()
+        WindowCompat.setDecorFitsSystemWindows(requireActivity().window, true)
+        tabManager.changeTabWindowInsets(false)
+        tabManager.changeTabVisibility(true)
+    }
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?,
+    ): View {
+        return ComposeView(requireContext()).apply {
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+
+            setContent {
+                VodovozTheme {
+                    val pagingState by viewModel.observeUiState().collectAsStateWithLifecycle()
+                    val viewState by rememberUpdatedState(newValue = pagingState.data)
+
+                    when (val uiState = viewState.uiState) {
+                        is ServiceOrderViewModel.ServiceOrderUiState.Success -> {
+                            VodovozLongPlaceholder(
+                                data = uiState.placeholder,
+                                onButtonClick = {
+                                    viewModel.navigateBack()
+                                },
+                                onCloseClick = {
+                                    viewModel.navigateBack()
+                                }
+                            )
+                        }
+
+                        else -> {
+                            ServiceOrderScreen(
+                                viewModel = viewModel,
+                                viewState = viewState
+                            )
+                        }
+
+                    }
+
+                    LifecycleEffect {
+                        viewModel.observeEvent().collect { event ->
+                            when (event) {
+                                ServiceOrderViewModel.ServiceOrderEvent.GoBack -> {
+                                    findNavController().popBackStack()
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        initAppBar()
-        setupButtons()
-        initFieldsRecycler()
-        observeViewModel()
-        viewModel.fetchData()
-    }
-
-    private fun initAppBar() {
-        (requireActivity() as AppCompatActivity).setSupportActionBar(binding.toolbar)
-        (requireActivity() as AppCompatActivity).supportActionBar?.let { noNullActionBar ->
-            noNullActionBar.setDisplayHomeAsUpEnabled(true)
-            noNullActionBar.setDisplayShowHomeEnabled(true)
-            noNullActionBar.title = args.serviceName
-        }
-        binding.toolbar.setNavigationOnClickListener {
-            findNavController().popBackStack()
+        ViewCompat.setOnApplyWindowInsetsListener(view) { _, insets ->
+            val imeVisible = insets.isVisible(WindowInsetsCompat.Type.ime())
+            tabManager.changeTabVisibility(!imeVisible)
+            tabManager.changeTabWindowInsets(!imeVisible)
+            return@setOnApplyWindowInsetsListener insets
         }
     }
 
-    @SuppressLint("NotifyDataSetChanged")
-    private fun setupButtons() {
-        binding.order.setOnClickListener {
-            if (!checkValid()) {
-                serviceOrderFormFieldsAdapter.notifyDataSetChanged()
-                return@setOnClickListener
-            }
-            val value = StringBuilder()
-            serviceOrderFormFieldsAdapter.serviceOrderFormFieldUIList.forEach {
-                value.append(it.id).append("$").append(it.value.trim()).append(";")
-            }
-            viewModel.orderService(value.toString())
-        }
-
-        SpanWithUrlHandler.setTextWithUrl(
-            text = AgreementController.getText(),
-            textView = binding.tvPersonalData
-        ) { url, index ->
-            findNavController().navigate(
-                ServiceOrderFragmentDirections.actionToWebViewFragment(
-                    url = url ?: "",
-                    title = AgreementController.getTitle(index) ?: "",
-                )
-            )
-
-        }
-    }
-
-    private fun checkValid(): Boolean {
-        var valid = true
-        serviceOrderFormFieldsAdapter.serviceOrderFormFieldUIList.forEach {
-            if (it.isRequired && it.value.isEmpty()) {
-                valid = false
-                it.isError = true
-            }
-        }
-        return valid
-    }
-
-    private fun initFieldsRecycler() {
-        binding.fieldsRecycler.layoutManager = LinearLayoutManager(requireContext())
-        binding.fieldsRecycler.adapter = serviceOrderFormFieldsAdapter
-    }
-
-    @SuppressLint("NotifyDataSetChanged")
-    private fun observeViewModel() {
-        lifecycleScope.launch {
-            viewModel.observeUiState().collect { state ->
-                if (state.loadingPage) {
-                    showLoaderWithBg(true)
-                } else {
-                    showLoaderWithBg(false)
-                }
-
-                val serviceOrderFormFieldUIList = state.data.serviceOrderFormFieldUIListMLD
-                if (serviceOrderFormFieldUIList.isNotEmpty()) {
-                    serviceOrderFormFieldsAdapter.serviceOrderFormFieldUIList =
-                        serviceOrderFormFieldUIList
-                    serviceOrderFormFieldsAdapter.notifyDataSetChanged()
-                }
-
-                val successMessage = state.data.successMessageMLD
-                if (successMessage.isNotEmpty()) {
-                    MaterialAlertDialogBuilder(requireContext())
-                        .setMessage(successMessage)
-                        .setPositiveButton("Ок") { dialog, _ ->
-                            dialog.dismiss()
-                            findNavController().popBackStack()
-                        }
-                        .show()
-                }
-
-                showError(state.error)
-            }
-        }
-    }
 }

@@ -30,16 +30,6 @@ abstract class BaseFragment : Fragment() {
     protected val contentView: View
         get() = requireView().findViewById(R.id.container_base)
 
-    protected val composeView: ComposeView
-        get() = requireView().findViewById(R.id.composeView)
-
-
-    private val progressBg: View
-        get() = viewBinding.progressBg
-
-
-    val refresh: TextView
-        get() = viewBinding.error.refreshTv
 
     protected abstract fun layout(): Int
     protected open fun update() {}
@@ -73,144 +63,13 @@ abstract class BaseFragment : Fragment() {
     protected fun hideLoader() {
     }
 
-    protected fun showLoaderWithBg(boolean: Boolean) {
-        progressBg.isVisible = boolean
-    }
-
-    protected fun showError(error: ErrorState?) {
-        if (error != null) {
-            with(viewBinding.error) {
-                root.isVisible = true
-                messageTv.text = error.message
-                descTv.text = error.description
-                icon.setImageDrawable(
-                    ContextCompat.getDrawable(
-                        requireContext(),
-                        error.iconDrawable
-                    )
-                )
-            }
-            viewBinding.appbarLayout.isEnabled = false
-            //showLoaderWithBg(false)
-        } else {
-            viewBinding.error.root.isVisible = false
-
-            viewBinding.appbarLayout.isEnabled = true
-        }
-    }
-
-    protected fun bindErrorRefresh(onRefresh: () -> Unit) {
-        refresh.setOnClickListener {
-            onRefresh.invoke()
-        }
-    }
 
     override fun onDestroyView() {
         super.onDestroyView()
         _viewBinding = null
     }
 
-    protected fun initSearchToolbar(
-        title: String? = null,
-        onContainerClick: () -> Unit,
-        bindEt: () -> Unit,
-        onQrCodeClick: () -> Unit = {},
-        onMicClick: () -> Unit = {},
-        showBackBtn: Boolean = false,
-    ) {
-        viewBinding.searchContainer.etSearch.setHint(title)
-        viewBinding.appbarLayout.isVisible = true
-        viewBinding.searchAppBar.isVisible = true
-        viewBinding.imgBack.setOnClickListener { findNavController().popBackStack() }
-        viewBinding.imgBack.isVisible = showBackBtn
 
-        viewBinding.searchContainer.clSearchContainer.setOnClickListener {
-            onContainerClick.invoke()
-        }
-
-        viewBinding.searchContainer.etSearch.setOnFocusChangeListener { _, isFocusable ->
-            if (isFocusable) {
-                bindEt.invoke()
-            }
-        }
-
-        viewBinding.searchContainer.imgQr.setOnClickListener {
-            onQrCodeClick.invoke()
-        }
-
-        viewBinding.searchContainer.imgMicro.setOnClickListener {
-            onMicClick.invoke()
-        }
-    }
-
-    protected fun initFilterToolbar(showBackBtn: Boolean = true, filterCount: Int = 0, onFilterBtnClick: () -> Unit) {
-        viewBinding.appbarLayout.isVisible = true
-        viewBinding.appBarFilter.root.isVisible = true
-        viewBinding.appBarFilter.imgBack.setOnClickListener { findNavController().popBackStack() }
-        viewBinding.appBarFilter.imgBack.isVisible = showBackBtn
-
-        viewBinding.appBarFilter.clFilter.setOnClickListener {
-            onFilterBtnClick.invoke()
-        }
-        if(filterCount > 0) {
-            viewBinding.appBarFilter.tvFiltersAmount.text = filterCount.toString()
-            viewBinding.appBarFilter.tvFiltersAmount.visibility = View.VISIBLE
-        } else {
-            viewBinding.appBarFilter.tvFiltersAmount.visibility = View.INVISIBLE
-        }
-    }
-
-    protected fun initToolbarDropDown(titleText: String, showBackBtn: Boolean = true, onTitleClick: () -> Unit) {
-        viewBinding.appbarLayout.isVisible = true
-        viewBinding.appBarDropDown.root.isVisible = true
-
-        viewBinding.appBarDropDown.imgBack.isVisible = showBackBtn
-        viewBinding.appBarDropDown.imgBack.setOnClickListener { findNavController().popBackStack() }
-
-        viewBinding.appBarDropDown.tvDropDownTitle.setOnClickListener {
-            onTitleClick.invoke()
-        }
-
-        viewBinding.appBarDropDown.tvDropDownTitle.text = titleText
-    }
-
-    protected fun setToolbarDropDownTitle(title: String, showArrowDropDown: Boolean = true) {
-        viewBinding.appBarDropDown.tvDropDownTitle.text = title
-
-        if (showArrowDropDown) {
-            viewBinding.appBarDropDown.tvDropDownTitle.setCompoundDrawablesWithIntrinsicBounds(
-                null,
-                null,
-                requireContext().drawable(R.drawable.ic_drop_down),
-                null
-            )
-        } else {
-            viewBinding.appBarDropDown.tvDropDownTitle.setCompoundDrawablesWithIntrinsicBounds(
-                null,
-                null,
-                null,
-                null
-            )
-        }
-    }
-
-    protected fun initToolbarMyData(
-        onLogout: () -> Unit,
-        onNavigateBack: () -> Unit = { findNavController().navigateUp() }
-    ){
-        viewBinding.appbarLayout.isVisible = true
-        val appBarUserDataBinding = viewBinding.appBarUserData
-        appBarUserDataBinding.root.visibility = View.VISIBLE
-        appBarUserDataBinding.root.isVisible = true
-
-        appBarUserDataBinding.imgBack.setOnClickListener {
-            onNavigateBack()
-        }
-
-        appBarUserDataBinding.imgLogout.setOnClickListener {
-            onLogout()
-        }
-    }
 
     protected fun initToolbar(
         titleText: String,
@@ -262,52 +121,12 @@ abstract class BaseFragment : Fragment() {
         }
     }
 
-    fun hideToolbar(){
-        viewBinding.appBarDef.root.visibility = View.GONE
-    }
-
-    fun showHideDefToolbarItem(itemId: Int, show: Boolean) {
-        val menuItem = viewBinding.appBarDef.tbToolbar.menu.findItem(itemId)
-        menuItem.isVisible = show
-    }
-
-    fun setMicroEnabled(enabled: Boolean) {
-        if (enabled) {
-            viewBinding.searchContainer.imgMicro.background =
-                requireContext().drawable(R.drawable.green_oval)
-            ImageViewCompat.setImageTintList(
-                viewBinding.searchContainer.imgMicro,
-                ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.white))
-            )
-        } else {
-            viewBinding.searchContainer.imgMicro.background = null
-            ImageViewCompat.setImageTintList(
-                viewBinding.searchContainer.imgMicro,
-                ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.micro))
-            )
-        }
-    }
-
     override fun onResume() {
         super.onResume()
 
         if (viewBinding.appBarDef.etSearch.text.isNullOrBlank().not()) {
             viewBinding.appBarDef.llTitleContainer.visibility = View.GONE
             viewBinding.appBarDef.llSearchContainer.visibility = View.VISIBLE
-        }
-    }
-
-    protected fun navigateTo(resId: Int, args: Bundle? = null, navOptions: NavOptions? = null) =
-        findNavController().navigate(resId, args, navOptions)
-
-    protected fun navigateUp() = findNavController().navigateUp()
-
-    protected fun hideSoftKeyboard() {
-        val view = requireActivity().currentFocus
-        if (view != null) {
-            val imm =
-                requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager?
-            imm!!.hideSoftInputFromWindow(view.windowToken, 0)
         }
     }
 }

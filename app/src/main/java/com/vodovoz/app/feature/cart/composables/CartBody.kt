@@ -61,6 +61,7 @@ fun CartBody(
     onPromotionCodeButtonClick: (CartPromoButtonUi) -> Unit,
     onPresentButtonClick: () -> Unit,
     onBottlesButtonClick: () -> Unit,
+    onOrderClick: () -> Unit
 ) {
     val density = LocalDensity.current
 
@@ -229,9 +230,7 @@ fun CartBody(
             VodovozButton(
                 modifier = Modifier.padding(top = 24.dp, start = 16.dp, end = 16.dp),
                 text = stringResource(id = R.string.place_order),
-                onClick = {
-                    /*TODO*/
-                }
+                onClick = onOrderClick
             )
         }
     }

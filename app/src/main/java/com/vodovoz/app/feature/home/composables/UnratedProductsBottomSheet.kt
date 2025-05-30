@@ -13,7 +13,6 @@ import androidx.compose.foundation.gestures.AnchoredDraggableState
 import androidx.compose.foundation.gestures.DraggableAnchors
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.anchoredDraggable
-import androidx.compose.foundation.gestures.animateTo
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -310,7 +309,7 @@ fun UpdatedProductsExpanded(
                     value = rating,
                     modifier = Modifier.padding(top = 32.dp),
                     painterEmpty = painterResource(id = R.drawable.ic_star_inactive),
-                    painterFilled = painterResource(id = R.drawable.ic_star),
+                    painterFilled = painterResource(id = R.drawable.ic_star_active),
                     size = 48.dp,
                     spaceBetween = 8.dp,
                     onValueChange = { newRating ->

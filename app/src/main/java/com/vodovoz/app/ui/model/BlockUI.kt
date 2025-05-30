@@ -14,7 +14,7 @@ data class BlockUI(
 ) : Parcelable, Item {
 
     override fun getItemViewType(): Int {
-        return R.layout.holder_product_detail_block
+        return 100
     }
 
     override fun areItemsTheSame(item: Item): Boolean {

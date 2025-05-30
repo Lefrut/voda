@@ -5,7 +5,7 @@ import com.vodovoz.app.data.vodovoz_service.model.order_details.IMAGE_AND_TEXT_D
 import com.vodovoz.app.data.vodovoz_service.model.order_details.TOCHKA_DTO
 import com.vodovoz.app.data.vodovoz_service.model.order_details.WHERE_ORDER_BUTTON_DTO
 import com.vodovoz.app.data.vodovoz_service.model.order_details.WhereMyOrderDetailsDTO
-import com.vodovoz.app.domain.general.ImageAndTextModel
+import com.vodovoz.app.domain.general.model.ImageAndTextModel
 import com.vodovoz.app.domain.general.model.ImageButtonModel
 import com.vodovoz.app.domain.general.model.MapPointModel
 import com.vodovoz.app.domain.general.model.order.WhereOrderDetailsModel

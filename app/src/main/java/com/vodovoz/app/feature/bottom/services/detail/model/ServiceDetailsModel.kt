@@ -40,7 +40,7 @@ data class ServiceDetailBlockUI(
 ) : Item {
 
     override fun getItemViewType(): Int {
-        return R.layout.item_service_detail
+        return -123
     }
 
     override fun areItemsTheSame(item: Item): Boolean {

@@ -37,7 +37,7 @@ fun SortingButton(
         border = BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary)
     ) {
         Icon(
-            painter = painterResource(id = R.drawable.ic_sort_18),
+            painter = painterResource(id = R.drawable.ic_sort),
             contentDescription = null,
             modifier = Modifier.size(18.dp),
             tint = MaterialTheme.colorScheme.primary

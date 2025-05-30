@@ -6,7 +6,8 @@
     android:id="@+id/clContainer"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:theme="@style/Theme.Vodovoz">
+    android:theme="@style/Theme.Vodovoz"
+    android:background="@color/white">
 
     <com.vodovoz.app.ui.view.ExtendedBottomNavigationView
         android:id="@+id/nvNavigation"

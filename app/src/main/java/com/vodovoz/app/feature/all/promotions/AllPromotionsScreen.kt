@@ -1,5 +1,6 @@
 package com.vodovoz.app.feature.all.promotions
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.consumeWindowInsets
@@ -7,17 +8,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.navigation.NavController
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.vodovoz.app.R
 import com.vodovoz.app.design_system.composables.top_bar.VodovozTopBar
-import com.vodovoz.app.design_system.effects.LifecycleEffect
 import com.vodovoz.app.feature.all.promotions.composables.AdvertisingInfoBottomSheet
 import com.vodovoz.app.feature.all.promotions.composables.AllPromotionsBody
 import com.vodovoz.app.feature.all.promotions.composables.PromotionsLoadingPlaceholder
@@ -28,15 +27,15 @@ import com.vodovoz.app.feature.all.promotions.composables.PromotionsLoadingPlace
 fun AllPromotionsScreen(
     viewModel: AllPromotionsFlowViewModel,
     viewState: AllPromotionsFlowViewModel.AllPromotionsState,
-    lazyListState: LazyListState
+    lazyListState: LazyListState,
 ) {
     val lazyPagingPromotions = viewState.pagedPromotions.collectAsLazyPagingItems()
 
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
             .windowInsetsPadding(WindowInsets.systemBars)
-            .consumeWindowInsets(WindowInsets.systemBars)
     ) {
         VodovozTopBar(
             onBack = { viewModel.navigateBack() },

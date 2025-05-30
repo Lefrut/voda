@@ -2,7 +2,7 @@ package com.vodovoz.app.feature.cart.model
 
 import androidx.compose.ui.graphics.Color
 import com.vodovoz.app.domain.general.model.cart.CartPromoButtonModel
-import com.vodovoz.app.util.fromHexOrUnspecified
+import com.vodovoz.app.ui.graphics.fromHexOrUnspecified
 
 
 data class CartPromoButtonUi(

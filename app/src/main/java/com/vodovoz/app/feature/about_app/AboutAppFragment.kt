@@ -25,10 +25,10 @@ import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 import androidx.core.net.toUri
 import com.vodovoz.app.BuildConfig
-import com.vodovoz.app.ui.extensions.ContextExtensions.isTablet
 import com.vodovoz.app.R
 import com.vodovoz.app.core.navigation.navigateToWebView
 import com.vodovoz.app.util.extensions.fromHtml
+import com.vodovoz.app.util.extensions.isTablet
 
 @AndroidEntryPoint
 class AboutAppFragment : Fragment() {

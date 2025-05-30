@@ -3,8 +3,8 @@ package com.vodovoz.app.feature.auth.login_by_phone_code
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import com.vodovoz.app.common.account.data.AccountManager
-import com.vodovoz.app.common.account.data.LoginManager
+import com.vodovoz.app.common.account.AccountManager
+import com.vodovoz.app.common.account.LoginManager
 import com.vodovoz.app.common.like.LikeManager
 import com.vodovoz.app.common.token.FirebaseTokenManager
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
@@ -12,7 +12,6 @@ import com.vodovoz.app.feature.auth.login_by_phone_code.model.LoginByPhoneCodeEv
 import com.vodovoz.app.feature.auth.login_by_phone_code.model.LoginByPhoneCodeState
 import com.vodovoz.app.feature.sitestate.SiteStateManager
 import com.vodovoz.app.ui.mvi.MviViewModel
-import com.vodovoz.app.util.extensions.debugLog
 import com.vodovoz.app.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -88,22 +87,19 @@ class LoginByPhoneCodeViewModel @Inject constructor(
             s.copy(blockScreen = true)
         }
 
-        val smsUrl = siteStateManager.siteStateFlow.value?.smsUrl?.takeIf { s ->
-            s.isNotBlank()
-        } ?: run { siteStateManager.requestSiteState()?.smsUrl ?: "" }
+        val smsUrl = siteStateManager.siteStateFlow.value?.smsUrl ?: ""
 
         val loginByPhoneResult = vodovozServiceRepository.loginByPhone(
-            smsUrl,
-            code,
-            stateSnapshot.phone
+            url = smsUrl,
+            code = code,
+            phone = stateSnapshot.phone
         ).singleResult()
 
         loginByPhoneResult.onSuccess { userAuthInfo ->
-            accountManager.updateUserId(userAuthInfo.userId)
-            accountManager.updateUserToken(userAuthInfo.token)
-            likeManager.updateLikesAfterLogin(userAuthInfo.userId)
-            firebaseTokenManager.sendFirebaseToken()
-            loginManager.updateLastAuthPhone(stateSnapshot.phone)
+            loginManager.initializeUserSession(
+                userAuthInfo.userId,
+                userAuthInfo.token
+            )
 
             _state.update { s ->
                 s.copy(blockScreen = false)
@@ -131,7 +127,6 @@ class LoginByPhoneCodeViewModel @Inject constructor(
             val totalMillis = timerDurationSeconds.seconds.inWholeMilliseconds
             val formatter = DateTimeFormatter.ofPattern("mm:ss")
             val startNano = System.nanoTime()
-            debugLog { "Timer started: totalMillis=$totalMillis" }
 
             while (isActive) {
                 val currentNano = System.nanoTime()
@@ -140,10 +135,6 @@ class LoginByPhoneCodeViewModel @Inject constructor(
                     (totalMillis - (elapsedMillis - elapsedMillis % 1000)).coerceAtLeast(0)
                 val remainingSeconds = (remainingMillis) / 1_000
 
-                debugLog {
-                    "Tick → elapsed=${elapsedMillis}ms, " +
-                            "remaining=${remainingMillis}ms (${remainingSeconds}s)"
-                }
 
                 val time = LocalTime.ofSecondOfDay(remainingSeconds)
                 _state.update { s ->
@@ -151,7 +142,6 @@ class LoginByPhoneCodeViewModel @Inject constructor(
                 }
 
                 if (remainingMillis <= 0L) {
-                    debugLog { "Timer finished, enabling request code" }
                     _state.update { s ->
                         s.copy(canRequestCode = true)
                     }

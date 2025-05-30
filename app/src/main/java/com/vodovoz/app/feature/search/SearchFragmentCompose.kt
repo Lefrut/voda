@@ -143,7 +143,7 @@ class SearchFragment : Fragment() {
                 }
 
                 SearchFlowViewModel.SearchEvents.GoToContacts -> {
-                    findNavController().navigate(SearchFragmentDirections.actionToContactsFragment())
+                    //findNavController().navigate(SearchFragmentDirections.actionToContactsFragment())
                 }
 
                 SearchFlowViewModel.SearchEvents.GoToPromotions -> {

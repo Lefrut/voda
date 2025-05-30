@@ -10,7 +10,7 @@ data class HowToOrderStepUI(
 ) : Item {
 
     override fun getItemViewType(): Int {
-        return R.layout.pager_how_to_order
+        return 2222
     }
 
     override fun areItemsTheSame(item: Item): Boolean {

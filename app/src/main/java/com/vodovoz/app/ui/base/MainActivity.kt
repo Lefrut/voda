@@ -44,9 +44,7 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks,
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        AppCompatDelegate.setApplicationLocales(
-            LocaleListCompat.forLanguageTags("ru")
-        )
+        AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags("ru"))
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
 
         super.onCreate(savedInstanceState)

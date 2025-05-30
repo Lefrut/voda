@@ -1,15 +1,13 @@
 package com.vodovoz.app.common.like
 
 import androidx.recyclerview.widget.RecyclerView
-import com.vodovoz.app.common.account.data.AccountManager
+import com.vodovoz.app.common.account.AccountManager
 import com.vodovoz.app.common.datastore.DataStoreRepository
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.ui.model.ProductUI
 import com.vodovoz.app.util.extensions.singleResult
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.singleOrNull
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.util.concurrent.ConcurrentHashMap
@@ -37,12 +35,6 @@ class LikeManager @Inject constructor(
     private val likes = ConcurrentHashMap<Long, Boolean>()
     private val likesVersions = ConcurrentHashMap<Long, Int>()
     private var selectedCategoryId: Long? = null
-
-    private val viewPool: RecyclerView.RecycledViewPool = RecyclerView.RecycledViewPool().apply {
-        setMaxRecycledViews(ProductUI.PRODUCT_VIEW_TYPE, 5)
-    }
-
-    fun fetchViewPool() = viewPool
 
     fun observeLikes() = likesStateListener.asSharedFlow()
 
@@ -116,34 +108,6 @@ class LikeManager @Inject constructor(
     }
 
 
-    /**
-     * @Deprecated Используйте [LikeManager.changeFavorite] вместо этого метода.
-     */
-    @Deprecated("")
-    suspend fun like(productId: Long, isFavorite: Boolean) {
-        val (likeVersion, userId) = mutex.withLock {
-            val version = updateFavoritesOptimistically(productId, !isFavorite)
-            val userId = accountManager.fetchAccountId()
-            version to userId
-        }
-
-
-        if (userId != null) {
-            runCatching {
-                updateFavoritesOnline(productId, isFavorite)
-            }.onFailure {
-                if (likeVersion >= getLikeVersion(productId)) {
-                    updateFavoritesOptimistically(
-                        productId,
-                        isFavorite
-                    )
-                }
-            }
-        } else {
-            updateFavoritesLocal(productId, isFavorite)
-        }
-    }
-
     private suspend fun updateFavoritesOnline(
         productId: Long,
         newIsFavorite: Boolean,
@@ -165,7 +129,7 @@ class LikeManager @Inject constructor(
         return currentVersion
     }
 
-    private suspend fun updateFavoritesLocal(productId: Long, newIsFavorite: Boolean) {
+    private fun updateFavoritesLocal(productId: Long, newIsFavorite: Boolean) {
         val localLikesListString = dataStoreRepository.getString(FAV_IDS)
         val localLikesList = if (localLikesListString.isNullOrEmpty()) {
             listOf(productId)

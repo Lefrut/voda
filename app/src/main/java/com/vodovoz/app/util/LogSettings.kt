@@ -11,6 +11,4 @@ object LogSettings {
     const val LIFECYCLE_LOG = "LIFECYCLE_LOG"
     const val PRICE_LOG = "PRICE_LOG"
     const val MAP_LOG = "MAP_LOG"
-
-    //275794
 }

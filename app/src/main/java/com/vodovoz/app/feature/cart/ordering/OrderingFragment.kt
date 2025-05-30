@@ -3,7 +3,6 @@ package com.vodovoz.app.feature.cart.ordering
 import android.app.DatePickerDialog
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.widget.TextView
 import androidx.core.content.ContextCompat
@@ -16,20 +15,19 @@ import by.kirich1409.viewbindingdelegate.viewBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.vodovoz.app.R
-import com.vodovoz.app.common.account.data.AccountManager
+import com.vodovoz.app.common.account.AccountManager
 import com.vodovoz.app.common.content.BaseFragment
 import com.vodovoz.app.common.content.ErrorState
 import com.vodovoz.app.databinding.FragmentOrderingFlowBinding
 import com.vodovoz.app.feature.addresses.AddressesFragment
 import com.vodovoz.app.feature.addresses.OpenMode
-import com.vodovoz.app.feature.cart.ordering.intervals.CheckDeliveryUI
 import com.vodovoz.app.ui.extensions.TextBuilderExtensions.setPriceText
 import com.vodovoz.app.ui.extensions.TextViewExtensions.setPhoneValidator
 import com.vodovoz.app.ui.model.AddressUI
 import com.vodovoz.app.ui.model.PayMethodUI
 import com.vodovoz.app.ui.model.ShippingIntervalUI
 import com.vodovoz.app.ui.model.custom.OrderingCompletedInfoBundleUI
-import com.vodovoz.app.util.FieldValidationsSettings
+import com.vodovoz.app.util.FieldValidationSettings
 import com.vodovoz.app.util.PhoneSingleFormatUtil.convertPhoneToBaseFormat
 import com.vodovoz.app.util.PhoneSingleFormatUtil.convertPhoneToFullFormat
 import com.vodovoz.app.util.extensions.debugLog
@@ -40,7 +38,6 @@ import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.time.Instant
 import java.time.LocalDate
-import java.time.ZonedDateTime
 import java.util.Calendar
 import java.util.Locale
 import javax.inject.Inject
@@ -208,7 +205,7 @@ class OrderingFragment : BaseFragment() {
                         requireActivity().snack(state.error.messageInfo)
                         findNavController().popBackStack()
                     } else {
-                        showError(state.error)
+                        //showError(state.error)
                     }
 
                     checkTitlesColor()
@@ -273,14 +270,14 @@ class OrderingFragment : BaseFragment() {
                         }
 
                         is OrderingFlowViewModel.OrderingEvents.OnFreeShippingClick -> {
-                            if (findNavController().currentDestination?.id == R.id.orderingFragment) {
-                                findNavController().navigate(
-                                    OrderingFragmentDirections.actionToFreeShippingSaysBS(
-                                        it.bundle.title,
-                                        it.bundle.info
-                                    )
-                                )
-                            }
+//                            if (findNavController().currentDestination?.id == R.id.orderingFragment) {
+//                                findNavController().navigate(
+//                                    OrderingFragmentDirections.actionToFreeShippingSaysBS(
+//                                        it.bundle.title,
+//                                        it.bundle.info
+//                                    )
+//                                )
+//                            }
                         }
 
                         is OrderingFlowViewModel.OrderingEvents.ShowDatePicker -> {
@@ -288,13 +285,13 @@ class OrderingFragment : BaseFragment() {
                         }
 
                         is OrderingFlowViewModel.OrderingEvents.OnShippingAlertClick -> {
-                            if (findNavController().currentDestination?.id == R.id.orderingFragment) {
-                                findNavController().navigate(
-                                    OrderingFragmentDirections.actionToShippingAlertsSelectionBS(
-                                        it.list.toTypedArray()
-                                    )
-                                )
-                            }
+//                            if (findNavController().currentDestination?.id == R.id.orderingFragment) {
+//                                findNavController().navigate(
+//                                    OrderingFragmentDirections.actionToShippingAlertsSelectionBS(
+//                                        it.list.toTypedArray()
+//                                    )
+//                                )
+//                            }
                         }
 
                         is OrderingFlowViewModel.OrderingEvents.ShowPaymentMethod -> {
@@ -373,15 +370,15 @@ class OrderingFragment : BaseFragment() {
                         }
 
                         is OrderingFlowViewModel.OrderingEvents.ShowCheckDeliveryBs -> {
-                            if (!it.isNewUser) {
-                                if (findNavController().currentDestination?.id == R.id.orderingFragment) {
-                                    findNavController().navigate(
-                                        OrderingFragmentDirections.actionToCheckActionDeliveryBS(
-                                            it.value
-                                        )
-                                    )
-                                }
-                            }
+//                            if (!it.isNewUser) {
+//                                if (findNavController().currentDestination?.id == R.id.orderingFragment) {
+//                                    findNavController().navigate(
+//                                        OrderingFragmentDirections.actionToCheckActionDeliveryBS(
+//                                            it.value
+//                                        )
+//                                    )
+//                                }
+//                            }
                         }
                     }
                 }
@@ -626,7 +623,7 @@ class OrderingFragment : BaseFragment() {
 
     private fun showPersonalBtn() {
         binding.btnCompany.setBackgroundResource(R.drawable.selector_bkg_button_gray_rect)
-        binding.btnPersonal.setBackgroundResource(R.drawable.bkg_into_cart_button)
+        //binding.btnPersonal.setBackgroundResource(R.drawable.bkg_into_cart_button)
         binding.llCompanyNameContainer.visibility = View.GONE
         binding.INNContainer.visibility = View.GONE
     }
@@ -756,30 +753,30 @@ class OrderingFragment : BaseFragment() {
                 clearFields()
                 viewModel.setSelectedAddress(addressUI)
             }
-        findNavController().currentBackStackEntry?.savedStateHandle
-            ?.getLiveData<CheckDeliveryUI>(SELECTED_CHECK_DELIVERY_ACTION)
-            ?.observe(viewLifecycleOwner) {
-                viewModel.setCheckDelivery(it.value)
-                binding.tvCheckDelivery.text = it.text
-                binding.tvNameCheckDelivery.setTextColor(
-                    ContextCompat.getColor(
-                        requireContext(),
-                        R.color.text_black
-                    )
-                )
-                checkTitlesColor()
-            }
+//        findNavController().currentBackStackEntry?.savedStateHandle
+//            ?.getLiveData<CheckDeliveryUI>(SELECTED_CHECK_DELIVERY_ACTION)
+//            ?.observe(viewLifecycleOwner) {
+//                viewModel.setCheckDelivery(it.value)
+//                binding.tvCheckDelivery.text = it.text
+//                binding.tvNameCheckDelivery.setTextColor(
+//                    ContextCompat.getColor(
+//                        requireContext(),
+//                        R.color.text_black
+//                    )
+//                )
+//                checkTitlesColor()
+//            }
     }
 
     private fun showPayMethodPopup(payMethodUIList: List<PayMethodUI>, selectedPayMethodId: Long) {
-        if (findNavController().currentDestination?.id == R.id.orderingFragment) {
-            findNavController().navigate(
-                OrderingFragmentDirections.actionToPayMethodSelectionBS(
-                    payMethodUIList.toTypedArray(),
-                    selectedPayMethodId
-                )
-            )
-        }
+//        if (findNavController().currentDestination?.id == R.id.orderingFragment) {
+//            findNavController().navigate(
+//                OrderingFragmentDirections.actionToPayMethodSelectionBS(
+//                    payMethodUIList.toTypedArray(),
+//                    selectedPayMethodId
+//                )
+//            )
+//        }
     }
 
     private fun showShippingIntervalSelectionPopup(
@@ -793,13 +790,13 @@ class OrderingFragment : BaseFragment() {
         if (shippingIntervalUIList.isEmpty()) {
             Snackbar.make(binding.root, "На эту дату нет доставок!", Snackbar.LENGTH_LONG).show()
         } else {
-            if (findNavController().currentDestination?.id == R.id.orderingFragment) {
-                findNavController().navigate(
-                    OrderingFragmentDirections.actionToShippingIntervalSelectionBS(
-                        shippingIntervalUIList.toTypedArray()
-                    )
-                )
-            }
+//            if (findNavController().currentDestination?.id == R.id.orderingFragment) {
+//                findNavController().navigate(
+//                    OrderingFragmentDirections.actionToShippingIntervalSelectionBS(
+//                        shippingIntervalUIList.toTypedArray()
+//                    )
+//                )
+//            }
         }
     }
 
@@ -816,7 +813,7 @@ class OrderingFragment : BaseFragment() {
     }
 
     private fun validateEmail(name: TextView, input: String) =
-        when (FieldValidationsSettings.EMAIL_REGEX.matches(input)) {
+        when (FieldValidationSettings.EMAIL_REGEX.matches(input)) {
             false -> {
                 name.setTextColor(ContextCompat.getColor(requireContext(), R.color.red))
                 false
@@ -829,7 +826,7 @@ class OrderingFragment : BaseFragment() {
         }
 
     private fun validatePhone(name: TextView, input: String) =
-        when (FieldValidationsSettings.PHONE_REGEX.matches(input)) {
+        when (FieldValidationSettings.PHONE_REGEX.matches(input)) {
             false -> {
                 name.setTextColor(ContextCompat.getColor(requireContext(), R.color.red))
                 false
@@ -879,22 +876,21 @@ class OrderingFragment : BaseFragment() {
         if (condition) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 textViewTitle?.setTextAppearance(R.style.NormalTextOrder)
-                textViewEdit.setTextAppearance(R.style.EditTextViewOrderBoldBlack)
+                //textViewEdit.setTextAppearance(R.style.EditTextViewOrderBoldBlack)
             } else {
                 @Suppress("DEPRECATION")
                 textViewTitle?.setTextAppearance(requireContext(), R.style.NormalTextOrder)
-                @Suppress("DEPRECATION")
-                textViewEdit.setTextAppearance(requireContext(), R.style.EditTextViewOrderBoldBlack)
+                //textViewEdit.setTextAppearance(requireContext(), R.style.EditTextViewOrderBoldBlack)
             }
         } else {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 textViewTitle?.setTextAppearance(R.style.BoldTextOrder)
-                textViewEdit.setTextAppearance(R.style.EditTextViewOrderNormal)
+                //textViewEdit.setTextAppearance(R.style.EditTextViewOrderNormal)
             } else {
                 @Suppress("DEPRECATION")
                 textViewTitle?.setTextAppearance(requireContext(), R.style.BoldTextOrder)
-                @Suppress("DEPRECATION")
-                textViewEdit.setTextAppearance(requireContext(), R.style.EditTextViewOrderNormal)
+//                @Suppress("DEPRECATION")
+//                textViewEdit.setTextAppearance(requireContext(), R.style.EditTextViewOrderNormal)
             }
         }
     }

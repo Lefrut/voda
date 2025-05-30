@@ -6,7 +6,7 @@ import com.vodovoz.app.domain.general.model.MenuItemModel
 import com.vodovoz.app.domain.general.model.MenuItemTypeModel
 import com.vodovoz.app.domain.general.model.HomeOrderModel
 import com.vodovoz.app.domain.general.model.OrderWithMenuModel
-import com.vodovoz.app.util.fromHexOrNull
+import com.vodovoz.app.ui.graphics.fromHexOrNull
 
 @Immutable
 data class OrderWithMenuUi(

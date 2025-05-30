@@ -12,7 +12,6 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
 import android.widget.EditText
-import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -27,13 +26,11 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.gms.location.LocationServices
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.imageview.ShapeableImageView
 import com.vodovoz.app.R
 import com.vodovoz.app.common.permissions.PermissionsController
 import com.vodovoz.app.feature.map.adapter.AddressResult
 import com.vodovoz.app.feature.map.adapter.AddressResultClickListener
 import com.vodovoz.app.feature.map.adapter.AddressResultFlowAdapter
-import com.vodovoz.app.ui.extensions.ColorExtensions.getColorWithAlpha
 import com.vodovoz.app.ui.model.AddressUI
 import com.vodovoz.app.ui.model.DeliveryZoneUI
 import com.yandex.mapkit.Animation
@@ -335,7 +332,7 @@ class MapController(
                     moveCamera(point)
                     distanceToRouteMap.clear()
                     viewModel.fetchSeveralMinimalLineDistancesToMainPolygonPoints(point)
-                    placeMark(point, R.drawable.png_map_marker)
+                    placeMark(point, R.drawable.ic_delivery)
                     isShowSearchResult = false
                     showContainer(false)
                 }
@@ -421,7 +418,7 @@ class MapController(
     private fun onMapClick(point: Point) {
         viewModel.clearState()
         moveCamera(point)
-        placeMark(point, R.drawable.png_map_marker)
+        placeMark(point, R.drawable.ic_delivery)
         viewModel.fetchAddressByGeocode(
             point.latitude,
             point.longitude
@@ -438,7 +435,7 @@ class MapController(
     override fun onObjectAdded(userLocationView: UserLocationView) {
         userLocationView.arrow.setIcon(
             ImageProvider.fromResource(
-                context, R.drawable.png_gps_1
+                context, R.drawable.svg_gps_outline
             ), IconStyle().setScale(0.1f).setRotationType(RotationType.ROTATE).setZIndex(1f)
         )
 
@@ -446,7 +443,7 @@ class MapController(
 
         pinIcon.setIcon(
             "icon",
-            ImageProvider.fromResource(context, R.drawable.search_result),
+            ImageProvider.fromResource(context, R.drawable.svg_gps_outline),
             IconStyle().setAnchor(PointF(0.5f, 0.5f))
                 .setRotationType(RotationType.ROTATE)
                 .setZIndex(0f)
@@ -455,7 +452,7 @@ class MapController(
 
         pinIcon.setIcon(
             "pin",
-            ImageProvider.fromResource(context, R.drawable.search_result),
+            ImageProvider.fromResource(context, R.drawable.svg_gps_outline),
             IconStyle()
                 .setAnchor(PointF(0.5f, 0.5f))
                 .setRotationType(RotationType.ROTATE)
@@ -594,7 +591,7 @@ class MapController(
                 val zone = mapView.map.mapObjects.addPolygon(
                     Polygon(LinearRing(deliveryZoneUI.pointList), ArrayList())
                 )
-                zone.fillColor = Color.parseColor(deliveryZoneUI.color).getColorWithAlpha(0.4f)
+                zone.fillColor = Color.parseColor(deliveryZoneUI.color)
                 zone.strokeWidth = 0.0f
                 zone.zIndex = 100.0f
             }

@@ -55,7 +55,7 @@ fun CommentCard(
 
                 (1..5).forEach { starNumber ->
                     Icon(
-                        painter = painterResource(id = R.drawable.ic_star),
+                        painter = painterResource(id = R.drawable.ic_star_active),
                         contentDescription = null,
                         tint = if (starNumber <= comment.rating) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.surfaceVariant,
                         modifier = Modifier.size(18.dp)

@@ -3,7 +3,7 @@ package com.vodovoz.app.design_system.model
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
 import com.vodovoz.app.domain.general.model.TextButtonModel
-import com.vodovoz.app.util.fromHexOrUnspecified
+import com.vodovoz.app.ui.graphics.fromHexOrUnspecified
 
 @Immutable
 data class TextButtonUi(

@@ -162,7 +162,7 @@ private fun CommentsInfoCard(modifier: Modifier = Modifier, aboutComments: Produ
                 style = MaterialTheme.typography.headlineSmall
             )
             Icon(
-                painter = painterResource(id = R.drawable.ic_star),
+                painter = painterResource(id = R.drawable.ic_star_active),
                 contentDescription = null,
                 modifier = Modifier
                     .padding(start = 4.dp)

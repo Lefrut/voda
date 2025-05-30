@@ -185,7 +185,7 @@ class AddAddressFragment : BaseFragment() {
                         }
 
                         buildAddressFields(state.data.addressUI)
-                        showError(state.error)
+                        //showError(state.error)
                     }
             }
         }

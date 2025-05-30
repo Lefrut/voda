@@ -2,7 +2,7 @@ package com.vodovoz.app.feature.cart
 
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.viewModelScope
-import com.vodovoz.app.common.account.data.AccountManager
+import com.vodovoz.app.common.account.AccountManager
 import com.vodovoz.app.common.cart.CartManager
 import com.vodovoz.app.common.content.Event
 import com.vodovoz.app.common.content.PagingContractViewModel
@@ -25,7 +25,6 @@ import com.vodovoz.app.feature.cart.model.mapToUi
 import com.vodovoz.app.feature.cart.model.toUi
 import com.vodovoz.app.feature.cart.model.withUpdatedCart
 import com.vodovoz.app.feature.cart.model.withUpdatedFavorites
-import com.vodovoz.app.util.CalculatedPrices
 import com.vodovoz.app.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.collectLatest
@@ -103,7 +102,7 @@ class CartFlowViewModel @Inject constructor(
             }
 
 
-            if(currentCartVersion >= cartManager.cartVersion){
+            if (currentCartVersion >= cartManager.cartVersion) {
                 cartManager.syncCart(
                     cartItems.associate { item -> item.productId to item.quantity }
                 )
@@ -254,13 +253,13 @@ class CartFlowViewModel @Inject constructor(
     fun navigateToGifts() = viewModelScope.launch {
         val userId = accountManager.fetchAccountId()
         if (userId == null) {
-            eventListener.emit(CartEvents.NavigateToProfile)
+            eventListener.emit(CartEvents.GoToProfile)
         } else {
             val present = dataState.present ?: return@launch
             val popupWindow = dataState.present?.popupWindow ?: return@launch
             if (popupWindow.items.isEmpty()) return@launch
 
-            eventListener.emit(CartEvents.NavigateToGifts(present, popupWindow))
+            eventListener.emit(CartEvents.GoToGifts(present, popupWindow))
         }
     }
 
@@ -276,6 +275,10 @@ class CartFlowViewModel @Inject constructor(
 
     fun navigateToAllBottles() = viewModelScope.launch {
         eventListener.emit(CartEvents.GoToAllBottles)
+    }
+
+    fun navigateToOrder() = viewModelScope.launch {
+        eventListener.emit(CartEvents.GoToOrder("", ""))
     }
 
     @Immutable
@@ -309,18 +312,17 @@ class CartFlowViewModel @Inject constructor(
 
     sealed class CartEvents : Event {
 
-        data class NavigateToOrder(
-            val prices: CalculatedPrices?,
+        data class GoToOrder(
             val cart: String,
             val coupon: String,
         ) : CartEvents()
 
-        data class NavigateToGifts(
+        data class GoToGifts(
             val present: CartPresentUi? = null,
             val popupWindow: CartPresentPopupWindowUi,
         ) : CartEvents()
 
-        data object NavigateToProfile : CartEvents()
+        data object GoToProfile : CartEvents()
         data object GoToCatalog : CartEvents()
         data object GoToAllBottles : CartEvents()
 

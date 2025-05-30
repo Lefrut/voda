@@ -5,14 +5,12 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
-import com.vodovoz.app.common.account.data.AccountManager
+import com.vodovoz.app.common.account.AccountManager
 import com.vodovoz.app.common.cookie.CookieManager
-import com.vodovoz.app.common.tracking.TrackingManager
-import com.vodovoz.app.core.network.messageWithCode
+import com.vodovoz.app.core.network.retrofit.messageWithCode
 import com.vodovoz.app.core.network.serialization.fromJson
-import com.vodovoz.app.core.network.stringBody
+import com.vodovoz.app.core.network.retrofit.stringBody
 import com.vodovoz.app.data.vodovoz_service.VodovozService
-import com.vodovoz.app.data.vodovoz_service.datastore.ForAdultsDataStore
 import com.vodovoz.app.data.vodovoz_service.mappers.executeRequest
 import com.vodovoz.app.data.vodovoz_service.mappers.mapToDomain
 import com.vodovoz.app.data.vodovoz_service.mappers.toDomain

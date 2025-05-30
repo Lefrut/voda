@@ -4,7 +4,7 @@ import android.app.Application
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.vodovoz.app.BuildConfig
-import com.vodovoz.app.common.account.data.AccountManager
+import com.vodovoz.app.common.account.AccountManager
 import com.vodovoz.app.common.cart.CartManager
 import com.vodovoz.app.common.content.ErrorState
 import com.vodovoz.app.common.content.Event
@@ -17,7 +17,6 @@ import com.vodovoz.app.data.model.common.ResponseEntity
 import com.vodovoz.app.mapper.FreeShippingDaysInfoBundleMapper.mapToUI
 import com.vodovoz.app.mapper.OrderingCompletedInfoBundleMapper.mapToUI
 import com.vodovoz.app.mapper.ShippingInfoBundleMapper.mapToUI
-import com.vodovoz.app.ui.extensions.ContextExtensions.getDeviceInfo
 import com.vodovoz.app.ui.model.AddressUI
 import com.vodovoz.app.ui.model.FreeShippingDaysInfoBundleUI
 import com.vodovoz.app.ui.model.PayMethodUI
@@ -26,6 +25,7 @@ import com.vodovoz.app.ui.model.ShippingInfoBundleUI
 import com.vodovoz.app.ui.model.ShippingIntervalUI
 import com.vodovoz.app.ui.model.custom.OrderingCompletedInfoBundleUI
 import com.vodovoz.app.util.extensions.debugLog
+import com.vodovoz.app.util.extensions.getDeviceInfo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.BufferOverflow
@@ -38,7 +38,6 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.time.LocalDate
-import java.util.Date
 import java.util.Locale
 import javax.inject.Inject
 

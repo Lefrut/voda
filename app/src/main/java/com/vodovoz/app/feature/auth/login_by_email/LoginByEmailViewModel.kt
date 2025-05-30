@@ -3,7 +3,8 @@ package com.vodovoz.app.feature.auth.login_by_email
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.viewModelScope
 import com.vodovoz.app.R
-import com.vodovoz.app.common.account.data.AccountManager
+import com.vodovoz.app.common.account.AccountManager
+import com.vodovoz.app.common.account.LoginManager
 import com.vodovoz.app.common.agreement.AgreementController
 import com.vodovoz.app.common.like.LikeManager
 import com.vodovoz.app.common.resources.ResourcesProvider
@@ -36,9 +37,8 @@ class LoginByEmailViewModel @Inject constructor(
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val siteStateManager: SiteStateManager,
     private val accountManager: AccountManager,
-    private val likeManager: LikeManager,
-    private val firebaseTokenManager: FirebaseTokenManager,
     private val resourcesProvider: ResourcesProvider,
+    private val loginManager: LoginManager
 ) : MviViewModel<LoginByEmailState, LoginByEmailEvent>(LoginByEmailState()) {
 
     companion object {
@@ -75,16 +75,13 @@ class LoginByEmailViewModel @Inject constructor(
             val password = fields.firstOrNull { it.id == "pass" }?.value ?: ""
 
             accountManager.updateLastLoginSetting(
-                AccountManager.UserSettings(
-                    email = email,
-                    password = password
-                )
+                AccountManager.UserSettings(email = email, password = password)
             )
 
-            accountManager.updateUserId(userAuthInfo.userId)
-            accountManager.updateUserToken(userAuthInfo.token)
-            likeManager.updateLikesAfterLogin(userAuthInfo.userId)
-            firebaseTokenManager.sendFirebaseToken()
+            loginManager.initializeUserSession(
+                userAuthInfo.userId,
+                userAuthInfo.token
+            )
 
             _state.update { s ->
                 s.copy(

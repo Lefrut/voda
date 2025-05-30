@@ -20,8 +20,8 @@ fun PasswordIcon(
     onClick: (Boolean) -> Unit
 ) {
     Icon(
-        painter = if (valueIsVisible) painterResource(id = R.drawable.icon_eye)
-        else painterResource(id = R.drawable.icon_eye_open),
+        painter = if (valueIsVisible) painterResource(id = R.drawable.ic_closed_eye)
+        else painterResource(id = R.drawable.ic_open_eye),
         contentDescription = null,
         modifier = modifier
             .padding(start = 16.dp)

@@ -77,8 +77,8 @@ class BlockAppFragment : BaseFragment() {
 
                         Glide.with(requireContext())
                             .load(siteState.data?.logo?.parseImagePath())
-                            .placeholder(R.drawable.placeholderimageproduits)
-                            .error(R.drawable.placeholderimageproduits)
+                            .placeholder(R.drawable.pic_product_placeholder)
+                            .error(R.drawable.pic_product_placeholder)
                             .into(binding.imageBlockApp)
 
 
@@ -94,32 +94,32 @@ class BlockAppFragment : BaseFragment() {
 
                         Glide.with(requireContext())
                             .load(siteState.data?.whatsUp?.image?.parseImagePath())
-                            .placeholder(R.drawable.placeholderimageproduits)
-                            .error(R.drawable.placeholderimageproduits)
+                            .placeholder(R.drawable.pic_product_placeholder)
+                            .error(R.drawable.pic_product_placeholder)
                             .into(binding.whatsUp)
 
                         Glide.with(requireContext())
                             .load(siteState.data?.viber?.image?.parseImagePath())
-                            .placeholder(R.drawable.placeholderimageproduits)
-                            .error(R.drawable.placeholderimageproduits)
+                            .placeholder(R.drawable.pic_product_placeholder)
+                            .error(R.drawable.pic_product_placeholder)
                             .into(binding.viber)
 
                         Glide.with(requireContext())
                             .load(siteState.data?.telegram?.image?.parseImagePath())
-                            .placeholder(R.drawable.placeholderimageproduits)
-                            .error(R.drawable.placeholderimageproduits)
+                            .placeholder(R.drawable.pic_product_placeholder)
+                            .error(R.drawable.pic_product_placeholder)
                             .into(binding.telegram)
 
                         Glide.with(requireContext())
                             .load(siteState.data?.chat?.image?.parseImagePath())
-                            .placeholder(R.drawable.placeholderimageproduits)
-                            .error(R.drawable.placeholderimageproduits)
+                            .placeholder(R.drawable.pic_product_placeholder)
+                            .error(R.drawable.pic_product_placeholder)
                             .into(binding.chat)
 
                         Glide.with(requireContext())
                             .load(siteState.data?.phone?.image?.parseImagePath())
-                            .placeholder(R.drawable.placeholderimageproduits)
-                            .error(R.drawable.placeholderimageproduits)
+                            .placeholder(R.drawable.pic_product_placeholder)
+                            .error(R.drawable.pic_product_placeholder)
                             .into(binding.imageCall)
 
                         binding.whatsUp.setOnClickListener {
@@ -155,14 +155,14 @@ class BlockAppFragment : BaseFragment() {
                         }
 
                     } else {
-                        showError(ErrorState.Error())
-                        bindErrorRefresh {
-                            lifecycleScope.launch {
-                                if (siteStateManager.siteActive()) {
-                                    findNavController().navigate(R.id.splashFragment)
-                                }
-                            }
-                        }
+//                        showError(ErrorState.Error())
+//                        bindErrorRefresh {
+//                            lifecycleScope.launch {
+//                                if (siteStateManager.siteActive()) {
+//                                    findNavController().navigate(R.id.splashFragment)
+//                                }
+//                            }
+//                        }
                     }
                     
                 }

@@ -43,7 +43,7 @@ fun ProductDetailsRatingBar(
         )
 
         Icon(
-            painter = painterResource(id = R.drawable.ic_star),
+            painter = painterResource(id = R.drawable.ic_star_active),
             contentDescription = null,
             tint = if (numberOfReviews == 0) MaterialTheme.colorScheme.surfaceVariant else MaterialTheme.colorScheme.tertiary,
             modifier = Modifier

@@ -162,7 +162,7 @@ private fun PickPhotoItem(modifier: Modifier = Modifier, onClick: () -> Unit) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Image(
-            painter = painterResource(id = R.drawable.pic_cam_plus),
+            painter = painterResource(id = R.drawable.svg_cam_plus),
             contentDescription = null,
             modifier = Modifier.size(24.dp),
             contentScale = ContentScale.Fit

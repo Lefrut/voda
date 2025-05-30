@@ -9,7 +9,7 @@ data class CommentsDataUI(
     val commentCountText: String = "Всего 0 отзывов",
 ) : Item {
     override fun getItemViewType(): Int {
-        return R.layout.view_holder_comments_header
+        return 0
     }
 
     override fun areItemsTheSame(item: Item): Boolean {

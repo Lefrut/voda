@@ -81,6 +81,9 @@ fun CartScreen(viewModel: CartFlowViewModel, viewState: CartFlowViewModel.CartSt
                 },
                 onPromotionCodeButtonClick = {
                     viewModel.showPromotionCodeBottomSheet()
+                },
+                onOrderClick = {
+                    viewModel.navigateToOrder()
                 }
             )
         }

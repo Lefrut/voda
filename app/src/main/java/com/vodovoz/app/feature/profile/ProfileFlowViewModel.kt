@@ -2,7 +2,7 @@ package com.vodovoz.app.feature.profile
 
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.viewModelScope
-import com.vodovoz.app.common.account.data.AccountManager
+import com.vodovoz.app.common.account.AccountManager
 import com.vodovoz.app.common.cart.CartManager
 import com.vodovoz.app.common.content.Event
 import com.vodovoz.app.common.content.PagingContractViewModel

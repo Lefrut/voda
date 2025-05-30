@@ -15,6 +15,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsCompat.CONSUMED
 import androidx.core.view.isVisible
 import androidx.core.view.updatePadding
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -23,8 +24,7 @@ import androidx.navigation.Navigation
 import by.kirich1409.viewbindingdelegate.viewBinding
 import com.google.android.material.snackbar.Snackbar
 import com.vodovoz.app.R
-import com.vodovoz.app.common.account.data.AccountManager
-import com.vodovoz.app.common.content.BaseFragment
+import com.vodovoz.app.common.account.AccountManager
 import com.vodovoz.app.common.permissions.PermissionsController
 import com.vodovoz.app.common.tab.TabManager
 import com.vodovoz.app.common.update.AppUpdateController
@@ -35,11 +35,10 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class MainFragment : BaseFragment() {
+class MainFragment : Fragment(R.layout.fragment_main) {
 
     @Inject
     lateinit var tabManager: TabManager
-
 
     @Inject
     lateinit var permissionsControllerFactory: PermissionsController.Factory
@@ -78,10 +77,8 @@ class MainFragment : BaseFragment() {
     }
 
 
-    override fun layout(): Int = R.layout.fragment_main
-
     private val binding: FragmentMainBinding by viewBinding {
-        FragmentMainBinding.bind(contentView)
+        FragmentMainBinding.bind(it.view ?: View(requireContext()))
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

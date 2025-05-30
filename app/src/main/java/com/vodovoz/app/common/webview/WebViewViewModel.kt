@@ -12,8 +12,8 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class WebViewViewModel  @Inject constructor(
-    savedStateHandle: SavedStateHandle
+class WebViewViewModel @Inject constructor(
+    savedStateHandle: SavedStateHandle,
 ) : MviViewModel<WebViewState, WebViewEvents>(WebViewState()) {
 
     private val title = savedStateHandle.get<String>("title") ?: navigateBack().run { "" }
@@ -24,7 +24,7 @@ class WebViewViewModel  @Inject constructor(
     }
 
     private fun setInitialData(title: String, url: String) = viewModelScope.launch {
-        _state.update { s -> s.copy(title = title, url = url) }
+        _state.update { s -> s.copy(title = title, url = url, showTopBar = title.isNotEmpty()) }
     }
 
     fun setUiState(uiState: WebViewUiState) = viewModelScope.launch {

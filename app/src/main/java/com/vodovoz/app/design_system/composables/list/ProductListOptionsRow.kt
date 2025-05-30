@@ -47,7 +47,7 @@ fun ProductListOptionsRow(
 
         onFiltersClick?.let {
             Icon(
-                painter = painterResource(id = R.drawable.ic_filter),
+                painter = painterResource(id = R.drawable.icon_filters),
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier

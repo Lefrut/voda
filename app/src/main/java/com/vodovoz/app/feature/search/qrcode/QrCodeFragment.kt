@@ -45,8 +45,6 @@ class QrCodeFragment : Fragment() {
     override fun onStop() {
         super.onStop()
         tabManager.changeTabVisibility(true)
-        //todo - do something
-        //requireActivity().disableFullScreen()
     }
 
     override fun onCreateView(
@@ -56,6 +54,7 @@ class QrCodeFragment : Fragment() {
     ): View {
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.Default)
+
             setContent {
                 VodovozTheme {
                     val viewState by viewModel.observeUiState().collectAsStateWithLifecycle()

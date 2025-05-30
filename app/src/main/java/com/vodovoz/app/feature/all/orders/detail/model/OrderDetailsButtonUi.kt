@@ -5,7 +5,7 @@ import androidx.compose.ui.graphics.Color
 import com.vodovoz.app.domain.general.model.order.OrderDetailsButtonModel
 import com.vodovoz.app.feature.all.orders.detail.composables.AboutOrderPopupWindowUi
 import com.vodovoz.app.feature.all.orders.detail.composables.toUi
-import com.vodovoz.app.util.fromHexOrUnspecified
+import com.vodovoz.app.ui.graphics.fromHexOrUnspecified
 
 sealed class OrderDetailsButtonUi {
 

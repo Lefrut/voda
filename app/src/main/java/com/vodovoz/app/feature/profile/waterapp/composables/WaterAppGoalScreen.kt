@@ -50,8 +50,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.vodovoz.app.R
 import com.vodovoz.app.design_system.composables.button.VodovozButton
-import com.vodovoz.app.ui.canvas.mergeToSinglePath
-import com.vodovoz.app.ui.canvas.toAndroidPaths
+import com.vodovoz.app.ui.graphics.mergeToSinglePath
+import com.vodovoz.app.ui.graphics.toAndroidPaths
 import kotlin.random.Random
 
 @Composable
@@ -67,7 +67,7 @@ fun WaterAppGoalScreen(
                 .padding(top = 140.dp)
                 .matchParentSize()
         ) {
-            val vector = ImageVector.vectorResource(id = R.drawable.waves)
+            val vector = ImageVector.vectorResource(id = R.drawable.svg_waves)
 
             val infiniteTransition = rememberInfiniteTransition(label = "waves")
 
@@ -92,7 +92,7 @@ fun WaterAppGoalScreen(
             )
 
             Image(
-                painter = painterResource(id = R.drawable.waves),
+                painter = painterResource(id = R.drawable.svg_waves),
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
@@ -178,7 +178,7 @@ fun WaterAppGoalScreen(
 @Preview
 @Composable
 fun Demo() {
-    val svgPaths = ImageVector.vectorResource(id = R.drawable.waves)
+    val svgPaths = ImageVector.vectorResource(id = R.drawable.svg_waves)
 
     BubblesClipped(
         clipVector = svgPaths,
@@ -294,7 +294,7 @@ fun BubblesClipped(
 fun BubblesClipped(
     shape: Shape,
     modifier: Modifier = Modifier,
-    bubbleCount: Int = 30,
+    bubbleCount: Int = 40,
 ) {
     val density = LocalDensity.current
     var canvasSize by remember { mutableStateOf(Size.Zero) }
@@ -313,7 +313,7 @@ fun BubblesClipped(
                 baseSizePx = size,
                 startYOffset = with(density) { 20.dp.toPx() },
                 durationMillis = Random.nextInt(2000, 4000),
-                delayMillis = Random.nextInt(0, 2000),
+                delayMillis = Random.nextInt(0, 3000),
                 color = color
             )
         }

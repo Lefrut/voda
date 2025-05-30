@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
@@ -23,19 +24,16 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import com.vodovoz.app.R
-import com.vodovoz.app.common.account.data.AccountManager
-import com.vodovoz.app.common.cart.CartManager
-import com.vodovoz.app.common.like.LikeManager
-import com.vodovoz.app.common.product.rating.RatingProductManager
+import com.vodovoz.app.common.account.AccountManager
 import com.vodovoz.app.common.tab.TabManager
 import com.vodovoz.app.core.navigation.navigateToAllBottles
 import com.vodovoz.app.core.navigation.navigateToGifts
 import com.vodovoz.app.core.navigation.navigateToProductDetails
 import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.composables.dialogs.VodovozDialog
-import com.vodovoz.app.design_system.composables.placeholders.VodovozPlaceholder
 import com.vodovoz.app.design_system.composables.placeholders.LoadingPlaceholder
 import com.vodovoz.app.design_system.composables.placeholders.NetworkErrorPlaceholder
+import com.vodovoz.app.design_system.composables.placeholders.VodovozPlaceholder
 import com.vodovoz.app.design_system.effects.LifecycleEffect
 import com.vodovoz.app.feature.cart.model.CartPresentItemUi
 import dagger.hilt.android.AndroidEntryPoint
@@ -46,20 +44,7 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class CartFragment : Fragment() {
 
-    companion object {
-        const val GIFT_ID = "GIFT_ID"
-    }
-
     internal val viewModel: CartFlowViewModel by activityViewModels()
-
-    @Inject
-    lateinit var cartManager: CartManager
-
-    @Inject
-    lateinit var likeManager: LikeManager
-
-    @Inject
-    lateinit var ratingProductManager: RatingProductManager
 
     @Inject
     lateinit var tabManager: TabManager
@@ -99,7 +84,7 @@ class CartFragment : Fragment() {
 
                         is CartFlowViewModel.CartUiState.Empty -> {
                             val placeholder = uiState.placeholder
-                            Column {
+                            Column(modifier = Modifier.background(MaterialTheme.colorScheme.background)) {
                                 Text(
                                     text = placeholder.title.ifEmpty {
                                         stringResource(R.string.cart)
@@ -178,32 +163,30 @@ class CartFragment : Fragment() {
         viewModel.observeEvent()
             .collect { event ->
                 when (event) {
-                    is CartFlowViewModel.CartEvents.NavigateToOrder -> {
-                        if (event.prices != null) {
-                            if (findNavController().currentBackStackEntry?.destination?.id == R.id.orderingFragment) {
-                                findNavController().popBackStack()
-                            }
-                            findNavController().navigate(
-                                CartFragmentDirections.actionToOrderingFragment(
-                                    event.prices.total,
-                                    event.prices.discountPrice,
-                                    event.prices.deposit,
-                                    event.prices.fullPrice,
-                                    event.cart,
-                                    event.coupon
-                                )
-                            )
+                    is CartFlowViewModel.CartEvents.GoToOrder -> {
+                        if (findNavController().currentBackStackEntry?.destination?.id == R.id.orderingFragment) {
+                            findNavController().popBackStack()
                         }
+                        findNavController().navigate(
+                            CartFragmentDirections.actionToOrderingFragment(
+                                0,
+                                0,
+                                0,
+                                0,
+                                event.cart,
+                                event.coupon
+                            )
+                        )
                     }
 
-                    is CartFlowViewModel.CartEvents.NavigateToGifts -> {
+                    is CartFlowViewModel.CartEvents.GoToGifts -> {
                         findNavController().navigateToGifts(
                             event.present,
                             event.popupWindow
                         )
                     }
 
-                    is CartFlowViewModel.CartEvents.NavigateToProfile -> {
+                    is CartFlowViewModel.CartEvents.GoToProfile -> {
                         tabManager.setAuthRedirect(findNavController().graph.id)
                         tabManager.selectTab(R.id.graph_profile)
                     }

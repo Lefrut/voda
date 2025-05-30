@@ -1,6 +1,5 @@
 package com.vodovoz.app.design_system.composables.button
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -71,7 +70,7 @@ fun BaseQuantityButton(
         ) {
 
             CounterButton(
-                painter = painterResource(id = R.drawable.ic_minus),
+                painter = painterResource(id = R.drawable.ic_minus_rounded),
                 iconModifier = iconModifier,
                 enabled = minusEnabled,
                 isLoading = isLoading,
@@ -87,7 +86,7 @@ fun BaseQuantityButton(
             }
 
             CounterButton(
-                painter = painterResource(id = R.drawable.ic_plus),
+                painter = painterResource(id = R.drawable.ic_plus_rounded),
                 iconModifier = iconModifier,
                 enabled = plusEnabled,
                 isLoading = isLoading,

@@ -31,7 +31,6 @@ import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.composables.placeholders.EmptyResultPlaceholder
 import com.vodovoz.app.design_system.composables.placeholders.EmptyResultPlaceholderItem
 import com.vodovoz.app.design_system.composables.placeholders.ForAdultsPlaceholder
-import com.vodovoz.app.design_system.composables.placeholders.LoadingPlaceholder
 import com.vodovoz.app.design_system.effects.LifecycleEffect
 import com.vodovoz.app.util.extensions.copyText
 import com.vodovoz.app.util.extensions.shareText
@@ -47,7 +46,7 @@ class ProductDetailsFragment : Fragment() {
     @Inject
     lateinit var tabManager: TabManager
 
-    val args: ProductDetailsFragmentArgs by navArgs()
+    private val args: ProductDetailsFragmentArgs by navArgs()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -68,9 +67,7 @@ class ProductDetailsFragment : Fragment() {
                     val viewState by viewModel.observeUiState().collectAsStateWithLifecycle()
 
                     when (val uiState = viewState.uiState) {
-                        ProductDetailsFlowViewModel.ProductDetailsUiState.Loading -> {
-                            LoadingPlaceholder()
-                        }
+
 
                         ProductDetailsFlowViewModel.ProductDetailsUiState.ProductNotFound -> {
                             EmptyResultPlaceholder(
@@ -81,7 +78,7 @@ class ProductDetailsFragment : Fragment() {
                             )
                         }
 
-                        ProductDetailsFlowViewModel.ProductDetailsUiState.Success -> {
+                        ProductDetailsFlowViewModel.ProductDetailsUiState.Success, ProductDetailsFlowViewModel.ProductDetailsUiState.Loading -> {
                             ProductDetailsScreen(
                                 viewState = viewState,
                                 viewModel = viewModel,
@@ -162,7 +159,7 @@ class ProductDetailsFragment : Fragment() {
             }
 
             is ProductDetailsFlowViewModel.ProductDetailsEvents.Share -> {
-                kotlin.runCatching { shareText(event.text) }
+                kotlin.runCatching { requireContext().shareText(event.text) }
             }
 
             is ProductDetailsFlowViewModel.ProductDetailsEvents.GoToSearchProductList -> {

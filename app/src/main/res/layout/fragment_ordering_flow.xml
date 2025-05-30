@@ -80,7 +80,6 @@
 
                 <androidx.appcompat.widget.AppCompatTextView
                     android:id="@+id/tvAddress"
-                    style="@style/EditTextViewOrderNormal"
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/field_ex_height"
                     android:background="@color/white"
@@ -109,7 +108,6 @@
 
                 <androidx.appcompat.widget.AppCompatEditText
                     android:id="@+id/etINN"
-                    style="@style/EditTextViewOrderNormal"
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/field_ex_height"
                     android:background="@color/white"
@@ -139,7 +137,6 @@
 
                 <androidx.appcompat.widget.AppCompatEditText
                     android:id="@+id/etCompanyName"
-                    style="@style/EditTextViewOrderNormal"
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/field_ex_height"
                     android:background="@color/white"
@@ -166,7 +163,6 @@
 
                 <androidx.appcompat.widget.AppCompatEditText
                     android:id="@+id/etName"
-                    style="@style/EditTextViewOrderNormal"
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/field_ex_height"
                     android:background="@color/white"
@@ -193,7 +189,6 @@
 
                 <androidx.appcompat.widget.AppCompatEditText
                     android:id="@+id/etEmail"
-                    style="@style/EditTextViewOrderNormal"
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/field_ex_height"
                     android:background="@color/white"
@@ -220,7 +215,6 @@
 
                 <androidx.appcompat.widget.AppCompatEditText
                     android:id="@+id/etPhone"
-                    style="@style/EditTextViewOrderNormal"
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/field_ex_height"
                     android:background="@color/white"
@@ -247,7 +241,6 @@
 
                 <androidx.appcompat.widget.AppCompatTextView
                     android:id="@+id/tvDate"
-                    style="@style/EditTextViewOrderNormal"
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/field_ex_height"
                     android:background="@color/white"
@@ -262,7 +255,6 @@
 
                 <androidx.appcompat.widget.AppCompatTextView
                     android:id="@+id/tvShippingInterval"
-                    style="@style/EditTextViewOrderNormal"
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/field_ex_height"
                     android:background="@color/white"
@@ -316,7 +308,6 @@
 
                 <androidx.appcompat.widget.AppCompatTextView
                     android:id="@+id/tvPayMethod"
-                    style="@style/EditTextViewOrderNormal"
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/field_ex_height"
                     android:background="@color/white"
@@ -333,7 +324,6 @@
 
                 <androidx.appcompat.widget.AppCompatEditText
                     android:id="@+id/etInputCash"
-                    style="@style/EditTextViewOrderNormal"
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/field_height"
                     android:background="@color/white"
@@ -357,7 +347,6 @@
 
             <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/tvCheckDelivery"
-                style="@style/EditTextViewOrderNormal"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/field_ex_height"
                 android:background="@color/white"
@@ -405,7 +394,6 @@
 
             <androidx.appcompat.widget.AppCompatEditText
                 android:id="@+id/etPhoneForDriver"
-                style="@style/EditTextViewOrderNormal"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/field_ex_height"
                 android:background="@color/white"
@@ -425,7 +413,6 @@
 
             <androidx.appcompat.widget.AppCompatEditText
                 android:id="@+id/etComment"
-                style="@style/EditTextViewOrderNormal"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/field_super_ex_height"
                 android:background="@color/white"

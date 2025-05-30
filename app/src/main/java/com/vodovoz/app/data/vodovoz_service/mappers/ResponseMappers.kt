@@ -3,7 +3,7 @@ package com.vodovoz.app.data.vodovoz_service.mappers
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import com.vodovoz.app.core.network.converters.LocalDateTimeJsonAdapter
-import com.vodovoz.app.core.network.messageWithCode
+import com.vodovoz.app.core.network.retrofit.messageWithCode
 import com.vodovoz.app.domain.general.model.RequestException
 import com.vodovoz.app.util.extensions.catchResult
 import com.vodovoz.app.util.extensions.debugLog

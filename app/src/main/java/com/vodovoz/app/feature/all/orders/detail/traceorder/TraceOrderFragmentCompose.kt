@@ -112,13 +112,13 @@ class TraceOrderFragment : Fragment() {
     private val userLocationListener = object : UserLocationObjectListener {
         override fun onObjectAdded(p0: UserLocationView) {
             p0.arrow.setIcon(
-                ImageProvider.fromResource(requireContext(), R.drawable.png_gps_1),
+                ImageProvider.fromResource(requireContext(), R.drawable.svg_gps_outline),
                 IconStyle().setScale(0.12f)
                     .setRotationType(RotationType.ROTATE)
                     .setZIndex(1f)
             )
             p0.pin.setIcon(
-                ImageProvider.fromResource(requireContext(), R.drawable.png_gps_1),
+                ImageProvider.fromResource(requireContext(), R.drawable.svg_gps_outline),
                 IconStyle().setScale(0.12f)
                     .setRotationType(RotationType.ROTATE)
                     .setZIndex(0f)

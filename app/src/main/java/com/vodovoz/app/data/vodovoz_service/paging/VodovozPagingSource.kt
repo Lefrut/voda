@@ -3,7 +3,7 @@ package com.vodovoz.app.data.vodovoz_service.paging
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.squareup.moshi.Types
-import com.vodovoz.app.core.network.messageWithCode
+import com.vodovoz.app.core.network.retrofit.messageWithCode
 import com.vodovoz.app.data.vodovoz_service.mappers.executeRequest
 import com.vodovoz.app.data.vodovoz_service.model.VodovozResponseDTO
 import com.vodovoz.app.domain.general.model.RequestException

@@ -3,7 +3,7 @@ package com.vodovoz.app.feature.splash
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.viewModelScope
 import com.vodovoz.app.common.like.LikeManager
-import com.vodovoz.app.common.logout.LogoutManager
+import com.vodovoz.app.common.account.LogoutManager
 import com.vodovoz.app.common.token.FirebaseTokenManager
 import com.vodovoz.app.feature.splash.model.SplashEvent
 import com.vodovoz.app.feature.splash.model.SplashState

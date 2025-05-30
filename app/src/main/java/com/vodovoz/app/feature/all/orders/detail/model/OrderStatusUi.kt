@@ -3,7 +3,7 @@ package com.vodovoz.app.feature.all.orders.detail.model
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
 import com.vodovoz.app.domain.general.model.order.OrderStatusModel
-import com.vodovoz.app.util.fromHexOrUnspecified
+import com.vodovoz.app.ui.graphics.fromHexOrUnspecified
 
 @Immutable
 data class OrderStatusUi(

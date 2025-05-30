@@ -1,7 +1,11 @@
 package com.vodovoz.app.feature.auth.login
 
 import android.app.Activity
+import android.content.Intent
+import android.os.Build
 import android.os.Bundle
+import android.provider.Settings.ACTION_BIOMETRIC_ENROLL
+import android.provider.Settings.EXTRA_BIOMETRIC_AUTHENTICATORS_ALLOWED
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -20,7 +24,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.fragment.findNavController
 import com.vodovoz.app.R
-import com.vodovoz.app.common.account.data.AccountManager
+import com.vodovoz.app.common.account.AccountManager
 import com.vodovoz.app.common.tab.TabManager
 import com.vodovoz.app.core.navigation.navigateToLoginByEmail
 import com.vodovoz.app.core.navigation.navigateToLoginByPhone
@@ -51,6 +55,7 @@ class LoginFragment : Fragment() {
     private val executor: Executor by lazy { ContextCompat.getMainExecutor(requireContext()) }
 
     private val biometricManager by lazy { BiometricManager.from(requireContext()) }
+
     private val biometricPrompt: BiometricPrompt by lazy {
         BiometricPrompt(this, executor,
             object : BiometricPrompt.AuthenticationCallback() {
@@ -61,7 +66,7 @@ class LoginFragment : Fragment() {
 
                 override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
                     super.onAuthenticationSucceeded(result)
-                    authByUserSettings()
+                    //todo - put auth method
                 }
 
                 override fun onAuthenticationFailed() {
@@ -150,15 +155,6 @@ class LoginFragment : Fragment() {
         biometricResultLauncher
     }
 
-
-    internal fun authByUserSettings() {
-        val userSettings = accountManager.fetchUserSettings()
-        if (userSettings.email.isNotEmpty() && userSettings.password.isNotEmpty()) {
-            viewModel.authByEmail(userSettings.email, userSettings.password)
-        }
-    }
-
-
     private fun checkShowFingerPrint() {
         val userSettings = accountManager.fetchUserSettings()
         val isSettingsCorrect =
@@ -228,17 +224,16 @@ class LoginFragment : Fragment() {
             BiometricManager.BIOMETRIC_ERROR_NONE_ENROLLED -> {
                 accountManager.saveUseBio(false)
 
-                //todo - did as old app
-                // Prompts the user to create credentials that your app accepts.
-                /*val enrollIntent = Intent(Settings.ACTION_BIOMETRIC_ENROLL).apply {
-                    putExtra(
-                        Settings.EXTRA_BIOMETRIC_AUTHENTICATORS_ALLOWED,
-                        BiometricManager.Authenticators.BIOMETRIC_STRONG or BiometricManager.Authenticators.DEVICE_CREDENTIAL
-                    )
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    val enrollIntent = Intent(ACTION_BIOMETRIC_ENROLL).apply {
+                        putExtra(
+                            EXTRA_BIOMETRIC_AUTHENTICATORS_ALLOWED,
+                            BiometricManager.Authenticators.BIOMETRIC_STRONG or BiometricManager.Authenticators.DEVICE_CREDENTIAL
+                        )
+                    }
+                    biometricResultLauncher.launch(enrollIntent)
                 }
-                biometricResultLauncher.launch(enrollIntent)*/
             }
-
             else -> {
                 accountManager.saveUseBio(false)
             }

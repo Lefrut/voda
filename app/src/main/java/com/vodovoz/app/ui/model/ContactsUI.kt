@@ -16,7 +16,7 @@ data class ChatsBundleUI(
 ) : Item {
 
     override fun getItemViewType(): Int {
-        return R.layout.view_holder_contact_chats_bundle
+        return 0
     }
 
     override fun areItemsTheSame(item: Item): Boolean {
@@ -34,7 +34,7 @@ data class ChatUI(
 ) : Item {
 
     override fun getItemViewType(): Int {
-        return R.layout.view_holder_contact_chat_icon
+        return 0
     }
 
     override fun areItemsTheSame(item: Item): Boolean {
@@ -52,7 +52,7 @@ data class PhoneUI(
 ) : Item {
 
     override fun getItemViewType(): Int {
-        return R.layout.view_holder_contact_phone
+        return 0
     }
 
     override fun areItemsTheSame(item: Item): Boolean {
@@ -70,7 +70,7 @@ data class EmailUI(
 ) : Item {
 
     override fun getItemViewType(): Int {
-        return R.layout.view_holder_contact_email
+        return 0
     }
 
     override fun areItemsTheSame(item: Item): Boolean {
