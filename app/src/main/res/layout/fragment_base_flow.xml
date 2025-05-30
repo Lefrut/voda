@@ -49,17 +49,7 @@
                 android:src="@drawable/icon_back"
                 android:visibility="visible" />
 
-            <include
-                android:id="@+id/searchContainer"
-                layout="@layout/view_search" />
-
         </LinearLayout>
-
-        <include
-            android:id="@+id/appBarDropDown"
-            layout="@layout/app_bar_drop_down"
-            android:visibility="gone"
-            tools:visibility="visible" />
 
         <include
             android:id="@+id/appBarDef"
@@ -67,24 +57,7 @@
             android:visibility="gone"
             tools:visibility="visible" />
 
-        <include
-            android:id="@+id/appBarFilter"
-            layout="@layout/app_bar_default_history"
-            android:visibility="gone"
-            tools:visibility="visible" />
-
-
-        <include
-            android:id="@+id/appBarUserData"
-            layout="@layout/app_bar_user_data"
-            android:visibility="gone"
-            />
-
     </com.google.android.material.appbar.AppBarLayout>
-
-    <include
-        android:id="@+id/error"
-        layout="@layout/fragment_base_error_flow" />
 
     <View
         android:id="@+id/progressBg"

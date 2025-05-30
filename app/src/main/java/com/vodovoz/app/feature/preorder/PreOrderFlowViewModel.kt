@@ -4,7 +4,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.vodovoz.app.R
-import com.vodovoz.app.common.account.data.AccountManager
+import com.vodovoz.app.common.account.AccountManager
 import com.vodovoz.app.common.content.ErrorState
 import com.vodovoz.app.common.content.Event
 import com.vodovoz.app.common.content.PagingContractViewModel
@@ -22,7 +22,7 @@ import com.vodovoz.app.feature.preorder.model.toDomain
 import com.vodovoz.app.feature.preorder.model.toUi
 import com.vodovoz.app.mapper.PreOrderFormDataMapper.mapToUI
 import com.vodovoz.app.ui.model.PreOrderFormDataUI
-import com.vodovoz.app.util.FieldValidationsSettings.EMAIL_REGEX
+import com.vodovoz.app.util.FieldValidationSettings.EMAIL_REGEX
 import com.vodovoz.app.util.extensions.debugLog
 import com.vodovoz.app.util.isValidRussianPhoneNumber
 import dagger.hilt.android.lifecycle.HiltViewModel

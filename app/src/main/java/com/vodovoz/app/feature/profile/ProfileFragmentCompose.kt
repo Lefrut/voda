@@ -2,6 +2,7 @@ package com.vodovoz.app.feature.profile
 
 import android.os.Bundle
 import android.view.View
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -24,26 +25,19 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.vodovoz.app.R
-import com.vodovoz.app.common.account.data.AccountManager
-import com.vodovoz.app.common.cart.CartManager
-import com.vodovoz.app.common.like.LikeManager
 import com.vodovoz.app.common.tab.TabManager
-import com.vodovoz.app.core.ui.activate
 import com.vodovoz.app.core.navigation.ProfileMainNavigator
 import com.vodovoz.app.core.navigation.navigateToLogin
 import com.vodovoz.app.core.navigation.navigateToRegister
 import com.vodovoz.app.core.navigation.navigateToUserData
 import com.vodovoz.app.core.navigation.navigateToWaitFeedbackProducts
 import com.vodovoz.app.core.navigation.navigateToWaterApp
+import com.vodovoz.app.core.ui.activate
 import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.composables.placeholders.LoadingPlaceholder
 import com.vodovoz.app.design_system.composables.placeholders.NetworkErrorPlaceholder
 import com.vodovoz.app.design_system.composables.placeholders.VodovozPlaceholder
-import com.vodovoz.app.feature.cart.CartFlowViewModel
-import com.vodovoz.app.feature.favorite.FavoriteFlowViewModel
-import com.vodovoz.app.feature.home.HomeFlowViewModel
 import com.vodovoz.app.feature.profile.navigation.ProfileChatsNavigator
 import com.vodovoz.app.util.extensions.copyText
 import dagger.hilt.android.AndroidEntryPoint
@@ -100,6 +94,7 @@ class ProfileFragment : Fragment() {
                             Column(
                                 modifier = Modifier
                                     .fillMaxSize()
+                                    .background(MaterialTheme.colorScheme.background)
                                     .systemBarsPadding()
                             ) {
                                 Text(

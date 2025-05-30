@@ -132,7 +132,7 @@ fun WaitFeedbackProductUi(
                 modifier = Modifier.padding(top = 16.dp),
                 value = rating,
                 painterEmpty = painterResource(id = R.drawable.ic_star_inactive),
-                painterFilled = painterResource(id = R.drawable.ic_star),
+                painterFilled = painterResource(id = R.drawable.ic_star_active),
                 size = 24.dp,
                 stepSize = StepSize.ONE,
                 onValueChange = { newRating ->

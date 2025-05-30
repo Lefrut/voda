@@ -142,7 +142,7 @@ fun LinearProductCard(
 
 
                     Icon(
-                        painter = painterResource(id = R.drawable.ic_star),
+                        painter = painterResource(id = R.drawable.ic_star_active),
                         contentDescription = null,
                         tint = if (product.rating <= 0.0f) MaterialTheme.colorScheme.surfaceVariant else MaterialTheme.colorScheme.tertiary,
                         modifier = Modifier

@@ -18,6 +18,7 @@ import com.vodovoz.app.design_system.composables.button.ProductBottomFloatingBut
 import com.vodovoz.app.feature.product_details.composables.MultiProductBottomSheet
 import com.vodovoz.app.feature.product_details.composables.PresentBottomSheet
 import com.vodovoz.app.feature.product_details.composables.ProductDetailsBody
+import com.vodovoz.app.feature.product_details.composables.ProductDetailsPlaceholder
 import com.vodovoz.app.feature.product_details.composables.ProductDetailsTopBar
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -75,92 +76,102 @@ fun ProductDetailsScreen(
         },
         contentWindowInsets = WindowInsets(0, 0, 0, 0)
     ) { paddingValues ->
-        ProductDetailsBody(
-            modifier = Modifier
-                .padding(top = paddingValues.calculateTopPadding())
-                .verticalScroll(rememberScrollState())
-                .padding(bottom = paddingValues.calculateBottomPadding()),
-            productDetails = productDetails,
-            comments = viewState.comments,
-            quantityButtonIsLoading = viewState.buttonIsLoading,
-            productCartQuantity = productDetails.cartQuantity,
-            showAllProperties = viewState.showAllProperties,
-            sectionSimilarProducts = viewState.sectionSimilarProducts,
-            sectionAccessory = viewState.sectionAccessory,
-            showDetailText = viewState.showDetailText,
-            buttons = viewState.buttons,
-            totalPrice = viewState.totalPrice,
-            onFloatingButtonChange = { show ->
-                viewModel.changeFloatingButton(show)
-            },
-            onAllPropertiesShow = {
-                viewModel.showAllProperties()
-            },
-            onDetailPreviewTextShowOrHide = {
-                viewModel.showOrHideDetailText()
-            },
-            onProductMediaClick = { media ->
-                viewModel.navigateToDetailMedia(media)
-            },
-            onIncrementProduct = {
-                viewModel.incrementCart()
-            },
-            onDecrementProduct = {
-                viewModel.decrementCart()
-            },
-            onAnalogButtonClick = {
-                viewModel.navigateToProductAnalogs()
-            },
-            onPreOrderButtonClick = {
-                viewModel.navigateToPreOrder()
-            },
-            onPresentButtonClick = {
-                viewModel.showPresentBottomSheet()
-            },
-            onMultiButtonClick = {
-                viewModel.showMultiBottomSheet()
-            },
-            onPresentBlockButtonClick = {
-                viewModel.showPresentBlockBottomSheet()
-            },
-            onAboutProductClick = {
-                viewModel.navigateToAboutProduct()
-            },
-            onShowAllCommentsClick = {
-                viewModel.showAllComments()
-            },
-            onQueryClick = { query ->
-                viewModel.navigateToSearch(query)
-            },
-            onProductClick = { product ->
-                viewModel.navigateToProductDetails(product)
-            },
-            onProductLikeClick = { product ->
-                viewModel.changeFavorite(product)
-            },
-
-            onBrandClick = { brandItem ->
-                viewModel.navigateToBrandProducts(brandItem)
-            },
-            onCategoryClick = { categoryItem ->
-                viewModel.navigateToCategory(categoryItem)
-            },
-            onCopyArticleNumberClick = {
-                viewModel.copyArticleNumber()
-            },
-            onIncrementProductToCart = { product ->
-                viewModel.incrementProductToCart(product)
-            },
-            onDecrementProductToCart = { product ->
-                viewModel.decrementProductToCart(product)
-            },
-            onProductAnalogsClick = { product ->
-                viewModel.navigateToProductAnalogs(product)
-            },
-            onWriteCommentClick = {
-                viewModel.navigateToWriteComment()
+        when (viewState.uiState) {
+            ProductDetailsFlowViewModel.ProductDetailsUiState.Loading -> {
+                ProductDetailsPlaceholder(
+                    modifier = Modifier.padding(top = paddingValues.calculateTopPadding())
+                )
             }
-        )
+
+            else -> {
+                ProductDetailsBody(
+                    modifier = Modifier
+                        .padding(top = paddingValues.calculateTopPadding())
+                        .verticalScroll(rememberScrollState())
+                        .padding(bottom = paddingValues.calculateBottomPadding()),
+                    productDetails = productDetails,
+                    comments = viewState.comments,
+                    quantityButtonIsLoading = viewState.buttonIsLoading,
+                    productCartQuantity = productDetails.cartQuantity,
+                    showAllProperties = viewState.showAllProperties,
+                    sectionSimilarProducts = viewState.sectionSimilarProducts,
+                    sectionAccessory = viewState.sectionAccessory,
+                    showDetailText = viewState.showDetailText,
+                    buttons = viewState.buttons,
+                    totalPrice = viewState.totalPrice,
+                    onFloatingButtonChange = { show ->
+                        viewModel.changeFloatingButton(show)
+                    },
+                    onAllPropertiesShow = {
+                        viewModel.showAllProperties()
+                    },
+                    onDetailPreviewTextShowOrHide = {
+                        viewModel.showOrHideDetailText()
+                    },
+                    onProductMediaClick = { media ->
+                        viewModel.navigateToDetailMedia(media)
+                    },
+                    onIncrementProduct = {
+                        viewModel.incrementCart()
+                    },
+                    onDecrementProduct = {
+                        viewModel.decrementCart()
+                    },
+                    onAnalogButtonClick = {
+                        viewModel.navigateToProductAnalogs()
+                    },
+                    onPreOrderButtonClick = {
+                        viewModel.navigateToPreOrder()
+                    },
+                    onPresentButtonClick = {
+                        viewModel.showPresentBottomSheet()
+                    },
+                    onMultiButtonClick = {
+                        viewModel.showMultiBottomSheet()
+                    },
+                    onPresentBlockButtonClick = {
+                        viewModel.showPresentBlockBottomSheet()
+                    },
+                    onAboutProductClick = {
+                        viewModel.navigateToAboutProduct()
+                    },
+                    onShowAllCommentsClick = {
+                        viewModel.showAllComments()
+                    },
+                    onQueryClick = { query ->
+                        viewModel.navigateToSearch(query)
+                    },
+                    onProductClick = { product ->
+                        viewModel.navigateToProductDetails(product)
+                    },
+                    onProductLikeClick = { product ->
+                        viewModel.changeFavorite(product)
+                    },
+
+                    onBrandClick = { brandItem ->
+                        viewModel.navigateToBrandProducts(brandItem)
+                    },
+                    onCategoryClick = { categoryItem ->
+                        viewModel.navigateToCategory(categoryItem)
+                    },
+                    onCopyArticleNumberClick = {
+                        viewModel.copyArticleNumber()
+                    },
+                    onIncrementProductToCart = { product ->
+                        viewModel.incrementProductToCart(product)
+                    },
+                    onDecrementProductToCart = { product ->
+                        viewModel.decrementProductToCart(product)
+                    },
+                    onProductAnalogsClick = { product ->
+                        viewModel.navigateToProductAnalogs(product)
+                    },
+                    onWriteCommentClick = {
+                        viewModel.navigateToWriteComment()
+                    }
+                )
+            }
+        }
     }
 
     if (viewState.showMultiBottomSheet) {

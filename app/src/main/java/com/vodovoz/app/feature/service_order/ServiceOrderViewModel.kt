@@ -4,7 +4,7 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import com.vodovoz.app.common.account.data.AccountManager
+import com.vodovoz.app.common.account.AccountManager
 import com.vodovoz.app.common.content.ErrorState
 import com.vodovoz.app.common.content.Event
 import com.vodovoz.app.common.content.PagingContractViewModel
@@ -54,9 +54,7 @@ class ServiceOrderViewModel @Inject constructor(
 ) {
 
 
-    private val serviceType = savedStateHandle.get<String>("serviceType") ?: navigateBack().run {
-        ""
-    }
+    private val serviceType = savedStateHandle.get<String>("serviceType") ?: navigateBack().run { "" }
 
     init {
         fetchServiceOrderDetails()

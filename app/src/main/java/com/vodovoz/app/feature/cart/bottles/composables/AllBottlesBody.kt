@@ -137,7 +137,7 @@ private fun BottleItem(
         ) { targetState ->
             if (targetState) {
                 Icon(
-                    painter = painterResource(id = R.drawable.ic_plus),
+                    painter = painterResource(id = R.drawable.ic_plus_rounded),
                     contentDescription = null,
                     modifier = Modifier
                         .padding(start = 16.dp, end = 24.dp)

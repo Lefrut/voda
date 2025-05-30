@@ -14,7 +14,7 @@ data class BannerUI(
 ): Parcelable, Item {
 
     override fun getItemViewType(): Int {
-        return R.layout.view_holder_slider_banner
+        return 0
     }
 
     override fun areItemsTheSame(item: Item): Boolean {

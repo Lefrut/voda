@@ -35,9 +35,6 @@ class TabManager @Inject constructor(
     private val bottomNavProfileStateListener = MutableStateFlow<Int?>(null)
     fun observeBottomNavProfileState() = bottomNavProfileStateListener.asStateFlow()
 
-//    private val loadingAddToCartListener = MutableSharedFlow<BottomNavCartState>()
-//    fun observeAddToCartLoading() = loadingAddToCartListener.asSharedFlow()
-
     private val tabReselectListener = MutableStateFlow(DEFAULT_STATE)
     fun observeTabReselect() = tabReselectListener.asStateFlow()
     fun setDefaultState() {

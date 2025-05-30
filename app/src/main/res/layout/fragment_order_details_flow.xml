@@ -92,10 +92,6 @@
                     android:src="@drawable/ic_order_in_processing"
                     app:tint="@color/white"/>
 
-                <Space
-                    android:id="@+id/statusSpacer"
-                    android:layout_width="32dp"
-                    android:layout_height="wrap_content"/>
 
                 <androidx.appcompat.widget.AppCompatImageView
                     android:id="@+id/payedStatus"
@@ -171,13 +167,6 @@
                     android:layout_weight="1"
                     android:gravity="center"
                     android:orientation="horizontal">
-
-                    <androidx.appcompat.widget.AppCompatImageView
-                        android:layout_width="25dp"
-                        android:layout_height="25dp"
-                        android:src="@drawable/png_rub"
-                        app:tint="@color/white"
-                        tools:ignore="ContentDescription" />
 
                     <androidx.appcompat.widget.AppCompatTextView
                         style="@style/TextViewMediumWhiteBold"

@@ -13,7 +13,7 @@ data class ParentSectionDataUI(
 ): Item, Parcelable {
 
     override fun getItemViewType(): Int {
-        return R.layout.view_holder_home_sections_tabs
+        return 0
     }
 
     override fun areItemsTheSame(item: Item): Boolean {

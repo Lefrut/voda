@@ -18,7 +18,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -28,12 +27,11 @@ import com.vodovoz.app.common.webview.model.WebViewState
 import com.vodovoz.app.common.webview.model.WebViewUiState
 import com.vodovoz.app.design_system.composables.placeholders.NetworkErrorPlaceholder
 import com.vodovoz.app.design_system.composables.top_bar.VodovozTopBar
-import kotlinx.coroutines.launch
 
 @Composable
 fun WebViewScreen(viewModel: WebViewViewModel, viewState: WebViewState) {
     Column(modifier = Modifier.fillMaxSize()) {
-        if (viewState.title.isNotEmpty()) {
+        if(viewState.showTopBar){
             VodovozTopBar(
                 onBack = {
                     viewModel.navigateBack()
@@ -100,7 +98,6 @@ private fun WebView(
         webView.webViewClient = webClient
         webView.webChromeClient = chromeClient
         onDispose { webView.destroy() }
-
     }
 
     AndroidView(

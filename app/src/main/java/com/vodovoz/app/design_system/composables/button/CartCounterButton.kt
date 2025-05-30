@@ -3,15 +3,12 @@ package com.vodovoz.app.design_system.composables.button
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -57,7 +54,7 @@ fun CartCounterButton(
             contentAlignment = Alignment.Center
         ) {
             Icon(
-                painter = painterResource(id = if (cartQuantity <= 1 && haveTrash) R.drawable.icon_trash else R.drawable.ic_minus),
+                painter = painterResource(id = if (cartQuantity <= 1 && haveTrash) R.drawable.icon_trash else R.drawable.ic_minus_rounded),
                 contentDescription = null,
                 modifier = Modifier.size(18.dp),
                 tint = if (cartQuantity > 0) MaterialTheme.colorScheme.primary
@@ -81,7 +78,7 @@ fun CartCounterButton(
             contentAlignment = Alignment.Center
         ) {
             Icon(
-                painter = painterResource(id = R.drawable.ic_plus),
+                painter = painterResource(id = R.drawable.ic_plus_rounded),
                 contentDescription = null,
                 modifier = Modifier.size(18.dp),
                 tint = if (cartQuantity < catalogQuantity)

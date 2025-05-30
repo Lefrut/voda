@@ -7,8 +7,8 @@ import com.vodovoz.app.design_system.model.ColorfulButtonUi
 import com.vodovoz.app.design_system.model.toUi
 import com.vodovoz.app.domain.general.model.FieldModel
 import com.vodovoz.app.domain.general.model.PreOrderSectionModel
-import com.vodovoz.app.util.FieldValidationsSettings
-import com.vodovoz.app.util.FieldValidationsSettings.PASSWORD_LENGTH
+import com.vodovoz.app.util.FieldValidationSettings
+import com.vodovoz.app.util.FieldValidationSettings.PASSWORD_LENGTH
 import com.vodovoz.app.util.isValidRussianPhoneNumber
 
 @Immutable
@@ -122,7 +122,7 @@ val KeyboardTypeValidator = FieldValidator { field ->
         }
 
         KeyboardType.Email -> {
-            FieldValidationResult.from(FieldValidationsSettings.EMAIL_REGEX.matches(value))
+            FieldValidationResult.from(FieldValidationSettings.EMAIL_REGEX.matches(value))
         }
 
         KeyboardType.Password -> {

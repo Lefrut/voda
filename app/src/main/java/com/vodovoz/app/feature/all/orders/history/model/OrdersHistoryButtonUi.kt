@@ -2,7 +2,7 @@ package com.vodovoz.app.feature.all.orders.history.model
 
 import androidx.compose.ui.graphics.Color
 import com.vodovoz.app.domain.general.model.order.OrdersHistoryButtonModel
-import com.vodovoz.app.util.fromHexOrUnspecified
+import com.vodovoz.app.ui.graphics.fromHexOrUnspecified
 import javax.annotation.concurrent.Immutable
 
 @Immutable

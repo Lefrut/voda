@@ -85,9 +85,7 @@
         <action
             android:id="@+id/action_to_webViewFragment"
             app:destination="@id/webViewFragment" />
-        <action
-            android:id="@+id/action_to_howToOrderFragment"
-            app:destination="@id/howToOrderFragment" />
+
         <action
             android:id="@+id/action_to_allOrdersFragment"
             app:destination="@id/allOrdersFragment" />
@@ -102,12 +100,7 @@
         <action
             android:id="@+id/action_to_searchFragment"
             app:destination="@id/searchFragment" />
-        <action
-            android:id="@+id/action_to_contactsFragment"
-            app:destination="@id/contactsFragment" />
-        <action
-            android:id="@+id/action_to_aboutAppDialogFragment"
-            app:destination="@id/aboutAppDialogFragment" />
+
         <action
             android:id="@+id/action_to_pastPurchasesFragment"
             app:destination="@id/pastPurchasesFragment" />
@@ -151,8 +144,7 @@
     <fragment
         android:id="@+id/catalogFragment"
         android:name="com.vodovoz.app.feature.catalog.CatalogFragment"
-        android:label="fragment_catalog"
-        tools:layout="@layout/fragment_main_catalog">
+        android:label="fragment_catalog">
 
         <action
             android:id="@+id/action_to_searchFragment"
@@ -180,10 +172,8 @@
         android:id="@+id/cartFragment"
         android:name="com.vodovoz.app.feature.cart.CartFragment"
         android:label="fragment_cart"
-        tools:layout="@layout/fragment_main_cart">
-        <action
-            android:id="@+id/action_to_giftsBottomFragment"
-            app:destination="@id/giftsBottomFragment" />
+        tools:layout="1">
+
         <action
             android:id="@+id/action_to_productDetailFragment"
             app:destination="@id/productDetailFragment" />
@@ -199,9 +189,7 @@
         <action
             android:id="@+id/action_to_allBottlesFragment"
             app:destination="@id/allBottlesFragment" />
-        <action
-            android:id="@+id/action_to_replacementProductsSelectionBS"
-            app:destination="@id/replacementProductsSelectionBS" />
+
 
     </fragment>
 
@@ -236,12 +224,7 @@
         <action
             android:id="@+id/action_to_fullScreenDetailPicturesSliderFragment"
             app:destination="@id/detailMedia" />
-        <action
-            android:id="@+id/action_to_youTubeVideoFragmentDialog"
-            app:destination="@id/youTubeVideoFragmentDialog" />
-        <action
-            android:id="@+id/action_to_ruTubeVideoFragmentDialog"
-            app:destination="@id/ruTubeVideoFragmentDialog" />
+
         <action
             android:id="@+id/action_to_allCommentsByProductDialogFragment"
             app:destination="@id/productCommentsFragment" />
@@ -249,9 +232,6 @@
         <action
             android:id="@+id/action_to_searchFragment"
             app:destination="@id/searchFragment" />
-        <action
-            android:id="@+id/action_to_replacementProductsSelectionBS"
-            app:destination="@id/replacementProductsSelectionBS" />
 
         <action
             android:id="@+id/action_to_profileFragment"
@@ -269,7 +249,7 @@
     </fragment>
     <fragment
         android:id="@+id/promotionDetailFragment"
-        android:name="com.vodovoz.app.feature.promotiondetail.PromotionDetailsFragment"
+        android:name="com.vodovoz.app.feature.promotion_details.PromotionDetailsFragment"
         android:label="PromotionDetailFragment">
         <argument
             android:name="promotionId"
@@ -292,34 +272,20 @@
         <argument
             android:name="dataSource"
             app:argType="com.vodovoz.app.feature.all.promotions.AllPromotionsFragment$DataSource" />
-        <action
-            android:id="@+id/action_to_promotionFiltersBottomFragment"
-            app:destination="@id/promotionFiltersBottomFragment" />
+
         <action
             android:id="@+id/action_to_promotionDetailFragment"
             app:destination="@id/promotionDetailFragment" />
     </fragment>
-    <dialog
-        android:id="@+id/promotionFiltersBottomFragment"
-        android:name="com.vodovoz.app.feature.promotion_filters.PromotionFiltersBottomFragment"
-        android:label="PromotionFiltersBottomFragment">
-        <argument
-            android:name="selectedFilterId"
-            app:argType="long" />
-        <argument
-            android:name="promotionFilterList"
-            app:argType="com.vodovoz.app.ui.model.ListOfPromotionFilterUi" />
-    </dialog>
+
     <fragment
         android:id="@+id/paginatedProductsCatalogWithoutFiltersFragment"
-        android:name="com.vodovoz.app.feature.productlistnofilter.ProductCatalogFragment"
+        android:name="com.vodovoz.app.feature.product_catalog.ProductCatalogFragment"
         android:label="PaginatedProductsCatalogWithoutFiltersFragment">
         <argument
             android:name="dataSource"
-            app:argType="com.vodovoz.app.feature.productlistnofilter.ProductCatalogFragment$DataSource" />
-        <action
-            android:id="@+id/action_to_miniCatalogBottomFragment"
-            app:destination="@id/miniCatalogBottomFragment" />
+            app:argType="com.vodovoz.app.feature.product_catalog.ProductCatalogFragment$DataSource" />
+
 
         <action
             android:id="@+id/action_to_productDetailFragment"
@@ -380,9 +346,6 @@
         android:label="FavoriteFragment">
 
         <action
-            android:id="@+id/action_to_miniCatalogBottomFragment"
-            app:destination="@id/miniCatalogBottomFragment" />
-        <action
             android:id="@+id/action_to_productDetailFragment"
             app:destination="@id/productDetailFragment" />
         <action
@@ -426,16 +389,12 @@
         <action
             android:id="@+id/action_to_questionnairesFragment"
             app:destination="@id/questionnairesFragment2" />
-        <action
-            android:id="@+id/action_to_aboutAppDialogFragment"
-            app:destination="@id/aboutAppDialogFragment" />
+
         <action
             android:id="@+id/action_to_serviceDetailFragment"
             app:destination="@id/serviceDetailFragment" />
 
-        <action
-            android:id="@+id/action_to_activeCertificateFragment"
-            app:destination="@id/activeCertificateFragment" />
+
         <action
             android:id="@+id/action_profileFragment_to_buyCertificateFragment"
             app:destination="@id/buyCertificateFragment" />
@@ -478,7 +437,7 @@
     </fragment>
     <fragment
         android:id="@+id/concreteFilterFragment"
-        android:name="com.vodovoz.app.feature.filters.concrete.ConcreteFilterFlowFragment"
+        android:name="com.vodovoz.app.feature.filter_values.FilterValuesFlowFragment"
         android:label="ConcreteFilterFragment">
         <argument
             android:name="categoryId"
@@ -489,7 +448,7 @@
     </fragment>
     <fragment
         android:id="@+id/productFiltersFragment"
-        android:name="com.vodovoz.app.feature.filters.product.ProductFiltersFlowFragment"
+        android:name="com.vodovoz.app.feature.product_filters.ProductFiltersFlowFragment"
         android:label="ProductFiltersFragment">
 
         <argument
@@ -506,22 +465,6 @@
         android:name="com.vodovoz.app.feature.product_details.detail_media.DetailMediaFragment"
         android:label="DetailMediaFragment"/>
 
-    <dialog
-        android:id="@+id/youTubeVideoFragmentDialog"
-        android:name="com.vodovoz.app.feature.player_dialog.YouTubeVideoFragmentDialog"
-        android:label="YouTubeVideoFragmentDialog">
-        <argument
-            android:name="videoId"
-            app:argType="string" />
-    </dialog>
-    <dialog
-        android:id="@+id/ruTubeVideoFragmentDialog"
-        android:name="com.vodovoz.app.feature.player_dialog.RuTubeVideoFragmentDialog"
-        android:label="RuTubeVideoFragmentDialog">
-        <argument
-            android:name="videoId"
-            app:argType="string" />
-    </dialog>
     <fragment
         android:id="@+id/productCommentsFragment"
         android:name="com.vodovoz.app.feature.product_comments.ProductCommentsFragment"
@@ -539,9 +482,7 @@
         <action
             android:id="@+id/action_to_serviceDetailFragment"
             app:destination="@id/serviceDetailFragment" />
-        <action
-            android:id="@+id/action_to_serviceDetailNewFragment"
-            app:destination="@id/serviceDetailNewFragment" />
+
     </fragment>
     <fragment
         android:id="@+id/mapDialogFragment"
@@ -628,10 +569,6 @@
             android:name="title"
             app:argType="string" />
     </fragment>
-    <fragment
-        android:id="@+id/howToOrderFragment"
-        android:name="com.vodovoz.app.feature.bottom.how_to_order.HowToOrderFragment"
-        android:label="HowToOrderFragment" />
 
     <fragment
         android:id="@+id/searchFragment"
@@ -643,9 +580,7 @@
             android:defaultValue=""
             app:argType="string" />
 
-        <action
-            android:id="@+id/action_to_miniCatalogBottomFragment"
-            app:destination="@id/miniCatalogBottomFragment" />
+
         <action
             android:id="@+id/action_to_productDetailFragment"
             app:destination="@id/productDetailFragment" />
@@ -653,15 +588,11 @@
         <action
             android:id="@+id/action_to_profileFragment"
             app:destination="@id/profileFragment" />
-        <action
-            android:id="@+id/action_to_contactsFragment"
-            app:destination="@id/contactsFragment" />
+
         <action
             android:id="@+id/action_to_allPromotionsFragment"
             app:destination="@id/allPromotionsFragment" />
-        <action
-            android:id="@+id/action_to_serviceDetailNewFragment"
-            app:destination="@id/serviceDetailNewFragment" />
+
         <action
             android:id="@+id/action_to_webViewFragment"
             app:destination="@id/webViewFragment" />
@@ -669,12 +600,8 @@
 
     <fragment
         android:id="@+id/userDataFragment"
-        android:name="com.vodovoz.app.feature.profile.userdata.UserDataFragment"
+        android:name="com.vodovoz.app.feature.profile.user_data.UserDataFragment"
         android:label="UserDataFragment">
-        <action
-            android:id="@+id/action_to_genderSelectionBS"
-            app:destination="@id/genderSelectionBS" />
-
 
         <action
             android:id="@+id/action_back_to_profile"
@@ -690,9 +617,6 @@
         android:name="com.vodovoz.app.feature.past_purchases.PastPurchasesFragment"
         android:label="PastPurchasesFragment">
 
-        <action
-            android:id="@+id/action_to_miniCatalogBottomFragment"
-            app:destination="@id/miniCatalogBottomFragment" />
         <action
             android:id="@+id/action_to_productDetailFragment"
             app:destination="@id/productDetailFragment" />
@@ -712,14 +636,7 @@
             android:id="@+id/action_to_webViewFragment"
             app:destination="@id/webViewFragment" />
     </fragment>
-    <fragment
-        android:id="@+id/contactsFragment"
-        android:name="com.vodovoz.app.feature.bottom.contacts.ContactsFragment"
-        android:label="ContactsFragment">
-        <action
-            android:id="@+id/action_to_webViewFragment"
-            app:destination="@id/webViewFragment" />
-    </fragment>
+
     <fragment
         android:id="@+id/serviceDetailFragment"
         android:name="com.vodovoz.app.feature.bottom.services.detail.ServiceDetailFragment"
@@ -737,9 +654,6 @@
             android:defaultValue="-1"
             />
 
-        <action
-            android:id="@+id/action_to_serviceSelectionBS"
-            app:destination="@id/serviceSelectionBS" />
         <action
             android:id="@+id/action_to_serviceOrderFragment"
             app:destination="@id/serviceOrderFragment" />
@@ -765,23 +679,8 @@
         android:name="com.vodovoz.app.feature.cart.ordering.OrderingFragment"
         android:label="OrderingFragment">
         <action
-            android:id="@+id/action_to_freeShippingSaysBS"
-            app:destination="@id/freeShippingSaysBS" />
-        <action
             android:id="@+id/action_to_savedAddressesDialogFragment"
             app:destination="@id/savedAddressesDialogFragment" />
-        <action
-            android:id="@+id/action_to_payMethodSelectionBS"
-            app:destination="@id/payMethodSelectionBS" />
-        <action
-            android:id="@+id/action_to_shippingIntervalSelectionBS"
-            app:destination="@id/shippingIntervalSelectionBS" />
-        <action
-            android:id="@+id/action_to_shippingAlertsSelectionBS"
-            app:destination="@id/shippingAlertsSelectionBS" />
-        <action
-            android:id="@+id/action_to_checkActionDeliveryBS"
-            app:destination="@id/checkDeliveryActionsBS" />
 
         <argument
             android:name="total"
@@ -803,44 +702,6 @@
             app:argType="string" />
     </fragment>
 
-    <dialog
-        android:id="@+id/freeShippingSaysBS"
-        android:name="com.vodovoz.app.feature.cart.ordering.intervals.FreeShippingSaysBS"
-        android:label="FreeShippingSaysBS">
-        <argument
-            android:name="title"
-            app:argType="string" />
-        <argument
-            android:name="info"
-            app:argType="string" />
-    </dialog>
-    <dialog
-        android:id="@+id/payMethodSelectionBS"
-        android:name="com.vodovoz.app.feature.cart.ordering.intervals.PayMethodSelectionBS"
-        android:label="PayMethodSelectionBS">
-        <argument
-            android:name="payMethodList"
-            app:argType="com.vodovoz.app.ui.model.PayMethodUI[]" />
-        <argument
-            android:name="selectedPayMethod"
-            app:argType="long" />
-    </dialog>
-    <dialog
-        android:id="@+id/shippingIntervalSelectionBS"
-        android:name="com.vodovoz.app.feature.cart.ordering.intervals.ShippingIntervalSelectionBS"
-        android:label="ShippingIntervalSelectionBS">
-        <argument
-            android:name="shippingIntervalList"
-            app:argType="com.vodovoz.app.ui.model.ShippingIntervalUI[]" />
-    </dialog>
-    <dialog
-        android:id="@+id/shippingAlertsSelectionBS"
-        android:name="com.vodovoz.app.feature.cart.ordering.intervals.ShippingAlertsSelectionBS"
-        android:label="ShippingAlertsSelectionBS">
-        <argument
-            android:name="shippingAlertList"
-            app:argType="com.vodovoz.app.ui.model.ShippingAlertUI[]" />
-    </dialog>
     <fragment
         android:id="@+id/allBottlesFragment"
         android:name="com.vodovoz.app.feature.cart.bottles.AllBottlesFlowFragment"
@@ -860,11 +721,6 @@
 
     </fragment>
 
-    <dialog
-        android:id="@+id/webViewFlowBottomSheetFragment"
-        android:name="com.vodovoz.app.common.webview.WebViewFlowBottomSheetFragment"
-        android:label="WebViewFlowBottomSheetFragment" />
-
     <fragment
         android:id="@+id/qrCodeFragment"
         android:name="com.vodovoz.app.feature.search.qrcode.QrCodeFragment"
@@ -875,7 +731,7 @@
     </fragment>
     <dialog
         android:id="@+id/speechDialogFragment"
-        android:name="com.vodovoz.app.common.speechrecognizer.SpeechDialogFragment"
+        android:name="com.vodovoz.app.common.speech_recognizer.SpeechDialogFragment"
         android:label="SpeechDialogFragment">
         <action
             android:id="@+id/action_to_searchFragment"
@@ -892,7 +748,7 @@
 
     <fragment
         android:id="@+id/notificationSettingsFragment"
-        android:name="com.vodovoz.app.feature.profile.notificationsettings.NotificationSettingsFragment"
+        android:name="com.vodovoz.app.feature.profile.notification_settings.NotificationSettingsFragment"
         android:label="NotificationSettingsFragment" />
     <fragment
         android:id="@+id/waterAppFragment"
@@ -918,49 +774,16 @@
             app:destination="@+id/webViewFragment" />
 
     </fragment>
-    <dialog
-        android:id="@+id/traceOrderBottomSheetFragment"
-        android:name="com.vodovoz.app.feature.all.orders.detail.traceorder.bottom.TraceOrderBottomSheetFragment"
-        android:label="TraceOrderBottomSheetFragment">
 
-        <action
-            android:id="@+id/action_to_webViewFragment"
-            app:destination="@+id/webViewFragment" />
-
-    </dialog>
-    <dialog
-        android:id="@+id/checkDeliveryActionsBS"
-        android:name="com.vodovoz.app.feature.cart.ordering.intervals.CheckDeliveryActionsBS"
-        android:label="CheckDeliveryActionsBS">
-
-        <argument
-            android:name="deliveryAction"
-            app:argType="integer" />
-
-    </dialog>
     <fragment
         android:id="@+id/biometricSettingsFragment"
         android:name="com.vodovoz.app.feature.profile.biometric.BiometricSettingsFragment"
         android:label="BiometricSettingsFragment" />
-    <fragment
-        android:id="@+id/activeCertificateFragment"
-        android:name="com.vodovoz.app.feature.profile.certificate.ActiveCertificateFragment"
-        android:label="ActiveCertificateFragment">
 
-        <action
-            android:id="@+id/action_to_webViewFragment"
-            app:destination="@+id/webViewFragment" />
-    </fragment>
     <fragment
         android:id="@+id/buyCertificateFragment"
         android:name="com.vodovoz.app.feature.buy_certificate.BuyCertificateFragment"
-        android:label="fragment_buy_certificate">
-
-        <action
-            android:id="@+id/action_to_payMethodSelectionBS"
-            app:destination="@id/payMethodSelectionBS" />
-
-    </fragment>
+        android:label="fragment_buy_certificate"/>
 
     <fragment
         android:id="@+id/loginByEmailFragment"

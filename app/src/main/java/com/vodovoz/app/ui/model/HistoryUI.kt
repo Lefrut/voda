@@ -13,7 +13,7 @@ data class HistoryUI(
 ) : Parcelable, Item {
 
     override fun getItemViewType(): Int {
-        return R.layout.view_holder_slider_history
+        return 0
     }
 
     override fun areItemsTheSame(item: Item): Boolean {

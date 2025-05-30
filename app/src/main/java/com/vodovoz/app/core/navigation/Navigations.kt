@@ -17,8 +17,7 @@ import com.vodovoz.app.feature.buy_certificate.model.FAQUi
 import com.vodovoz.app.feature.cart.model.CartPresentPopupWindowUi
 import com.vodovoz.app.feature.cart.model.CartPresentUi
 import com.vodovoz.app.feature.home.model.CategoryUi
-import com.vodovoz.app.feature.productlistnofilter.ProductCatalogFragment
-import com.vodovoz.app.util.extensions.indexOfOrNull
+import com.vodovoz.app.feature.product_catalog.ProductCatalogFragment
 
 
 private val SlideNavOptions = NavOptions.Builder()

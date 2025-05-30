@@ -8,7 +8,7 @@ import com.vodovoz.app.domain.general.model.CategoryWithProductsModel
 import com.vodovoz.app.domain.general.model.LabelModel
 import com.vodovoz.app.domain.general.model.ProductModel
 import com.vodovoz.app.domain.general.model.SectionModel
-import com.vodovoz.app.util.fromHexOrUnspecified
+import com.vodovoz.app.ui.graphics.fromHexOrUnspecified
 
 
 @JvmName("withUpdatedFavoritesSectionProduct")

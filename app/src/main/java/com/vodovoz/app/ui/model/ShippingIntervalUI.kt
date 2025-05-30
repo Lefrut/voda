@@ -12,7 +12,7 @@ data class ShippingIntervalUI(
 ): Parcelable, Item {
 
     override fun getItemViewType(): Int {
-        return R.layout.view_holder_shipping_interval
+        return 0
     }
 
     override fun areItemsTheSame(item: Item): Boolean {

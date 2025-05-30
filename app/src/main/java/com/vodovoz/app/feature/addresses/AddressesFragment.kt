@@ -91,7 +91,7 @@ class AddressesFragment : BaseFragment() {
 
         addressesController.bind(binding.rvAddresses, binding.refreshContainer)
         initToolbar(resources.getString(R.string.addresses_title))
-        bindErrorRefresh { viewModel.refresh() }
+        //bindErrorRefresh { viewModel.refresh() }
         initAddAddressButton()
         observeUiState()
         observeEvents()
@@ -140,7 +140,6 @@ class AddressesFragment : BaseFragment() {
                             addressesController.submitList(state.data.fullList)
                         }
 
-                        showError(state.error)
                     }
             }
         }

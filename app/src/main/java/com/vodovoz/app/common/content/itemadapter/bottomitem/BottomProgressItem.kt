@@ -9,7 +9,7 @@ data class BottomProgressItem(
 ) : Item {
 
     override fun getItemViewType(): Int {
-        return R.layout.item_progress
+        return 0
     }
 
     override fun areItemsTheSame(item: Item): Boolean {

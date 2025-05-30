@@ -1246,10 +1246,6 @@ class MainRepository @Inject constructor(
         )
     }
 
-    suspend fun fetchNotificationSettingsData(uri: String) = coroutineScope {
-        api.fetchNotificationSettingsData(uri)
-    }
-
     suspend fun fetchBottles() = api.fetchBottles().parseBottlesResponse()
 
     suspend fun postUrl(url: String) {

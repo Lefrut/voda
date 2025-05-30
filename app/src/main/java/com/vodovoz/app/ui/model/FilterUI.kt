@@ -1,7 +1,6 @@
 package com.vodovoz.app.ui.model
 
 import android.os.Parcelable
-import com.vodovoz.app.R
 import com.vodovoz.app.common.content.itemadapter.Item
 import kotlinx.parcelize.Parcelize
 
@@ -15,11 +14,7 @@ class FilterUI(
 ) : Parcelable, Item {
 
     override fun getItemViewType(): Int {
-        return if (type == "range_filter") {
-            R.layout.view_holder_filter_range
-        } else {
-            R.layout.view_holder_filter
-        }
+        return 0
     }
 
     override fun areItemsTheSame(item: Item): Boolean {

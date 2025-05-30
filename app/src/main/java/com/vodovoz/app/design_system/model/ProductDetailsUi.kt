@@ -24,7 +24,7 @@ import com.vodovoz.app.domain.general.model.ProductDetailsModel
 import com.vodovoz.app.domain.general.model.ProductDetailsTabModel
 import com.vodovoz.app.domain.general.model.ProductVideoModel
 import com.vodovoz.app.domain.general.model.PromoProductModel
-import com.vodovoz.app.util.fromHexOrUnspecified
+import com.vodovoz.app.ui.graphics.fromHexOrUnspecified
 import kotlinx.parcelize.Parcelize
 
 

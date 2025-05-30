@@ -10,7 +10,7 @@ import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequest
 import androidx.work.WorkManager
 import com.squareup.moshi.Moshi
-import com.vodovoz.app.common.account.data.AccountManager
+import com.vodovoz.app.common.account.AccountManager
 import com.vodovoz.app.common.datastore.DataStoreRepository
 import com.vodovoz.app.feature.profile.waterapp.worker.WaterAppWorker
 import com.vodovoz.app.util.extensions.debugLog
@@ -33,7 +33,7 @@ class WaterAppHelper @Inject constructor(
     moshi: Moshi,
 ) {
 
-    data object Colors{
+    data object Colors {
 
         val lightBlue = Color(0xFF5AC3FF)
         val darkBlue = Color(0xFF078FDD)
@@ -52,7 +52,7 @@ class WaterAppHelper @Inject constructor(
         @SuppressLint("DefaultLocale")
         val weights: List<Float> = (0..((300f - 20f) / 0.2f).toInt())
             .map { i ->
-                val a = String.format(Locale("en"),"%.1f", 20f + i * 0.2f)
+                val a = String.format(Locale("en"), "%.1f", 20f + i * 0.2f)
                 a.toFloatOrNull() ?: 0f
             }
 
@@ -183,7 +183,11 @@ class WaterAppHelper @Inject constructor(
         val result = when {
             data == null -> WaterAppRateData(lastSavedDate = currentDate)
             data.lastSavedDate == 0L -> data.copy(lastSavedDate = currentDate)
-            data.lastSavedDate != currentDate -> data.copy(lastSavedDate = currentDate, currentLevel = 0)
+            data.lastSavedDate != currentDate -> data.copy(
+                lastSavedDate = currentDate,
+                currentLevel = 0
+            )
+
             else -> data
         }
 
@@ -275,6 +279,7 @@ class WaterAppHelper @Inject constructor(
 
         if (data.switch) {
             WorkManager.getInstance(applicationContext).cancelAllWorkByTag(waterTag)
+
             val work = PeriodicWorkRequest.Builder(
                 WaterAppWorker::class.java,
                 data.time.toLong(),

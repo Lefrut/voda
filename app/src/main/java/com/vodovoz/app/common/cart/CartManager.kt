@@ -33,13 +33,11 @@ class CartManager @Inject constructor(
 ) {
 
     private val cartMutex = Mutex()
-    private val coroutineScope = CoroutineScope(Dispatchers.Default)
+    private val coroutineScope = CoroutineScope(Dispatchers.IO)
 
     fun observeUpdateCartList() = updateCartListListener.asStateFlow()
 
-    fun updateCartListState(update: Boolean) {
-        updateCartListListener.value = update
-    }
+    fun updateCartListState(update: Boolean) { updateCartListListener.value = update }
 
     private val updateCartListListener = MutableStateFlow(false)
     private val carts = ConcurrentHashMap<Long, Int>()
@@ -145,9 +143,6 @@ class CartManager @Inject constructor(
         tabManager.clearBottomNavCartState()
     }
 
-    fun isCartEmpty() = carts.isEmpty()
-
-
     suspend fun syncCart(newCart: Map<Long, Int>) = cartMutex.withLock {
         if ((firstCart.isNotEmpty() && carts.isNotEmpty()) || blockedProductsState.value.isNotEmpty()) {
             return@withLock
@@ -155,14 +150,6 @@ class CartManager @Inject constructor(
         updateCart(newCart)
 
         tabManager.updateBottomNavCartState()
-    }
-
-    suspend fun syncCart(list: List<ProductUI>) {
-        list.forEach { product ->
-            carts[product.id] = product.cartQuantity
-        }
-        tabManager.updateBottomNavCartState()
-        cartsStateListener.emit(carts)
     }
 
     private suspend fun updateCartOnline(
@@ -244,7 +231,6 @@ class CartManager @Inject constructor(
 
             for ((key, value) in addInCart) {
                 updateCartItem(key, (carts[key] ?: 0) + value)
-                debugLog { "CartManager: updateCartItem($key, ${(carts[key] ?: 0) + value})" }
             }
 
 
@@ -267,7 +253,6 @@ class CartManager @Inject constructor(
 
             if (currentCartVersion >= cartVersion) {
                 updateCartListState(true)
-                debugLog { "CartManager: updateCartListState(true)" }
             }
 
         }

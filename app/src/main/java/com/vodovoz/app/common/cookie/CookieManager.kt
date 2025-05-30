@@ -1,6 +1,6 @@
 package com.vodovoz.app.common.cookie
 
-import com.vodovoz.app.common.account.data.AccountManager
+import com.vodovoz.app.common.account.AccountManager
 import com.vodovoz.app.common.datastore.DataStoreRepository
 import com.vodovoz.app.util.extensions.debugLog
 import kotlinx.coroutines.runBlocking

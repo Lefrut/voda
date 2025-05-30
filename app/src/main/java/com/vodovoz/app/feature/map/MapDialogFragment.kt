@@ -137,7 +137,7 @@ class MapDialogFragment : BaseFragment() {
                         binding.streetNameTv.isVisible = true
                         binding.streetNameTv.text = full
 
-                        showError(state.error)
+                        //showError(state.error)
                     }
             }
         }
@@ -160,15 +160,15 @@ class MapDialogFragment : BaseFragment() {
                             }
                         }
                         is MapFlowViewModel.MapFlowEvents.ShowInfoDialog -> {
-                            if (it.url.isNullOrEmpty().not()) {
-                                findNavController().navigate(
-                                    R.id.webViewFlowBottomSheetFragment,
-                                    bundleOf(
-                                        "title" to "Зоны бесплатных дней доставки за МКАД",
-                                        "url" to it.url
-                                    )
-                                )
-                            }
+//                            if (it.url.isNullOrEmpty().not()) {
+//                                findNavController().navigate(
+//                                    R.id.webViewFlowBottomSheetFragment,
+//                                    bundleOf(
+//                                        "title" to "Зоны бесплатных дней доставки за МКАД",
+//                                        "url" to it.url
+//                                    )
+//                                )
+//                            }
                         }
                         is MapFlowViewModel.MapFlowEvents.ShowAlert -> {
                             MaterialAlertDialogBuilder(requireContext())

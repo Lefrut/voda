@@ -66,8 +66,6 @@ data class PagingState<S>(
 }
 
 sealed class ErrorState(
-    @DrawableRes
-    val iconDrawable: Int = R.drawable.png_logo,
     val message: String,
     val description: String,
 ) {
@@ -81,15 +79,13 @@ sealed class ErrorState(
         val desc: String = "Проверьте соединение с сетью и обновите страницу",
     ) : ErrorState(
         message = messageInfo,
-        iconDrawable = R.drawable.ic_no_connection,
         description = desc
     )
 
     data class Empty(
         val messageInfo: String = "Список пуст.",
-        val icon: Int = R.drawable.png_logo,
         val desc: String = "",
-    ) : ErrorState(message = messageInfo, iconDrawable = icon, description = desc)
+    ) : ErrorState(message = messageInfo, description = desc)
 
     data object BadGateway :
         ErrorState(message = "Слишком частый запрос.", description = "Обновите страницу.")

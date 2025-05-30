@@ -37,7 +37,7 @@ import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.composables.placeholders.NetworkErrorPlaceholder
 import com.vodovoz.app.feature.splash.model.SplashState
 import com.vodovoz.app.feature.splash.model.SplashUiState
-import com.vodovoz.app.ui.extensions.ContextExtensions.isTablet
+import com.vodovoz.app.util.extensions.isTablet
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.take
 

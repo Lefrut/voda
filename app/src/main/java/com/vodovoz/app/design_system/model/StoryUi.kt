@@ -7,7 +7,7 @@ import com.vodovoz.app.domain.general.model.ActionWithButtonModel
 import com.vodovoz.app.domain.general.model.ColorfulButtonModel
 import com.vodovoz.app.domain.general.model.StoryModel
 import com.vodovoz.app.domain.general.model.VodovozAction
-import com.vodovoz.app.util.fromHexOrUnspecified
+import com.vodovoz.app.ui.graphics.fromHexOrUnspecified
 import kotlinx.parcelize.Parcelize
 
 @Immutable

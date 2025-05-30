@@ -1,0 +1,59 @@
+package com.vodovoz.app.util.extensions
+
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
+import android.content.Intent
+
+
+fun Context.copyText(text: String) {
+    val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+    val clip: ClipData = ClipData.newPlainText("Copied text", text)
+    clipboard.setPrimaryClip(clip)
+}
+
+fun Context.shareText(text: String) {
+    val sendIntent: Intent = Intent().apply {
+        action = Intent.ACTION_SEND
+        putExtra(Intent.EXTRA_TEXT, text)
+        type = "text/plain"
+    }
+    val shareIntent = Intent.createChooser(sendIntent, null)
+    startActivity(shareIntent)
+}
+
+
+fun String.prepareServiceHtml(): String {
+    return "<style>\n" +
+            "    img {\n" +
+            "        display: inline;\n" +
+            "        height: auto;\n" +
+            "        max-width: 100%;\n" +
+            "    }\n" +
+            "    .ordered-block,\n" +
+            "    .order_sale {\n" +
+            "        display: none;\n" +
+            "    }\n" +
+            "    .tables-responsive {\n" +
+            "        overflow-x: auto;\n" +
+            "        width: 100%;\n" +
+            "    }\n" +
+            "    table {\n" +
+            "        width: 100%;\n" +
+            "        border-collapse: collapse;\n" +
+            "    }\n" +
+            "    .colored_table {\n" +
+            "        font-size: 2em;\n" +
+            "        line-height: inherit;\n" +
+            "    }\n" +
+            "    .colored_table th,\n" +
+            "    .colored_table td {\n" +
+            "        padding: 8px;\n" +
+            "        border: 1px solid #ccc;\n" +
+            "        text-align: left;\n" +
+            "    }" +
+            "</style>$this"
+}
+
+
+

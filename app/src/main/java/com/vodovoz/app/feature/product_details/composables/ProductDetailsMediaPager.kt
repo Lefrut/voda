@@ -76,7 +76,7 @@ fun ProductDetailsMediaPager(
                             .align(Alignment.Center)
                             .size(42.dp)
                             .clip(CircleShape),
-                        painter = painterResource(id = R.drawable.pic_play),
+                        painter = painterResource(id = R.drawable.svg_play_video),
                         contentDescription = null
                     )
 

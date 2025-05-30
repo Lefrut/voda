@@ -12,7 +12,7 @@ data class DiscountCardPropertyUI(
 ) : Item {
 
     override fun getItemViewType(): Int {
-        return R.layout.view_holder_discount_card_property
+        return 3
     }
 
     override fun areItemsTheSame(item: Item): Boolean {

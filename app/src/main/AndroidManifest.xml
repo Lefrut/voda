@@ -47,9 +47,6 @@
             android:windowSoftInputMode="adjustResize"
             android:configChanges="orientation|screenSize|keyboardHidden">
 
-            <!--TODO - mb change to adjust pan-->
-
-
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

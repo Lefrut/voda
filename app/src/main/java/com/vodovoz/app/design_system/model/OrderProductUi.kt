@@ -5,7 +5,7 @@ import androidx.compose.ui.graphics.Color
 import com.vodovoz.app.domain.general.model.order.OrderProductModel
 import com.vodovoz.app.domain.general.model.order.OrderProductPresentModel
 import com.vodovoz.app.feature.cart.model.ProductRestrictionUi
-import com.vodovoz.app.util.fromHexOrUnspecified
+import com.vodovoz.app.ui.graphics.fromHexOrUnspecified
 
 @Immutable
 data class OrderProductUi(

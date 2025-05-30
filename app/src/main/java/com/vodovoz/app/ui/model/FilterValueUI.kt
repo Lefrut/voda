@@ -13,7 +13,7 @@ data class FilterValueUI(
 ) : Parcelable, Item {
 
     override fun getItemViewType(): Int {
-        return R.layout.view_holder_brand_filter_value
+        return 1111
     }
 
     override fun areItemsTheSame(item: Item): Boolean {

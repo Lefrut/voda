@@ -72,8 +72,8 @@ import androidx.compose.ui.unit.sp
 import com.vodovoz.app.R
 import com.vodovoz.app.design_system.robotoFontFamily
 import com.vodovoz.app.feature.profile.waterapp.WaterAppHelper
-import com.vodovoz.app.ui.canvas.mergeToSinglePath
-import com.vodovoz.app.ui.canvas.toAndroidPaths
+import com.vodovoz.app.ui.graphics.mergeToSinglePath
+import com.vodovoz.app.ui.graphics.toAndroidPaths
 
 @Composable
 fun WaterAppBottleScreen(
@@ -111,7 +111,7 @@ fun WaterAppBottleScreen(
             )
 
             Icon(
-                painter = painterResource(R.drawable.ic_filter),
+                painter = painterResource(R.drawable.icon_filters),
                 tint = MaterialTheme.colorScheme.onBackground,
                 contentDescription = null,
                 modifier = Modifier
@@ -166,7 +166,7 @@ fun WaterAppBottleScreen(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Icon(
-                painter = painterResource(R.drawable.ic_minus),
+                painter = painterResource(R.drawable.ic_minus_rounded),
                 contentDescription = null,
                 modifier = Modifier
                     .size(32.dp)
@@ -184,7 +184,7 @@ fun WaterAppBottleScreen(
             )
 
             Icon(
-                painter = painterResource(R.drawable.ic_plus),
+                painter = painterResource(R.drawable.ic_plus_rounded),
                 contentDescription = null,
                 modifier = Modifier
                     .size(32.dp)
@@ -216,17 +216,19 @@ private fun WaterAppBottle(
 
 
     val levelFraction = currentLevel.coerceAtMost(maxLevel).toFloat() / maxLevel.coerceAtLeast(1)
-    val animatedWaveHeight by animateDpAsState(
-        targetValue = (bottleBoundsHeightDp * 0.82f) * levelFraction,
+
+    val infiniteTransition = rememberInfiniteTransition(label = "waveMotion")
+
+    val waveOffsetY by animateDpAsState(
+        targetValue = (bottleBoundsHeightDp * 0.9f) * levelFraction,
         label = "waveHeight",
         animationSpec = tween(250, 0, easing = LinearEasing)
     )
 
-    val infiniteTransition = rememberInfiniteTransition(label = "waveMotion")
 
     val waveOffsetX by infiniteTransition.animateFloat(
-        initialValue = -10f,
-        targetValue = 10f,
+        initialValue = -7f,
+        targetValue = 7f,
         animationSpec = infiniteRepeatable(
             animation = tween(1000, easing = LinearEasing),
             repeatMode = RepeatMode.Reverse
@@ -235,7 +237,7 @@ private fun WaterAppBottle(
     )
     val waveScale by infiniteTransition.animateFloat(
         initialValue = 1f,
-        targetValue = 1.1f,
+        targetValue = 1.05f,
         animationSpec = infiniteRepeatable(
             animation = tween(1500, easing = LinearEasing),
             repeatMode = RepeatMode.Reverse
@@ -252,7 +254,7 @@ private fun WaterAppBottle(
 
         val bottleBoundsVector = ImageVector.vectorResource(R.drawable.bottle_bounds)
 
-        val waveShape = remember(bottleBoundsVector) {
+        val waveShapeFromBottle = remember(bottleBoundsVector) {
             val bottlePath = bottleBoundsVector.toAndroidPaths(
                 targetWidthPx = with(density) { bottleWidthDp.toPx() },
                 targetHeightPx = with(density) { bottleBoundsHeightDp.toPx() },
@@ -293,26 +295,26 @@ private fun WaterAppBottle(
                 .fillMaxWidth()
                 .height(bottleBoundsHeightDp)
                 .align(Alignment.BottomCenter)
-                .clip(waveShape)
+                .clip(waveShapeFromBottle)
 
         ) {
             Image(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
-                    .fillMaxWidth()
-                    .height(animatedWaveHeight)
+                    .fillMaxSize()
                     .graphicsLayer {
                         translationX = waveOffsetX
+                        translationY = bottleBoundsHeightDp.toPx() - waveOffsetY.toPx()
                         scaleX = waveScale
                         scaleY = waveScale
-                        alpha = 0.7f
+                        alpha = 0.85f
                     },
-                painter = painterResource(R.drawable.waves),
+                painter = painterResource(R.drawable.svg_waves),
                 contentDescription = null,
-                contentScale = ContentScale.FillBounds
+                contentScale = ContentScale.Crop
             )
 
-            BubblesClipped(shape = waveShape)
+            BubblesClipped(shape = waveShapeFromBottle)
         }
 
         Image(

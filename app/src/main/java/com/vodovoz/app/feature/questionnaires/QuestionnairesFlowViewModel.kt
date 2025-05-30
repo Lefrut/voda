@@ -3,7 +3,7 @@ package com.vodovoz.app.feature.questionnaires
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.viewModelScope
 import com.vodovoz.app.R
-import com.vodovoz.app.common.account.data.AccountManager
+import com.vodovoz.app.common.account.AccountManager
 import com.vodovoz.app.common.content.ErrorState
 import com.vodovoz.app.common.content.Event
 import com.vodovoz.app.common.content.PagingContractViewModel

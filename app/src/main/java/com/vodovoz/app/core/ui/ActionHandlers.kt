@@ -21,7 +21,6 @@ import com.vodovoz.app.core.navigation.navigateToPromotions
 import com.vodovoz.app.core.navigation.navigateToServiceDetails
 import com.vodovoz.app.core.navigation.navigateToWaterApp
 import com.vodovoz.app.core.navigation.navigateToWebView
-import com.vodovoz.app.core.network.VODOVOZ_URL
 import com.vodovoz.app.core.network.VodovozWebConfig
 import com.vodovoz.app.domain.general.model.ButtonAction
 import com.vodovoz.app.domain.general.model.DataAllAction
@@ -162,7 +161,7 @@ fun VodovozAction.activate(
         is VodovozAction.UrlWithCookie -> {
             val webCookieManager = CookieManager.getInstance()
             webCookieManager.acceptCookie()
-            webCookieManager.setCookie(VODOVOZ_URL, cookie)
+            webCookieManager.setCookie(VodovozWebConfig.VODOVOZ_URL, cookie)
             navController.navigateToWebView(url, "")
         }
 

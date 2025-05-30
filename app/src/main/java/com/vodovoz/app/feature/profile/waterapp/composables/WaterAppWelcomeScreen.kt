@@ -87,7 +87,7 @@ fun WaterAppWelcomeScreen(
             )
         }
 
-        val waveImage = ImageBitmap.imageResource(id = R.drawable.water_app_wave)
+        val waveImage = ImageBitmap.imageResource(id = R.drawable.pic_spray)
 
 
         Column(
