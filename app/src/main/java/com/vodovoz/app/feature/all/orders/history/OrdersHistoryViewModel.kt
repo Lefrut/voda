@@ -6,7 +6,6 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.CombinedLoadStates
 import androidx.paging.LoadState
 import androidx.paging.map
-import com.vodovoz.app.BuildConfig
 import com.vodovoz.app.common.account.AccountManager
 import com.vodovoz.app.common.cart.CartManager
 import com.vodovoz.app.common.content.ErrorState
@@ -14,7 +13,6 @@ import com.vodovoz.app.common.content.Event
 import com.vodovoz.app.common.content.PagingContractViewModel
 import com.vodovoz.app.common.content.State
 import com.vodovoz.app.common.content.itemadapter.Item
-import com.vodovoz.app.common.content.itemadapter.bottomitem.BottomProgressItem
 import com.vodovoz.app.common.content.toErrorState
 import com.vodovoz.app.common.content.updateData
 import com.vodovoz.app.data.MainRepository
@@ -27,8 +25,6 @@ import com.vodovoz.app.feature.all.orders.history.model.OrderFilterUi
 import com.vodovoz.app.feature.all.orders.history.model.OrdersHistoryItemUi
 import com.vodovoz.app.feature.all.orders.history.model.mapToUi
 import com.vodovoz.app.feature.all.orders.history.model.toUi
-import com.vodovoz.app.mapper.OrderListMapper.mapToUI
-import com.vodovoz.app.ui.model.custom.OrdersFiltersBundleUI
 import com.vodovoz.app.ui.paging.PagingDataListener
 import com.vodovoz.app.ui.paging.copy
 import com.vodovoz.app.ui.paging.emptyCombinedLoadStates
@@ -161,131 +157,6 @@ class OrdersHistoryViewModel @Inject constructor(
         }
     }
 
-    private fun fetchAllOrders() {
-        val userId =
-            accountManager.fetchAccountId() ?: return
-        viewModelScope.launch {
-            flow {
-                emit(
-                    repository.fetchAllOrders(
-                        userId = userId,
-                        page = state.page,
-                        appVersion = BuildConfig.VERSION_NAME,
-                        orderId = state.data.ordersFiltersBundleUI.orderId,
-                        status = StringBuilder().apply {
-                            state.data.ordersFiltersBundleUI.orderFilterUIList.forEach {
-                                if (it.isChecked) {
-                                    append(it.id).append(
-                                        ","
-                                    )
-                                }
-                            }
-                        }.toString()
-                    )
-                )
-            }
-                .onEach { response ->
-                    if (response is ResponseEntity.Success) {
-                        val data = response.data.mapToUI()
-                        uiStateListener.value = if (data.orders.isEmpty() && !state.loadMore) {
-                            state.copy(
-                                error = ErrorState.Empty(),
-                                loadingPage = false,
-                                loadMore = false,
-                                bottomItem = null,
-                                page = 1,
-                                data = state.data.copy(
-                                    errorTitle = data.title,
-                                    errorMessage = data.message,
-                                    itemsList = listOf()
-                                )
-                            )
-                        } else {
-
-                            val itemsList = if (state.loadMore) {
-                                state.data.itemsList + data.orders
-                            } else {
-                                data.orders
-                            }
-
-                            state.copy(
-                                page = if (data.orders.isEmpty()) null else state.page?.plus(1),
-                                loadingPage = false,
-                                data = state.data.copy(
-                                    itemsList = itemsList,
-                                    ordersFiltersBundleUI = if (state.data.ordersFiltersBundleUI.orderFilterUIList.isEmpty()) {
-                                        OrdersFiltersBundleUI().apply {
-                                            orderFilterUIList.addAll(data.filters)
-                                        }
-                                    } else {
-                                        state.data.ordersFiltersBundleUI
-                                    }
-                                ),
-                                error = null,
-                                loadMore = false,
-                                bottomItem = null
-                            )
-                        }
-                    } else {
-                        uiStateListener.value =
-                            state.copy(
-                                loadingPage = false,
-                                error = ErrorState.Error(),
-                                page = 1,
-                                loadMore = false
-                            )
-                    }
-                }
-                .flowOn(Dispatchers.Default)
-                .catch {
-                    debugLog { "fetch all orders sorted error ${it.localizedMessage}" }
-                    uiStateListener.value =
-                        state.copy(error = it.toErrorState(), loadingPage = false)
-                }
-                .collect()
-        }
-    }
-
-    fun firstLoadSorted() {
-        if (!state.isFirstLoad) {
-            uiStateListener.value =
-                state.copy(isFirstLoad = true, loadingPage = true)
-            fetchAllOrders()
-        }
-    }
-
-    fun refreshSorted() {
-        uiStateListener.value =
-            state.copy(loadingPage = true, page = 1, loadMore = false, bottomItem = null)
-        fetchAllOrders()
-    }
-
-    fun loadMoreSorted() {
-        if (state.bottomItem == null && state.page != null) {
-            uiStateListener.value = state.copy(loadMore = true, bottomItem = BottomProgressItem())
-            fetchAllOrders()
-        }
-    }
-
-    fun updateFilterBundle(filterBundle: OrdersFiltersBundleUI) {
-        var filterCount = if (filterBundle.orderId != null) 1 else 0
-        filterBundle.orderFilterUIList.forEach {
-            if (it.isChecked) {
-                filterCount++
-            }
-        }
-        uiStateListener.value = state.copy(
-            data = state.data.copy(
-                ordersFiltersBundleUI = filterBundle,
-                filterCount = filterCount
-            ),
-            page = 1,
-            loadMore = false,
-            loadingPage = true
-        )
-        fetchAllOrders()
-    }
-
     fun repeatOrder(orderId: Long) {
         val userId =
             accountManager.fetchAccountId() ?: return
@@ -321,8 +192,6 @@ class OrdersHistoryViewModel @Inject constructor(
                 .collect()
         }
     }
-
-    fun isLoginAlready() = accountManager.isAlreadyLogin()
 
     fun changeMode(searchMode: Boolean) = viewModelScope.launch {
         uiStateListener.updateData { s ->
@@ -385,12 +254,6 @@ class OrdersHistoryViewModel @Inject constructor(
 
     @Immutable
     data class AllOrdersState(
-        val itemsList: List<Item> = emptyList(),
-        val ordersFiltersBundleUI: OrdersFiltersBundleUI = OrdersFiltersBundleUI(),
-        val filterCount: Int = 0,
-        val errorTitle: String = "",
-        val errorMessage: String = "",
-
         val title: String = "",
         val searchQuery: String = "",
         val uiState: AllOrdersUiState = AllOrdersUiState.Loading,

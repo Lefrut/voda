@@ -15,12 +15,12 @@ import com.vodovoz.app.domain.general.model.ColorfulButtonModel
 import com.vodovoz.app.domain.general.model.cart.CartButtonModel
 import com.vodovoz.app.domain.general.model.cart.CartDetailsModel
 import com.vodovoz.app.domain.general.model.cart.CartItemModel
-import com.vodovoz.app.domain.general.model.cart.OrderSummaryItemModel
 import com.vodovoz.app.domain.general.model.cart.CartPresentItemModel
 import com.vodovoz.app.domain.general.model.cart.CartPresentModel
 import com.vodovoz.app.domain.general.model.cart.CartPresentPopupWindowModel
 import com.vodovoz.app.domain.general.model.cart.CartPromoButtonModel
 import com.vodovoz.app.domain.general.model.cart.CartPromoPopupWindowModel
+import com.vodovoz.app.domain.general.model.cart.OrderSummaryItemModel
 
 fun CartDetailsDTO.toDomain(): CartDetailsModel {
     return CartDetailsModel(

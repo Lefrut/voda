@@ -1,8 +1,8 @@
 package com.vodovoz.app.data.vodovoz_service.model.order_details
 
 
-import com.squareup.moshi.Json
 import androidx.annotation.Keep
+import com.squareup.moshi.Json
 import com.vodovoz.app.data.vodovoz_service.model.COLORFUL_KNOPKA_DTO
 
 @Keep

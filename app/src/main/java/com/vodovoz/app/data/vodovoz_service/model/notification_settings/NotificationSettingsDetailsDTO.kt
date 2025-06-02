@@ -1,15 +1,16 @@
 package com.vodovoz.app.data.vodovoz_service.model.notification_settings
 
 
-import com.squareup.moshi.Json
 import androidx.annotation.Keep
+import com.squareup.moshi.Json
+import com.vodovoz.app.data.vodovoz_service.model.KNOPKA_ORDER_DTO
 
 @Keep
 data class NotificationSettingsDetailsDTO(
-    @Json(name = "TITLE")
-    val TITLE: String?,
-    @Json(name = "TELEFON")
-    val TELEFON: TELEFON_DTO?,
-    @Json(name = "LISTADATA")
-    val LISTADATA: List<SWITCH_SECTION_DTO>?
+    @Json(name = "TEXT")
+    val TEXT: String?,
+    @Json(name = "DANNYE")
+    val DANNYE: List<NOTIFICATION_SECTION_DTO>?,
+    @Json(name = "KNOPKA")
+    val KNOPKA: KNOPKA_ORDER_DTO?
 )

@@ -23,14 +23,12 @@ import com.vodovoz.app.feature.buy_certificate.model.FAQUi
 import com.vodovoz.app.feature.buy_certificate.model.PaymentInfoUi
 import com.vodovoz.app.feature.buy_certificate.model.mapToUi
 import com.vodovoz.app.feature.buy_certificate.model.toUi
-import com.vodovoz.app.feature.preorder.model.FieldUi
-import com.vodovoz.app.feature.preorder.model.checkFields
-import com.vodovoz.app.feature.preorder.model.getErrorText
-import com.vodovoz.app.feature.preorder.model.mapToDomain
-import com.vodovoz.app.feature.preorder.model.updateFieldAndResetError
-import com.vodovoz.app.feature.preorder.model.vodovozValidators
-import com.vodovoz.app.ui.model.custom.BuyCertificateBundleUI
-import com.vodovoz.app.ui.model.custom.BuyCertificateTypeUI
+import com.vodovoz.app.design_system.model.widgets.FieldUi
+import com.vodovoz.app.design_system.model.widgets.checkFields
+import com.vodovoz.app.design_system.model.widgets.getErrorText
+import com.vodovoz.app.design_system.model.widgets.mapToDomain
+import com.vodovoz.app.design_system.model.widgets.updateFieldAndResetError
+import com.vodovoz.app.design_system.model.widgets.vodovozValidators
 import com.vodovoz.app.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -222,8 +220,6 @@ class BuyCertificateViewModel @Inject constructor(
 
     @Immutable
     data class BuyCertificateState(
-        val buyCertificateBundleUI: BuyCertificateBundleUI? = null,
-
         val title: String = "",
         val uiState: BuyCertificateUiState = BuyCertificateUiState.Loading,
         val codes: BuyCertificateCodesUi = BuyCertificateCodesUi.Empty,
@@ -254,23 +250,6 @@ class BuyCertificateViewModel @Inject constructor(
 
     }
 
-    sealed interface UiAction {
-
-        data class OnSelectCertificate(val id: String) : UiAction
-
-        object OnIncreaseCount : UiAction
-
-        object OnDecreaseCount : UiAction
-
-        data class OnSelectType(val type: BuyCertificateTypeUI) : UiAction
-
-        data class AddResult(val code: String, val value: String) : UiAction
-
-        object ShowPaymentMethods : UiAction
-
-        object BuyCertificate : UiAction
-
-    }
 
     @Immutable
     sealed interface BuyCertificateUiState {
@@ -280,5 +259,3 @@ class BuyCertificateViewModel @Inject constructor(
         data class Success(val placeholder: VodovozPlaceholderUi) : BuyCertificateUiState
     }
 }
-
-typealias OnAction = (BuyCertificateViewModel.UiAction) -> Unit

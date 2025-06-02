@@ -22,7 +22,6 @@ import com.vodovoz.app.feature.product_catalog.composables.ProductCatalogBody
 
 
 @OptIn(ExperimentalMaterial3Api::class)
-@Suppress("NonSkippableComposable")
 @Composable
 fun ProductCatalogScreen(
     viewModel: ProductCatalogViewModel,

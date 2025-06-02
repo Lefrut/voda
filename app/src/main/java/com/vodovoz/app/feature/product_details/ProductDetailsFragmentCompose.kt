@@ -8,12 +8,14 @@ import android.view.ViewGroup
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import coil3.compose.rememberAsyncImagePainter
 import com.vodovoz.app.R
 import com.vodovoz.app.common.tab.TabManager
 import com.vodovoz.app.core.navigation.navigateToAboutProduct
@@ -74,6 +76,12 @@ class ProductDetailsFragment : Fragment() {
                                 title = stringResource(R.string.product_not_found),
                                 description = stringResource(R.string.product_not_found_details),
                                 item = EmptyResultPlaceholderItem.Arrow,
+                                imagePainter = rememberAsyncImagePainter(
+                                    model = "",
+                                    error = painterResource(
+                                        id = R.drawable.pic_search
+                                    )
+                                ),
                                 onItemClick = { viewModel.navigateBack() }
                             )
                         }

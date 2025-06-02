@@ -3,18 +3,24 @@ package com.vodovoz.app.feature.profile.notification_settings
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.viewModelScope
-import com.vodovoz.app.common.account.AccountManager
+import com.vodovoz.app.R
 import com.vodovoz.app.common.content.Event
 import com.vodovoz.app.common.content.PagingContractViewModel
 import com.vodovoz.app.common.content.State
 import com.vodovoz.app.common.content.updateData
-import com.vodovoz.app.data.MainRepository
+import com.vodovoz.app.common.model.VodovozBoolean
+import com.vodovoz.app.common.model.from
+import com.vodovoz.app.common.resources.ResourcesProvider
+import com.vodovoz.app.design_system.model.ColorfulButtonUi
+import com.vodovoz.app.design_system.model.SectionUi
+import com.vodovoz.app.design_system.model.toUi
+import com.vodovoz.app.design_system.model.widgets.FieldUi
+import com.vodovoz.app.design_system.model.widgets.SwitchUi
+import com.vodovoz.app.design_system.model.widgets.WidgetUi
+import com.vodovoz.app.design_system.model.widgets.WidgetUpdaterHandler
+import com.vodovoz.app.design_system.model.widgets.checkFields
+import com.vodovoz.app.design_system.model.widgets.toUi
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
-import com.vodovoz.app.feature.preorder.model.FieldUi
-import com.vodovoz.app.feature.preorder.model.toUi
-import com.vodovoz.app.feature.profile.notification_settings.model.SwitchSectionUi
-import com.vodovoz.app.feature.profile.notification_settings.model.SwitchUi
-import com.vodovoz.app.feature.profile.notification_settings.model.mapToUi
 import com.vodovoz.app.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
@@ -24,9 +30,8 @@ import javax.inject.Inject
 @HiltViewModel
 @Stable
 class NotificationSettingsViewModel @Inject constructor(
-    private val repository: MainRepository,
-    private val accountManager: AccountManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
+    private val resourcesProvider: ResourcesProvider,
 ) : PagingContractViewModel<NotificationSettingsViewModel.NotSettingsState, NotificationSettingsViewModel.NotSettingsEvents>(
     NotSettingsState()
 ) {
@@ -52,10 +57,11 @@ class NotificationSettingsViewModel @Inject constructor(
             uiStateListener.updateData { s ->
                 s.copy(
                     title = notificationSettingDetails.title,
-                    phoneTitle = notificationSettingDetails.phoneTitle,
-                    phoneField = notificationSettingDetails.phoneField.toUi(),
-                    switchSections = notificationSettingDetails.switchSections.mapToUi(),
-                    uiState = NotSettingsUiState.Success
+                    uiState = NotSettingsUiState.Success,
+                    sections = notificationSettingDetails.sections.map { section ->
+                        section.toUi()
+                    },
+                    button = notificationSettingDetails.button.toUi()
                 )
             }
 
@@ -68,60 +74,100 @@ class NotificationSettingsViewModel @Inject constructor(
         }
     }
 
-    private fun updateNotificationSettings() = viewModelScope.launch {
-        val queries = listOf(
-            with(dataState.phoneField) { id to value }
-        ) + dataState.switchSections.map { switchSection ->
-            switchSection.switches.map { switch -> switch.id to (if (switch.checked) "Y" else "N") }
-        }.flatten()
-
-        val queriesMap = queries.associate { it.first to it.second }
-
-        vodovozServiceRepository.updateNotificationSettings(queriesMap).singleResult()
-    }
-
     fun navigateBack() = viewModelScope.launch {
         eventListener.emit(NotSettingsEvents.GoBack)
     }
 
 
-    fun changeField(field: FieldUi, updatedField: FieldUi) = viewModelScope.launch {
-        uiStateListener.updateData { s ->
-            s.copy(phoneField = updatedField)
-        }
-    }
+    fun changeWidget(widget: WidgetUi, updatedWidget: WidgetUi) = viewModelScope.launch {
 
-    fun changeSwitch(switch: SwitchUi, checked: Boolean) = viewModelScope.launch {
+        val currentSection =
+            dataState.sections.firstOrNull { section ->
+                section.items.firstOrNull { widgetUi -> widgetUi.id == widget.id } != null
+            } ?: return@launch
+
+        val updatedWidgets = WidgetUpdaterHandler(
+            getString = { id -> resourcesProvider.getString(id) }
+        ).changeWidget(currentSection.items, widget, updatedWidget)
+
         uiStateListener.updateData { s ->
             s.copy(
-                switchSections = s.switchSections.map { section ->
-                    section.copy(
-                        switches = section.switches.map {
-                            if (it.id == switch.id) it.copy(checked = checked) else it
-                        }
-                    )
+                sections = s.sections.map { section ->
+                    if (section == currentSection) section.copy(items = updatedWidgets)
+                    else section
                 }
             )
         }
-
-        updateNotificationSettings().join()
-        fetchNotificationSettingsDetails()
     }
 
+    fun saveNotificationSettings() {
+        //todo - need review when backend's fixed
+        viewModelScope.launch {
+
+            uiStateListener.updateData { s ->
+                s.copy(button = s.button.copy(loading = true))
+            }
+
+            val widgets = dataState.sections.map { sectionUi ->
+                sectionUi.items
+            }.flatten()
+
+            if (!widgets.mapNotNull { it as? FieldUi }.checkFields(true)) {
+                eventListener.emit(
+                    NotSettingsEvents.ShowToast(
+                        resourcesProvider.getString(R.string.notification_settings_validation_error)
+                    )
+                )
+                uiStateListener.updateData { s ->
+                    s.copy(button = s.button.copy(loading = false))
+                }
+            }
+
+
+            val queriesMap = widgets.mapNotNull { widget ->
+                when (widget) {
+                    is FieldUi -> {
+                        widget.id to widget.value
+                    }
+
+                    is SwitchUi -> {
+                        widget.id to VodovozBoolean.from(widget.value).value
+                    }
+
+                    else -> null
+                }
+            }.associate { it.first to it.second }
+
+
+            val result =
+                vodovozServiceRepository.updateNotificationSettings(queriesMap).singleResult()
+
+            result.onFailure {
+                eventListener.emit(
+                    NotSettingsEvents.ShowToast(
+                        resourcesProvider.getString(R.string.notification_settings_save_error)
+                    )
+                )
+                fetchNotificationSettingsDetails()
+            }
+
+            uiStateListener.updateData { s ->
+                s.copy(button = s.button.copy(loading = false))
+            }
+        }
+
+    }
 
     @Immutable
     data class NotSettingsState(
         val title: String = "",
-        val phoneTitle: String = "",
-        val phoneField: FieldUi = FieldUi.Empty,
-        val switchSections: List<SwitchSectionUi> = emptyList(),
         val uiState: NotSettingsUiState = NotSettingsUiState.Loading,
+        val sections: List<SectionUi<WidgetUi>> = emptyList(),
+        val button: ColorfulButtonUi = ColorfulButtonUi.Empty,
     ) : State
 
     sealed class NotSettingsEvents : Event {
-        data class Success(val message: String) : NotSettingsEvents()
-        data class Failure(val message: String) : NotSettingsEvents()
-
+        data class ShowToast(val message: String) : NotSettingsEvents()
         data object GoBack : NotSettingsEvents()
     }
 
@@ -129,6 +175,5 @@ class NotificationSettingsViewModel @Inject constructor(
         data object Loading : NotSettingsUiState
         data object Success : NotSettingsUiState
         data object Error : NotSettingsUiState
-
     }
 }

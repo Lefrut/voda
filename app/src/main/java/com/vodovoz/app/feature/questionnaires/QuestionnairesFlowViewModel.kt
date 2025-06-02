@@ -3,26 +3,21 @@ package com.vodovoz.app.feature.questionnaires
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.viewModelScope
 import com.vodovoz.app.R
-import com.vodovoz.app.common.account.AccountManager
-import com.vodovoz.app.common.content.ErrorState
 import com.vodovoz.app.common.content.Event
 import com.vodovoz.app.common.content.PagingContractViewModel
 import com.vodovoz.app.common.content.State
-import com.vodovoz.app.common.content.toErrorState
 import com.vodovoz.app.common.content.updateData
 import com.vodovoz.app.util.formatters.DateFormatters
 import com.vodovoz.app.common.resources.ResourcesProvider
-import com.vodovoz.app.data.MainRepository
-import com.vodovoz.app.data.model.common.ResponseEntity
 import com.vodovoz.app.design_system.model.ColorfulButtonUi
 import com.vodovoz.app.design_system.model.VodovozPlaceholderUi
 import com.vodovoz.app.design_system.model.mapToUi
 import com.vodovoz.app.design_system.model.toUi
 import com.vodovoz.app.domain.general.model.RequestException
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
-import com.vodovoz.app.feature.preorder.model.checkFields
-import com.vodovoz.app.feature.preorder.model.getErrorText
-import com.vodovoz.app.feature.preorder.model.vodovozValidators
+import com.vodovoz.app.design_system.model.widgets.checkFields
+import com.vodovoz.app.design_system.model.widgets.getErrorText
+import com.vodovoz.app.design_system.model.widgets.vodovozValidators
 import com.vodovoz.app.feature.questionnaires.model.CheckOption
 import com.vodovoz.app.feature.questionnaires.model.CheckboxListUi
 import com.vodovoz.app.feature.questionnaires.model.ConditionUi
@@ -33,35 +28,20 @@ import com.vodovoz.app.feature.questionnaires.model.SwitchUi
 import com.vodovoz.app.feature.questionnaires.model.ToggleListUi
 import com.vodovoz.app.feature.questionnaires.model.ToggleOption
 import com.vodovoz.app.feature.questionnaires.model.toUi
-import com.vodovoz.app.mapper.QuestionnaireMapper.mapToUI
-import com.vodovoz.app.ui.model.QuestionUI
-import com.vodovoz.app.ui.model.QuestionnaireTypeUI
-import com.vodovoz.app.util.extensions.debugLog
 import com.vodovoz.app.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import javax.inject.Inject
 
 @HiltViewModel
 class QuestionnairesFlowViewModel @Inject constructor(
-    private val repository: MainRepository,
-    private val accountManager: AccountManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val resourcesProvider: ResourcesProvider,
 ) : PagingContractViewModel<QuestionnairesFlowViewModel.QuestionnaireState, QuestionnairesFlowViewModel.QuestionnaireEvents>(
     QuestionnaireState()
 ) {
-
-    var isTryToGetQuestionnaire = false
-    private var lastQuestionnaireType: String? = null
 
     init {
         viewModelScope.launch { delay(200) }.invokeOnCompletion {
@@ -217,97 +197,6 @@ class QuestionnairesFlowViewModel @Inject constructor(
     }
 
 
-    fun fetchQuestionnaireTypes() {
-        viewModelScope.launch {
-            uiStateListener.value = state.copy(loadingPage = true)
-            flow {
-                emit(repository.fetchQuestionnairesResponse())
-            }
-                .onEach { response ->
-                    if (response is ResponseEntity.Success) {
-                        response.data.mapToUI().let { questionnaire ->
-                            uiStateListener.value = state.copy(
-                                data = state.data.copy(
-                                    message = questionnaire.message,
-                                    questionnaireTypeUIList = questionnaire.questionUiTypeList
-                                ),
-                                loadingPage = false,
-                                error = null
-                            )
-                        }
-                    } else {
-                        uiStateListener.value =
-                            state.copy(
-                                loadingPage = false,
-                                error = ErrorState.Error()
-                            )
-                    }
-                }.catch {
-                    debugLog { "fetch questionnaires types by id error ${it.localizedMessage}" }
-                    uiStateListener.value =
-                        state.copy(error = it.toErrorState(), loadingPage = false)
-                }
-                .collect()
-        }
-    }
-
-
-    fun fetchQuestionnaireByType(type: String? = lastQuestionnaireType) {
-        lastQuestionnaireType = type
-        val userId = accountManager.fetchAccountId() ?: return
-        viewModelScope.launch {
-            uiStateListener.value = state.copy(loadingPage = true)
-            flow {
-                emit(
-                    repository.fetchQuestionnairesResponse(
-                        action = lastQuestionnaireType,
-                        userId = userId
-                    )
-                )
-            }.flowOn(Dispatchers.Main)
-                .onEach { response ->
-                    if (response is ResponseEntity.Success) {
-                        response.data.mapToUI().let { questionnaire ->
-                            uiStateListener.value = state.copy(
-                                data = state.data.copy(
-                                    questionUIList = questionnaire.questionUiList
-                                ),
-                                loadingPage = false,
-                                error = null
-                            )
-                        }
-                    } else {
-                        uiStateListener.value =
-                            state.copy(
-                                loadingPage = false,
-                                error = ErrorState.Error()
-                            )
-                    }
-                }.catch {
-                    debugLog { "fetch questions by id error ${it.localizedMessage}" }
-                    uiStateListener.value =
-                        state.copy(error = it.toErrorState(), loadingPage = false)
-                }
-                .collect()
-        }
-    }
-
-    fun clickBack() {
-        if (state.data.questionUIList.isNotEmpty()) {
-            uiStateListener.value = state.copy(
-                data = state.data.copy(
-                    questionUIList = listOf()
-                )
-            )
-        } else {
-            uiStateListener.value = state.copy(
-                data = state.data.copy(
-                    onBack = true
-                )
-            )
-        }
-    }
-
     fun navigateBack() = viewModelScope.launch {
         val uiState = dataState.uiState
         if (uiState is QuestionnairesUiState.Body
@@ -340,7 +229,7 @@ class QuestionnairesFlowViewModel @Inject constructor(
         fetchQuestionnairesDetails()
     }
 
-    fun sendAnswers(button: ColorfulButtonUi) = viewModelScope.launch {
+    fun sendAnswers() = viewModelScope.launch {
         val checkedComponents = dataState.components.map { component ->
             when (component) {
                 is CheckboxListUi -> {
@@ -482,11 +371,6 @@ class QuestionnairesFlowViewModel @Inject constructor(
 
     @Immutable
     data class QuestionnaireState(
-        val message: String = "",
-        val questionnaireTypeUIList: List<QuestionnaireTypeUI> = listOf(),
-        val questionUIList: List<QuestionUI> = listOf(),
-        val onBack: Boolean = false,
-
         val uiState: QuestionnairesUiState = QuestionnairesUiState.Loading,
         val currentWho: String? = null,
         val title: String = "",

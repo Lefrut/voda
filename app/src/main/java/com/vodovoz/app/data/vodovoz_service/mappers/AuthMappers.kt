@@ -1,8 +1,8 @@
 package com.vodovoz.app.data.vodovoz_service.mappers
 
+import com.vodovoz.app.data.vodovoz_service.model.auth.AuthDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.auth.KNOPKA_AUTH_DTO
 import com.vodovoz.app.data.vodovoz_service.model.auth.LoginByPhoneDTO
-import com.vodovoz.app.data.vodovoz_service.model.auth.AuthDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.auth.RequestCodeDTO
 import com.vodovoz.app.data.vodovoz_service.model.auth.UserAuthInfoDTO
 import com.vodovoz.app.domain.general.model.ColorfulButtonModel

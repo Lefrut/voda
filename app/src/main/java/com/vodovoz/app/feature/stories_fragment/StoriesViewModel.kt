@@ -7,11 +7,10 @@ import com.vodovoz.app.common.content.Event
 import com.vodovoz.app.common.content.PagingContractViewModel
 import com.vodovoz.app.common.content.State
 import com.vodovoz.app.common.content.updateData
-import com.vodovoz.app.data.MainRepository
 import com.vodovoz.app.design_system.model.StoryUi
 import com.vodovoz.app.design_system.model.mapToUi
+import com.vodovoz.app.domain.general.model.VodovozAction
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
-import com.vodovoz.app.ui.model.HistoryUI
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
@@ -22,9 +21,8 @@ import javax.inject.Inject
 @HiltViewModel
 class StoriesViewModel @Inject constructor(
     savedState: SavedStateHandle,
-    private val repository: MainRepository,
     private val vodovozServiceRepository: VodovozServiceRepository,
-) : PagingContractViewModel<StoriesViewModel.HistoriesSliderState, StoriesViewModel.HistoriesSliderEvents>(
+) : PagingContractViewModel<StoriesViewModel.HistoriesSliderState, StoriesViewModel.StoriesEvents>(
     HistoriesSliderState()
 ) {
 
@@ -107,7 +105,7 @@ class StoriesViewModel @Inject constructor(
     }
 
     fun navigateBack() = viewModelScope.launch {
-        eventListener.emit(HistoriesSliderEvents.GoBack)
+        eventListener.emit(StoriesEvents.GoBack)
     }
 
     fun changeStoryIndex(currentStoryPage: Int) = viewModelScope.launch {
@@ -128,11 +126,11 @@ class StoriesViewModel @Inject constructor(
 
         when {
             isFirstPage && isFirstStory -> {
-                eventListener.emit(HistoriesSliderEvents.GoBack)
+                eventListener.emit(StoriesEvents.GoBack)
             }
             isFirstPage -> {
                 val prevStoryIndex = dataState.currentStoryIndex - 1
-                eventListener.emit(HistoriesSliderEvents.ChangePagerIndex(prevStoryIndex))
+                eventListener.emit(StoriesEvents.ChangePagerIndex(prevStoryIndex))
             }
             else -> {
                 uiStateListener.updateData { state ->
@@ -156,11 +154,11 @@ class StoriesViewModel @Inject constructor(
                 uiStateListener.updateData { state ->
                     state.copy(storyIsPlay = false)
                 }
-                eventListener.emit(HistoriesSliderEvents.GoBack)
+                eventListener.emit(StoriesEvents.GoBack)
             }
             isLastPage -> {
                 eventListener.emit(
-                    HistoriesSliderEvents.ChangePagerIndex(dataState.currentStoryIndex + 1)
+                    StoriesEvents.ChangePagerIndex(dataState.currentStoryIndex + 1)
                 )
             }
             else -> {
@@ -171,13 +169,17 @@ class StoriesViewModel @Inject constructor(
         }
     }
 
+    fun activateButtonAction(action: VodovozAction){
+        viewModelScope.launch {
+            eventListener.emit(StoriesEvents.ActivateAction(action))
+        }
+    }
 
-    sealed class HistoriesSliderEvents : Event {
-        data object GoToProfile : HistoriesSliderEvents()
 
-        data object GoBack : HistoriesSliderEvents()
-
-        data class ChangePagerIndex(val newStoryIndex: Int) : HistoriesSliderEvents()
+    sealed class StoriesEvents : Event {
+        data object GoBack : StoriesEvents()
+        data class ChangePagerIndex(val newStoryIndex: Int) : StoriesEvents()
+        data class ActivateAction(val action: VodovozAction) : StoriesEvents()
     }
 
     @Immutable

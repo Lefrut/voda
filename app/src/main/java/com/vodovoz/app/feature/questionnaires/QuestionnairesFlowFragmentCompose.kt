@@ -63,7 +63,6 @@ class QuestionnairesFlowFragment : Fragment() {
     @Inject
     lateinit var siteStateManager: SiteStateManager
 
-    private var threeFingerTouchCount = 0
 
     override fun onStart() {
         super.onStart()
@@ -75,18 +74,13 @@ class QuestionnairesFlowFragment : Fragment() {
         tabManager.changeTabVisibility(true)
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        viewModel.fetchQuestionnaireTypes()
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View {
         return ComposeView(requireContext()).apply {
-            setViewCompositionStrategy(ViewCompositionStrategy.Default)
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
 
             setContent {
                 VodovozTheme {
@@ -139,7 +133,7 @@ class QuestionnairesFlowFragment : Fragment() {
                     }
 
 
-                    if(viewState.showCancelDialog){
+                    if (viewState.showCancelDialog) {
                         VodovozDialog(
                             title = stringResource(R.string.questionnaire_cancel_title),
                             description = stringResource(R.string.questionnaire_cancel_description),
@@ -155,7 +149,7 @@ class QuestionnairesFlowFragment : Fragment() {
                     }
 
 
-                    LifecycleEffect(arg2 = snackbarHostState) {
+                    LifecycleEffect(snackbarHostState) {
                         viewModel.observeEvent().collect { event ->
                             when (event) {
                                 QuestionnairesFlowViewModel.QuestionnaireEvents.GoBack -> {
@@ -197,6 +191,8 @@ class QuestionnairesFlowFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         setBackDoor()
     }
+
+    private var threeFingerTouchCount = 0
 
     @SuppressLint("ClickableViewAccessibility")
     private fun setBackDoor() {

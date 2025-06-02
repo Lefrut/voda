@@ -10,7 +10,6 @@ import com.vodovoz.app.common.cart.CartManager
 import com.vodovoz.app.common.content.Event
 import com.vodovoz.app.common.content.State
 import com.vodovoz.app.common.like.LikeManager
-import com.vodovoz.app.common.product.rating.RatingProductManager
 import com.vodovoz.app.design_system.model.BrandCategoryItemUi
 import com.vodovoz.app.design_system.model.BuyButtonUi
 import com.vodovoz.app.design_system.model.ColorfulButtonUi
@@ -54,7 +53,6 @@ import kotlin.math.roundToInt
 class ProductDetailsFlowViewModel @Inject constructor(
     private val cartManager: CartManager,
     private val likeManager: LikeManager,
-    private val ratingProductManager: RatingProductManager,
     private val accountManager: AccountManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val aboutProductManager: AboutProductManager,
@@ -217,11 +215,6 @@ class ProductDetailsFlowViewModel @Inject constructor(
         val productDetails = state.productDetails
         cartManager.change(productDetails.id, productDetails.cartQuantity - 1)
     }
-
-    fun changeRating(productId: Long, rating: Float, oldRating: Float) = viewModelScope.launch {
-        ratingProductManager.rate(productId, rating = rating, oldRating = oldRating)
-    }
-
 
     fun showOrHideDetailText() = viewModelScope.launch {
         uiStateListener.update { s ->

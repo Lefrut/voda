@@ -14,7 +14,6 @@ import com.vodovoz.app.common.content.State
 import com.vodovoz.app.common.content.itemadapter.Item
 import com.vodovoz.app.common.content.updateData
 import com.vodovoz.app.common.like.LikeManager
-import com.vodovoz.app.common.product.rating.RatingProductManager
 import com.vodovoz.app.design_system.model.ProductUi
 import com.vodovoz.app.design_system.model.VodovozPlaceholderUi
 import com.vodovoz.app.design_system.model.toUi
@@ -28,9 +27,6 @@ import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.feature.home.model.CategoryUi
 import com.vodovoz.app.feature.product_comments.model.SortUi
 import com.vodovoz.app.feature.product_comments.model.toDomain
-import com.vodovoz.app.ui.model.CategoryDetailUI
-import com.vodovoz.app.ui.model.CategoryUI
-import com.vodovoz.app.ui.model.SortTypeUI
 import com.vodovoz.app.ui.paging.PagingDataListener
 import com.vodovoz.app.ui.paging.copy
 import com.vodovoz.app.ui.paging.emptyCombinedLoadStates
@@ -334,20 +330,6 @@ class FavoriteFlowViewModel @Inject constructor(
 
     @Immutable
     data class FavoriteState(
-        val favoriteCategory: CategoryUI? = null,
-        val bestForYouCategoryDetailUI: CategoryDetailUI? = null,
-        val availableTitle: String? = null,
-        val notAvailableTitle: String? = null,
-        val sortType: SortTypeUI = SortTypeUI(),
-        val isAvailable: Boolean = true,
-        val selectedCategoryId: Long = -1,
-        val isFirstLoadSorted: Boolean = false,
-        val itemsList: List<Item> = emptyList(),
-        val layoutManager: String = LINEAR,
-        val emptyTitle: String? = null,
-        val emptyMessage: String? = null,
-        val scrollToTop: Boolean = false,
-
         val productsSection: ProductsSectionUi = ProductsSectionUi.Empty,
         val currentSort: SortUi = SortUi.Empty,
         val currentCategory: CategoryUi = CategoryUi.Empty,
@@ -370,10 +352,5 @@ class FavoriteFlowViewModel @Inject constructor(
 
         data object Error : FavoriteUiState
 
-    }
-
-    companion object {
-        const val LINEAR = "linear"
-        const val GRID = "grid"
     }
 }

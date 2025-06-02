@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.key
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
@@ -17,7 +18,7 @@ import com.vodovoz.app.design_system.composables.tab_row.VodovozScrollableTabRow
 import com.vodovoz.app.feature.home.model.CategoryUi
 import com.vodovoz.app.util.extensions.indexOfOrNull
 
-@Suppress("NonSkippableComposable")
+
 @Composable
 fun ProductListCategoriesRow(
     modifier: Modifier = Modifier,
@@ -58,11 +59,13 @@ fun ProductListCategoriesRow(
         }
 
         categories.forEach { category ->
-            VodovozChip(
-                text = category.name,
-                selected = category == currentCategory,
-                onSelect = { onCategoryClick(category) }
-            )
+            key(category.id) {
+                VodovozChip(
+                    text = category.name,
+                    selected = category == currentCategory,
+                    onSelect = { onCategoryClick(category) }
+                )
+            }
         }
     }
 }

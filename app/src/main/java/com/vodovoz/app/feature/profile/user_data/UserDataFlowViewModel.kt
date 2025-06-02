@@ -13,13 +13,13 @@ import com.vodovoz.app.common.media.MediaManager
 import com.vodovoz.app.common.resources.ResourcesProvider
 import com.vodovoz.app.domain.general.model.UserNotLoginException
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
-import com.vodovoz.app.feature.preorder.model.FieldUi
-import com.vodovoz.app.feature.preorder.model.checkFields
-import com.vodovoz.app.feature.preorder.model.mapToDomain
+import com.vodovoz.app.design_system.model.widgets.FieldUi
+import com.vodovoz.app.design_system.model.widgets.checkFields
+import com.vodovoz.app.design_system.model.widgets.mapToDomain
+import com.vodovoz.app.design_system.model.widgets.mapToUi
 import com.vodovoz.app.feature.preorder.model.toUi
-import com.vodovoz.app.feature.preorder.model.updateFieldAndResetError
-import com.vodovoz.app.feature.preorder.model.updateFieldValueAndResetError
-import com.vodovoz.app.ui.model.UserDataUI
+import com.vodovoz.app.design_system.model.widgets.updateFieldAndResetError
+import com.vodovoz.app.design_system.model.widgets.updateFieldValueAndResetError
 import com.vodovoz.app.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -64,7 +64,7 @@ class UserDataFlowViewModel @Inject constructor(
                 val photoModel = userData.photo
                 s.copy(
                     title = userData.title,
-                    fields = userData.fields.map { field -> field.toUi() },
+                    fields = userData.fields.mapToUi(),
                     photo = photoModel.imageUrl,
                     photoDescription = photoModel.description,
                     photoTitle = photoModel.title,
@@ -243,10 +243,6 @@ class UserDataFlowViewModel @Inject constructor(
 
     @Immutable
     data class UserDataState(
-        val item: UserDataUI? = null,
-        val canChangeBirthDay: Boolean = true,
-        val showPassword: Boolean = false,
-
         val fields: List<FieldUi> = emptyList(),
         val title: String = "",
         val photo: String = "",

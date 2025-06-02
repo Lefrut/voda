@@ -16,7 +16,6 @@ import com.vodovoz.app.common.webview.model.WebViewEvents
 import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.effects.LifecycleEffect
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.flow.collect
 import javax.inject.Inject
 
 @AndroidEntryPoint

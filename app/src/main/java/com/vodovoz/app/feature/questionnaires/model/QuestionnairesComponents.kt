@@ -4,7 +4,8 @@ import androidx.compose.runtime.Immutable
 import com.vodovoz.app.domain.general.model.ConditionModel
 import com.vodovoz.app.domain.general.model.QuestionnairesItemModel
 import com.vodovoz.app.domain.general.model.toFieldModel
-import com.vodovoz.app.feature.preorder.model.FieldUi
+import com.vodovoz.app.design_system.model.widgets.FieldUi
+import com.vodovoz.app.design_system.model.widgets.toUi
 import com.vodovoz.app.feature.preorder.model.toUi
 
 @Immutable

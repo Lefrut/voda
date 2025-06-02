@@ -15,8 +15,6 @@ import com.vodovoz.app.common.tab.TabManager
 import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.effects.LifecycleEffect
 import com.vodovoz.app.feature.categories.model.CategoriesEvent
-import com.vodovoz.app.feature.home.model.CategoryUi
-import com.vodovoz.app.feature.home.model.PopularCategoryUi
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -46,7 +44,8 @@ class CategoriesFragment : Fragment() {
         savedInstanceState: Bundle?,
     ): View {
         return ComposeView(requireContext()).apply {
-            setViewCompositionStrategy(ViewCompositionStrategy.Default)
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+
             setContent {
                 VodovozTheme {
                     val viewState by viewModel.state.collectAsStateWithLifecycle()

@@ -18,34 +18,26 @@ import com.vodovoz.app.design_system.model.ColorfulButtonUi
 import com.vodovoz.app.design_system.model.VodovozPlaceholderUi
 import com.vodovoz.app.design_system.model.toUi
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
-import com.vodovoz.app.feature.preorder.model.EmptyTextValidator
-import com.vodovoz.app.feature.preorder.model.FieldUi
-import com.vodovoz.app.feature.preorder.model.KeyboardTypeValidator
-import com.vodovoz.app.feature.preorder.model.NameValidator
-import com.vodovoz.app.feature.preorder.model.NoRequiredValidator
-import com.vodovoz.app.feature.preorder.model.PhoneNumberValidator
-import com.vodovoz.app.feature.preorder.model.checkFields
-import com.vodovoz.app.feature.preorder.model.getErrorText
-import com.vodovoz.app.feature.preorder.model.mapToDomain
-import com.vodovoz.app.feature.preorder.model.mapToUi
-import com.vodovoz.app.feature.preorder.model.updateField
-import com.vodovoz.app.mapper.ServiceOrderFormFieldMapper.mapToUI
-import com.vodovoz.app.ui.model.ServiceOrderFormFieldUI
-import com.vodovoz.app.util.extensions.debugLog
+import com.vodovoz.app.design_system.model.widgets.EmptyTextValidator
+import com.vodovoz.app.design_system.model.widgets.FieldUi
+import com.vodovoz.app.design_system.model.widgets.KeyboardTypeValidator
+import com.vodovoz.app.design_system.model.widgets.NameValidator
+import com.vodovoz.app.design_system.model.widgets.NoRequiredValidator
+import com.vodovoz.app.design_system.model.widgets.PhoneNumberValidator
+import com.vodovoz.app.design_system.model.widgets.checkFields
+import com.vodovoz.app.design_system.model.widgets.getErrorText
+import com.vodovoz.app.design_system.model.widgets.mapToDomain
+import com.vodovoz.app.design_system.model.widgets.mapToUi
+import com.vodovoz.app.design_system.model.widgets.updateField
 import com.vodovoz.app.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 @Stable
 class ServiceOrderViewModel @Inject constructor(
-    private val repository: MainRepository,
-    private val accountManager: AccountManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val resourceProvider: ResourcesProvider,
     savedStateHandle: SavedStateHandle,
@@ -57,7 +49,9 @@ class ServiceOrderViewModel @Inject constructor(
     private val serviceType = savedStateHandle.get<String>("serviceType") ?: navigateBack().run { "" }
 
     init {
-        fetchServiceOrderDetails()
+        viewModelScope.launch { delay(200L) }.invokeOnCompletion {
+            fetchServiceOrderDetails()
+        }
     }
 
     private fun fetchServiceOrderDetails() = viewModelScope.launch {
@@ -86,100 +80,6 @@ class ServiceOrderViewModel @Inject constructor(
 
     fun navigateBack() = viewModelScope.launch {
         eventListener.emit(ServiceOrderEvent.GoBack)
-    }
-
-    fun fetchData() {
-
-        viewModelScope.launch {
-            uiStateListener.value =
-                state.copy(isFirstLoad = true, loadingPage = true, data = ServiceOrderState())
-            val userId = accountManager.fetchAccountId()
-            if (userId == null) {
-                uiStateListener.value =
-                    state.copy(
-                        error = ErrorState.Error(
-                            messageInfo = "Авторизуйтесь, пожалуйста",
-                            desc = ""
-                        ),
-                        loadingPage = false
-                    )
-                return@launch
-            }
-            flow {
-                emit(
-                    repository.fetchFormForOrderService(
-                        type = serviceType,
-                        userId = userId
-                    )
-                )
-            }
-                .onEach { response ->
-                    if (response is ResponseEntity.Success) {
-                        response.data.mapToUI().let { data ->
-                            uiStateListener.value = state.copy(
-                                data = state.data.copy(
-                                    serviceOrderFormFieldUIListMLD = data
-                                ),
-                                loadingPage = false,
-                                error = null
-                            )
-                        }
-                    } else {
-                        uiStateListener.value =
-                            state.copy(
-                                loadingPage = false,
-                                error = ErrorState.Error()
-                            )
-                    }
-                }
-                .catch {
-                    debugLog { "fetch Form For Order error ${it.localizedMessage}" }
-                    uiStateListener.value =
-                        state.copy(error = it.toErrorState(), loadingPage = false)
-                }
-                .collect()
-        }
-    }
-
-    fun orderService(value: String) {
-
-        viewModelScope.launch {
-            uiStateListener.value =
-                state.copy(isFirstLoad = true, loadingPage = true, data = ServiceOrderState())
-            val userId = accountManager.fetchAccountId() ?: return@launch
-            flow {
-                emit(
-                    repository.orderService(
-                        type = serviceType,
-                        userId = userId,
-                        value = value
-                    )
-                )
-            }
-                .onEach { response ->
-                    if (response is ResponseEntity.Success) {
-                        uiStateListener.value = state.copy(
-                            data = state.data.copy(
-                                successMessageMLD = response.data
-                            ),
-                            loadingPage = false,
-                            error = null
-                        )
-                    } else {
-                        uiStateListener.value =
-                            state.copy(
-                                loadingPage = false,
-                                error = ErrorState.Error()
-                            )
-                    }
-                }
-                .catch {
-                    debugLog { "fetch order Service error ${it.localizedMessage}" }
-                    uiStateListener.value =
-                        state.copy(error = it.toErrorState(), loadingPage = false)
-                }
-                .collect()
-        }
     }
 
     fun doOrderService() = viewModelScope.launch {
@@ -257,9 +157,6 @@ class ServiceOrderViewModel @Inject constructor(
 
     @Immutable
     data class ServiceOrderState(
-        val serviceOrderFormFieldUIListMLD: List<ServiceOrderFormFieldUI> = listOf(),
-        val successMessageMLD: String = "",
-
         val title: String = "",
         val subtitle: String = "",
         val fields: List<FieldUi> = emptyList(),

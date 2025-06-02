@@ -1,0 +1,49 @@
+package com.vodovoz.app.common.model
+
+import com.vodovoz.app.common.model.VodovozBoolean.False
+import com.vodovoz.app.common.model.VodovozBoolean.True
+
+enum class VodovozBoolean(val value: String) {
+    True("Y"), False("N");
+
+    companion object
+
+
+}
+
+
+val VodovozBoolean.boolean: Boolean
+    get() {
+        return when(this){
+            True -> true
+            False -> false
+        }
+    }
+
+fun VodovozBoolean.toBoolean(): Boolean {
+    return when (this) {
+        True -> true
+        False -> false
+    }
+}
+
+fun VodovozBoolean.Companion.from(value: String?): VodovozBoolean {
+    return when (value) {
+        True.value -> { True }
+
+        else -> { False }
+    }
+}
+
+fun VodovozBoolean.Companion.from(value: Boolean?): VodovozBoolean {
+    return when (value) {
+        true -> { True }
+
+        else -> { False }
+    }
+}
+
+
+infix fun VodovozBoolean.equalsTo(boolean: Boolean?): Boolean = toBoolean() == boolean
+
+infix fun VodovozBoolean.equalsTo(string: String?): Boolean = VodovozBoolean.from(string) == this

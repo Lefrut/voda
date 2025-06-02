@@ -13,7 +13,6 @@ import com.vodovoz.app.common.content.State
 import com.vodovoz.app.common.content.toErrorState
 import com.vodovoz.app.common.content.updateData
 import com.vodovoz.app.common.like.LikeManager
-import com.vodovoz.app.common.product.rating.RatingProductManager
 import com.vodovoz.app.common.resources.ResourcesProvider
 import com.vodovoz.app.core.network.VodovozWebConfig
 import com.vodovoz.app.data.MainRepository
@@ -71,7 +70,6 @@ class HomeFlowViewModel @Inject constructor(
     private val repository: MainRepository,
     private val cartManager: CartManager,
     private val likeManager: LikeManager,
-    private val ratingProductManager: RatingProductManager,
     private val accountManager: AccountManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val resourcesProvider: ResourcesProvider,
@@ -319,12 +317,6 @@ class HomeFlowViewModel @Inject constructor(
         }
     }
 
-
-    fun changeRating(productId: Long, rating: Float, oldRating: Float) {
-        viewModelScope.launch {
-            ratingProductManager.rate(productId, rating = rating, oldRating = oldRating)
-        }
-    }
 
     fun repeatOrder(orderId: Long) {
         val userId =

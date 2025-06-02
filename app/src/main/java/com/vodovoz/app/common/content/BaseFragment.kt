@@ -1,25 +1,17 @@
 package com.vodovoz.app.common.content
 
-import android.content.Context
-import android.content.res.ColorStateList
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.inputmethod.InputMethodManager
-import android.widget.TextView
-import androidx.compose.ui.platform.ComposeView
 import androidx.core.content.ContextCompat
 import androidx.core.view.MenuProvider
 import androidx.core.view.isVisible
-import androidx.core.widget.ImageViewCompat
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
-import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
 import com.vodovoz.app.R
 import com.vodovoz.app.databinding.FragmentBaseFlowBinding
-import com.vodovoz.app.util.extensions.drawable
 
 abstract class BaseFragment : Fragment() {
 

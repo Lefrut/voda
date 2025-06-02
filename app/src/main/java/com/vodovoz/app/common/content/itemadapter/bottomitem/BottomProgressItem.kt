@@ -1,6 +1,5 @@
 package com.vodovoz.app.common.content.itemadapter.bottomitem
 
-import com.vodovoz.app.R
 import com.vodovoz.app.common.content.itemadapter.Item
 import java.util.UUID
 

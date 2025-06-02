@@ -17,7 +17,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.vodovoz.app.R
 import com.vodovoz.app.design_system.composables.button.VodovozButton
-import com.vodovoz.app.feature.preorder.model.FieldUi
+import com.vodovoz.app.design_system.model.widgets.FieldUi
 
 @Suppress("NonSkippableComposable")
 @Composable

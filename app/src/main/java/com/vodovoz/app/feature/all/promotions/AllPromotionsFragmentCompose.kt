@@ -25,12 +25,6 @@ class AllPromotionsFragment : Fragment() {
 
     private val viewModel: AllPromotionsFlowViewModel by viewModels()
 
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        viewModel.firstLoadSorted()
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -38,6 +32,7 @@ class AllPromotionsFragment : Fragment() {
     ): View {
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+
             setContent {
                 VodovozTheme {
                     val viewState by viewModel.observeUiState().collectAsStateWithLifecycle()
@@ -45,7 +40,7 @@ class AllPromotionsFragment : Fragment() {
 
                     when (viewState.data.uiState) {
                         AllPromotionsFlowViewModel.UiState.Error -> {
-                            NetworkErrorPlaceholder { viewModel.firstLoadSorted() }
+                            NetworkErrorPlaceholder { viewModel.fetchPromotions() }
                         }
 
                         else -> {

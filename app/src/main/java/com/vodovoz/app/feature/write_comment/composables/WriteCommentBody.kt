@@ -42,7 +42,7 @@ import com.vodovoz.app.R
 import com.vodovoz.app.design_system.composables.button.VodovozButton
 import com.vodovoz.app.design_system.composables.decoration.VodovozRatingBar
 import com.vodovoz.app.design_system.composables.text_fields.VodovozTextField
-import com.vodovoz.app.feature.preorder.model.FieldUi
+import com.vodovoz.app.design_system.model.widgets.FieldUi
 
 @Suppress("NonSkippableComposable")
 @Composable

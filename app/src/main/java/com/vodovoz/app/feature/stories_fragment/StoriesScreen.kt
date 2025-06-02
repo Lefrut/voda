@@ -183,7 +183,7 @@ fun StoriesScreen(
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 24.dp),
                     text = colorfulButton.name,
                     onClick = {
-
+                        viewModel.activateButtonAction(actionWithButton.action)
                     },
                     colors = ButtonDefaults.filledTonalButtonColors(
                         containerColor = colorfulButton.backgroundColor,

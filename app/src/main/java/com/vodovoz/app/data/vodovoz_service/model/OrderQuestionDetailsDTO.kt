@@ -1,10 +1,8 @@
 package com.vodovoz.app.data.vodovoz_service.model
 
 
-import com.squareup.moshi.Json
 import androidx.annotation.Keep
-import com.vodovoz.app.data.vodovoz_service.model.auth.KNOPKA_AUTH_DTO
-import com.vodovoz.app.data.vodovoz_service.model.product_details.KNOPKA_ANALOG_DTO
+import com.squareup.moshi.Json
 import com.vodovoz.app.data.vodovoz_service.model.user_data.POLE_DTO
 
 @Keep

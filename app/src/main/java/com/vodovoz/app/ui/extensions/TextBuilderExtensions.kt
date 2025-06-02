@@ -1,8 +1,6 @@
 package com.vodovoz.app.ui.extensions
 
 import android.widget.TextView
-import java.util.Locale
-import kotlin.math.roundToInt
 
 object TextBuilderExtensions {
 

@@ -41,8 +41,8 @@ fun QuestionnairesScreen(
                 .verticalScroll(scrollState),
             components = viewState.components,
             button = viewState.button,
-            onButtonClick = { button ->
-                viewModel.sendAnswers(button)
+            onButtonClick = {
+                viewModel.sendAnswers()
             },
             onFieldChange = { field, newValue ->
                 viewModel.updateText(field.id, newValue.value)

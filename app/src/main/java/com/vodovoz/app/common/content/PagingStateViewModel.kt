@@ -1,8 +1,6 @@
 package com.vodovoz.app.common.content
 
-import androidx.annotation.DrawableRes
 import androidx.lifecycle.ViewModel
-import com.vodovoz.app.R
 import com.vodovoz.app.common.content.itemadapter.Item
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow

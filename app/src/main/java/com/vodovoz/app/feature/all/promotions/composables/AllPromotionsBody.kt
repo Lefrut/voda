@@ -14,7 +14,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
-import androidx.paging.compose.itemKey
 import com.valentinilk.shimmer.ShimmerBounds
 import com.valentinilk.shimmer.rememberShimmer
 import com.vodovoz.app.design_system.composables.chip.VodovozChip
@@ -23,7 +22,6 @@ import com.vodovoz.app.design_system.composables.tab_row.VodovozScrollableTabRow
 import com.vodovoz.app.design_system.model.PromotionCategoryUi
 import com.vodovoz.app.design_system.model.PromotionUi
 import com.vodovoz.app.util.extensions.indexOfOrNull
-import kotlin.random.Random
 
 @Suppress("NonSkippableComposable")
 @Composable

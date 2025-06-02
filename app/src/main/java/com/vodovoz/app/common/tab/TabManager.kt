@@ -1,10 +1,7 @@
 package com.vodovoz.app.common.tab
 
 import com.vodovoz.app.R
-import com.vodovoz.app.data.MainRepository
-import com.vodovoz.app.data.model.common.ResponseEntity
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
-import com.vodovoz.app.mapper.BottomCartMapper.mapToUI
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -12,8 +9,6 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch

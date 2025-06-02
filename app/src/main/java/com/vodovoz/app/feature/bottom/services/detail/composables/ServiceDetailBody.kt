@@ -1,18 +1,14 @@
 package com.vodovoz.app.feature.bottom.services.detail.composables
 
 import android.annotation.SuppressLint
-import android.view.View
 import android.view.ViewGroup
 import android.webkit.WebSettings
-import android.webkit.WebSettings.LOAD_CACHE_ELSE_NETWORK
-import android.webkit.WebSettings.LOAD_CACHE_ONLY
 import android.webkit.WebView
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -25,15 +21,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import coil3.compose.AsyncImage
 import coil3.compose.rememberAsyncImagePainter
-import coil3.request.ImageRequest
-import coil3.request.crossfade
 import com.vodovoz.app.core.network.ApiConfig
-import com.vodovoz.app.core.network.VodovozWebConfig
 import com.vodovoz.app.design_system.composables.button.VodovozButtonsColumn
 import com.vodovoz.app.design_system.composables.card.GridProductCard
 import com.vodovoz.app.design_system.model.ColorfulButtonUi

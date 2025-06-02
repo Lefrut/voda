@@ -17,7 +17,7 @@ import com.vodovoz.app.feature.buy_certificate.model.BuyCertificateErrorsUi
 import com.vodovoz.app.feature.buy_certificate.model.BuyCertificateTabUi
 import com.vodovoz.app.feature.buy_certificate.model.CertificateUi
 import com.vodovoz.app.feature.buy_certificate.model.FAQUi
-import com.vodovoz.app.feature.preorder.model.FieldUi
+import com.vodovoz.app.design_system.model.widgets.FieldUi
 
 @Suppress("NonSkippableComposable")
 @Composable

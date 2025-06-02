@@ -251,7 +251,7 @@ interface VodovozService {
         @Query("userid") userId: Long?,
     ): Response<VodovozResponseDTO<NotificationSettingsDetailsDTO>>
 
-    @GET("osnova/form/uvedomlenie.php?action=sms")
+    @GET("osnova/form/uvedomlenie.php?action=otpiska")
     suspend fun updateNotificationSettings(
         @Query("userid") userId: Long?,
         @QueryMap queries: Map<String, String>,

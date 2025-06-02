@@ -1,6 +1,5 @@
 package com.vodovoz.app.feature.home
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.gestures.awaitDragOrCancellation
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
@@ -27,7 +26,6 @@ import com.vodovoz.app.feature.home.composables.HomeBody
 import com.vodovoz.app.feature.home.composables.HomeLoadingPlaceholder
 import com.vodovoz.app.feature.home.composables.HomeTopBar
 import com.vodovoz.app.feature.home.composables.SpecialPromotionBottomSheet
-import com.vodovoz.app.feature.home.composables.UnratedProductsBottomSheet
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

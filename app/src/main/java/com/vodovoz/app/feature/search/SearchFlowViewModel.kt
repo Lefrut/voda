@@ -3,24 +3,13 @@ package com.vodovoz.app.feature.search
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import com.vodovoz.app.common.account.AccountManager
 import com.vodovoz.app.common.cart.CartManager
-import com.vodovoz.app.common.content.ErrorState
 import com.vodovoz.app.common.content.Event
 import com.vodovoz.app.common.content.PagingContractViewModel
 import com.vodovoz.app.common.content.State
-import com.vodovoz.app.common.content.itemadapter.Item
-import com.vodovoz.app.common.content.itemadapter.bottomitem.BottomProgressItem
-import com.vodovoz.app.common.content.toErrorState
 import com.vodovoz.app.common.content.updateData
 import com.vodovoz.app.common.like.LikeManager
-import com.vodovoz.app.common.product.rating.RatingProductManager
 import com.vodovoz.app.common.search.SearchManager
-import com.vodovoz.app.core.network.ApiConfig
-import com.vodovoz.app.data.MainRepository
-import com.vodovoz.app.data.model.common.ResponseEntity
-import com.vodovoz.app.data.model.common.SearchQueryHeaderResponse
-import com.vodovoz.app.data.model.common.SearchQueryResponse
 import com.vodovoz.app.design_system.model.ProductUi
 import com.vodovoz.app.design_system.model.SectionUi
 import com.vodovoz.app.design_system.model.toUi
@@ -29,50 +18,25 @@ import com.vodovoz.app.design_system.model.withUpdatedFavorites
 import com.vodovoz.app.design_system.model.withUpdatedLoading
 import com.vodovoz.app.domain.general.model.EmptyResultException
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
-import com.vodovoz.app.feature.favorite.mapper.FavoritesMapper
-import com.vodovoz.app.mapper.CategoryMapper.mapToUI
-import com.vodovoz.app.mapper.DefaultSearchDataBundleMapper.mapToUI
-import com.vodovoz.app.mapper.ProductMapper.mapToUI
-import com.vodovoz.app.mapper.QuickSearchDataBundleMapper.mapToUI
-import com.vodovoz.app.ui.model.CategoryDetailUI
-import com.vodovoz.app.ui.model.CategoryUI
-import com.vodovoz.app.ui.model.ProductUI
-import com.vodovoz.app.ui.model.SortTypeUI
-import com.vodovoz.app.ui.model.custom.QuickQueryBundleUI
 import com.vodovoz.app.util.extensions.debounceWithMax
-import com.vodovoz.app.util.extensions.debugLog
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.singleOrNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import javax.inject.Inject
 
-@OptIn(FlowPreview::class)
 @HiltViewModel
 class SearchFlowViewModel @Inject constructor(
-    private val repository: MainRepository,
     private val cartManager: CartManager,
     private val likeManager: LikeManager,
-    private val ratingProductManager: RatingProductManager,
-    private val accountManager: AccountManager,
     private val searchManager: SearchManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
     savedStateHandle: SavedStateHandle,
@@ -324,19 +288,6 @@ class SearchFlowViewModel @Inject constructor(
 
     @Immutable
     data class SearchState(
-        val categoryHeader: CategoryUI? = null,
-        val popularCategoryDetail: CategoryDetailUI? = null,
-        val mayBeSearchDetail: CategoryDetailUI? = null,
-        val popularQuery: List<String> = emptyList(),
-        val historyQueries: List<String> = emptyList(),
-        val matchesQuery: QuickQueryBundleUI? = null,
-        val sortType: SortTypeUI = SortTypeUI(),
-        val selectedCategoryId: Long = -1,
-        val isFirstLoadSorted: Boolean = false,
-        val itemsList: List<Item> = emptyList(),
-        val layoutManager: String = LINEAR,
-        val scrollToTop: Boolean = false,
-
         val query: String = "",
         val matchingQueries: List<String> = emptyList(),
         val uiState: UiState = UiState.Loading,
@@ -350,10 +301,5 @@ class SearchFlowViewModel @Inject constructor(
         data class Empty(val image: String, val description: String) : UiState
         data object Error : UiState
 
-    }
-
-    companion object {
-        const val LINEAR = "linear"
-        const val GRID = "grid"
     }
 }

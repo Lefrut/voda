@@ -1,15 +1,20 @@
 package com.vodovoz.app.feature.categories
 
+import androidx.compose.runtime.Stable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.vodovoz.app.feature.categories.model.CategoriesEvent
 import com.vodovoz.app.feature.categories.model.CategoriesState
 import com.vodovoz.app.feature.home.model.CategoryUi
 import com.vodovoz.app.ui.mvi.MviViewModel
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class CategoriesViewModel(
+@HiltViewModel
+@Stable
+class CategoriesViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
 ) : MviViewModel<CategoriesState, CategoriesEvent>(CategoriesState()) {
 

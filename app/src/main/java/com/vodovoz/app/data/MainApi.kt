@@ -1,7 +1,6 @@
 package com.vodovoz.app.data
 
 import com.vodovoz.app.BuildConfig
-import com.vodovoz.app.data.model.common.UserReloginEntity
 import com.vodovoz.app.feature.search.qrcode.model.QrCodeModel
 import okhttp3.MultipartBody
 import okhttp3.ResponseBody
@@ -450,13 +449,6 @@ interface MainApi {
         @Query("email") email: String,
         @Query("pass") password: String,
     ): ResponseBody
-
-    // https://szorin.vodovoz.ru/newmobile/config/openuserid.php?userid=515&token=a6af096d-7aee-0694-b7d6-431f-b073-6258c34be4bb
-    @GET("/newmobile/config/openuserid.php")
-    suspend fun fetchReloginResponse(
-        @Query("userid") userId: Long,
-        @Query("token") token: String,
-    ): Response<UserReloginEntity>
 
     @GET
     suspend fun fetchAuthByPhoneResponse(

@@ -23,6 +23,8 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.fromHtml
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import coil3.compose.AsyncImagePainter
+import coil3.compose.rememberAsyncImagePainter
 import com.vodovoz.app.R
 import com.vodovoz.app.design_system.composables.ClickableIcon
 
@@ -36,10 +38,11 @@ fun EmptyResultPlaceholder(
     modifier: Modifier = Modifier,
     title: String,
     description: String,
-    imagePainter: Painter = painterResource(id = R.drawable.pic_search),
+    imagePainter: AsyncImagePainter? = null,
     item: EmptyResultPlaceholderItem = EmptyResultPlaceholderItem.None,
     onItemClick: () -> Unit = { },
 ) {
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -57,7 +60,7 @@ fun EmptyResultPlaceholder(
                 EmptyResultPlaceholderItem.Arrow -> {
                     ClickableIcon(
                         modifier = Modifier.clip(CircleShape),
-                        painter = painterResource(id = R.drawable.ic_arrow_left),
+                        iconId = R.drawable.ic_arrow_left,
                         tint = MaterialTheme.colorScheme.onBackground,
                         onClick = onItemClick
                     )
@@ -67,7 +70,7 @@ fun EmptyResultPlaceholder(
                     Spacer(modifier = Modifier.weight(1f))
                     ClickableIcon(
                         modifier = Modifier.clip(CircleShape),
-                        painter = painterResource(id = R.drawable.icon_close),
+                        iconId = R.drawable.icon_close,
                         tint = MaterialTheme.colorScheme.onBackground,
                         onClick = onItemClick
                     )
@@ -84,11 +87,13 @@ fun EmptyResultPlaceholder(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.padding(horizontal = 32.dp)
         ) {
-            Image(
-                painter = imagePainter,
-                contentDescription = null,
-                modifier = Modifier.size(80.dp)
-            )
+            imagePainter?.let {
+                Image(
+                    painter = imagePainter,
+                    contentDescription = null,
+                    modifier = Modifier.size(80.dp)
+                )
+            }
 
             Text(
                 modifier = Modifier.padding(top = 24.dp),

@@ -1,5 +1,6 @@
 package com.vodovoz.app.design_system.composables.tab_row
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateDpAsState
@@ -46,9 +47,10 @@ fun VodovozTabRow(
     contentPadding: PaddingValues = PaddingValues(4.dp),
     tabSpacing: Dp = 4.dp,
     selectedTabPosition: Int = 0,
-    animationSpec: AnimationSpec<Dp> = tween(durationMillis = 200, easing = LinearEasing),
     tabItems: @Composable () -> Unit,
 ) {
+
+
     Surface(
         modifier = modifier,
         color = MaterialTheme.colorScheme.surface,
@@ -106,7 +108,7 @@ fun VodovozTabRow(
                         Modifier
                             .tabIndicator(
                                 tabPositions.getOrNull(selectedTabPosition) ?: TabPosition.Empty,
-                                animationSpec
+                                tween(durationMillis = 200, easing = LinearEasing)
                             )
                             .fillMaxWidth()
                             .height(maxItemHeight.toDp())

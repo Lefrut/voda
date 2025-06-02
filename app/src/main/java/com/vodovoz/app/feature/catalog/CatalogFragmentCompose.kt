@@ -124,7 +124,7 @@ class CatalogFragment : Fragment() {
                     is CatalogFlowViewModel.CatalogEvents.ActivateVodovozAction -> {
                         event.action.activate(
                             navController = findNavController(),
-                            activity = requireActivity(),
+                            context = requireActivity(),
                             cookie = cookieManager.fetchCookieSessionId() ?: "",
                             tabManager = tabManager
                         )

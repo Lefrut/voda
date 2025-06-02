@@ -354,5 +354,9 @@
     </string>
     <string name="notification_dialog_accept">Настройки</string>
     <string name="notification_dialog_cancel">Отмена</string>
+    <string name="setting_notifications">Настройка уведомлений</string>
+
+    <string name="notification_settings_save_error">Не удалось сохранить изменения, попробуйте снова.</string>
+    <string name="notification_settings_validation_error">Не удалось сохранить изменения, ошибка валидации полей.</string>
 
 </resources>

@@ -2,36 +2,37 @@ package com.vodovoz.app.feature.profile.notification_settings.composables
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Switch
-import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.fromHtml
 import androidx.compose.ui.unit.dp
-import com.vodovoz.app.design_system.composables.swich.vodovozColors
+import com.vodovoz.app.design_system.composables.button.VodovozButtonsColumn
+import com.vodovoz.app.design_system.composables.swich.VodovozSwitch
 import com.vodovoz.app.design_system.composables.text_fields.VodovozTextField
-import com.vodovoz.app.feature.preorder.model.FieldUi
-import com.vodovoz.app.feature.profile.notification_settings.model.SwitchSectionUi
-import com.vodovoz.app.feature.profile.notification_settings.model.SwitchUi
+import com.vodovoz.app.design_system.model.ColorfulButtonUi
+import com.vodovoz.app.design_system.model.SectionUi
+import com.vodovoz.app.design_system.model.widgets.FieldUi
+import com.vodovoz.app.design_system.model.widgets.SwitchUi
+import com.vodovoz.app.design_system.model.widgets.WidgetUi
 
+@Suppress("NonSkippableComposable")
 @Composable
 fun NotificationSettingsBody(
     modifier: Modifier = Modifier,
-    switchSections: List<SwitchSectionUi> = emptyList(),
-    onSwitchChange: (SwitchUi, Boolean) -> Unit,
+    header: String,
+    sections: List<SectionUi<WidgetUi>>,
+    button: ColorfulButtonUi,
+    onWidgetChange: (WidgetUi, WidgetUi) -> Unit,
+    onSaveClick: () -> Unit,
 ) {
     Column(
         modifier = modifier
@@ -40,75 +41,71 @@ fun NotificationSettingsBody(
             .padding(vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
-        switchSections.forEach { switchSection ->
-            SwitchSectionItem(
-                data = switchSection,
-                onSwitchChange = onSwitchChange
+
+        Text(
+            modifier = Modifier.padding(horizontal = 16.dp),
+            text = header,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onBackground,
+        )
+
+        sections.forEach { switchSection ->
+            NotificationSectionColumn(
+                section = switchSection,
+                onWidgetChange = onWidgetChange
             )
         }
+
+        Spacer(modifier = Modifier.weight(1f))
+
+        VodovozButtonsColumn(
+            modifier = Modifier.padding(
+                vertical = 8.dp,
+                horizontal = 16.dp
+            ),
+            buttons = listOf(button),
+            onButtonClick = { onSaveClick() }
+        )
     }
 }
 
 @Composable
-fun SwitchSectionItem(
+fun NotificationSectionColumn(
     modifier: Modifier = Modifier,
-    data: SwitchSectionUi,
-    onSwitchChange: (SwitchUi, Boolean) -> Unit,
+    section: SectionUi<WidgetUi>,
+    onWidgetChange: (WidgetUi, WidgetUi) -> Unit,
 ) {
+
+
     Column(modifier = modifier) {
-        if (data.title.isNotEmpty()) {
+        if (section.title.isNotEmpty())
             Text(
                 modifier = Modifier.padding(horizontal = 16.dp),
-                text = data.title,
+                text = AnnotatedString.fromHtml(section.title.trim()),
                 color = MaterialTheme.colorScheme.onBackground,
-                style = MaterialTheme.typography.headlineSmall
+                style = MaterialTheme.typography.bodyMedium
             )
-        }
 
-        if (data.description.isNotEmpty()) {
-
-            Text(
-                modifier = Modifier.padding(top = 4.dp, start = 16.dp, end = 16.dp),
-                text = data.description,
-                color = MaterialTheme.colorScheme.surfaceTint,
-                style = MaterialTheme.typography.bodySmall
-            )
-        }
-
-
-        data.switches.forEachIndexed { index, switch ->
+        section.items.forEachIndexed { index, widget ->
             if (index == 0) {
-                Spacer(modifier = Modifier.height(16.dp))
                 HorizontalDivider(
                     thickness = 1.dp,
                     color = MaterialTheme.colorScheme.surfaceVariant
                 )
             }
 
-            Row(
-                modifier = Modifier
-                    .heightIn(64.dp)
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text(
-                    text = switch.name,
-                    modifier = Modifier.weight(1f),
-                    color = MaterialTheme.colorScheme.onBackground,
-                    style = MaterialTheme.typography.bodyMedium
-                )
+            when (widget) {
+                is FieldUi -> {
+                    VodovozTextField(
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        field = widget,
+                        onFieldChange = onWidgetChange
+                    )
+                }
 
-                Switch(
-                    modifier = Modifier
-                        .padding(start = 16.dp)
-                        .requiredHeight(32.dp),
-                    checked = switch.checked,
-                    onCheckedChange = {
-                        onSwitchChange(switch, it)
-                    },
-                    colors = SwitchDefaults.vodovozColors()
-                )
+                is SwitchUi -> {
+                    VodovozSwitch(switch = widget, onSwitchChange = onWidgetChange)
+                }
             }
 
             HorizontalDivider(
@@ -117,27 +114,5 @@ fun SwitchSectionItem(
             )
         }
     }
-}
-
-@Composable
-fun PhoneItem(
-    title: String,
-    field: FieldUi,
-    onFieldChange: (FieldUi, FieldUi) -> Unit,
-) {
-    Column(modifier = Modifier.padding(horizontal = 16.dp)) {
-        if (title.isNotEmpty()) {
-            Text(
-                modifier = Modifier.padding(bottom = 8.dp),
-                text = title,
-                color = MaterialTheme.colorScheme.onBackground,
-                style = MaterialTheme.typography.headlineSmall
-            )
-        }
-        VodovozTextField(
-            field = field, onFieldChange = onFieldChange
-        )
-    }
-
 }
 

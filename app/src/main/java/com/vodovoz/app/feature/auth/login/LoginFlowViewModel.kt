@@ -1,6 +1,7 @@
 package com.vodovoz.app.feature.auth.login
 
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.Stable
 import androidx.lifecycle.viewModelScope
 import com.vodovoz.app.R
 import com.vodovoz.app.common.account.AccountManager
@@ -13,12 +14,12 @@ import com.vodovoz.app.common.resources.ResourcesProvider
 import com.vodovoz.app.design_system.model.ColorfulButtonUi
 import com.vodovoz.app.design_system.model.toUi
 import com.vodovoz.app.design_system.model.updateButton
+import com.vodovoz.app.design_system.model.widgets.FieldUi
+import com.vodovoz.app.design_system.model.widgets.checkFields
+import com.vodovoz.app.design_system.model.widgets.mapToUi
+import com.vodovoz.app.design_system.model.widgets.updateFieldAndResetError
 import com.vodovoz.app.domain.general.model.TooManyRequestsException
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
-import com.vodovoz.app.feature.preorder.model.FieldUi
-import com.vodovoz.app.feature.preorder.model.checkFields
-import com.vodovoz.app.feature.preorder.model.mapToUi
-import com.vodovoz.app.feature.preorder.model.updateFieldAndResetError
 import com.vodovoz.app.feature.sitestate.SiteStateManager
 import com.vodovoz.app.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -27,6 +28,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
+@Stable
 class LoginFlowViewModel @Inject constructor(
     private val accountManager: AccountManager,
     private val siteStateManager: SiteStateManager,

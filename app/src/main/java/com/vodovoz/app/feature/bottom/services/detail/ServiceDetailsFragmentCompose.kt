@@ -16,13 +16,13 @@ import com.vodovoz.app.core.navigation.navigateToProductDetails
 import com.vodovoz.app.core.navigation.navigateToServiceOrder
 import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.effects.LifecycleEffect
-import com.vodovoz.app.feature.bottom.services.detail.model.ServiceDetailEvent
+import com.vodovoz.app.feature.bottom.services.detail.model.ServiceDetailsEvent
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class ServiceDetailFragment : Fragment() {
 
-    private val viewModel: ServiceDetailViewModel by viewModels()
+    private val viewModel: ServiceDetailsViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -56,19 +56,19 @@ class ServiceDetailFragment : Fragment() {
                     LifecycleEffect {
                         viewModel.events.collect { event ->
                             when (event) {
-                                ServiceDetailEvent.GoBack -> {
+                                ServiceDetailsEvent.GoBack -> {
                                     findNavController().popBackStack()
                                 }
 
-                                is ServiceDetailEvent.GoToAnalogs -> {
+                                is ServiceDetailsEvent.GoToAnalogs -> {
                                     findNavController().navigateToProductAnalogs(event.productId)
                                 }
 
-                                is ServiceDetailEvent.GoToProductDetails -> {
+                                is ServiceDetailsEvent.GoToProductDetails -> {
                                     findNavController().navigateToProductDetails(event.productId)
                                 }
 
-                                is ServiceDetailEvent.GoToServiceOrder -> {
+                                is ServiceDetailsEvent.GoToServiceOrder -> {
                                     findNavController().navigateToServiceOrder(event.serviceType)
                                 }
                             }

@@ -1,30 +1,20 @@
 package com.vodovoz.app.feature.cart.bottles
 
 import androidx.compose.runtime.Immutable
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.vodovoz.app.common.cart.CartManager
 import com.vodovoz.app.common.content.Event
 import com.vodovoz.app.common.content.PagingContractViewModel
 import com.vodovoz.app.common.content.State
-import com.vodovoz.app.common.content.stringToErrorState
 import com.vodovoz.app.common.content.updateData
-import com.vodovoz.app.data.MainRepository
-import com.vodovoz.app.data.model.common.ResponseEntity
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.feature.cart.bottles.model.BottleUi
 import com.vodovoz.app.feature.cart.bottles.model.mapToUi
-import com.vodovoz.app.mapper.BottleMapper.mapToUI
-import com.vodovoz.app.ui.model.BottleUI
 import com.vodovoz.app.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 

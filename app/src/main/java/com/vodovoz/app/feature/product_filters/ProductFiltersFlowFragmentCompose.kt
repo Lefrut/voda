@@ -104,7 +104,7 @@ class ProductFiltersFlowFragment : Fragment() {
                     }
 
 
-                    LifecycleEffect(arg2 = sliderState) {
+                    LifecycleEffect(sliderState) {
                         viewModel.observeEvent().collect { event ->
                             when (event) {
                                 is ProductFiltersFlowViewModel.ProductFiltersEvent.GoBack -> {

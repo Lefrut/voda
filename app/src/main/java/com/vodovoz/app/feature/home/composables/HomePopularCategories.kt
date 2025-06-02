@@ -27,8 +27,8 @@ import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
-import com.vodovoz.app.feature.home.model.PopularCategoryUi
 import com.vodovoz.app.design_system.model.SectionUi
+import com.vodovoz.app.feature.home.model.PopularCategoryUi
 
 @Composable
 fun HomePopularCategories(

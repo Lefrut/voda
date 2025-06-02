@@ -1,13 +1,11 @@
 package com.vodovoz.app.ui.base
 
 import android.app.Application
-import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.vodovoz.app.ui.base.model.SplashFileState
 import com.vodovoz.app.util.SplashFileConfig
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update

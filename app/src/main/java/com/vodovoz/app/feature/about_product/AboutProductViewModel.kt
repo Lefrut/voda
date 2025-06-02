@@ -1,5 +1,6 @@
 package com.vodovoz.app.feature.about_product
 
+import androidx.compose.runtime.Stable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.vodovoz.app.common.about_product.AboutProductManager
@@ -27,6 +28,7 @@ import javax.inject.Inject
 import kotlin.math.roundToInt
 
 @HiltViewModel
+@Stable
 class AboutProductViewModel @Inject constructor(
     private val aboutProductManager: AboutProductManager,
     private val cartManager: CartManager,

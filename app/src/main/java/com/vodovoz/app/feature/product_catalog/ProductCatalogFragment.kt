@@ -8,6 +8,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
@@ -183,8 +185,10 @@ class ProductCatalogFragment : Fragment() {
     }
 
 
+    @Immutable
     sealed class DataSource : Parcelable {
         @Parcelize
+        @Immutable
         class Brand(val brandId: Long) : DataSource()
 
         @Parcelize
@@ -197,15 +201,19 @@ class ProductCatalogFragment : Fragment() {
         data object ViewedProducts : DataSource()
 
         @Parcelize
+        @Immutable
         data class ButtonProducts(val buttonId: Int) : DataSource()
 
         @Parcelize
+        @Immutable
         data class Products(val bannerId: Long, val blockId: Long) : DataSource()
 
         @Parcelize
+        @Immutable
         data class Search(val query: String) : DataSource()
 
         @Parcelize
+        @Immutable
         data class Category(val categoryId: Long) : DataSource()
 
         @Parcelize

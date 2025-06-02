@@ -1,8 +1,8 @@
 package com.vodovoz.app.data.vodovoz_service.model.auth
 
 
-import com.squareup.moshi.Json
 import androidx.annotation.Keep
+import com.squareup.moshi.Json
 import com.vodovoz.app.data.vodovoz_service.model.user_data.POLE_DTO
 
 @Keep
