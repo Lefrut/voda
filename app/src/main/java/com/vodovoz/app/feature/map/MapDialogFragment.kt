@@ -5,13 +5,11 @@ import android.os.Bundle
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import androidx.core.content.ContextCompat
-import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import by.kirich1409.viewbindingdelegate.viewBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -24,7 +22,6 @@ import com.vodovoz.app.feature.map.adapter.AddressResultClickListener
 import com.vodovoz.app.util.extensions.snack
 import com.yandex.mapkit.MapKit
 import com.yandex.mapkit.MapKitFactory
-import com.yandex.mapkit.geometry.Point
 import com.yandex.mapkit.user_location.UserLocationLayer
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch

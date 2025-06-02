@@ -13,7 +13,6 @@ import com.vodovoz.app.common.content.updateData
 import com.vodovoz.app.design_system.model.BrandUi
 import com.vodovoz.app.design_system.model.toUi
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
-import com.vodovoz.app.ui.model.BrandUI
 import com.vodovoz.app.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.FlowPreview
@@ -109,10 +108,6 @@ class AllBrandsFlowViewModel @Inject constructor(
 
     @Immutable
     data class AllBrandsState(
-        val items: List<BrandUI> = emptyList(),
-        val filteredItems: List<BrandUI> = emptyList(),
-        val scrollToTop: Boolean = false,
-
         val brands: Flow<PagingData<BrandUi>> = emptyFlow(),
         val title: String = "",
         val searchQuery: String = "",

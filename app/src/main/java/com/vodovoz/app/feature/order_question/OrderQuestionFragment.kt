@@ -96,7 +96,7 @@ class OrderQuestionFragment : Fragment() {
                     }
 
 
-                    LifecycleEffect(arg2 = snackbarHostState) {
+                    LifecycleEffect(snackbarHostState) {
                         viewModel.events.collect { event ->
                             when (event) {
                                 OrderQuestionEvent.GoBack -> {

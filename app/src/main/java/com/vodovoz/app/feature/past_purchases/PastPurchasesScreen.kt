@@ -9,7 +9,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import com.vodovoz.app.R
 import com.vodovoz.app.design_system.composables.bottom_sheet.SortOptionsBottomSheet
 import com.vodovoz.app.design_system.composables.placeholders.LoadingPlaceholder
@@ -33,7 +32,7 @@ fun PastPurchasesScreen(
     ) {
         VodovozTopBar(
             title = viewState.title,
-            actionPainter = painterResource(id = R.drawable.icon_search),
+            actionIconId = R.drawable.icon_search,
             onActionClick = {
                 viewModel.navigateToSearch()
             },
@@ -44,7 +43,9 @@ fun PastPurchasesScreen(
 
         when (val uiState = viewState.uiState) {
             is PastPurchasesFlowViewModel.PastPurchasesUiState.Empty -> {
-                VodovozPlaceholder(data = uiState.placeholder, onButtonClick = { viewModel.navigateToCatalog() })
+                VodovozPlaceholder(
+                    data = uiState.placeholder,
+                    onButtonClick = { viewModel.navigateToCatalog() })
             }
 
             PastPurchasesFlowViewModel.PastPurchasesUiState.Error -> {

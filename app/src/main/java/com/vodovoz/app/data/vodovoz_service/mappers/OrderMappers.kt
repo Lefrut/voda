@@ -1,5 +1,7 @@
 package com.vodovoz.app.data.vodovoz_service.mappers
 
+import com.vodovoz.app.common.model.VodovozBoolean
+import com.vodovoz.app.common.model.equalsTo
 import com.vodovoz.app.data.vodovoz_service.di.toFullUrl
 import com.vodovoz.app.data.vodovoz_service.model.CancelOrderDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.KNOPKA_ORDER_DTO
@@ -62,7 +64,7 @@ fun OPLATA_DTO.toDomain(): PaymentInfoModel {
     return PaymentInfoModel(
         id = ID ?: throw IllegalArgumentException("Payment ID cannot be null"),
         name = NAME ?: "",
-        browser = BRAYZER == "Y",
+        browser = VodovozBoolean.True equalsTo BRAYZER,
         url = URL ?: throw IllegalArgumentException("Payment URL cannot be null")
     )
 }

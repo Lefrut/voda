@@ -1,5 +1,6 @@
 package com.vodovoz.app.design_system.composables.button
 
+import androidx.annotation.DrawableRes
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -21,7 +22,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
@@ -70,7 +70,7 @@ fun BaseQuantityButton(
         ) {
 
             CounterButton(
-                painter = painterResource(id = R.drawable.ic_minus_rounded),
+                iconId = R.drawable.ic_minus_rounded,
                 iconModifier = iconModifier,
                 enabled = minusEnabled,
                 isLoading = isLoading,
@@ -86,7 +86,7 @@ fun BaseQuantityButton(
             }
 
             CounterButton(
-                painter = painterResource(id = R.drawable.ic_plus_rounded),
+                iconId = R.drawable.ic_plus_rounded,
                 iconModifier = iconModifier,
                 enabled = plusEnabled,
                 isLoading = isLoading,
@@ -103,7 +103,8 @@ fun BaseQuantityButton(
 
 @Composable
 private fun CounterButton(
-    painter: Painter,
+    @DrawableRes
+    iconId: Int,
     modifier: Modifier = Modifier,
     iconModifier: Modifier = Modifier,
     enabled: Boolean,
@@ -122,7 +123,7 @@ private fun CounterButton(
             }, contentAlignment = Alignment.Center
     ) {
         Icon(
-            painter = painter,
+            painter = painterResource(id = iconId),
             contentDescription = null,
             modifier = iconModifier,
             tint = if (enabled) {

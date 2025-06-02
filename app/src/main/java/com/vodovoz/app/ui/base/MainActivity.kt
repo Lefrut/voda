@@ -11,7 +11,6 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
 import com.google.firebase.messaging.RemoteMessage
 import com.vodovoz.app.common.permissions.PermissionsManager
-import com.vodovoz.app.common.product.rating.RatingProductManager
 import com.vodovoz.app.databinding.ActivityMainBinding
 import com.vodovoz.app.feature.sitestate.SiteStateManager
 import com.vodovoz.app.util.extensions.debugLog
@@ -24,20 +23,12 @@ import javax.inject.Inject
 
 
 @AndroidEntryPoint
-class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks,
-    EasyPermissions.RationaleCallbacks {
+class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
 
     @Inject
-    lateinit var ratingProductManager: RatingProductManager
-
-    @Inject
     lateinit var siteStateManager: SiteStateManager
-
-    @Inject
-    lateinit var permissionsManager: PermissionsManager
-
 
     private val viewModel: MainActivityViewModel by viewModels()
     private val splashFileViewModel: SplashFileViewModel by viewModels()
@@ -108,36 +99,5 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks,
             siteStateManager.saveDeepLinkPath(path)
         }
 
-    }
-
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray,
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this)
-    }
-
-    override fun onPermissionsGranted(requestCode: Int, perms: MutableList<String>) {
-
-        debugLog { "Permissions: onPermissionsGranted $requestCode" }
-        permissionsManager.setPermissionChecked(requestCode, true)
-    }
-
-    override fun onPermissionsDenied(requestCode: Int, perms: MutableList<String>) {
-
-        debugLog { "Permissions: onPermissionsDenied $requestCode" }
-        if (EasyPermissions.somePermissionPermanentlyDenied(this, perms)) {
-            debugLog { "Permissions: somePermissionPermanentlyDenied $requestCode" }
-            permissionsManager.setPermissionChecked(requestCode, true)
-        }
-    }
-
-    override fun onRationaleAccepted(requestCode: Int) {}
-
-    override fun onRationaleDenied(requestCode: Int) {
-        debugLog { "Permissions: onRationaleDenied $requestCode" }
-        permissionsManager.setPermissionChecked(requestCode, true)
     }
 }

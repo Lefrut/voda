@@ -1,8 +1,8 @@
 package com.vodovoz.app.data.vodovoz_service.model.cart
 
 
-import com.squareup.moshi.Json
 import androidx.annotation.Keep
+import com.squareup.moshi.Json
 
 @Keep
 data class OKNO_PODAROK_DTO(

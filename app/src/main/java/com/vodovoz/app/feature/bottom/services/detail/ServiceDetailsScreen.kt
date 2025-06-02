@@ -10,13 +10,13 @@ import com.vodovoz.app.design_system.composables.placeholders.LoadingPlaceholder
 import com.vodovoz.app.design_system.composables.placeholders.NetworkErrorPlaceholder
 import com.vodovoz.app.design_system.composables.top_bar.VodovozTopBar
 import com.vodovoz.app.feature.bottom.services.detail.composables.ServiceDetailBody
-import com.vodovoz.app.feature.bottom.services.detail.model.ServiceDetailState
-import com.vodovoz.app.feature.bottom.services.detail.model.ServiceDetailUiState
+import com.vodovoz.app.feature.bottom.services.detail.model.ServiceDetailsState
+import com.vodovoz.app.feature.bottom.services.detail.model.ServiceDetailsUiState
 
 @Composable
 fun ServiceDetailScreen(
-    viewModel: ServiceDetailViewModel,
-    viewState: ServiceDetailState,
+    viewModel: ServiceDetailsViewModel,
+    viewState: ServiceDetailsState,
 ) {
     Column(
         modifier = Modifier
@@ -25,17 +25,17 @@ fun ServiceDetailScreen(
     ) {
         VodovozTopBar(onBack = { viewModel.navigateBack() }, title = viewState.title)
         when (viewState.uiState) {
-            ServiceDetailUiState.Error -> {
+            ServiceDetailsUiState.Error -> {
                 NetworkErrorPlaceholder {
                     viewModel.fetchServiceDetails()
                 }
             }
 
-            ServiceDetailUiState.Loading -> {
+            ServiceDetailsUiState.Loading -> {
                 LoadingPlaceholder()
             }
 
-            ServiceDetailUiState.Success -> {
+            ServiceDetailsUiState.Success -> {
                 ServiceDetailBody(
                     image = viewState.image,
                     html = viewState.html,

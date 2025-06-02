@@ -34,7 +34,7 @@ import com.vodovoz.app.design_system.composables.button.VodovozRadioButton
 import com.vodovoz.app.design_system.composables.decoration.VodovozHorizontalDivider
 import com.vodovoz.app.design_system.composables.text_fields.VodovozTextField
 import com.vodovoz.app.design_system.model.ColorfulButtonUi
-import com.vodovoz.app.feature.preorder.model.FieldUi
+import com.vodovoz.app.design_system.model.widgets.FieldUi
 import com.vodovoz.app.feature.questionnaires.model.CheckOption
 import com.vodovoz.app.feature.questionnaires.model.CheckboxListUi
 import com.vodovoz.app.feature.questionnaires.model.ConditionUi

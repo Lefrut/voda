@@ -29,7 +29,7 @@ fun UserDataScreen(
             VodovozTopBar(
                 onBack = { viewModel.navigateBack() },
                 title = viewState.title,
-                actionPainter = painterResource(id = R.drawable.ic_logout),
+                actionIconId = R.drawable.ic_logout,
                 onActionClick = {
                     viewModel.showLogoutDialog()
                 }

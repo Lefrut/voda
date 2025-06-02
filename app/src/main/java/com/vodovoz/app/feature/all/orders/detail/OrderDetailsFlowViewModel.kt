@@ -3,11 +3,6 @@ package com.vodovoz.app.feature.all.orders.detail
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
-import com.vodovoz.app.BuildConfig
 import com.vodovoz.app.common.account.AccountManager
 import com.vodovoz.app.common.cart.CartManager
 import com.vodovoz.app.common.content.ErrorState
@@ -25,21 +20,16 @@ import com.vodovoz.app.design_system.model.mapToUi
 import com.vodovoz.app.design_system.model.withUpdatedFavorites
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.feature.all.orders.detail.composables.AboutOrderPopupWindowUi
-import com.vodovoz.app.feature.all.orders.detail.model.DriverPointsEntity
 import com.vodovoz.app.feature.all.orders.detail.model.OrderDetailsButtonUi
 import com.vodovoz.app.feature.all.orders.detail.model.OrderDetailsSummaryUi
 import com.vodovoz.app.feature.all.orders.detail.model.OrderStatusUi
 import com.vodovoz.app.feature.all.orders.detail.model.mapToUi
 import com.vodovoz.app.feature.all.orders.detail.model.toUi
-import com.vodovoz.app.mapper.mapToUI
-import com.vodovoz.app.ui.model.OrderDetailsUI
 import com.vodovoz.app.util.extensions.debugLog
 import com.vodovoz.app.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
@@ -63,12 +53,7 @@ class OrderDetailsFlowViewModel @Inject constructor(
     OrderDetailsState()
 ) {
 
-    private val firebaseDatabase = FirebaseDatabase.getInstance().reference
-
     private val orderId = savedState.get<Long>("orderId") ?: navigateBack().run { -1 }
-
-    private val cancelResultListener = MutableSharedFlow<String>()
-    fun observeCancelResult() = cancelResultListener.asSharedFlow()
 
     @OptIn(ExperimentalCoroutinesApi::class)
     suspend fun listenFavorites() =
@@ -124,49 +109,6 @@ class OrderDetailsFlowViewModel @Inject constructor(
         }
     }
 
-    private fun fetchOrderDetailsOld() {
-        val userId = accountManager.fetchAccountId() ?: return
-        val id = orderId ?: return
-        viewModelScope.launch {
-            flow {
-                emit(
-                    repository.fetchOrderDetailsResponse(
-                        userId = userId,
-                        appVersion = BuildConfig.VERSION_NAME,
-                        orderId = id
-                    )
-                )
-            }
-                .onEach { response ->
-                    if (response is ResponseEntity.Success) {
-                        val orderDetails = response.data.mapToUI()
-                        if (orderDetails.status?.id == "E" && orderDetails.driverId != null) {
-                            checkIfDriverExists(orderDetails.driverId)
-                        }
-                        uiStateListener.value = state.copy(
-                            data = state.data.copy(orderDetailsUI = orderDetails),
-                            loadingPage = false,
-                            error = null
-                        )
-                    } else {
-                        uiStateListener.value =
-                            state.copy(
-                                loadingPage = false,
-                                error = ErrorState.Error()
-                            )
-                    }
-                }
-                .flowOn(Dispatchers.Default)
-                .catch {
-                    debugLog { "fetch order details error ${it.localizedMessage}" }
-                    uiStateListener.value =
-                        state.copy(error = it.toErrorState(), loadingPage = false)
-                }
-                .collect()
-
-        }
-    }
-
     fun repeatOrder() {
         val userId = accountManager.fetchAccountId() ?: return
         val id = orderId ?: return
@@ -206,53 +148,6 @@ class OrderDetailsFlowViewModel @Inject constructor(
         }
     }
 
-    fun firstLoadSorted() {
-        if (!state.isFirstLoad) {
-            uiStateListener.value =
-                state.copy(isFirstLoad = true, loadingPage = true)
-            fetchOrderDetailsOld()
-        }
-    }
-
-    fun refreshSorted() {
-        uiStateListener.value =
-            state.copy(loadingPage = true)
-        fetchOrderDetailsOld()
-    }
-
-    private fun checkIfDriverExists(driverId: String) {
-        viewModelScope.launch(Dispatchers.IO) {
-            runCatching {
-                firebaseDatabase.child(driverId)
-                    .addListenerForSingleValueEvent(object : ValueEventListener {
-                        override fun onDataChange(snapshot: DataSnapshot) {
-                            val list = mutableListOf<DriverPointsEntity?>()
-                            snapshot.child("ListTochki").children.forEach {
-                                val driverPointsEntity = it.getValue(DriverPointsEntity::class.java)
-                                list.add(driverPointsEntity)
-                            }
-
-                            val isExists = list.find { it?.OrderNumber == orderId.toString() }
-
-                            if (isExists != null) {
-                                uiStateListener.value = state.copy(
-                                    data = state.data.copy(
-                                        ifDriverExists = true
-                                    )
-                                )
-                            }
-                        }
-
-                        override fun onCancelled(error: DatabaseError) {
-
-                        }
-                    })
-            }.onFailure {
-                debugLog { "checkIfDriverExists error $it" }
-                accountManager.reportError("checkIfDriverExists error", it)
-            }
-        }
-    }
 
     fun activateTopButton(orderDetailsButton: OrderDetailsButtonUi) = viewModelScope.launch {
         when (orderDetailsButton) {
@@ -281,7 +176,6 @@ class OrderDetailsFlowViewModel @Inject constructor(
 
 
     fun activateBottomButton(button: ColorfulButtonUi) = viewModelScope.launch {
-        orderId ?: return@launch
         when (button.id) {
             "voproszakaz" -> {
                 eventListener.emit(OrderDetailsEvent.GoToOrderQuestion(orderId))
@@ -319,8 +213,6 @@ class OrderDetailsFlowViewModel @Inject constructor(
 
     @Immutable
     data class OrderDetailsState(
-        val orderDetailsUI: OrderDetailsUI? = null,
-        val ifDriverExists: Boolean = false,
         val ifRepeatOrder: Boolean = false,
 
         val title: String = "",

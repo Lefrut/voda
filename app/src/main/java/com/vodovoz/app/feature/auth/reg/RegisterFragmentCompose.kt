@@ -62,7 +62,8 @@ class RegisterFragment : Fragment() {
         savedInstanceState: Bundle?,
     ): View {
         return ComposeView(requireContext()).apply {
-            setViewCompositionStrategy(ViewCompositionStrategy.Default)
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+
             setContent {
                 VodovozTheme {
                     val pagingState by viewModel.observeUiState().collectAsStateWithLifecycle()
@@ -89,15 +90,6 @@ class RegisterFragment : Fragment() {
     ) {
         viewModel.observeEvent().collect { event ->
             when (event) {
-                is RegFlowViewModel.RegEvents.RegError -> {
-                }
-
-                is RegFlowViewModel.RegEvents.RegSuccess -> {
-                    findNavController().popBackStack(
-                        R.id.profileFragment, false
-                    )
-                }
-
                 is RegFlowViewModel.RegEvents.ShowSnackbar -> {
                     uiCoroutinesScope.launch {
                         snackbarHostState.currentSnackbarData?.dismiss()

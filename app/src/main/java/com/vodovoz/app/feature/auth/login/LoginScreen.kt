@@ -12,7 +12,6 @@ import androidx.compose.ui.Modifier
 import com.vodovoz.app.design_system.composables.top_bar.VodovozTopBar
 import com.vodovoz.app.feature.auth.login.composables.LoginBody
 
-@Suppress("NonSkippableComposable")
 @Composable
 fun LoginScreen(viewModel: LoginFlowViewModel, viewState: LoginFlowViewModel.LoginState) {
     Column(

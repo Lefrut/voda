@@ -23,3 +23,16 @@ data class ConditionModel(
     val text: String,
     val url: String
 )
+
+fun QuestionnairesItemModel.toFieldModel(): FieldModel {
+    return FieldModel(
+        id = code,
+        label = name,
+        value = value,
+        valueType = type,
+        isRequired = required,
+        readOnly = code == "DR",
+        supportingText = "",
+        hint = hint
+    )
+}

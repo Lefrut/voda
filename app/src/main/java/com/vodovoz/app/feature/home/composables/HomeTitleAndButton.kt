@@ -21,8 +21,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.vodovoz.app.R
 import com.vodovoz.app.design_system.VodovozTheme
-import com.vodovoz.app.domain.general.model.ButtonAction
 import com.vodovoz.app.design_system.model.ButtonUi
+import com.vodovoz.app.domain.general.model.ButtonAction
 
 @Composable
 fun TitleAndButton(

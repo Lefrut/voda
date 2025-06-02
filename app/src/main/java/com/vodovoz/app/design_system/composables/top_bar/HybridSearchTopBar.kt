@@ -58,7 +58,7 @@ fun HybridSearchTopBar(
 
             ClickableIcon(
                 modifier = Modifier.clip(CircleShape),
-                painter = painterResource(id = R.drawable.ic_arrow_left),
+                iconId = R.drawable.ic_arrow_left,
                 tint = MaterialTheme.colorScheme.onBackground,
                 onClick = onNavigationClick
             )
@@ -122,7 +122,7 @@ fun HybridSearchTopBar(
 
             ClickableIcon(
                 modifier = Modifier.clip(CircleShape),
-                painter = painterResource(id = if (!isSearchMode) R.drawable.icon_search else R.drawable.ic_clean),
+                iconId = if (!isSearchMode) R.drawable.icon_search else R.drawable.ic_clean,
                 tint = if (!isSearchMode) MaterialTheme.colorScheme.onBackground
                     else MaterialTheme.colorScheme.surfaceTint,
                 onClick = { onSearchModeChange(!isSearchMode) }

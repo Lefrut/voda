@@ -7,9 +7,8 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.vodovoz.app.R
 import com.vodovoz.app.common.resources.ResourcesProvider
-import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
-import com.vodovoz.app.feature.preorder.model.FieldUi
-import com.vodovoz.app.feature.preorder.model.resetError
+import com.vodovoz.app.design_system.model.widgets.FieldUi
+import com.vodovoz.app.design_system.model.widgets.resetError
 import com.vodovoz.app.feature.sitestate.SiteStateManager
 import com.vodovoz.app.feature.write_comment.model.WriteCommentEvent
 import com.vodovoz.app.feature.write_comment.model.WriteCommentState
@@ -27,7 +26,6 @@ import kotlin.math.roundToInt
 @Stable
 class WriteCommentViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    private val vodovozServiceRepository: VodovozServiceRepository,
     private val siteStateManager: SiteStateManager,
     private val resourcesProvider: ResourcesProvider,
 ) : MviViewModel<WriteCommentState, WriteCommentEvent>(WriteCommentState()) {
@@ -37,6 +35,18 @@ class WriteCommentViewModel @Inject constructor(
     private val productImage: String = savedStateHandle["product_image"] ?: ""
     private val rating: Int = savedStateHandle["rating"] ?: 0
 
+    private val commentField = FieldUi(
+        id = "",
+        label = resourcesProvider.getString(R.string.comment),
+        value = "",
+        keyboardType = KeyboardType.Text,
+        isRequired = false,
+        isError = false,
+        readOnly = false,
+        supportingText = resourcesProvider.getString(R.string.minimal_count_15),
+        hint = resourcesProvider.getString(R.string.enter_comment)
+    )
+
 
     init {
         _state.update { s ->
@@ -44,17 +54,7 @@ class WriteCommentViewModel @Inject constructor(
                 productImage = productImage,
                 rating = rating,
                 productName = productName,
-                field = FieldUi(
-                    id = "",
-                    label = resourcesProvider.getString(R.string.comment),
-                    value = "",
-                    keyboardType = KeyboardType.Text,
-                    isRequired = false,
-                    isError = false,
-                    readOnly = false,
-                    supportingText = resourcesProvider.getString(R.string.minimal_count_15),
-                    hint = resourcesProvider.getString(R.string.enter_comment)
-                )
+                field = commentField
             )
         }
 
@@ -65,8 +65,7 @@ class WriteCommentViewModel @Inject constructor(
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun listenHavePhotos() = siteStateManager.siteStateFlow.mapLatest { siteState ->
         _state.update { s ->
-            s.copy(havePhotos = true)
-            //todo - siteState?.showComments ?: false
+            s.copy(havePhotos = siteState?.showComments ?: false)
         }
     }.launchIn(viewModelScope)
 
@@ -96,7 +95,7 @@ class WriteCommentViewModel @Inject constructor(
         _state.update { s ->
             val imagesSet = uri.map { it.toString() }.toSet() + s.imagesUri.reversed()
             s.copy(
-                imagesUri =  imagesSet.take(5)
+                imagesUri = imagesSet.take(5)
             )
         }
     }

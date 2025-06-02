@@ -10,8 +10,8 @@ import com.vodovoz.app.data.vodovoz_service.model.PROMOTION_RAZDEL_DTO
 import com.vodovoz.app.data.vodovoz_service.model.PromotionsDTO
 import com.vodovoz.app.domain.general.model.AboutAdvertisingModel
 import com.vodovoz.app.domain.general.model.LabelModel
-import com.vodovoz.app.domain.general.model.PromotionDetailsModel
 import com.vodovoz.app.domain.general.model.PromotionCategoryModel
+import com.vodovoz.app.domain.general.model.PromotionDetailsModel
 import com.vodovoz.app.domain.general.model.PromotionModel
 import com.vodovoz.app.domain.general.model.PromotionsSectionModel
 import com.vodovoz.app.domain.general.model.emptyLabelModel

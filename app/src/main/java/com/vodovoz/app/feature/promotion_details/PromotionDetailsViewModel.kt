@@ -12,9 +12,7 @@ import com.vodovoz.app.common.content.PagingContractViewModel
 import com.vodovoz.app.common.content.State
 import com.vodovoz.app.common.content.updateData
 import com.vodovoz.app.common.like.LikeManager
-import com.vodovoz.app.common.product.rating.RatingProductManager
 import com.vodovoz.app.data.MainRepository
-import com.vodovoz.app.data.parser.response.promotion.PromotionDetailResponseJsonParser
 import com.vodovoz.app.design_system.model.ProductUi
 import com.vodovoz.app.design_system.model.PromotionDetailsUi
 import com.vodovoz.app.design_system.model.toUi
@@ -22,7 +20,6 @@ import com.vodovoz.app.design_system.model.withUpdatedCart
 import com.vodovoz.app.design_system.model.withUpdatedFavorites
 import com.vodovoz.app.design_system.model.withUpdatedLoading
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
-import com.vodovoz.app.ui.model.PromotionDetailUI
 import com.vodovoz.app.ui.paging.PagingDataListener
 import com.vodovoz.app.ui.paging.copy
 import com.vodovoz.app.ui.paging.emptyCombinedLoadStates
@@ -39,11 +36,9 @@ import javax.inject.Inject
 @HiltViewModel
 class PromotionDetailsViewModel @Inject constructor(
     savedState: SavedStateHandle,
-    private val repository: MainRepository,
     private val accountManager: AccountManager,
     private val cartManager: CartManager,
     private val likeManager: LikeManager,
-    private val ratingProductManager: RatingProductManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
 ) : PagingContractViewModel<PromotionDetailsViewModel.PromotionDetailFlowState, PromotionDetailsViewModel.PromotionDetailEvent>(
     PromotionDetailFlowState()
@@ -179,8 +174,6 @@ class PromotionDetailsViewModel @Inject constructor(
         eventListener.emit(PromotionDetailEvent.GoBack)
     }
 
-    fun isLoginAlready() = accountManager.isAlreadyLogin()
-
     fun navigateToWebView(url: String) = viewModelScope.launch {
         eventListener.emit(PromotionDetailEvent.GoToWebView(url))
     }
@@ -200,8 +193,6 @@ class PromotionDetailsViewModel @Inject constructor(
     }
 
     data class PromotionDetailFlowState(
-        val items: PromotionDetailUI? = null,
-        val errorItem: PromotionDetailResponseJsonParser.PromotionDetailErrorUI? = null,
         val promotionDetails: PromotionDetailsUi = PromotionDetailsUi.Empty,
         val productsTitle: String = "",
         val products: List<ProductUi> = emptyList(),
@@ -219,8 +210,6 @@ class PromotionDetailsViewModel @Inject constructor(
         data class GoToWebView(val url: String) : PromotionDetailEvent()
         data class GoToProductAnalogs(val productId: Long) : PromotionDetailEvent()
         data class GoToProductDetails(val productId: Long) : PromotionDetailEvent()
-
         data object GoBack : PromotionDetailEvent()
-
     }
 }

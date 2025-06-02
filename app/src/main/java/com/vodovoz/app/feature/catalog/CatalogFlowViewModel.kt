@@ -16,39 +16,20 @@ import com.vodovoz.app.domain.general.model.DataAllAction
 import com.vodovoz.app.domain.general.model.VodovozAction
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.feature.catalog.model.toUi
-import com.vodovoz.app.mapper.CategoryMapper.mapToUI
-import com.vodovoz.app.ui.model.CatalogBannerUI
-import com.vodovoz.app.ui.model.CategoryUI
-import com.vodovoz.app.util.extensions.debugLog
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class CatalogFlowViewModel @Inject constructor(
-    private val mainRepository: MainRepository,
     private val vodovozServiceRepository: VodovozServiceRepository,
 ) : PagingContractViewModel<CatalogFlowViewModel.CatalogState, CatalogFlowViewModel.CatalogEvents>(
     CatalogState()
 ) {
 
-    fun firstLoad() {
-        fetchCatalogDetails()
-        if (!state.isFirstLoad) {
-            uiStateListener.value = state.copy(isFirstLoad = true, loadingPage = true)
-            fetchCatalogOld()
-        }
-    }
 
     fun refresh() {
-        uiStateListener.value =
-            state.copy(loadingPage = true)
-        fetchCatalogOld()
+        fetchCatalogDetails()
     }
 
     fun fetchCatalogDetails() = viewModelScope.launch {
@@ -73,45 +54,6 @@ class CatalogFlowViewModel @Inject constructor(
         }
     }
 
-    private fun fetchCatalogOld() {
-        viewModelScope.launch(Dispatchers.IO) {
-            flow { emit(mainRepository.fetchCatalogResponse()) }
-                .onEach { response ->
-                    when (response) {
-                        is ResponseEntity.Hide -> {}
-                        is ResponseEntity.Error -> state.copy(
-                            error = response.errorMessage.stringToErrorState(),
-                            loadingPage = false
-                        )
-
-                        is ResponseEntity.Success -> {
-                            val catalog = response.data.mapToUI()
-                            uiStateListener.value = state.copy(
-                                loadingPage = false,
-                                data = state.data.copy(
-                                    itemsList = catalog.categoryEntityList,
-                                    topCatalogBanner = catalog.topCatalogBanner
-                                ),
-                                error = null
-                            )
-                        }
-                    }
-                }
-                .catch {
-                    debugLog { "fetch catalog response error ${it.localizedMessage}" }
-
-                    uiStateListener.value =
-                        state.copy(error = it.toErrorState(), loadingPage = false)
-                }
-                .collect()
-        }
-    }
-
-    fun goToProfile() {
-        viewModelScope.launch {
-            eventListener.emit(CatalogEvents.GoToProfile)
-        }
-    }
 
     fun navigateToSearch() = viewModelScope.launch {
         eventListener.emit(CatalogEvents.GoToSearch)
@@ -167,9 +109,6 @@ class CatalogFlowViewModel @Inject constructor(
     }
 
     data class CatalogState(
-        val itemsList: List<CategoryUI> = emptyList(),
-        val topCatalogBanner: CatalogBannerUI? = null,
-
         val categories: List<ParentCategoryUi> = emptyList(),
         val banners: List<BannerUi> = emptyList(),
         val uiState: UiState = UiState.Loading,

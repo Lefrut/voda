@@ -17,7 +17,6 @@ import com.vodovoz.app.R
 import com.vodovoz.app.common.account.AccountManager
 import com.vodovoz.app.common.cart.CartManager
 import com.vodovoz.app.common.like.LikeManager
-import com.vodovoz.app.common.product.rating.RatingProductManager
 import com.vodovoz.app.common.tab.TabManager
 import com.vodovoz.app.core.navigation.navigateToProductAnalogs
 import com.vodovoz.app.core.navigation.navigateToPreOrder
@@ -38,9 +37,6 @@ class PastPurchasesFragment : Fragment() {
 
     @Inject
     lateinit var likeManager: LikeManager
-
-    @Inject
-    lateinit var ratingProductManager: RatingProductManager
 
     @Inject
     lateinit var accountManager: AccountManager

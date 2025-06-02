@@ -65,7 +65,7 @@ class AboutAppFragment : Fragment() {
                         viewState = viewState
                     )
 
-                    LifecycleEffect(arg2 = context) {
+                    LifecycleEffect {
                         viewModel.events.collect { event ->
                             when (event) {
                                 AboutAppEvent.GoBack -> {

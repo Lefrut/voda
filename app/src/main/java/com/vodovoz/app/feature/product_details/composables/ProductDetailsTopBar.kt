@@ -43,7 +43,7 @@ fun ProductDetailsTopBar(
         ) {
             ClickableIcon(
                 modifier = Modifier.clip(CircleShape),
-                painter = painterResource(id = R.drawable.ic_arrow_left),
+                iconId = R.drawable.ic_arrow_left,
                 tint = MaterialTheme.colorScheme.onBackground,
                 onClick = onNavigationClick
             )

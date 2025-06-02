@@ -16,7 +16,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import com.vodovoz.app.design_system.composables.text_fields.VodovozTextField
 import com.vodovoz.app.design_system.text.PhoneNumberVisualTransformation
-import com.vodovoz.app.feature.preorder.model.FieldUi
+import com.vodovoz.app.design_system.model.widgets.FieldUi
 
 @Suppress("NonSkippableComposable")
 @Composable

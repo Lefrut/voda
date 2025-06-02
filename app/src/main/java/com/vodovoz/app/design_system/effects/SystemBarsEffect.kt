@@ -14,6 +14,7 @@ import com.vodovoz.app.util.extensions.window
 fun SystemBarsEffect(
     statusBarColor: Color,
     navigationBarColor: Color,
+    navigationBarContrastEnforced: Boolean = true,
     darkIcons: Boolean = false,
 ) {
     val context = LocalContext.current
@@ -40,11 +41,12 @@ fun SystemBarsEffect(
         onDispose {
             systemUiController.setStatusBarColor(
                 color = Color(prevStatusBarColor),
-                darkIcons = !darkIcons
+                darkIcons = !darkIcons,
             )
             systemUiController.setNavigationBarColor(
                 color = Color(prevNavBarColor),
-                darkIcons = !darkIcons
+                darkIcons = !darkIcons,
+                navigationBarContrastEnforced = navigationBarContrastEnforced
             )
 
             WindowCompat.setDecorFitsSystemWindows(window, true)

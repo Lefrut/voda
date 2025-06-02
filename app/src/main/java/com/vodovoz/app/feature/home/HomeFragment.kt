@@ -1,17 +1,13 @@
 package com.vodovoz.app.feature.home
 
-import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.CookieManager
-import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import androidx.viewpager2.widget.ViewPager2
 import by.kirich1409.viewbindingdelegate.viewBinding
@@ -23,11 +19,9 @@ import com.vodovoz.app.common.cart.CartManager
 import com.vodovoz.app.common.content.BaseFragment
 import com.vodovoz.app.common.like.LikeManager
 import com.vodovoz.app.common.media.MediaManager
-import com.vodovoz.app.common.product.rating.RatingProductManager
 import com.vodovoz.app.common.tab.TabManager
 import com.vodovoz.app.core.navigation.navigateToAboutApp
 import com.vodovoz.app.core.network.ApiConfig
-import com.vodovoz.app.data.model.common.ActionEntity
 import com.vodovoz.app.databinding.FragmentMainHomeFlowBinding
 import com.vodovoz.app.feature.all.promotions.AllPromotionsFragment
 import com.vodovoz.app.feature.product_catalog.ProductCatalogFragment
@@ -54,9 +48,6 @@ class HomeFragment1 : BaseFragment() {
     }
 
     internal val flowViewModel: HomeFlowViewModel by activityViewModels()
-
-    @Inject
-    lateinit var ratingProductManager: RatingProductManager
 
     @Inject
     lateinit var cartManager: CartManager
@@ -479,87 +470,87 @@ class HomeFragment1 : BaseFragment() {
 
 
 
-    internal fun ActionEntity.invoke(
-        navController: NavController = findNavController(),
-        activity: FragmentActivity = requireActivity(),
-    ) {
-        val navDirect = when (this) {
-            is ActionEntity.Brand ->
-                HomeFragmentDirections.actionToPaginatedProductsCatalogWithoutFiltersFragment(
-                    ProductCatalogFragment.DataSource.Brand(brandId = this.brandId)
-                )
-
-            is ActionEntity.Brands -> {
-                HomeFragmentDirections.actionToAllBrandsFragment(this.brandIdList.toLongArray())
-            }
-
-            is ActionEntity.Product ->
-                HomeFragmentDirections.actionToProductDetailFragment(this.productId)
-
-            is ActionEntity.Products -> HomeFragmentDirections.actionToPaginatedProductsCatalogWithoutFiltersFragment(
-                ProductCatalogFragment.DataSource.HurryBuyUpProducts
-            )
-
-
-            is ActionEntity.Promotion ->
-                HomeFragmentDirections.actionToPromotionDetailFragment(this.promotionId)
-
-            is ActionEntity.Promotions -> HomeFragmentDirections.actionToAllPromotionsFragment(
-                AllPromotionsFragment.DataSource.ByBanner(-1, -1) //todo - put a actual realization
-            )
-
-            is ActionEntity.AllPromotions -> HomeFragmentDirections.actionToAllPromotionsFragment(
-                AllPromotionsFragment.DataSource.All
-            )
-
-            is ActionEntity.Link -> {
-                val openLinkIntent = Intent(Intent.ACTION_VIEW, Uri.parse(this.url))
-                activity.startActivity(openLinkIntent)
-                null
-            }
-
-            is ActionEntity.LinkWithCookies -> {
-                setCookie()
-                HomeFragmentDirections.actionToWebViewFragment(
-                    url,
-                    "",
-                )
-                null
-            }
-
-            is ActionEntity.Category -> HomeFragmentDirections.actionToPaginatedProductsCatalogWithoutFiltersFragment(
-                ProductCatalogFragment.DataSource.HurryBuyUpProducts
-            )
-
-
-            is ActionEntity.Discount -> HomeFragmentDirections.actionToPaginatedProductsCatalogWithoutFiltersFragment(
-                ProductCatalogFragment.DataSource.HurryBuyUpProducts
-            )
-
-            is ActionEntity.Novelties -> HomeFragmentDirections.actionToPaginatedProductsCatalogWithoutFiltersFragment(
-                ProductCatalogFragment.DataSource.NewProducts
-            )
-
-            is ActionEntity.WaterApp -> {
-                HomeFragmentDirections.actionToWaterAppFragment()
-            }
-
-            is ActionEntity.Delivery -> HomeFragmentDirections.actionToWebViewFragment(
-                ApiConfig.ABOUT_DELIVERY_URL,
-                "О доставке"
-            )
-
-            is ActionEntity.Profile -> {
-                flowViewModel.goToProfile()
-                null
-            }
-
-            is ActionEntity.BuyCertificate -> {
-                HomeFragmentDirections.actionToBuyCertificateFragment()
-            }
-        }
-        navDirect?.let { navController.navigate(navDirect) }
-    }
+//    internal fun ActionEntity.invoke(
+//        navController: NavController = findNavController(),
+//        activity: FragmentActivity = requireActivity(),
+//    ) {
+//        val navDirect = when (this) {
+//            is ActionEntity.Brand ->
+//                HomeFragmentDirections.actionToPaginatedProductsCatalogWithoutFiltersFragment(
+//                    ProductCatalogFragment.DataSource.Brand(brandId = this.brandId)
+//                )
+//
+//            is ActionEntity.Brands -> {
+//                HomeFragmentDirections.actionToAllBrandsFragment(this.brandIdList.toLongArray())
+//            }
+//
+//            is ActionEntity.Product ->
+//                HomeFragmentDirections.actionToProductDetailFragment(this.productId)
+//
+//            is ActionEntity.Products -> HomeFragmentDirections.actionToPaginatedProductsCatalogWithoutFiltersFragment(
+//                ProductCatalogFragment.DataSource.HurryBuyUpProducts
+//            )
+//
+//
+//            is ActionEntity.Promotion ->
+//                HomeFragmentDirections.actionToPromotionDetailFragment(this.promotionId)
+//
+//            is ActionEntity.Promotions -> HomeFragmentDirections.actionToAllPromotionsFragment(
+//                AllPromotionsFragment.DataSource.ByBanner(-1, -1) //todo - put a actual realization
+//            )
+//
+//            is ActionEntity.AllPromotions -> HomeFragmentDirections.actionToAllPromotionsFragment(
+//                AllPromotionsFragment.DataSource.All
+//            )
+//
+//            is ActionEntity.Link -> {
+//                val openLinkIntent = Intent(Intent.ACTION_VIEW, Uri.parse(this.url))
+//                activity.startActivity(openLinkIntent)
+//                null
+//            }
+//
+//            is ActionEntity.LinkWithCookies -> {
+//                setCookie()
+//                HomeFragmentDirections.actionToWebViewFragment(
+//                    url,
+//                    "",
+//                )
+//                null
+//            }
+//
+//            is ActionEntity.Category -> HomeFragmentDirections.actionToPaginatedProductsCatalogWithoutFiltersFragment(
+//                ProductCatalogFragment.DataSource.HurryBuyUpProducts
+//            )
+//
+//
+//            is ActionEntity.Discount -> HomeFragmentDirections.actionToPaginatedProductsCatalogWithoutFiltersFragment(
+//                ProductCatalogFragment.DataSource.HurryBuyUpProducts
+//            )
+//
+//            is ActionEntity.Novelties -> HomeFragmentDirections.actionToPaginatedProductsCatalogWithoutFiltersFragment(
+//                ProductCatalogFragment.DataSource.NewProducts
+//            )
+//
+//            is ActionEntity.WaterApp -> {
+//                HomeFragmentDirections.actionToWaterAppFragment()
+//            }
+//
+//            is ActionEntity.Delivery -> HomeFragmentDirections.actionToWebViewFragment(
+//                ApiConfig.ABOUT_DELIVERY_URL,
+//                "О доставке"
+//            )
+//
+//            is ActionEntity.Profile -> {
+//                flowViewModel.goToProfile()
+//                null
+//            }
+//
+//            is ActionEntity.BuyCertificate -> {
+//                HomeFragmentDirections.actionToBuyCertificateFragment()
+//            }
+//        }
+//        navDirect?.let { navController.navigate(navDirect) }
+//    }
 
 
     private fun observeTabReselect() {

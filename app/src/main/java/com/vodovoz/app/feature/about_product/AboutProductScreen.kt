@@ -33,7 +33,6 @@ import com.vodovoz.app.feature.about_product.composables.DescriptionTabContent
 import com.vodovoz.app.feature.about_product.composables.DocumentsTabContent
 import com.vodovoz.app.feature.about_product.model.AboutProductState
 
-@Suppress("NonSkippableComposable")
 @Composable
 fun AboutProductScreen(
     viewState: AboutProductState,

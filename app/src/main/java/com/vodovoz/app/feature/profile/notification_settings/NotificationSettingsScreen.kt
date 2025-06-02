@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import com.vodovoz.app.R
 import com.vodovoz.app.design_system.composables.placeholders.LoadingPlaceholder
 import com.vodovoz.app.design_system.composables.placeholders.NetworkErrorPlaceholder
 import com.vodovoz.app.design_system.composables.top_bar.VodovozTopBar
@@ -24,7 +26,7 @@ fun NotificationSettingsScreen(
     ) {
         VodovozTopBar(
             onBack = { viewModel.navigateBack() },
-            title = viewState.title
+            title = stringResource(R.string.setting_notifications)
         )
         when (viewState.uiState) {
             NotificationSettingsViewModel.NotSettingsUiState.Error -> {
@@ -39,9 +41,14 @@ fun NotificationSettingsScreen(
 
             NotificationSettingsViewModel.NotSettingsUiState.Success -> {
                 NotificationSettingsBody(
-                    switchSections = viewState.switchSections,
-                    onSwitchChange = { switch, checked ->
-                        viewModel.changeSwitch(switch, checked)
+                    header = viewState.title,
+                    sections = viewState.sections,
+                    button = viewState.button,
+                    onWidgetChange = { widget, updatedWidget ->
+                        viewModel.changeWidget(widget, updatedWidget)
+                    },
+                    onSaveClick = {
+                        viewModel.saveNotificationSettings()
                     }
                 )
             }

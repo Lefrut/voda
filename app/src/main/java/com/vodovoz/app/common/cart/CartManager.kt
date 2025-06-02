@@ -1,10 +1,7 @@
 package com.vodovoz.app.common.cart
 
 import com.vodovoz.app.common.tab.TabManager
-import com.vodovoz.app.data.MainRepository
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
-import com.vodovoz.app.ui.model.ProductUI
-import com.vodovoz.app.util.extensions.debugLog
 import com.vodovoz.app.util.extensions.singleResult
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -27,7 +24,6 @@ import javax.inject.Singleton
 
 @Singleton
 class CartManager @Inject constructor(
-    private val repository: MainRepository,
     private val tabManager: TabManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
 ) {
@@ -111,27 +107,6 @@ class CartManager @Inject constructor(
         }
     }
 
-    suspend fun add(
-        id: Long,
-        oldCount: Int,
-        newCount: Int,
-        withUpdate: Boolean = true,
-    ) {
-        val isInCart = oldCount != 0
-
-        //val plus = newCount >= oldCount
-
-        updateCartItem(id, newCount)
-
-        runCatching {
-            action(id = id, count = newCount, isInCart = isInCart/*, plus*/)
-            updateCartListState(withUpdate)
-        }.onFailure {
-            //tabManager.loadingAddToCart(false, plus = true)
-            updateCartItem(id, oldCount)
-        }
-    }
-
     suspend fun clearCart() {
         cartMutex.withLock {
             cartVersion++
@@ -167,15 +142,6 @@ class CartManager @Inject constructor(
                 flow.singleResult().getOrThrow()
             }
         }.awaitAll()
-    }
-
-    private suspend fun action(id: Long, count: Int, isInCart: Boolean) {
-        if (!isInCart) {
-            repository.addProductToCart(id, count)
-        } else {
-            repository.changeProductsQuantityInCart(id, count)
-
-        }
     }
 
     private suspend fun updateCart(cart: Map<Long, Int>) {
@@ -258,36 +224,6 @@ class CartManager @Inject constructor(
         }
     }
 
-
-    //Service Details Products
-    suspend fun add(
-        id: Long,
-        newCount: Int,
-        withUpdate: Boolean = true,
-        giftId: String,
-    ) {
-        //val plus = newCount >= oldCount
-
-        updateCartItem(id, newCount)
-
-        runCatching {
-            debugLog { "add with gift" }
-            actionWithGift(id = id, count = newCount, /*plus,*/ giftId)
-            updateCartListState(withUpdate)
-        }.onFailure {
-            debugLog { "add with gift error ${it.localizedMessage}" }
-            // tabManager.loadingAddToCart(false, plus = true)
-            updateCartItem(id, newCount)
-        }
-    }
-
-    private suspend fun actionWithGift(id: Long, count: Int,/* plus: Boolean,*/ giftId: String) {
-        val idWithGift = "$id-$count;$giftId"
-        debugLog { "action add with gift $idWithGift" }
-        //tabManager.loadingAddToCart(true, plus = plus)
-        repository.addProductFromServiceDetails(idWithGift)
-        updateCartItem(id, count)
-    }
 
     fun formatCart(cart: Map<Long, Int>): String {
         return cart.entries.joinToString(";") { "${it.key}-${it.value}" }

@@ -19,7 +19,6 @@ import com.vodovoz.app.design_system.composables.snackbar.VodovozSnackbarHost
 import com.vodovoz.app.design_system.composables.top_bar.VodovozTopBar
 import com.vodovoz.app.feature.auth.reg.RegFlowViewModel
 
-@Suppress("NonSkippableComposable")
 @Composable
 fun RegisterScreen(
     viewModel: RegFlowViewModel,

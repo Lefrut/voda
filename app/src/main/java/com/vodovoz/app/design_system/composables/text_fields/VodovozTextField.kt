@@ -44,7 +44,7 @@ import com.vodovoz.app.R
 import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.composables.decoration.PasswordIcon
 import com.vodovoz.app.design_system.text.PhoneNumberVisualTransformation
-import com.vodovoz.app.feature.preorder.model.FieldUi
+import com.vodovoz.app.design_system.model.widgets.FieldUi
 import com.vodovoz.app.util.formatRussianPhoneNumber
 
 @Composable

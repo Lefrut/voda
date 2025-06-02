@@ -25,8 +25,8 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.vodovoz.app.R
 import com.vodovoz.app.design_system.composables.card.VodovozOutlinedCard
-import com.vodovoz.app.feature.home.model.MenuItemUi
 import com.vodovoz.app.feature.home.model.HomeOrderUi
+import com.vodovoz.app.feature.home.model.MenuItemUi
 import com.vodovoz.app.feature.home.model.OrderWithMenuUi
 
 @Composable

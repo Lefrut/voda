@@ -1,58 +1,56 @@
 package com.vodovoz.app.data.vodovoz_service.mappers
 
+import com.vodovoz.app.common.model.VodovozBoolean
+import com.vodovoz.app.common.model.equalsTo
+import com.vodovoz.app.data.vodovoz_service.model.notification_settings.NOTIFICATION_SECTION_DTO
+import com.vodovoz.app.data.vodovoz_service.model.notification_settings.NOTIFICATION_SECTION_ITEM_DTO
 import com.vodovoz.app.data.vodovoz_service.model.notification_settings.NotificationSettingsDetailsDTO
-import com.vodovoz.app.data.vodovoz_service.model.notification_settings.SWITCH_DTO
-import com.vodovoz.app.data.vodovoz_service.model.notification_settings.SWITCH_SECTION_DTO
-import com.vodovoz.app.data.vodovoz_service.model.notification_settings.TELEFON_DTO
-import com.vodovoz.app.domain.general.model.FieldModel
-import com.vodovoz.app.domain.general.model.NotificationSettingsDetailsModel
-import com.vodovoz.app.domain.general.model.SwitchModel
-import com.vodovoz.app.domain.general.model.SwitchSectionModel
+import com.vodovoz.app.domain.general.model.ColorfulButtonModel
+import com.vodovoz.app.domain.general.model.SectionModel
+import com.vodovoz.app.domain.general.model.notification_settings.NotificationSectionItemModel
+import com.vodovoz.app.domain.general.model.notification_settings.NotificationSettingsDetailsModel
 
 fun NotificationSettingsDetailsDTO.toDomain(): NotificationSettingsDetailsModel {
     return NotificationSettingsDetailsModel(
-        title = TITLE ?: "",
-        phoneTitle = TELEFON?.NAME ?: "",
-        phoneField = TELEFON?.toDomain()
-            ?: throw IllegalArgumentException("Notification settings phone can't be null"),
-        switchSections = LISTADATA?.mapToDomain()
-            ?: throw IllegalArgumentException("Notification settings switches can't be null")
+        title = TEXT ?: "",
+        sections = DANNYE?.mapToDomain() ?: emptyList(),
+        button = KNOPKA?.toDomain() ?: ColorfulButtonModel.Empty
     )
 }
 
-fun TELEFON_DTO.toDomain(): FieldModel {
-    return FieldModel(
-        id = KLYCH ?: "phone",
-        label = "",
-        value = ACTIVE ?: "",
-        valueType = "phone",
-        isRequired = true,
-        readOnly = false,
-        supportingText = "",
-        hint = ""
+
+@JvmName("mapToNotificationSectionItemModelSectionModelList")
+fun List<NOTIFICATION_SECTION_DTO>.mapToDomain(): List<SectionModel<NotificationSectionItemModel>> {
+    return mapNotNull { notificationSectionDto ->
+        notificationSectionDto.toDomain()
+    }
+}
+
+fun NOTIFICATION_SECTION_DTO.toDomain(): SectionModel<NotificationSectionItemModel>? {
+    return SectionModel(
+        title = NAME ?: "",
+        items = POLA?.mapToDomain()?.ifEmpty { return null } ?: return null,
+        button = null
     )
 }
 
-fun List<SWITCH_SECTION_DTO>.mapToDomain(): List<SwitchSectionModel> {
+fun NOTIFICATION_SECTION_ITEM_DTO.toDomain(): NotificationSectionItemModel? {
+    if(FIELD_TYPE == "hidden") return null
+    return NotificationSectionItemModel(
+        id = ID ?: -1,
+        message = MESSAGE ?: "",
+        code = KLYCH ?: return null,
+        type = FIELD_TYPE ?: "",
+        readOnly = VodovozBoolean.True equalsTo ZAPRETREDAK,
+        value = VALUE ?: "",
+        isVisible = true
+    )
+}
+
+fun List<NOTIFICATION_SECTION_ITEM_DTO>.mapToDomain(): List<NotificationSectionItemModel> {
     return mapNotNull { it.toDomain() }
 }
 
-fun SWITCH_SECTION_DTO.toDomain(): SwitchSectionModel? {
-    return SwitchSectionModel(
-        title = ZAGOLOVOK ?: "",
-        description = OPISANIE ?: "",
-        switches = DANNYE?.mapNotNull { it?.toDomain() }?.apply {
-            if (isEmpty()) return null
-        } ?: return null
-    )
-}
 
 
-fun SWITCH_DTO.toDomain(): SwitchModel? {
-    return SwitchModel(
-        id = KLYCH ?: return null,
-        name = NAME ?: return null,
-        active = ACTIVE == "Y"
-    )
-}
 

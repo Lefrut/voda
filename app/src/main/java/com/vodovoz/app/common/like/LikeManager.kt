@@ -1,10 +1,8 @@
 package com.vodovoz.app.common.like
 
-import androidx.recyclerview.widget.RecyclerView
 import com.vodovoz.app.common.account.AccountManager
 import com.vodovoz.app.common.datastore.DataStoreRepository
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
-import com.vodovoz.app.ui.model.ProductUI
 import com.vodovoz.app.util.extensions.singleResult
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow

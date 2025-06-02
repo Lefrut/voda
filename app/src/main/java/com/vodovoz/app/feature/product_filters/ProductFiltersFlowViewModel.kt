@@ -14,7 +14,6 @@ import com.vodovoz.app.design_system.model.filters.FiltersPriceUi
 import com.vodovoz.app.design_system.model.filters.FiltersUi
 import com.vodovoz.app.design_system.model.filters.toUi
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
-import com.vodovoz.app.ui.model.custom.FiltersBundleUI
 import com.vodovoz.app.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.collectLatest
@@ -28,7 +27,6 @@ import kotlin.math.roundToInt
 @HiltViewModel
 class ProductFiltersFlowViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    private val repository: MainRepository,
     private val vodovozServiceRepository: VodovozServiceRepository,
 ) : PagingContractViewModel<ProductFiltersFlowViewModel.ProductFiltersState, ProductFiltersFlowViewModel.ProductFiltersEvent>(
     ProductFiltersState()
@@ -298,9 +296,6 @@ class ProductFiltersFlowViewModel @Inject constructor(
 
     @Immutable
     data class ProductFiltersState(
-        val filterBundle: FiltersBundleUI? = null,
-        val defaultBundle: FiltersBundleUI? = null,
-
         val filters: FiltersUi = FiltersUi.Empty,
         val uiState: ProductFiltersUiState = ProductFiltersUiState.Loading,
         val showApplyButton: Boolean = false,

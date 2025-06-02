@@ -4,13 +4,10 @@ import android.Manifest
 import android.app.Activity
 import android.app.AlertDialog
 import android.content.Intent
-import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
-import android.view.View
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
@@ -19,7 +16,6 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.github.dhaval2404.imagepicker.ImagePicker
 import com.vodovoz.app.R
-import com.vodovoz.app.common.content.BaseFragment
 import com.vodovoz.app.common.tab.TabManager
 import com.vodovoz.app.util.extensions.debugLog
 import com.vodovoz.app.util.extensions.longArgs

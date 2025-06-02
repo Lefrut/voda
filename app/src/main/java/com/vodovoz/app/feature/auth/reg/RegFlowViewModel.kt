@@ -1,6 +1,7 @@
 package com.vodovoz.app.feature.auth.reg
 
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.Stable
 import androidx.lifecycle.viewModelScope
 import com.vodovoz.app.R
 import com.vodovoz.app.common.account.AccountManager
@@ -11,22 +12,20 @@ import com.vodovoz.app.common.content.PagingContractViewModel
 import com.vodovoz.app.common.content.State
 import com.vodovoz.app.common.content.itemadapter.Item
 import com.vodovoz.app.common.content.updateData
-import com.vodovoz.app.common.like.LikeManager
 import com.vodovoz.app.common.resources.ResourcesProvider
-import com.vodovoz.app.common.token.FirebaseTokenManager
 import com.vodovoz.app.design_system.model.ColorfulButtonUi
 import com.vodovoz.app.design_system.model.mapToUi
 import com.vodovoz.app.design_system.model.updateButton
+import com.vodovoz.app.design_system.model.widgets.EmptyTextValidator
+import com.vodovoz.app.design_system.model.widgets.FieldUi
+import com.vodovoz.app.design_system.model.widgets.PhoneNumberValidator
+import com.vodovoz.app.design_system.model.widgets.checkFields
+import com.vodovoz.app.design_system.model.widgets.getErrorText
+import com.vodovoz.app.design_system.model.widgets.mapToDomain
+import com.vodovoz.app.design_system.model.widgets.mapToUi
+import com.vodovoz.app.design_system.model.widgets.updateFieldAndResetError
 import com.vodovoz.app.domain.general.model.ValidationException
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
-import com.vodovoz.app.feature.preorder.model.EmptyTextValidator
-import com.vodovoz.app.feature.preorder.model.FieldUi
-import com.vodovoz.app.feature.preorder.model.PhoneNumberValidator
-import com.vodovoz.app.feature.preorder.model.checkFields
-import com.vodovoz.app.feature.preorder.model.getErrorText
-import com.vodovoz.app.feature.preorder.model.mapToUi
-import com.vodovoz.app.feature.preorder.model.toDomain
-import com.vodovoz.app.feature.preorder.model.updateFieldAndResetError
 import com.vodovoz.app.feature.sitestate.SiteStateManager
 import com.vodovoz.app.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -34,10 +33,9 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
+@Stable
 class RegFlowViewModel @Inject constructor(
     private val accountManager: AccountManager,
-    private val firebaseTokenManager: FirebaseTokenManager,
-    private val likeManager: LikeManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val resourceProvider: ResourcesProvider,
     private val siteStateManager: SiteStateManager,
@@ -111,7 +109,7 @@ class RegFlowViewModel @Inject constructor(
         val failMessage = resourceProvider.getString(R.string.error_registration)
 
         val registerResult = vodovozServiceRepository.register(
-            dataState.fields.map { fieldUi -> fieldUi.toDomain() }
+            dataState.fields.mapToDomain()
         ).singleResult()
 
         registerResult.onSuccess { authInfo ->
@@ -220,8 +218,6 @@ class RegFlowViewModel @Inject constructor(
 
 
     sealed class RegEvents : Event {
-        data object RegSuccess : RegEvents()
-        data class RegError(val message: String) : RegEvents()
         data class ShowSnackbar(val message: String) : RegEvents()
         data class GoToWebView(val url: String, val title: String) : RegEvents()
 

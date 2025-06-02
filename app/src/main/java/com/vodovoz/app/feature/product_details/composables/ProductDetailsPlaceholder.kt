@@ -33,10 +33,12 @@ fun ProductDetailsPlaceholder(modifier: Modifier = Modifier) {
         SkeletonBox(
             shimmerState = shimmer, modifier = Modifier
                 .fillMaxWidth()
-                .height(211.dp)
+                .height(250.dp)
         )
         Row(
-            modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 16.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             repeat(3) {
@@ -48,16 +50,40 @@ fun ProductDetailsPlaceholder(modifier: Modifier = Modifier) {
             }
         }
 
-        SkeletonBox(shimmerState = shimmer, modifier = Modifier.padding(top = 16.dp).height(36.dp).fillMaxWidth(0.9f))
+        SkeletonBox(
+            shimmerState = shimmer, modifier = Modifier
+                .padding(top = 16.dp)
+                .height(36.dp)
+                .fillMaxWidth(0.9f)
+        )
 
-        SkeletonBox(shimmerState = shimmer, modifier = Modifier.padding(top = 16.dp).height(36.dp).fillMaxWidth(0.75f))
+        SkeletonBox(
+            shimmerState = shimmer, modifier = Modifier
+                .padding(top = 16.dp)
+                .height(36.dp)
+                .fillMaxWidth(0.75f)
+        )
 
-        SkeletonBox(shimmerState = shimmer, modifier = Modifier.padding(top = 16.dp).height(36.dp).fillMaxWidth(0.55f))
+        SkeletonBox(
+            shimmerState = shimmer, modifier = Modifier
+                .padding(top = 16.dp)
+                .height(36.dp)
+                .fillMaxWidth(0.55f)
+        )
 
-        SkeletonBox(shimmerState = shimmer, modifier = Modifier.padding(top = 16.dp).height(36.dp).fillMaxWidth(0.8f))
+        SkeletonBox(
+            shimmerState = shimmer, modifier = Modifier
+                .padding(top = 16.dp)
+                .height(36.dp)
+                .fillMaxWidth(0.8f)
+        )
 
-        SkeletonBox(shimmerState = shimmer, modifier = Modifier.padding(top = 16.dp).height(400.dp).fillMaxWidth())
-
+        SkeletonBox(
+            shimmerState = shimmer, modifier = Modifier
+                .padding(top = 16.dp)
+                .height(36.dp)
+                .fillMaxWidth()
+        )
     }
 }
 

@@ -1,8 +1,8 @@
 package com.vodovoz.app.data.vodovoz_service.model.order_history
 
 
-import com.squareup.moshi.Json
 import androidx.annotation.Keep
+import com.squareup.moshi.Json
 import com.vodovoz.app.data.vodovoz_service.model.order_details.ORDER_STATUS_DTO
 import java.time.LocalDateTime
 

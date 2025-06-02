@@ -1,6 +1,5 @@
 package com.vodovoz.app.data.vodovoz_service.mappers
 
-import android.provider.ContactsContract.Data
 import com.vodovoz.app.data.vodovoz_service.model.ACTION_DTO
 import com.vodovoz.app.domain.general.model.DataAllAction
 import com.vodovoz.app.domain.general.model.VodovozAction

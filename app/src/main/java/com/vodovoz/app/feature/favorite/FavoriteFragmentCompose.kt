@@ -1,7 +1,5 @@
 package com.vodovoz.app.feature.favorite
 
-import android.Manifest
-import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -18,7 +16,6 @@ import androidx.navigation.fragment.findNavController
 import com.vodovoz.app.R
 import com.vodovoz.app.common.cart.CartManager
 import com.vodovoz.app.common.like.LikeManager
-import com.vodovoz.app.common.product.rating.RatingProductManager
 import com.vodovoz.app.common.tab.TabManager
 import com.vodovoz.app.core.navigation.navigateToProductAnalogs
 import com.vodovoz.app.core.navigation.navigateToCategories
@@ -42,9 +39,6 @@ class FavoriteFragment : Fragment() {
 
     @Inject
     lateinit var likeManager: LikeManager
-
-    @Inject
-    lateinit var ratingProductManager: RatingProductManager
 
     @Inject
     lateinit var tabManager: TabManager

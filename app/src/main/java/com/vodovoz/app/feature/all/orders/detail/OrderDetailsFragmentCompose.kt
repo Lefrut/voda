@@ -13,7 +13,6 @@ import androidx.navigation.fragment.findNavController
 import com.vodovoz.app.common.account.AccountManager
 import com.vodovoz.app.common.cart.CartManager
 import com.vodovoz.app.common.like.LikeManager
-import com.vodovoz.app.common.product.rating.RatingProductManager
 import com.vodovoz.app.core.navigation.navigateToCancelOrder
 import com.vodovoz.app.core.navigation.navigateToOrderQuestion
 import com.vodovoz.app.core.navigation.navigateToProductDetails
@@ -41,9 +40,6 @@ class OrderDetailsFragment : Fragment() {
 
     @Inject
     lateinit var accountManager: AccountManager
-
-    @Inject
-    lateinit var ratingProductManager: RatingProductManager
 
 
     override fun onResume() {

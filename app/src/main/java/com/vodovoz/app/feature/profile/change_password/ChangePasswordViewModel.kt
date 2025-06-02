@@ -6,11 +6,12 @@ import com.vodovoz.app.common.resources.ResourcesProvider
 import com.vodovoz.app.domain.general.model.UserNotLoginException
 import com.vodovoz.app.domain.general.model.ValidationException
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
-import com.vodovoz.app.feature.preorder.model.FieldUi
-import com.vodovoz.app.feature.preorder.model.checkFields
-import com.vodovoz.app.feature.preorder.model.mapToDomain
+import com.vodovoz.app.design_system.model.widgets.FieldUi
+import com.vodovoz.app.design_system.model.widgets.checkFields
+import com.vodovoz.app.design_system.model.widgets.mapToDomain
+import com.vodovoz.app.design_system.model.widgets.toUi
 import com.vodovoz.app.feature.preorder.model.toUi
-import com.vodovoz.app.feature.preorder.model.updateFieldAndResetError
+import com.vodovoz.app.design_system.model.widgets.updateFieldAndResetError
 import com.vodovoz.app.feature.profile.change_password.model.ChangePasswordEvent
 import com.vodovoz.app.feature.profile.change_password.model.ChangePasswordState
 import com.vodovoz.app.feature.profile.change_password.model.ChangePasswordUiState

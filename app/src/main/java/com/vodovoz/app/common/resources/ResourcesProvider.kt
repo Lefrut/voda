@@ -1,6 +1,5 @@
 package com.vodovoz.app.common.resources
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable

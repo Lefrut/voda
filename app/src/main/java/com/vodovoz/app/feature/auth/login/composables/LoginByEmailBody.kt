@@ -23,7 +23,7 @@ import com.vodovoz.app.design_system.composables.button.VodovozButtonDefaults
 import com.vodovoz.app.design_system.composables.decoration.AgreementRow
 import com.vodovoz.app.design_system.composables.text_fields.VodovozTextFieldsColumn
 import com.vodovoz.app.design_system.model.ColorfulButtonUi
-import com.vodovoz.app.feature.preorder.model.FieldUi
+import com.vodovoz.app.design_system.model.widgets.FieldUi
 
 @Suppress("NonSkippableComposable")
 @Composable

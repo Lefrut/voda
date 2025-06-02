@@ -149,7 +149,7 @@ class ProfileFragment : Fragment() {
                         is ProfileFlowViewModel.ProfileEvents.ActivateVodovozAction -> {
                             events.action.activate(
                                 navController = findNavController(),
-                                activity = requireActivity(),
+                                context = requireActivity(),
                                 cookie = cookieManager.fetchCookieSessionId() ?: "",
                                 tabManager = tabManager
                             )

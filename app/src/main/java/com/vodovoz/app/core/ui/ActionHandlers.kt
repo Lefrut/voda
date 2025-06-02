@@ -1,6 +1,6 @@
 package com.vodovoz.app.core.ui
 
-import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.webkit.CookieManager
@@ -114,7 +114,7 @@ fun ButtonAction.activate(
 
 fun VodovozAction.activate(
     navController: NavController,
-    activity: Activity,
+    context: Context,
     cookie: String,
     tabManager: TabManager,
     activators: List<VodovozActionActivator> = emptyList(),
@@ -154,7 +154,7 @@ fun VodovozAction.activate(
         is VodovozAction.Url -> {
             runCatching {
                 val openLinkIntent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-                activity.startActivity(openLinkIntent)
+                context.startActivity(openLinkIntent)
             }
         }
 

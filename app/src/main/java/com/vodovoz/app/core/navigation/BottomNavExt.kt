@@ -13,7 +13,6 @@ import androidx.navigation.NavController
 import androidx.navigation.NavDirections
 import androidx.navigation.fragment.NavHostFragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.vodovoz.app.feature.preorder.PreOrderFragmentDirections
 import com.vodovoz.app.ui.view.ExtendedBottomNavigationView
 import java.util.LinkedList
 

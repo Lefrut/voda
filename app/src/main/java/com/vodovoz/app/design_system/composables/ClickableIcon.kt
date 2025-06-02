@@ -1,5 +1,6 @@
 package com.vodovoz.app.design_system.composables
 
+import androidx.annotation.DrawableRes
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.padding
@@ -20,9 +21,9 @@ import androidx.compose.ui.unit.dp
 import com.vodovoz.app.R
 
 @Composable
-fun ClickableIcon(painter: Painter, tint: Color, modifier: Modifier = Modifier, onClick: () -> Unit) {
+fun ClickableIcon(@DrawableRes iconId: Int, tint: Color, modifier: Modifier = Modifier, onClick: () -> Unit) {
     Icon(
-        painter = painter,
+        painter = painterResource(id = iconId),
         contentDescription = null,
         modifier = modifier
             .size(24.dp)

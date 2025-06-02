@@ -274,7 +274,7 @@ class HomeFragment : Fragment() {
                     val cookie = cookieManager.fetchCookieSessionId() ?: ""
                     event.action.activate(
                         navController = findNavController(),
-                        activity = requireActivity(),
+                        context = requireActivity(),
                         cookie = cookie,
                         tabManager = tabManager
                     )

@@ -1,6 +1,7 @@
 package com.vodovoz.app.feature.product_catalog
 
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.Stable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.paging.CombinedLoadStates
@@ -14,7 +15,6 @@ import com.vodovoz.app.common.content.State
 import com.vodovoz.app.common.content.itemadapter.Item
 import com.vodovoz.app.common.content.updateData
 import com.vodovoz.app.common.like.LikeManager
-import com.vodovoz.app.common.product.rating.RatingProductManager
 import com.vodovoz.app.common.resources.ResourcesProvider
 import com.vodovoz.app.design_system.model.ForAdultsUi
 import com.vodovoz.app.design_system.model.ParentCategoryUi
@@ -42,8 +42,6 @@ import com.vodovoz.app.feature.home.model.toParentCategory
 import com.vodovoz.app.feature.product_comments.model.SortUi
 import com.vodovoz.app.feature.product_comments.model.toDomain
 import com.vodovoz.app.feature.product_catalog.ProductCatalogFragment.DataSource
-import com.vodovoz.app.ui.model.CategoryUI
-import com.vodovoz.app.ui.model.SortTypeUI
 import com.vodovoz.app.ui.paging.PagingDataListener
 import com.vodovoz.app.ui.paging.copy
 import com.vodovoz.app.ui.paging.emptyCombinedLoadStates
@@ -58,11 +56,11 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
+@Stable
 class ProductCatalogViewModel @Inject constructor(
     savedState: SavedStateHandle,
     private val cartManager: CartManager,
     private val likeManager: LikeManager,
-    private val ratingProductManager: RatingProductManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val resourcesProvider: ResourcesProvider,
     private val userPreferencesRepository: UserPreferencesRepository,
@@ -480,12 +478,6 @@ class ProductCatalogViewModel @Inject constructor(
 
     }
 
-    fun changeRating(productId: Long, rating: Float, oldRating: Float) {
-        viewModelScope.launch {
-            ratingProductManager.rate(productId, rating = rating, oldRating = oldRating)
-        }
-    }
-
     fun selectSort(sort: SortUi) = viewModelScope.launch {
         uiStateListener.updateData { s ->
             s.copy(
@@ -663,15 +655,6 @@ class ProductCatalogViewModel @Inject constructor(
 
     @Immutable
     data class ProductCatalogState(
-        val categoryId: Long = -1,
-        val categoryHeader: CategoryUI? = null,
-        val sortType: SortTypeUI = SortTypeUI(),
-        val isFirstLoadSorted: Boolean = false,
-        val itemsList: List<Item> = emptyList(),
-        val layoutManager: String = LINEAR,
-        val selectedCategoryId: Long = -1,
-        val scrollToTop: Boolean = false,
-
         val productsSection: ProductsSectionUi = ProductsSectionUi.Empty,
         val products: List<ProductUi> = emptyList(),
         val productsLoadStates: CombinedLoadStates = emptyCombinedLoadStates,
@@ -719,10 +702,5 @@ class ProductCatalogViewModel @Inject constructor(
 
         data class Share(val text: String) : ProductCatalogEvent()
         data class GoToProductAnalogs(val productId: Long) : ProductCatalogEvent()
-    }
-
-    companion object {
-        const val LINEAR = "linear"
-        const val GRID = "grid"
     }
 }

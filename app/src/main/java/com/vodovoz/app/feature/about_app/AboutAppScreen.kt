@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import com.vodovoz.app.R
 import com.vodovoz.app.design_system.composables.top_bar.VodovozTopBar
@@ -27,9 +26,7 @@ fun AboutAppScreen(viewModel: AboutAppViewModel, viewState: AboutAppState) {
                 viewModel.navigateBack()
             },
             title = stringResource(R.string.about_app),
-            actionPainter = painterResource(
-                R.drawable.ic_share
-            ),
+            actionIconId = R.drawable.ic_share,
             onActionClick = {
                 viewModel.share()
             }

@@ -20,8 +20,8 @@ import com.vodovoz.app.design_system.model.PromotionUi
 import com.vodovoz.app.design_system.model.SectionUi
 import com.vodovoz.app.design_system.model.StoryUi
 import com.vodovoz.app.domain.general.model.ButtonAction
-import com.vodovoz.app.feature.home.model.MenuItemUi
 import com.vodovoz.app.feature.home.model.HomeOrderUi
+import com.vodovoz.app.feature.home.model.MenuItemUi
 import com.vodovoz.app.feature.home.model.OrderWithMenuUi
 import com.vodovoz.app.feature.home.model.PopularCategoryUi
 

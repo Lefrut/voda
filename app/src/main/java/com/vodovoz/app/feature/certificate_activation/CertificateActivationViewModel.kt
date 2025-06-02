@@ -6,10 +6,10 @@ import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.feature.certificate_activation.model.CertificateActivationEvent
 import com.vodovoz.app.feature.certificate_activation.model.CertificateActivationState
 import com.vodovoz.app.feature.certificate_activation.model.CertificateActivationUiState
-import com.vodovoz.app.feature.preorder.model.FieldUi
-import com.vodovoz.app.feature.preorder.model.FieldValidationResult
-import com.vodovoz.app.feature.preorder.model.KeyboardTypeValidator
-import com.vodovoz.app.feature.preorder.model.toUi
+import com.vodovoz.app.design_system.model.widgets.FieldUi
+import com.vodovoz.app.design_system.model.widgets.FieldValidationResult
+import com.vodovoz.app.design_system.model.widgets.KeyboardTypeValidator
+import com.vodovoz.app.design_system.model.widgets.toUi
 import com.vodovoz.app.ui.mvi.MviViewModel
 import com.vodovoz.app.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel

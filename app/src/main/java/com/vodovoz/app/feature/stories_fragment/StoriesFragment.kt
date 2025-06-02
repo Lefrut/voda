@@ -7,7 +7,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -17,11 +16,13 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.fragment.findNavController
-import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import com.vodovoz.app.common.cookie.CookieManager
 import com.vodovoz.app.common.tab.TabManager
+import com.vodovoz.app.core.ui.activate
 import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.composables.placeholders.LoadingPlaceholder
 import com.vodovoz.app.design_system.effects.LifecycleEffect
+import com.vodovoz.app.design_system.effects.SystemBarsEffect
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -34,14 +35,16 @@ class StoriesFragment : Fragment() {
     @Inject
     lateinit var tabManager: TabManager
 
+    @Inject
+    lateinit var cookieManager: CookieManager
+
     override fun onStart() {
         super.onStart()
         tabManager.changeTabVisibility(false)
-
     }
 
-    override fun onStop() {
-        super.onStop()
+    override fun onPause() {
+        super.onPause()
         tabManager.changeTabVisibility(true)
     }
 
@@ -51,7 +54,6 @@ class StoriesFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View {
-        val navController = findNavController()
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
 
@@ -84,25 +86,10 @@ class StoriesFragment : Fragment() {
                     }
 
 
-                    val systemUiController = rememberSystemUiController()
-
-                    val backgroundColor = MaterialTheme.colorScheme.background
-                    val onBackgroundColor = MaterialTheme.colorScheme.onBackground
-
-                    DisposableEffect(Unit) {
-                        systemUiController.setSystemBarsColor(
-                            color = onBackgroundColor,
-                            isNavigationBarContrastEnforced = false
-                        )
-                        onDispose {
-                            systemUiController.setSystemBarsColor(
-                                color = backgroundColor,
-                                isNavigationBarContrastEnforced = false
-                            )
-                        }
-                    }
-
-
+                    SystemBarsEffect(
+                        statusBarColor = MaterialTheme.colorScheme.onBackground,
+                        navigationBarColor = MaterialTheme.colorScheme.onBackground
+                    )
 
                     LaunchedEffect(pagerState.currentPage) {
                         viewModel.changeStoryIndex(pagerState.currentPage)
@@ -110,19 +97,26 @@ class StoriesFragment : Fragment() {
 
 
 
-                    LifecycleEffect(arg2 = pagerState) {
+                    LifecycleEffect(pagerState) {
                         viewModel.observeEvent().collect { event ->
                             when (event) {
-                                is StoriesViewModel.HistoriesSliderEvents.ChangePagerIndex -> {
+                                is StoriesViewModel.StoriesEvents.ChangePagerIndex -> {
                                     launch { pagerState.animateScrollToPage(event.newStoryIndex) }
                                 }
 
-                                StoriesViewModel.HistoriesSliderEvents.GoBack -> {
+                                StoriesViewModel.StoriesEvents.GoBack -> {
+                                    val navController = findNavController()
                                     navController.popBackStack()
                                 }
 
-                                StoriesViewModel.HistoriesSliderEvents.GoToProfile -> {
-
+                                is StoriesViewModel.StoriesEvents.ActivateAction -> {
+                                    val cookie = cookieManager.fetchCookieSessionId() ?: ""
+                                    event.action.activate(
+                                        navController = findNavController(),
+                                        context = requireContext(),
+                                        cookie = cookie,
+                                        tabManager = tabManager
+                                    )
                                 }
                             }
                         }
@@ -132,8 +126,6 @@ class StoriesFragment : Fragment() {
             }
         }
     }
-
-
 
 
 }

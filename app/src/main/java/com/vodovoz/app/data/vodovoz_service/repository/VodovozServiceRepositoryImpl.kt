@@ -8,8 +8,8 @@ import com.squareup.moshi.Types
 import com.vodovoz.app.common.account.AccountManager
 import com.vodovoz.app.common.cookie.CookieManager
 import com.vodovoz.app.core.network.retrofit.messageWithCode
-import com.vodovoz.app.core.network.serialization.fromJson
 import com.vodovoz.app.core.network.retrofit.stringBody
+import com.vodovoz.app.core.network.serialization.fromJson
 import com.vodovoz.app.data.vodovoz_service.VodovozService
 import com.vodovoz.app.data.vodovoz_service.mappers.executeRequest
 import com.vodovoz.app.data.vodovoz_service.mappers.mapToDomain
@@ -26,6 +26,7 @@ import com.vodovoz.app.data.vodovoz_service.model.WaitFeedbackProductsDTO
 import com.vodovoz.app.data.vodovoz_service.model.order_details.OrderDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.order_history.OrdersHistoryDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.paging.VodovozPagingSource
+import com.vodovoz.app.design_system.model.widgets.FieldUi
 import com.vodovoz.app.domain.general.model.AllBottlesDetailsModel
 import com.vodovoz.app.domain.general.model.BannerModel
 import com.vodovoz.app.domain.general.model.BrandModel
@@ -39,7 +40,6 @@ import com.vodovoz.app.domain.general.model.EmptyResultException
 import com.vodovoz.app.domain.general.model.FieldModel
 import com.vodovoz.app.domain.general.model.FilterValueModel
 import com.vodovoz.app.domain.general.model.FiltersModel
-import com.vodovoz.app.domain.general.model.NotificationSettingsDetailsModel
 import com.vodovoz.app.domain.general.model.OrderWithMenuModel
 import com.vodovoz.app.domain.general.model.ParentCategoryModel
 import com.vodovoz.app.domain.general.model.PopularCategoryModel
@@ -80,6 +80,7 @@ import com.vodovoz.app.domain.general.model.format
 import com.vodovoz.app.domain.general.model.login.AuthDetailsModel
 import com.vodovoz.app.domain.general.model.login.RequestCodeModel
 import com.vodovoz.app.domain.general.model.login.UserAuthInfoModel
+import com.vodovoz.app.domain.general.model.notification_settings.NotificationSettingsDetailsModel
 import com.vodovoz.app.domain.general.model.order.OrderDetailsModel
 import com.vodovoz.app.domain.general.model.order.OrderQuestionDetailsModel
 import com.vodovoz.app.domain.general.model.order.OrdersHistoryDetailsModel
@@ -90,7 +91,6 @@ import com.vodovoz.app.domain.general.model.service.ServiceDetailsModel
 import com.vodovoz.app.domain.general.model.service.ServiceOrderDetailsModel
 import com.vodovoz.app.domain.general.model.toQueries
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
-import com.vodovoz.app.feature.preorder.model.FieldUi
 import com.vodovoz.app.util.extensions.singleResult
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
