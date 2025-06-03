@@ -7,7 +7,7 @@ import com.squareup.moshi.Json
 @Keep
 data class SPISOK(
     @Json(name = "NAME")
-    val _VODNAME: String?,
+    val NAME: String?,
     @Json(name = "ID")
-    val _VODID: String?
+    val ID: String?
 )

@@ -6,19 +6,21 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.NonRestartableComposable
 import androidx.compose.runtime.key
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.google.firebase.database.core.utilities.ImmutableTree
 import com.vodovoz.app.R
 import com.vodovoz.app.design_system.composables.chip.VodovozChip
 import com.vodovoz.app.design_system.composables.tab_row.VodovozScrollableTabRow
 import com.vodovoz.app.feature.home.model.CategoryUi
 import com.vodovoz.app.util.extensions.indexOfOrNull
 
-
+@NonRestartableComposable
 @Composable
 fun ProductListCategoriesRow(
     modifier: Modifier = Modifier,

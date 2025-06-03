@@ -114,7 +114,6 @@ class VodovozServiceRepositoryImpl @Inject constructor(
 ) : VodovozServiceRepository {
 
 
-
     override fun orderService(
         serviceType: String,
         fields: List<FieldModel>,
@@ -856,7 +855,8 @@ class VodovozServiceRepositoryImpl @Inject constructor(
             request = {
                 vodovozService.updateUserData(
                     accountManager.fetchAccountId() ?: -1,
-                    fields.filter { it.value.isNotEmpty() }.associate { it.id to it.value.trim() })
+                    fields.toQueries()
+                )
             },
             mapper = {
                 it.message ?: ""

@@ -49,9 +49,6 @@ fun UserDataScreen(
             photo = viewState.photo,
             photoDescription = viewState.photoDescription,
             buttonEnabled = viewState.buttonEnabled,
-            onFieldValueChange = { field, newValue ->
-                viewModel.changeFieldValue(field, newValue)
-            },
             onSaveDataClick = {
                 viewModel.updateUserData()
             },
@@ -63,6 +60,9 @@ fun UserDataScreen(
             },
             onFieldClick = { field ->
                 viewModel.checkBirthdayField(field)
+            },
+            onFieldChange = { field, updatedField ->
+                viewModel.changeField(field, updatedField)
             }
         )
     }

@@ -7,6 +7,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.vodovoz.app.R
 import com.vodovoz.app.common.resources.ResourcesProvider
+import com.vodovoz.app.design_system.model.widgets.FieldTypeUi
 import com.vodovoz.app.design_system.model.widgets.FieldUi
 import com.vodovoz.app.design_system.model.widgets.resetError
 import com.vodovoz.app.feature.sitestate.SiteStateManager
@@ -44,7 +45,9 @@ class WriteCommentViewModel @Inject constructor(
         isError = false,
         readOnly = false,
         supportingText = resourcesProvider.getString(R.string.minimal_count_15),
-        hint = resourcesProvider.getString(R.string.enter_comment)
+        hint = resourcesProvider.getString(R.string.enter_comment),
+        type = FieldTypeUi.Text,
+        isValueVisible = true
     )
 
 

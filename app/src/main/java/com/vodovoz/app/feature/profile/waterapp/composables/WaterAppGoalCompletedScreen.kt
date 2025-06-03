@@ -41,7 +41,6 @@ fun WaterAppGoalCompletedScreen(goal: Int, onCloseClick: () -> Unit) {
         false
     )
 
-
     Column(
         modifier = Modifier
             .fillMaxSize()

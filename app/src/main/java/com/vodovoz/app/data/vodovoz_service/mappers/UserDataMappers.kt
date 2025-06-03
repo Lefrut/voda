@@ -5,6 +5,7 @@ import com.vodovoz.app.data.vodovoz_service.model.user_data.FOTO_DTO
 import com.vodovoz.app.data.vodovoz_service.model.user_data.POLE_DTO
 import com.vodovoz.app.data.vodovoz_service.model.user_data.UserDataDTO
 import com.vodovoz.app.domain.general.model.FieldModel
+import com.vodovoz.app.domain.general.model.FieldOptionModel
 import com.vodovoz.app.domain.general.model.UserDataModel
 import com.vodovoz.app.domain.general.model.UserDataPhotoModel
 
@@ -39,6 +40,12 @@ fun POLE_DTO.toDomain(): FieldModel? {
         isRequired = (OBYZATELNO ?: OBAZATELEN) == "Y",
         readOnly = ZABLOCKPOLE == "Y",
         supportingText = OPIS ?: "",
-        hint = TEXTOPIS ?: TEXT_V_POLE ?: TEXTVPOLE ?:  "",
+        hint = TEXTOPIS ?: TEXT_V_POLE ?: TEXTVPOLE ?: "",
+        values = SPISOK?.mapNotNull { item ->
+            FieldOptionModel(
+                item.ID ?: return@mapNotNull null,
+                item.NAME ?: return@mapNotNull null
+            )
+        } ?: emptyList()
     )
 }

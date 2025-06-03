@@ -19,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -67,7 +68,7 @@ fun ActivityLevelCard(
 ) {
 
     VodovozOutlinedCard(
-        modifier = modifier.clickable { onClick(activityLevel) },
+        modifier = modifier.clip(RoundedCornerShape(20.dp)).clickable { onClick(activityLevel) },
         contentPadding = PaddingValues(
             start = 8.dp,
             top = 8.dp,
