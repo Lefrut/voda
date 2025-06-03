@@ -1,6 +1,8 @@
 package com.vodovoz.app.ui.base
 
 import android.app.Application
+import androidx.hilt.work.HiltWorkerFactory
+import androidx.work.Configuration
 import com.vodovoz.app.BuildConfig
 import com.vodovoz.app.common.notification.NotificationChannels
 import com.vodovoz.app.core.network.ApiConfig
@@ -11,9 +13,19 @@ import com.yandex.metrica.YandexMetrica
 import com.yandex.metrica.YandexMetricaConfig
 import dagger.hilt.android.HiltAndroidApp
 import timber.log.Timber
+import javax.inject.Inject
 
 @HiltAndroidApp
-class VodovozApplication : Application() {
+class VodovozApplication : Application(), Configuration.Provider {
+
+    @Inject
+    lateinit var workerFactory: HiltWorkerFactory
+
+    override val workManagerConfiguration: Configuration
+        get() = Configuration.Builder()
+            .setWorkerFactory(workerFactory)
+            .setMinimumLoggingLevel(android.util.Log.DEBUG)
+            .build()
 
     override fun onCreate() {
         super.onCreate()
@@ -26,8 +38,7 @@ class VodovozApplication : Application() {
     //todo - need review
     private fun initYandexMetrica() {
         if(!BuildConfig.DEBUG) {
-            val config: YandexMetricaConfig =
-                YandexMetricaConfig.newConfigBuilder(YANDEX_METRICA_KEY)
+            val config: YandexMetricaConfig = YandexMetricaConfig.newConfigBuilder(YANDEX_METRICA_KEY)
                     .withNativeCrashReporting(false)
                     .withLocationTracking(false)
                     .withAppVersion(BuildConfig.VERSION_NAME)

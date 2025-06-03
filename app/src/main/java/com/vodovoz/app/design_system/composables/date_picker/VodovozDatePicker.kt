@@ -36,6 +36,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.NonRestartableComposable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -72,7 +73,7 @@ import java.util.Locale
 private val russianLocale = Locale("ru")
 private val selectedDateFormatter = DateTimeFormatter.ofPattern("EEE, MMM d", russianLocale)
 private val monthYearFormatter =
-    DateTimeFormatter.ofPattern("LLLL yyyy", russianLocale).withLocale(russianLocale)
+    DateTimeFormatter.ofPattern("LLLL yyyy", russianLocale)
 
 @Composable
 fun VodovozCalendarDialog(
@@ -82,7 +83,7 @@ fun VodovozCalendarDialog(
     onDismiss: () -> Unit,
 ) {
     var selection by remember(initialDate) { mutableStateOf(initialDate) }
-    val daysOfWeek = remember { daysOfWeek(firstDayOfWeek = DayOfWeek.MONDAY) }
+    val daysOfWeek = remember { daysOfWeek(DayOfWeek.MONDAY) }
     val coroutineScope = rememberCoroutineScope()
 
     val today = remember { LocalDate.now() }
@@ -149,7 +150,7 @@ fun VodovozCalendarDialog(
                 Box {
 
                     Column {
-                        DaysOfWeekTitle(daysOfWeek = daysOfWeek)
+                        VodovozDaysOfWeekTitle(daysOfWeek = daysOfWeek)
 
                         HorizontalCalendar(
                             modifier = Modifier
@@ -157,7 +158,7 @@ fun VodovozCalendarDialog(
                                 .padding(horizontal = 12.dp),
                             state = state,
                             dayContent = { day ->
-                                Day(
+                                VodovozDay(
                                     day = day,
                                     isSelected = selection == day.date,
                                     isDisabled = !isSelectableDate(day.date)
@@ -331,9 +332,9 @@ private fun CalendarHeader(
 }
 
 
-@Suppress("NonSkippableComposable")
+@NonRestartableComposable
 @Composable
-private fun DaysOfWeekTitle(daysOfWeek: List<DayOfWeek>) {
+private fun VodovozDaysOfWeekTitle(daysOfWeek: List<DayOfWeek>) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -359,7 +360,7 @@ private fun DaysOfWeekTitle(daysOfWeek: List<DayOfWeek>) {
 
 
 @Composable
-private fun Day(
+private fun VodovozDay(
     day: CalendarDay,
     isSelected: Boolean,
     isDisabled: Boolean,

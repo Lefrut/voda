@@ -96,7 +96,7 @@ class WaterAppViewModel @Inject constructor(
     }
 
     fun selectGender(man: Boolean) = viewModelScope.launch {
-        waterAppHelper.saveGender(if (man) "man" else "gril")
+        waterAppHelper.setGender(if (man) "man" else "gril")
     }
 
     fun goToPreviousStage() = viewModelScope.launch {
@@ -116,9 +116,9 @@ class WaterAppViewModel @Inject constructor(
         val nextUiState = when (val currentUiState = dataState.uiState) {
             is WaterAppUiState.UserData -> currentUiState.next() ?: run {
 
-                waterAppHelper.saveWaterAppUserData()
-                waterAppHelper.saveRate()
-                waterAppHelper.saveStart(true)
+                waterAppHelper.saveUserData()
+                waterAppHelper.calculateAndSaveRate()
+                waterAppHelper.setStart(true)
                 waterAppHelper.saveWaterAppNotificationData()
 
                 WaterAppUiState.WaterGoal
@@ -142,11 +142,11 @@ class WaterAppViewModel @Inject constructor(
     }
 
     fun selectActivityLevel(activityLevel: WaterAppActivityLevel) {
-        waterAppHelper.saveSport(activityLevel.value.toString())
+        waterAppHelper.setSport(activityLevel.value.toString())
     }
 
     fun selectReminderInterval(reminderInterval: ReminderIntervalUi) = viewModelScope.launch {
-        waterAppHelper.saveNotificationTime(reminderInterval.minutes.toString())
+        waterAppHelper.setNotificationTime(reminderInterval.minutes.toString())
     }
 
     fun checkHaveNotifications() = viewModelScope.launch {
@@ -154,26 +154,28 @@ class WaterAppViewModel @Inject constructor(
     }
 
     fun changeHaveNotifications(haveNotifications: Boolean) = viewModelScope.launch {
-        waterAppHelper.saveNotificationSwitch(haveNotifications)
+        waterAppHelper.setNotificationSwitch(haveNotifications)
     }
 
 
     fun saveSettingsNotifications() = viewModelScope.launch {
-        waterAppHelper.saveNotificationFirstShow()
+        waterAppHelper.setNotificationFirstShow()
         waterAppHelper.saveWaterAppNotificationData()
-        waterAppHelper.saveWaterAppUserData()
-        waterAppHelper.saveRate()
+        waterAppHelper.saveUserData()
+        waterAppHelper.calculateAndSaveRate()
         uiStateListener.updateData { s -> s.copy(uiState = WaterAppUiState.Main) }
     }
 
     fun goToWaterApp() = viewModelScope.launch {
-        waterAppHelper.fetchWaterAppUserData()
         uiStateListener.updateData { s ->
             s.copy(uiState = WaterAppUiState.Main)
         }
 
+        delay(200L)
+
+        waterAppHelper.fetchWaterAppUserData()
         if (!dataState.notificationData.firstShow) {
-            waterAppHelper.saveNotificationFirstShow()
+            waterAppHelper.setNotificationFirstShow()
             waterAppHelper.saveWaterAppNotificationData()
         }
 
@@ -186,19 +188,19 @@ class WaterAppViewModel @Inject constructor(
     }
 
     fun selectWeight(weight: Float) = viewModelScope.launch {
-        waterAppHelper.saveWeight(weight.toString())
+        waterAppHelper.setWeight(weight.toString())
     }
 
     fun selectHeight(height: Int) = viewModelScope.launch {
-        waterAppHelper.saveHeight(height.toString())
+        waterAppHelper.setHeight(height.toString())
     }
 
     fun selectWakeUpTime(time: String) = viewModelScope.launch {
-        waterAppHelper.saveWakeUpTime(WaterAppHelper.parseTime(time))
+        waterAppHelper.setWakeUpTime(WaterAppHelper.parseTime(time))
     }
 
     fun selectSleepTime(time: String) = viewModelScope.launch {
-        waterAppHelper.saveSleepTime(WaterAppHelper.parseTime(time))
+        waterAppHelper.setSleepTime(WaterAppHelper.parseTime(time))
     }
 
     fun changeWaterLevel(progress: Float) = viewModelScope.launch {
@@ -216,7 +218,7 @@ class WaterAppViewModel @Inject constructor(
     fun addWater() = viewModelScope.launch {
         if (!dataState.rateData.canFill) return@launch
 
-        waterAppHelper.tryToChangeWaterLevel(dataState.changeWaterStep)
+        waterAppHelper.tryToAddWater(dataState.changeWaterStep)
 
         goToGoalCompleted()
     }

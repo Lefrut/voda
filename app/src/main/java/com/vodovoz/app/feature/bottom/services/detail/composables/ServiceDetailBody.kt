@@ -1,10 +1,10 @@
 package com.vodovoz.app.feature.bottom.services.detail.composables
 
 import android.annotation.SuppressLint
+import android.os.Bundle
 import android.view.ViewGroup
 import android.webkit.WebSettings
 import android.webkit.WebView
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
@@ -19,11 +19,18 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import coil3.compose.rememberAsyncImagePainter
+import androidx.core.os.bundleOf
+import coil3.compose.AsyncImage
+import coil3.request.ImageRequest
+import coil3.request.crossfade
 import com.vodovoz.app.core.network.ApiConfig
 import com.vodovoz.app.design_system.composables.button.VodovozButtonsColumn
 import com.vodovoz.app.design_system.composables.card.GridProductCard
@@ -31,6 +38,7 @@ import com.vodovoz.app.design_system.model.ColorfulButtonUi
 import com.vodovoz.app.design_system.model.ProductUi
 import com.vodovoz.app.feature.bottom.services.detail.model.ServiceProductsUi
 import com.vodovoz.app.util.extensions.prepareServiceHtml
+import kotlinx.coroutines.launch
 
 @SuppressLint("SetJavaScriptEnabled")
 @Suppress("NonSkippableComposable")
@@ -48,6 +56,14 @@ fun ServiceDetailBody(
     onDecrementProductToCart: (ProductUi) -> Unit,
     onAnalogsClick: (ProductUi) -> Unit,
 ) {
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+
+    val webView = remember {
+        WebView(context)
+    }
+    val webViewBundle: Bundle = rememberSaveable { bundleOf() }
+
     Scaffold(
         modifier = modifier,
         bottomBar = {
@@ -66,23 +82,25 @@ fun ServiceDetailBody(
                 .verticalScroll(rememberScrollState())
                 .padding(paddingValues)
         ) {
-            if (image.isNotEmpty()) {
-                Image(
-                    painter = rememberAsyncImagePainter(model = image, contentScale = ContentScale.Crop),
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(180.dp)
-                )
-            }
+            AsyncImage(
+                model = ImageRequest.Builder(context).data(image)
+                    .crossfade(true)
+                    .coroutineContext(coroutineScope.coroutineContext)
+                    .memoryCacheKey(image)
+                    .build(),
+                contentDescription = null,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(180.dp),
+                contentScale = ContentScale.Crop,
+            )
 
             AndroidView(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 8.dp),
-                factory = { context ->
-                    WebView(context).apply {
+                factory = {
+                    webView.apply {
                         layoutParams = ViewGroup.LayoutParams(
                             ViewGroup.LayoutParams.MATCH_PARENT,
                             ViewGroup.LayoutParams.WRAP_CONTENT
@@ -94,28 +112,32 @@ fun ServiceDetailBody(
                             javaScriptEnabled = true
                             blockNetworkImage = false
                             loadsImagesAutomatically = true
-
                             useWideViewPort = true
                             loadWithOverviewMode = true
-
                             layoutAlgorithm = WebSettings.LayoutAlgorithm.TEXT_AUTOSIZING
                         }
 
                     }
 
                 },
-                update = { webView ->
-                    webView.loadDataWithBaseURL(
-                        ApiConfig.VODOVOZ_URL,
-                        html.prepareServiceHtml(),
-                        "text/html",
-                        "utf-8",
-                        null
-                    )
+                update = {
+                    when (webViewBundle.isEmpty) {
+                        true -> coroutineScope.launch {
+                            webView.loadDataWithBaseURL(
+                                ApiConfig.VODOVOZ_URL,
+                                html.prepareServiceHtml(),
+                                "text/html",
+                                "utf-8",
+                                null
+                            )
+                        }
+                        false -> webView.restoreState(webViewBundle)
+                    }
                 },
+                onRelease = {
+                    webView.saveState(webViewBundle)
+                }
             )
-
-
 
             productsSection?.let {
                 Text(

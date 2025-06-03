@@ -25,6 +25,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.NonRestartableComposable
 import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -50,7 +51,7 @@ import com.vodovoz.app.feature.profile.waterapp.model.ReminderIntervalUi
 import com.vodovoz.app.feature.profile.waterapp.model.WaterAppUiState
 import com.vodovoz.app.util.toExactIntOrNull
 
-@Suppress("NonSkippableComposable")
+@NonRestartableComposable
 @Composable
 fun WaterAppSettingsScreen(
     modifier: Modifier = Modifier,

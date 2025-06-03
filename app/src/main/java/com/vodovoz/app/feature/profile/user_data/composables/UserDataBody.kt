@@ -2,7 +2,9 @@ package com.vodovoz.app.feature.profile.user_data.composables
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -17,6 +19,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.vodovoz.app.R
 import com.vodovoz.app.design_system.composables.button.VodovozButton
+import com.vodovoz.app.design_system.composables.text_fields.VodovozTextFieldsColumn
 import com.vodovoz.app.design_system.model.widgets.FieldUi
 
 @Suppress("NonSkippableComposable")
@@ -28,11 +31,11 @@ fun UserDataBody(
     photoDescription: String,
     fields: List<FieldUi>,
     buttonEnabled: Boolean,
-    onFieldValueChange: (FieldUi, String) -> Unit,
+    onFieldChange: (FieldUi, FieldUi) -> Unit,
     onFieldClick: (FieldUi) -> Unit,
     onSaveDataClick: () -> Unit,
     onDeleteAccountClick: () -> Unit,
-    onAvatarClick: () -> Unit
+    onAvatarClick: () -> Unit,
 ) {
     Column(
         modifier = modifier
@@ -40,6 +43,7 @@ fun UserDataBody(
             .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+
         UserDataPhotoColumn(
             modifier = Modifier.padding(top = 8.dp),
             photo = photo,
@@ -48,10 +52,15 @@ fun UserDataBody(
             onPhotoClick = onAvatarClick
         )
 
-        UserDataFieldsColumn(
-            modifier = Modifier.padding(top = 16.dp),
+
+        VodovozTextFieldsColumn(
+            modifier = Modifier.padding(
+                top = 16.dp,
+                start = 16.dp,
+                end = 16.dp
+            ),
             fields = fields,
-            onFieldValueChange = onFieldValueChange,
+            onFieldChange = onFieldChange,
             onFieldClick = onFieldClick
         )
 
@@ -64,7 +73,7 @@ fun UserDataBody(
 
         Text(
             modifier = Modifier
-                .padding(top = 16.dp, bottom = 8.dp)
+                .padding(top = 16.dp, bottom = 32.dp)
                 .align(Alignment.Start)
                 .clip(MaterialTheme.shapes.small)
                 .clickable(onClick = onDeleteAccountClick)
@@ -75,6 +84,5 @@ fun UserDataBody(
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
-
     }
 }

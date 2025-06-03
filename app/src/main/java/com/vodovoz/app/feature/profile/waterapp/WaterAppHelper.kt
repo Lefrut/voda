@@ -1,22 +1,22 @@
 package com.vodovoz.app.feature.profile.waterapp
 
-import android.annotation.SuppressLint
 import android.app.Application
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.graphics.Color
 import androidx.work.Constraints
 import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequest
 import androidx.work.WorkManager
 import com.squareup.moshi.Moshi
 import com.vodovoz.app.common.account.AccountManager
 import com.vodovoz.app.common.datastore.DataStoreRepository
 import com.vodovoz.app.feature.profile.waterapp.worker.WaterAppWorker
-import com.vodovoz.app.util.extensions.debugLog
 import com.vodovoz.app.util.extensions.fetchCurrentDayInTimeMillis
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -24,8 +24,8 @@ import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@Singleton
 @Stable
+@Singleton
 class WaterAppHelper @Inject constructor(
     private val dataStoreRepository: DataStoreRepository,
     private val applicationContext: Application,
@@ -34,10 +34,8 @@ class WaterAppHelper @Inject constructor(
 ) {
 
     data object Colors {
-
         val lightBlue = Color(0xFF5AC3FF)
         val darkBlue = Color(0xFF078FDD)
-
     }
 
     companion object {
@@ -49,10 +47,11 @@ class WaterAppHelper @Inject constructor(
             15L, 30L, 60L, 90L, 120L, 180L, 240L, 300L
         )
 
-        @SuppressLint("DefaultLocale")
+        private val locale = Locale("en")
+
         val weights: List<Float> = (0..((300f - 20f) / 0.2f).toInt())
             .map { i ->
-                val a = String.format(Locale("en"), "%.1f", 20f + i * 0.2f)
+                val a = String.format(locale, "%.1f", 20f + i * 0.2f)
                 a.toFloatOrNull() ?: 0f
             }
 
@@ -67,7 +66,7 @@ class WaterAppHelper @Inject constructor(
             else ((minutes / 60) + (minutes % 60).toFloat() / 60).toString()
         }
 
-        fun formatTime(minutes: String): String {
+        private fun formatTime(minutes: String): String {
             return try {
                 val sleepTime = LocalTime.ofSecondOfDay(minutes.toLong() * 60)
                 sleepTime.format(DateTimeFormatter.ofPattern(TIME_FORMAT))
@@ -92,9 +91,9 @@ class WaterAppHelper @Inject constructor(
 
     }
 
-    private val adapter = moshi.adapter(WaterAppUserData::class.java)
-    private val adapterNotification = moshi.adapter(WaterAppNotificationData::class.java)
-    private val adapterRate = moshi.adapter(WaterAppRateData::class.java)
+    private val userDataJsonAdapter = moshi.adapter(WaterAppUserData::class.java)
+    private val notificationJsonAdapter = moshi.adapter(WaterAppNotificationData::class.java)
+    private val rateJsonAdapter = moshi.adapter(WaterAppRateData::class.java)
 
     private val waterAppUserDataListener = MutableStateFlow<WaterAppUserData?>(null)
     fun observeWaterAppUserData() = waterAppUserDataListener.asStateFlow()
@@ -105,100 +104,63 @@ class WaterAppHelper @Inject constructor(
     private val waterAppRateDataListener = MutableStateFlow<WaterAppRateData?>(null)
     fun observeWaterAppRateData() = waterAppRateDataListener.asStateFlow()
 
-    fun fetchWaterAppUserData() {
-        val json = dataStoreRepository.getString(WATER_APP_USER_DATA)
 
-        val data = json?.takeIf { it.isNotEmpty() }?.let { adapter.fromJson(it) }
-
-        waterAppUserDataListener.value = data ?: WaterAppUserData()
-    }
-
-
-    fun saveWaterAppUserData() {
-
+    fun saveUserData() {
         val data = waterAppUserDataListener.value
-
-        val json = adapter.toJson(data)
-
-        debugLog { "json $json" }
-
+        val json = userDataJsonAdapter.toJson(data)
         dataStoreRepository.putString(WATER_APP_USER_DATA, json)
     }
 
-    fun saveGender(gender: String) {
+    fun setGender(gender: String) {
         waterAppUserDataListener.value = waterAppUserDataListener.value?.copy(
             gender = gender
         )
     }
 
-    fun saveHeight(height: String) {
-        waterAppUserDataListener.value = waterAppUserDataListener.value?.copy(
-            height = height
-        )
+    fun setHeight(height: String) {
+        waterAppUserDataListener.update { userData ->
+            userData?.copy(height = height)
+        }
     }
 
-    fun saveWeight(weight: String) {
-        waterAppUserDataListener.value = waterAppUserDataListener.value?.copy(
-            weight = weight
-        )
+    fun setWeight(weight: String) {
+        waterAppUserDataListener.update { userData ->
+            userData?.copy(weight = weight)
+        }
     }
 
-    fun saveSleepTime(sleepTime: String) {
+    fun setSleepTime(sleepTime: String) {
         waterAppUserDataListener.value = waterAppUserDataListener.value?.copy(
             sleepTime = sleepTime
         )
     }
 
-    fun saveWakeUpTime(wakeUpTime: String) {
+    fun setWakeUpTime(wakeUpTime: String) {
         waterAppUserDataListener.value = waterAppUserDataListener.value?.copy(
             wakeUpTime = wakeUpTime
         )
     }
 
-    fun saveSport(sport: String) {
+    fun setSport(sport: String) {
         waterAppUserDataListener.value = waterAppUserDataListener.value?.copy(
             sport = sport
         )
     }
 
-    fun saveStart(started: Boolean) {
+    fun setStart(started: Boolean) {
         waterAppNotificationDataListener.value = waterAppNotificationDataListener.value?.copy(
             started = started
         )
     }
 
-    fun saveRate(): Int {
+    fun calculateAndSaveRate(): Int {
         val rate = calculateRate()
         waterAppRateDataListener.value = waterAppRateDataListener.value?.copy(rate = rate)
         saveWaterAppRateData()
         return rate
     }
 
-    fun fetchWaterAppRateData() {
-        val currentDate = fetchCurrentDayInTimeMillis()
-        val json = dataStoreRepository.getString(WATER_APP_RATE)
-
-        val data = json?.takeIf { it.isNotEmpty() }?.let { adapterRate.fromJson(it) }
-
-        val result = when {
-            data == null -> WaterAppRateData(lastSavedDate = currentDate)
-            data.lastSavedDate == 0L -> data.copy(lastSavedDate = currentDate)
-            data.lastSavedDate != currentDate -> data.copy(
-                lastSavedDate = currentDate,
-                currentLevel = 0
-            )
-
-            else -> data
-        }
-
-        waterAppRateDataListener.value = result
-    }
-
-    fun startCalculate() {
-        accountManager.reportEvent("trekervodi_vhod")
-    }
-
-    fun tryToChangeWaterLevel(levelChange: Int) {
+    fun tryToAddWater(levelChange: Int) {
         accountManager.reportEvent("trekervodi_chasha")
 
         val rateState = waterAppRateDataListener.value ?: return
@@ -231,7 +193,7 @@ class WaterAppHelper @Inject constructor(
 
     fun saveWaterAppRateData() {
         val data = waterAppRateDataListener.value
-        val json = adapterRate.toJson(data)
+        val json = rateJsonAdapter.toJson(data)
         dataStoreRepository.putString(WATER_APP_RATE, json)
     }
 
@@ -241,29 +203,57 @@ class WaterAppHelper @Inject constructor(
         return ((1.5 + (weight - 20) * 0.02 + sport) * 1000).toInt()
     }
 
-    fun saveNotificationFirstShow() {
-        waterAppNotificationDataListener.value = waterAppNotificationDataListener.value?.copy(
-            firstShow = true
-        )
+    fun setNotificationFirstShow() {
+        waterAppNotificationDataListener.update { notificationData ->
+            notificationData?.copy(firstShow = true)
+        }
     }
 
-    fun saveNotificationSwitch(switch: Boolean) {
-        waterAppNotificationDataListener.value = waterAppNotificationDataListener.value?.copy(
-            switch = switch
-        )
+    fun setNotificationSwitch(switch: Boolean) {
+        waterAppNotificationDataListener.update { notificationData ->
+            notificationData?.copy(switch = switch)
+        }
     }
 
-    fun saveNotificationTime(time: String) {
-        waterAppNotificationDataListener.value = waterAppNotificationDataListener.value?.copy(
-            time = time
-        )
+    fun setNotificationTime(time: String) {
+        waterAppNotificationDataListener.update { notificationData ->
+            notificationData?.copy(time = time)
+        }
     }
+
+    fun fetchWaterAppUserData() {
+        val json = dataStoreRepository.getString(WATER_APP_USER_DATA)
+        val data = json?.takeIf { it.isNotEmpty() }?.let { userDataJsonAdapter.fromJson(it) }
+        waterAppUserDataListener.value = data ?: WaterAppUserData()
+    }
+
+
+    fun fetchWaterAppRateData() {
+        val currentDate = fetchCurrentDayInTimeMillis()
+        val json = dataStoreRepository.getString(WATER_APP_RATE)
+
+        val data = json?.takeIf { it.isNotEmpty() }?.let { rateJsonAdapter.fromJson(it) }
+
+        val result = when {
+            data == null -> WaterAppRateData(lastSavedDate = currentDate)
+            data.lastSavedDate == 0L -> data.copy(lastSavedDate = currentDate)
+            data.lastSavedDate != currentDate -> data.copy(
+                lastSavedDate = currentDate,
+                currentLevel = 0
+            )
+
+            else -> data
+        }
+
+        waterAppRateDataListener.value = result
+    }
+
 
     fun fetchWaterAppNotificationData() {
         val json = dataStoreRepository.getString(WATER_APP_NOTIFICATION_DATA)
 
         val data = if (!json.isNullOrEmpty()) {
-            adapterNotification.fromJson(json)
+            notificationJsonAdapter.fromJson(json)
         } else {
             null
         }
@@ -277,9 +267,10 @@ class WaterAppHelper @Inject constructor(
         val data = waterAppNotificationDataListener.value ?: return
         val waterTag = "water"
 
-        if (data.switch) {
-            WorkManager.getInstance(applicationContext).cancelAllWorkByTag(waterTag)
+        val workManager = WorkManager.getInstance(applicationContext)
 
+        workManager.cancelAllWorkByTag(waterTag)
+        if (data.switch) {
             val work = PeriodicWorkRequest.Builder(
                 WaterAppWorker::class.java,
                 data.time.toLong(),
@@ -289,29 +280,13 @@ class WaterAppHelper @Inject constructor(
                 .setInitialDelay(data.time.toLong(), TimeUnit.MINUTES)
                 .addTag(waterTag)
                 .build()
-            WorkManager
-                .getInstance(applicationContext)
-                .enqueueUniquePeriodicWork(waterTag, ExistingPeriodicWorkPolicy.UPDATE, work)
-        } else {
-            WorkManager
-                .getInstance(applicationContext)
-                .cancelAllWorkByTag(waterTag)
+            workManager.enqueueUniquePeriodicWork(waterTag, ExistingPeriodicWorkPolicy.UPDATE, work)
         }
 
-        val json = adapterNotification.toJson(data)
+        val notificationJson = notificationJsonAdapter.toJson(data)
 
-        dataStoreRepository.putString(WATER_APP_NOTIFICATION_DATA, json)
+        dataStoreRepository.putString(WATER_APP_NOTIFICATION_DATA, notificationJson)
     }
-
-    fun fetchAppNotificationData(): WaterAppNotificationData {
-        val json = dataStoreRepository.getString(WATER_APP_NOTIFICATION_DATA)
-        debugLog { "json contains $json" }
-
-        return json?.takeIf { it.isNotEmpty() }
-            ?.let { adapterNotification.fromJson(it) }
-            ?: WaterAppNotificationData()
-    }
-
 
     fun clearData() {
         dataStoreRepository.remove(WATER_APP_NOTIFICATION_DATA)

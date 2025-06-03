@@ -88,19 +88,6 @@ class UserDataFlowViewModel @Inject constructor(
         eventListener.emit(UserDataEvents.GoBack)
     }
 
-    fun changeFieldValue(field: FieldUi, newValue: String) = viewModelScope.launch {
-        val updatedFields = dataState.fields.updateFieldValueAndResetError(field, newValue)
-
-        updatedFields.checkFields(false) { fields, isValid ->
-            uiStateListener.updateData { s ->
-                s.copy(
-                    fields = fields,
-                    buttonEnabled = fields.checkFields()
-                )
-            }
-        }
-    }
-
     private fun updateUserAvatar(imageFile: File) = viewModelScope.launch {
         val updateUserAvatarResult =
             vodovozServiceRepository.updateUserAvatar(imageFile).singleResult()
@@ -222,6 +209,19 @@ class UserDataFlowViewModel @Inject constructor(
                 showDatePicker = false,
                 buttonEnabled = updatedFields.checkFields()
             )
+        }
+    }
+
+    fun changeField(field: FieldUi, updatedField: FieldUi) = viewModelScope.launch {
+        val updatedFields = dataState.fields.updateFieldAndResetError(field, updatedField)
+
+        updatedFields.checkFields(false) { fields, _ ->
+            uiStateListener.updateData { s ->
+                s.copy(
+                    fields = fields,
+                    buttonEnabled = fields.checkFields()
+                )
+            }
         }
     }
 

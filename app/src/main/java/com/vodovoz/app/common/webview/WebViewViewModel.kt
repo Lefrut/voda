@@ -1,5 +1,6 @@
 package com.vodovoz.app.common.webview
 
+import androidx.compose.runtime.Stable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.vodovoz.app.common.webview.model.WebViewEvents
@@ -12,6 +13,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
+@Stable
 class WebViewViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
 ) : MviViewModel<WebViewState, WebViewEvents>(WebViewState()) {

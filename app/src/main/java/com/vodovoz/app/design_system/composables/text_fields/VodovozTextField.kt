@@ -17,6 +17,7 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActionScope
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -43,10 +44,12 @@ import androidx.compose.ui.unit.dp
 import com.vodovoz.app.R
 import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.composables.decoration.PasswordIcon
-import com.vodovoz.app.design_system.text.PhoneNumberVisualTransformation
+import com.vodovoz.app.design_system.model.widgets.FieldTypeUi
 import com.vodovoz.app.design_system.model.widgets.FieldUi
+import com.vodovoz.app.design_system.text.PhoneNumberVisualTransformation
 import com.vodovoz.app.util.formatRussianPhoneNumber
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun VodovozTextField(
     modifier: Modifier = Modifier,
@@ -62,6 +65,7 @@ fun VodovozTextField(
     }
     val isFocused by interactionSource.collectIsFocusedAsState()
     val isMessage = field.id.contains("message", true) || field.id == "dr127" || field.id == "dr53"
+
     val visualTransformation = when (field.keyboardType) {
         KeyboardType.Phone -> PhoneNumberVisualTransformation()
         KeyboardType.Password -> if (!field.isValueVisible) {
@@ -77,37 +81,49 @@ fun VodovozTextField(
         }
     }
 
-    VodovozTextField(
-        modifier = modifier,
-        value = field.value,
-        onValueChange = { newValue ->
-            onFieldChange(field, field.copy(value = newValue))
-        },
-        isError = field.isError,
-        keyboardOptions = keyboardOptions,
-        keyboardActions = KeyboardActions(
-            onDone = onDone,
-        ),
-        readOnly = field.readOnly,
-        label = field.label,
-        hint = field.hint,
-        maxLines = if (isMessage) 3 else maxLines,
-        minLines = if (isMessage) 2 else minLines,
-        supportingText = field.supportingText,
-        visualTransformation = visualTransformation,
-        trailingIcon = {
-            if (field.keyboardType == KeyboardType.Password) {
-                PasswordIcon(valueIsVisible = field.isValueVisible) {
-                    onFieldChange(
-                        field,
-                        field.copy(isValueVisible = !field.isValueVisible)
-                    )
-                }
-            }
-        },
-        prefix = null,
-        interactionSource = interactionSource
-    )
+    when (field.type) {
+        is FieldTypeUi.DropDown -> {
+            VodovozDropDownTextField(
+                field = field,
+                onFieldChange = onFieldChange
+            )
+        }
+
+        FieldTypeUi.Text -> {
+            VodovozTextField(
+                modifier = modifier,
+                value = field.value,
+                onValueChange = { newValue ->
+                    onFieldChange(field, field.copy(value = newValue))
+                },
+                isError = field.isError,
+                keyboardOptions = keyboardOptions,
+                keyboardActions = KeyboardActions(
+                    onDone = onDone,
+                ),
+                readOnly = field.readOnly,
+                label = field.label,
+                hint = field.hint,
+                maxLines = if (isMessage) 3 else maxLines,
+                minLines = if (isMessage) 2 else minLines,
+                supportingText = field.supportingText,
+                visualTransformation = visualTransformation,
+                trailingIcon = {
+                    if (field.keyboardType == KeyboardType.Password) {
+                        PasswordIcon(valueIsVisible = field.isValueVisible) {
+                            onFieldChange(
+                                field,
+                                field.copy(isValueVisible = !field.isValueVisible)
+                            )
+                        }
+                    }
+                },
+                prefix = null,
+                interactionSource = interactionSource
+            )
+        }
+    }
+
 
 }
 
@@ -247,6 +263,7 @@ fun VodovozTextField(
     prefix: String? = null,
     trailingIcon: @Composable (() -> Unit)? = null,
     isError: Boolean = false,
+    //todo - need or not need?
     isDate: Boolean = false,
     visualTransformation: VisualTransformation = VisualTransformation.None,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
@@ -289,7 +306,7 @@ fun VodovozTextField(
         modifier = modifier,
         value = textFieldValue,
         onValueChange = onValueChange@{ newTextFieldValueState ->
-            if (isDate) return@onValueChange
+            if (readOnly) return@onValueChange
 
             val newText =
                 if (isPhone) formatRussianPhoneNumber(newTextFieldValueState.text) else newTextFieldValueState.text

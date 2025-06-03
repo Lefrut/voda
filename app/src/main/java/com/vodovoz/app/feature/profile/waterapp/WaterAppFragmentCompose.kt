@@ -10,6 +10,7 @@ import android.view.ViewGroup
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.ComposeView
@@ -252,6 +253,12 @@ class WaterAppFragment : Fragment() {
                             }
                         }
 
+                    }
+
+                    LaunchedEffect(Unit) {
+                        if (!haveNotificationPermission()) {
+                            viewModel.changeHaveNotifications(false)
+                        }
                     }
 
                     LifecycleEffect {

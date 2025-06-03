@@ -1,5 +1,8 @@
 package com.vodovoz.app.design_system.composables.text_fields
 
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.text.KeyboardActionScope
@@ -8,6 +11,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import com.vodovoz.app.design_system.model.widgets.FieldUi
@@ -18,7 +23,8 @@ fun VodovozTextFieldsColumn(
     modifier: Modifier = Modifier,
     fields: List<FieldUi>,
     onFieldChange: (currentField: FieldUi, newField: FieldUi) -> Unit,
-    onDone: KeyboardActionScope.() -> Unit,
+    onFieldClick: (FieldUi) -> Unit = {},
+    onDone: KeyboardActionScope.() -> Unit = {},
 ) {
     Column(
         modifier = modifier,
@@ -28,10 +34,20 @@ fun VodovozTextFieldsColumn(
         fields.forEachIndexed { index, field ->
             key(field.id) {
                 VodovozTextField(
-                    field = field, onFieldChange = onFieldChange, keyboardOptions = KeyboardOptions(
+                    modifier = Modifier.pointerInput(Unit){
+                        awaitEachGesture {
+                            awaitFirstDown(pass = PointerEventPass.Initial)
+                            val up = waitForUpOrCancellation(pass = PointerEventPass.Initial)
+                            if(up != null ) onFieldClick(field)
+                        }
+                    },
+                    field = field,
+                    onFieldChange = onFieldChange,
+                    keyboardOptions = KeyboardOptions(
                         keyboardType = field.keyboardType,
                         imeAction = if (fields.lastIndex == index) ImeAction.Done else ImeAction.Next,
-                    ), onDone = onDone
+                    ),
+                    onDone = onDone
                 )
             }
         }

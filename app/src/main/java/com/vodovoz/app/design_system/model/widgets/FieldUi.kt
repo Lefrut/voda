@@ -4,6 +4,7 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.ui.text.input.KeyboardType
 import com.vodovoz.app.R
 import com.vodovoz.app.domain.general.model.FieldModel
+import com.vodovoz.app.domain.general.model.FieldOptionModel
 import com.vodovoz.app.util.FieldValidationSettings
 import com.vodovoz.app.util.FieldValidationSettings.PASSWORD_LENGTH
 import com.vodovoz.app.util.isValidRussianPhoneNumber
@@ -22,6 +23,23 @@ enum class FieldValidationResult {
 
 
 @Immutable
+sealed interface FieldTypeUi {
+    @Immutable
+    data object Text : FieldTypeUi
+
+    @Immutable
+    data class DropDown(
+        val options: List<DropDownOptionUi>,
+    ) : FieldTypeUi
+}
+
+@Immutable
+data class DropDownOptionUi(
+    val id: String,
+    val value: String,
+)
+
+@Immutable
 data class FieldUi(
     override val id: String,
     val label: String,
@@ -32,8 +50,9 @@ data class FieldUi(
     val readOnly: Boolean,
     val supportingText: String,
     val hint: String = "",
-    val isValueVisible: Boolean = true,
-): WidgetUi(id) {
+    val type: FieldTypeUi,
+    val isValueVisible: Boolean,
+) : WidgetUi(id) {
     companion object {
         val Empty = FieldUi(
             id = "",
@@ -43,7 +62,9 @@ data class FieldUi(
             isRequired = false,
             isError = false,
             readOnly = false,
-            supportingText = ""
+            supportingText = "",
+            type = FieldTypeUi.Text,
+            isValueVisible = true
         )
     }
 }
@@ -114,7 +135,7 @@ val KeyboardTypeValidator = FieldValidator { field ->
 val NameValidator = FieldValidator { field ->
     val value = field.value
     when {
-        field.id == "name" || field.id == "lastname" || field.id == "dr49"-> {
+        field.id == "name" || field.id == "lastname" || field.id == "dr49" -> {
             FieldValidationResult.from(value.length in 3..30 && value.isNotBlank())
         }
 
@@ -251,18 +272,28 @@ fun FieldModel.toUi(): FieldUi {
             else -> KeyboardType.Unspecified
         }
     }
+    val isDropDownField = valueType.uppercase() == "SPISOK"
+
+
 
     return FieldUi(
         id = id,
         label = label,
-        value = value,
-        keyboardType = keyboardType,
+        value = values.firstOrNull { optionModel ->
+            optionModel.id == value
+        }?.value ?: value,
+        keyboardType = if (isDropDownField) KeyboardType.Unspecified else keyboardType,
         isRequired = isRequired,
         isError = false,
         readOnly = readOnly,
         supportingText = supportingText,
         hint = hint,
-        isValueVisible = keyboardType != KeyboardType.Password
+        isValueVisible = keyboardType != KeyboardType.Password,
+        type = if (isDropDownField) FieldTypeUi.DropDown(
+            options = values.map { option ->
+                DropDownOptionUi(option.id, option.value)
+            }
+        ) else FieldTypeUi.Text
     )
 }
 
@@ -286,6 +317,13 @@ fun FieldUi.toDomain(): FieldModel {
         readOnly = readOnly,
         supportingText = supportingText,
         label = label,
-        hint = hint
+        hint = hint,
+        values = if (type is FieldTypeUi.DropDown) {
+            type.options.map { option ->
+                FieldOptionModel(option.id, option.value)
+            }
+        } else {
+            emptyList()
+        }
     )
 }
