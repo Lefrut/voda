@@ -52,6 +52,7 @@ import com.vodovoz.app.domain.general.model.login.UserAuthInfoModel
 import com.vodovoz.app.domain.general.model.notification_settings.NotificationSettingsDetailsModel
 import com.vodovoz.app.domain.general.model.order.OrderDetailsModel
 import com.vodovoz.app.domain.general.model.order.OrderQuestionDetailsModel
+import com.vodovoz.app.domain.general.model.order.OrderingDetailsModel
 import com.vodovoz.app.domain.general.model.order.OrdersHistoryDetailsModel
 import com.vodovoz.app.domain.general.model.order.OrdersHistoryItemModel
 import com.vodovoz.app.domain.general.model.order.WhereOrderDetailsModel
@@ -62,6 +63,8 @@ import kotlinx.coroutines.flow.Flow
 import java.io.File
 
 interface VodovozServiceRepository {
+
+    fun getOrderingDetails(): Flow<Result<OrderingDetailsModel>>
 
     fun orderService(serviceType: String, fields: List<FieldModel>): Flow<Result<VodovozPlaceholderModel>>
 

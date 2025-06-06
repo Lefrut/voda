@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.navigation.NavController
 import com.vodovoz.app.R
 import com.vodovoz.app.core.network.VodovozWebConfig
+import com.vodovoz.app.feature.addresses.model.AddressScreenTypeUi
 
 data object ProfileMainNavigator {
 
@@ -26,7 +27,7 @@ data object ProfileMainNavigator {
             }
 
             ADDRESSES_ROUTE -> {
-                navController.navigateToAddresses()
+                navController.navigateToAddresses(AddressScreenTypeUi.Add)
             }
 
             QUESTIONNAIRES_ROUTE -> {

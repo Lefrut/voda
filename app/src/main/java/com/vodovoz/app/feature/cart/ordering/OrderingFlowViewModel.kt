@@ -1,6 +1,8 @@
 package com.vodovoz.app.feature.cart.ordering
 
 import android.app.Application
+import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.Stable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.vodovoz.app.BuildConfig
@@ -11,9 +13,22 @@ import com.vodovoz.app.common.content.Event
 import com.vodovoz.app.common.content.PagingContractViewModel
 import com.vodovoz.app.common.content.State
 import com.vodovoz.app.common.content.toErrorState
+import com.vodovoz.app.common.content.updateData
 import com.vodovoz.app.data.MainRepository
 import com.vodovoz.app.data.config.ShippingAlertConfig
 import com.vodovoz.app.data.model.common.ResponseEntity
+import com.vodovoz.app.design_system.model.ColorfulButtonUi
+import com.vodovoz.app.design_system.model.SectionUi
+import com.vodovoz.app.design_system.model.toUi
+import com.vodovoz.app.design_system.model.widgets.FieldUi
+import com.vodovoz.app.design_system.model.widgets.toUi
+import com.vodovoz.app.domain.general.model.cart.OrderSummaryItemUi
+import com.vodovoz.app.domain.general.model.cart.mapToUi
+import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
+import com.vodovoz.app.feature.cart.ordering.model.OrderNotifyItemUi
+import com.vodovoz.app.feature.cart.ordering.model.OrderPaymentItemUi
+import com.vodovoz.app.feature.cart.ordering.model.OrderRecipientItemUi
+import com.vodovoz.app.feature.cart.ordering.model.mapToUi
 import com.vodovoz.app.mapper.FreeShippingDaysInfoBundleMapper.mapToUI
 import com.vodovoz.app.mapper.OrderingCompletedInfoBundleMapper.mapToUI
 import com.vodovoz.app.mapper.ShippingInfoBundleMapper.mapToUI
@@ -26,6 +41,7 @@ import com.vodovoz.app.ui.model.ShippingIntervalUI
 import com.vodovoz.app.ui.model.custom.OrderingCompletedInfoBundleUI
 import com.vodovoz.app.util.extensions.debugLog
 import com.vodovoz.app.util.extensions.getDeviceInfo
+import com.vodovoz.app.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.BufferOverflow
@@ -42,12 +58,14 @@ import java.util.Locale
 import javax.inject.Inject
 
 @HiltViewModel
+@Stable
 class OrderingFlowViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val repository: MainRepository,
     private val accountManager: AccountManager,
     private val application: Application,
     private val cartManager: CartManager,
+    private val vodovozServiceRepository: VodovozServiceRepository,
 ) : PagingContractViewModel<OrderingFlowViewModel.OrderingState, OrderingFlowViewModel.OrderingEvents>(
     OrderingState(
         full = savedStateHandle.get<Int>("full"),
@@ -70,6 +88,44 @@ class OrderingFlowViewModel @Inject constructor(
     init {
         debugLog { "full ${state.data.full}, discount ${state.data.discount}" }
         fetchFreeShippingDaysInfo()
+        fetchOrderingDetails()
+    }
+
+    fun fetchOrderingDetails() = viewModelScope.launch {
+        val orderingDetailsResult = vodovozServiceRepository.getOrderingDetails().singleResult()
+
+        orderingDetailsResult.onSuccess { orderingDetails ->
+            uiStateListener.updateData { s ->
+
+                val notifySection = orderingDetails.notifySection.toUi { items ->
+                    items.mapToUi()
+                }
+
+                s.copy(
+                    title = orderingDetails.title,
+                    comment = orderingDetails.commentField?.toUi(),
+                    paymentSection = orderingDetails.paymentSection.toUi { items ->
+                        items.mapToUi()
+                    },
+                    recipientSection = orderingDetails.recipientSection.toUi { items ->
+                        items.mapToUi()
+                    },
+                    notifySection = notifySection,
+                    totals = orderingDetails.totals.mapToUi(),
+                    button = orderingDetails.button.toUi(),
+                    selectedNotifyItem = s.selectedNotifyItem.takeIf {
+                        it != OrderNotifyItemUi.Empty
+                    } ?: notifySection.items.firstOrNull() ?: s.selectedNotifyItem,
+                    uiState = OrderingUiState.Success
+                )
+            }
+        }.onFailure {
+            uiStateListener.updateData { s ->
+                s.copy(
+                    uiState = OrderingUiState.Error
+                )
+            }
+        }
     }
 
     fun regOrder(
@@ -483,6 +539,60 @@ class OrderingFlowViewModel @Inject constructor(
         )
     }
 
+    fun navigateBack() = viewModelScope.launch {
+        eventListener.emit(OrderingEvents.GoBack)
+    }
+
+    fun navigateByRecipientItem(orderRecipientItem: OrderRecipientItemUi) = viewModelScope.launch {
+        when (orderRecipientItem.id) {
+            "adress" -> {
+                eventListener.emit(OrderingEvents.GoToAddresses)
+            }
+
+            "klient" -> {
+
+            }
+
+            "time" -> {
+
+            }
+        }
+    }
+
+    fun selectNotifyItem(notifyItem: OrderNotifyItemUi) = viewModelScope.launch {
+        uiStateListener.updateData { s ->
+            s.copy(selectedNotifyItem = notifyItem)
+        }
+    }
+
+    fun changeComment(field: FieldUi, updatedField: FieldUi) = viewModelScope.launch {
+        uiStateListener.updateData { s ->
+            if (s.comment == null) return@updateData s
+            s.copy(
+                comment = s.comment.copy(
+                    value = updatedField.value
+                )
+            )
+        }
+    }
+
+    fun navigateByPaymentItem(orderPaymentItem: OrderPaymentItemUi) = viewModelScope.launch {
+        when (orderPaymentItem.id) {
+            "oplata" -> {
+
+            }
+
+            else -> {
+
+            }
+        }
+    }
+
+    fun doOrder() = viewModelScope.launch {
+
+    }
+
+    @Immutable
     data class OrderingState(
         val full: Int? = null,
         val deposit: Int? = null,
@@ -506,6 +616,16 @@ class OrderingFlowViewModel @Inject constructor(
         val shippingDaysInfoBundleUi: FreeShippingDaysInfoBundleUI? = null,
         val orderingCompletedInfoBundleUI: OrderingCompletedInfoBundleUI? = null,
         val checkDeliveryValue: Int = 0,
+
+        val title: String = "",
+        val comment: FieldUi? = null,
+        val paymentSection: SectionUi<OrderPaymentItemUi> = SectionUi.empty(),
+        val notifySection: SectionUi<OrderNotifyItemUi> = SectionUi.empty(),
+        val selectedNotifyItem: OrderNotifyItemUi = OrderNotifyItemUi.Empty,
+        val recipientSection: SectionUi<OrderRecipientItemUi> = SectionUi.empty(),
+        val totals: List<OrderSummaryItemUi> = emptyList(),
+        val button: ColorfulButtonUi = ColorfulButtonUi.Empty,
+        val uiState: OrderingUiState = OrderingUiState.Loading,
     ) : State
 
     sealed class OrderingEvents : Event {
@@ -536,6 +656,15 @@ class OrderingFlowViewModel @Inject constructor(
         data class ShowCheckDeliveryBs(val value: Int, val isNewUser: Boolean = false) :
             OrderingEvents()
 
-        object ClearFields : OrderingEvents()
+        data object ClearFields : OrderingEvents()
+        data object GoBack : OrderingEvents()
+        data object GoToAddresses: OrderingEvents()
+    }
+
+    @Immutable
+    sealed interface OrderingUiState {
+        data object Success : OrderingUiState
+        data object Loading : OrderingUiState
+        data object Error : OrderingUiState
     }
 }

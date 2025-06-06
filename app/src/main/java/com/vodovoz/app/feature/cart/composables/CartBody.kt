@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import com.vodovoz.app.R
 import com.vodovoz.app.design_system.composables.bottomLine
 import com.vodovoz.app.design_system.composables.button.VodovozButton
+import com.vodovoz.app.design_system.composables.decoration.OrderSummaryColumn
 import com.vodovoz.app.domain.general.model.cart.OrderSummaryItemUi
 import com.vodovoz.app.feature.cart.model.CartButtonUi
 import com.vodovoz.app.feature.cart.model.CartItemUi
@@ -220,7 +221,7 @@ fun CartBody(
         }
 
         item {
-            CartOrderSummaryColumn(
+            OrderSummaryColumn(
                 modifier = Modifier.padding(top = 24.dp, start = 16.dp, end = 16.dp),
                 items = cartOrderSummary
             )

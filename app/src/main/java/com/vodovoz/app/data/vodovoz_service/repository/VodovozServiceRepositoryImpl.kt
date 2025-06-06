@@ -84,6 +84,7 @@ import com.vodovoz.app.domain.general.model.login.UserAuthInfoModel
 import com.vodovoz.app.domain.general.model.notification_settings.NotificationSettingsDetailsModel
 import com.vodovoz.app.domain.general.model.order.OrderDetailsModel
 import com.vodovoz.app.domain.general.model.order.OrderQuestionDetailsModel
+import com.vodovoz.app.domain.general.model.order.OrderingDetailsModel
 import com.vodovoz.app.domain.general.model.order.OrdersHistoryDetailsModel
 import com.vodovoz.app.domain.general.model.order.OrdersHistoryItemModel
 import com.vodovoz.app.domain.general.model.order.WhereOrderDetailsModel
@@ -113,6 +114,17 @@ class VodovozServiceRepositoryImpl @Inject constructor(
     private val cookieManager: CookieManager,
     private val moshi: Moshi,
 ) : VodovozServiceRepository {
+
+    override fun getOrderingDetails(): Flow<Result<OrderingDetailsModel>> {
+        return executeRequest(
+            request = {
+                vodovozService.getOrderingDetails(accountManager.fetchAccountId())
+            },
+            mapper = {
+                it.data!!.toDomain()
+            }
+        )
+    }
 
 
     override fun orderService(

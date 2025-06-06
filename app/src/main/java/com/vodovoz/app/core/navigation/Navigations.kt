@@ -12,6 +12,7 @@ import com.vodovoz.app.design_system.model.PriceUi
 import com.vodovoz.app.design_system.model.ProductMediaUi
 import com.vodovoz.app.design_system.model.filters.FilterUi
 import com.vodovoz.app.design_system.model.filters.FiltersUi
+import com.vodovoz.app.feature.addresses.model.AddressScreenTypeUi
 import com.vodovoz.app.feature.all.promotions.AllPromotionsFragment
 import com.vodovoz.app.feature.buy_certificate.model.FAQUi
 import com.vodovoz.app.feature.cart.model.CartPresentPopupWindowUi
@@ -167,8 +168,12 @@ fun NavController.navigateToGifts(
     )
 }
 
-fun NavController.navigateToAddresses() {
-    navigate(R.id.savedAddressesDialogFragment, Bundle.EMPTY, SlideNavOptions)
+fun NavController.navigateToAddresses(addressScreenType: AddressScreenTypeUi) {
+    navigate(
+        R.id.savedAddressesDialogFragment,
+        bundleOf("screenType" to addressScreenType),
+        SlideNavOptions
+    )
 }
 
 fun NavController.navigateToRecoverPassword() {

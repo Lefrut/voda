@@ -1,4 +1,4 @@
-package com.vodovoz.app.feature.cart.composables
+package com.vodovoz.app.design_system.composables.decoration
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -18,7 +18,7 @@ import com.vodovoz.app.domain.general.model.cart.OrderSummaryItemUi
 
 @Suppress("NonSkippableComposable")
 @Composable
-fun CartOrderSummaryColumn(modifier: Modifier = Modifier, items: List<OrderSummaryItemUi>) {
+fun OrderSummaryColumn(modifier: Modifier = Modifier, items: List<OrderSummaryItemUi>) {
     Column(modifier = modifier) {
         items.forEachIndexed { index, item ->
             val isFirstItem = index == 0
@@ -46,12 +46,10 @@ fun CartOrderSummaryColumn(modifier: Modifier = Modifier, items: List<OrderSumma
 
             Spacer(
                 modifier = Modifier.height(
-                    if (index == 0) {
-                        16.dp
-                    } else if (index != items.lastIndex) {
-                        4.dp
-                    } else {
-                        0.dp
+                    when (index) {
+                        0 -> 16.dp
+                        items.lastIndex -> 0.dp
+                        else -> 4.dp
                     }
                 )
             )

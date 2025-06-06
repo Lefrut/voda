@@ -1,15 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    //Ordering
-    <string name="ordering_title_text">Оформление заказа</string>
-    <string name="personal_btn_text">Частное лицо</string>
-    <string name="company_btn_text">Компания</string>
-    <string name="order_btn_text">Оформить заказ на %d ₽</string>
-
-    //DatePicker
-
-    //Free Shipping Days
-
-    //Form
+    <string name="ordering_title_text" translatable="false">Оформление заказа</string>
+    <string name="personal_btn_text" translatable="false">Частное лицо</string>
+    <string name="company_btn_text" translatable="false">Компания</string>
+    <string name="order_btn_text" translatable="false">Оформить заказ на %d ₽</string>
 
 </resources>

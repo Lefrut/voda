@@ -22,9 +22,17 @@ import com.vodovoz.app.data.vodovoz_service.model.order_history.ORDERS_HISTORY_I
 import com.vodovoz.app.data.vodovoz_service.model.order_history.ORDERS_HISTORY_KNOPKA_DTO
 import com.vodovoz.app.data.vodovoz_service.model.order_history.ORDERS_HISTORY_PRODUCT_DTO
 import com.vodovoz.app.data.vodovoz_service.model.order_history.OrdersHistoryDetailsDTO
+import com.vodovoz.app.data.vodovoz_service.model.ordering.ORDER_OPLATA_DTO
+import com.vodovoz.app.data.vodovoz_service.model.ordering.ORDER_OPLATA_ITEM_DTO
+import com.vodovoz.app.data.vodovoz_service.model.ordering.ORDER_POLYSHATEL_DTO
+import com.vodovoz.app.data.vodovoz_service.model.ordering.ORDER_POLYSHATEL_ITEM_DTO
+import com.vodovoz.app.data.vodovoz_service.model.ordering.ORDER_PREDYP_DTO
+import com.vodovoz.app.data.vodovoz_service.model.ordering.ORDER_PREDYP_ITEM_DTO
+import com.vodovoz.app.data.vodovoz_service.model.ordering.OrderingDetailsDTO
 import com.vodovoz.app.domain.general.model.CancelOrderDetailsModel
 import com.vodovoz.app.domain.general.model.ColorfulButtonModel
 import com.vodovoz.app.domain.general.model.PaymentInfoModel
+import com.vodovoz.app.domain.general.model.SectionModel
 import com.vodovoz.app.domain.general.model.VodovozPlaceholderModel
 import com.vodovoz.app.domain.general.model.cart.BottomCartModel
 import com.vodovoz.app.domain.general.model.certificate.BuyCertificateModel
@@ -34,15 +42,99 @@ import com.vodovoz.app.domain.general.model.order.OrderDetailsButtonModel
 import com.vodovoz.app.domain.general.model.order.OrderDetailsModel
 import com.vodovoz.app.domain.general.model.order.OrderDetailsSummaryModel
 import com.vodovoz.app.domain.general.model.order.OrderFilterModel
+import com.vodovoz.app.domain.general.model.order.OrderNotifyItemModel
+import com.vodovoz.app.domain.general.model.order.OrderPaymentItemModel
 import com.vodovoz.app.domain.general.model.order.OrderProductModel
 import com.vodovoz.app.domain.general.model.order.OrderProductPresentModel
 import com.vodovoz.app.domain.general.model.order.OrderQuestionDetailsModel
+import com.vodovoz.app.domain.general.model.order.OrderRecipientItemModel
 import com.vodovoz.app.domain.general.model.order.OrderStatusModel
+import com.vodovoz.app.domain.general.model.order.OrderingDetailsModel
 import com.vodovoz.app.domain.general.model.order.OrdersHistoryButtonModel
 import com.vodovoz.app.domain.general.model.order.OrdersHistoryDetailsModel
 import com.vodovoz.app.domain.general.model.order.OrdersHistoryItemModel
 import com.vodovoz.app.domain.general.model.order.OrdersHistoryProductModel
 
+
+fun OrderingDetailsDTO.toDomain(): OrderingDetailsModel {
+    return OrderingDetailsModel(
+        title = TITLE ?: "",
+        commentField = KOMMENT?.KOMMENTARY?.toDomain(),
+        recipientSection = POLYSHATEL?.toDomain() ?: throw IllegalArgumentException("Ordering recipient can't be null"),
+        notifySection = KOMMENT?.PREDYP?.toDomain() ?: SectionModel.empty(),
+        paymentSection = OPLATA?.toDomain() ?: throw IllegalArgumentException("Ordering payment can't be null"),
+        totals = ITOG?.mapToDomain() ?: emptyList(),
+        button = KNOPKA?.toDomain() ?: throw IllegalArgumentException("Ordering button can't be null")
+    )
+}
+
+
+fun ORDER_OPLATA_DTO.toDomain(): SectionModel<OrderPaymentItemModel>{
+    return SectionModel(
+        title = ZAGOLOVOK ?: "",
+        items = DANNYE?.mapToDomain() ?: emptyList(),
+        button = null
+    )
+}
+
+@JvmName("OrderPaymentItemModelList")
+fun List<ORDER_OPLATA_ITEM_DTO>.mapToDomain(): List<OrderPaymentItemModel>{
+    return mapNotNull { it -> it.toDomain() }
+}
+
+
+fun ORDER_OPLATA_ITEM_DTO.toDomain(): OrderPaymentItemModel{
+    return OrderPaymentItemModel(
+        image = KARTINKA?.toVodovozUrl() ?: "",
+        name = NAME ?: "",
+        description = OPISANIE ?: "",
+        id = ID ?: ""
+    )
+}
+
+
+fun ORDER_POLYSHATEL_DTO.toDomain(): SectionModel<OrderRecipientItemModel>{
+    return SectionModel(
+        title = ZAGOLOVOK ?: "",
+        items = DANNYE?.mapToDomain() ?: emptyList(),
+        button = null
+    )
+}
+
+@JvmName("mapToOrderRecipientItemModelList")
+fun List<ORDER_POLYSHATEL_ITEM_DTO>.mapToDomain(): List<OrderRecipientItemModel>{
+    return mapNotNull { it.toDomain() }
+}
+
+fun ORDER_POLYSHATEL_ITEM_DTO.toDomain(): OrderRecipientItemModel? {
+    return OrderRecipientItemModel(
+        image = KARTINKA?.toVodovozUrl() ?: "",
+        name = NAME ?: "",
+        description = OPISANIE ?: "",
+        id = ID ?: return null
+    )
+}
+
+fun ORDER_PREDYP_DTO.toDomain(): SectionModel<OrderNotifyItemModel> {
+    return SectionModel(
+        title = NAME ?: "",
+        items = DANNYE?.mapToDomain() ?: emptyList(),
+        button = null
+    )
+}
+
+@JvmName("mapToOrderNotifyItemModel")
+fun List<ORDER_PREDYP_ITEM_DTO>.mapToDomain(): List<OrderNotifyItemModel> {
+    return mapNotNull { it.toDomain() }
+}
+
+fun ORDER_PREDYP_ITEM_DTO.toDomain(): OrderNotifyItemModel? {
+    return OrderNotifyItemModel(
+        name = NAME ?: return null,
+        value = VALUE ?: return null,
+        code = CODE ?: return null
+    )
+}
 
 fun BottomCartDTO.toDomain(): BottomCartModel {
     return BottomCartModel(

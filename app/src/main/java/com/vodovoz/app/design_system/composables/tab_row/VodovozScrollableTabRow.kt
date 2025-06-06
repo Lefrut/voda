@@ -213,7 +213,7 @@ private class ScrollableTabData(
                 if (scrollState.value != calculatedOffset) {
                     coroutineScope.launch {
                         scrollState.animateScrollTo(
-                            calculatedOffset,
+                            value = calculatedOffset,
                             animationSpec = ScrollableTabRowScrollSpec
                         )
                     }

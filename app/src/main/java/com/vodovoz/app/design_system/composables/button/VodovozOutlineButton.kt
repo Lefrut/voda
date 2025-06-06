@@ -22,6 +22,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil3.compose.AsyncImagePainter
+import coil3.compose.rememberAsyncImagePainter
 import com.vodovoz.app.R
 import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.composables.card.VodovozOutlinedCard
@@ -29,7 +31,7 @@ import com.vodovoz.app.design_system.composables.card.VodovozOutlinedCard
 @Composable
 fun VodovozOutlineButton(
     modifier: Modifier = Modifier,
-    imagePainter: Painter?,
+    imagePainter: AsyncImagePainter?,
     name: String,
     description: String = "",
     onClick: () -> Unit,
@@ -41,6 +43,8 @@ fun VodovozOutlineButton(
         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
         onClick = onClick
     ) {
+        
+
         Row(verticalAlignment = Alignment.CenterVertically) {
             imagePainter?.let {
                 Image(
@@ -92,7 +96,7 @@ fun VodovozOutlineButton(
 private fun VodovozOutlineButtonPreview() {
     VodovozTheme {
         VodovozOutlineButton(
-            imagePainter = painterResource(id = R.drawable.pic_man),
+            imagePainter = rememberAsyncImagePainter(R.drawable.pic_man),
             name = "S p a s i b o :)",
             onClick = {}
         )
