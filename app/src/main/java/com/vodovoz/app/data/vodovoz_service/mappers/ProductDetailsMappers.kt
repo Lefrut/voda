@@ -1,6 +1,6 @@
 package com.vodovoz.app.data.vodovoz_service.mappers
 
-import com.vodovoz.app.data.vodovoz_service.di.toFullUrl
+import com.vodovoz.app.data.vodovoz_service.di.toVodovozUrl
 import com.vodovoz.app.data.vodovoz_service.model.COMMENT_DTO
 import com.vodovoz.app.data.vodovoz_service.model.PresentDTO
 import com.vodovoz.app.data.vodovoz_service.model.product_details.BLOCK_KNOPKA_DATA_DTO
@@ -70,7 +70,7 @@ private fun BLOCK_RAZDEL_INFO_DATA_DTO.toDomain(): BrandCategoryItemDataModel? {
     return BrandCategoryItemDataModel(
         id = ID ?: return null,
         name = NAME ?: return null,
-        detailPicture = DETAIL_PICTURE?.toFullUrl() ?: return null
+        detailPicture = DETAIL_PICTURE?.toVodovozUrl() ?: return null
     )
 }
 
@@ -85,7 +85,7 @@ private fun TOVAR_DETAIL_DTO.toDomain(
     shareUrlText: String,
     commentsCount: Int,
 ): ProductDetailsModel {
-    val detailPicture = DETAIL_PICTURE?.toFullUrl()
+    val detailPicture = DETAIL_PICTURE?.toVodovozUrl()
 
     return ProductDetailsModel(
         id = ID ?: throw IllegalArgumentException("ID cannot be null"),
@@ -100,7 +100,7 @@ private fun TOVAR_DETAIL_DTO.toDomain(
             ?: throw IllegalArgumentException("Documents cannot be null"),
         detailPicture = detailPicture
             ?: throw IllegalArgumentException("Detail picture cannot be null"),
-        pictures = ((MORE_PHOTO?.map { img -> img.toFullUrl() }
+        pictures = ((MORE_PHOTO?.map { img -> img.toVodovozUrl() }
             ?: emptyList()) + detailPicture).distinct().reversed(),
         sectionTags = TAGS?.toDomain() ?: SectionModel.empty(),
         isFavorite = FAVORITE ?: false,
@@ -109,7 +109,7 @@ private fun TOVAR_DETAIL_DTO.toDomain(
         labels = NALICHIE?.mapToDomain() ?: emptyList(),
         rating = PROPERTY_RATING_VALUE?.toFloat() ?: 0f,
         deposit = ZALOG?.toDomain(),
-        shareUrl = DETAIL_PAGE_URL?.toFullUrl() ?: "",
+        shareUrl = DETAIL_PAGE_URL?.toVodovozUrl() ?: "",
         shareUrlText = shareUrlText,
         rutubeVideo = RUTUBE_VIDEO?.firstOrNull()?.toDomain(),
         youtubeVideo = YOUTUBE_VIDEO?.firstOrNull()?.toDomain(),
@@ -159,9 +159,9 @@ fun DOCUMENT_DTO.toDomain(): DocumentModel? {
         type = TYPE ?: "",
         size = FILE_SIZE?.toFloat() ?: return null,
         sizeText = FILE_SIZE_FORMAT ?: return null,
-        iconUrl = IKONKA?.toFullUrl() ?: "",
+        iconUrl = IKONKA?.toVodovozUrl() ?: "",
         description = DESCRIPTION ?: "",
-        src = SRC?.toFullUrl() ?: ""
+        src = SRC?.toVodovozUrl() ?: ""
     )
 }
 
@@ -276,7 +276,7 @@ private fun BLOCK_TOVAR_DTO.toDomain(): PromoProductModel? {
     return PromoProductModel(
         name = NAME ?: "",
         price = PRICE?.toDomain() ?: return null,
-        image = KARTINKA?.toFullUrl() ?: ""
+        image = KARTINKA?.toVodovozUrl() ?: ""
     )
 }
 
@@ -346,7 +346,7 @@ private fun DETAILTEXT_DTO.toDomain(): ProductDetailsTabModel? {
 fun COMMENT_DTO.toDomain(): CommentModel {
     return CommentModel(
         userName = NAME ?: "",
-        userPhoto = USER_PHOTO?.toFullUrl() ?: "",
+        userPhoto = USER_PHOTO?.toVodovozUrl() ?: "",
         text = TEXT ?: "",
         dateText = DATA ?: "",
         rating = RATING ?: 0,
@@ -365,7 +365,7 @@ private fun BLOK_KNOPKA_DIZAIN_DTO.toDomain(): ButtonDesignBlockModel? {
 private fun BLOCK_U_BLOCK_KNOPKA_DIZAIN_DTO.toDomain(): DesignBlockModel? {
     return DesignBlockModel(
         title = TITLE ?: "",
-        image = KARTINKA?.toFullUrl() ?: "",
+        image = KARTINKA?.toVodovozUrl() ?: "",
         button = KNOPKA?.toDomain() ?: return null,
         background = BACKGROUND ?: "",
         textColor = TEXTCOLOR ?: "",

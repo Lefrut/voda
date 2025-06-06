@@ -42,16 +42,12 @@ import javax.inject.Inject
 @HiltViewModel
 @Stable
 class TraceOrderViewModel @Inject constructor(
-    private val application: Application,
-    private val accountManager: AccountManager,
+    savedStateHandle: SavedStateHandle,
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val siteStateManager: SiteStateManager,
-    savedStateHandle: SavedStateHandle,
 ) : PagingContractViewModel<TraceOrderViewModel.TraceOrderState, TraceOrderViewModel.TraceOrderEvents>(
     TraceOrderState()
 ) {
-
-    private val firebaseDatabase = FirebaseDatabase.getInstance().reference
 
     private val orderId: Long = savedStateHandle["orderId"] ?: navigateBack().run { -1 }
     private val driverId: String = savedStateHandle["driverId"] ?: navigateBack().run { "" }
@@ -60,51 +56,10 @@ class TraceOrderViewModel @Inject constructor(
         viewModelScope.launch {
             fetchWhereOrderDetails()
         }
-
-        viewModelScope.launch(Dispatchers.Default) {
-            generateBitmap(
-                "http://vodovoz.ru/bitrix/templates/vodovoz/images/karta/auto.png",
-                true
-            )
-            generateBitmap(
-                "http://vodovoz.ru/bitrix/templates/vodovoz/images/karta/home.png",
-                false
-            )
-        }
     }
 
     fun navigateBack() = viewModelScope.launch {
         eventListener.emit(TraceOrderEvents.GoBack)
-    }
-
-    private fun generateBitmap(url: String, auto: Boolean) {
-        val bitmap = Glide
-            .with(application)
-            .asBitmap()
-            .load(url)
-            .submit()
-            .get()
-
-        val scaledBitmap = Bitmap.createScaledBitmap(
-            bitmap,
-            80,
-            80,
-            false
-        )
-
-        uiStateListener.value = if (auto) {
-            state.copy(
-                data = state.data.copy(
-                    autoBitmap = scaledBitmap
-                )
-            )
-        } else {
-            state.copy(
-                data = state.data.copy(
-                    homeBitmap = scaledBitmap
-                )
-            )
-        }
     }
 
     fun orderDetailsCallbackFlow(): Flow<Unit> = callbackFlow {
@@ -129,11 +84,8 @@ class TraceOrderViewModel @Inject constructor(
 
     private suspend fun fetchWhereOrderDetails() {
 
-        //
-        //orderId
-        //driverId
         val whereOrderDetailsResult =
-            vodovozServiceRepository.getWhereMyOrderDetails(1761455, "mh-2424%20(Сафонов)")
+            vodovozServiceRepository.getWhereMyOrderDetails(orderId, driverId)
                 .singleResult()
 
         whereOrderDetailsResult.onSuccess { whereOrderDetails ->
@@ -149,98 +101,6 @@ class TraceOrderViewModel @Inject constructor(
                     bottomSheetButtons = whereOrderDetails.buttons.mapToUi()
                         .ifEmpty { s.bottomSheetButtons }
                 )
-            }
-        }
-    }
-
-    fun fetchDriverData(driverId: String?, orderId: String?) {
-        viewModelScope.launch(Dispatchers.IO) {
-            debugLog { "driverId $driverId" }
-            if (driverId == null) return@launch
-            runCatching {
-                firebaseDatabase.child(driverId).addListenerForSingleValueEvent(object :
-                    ValueEventListener {
-                    override fun onDataChange(snapshot: DataSnapshot) {
-
-                        if (!snapshot.exists()) return
-
-                        val nameBuilder = StringBuilder()
-                        val carBuilder = StringBuilder()
-                        val lastName = snapshot.child("LastName").value.toString()
-                        val firstName = snapshot.child("FirstName").value.toString()
-                        val carName = snapshot.child("Auto").value.toString()
-                        val carNumber = snapshot.child("CarNumber").value.toString()
-
-                        debugLog { "lastName $lastName, firstName $firstName, carName $carName, carNumber $carNumber" }
-
-                        nameBuilder
-                            .append("водитель ")
-                            .apply {
-                                if (lastName.isNotEmpty()) {
-                                    append("$lastName ")
-                                }
-                                if (firstName.isNotEmpty()) {
-                                    append(firstName)
-                                }
-                            }
-
-                        carBuilder
-                            .apply {
-                                if (carName.isNotEmpty()) {
-                                    append("$carName ")
-                                }
-                                if (carNumber.isNotEmpty()) {
-                                    append(", номер машины $carNumber")
-                                }
-                            }
-
-                        val driverLatitude =
-                            snapshot.child("Position_vodila").child("Latitude").value.toString()
-                                .replace(",", ".")
-                        val driverLongitude =
-                            snapshot.child("Position_vodila")
-                                .child("Longitude").value.toString()
-                                .replace(",", ".")
-
-                        debugLog { "driverLatitude $driverLatitude, driverLongitude $driverLongitude" }
-
-                        val point =
-                            if (driverLatitude.isNotEmpty() && driverLongitude.isNotEmpty()) {
-                                Point(driverLatitude.toDouble(), driverLongitude.toDouble())
-                            } else {
-                                null
-                            }
-
-                        val list = mutableListOf<DriverPointsEntity?>()
-                        snapshot.child("ListTochki").children.forEach {
-                            val driverPointsEntity = it.getValue(DriverPointsEntity::class.java)
-                            list.add(driverPointsEntity)
-                        }
-
-                        val driverPointsEntity =
-                            list.find { it?.OrderNumber == orderId.toString() }
-
-                        debugLog { "driverPointsEntity $driverPointsEntity" }
-
-
-                        uiStateListener.value = state.copy(
-                            data = state.data.copy(
-                                name = nameBuilder.toString(),
-                                car = carBuilder.toString(),
-                                driverPoint = point,
-                                driverPointsEntity = driverPointsEntity
-                            )
-                        )
-
-                    }
-
-                    override fun onCancelled(error: DatabaseError) {
-
-                    }
-                })
-            }.onFailure {
-                debugLog { "fetchDriverData error $it" }
-                accountManager.reportError("fetchDriverData error", it)
             }
         }
     }
@@ -285,7 +145,6 @@ class TraceOrderViewModel @Inject constructor(
 
         when (imageButton.id) {
             "chat" -> {
-
                 eventListener.emit(TraceOrderEvents.GoToJivoChat(JivoChatController.getLink()))
             }
 
@@ -322,14 +181,6 @@ class TraceOrderViewModel @Inject constructor(
 
     @Immutable
     data class TraceOrderState(
-        val item: Item? = null,
-        val name: String? = null,
-        val car: String? = null,
-        val driverPoint: Point? = null,
-        val autoBitmap: Bitmap? = null,
-        val homeBitmap: Bitmap? = null,
-        val driverPointsEntity: DriverPointsEntity? = null,
-
         val showSettingDialog: Boolean = false,
         val carPoint: MapPointUi? = null,
         val finishPoint: MapPointUi? = null,

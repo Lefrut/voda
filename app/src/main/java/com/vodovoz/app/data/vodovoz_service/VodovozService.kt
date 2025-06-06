@@ -33,6 +33,7 @@ import com.vodovoz.app.data.vodovoz_service.model.VodovozErrorResponseDTO
 import com.vodovoz.app.data.vodovoz_service.model.VodovozPlaceholderDTO
 import com.vodovoz.app.data.vodovoz_service.model.VodovozResponseDTO
 import com.vodovoz.app.data.vodovoz_service.model.WaitFeedbackProductsDTO
+import com.vodovoz.app.data.vodovoz_service.model.address.AddressesDTO
 import com.vodovoz.app.data.vodovoz_service.model.auth.AuthDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.auth.LoginByPhoneDTO
 import com.vodovoz.app.data.vodovoz_service.model.auth.RequestCodeDTO
@@ -82,7 +83,6 @@ interface VodovozService {
     /**
      * Push requests
      * */
-
     @GET("osnova/userpushapi.php?action=token")
     suspend fun sendFirebaseToken(
         @Query("userid") userId: Long?,
@@ -126,7 +126,6 @@ interface VodovozService {
     /**
      * Order requests
      * */
-
     @GET("profile/historyorder/voditel.php")
     suspend fun getWhereMyOrderDetails(
         @Query("userid") userId: Long?,
@@ -177,6 +176,14 @@ interface VodovozService {
         @Query("status") statuses: String? = null,
         @Query("search") search: String? = null,
     ): Response<VodovozResponseDTO<OrdersHistoryDetailsDTO>>
+
+    /**
+     * Addresses requests
+     * */
+    @GET("oformlenie/address.php?action=get")
+    suspend fun getAddresses(
+        @Query("userid") userId: Long?
+    ): Response<VodovozResponseDTO<AddressesDTO>>
 
     /**
      * Brand requests

@@ -77,7 +77,7 @@ private val monthYearFormatter =
 
 @Composable
 fun VodovozCalendarDialog(
-    initialDate: LocalDate = remember { LocalDate.now() },
+    initialDate: CalendarDay = remember { CalendarDay(LocalDate.now(), DayPosition.MonthDate) },
     isSelectableDate: (LocalDate) -> Boolean = { true },
     onDateSelected: (LocalDate) -> Unit,
     onDismiss: () -> Unit,
@@ -87,10 +87,10 @@ fun VodovozCalendarDialog(
     val coroutineScope = rememberCoroutineScope()
 
     val today = remember { LocalDate.now() }
-    val currentMonth = remember(initialDate) { selection.yearMonth }
+    val currentMonth = remember(initialDate) { selection.date.yearMonth }
     val state = rememberCalendarState(
-        startMonth = remember { currentMonth.minusYears(100) },
-        endMonth = remember { currentMonth.plusYears(100) },
+        startMonth = remember { currentMonth.minusYears(200) },
+        endMonth = remember { currentMonth.plusYears(200) },
         firstVisibleMonth = currentMonth,
         firstDayOfWeek = daysOfWeek.first()
     )
@@ -116,7 +116,7 @@ fun VodovozCalendarDialog(
                 )
 
                 Text(
-                    text = selection.format(selectedDateFormatter)?.capitalize(russianLocale)
+                    text = selection.date.format(selectedDateFormatter)?.capitalize(russianLocale)
                         ?: stringResource(id = R.string.space),
                     style = MaterialTheme.typography.displaySmall,
                     color = MaterialTheme.colorScheme.onBackground,
@@ -160,18 +160,26 @@ fun VodovozCalendarDialog(
                             dayContent = { day ->
                                 VodovozDay(
                                     day = day,
-                                    isSelected = selection == day.date,
+                                    isSelected = selection.date == day.date,
                                     isDisabled = !isSelectableDate(day.date)
                                 ) { clickedDay ->
                                     if (clickedDay.position == DayPosition.MonthDate && isSelectableDate(
                                             clickedDay.date
                                         )
                                     ) {
-                                        selection = clickedDay.date
+                                        selection = clickedDay
                                     }
                                 }
                             }
                         )
+                    }
+
+                    val yearFrom = remember {
+                        1885
+                    }
+
+                    val yearTo = remember {
+                        LocalDate.now().year + 10
                     }
 
 
@@ -190,7 +198,7 @@ fun VodovozCalendarDialog(
                                     .fillMaxSize()
                                     .padding(horizontal = 12.dp)
                             ) {
-                                val years = (currentMonth.year - 100)..(currentMonth.year + 31)
+                                val years = yearFrom..yearTo
                                 val rows = years.chunked(3)
 
                                 items(rows) { rowYears ->
@@ -254,7 +262,7 @@ fun VodovozCalendarDialog(
                     Spacer(modifier = Modifier.width(8.dp))
                     TextButton(
                         onClick = {
-                            onDateSelected(selection)
+                            onDateSelected(selection.date)
                             onDismiss()
                         },
                         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp)

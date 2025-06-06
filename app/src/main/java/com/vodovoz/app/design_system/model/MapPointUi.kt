@@ -14,10 +14,14 @@ data class MapPointUi(
     }
 }
 
+fun Point.toMapPoint(): MapPointUi {
+    return MapPointUi(lat = latitude, lon = longitude)
+}
+
 fun MapPointModel.toUi(): MapPointUi {
     return MapPointUi(lat, lon)
 }
 
-fun MapPointUi.toPoint(): Point{
+fun MapPointUi.toPoint(): Point {
     return Point(lat, lon)
 }

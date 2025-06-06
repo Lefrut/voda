@@ -72,6 +72,7 @@ import com.vodovoz.app.domain.general.model.UserNotLoginException
 import com.vodovoz.app.domain.general.model.ValidationException
 import com.vodovoz.app.domain.general.model.VodovozPlaceholderModel
 import com.vodovoz.app.domain.general.model.WaitFeedbackProductModel
+import com.vodovoz.app.domain.general.model.addresses.AddressModel
 import com.vodovoz.app.domain.general.model.cart.BottomCartModel
 import com.vodovoz.app.domain.general.model.cart.CartDetailsModel
 import com.vodovoz.app.domain.general.model.certificate.BuyCertificateDetailsModel
@@ -511,6 +512,22 @@ class VodovozServiceRepositoryImpl @Inject constructor(
             },
             mapper = {
                 it.data!!.toDomain()
+            }
+        )
+    }
+
+    override fun getAddresses(): Flow<Result<List<SectionModel<AddressModel>>>> {
+        return executeRequest(
+            request = {
+                vodovozService.getAddresses(accountManager.fetchAccountId())
+            },
+            mapper = {
+                it.data!!.toDomain()
+            },
+            onFail = { response ->
+                val body = response.stringBody()
+                val placeholder = moshi.fromJson<VodovozResponseDTO<VodovozPlaceholderDTO>>(body).data!!
+                throw EmptyResultException(placeholder = placeholder.toDomain())
             }
         )
     }

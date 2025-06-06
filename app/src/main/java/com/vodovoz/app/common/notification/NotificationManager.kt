@@ -2,18 +2,16 @@ package com.vodovoz.app.common.notification
 
 import android.Manifest
 import android.content.pm.PackageManager
-import android.graphics.Bitmap
-import android.net.Uri
 import android.os.Build
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.os.bundleOf
 import androidx.navigation.NavDeepLinkBuilder
-import com.bumptech.glide.Glide
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.vodovoz.app.R
+import com.vodovoz.app.core.android.getBitmap
 import com.vodovoz.app.util.extensions.debugLog
 import com.vodovoz.app.util.extensions.fromHtml
 import org.json.JSONObject
@@ -23,25 +21,20 @@ class NotificationManager : FirebaseMessagingService() {
     override fun onMessageReceived(message: RemoteMessage) {
         super.onMessageReceived(message)
 
-        val messageNotification = message.notification
+        val messageNotification = message.notification ?: return
 
-        if (messageNotification != null) {
-
-            val jsonData = if (message.data.isNotEmpty()) {
-                JSONObject(message.data.toString())
-            } else {
-                JSONObject()
-            }
-
-            debugLog { "jsonData $jsonData" }
-            debugLog { "imageUrl ${messageNotification.imageUrl}" }
-
-            if (messageNotification.imageUrl != null) {
-                showLargeIconNotification(messageNotification, jsonData)
-            } else {
-                showSmallIconNotification(messageNotification, jsonData)
-            }
+        val jsonData = if (message.data.isNotEmpty()) {
+            JSONObject(message.data.toString())
+        } else {
+            JSONObject()
         }
+
+        if (messageNotification.imageUrl != null) {
+            showLargeIconNotification(messageNotification, jsonData)
+        } else {
+            showSmallIconNotification(messageNotification, jsonData)
+        }
+
     }
 
     private fun showLargeIconNotification(not: RemoteMessage.Notification, data: JSONObject) {
@@ -51,7 +44,7 @@ class NotificationManager : FirebaseMessagingService() {
             .setDestination(R.id.splashFragment)
             .createPendingIntent()
 
-        val bitmap = getBitmap(not.imageUrl)
+        val bitmap = getBitmap(not.imageUrl.toString())
         debugLog { "large icon bitmap $bitmap" }
         val bigPictureStyle = NotificationCompat.BigPictureStyle().also {
             it.setBigContentTitle(not.title)
@@ -118,14 +111,5 @@ class NotificationManager : FirebaseMessagingService() {
             NotificationManagerCompat.from(this)
                 .notify(NotificationConfig.NOTIFICATION_ID, notification)
         }
-    }
-
-    private fun getBitmap(fileUri: Uri?): Bitmap? {
-        return Glide
-            .with(applicationContext)
-            .asBitmap()
-            .load(fileUri)
-            .submit()
-            .get()
     }
 }

@@ -1,6 +1,6 @@
 package com.vodovoz.app.data.vodovoz_service.mappers
 
-import com.vodovoz.app.data.vodovoz_service.di.toFullUrl
+import com.vodovoz.app.data.vodovoz_service.di.toVodovozUrl
 import com.vodovoz.app.data.vodovoz_service.model.AnalogsSectionDTO
 import com.vodovoz.app.data.vodovoz_service.model.CATEGORY_DTO
 import com.vodovoz.app.data.vodovoz_service.model.EXTENDED_PRICE_DTO
@@ -92,7 +92,7 @@ fun TOVAR_DATA_DTO.toDomain(): ProductModel? {
         isFavorite = FAVORITE ?: false,
         deposit = PROPERTY_ZALOG_VALUE ?: 0,
         rating = PROPERTY_RATING_VALUE ?: return null,
-        picture = DETAIL_PICTURE?.toFullUrl() ?: return null,
+        picture = DETAIL_PICTURE?.toVodovozUrl() ?: return null,
         pricePerUnit = PROPERTY_TSENA_ZA_EDINITSU_TOVARA_VALUE,
         unitOfMeasurement = EDINICAIZMERENIYA,
         coefficient = KOFFICIENT?.toFloat() ?: 1f,

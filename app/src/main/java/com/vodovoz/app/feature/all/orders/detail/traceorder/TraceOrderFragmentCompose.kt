@@ -1,13 +1,10 @@
 package com.vodovoz.app.feature.all.orders.detail.traceorder
 
 import android.Manifest
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
-import android.location.LocationManager
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.view.LayoutInflater
@@ -23,25 +20,29 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SheetValue.Hidden
 import androidx.compose.material3.SheetValue.PartiallyExpanded
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.fragment.findNavController
 import com.google.android.gms.location.LocationServices
-import com.vodovoz.app.R
+import com.vodovoz.app.core.android.handleLocationAvailability
+import com.vodovoz.app.core.android.locationPermissions
+import com.vodovoz.app.core.android.locationPermissionsGranted
 import com.vodovoz.app.core.navigation.navigateToWebView
 import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.effects.LifecycleEffect
 import com.vodovoz.app.design_system.model.toPoint
+import com.vodovoz.app.ui.yandex_map.VodovozUserLocationListener
+import com.vodovoz.app.ui.yandex_map.YandexMapUi
 import com.vodovoz.app.ui.yandex_map.calculateBounds
 import com.vodovoz.app.ui.yandex_map.minusZoom
 import com.vodovoz.app.ui.yandex_map.plusZoom
@@ -49,16 +50,13 @@ import com.vodovoz.app.util.extensions.dialPhoneNumber
 import com.yandex.mapkit.Animation
 import com.yandex.mapkit.MapKit
 import com.yandex.mapkit.MapKitFactory
+import com.yandex.mapkit.ScreenPoint
+import com.yandex.mapkit.ScreenRect
 import com.yandex.mapkit.geometry.Point
-import com.yandex.mapkit.layers.ObjectEvent
 import com.yandex.mapkit.map.CameraPosition
-import com.yandex.mapkit.map.IconStyle
 import com.yandex.mapkit.map.Map
-import com.yandex.mapkit.map.RotationType
+import com.yandex.mapkit.map.MapWindow
 import com.yandex.mapkit.mapview.MapView
-import com.yandex.mapkit.user_location.UserLocationObjectListener
-import com.yandex.mapkit.user_location.UserLocationView
-import com.yandex.runtime.image.ImageProvider
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collect
@@ -70,72 +68,41 @@ class TraceOrderFragment : Fragment() {
 
     val viewModel by viewModels<TraceOrderViewModel>()
 
-
-    private val locationPermissions = arrayOf(
-        Manifest.permission.ACCESS_FINE_LOCATION,
-        Manifest.permission.ACCESS_COARSE_LOCATION
-    )
-
-    private val locationPermissionsGranted
-        get() = locationPermissions.any { perm ->
-            ContextCompat.checkSelfPermission(
-                requireContext(),
-                perm
-            ) == PackageManager.PERMISSION_GRANTED
-        }
-
     private val fusedLocationClient by lazy {
         LocationServices.getFusedLocationProviderClient(requireActivity())
-    }
-    private val locationManager by lazy {
-        requireContext().getSystemService(Context.LOCATION_SERVICE) as? LocationManager
     }
 
     private val mapKit: MapKit = MapKitFactory.getInstance()
 
-
-    private val mapView by lazy {
-        MapView(requireContext()).apply {
-            layoutParams = ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT
-            )
-        }
+    private val yandexMap by lazy {
+        YandexMapUi(
+            mapView = MapView(requireContext()).apply {
+                layoutParams = ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT
+                )
+            }
+        )
     }
 
+    private val mapView: MapView get() = yandexMap.mapView
+    private val mapWindow: MapWindow get() = mapView.mapWindow
     private val map: Map get() = mapView.mapWindow.map
 
     private val userLocationLayer by lazy {
         mapKit.createUserLocationLayer(mapView.mapWindow)
     }
 
-    private val userLocationListener = object : UserLocationObjectListener {
-        override fun onObjectAdded(p0: UserLocationView) {
-            p0.arrow.setIcon(
-                ImageProvider.fromResource(requireContext(), R.drawable.svg_gps_outline),
-                IconStyle().setScale(0.12f)
-                    .setRotationType(RotationType.ROTATE)
-                    .setZIndex(1f)
-            )
-            p0.pin.setIcon(
-                ImageProvider.fromResource(requireContext(), R.drawable.svg_gps_outline),
-                IconStyle().setScale(0.12f)
-                    .setRotationType(RotationType.ROTATE)
-                    .setZIndex(0f)
-            )
-
-            p0.accuracyCircle.fillColor = Color.Transparent.hashCode()
-        }
-
-        override fun onObjectRemoved(p0: UserLocationView) = Unit
-
-        override fun onObjectUpdated(p0: UserLocationView, p1: ObjectEvent) = Unit
+    private val userLocationListener by lazy {
+        VodovozUserLocationListener(requireContext())
     }
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         MapKitFactory.initialize(requireContext())
+
+
     }
 
     override fun onStart() {
@@ -169,6 +136,7 @@ class TraceOrderFragment : Fragment() {
                 VodovozTheme {
 
                     val context = LocalContext.current
+
                     val pagingState by viewModel.observeUiState().collectAsStateWithLifecycle()
                     val viewState by rememberUpdatedState(newValue = pagingState.data)
 
@@ -188,14 +156,15 @@ class TraceOrderFragment : Fragment() {
                     }
 
                     TraceOrderScreen(
+                        yandexMap = yandexMap,
                         viewModel = viewModel,
                         viewState = viewState,
-                        anchoredDraggableState = anchoredDraggableState,
-                        mapView = { mapView }
+                        anchoredDraggableState = anchoredDraggableState
                     )
 
+
                     LaunchedEffect(Unit) {
-                        if (locationPermissionsGranted) return@LaunchedEffect
+                        if (context.locationPermissionsGranted) return@LaunchedEffect
 
                         locationPermissionLauncher.launch(locationPermissions)
                     }
@@ -222,53 +191,44 @@ class TraceOrderFragment : Fragment() {
                                 }
 
                                 TraceOrderViewModel.TraceOrderEvents.CheckUserGeo -> {
-                                    val showSettingDialog =
-                                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                                            !locationPermissions.any { perm ->
-                                                requireActivity().shouldShowRequestPermissionRationale(
-                                                    perm
-                                                )
-                                            } && !locationPermissionsGranted
-                                        } else false
-
-
-                                    when {
-                                        locationPermissionsGranted -> {
+                                    requireActivity().handleLocationAvailability(
+                                        onPermissionHave = {
                                             viewModel.moveToUserGeo()
-                                        }
-
-
-                                        locationManager?.isProviderEnabled(LocationManager.GPS_PROVIDER) != true -> {
+                                        },
+                                        onPermissionNotRational = {
+                                            viewModel.showSettingDialog()
+                                        },
+                                        onPermissionNotHave = {
+                                            locationPermissionLauncher.launch(locationPermissions)
+                                        },
+                                        onGpsDisabled = {
                                             Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS).also { intent ->
                                                 context.startActivity(intent)
                                             }
                                         }
-
-
-                                        showSettingDialog -> {
-                                            viewModel.showSettingDialog()
-                                        }
-
-                                        else -> {
-                                            locationPermissionLauncher.launch(locationPermissions)
-                                        }
-                                    }
+                                    )
                                 }
 
                                 is TraceOrderViewModel.TraceOrderEvents.MoveToDeliveryGeo -> {
+
+                                    //todo - need tests focus rect
+
                                     val bounds = calculateBounds(
                                         event.finishPoint?.toPoint() ?: return@collect,
                                         event.driverPoint?.toPoint() ?: return@collect
                                     )
 
-                                    val (tilt, azimuth) = map.cameraPosition.let { it.tilt to it.azimuth }
+
+                                    val (tilt, azimuth) = map.cameraPosition.let {
+                                        it.tilt to it.azimuth
+                                    }
 
 
-                                    val cP = map.cameraPosition(bounds)
+                                    val cameraPositionWithBounds = map.cameraPosition(bounds)
 
                                     val cameraPosition = CameraPosition(
-                                        cP.target,
-                                        cP.zoom - 2f,
+                                        cameraPositionWithBounds.target,
+                                        cameraPositionWithBounds.zoom - 1f,
                                         azimuth,
                                         tilt
                                     )

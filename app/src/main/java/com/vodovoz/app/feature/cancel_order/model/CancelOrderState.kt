@@ -1,4 +1,4 @@
-package com.vodovoz.app.feature.cancel_order_fragment.model
+package com.vodovoz.app.feature.cancel_order.model
 
 import androidx.compose.runtime.Immutable
 import com.vodovoz.app.design_system.model.ColorfulButtonUi

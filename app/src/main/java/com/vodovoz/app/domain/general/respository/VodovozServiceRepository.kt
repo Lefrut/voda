@@ -41,6 +41,7 @@ import com.vodovoz.app.domain.general.model.UnratedProductsSectionModel
 import com.vodovoz.app.domain.general.model.UserDataModel
 import com.vodovoz.app.domain.general.model.VodovozPlaceholderModel
 import com.vodovoz.app.domain.general.model.WaitFeedbackProductModel
+import com.vodovoz.app.domain.general.model.addresses.AddressModel
 import com.vodovoz.app.domain.general.model.cart.BottomCartModel
 import com.vodovoz.app.domain.general.model.cart.CartDetailsModel
 import com.vodovoz.app.domain.general.model.certificate.BuyCertificateDetailsModel
@@ -126,6 +127,8 @@ interface VodovozServiceRepository {
         orderId: Long,
         driverId: String
     ): Flow<Result<WhereOrderDetailsModel>>
+
+    fun getAddresses(): Flow<Result<List<SectionModel<AddressModel>>>>
 
 
     fun getPastPurchasesDetails(

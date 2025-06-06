@@ -28,26 +28,23 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class MapDialogFragment : BaseFragment() {
+class MapFragment1 : BaseFragment() {
 
     override fun layout(): Int = R.layout.fragment_map_flow
 
     internal val binding: FragmentMapFlowBinding by viewBinding {
-        FragmentMapFlowBinding.bind(
-            contentView
-        )
+        FragmentMapFlowBinding.bind(contentView)
     }
+
     private val viewModel: MapFlowViewModel by viewModels()
 
-    private val args: MapDialogFragmentArgs by navArgs()
+    private val args: MapFragmentArgs by navArgs()
 
     private val userLocationLayer: UserLocationLayer by lazy {
         mapKit.createUserLocationLayer(binding.mapView.mapWindow)
     }
 
-    private val mapKit: MapKit by lazy {
-        MapKitFactory.getInstance()
-    }
+    private val mapKit: MapKit by lazy { MapKitFactory.getInstance() }
 
     @Inject
     lateinit var permissionsControllerFactory: PermissionsController.Factory
@@ -143,7 +140,7 @@ class MapDialogFragment : BaseFragment() {
     private fun observeEvents() {
         lifecycleScope.launch {
             viewModel.observeEvent()
-                .collect {
+                .collect { it ->
                     when (it) {
                         is MapFlowViewModel.MapFlowEvents.ShowAddAddressBottomDialog -> {
                             //todo - uncomment and fix graph

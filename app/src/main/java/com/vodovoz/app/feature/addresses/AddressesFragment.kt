@@ -1,242 +1,103 @@
 package com.vodovoz.app.feature.addresses
 
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.fragment.findNavController
-import by.kirich1409.viewbindingdelegate.viewBinding
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.vodovoz.app.R
-import com.vodovoz.app.common.content.BaseFragment
-import com.vodovoz.app.common.permissions.PermissionsController
 import com.vodovoz.app.common.tab.TabManager
-import com.vodovoz.app.databinding.FragmentAddressesFlowBinding
-import com.vodovoz.app.feature.addresses.adapter.AddressesClickListener
-import com.vodovoz.app.feature.map.MapController
-import com.vodovoz.app.feature.map.MapFlowViewModel
-import com.vodovoz.app.feature.map.adapter.AddressResultClickListener
-import com.vodovoz.app.ui.model.AddressUI
+import com.vodovoz.app.design_system.VodovozTheme
+import com.vodovoz.app.design_system.effects.LifecycleEffect
 import com.vodovoz.app.util.extensions.snack
-import com.yandex.mapkit.MapKit
-import com.yandex.mapkit.MapKitFactory
-import com.yandex.mapkit.user_location.UserLocationLayer
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class AddressesFragment : BaseFragment() {
+class AddressesFragment : Fragment() {
 
     companion object {
         const val SELECTED_ADDRESS = "SELECTED_ADDRESS"
-    }
-
-    override fun layout(): Int = R.layout.fragment_addresses_flow
-
-    private val binding: FragmentAddressesFlowBinding by viewBinding {
-        FragmentAddressesFlowBinding.bind(
-            contentView
-        )
     }
 
     @Inject
     lateinit var tabManager: TabManager
 
     internal val viewModel: AddressesFlowViewModel by viewModels()
-    private val mapViewModel: MapFlowViewModel by viewModels()
 
-    private val userLocationLayer: UserLocationLayer by lazy {
-        mapKit.createUserLocationLayer(binding.mapView.mapWindow)
-    }
-    private val mapKit: MapKit by lazy {
-        MapKitFactory.getInstance()
-    }
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?,
+    ): View {
+        return ComposeView(requireContext()).apply {
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
 
-    @Inject
-    lateinit var permissionsControllerFactory: PermissionsController.Factory
+            setContent {
+                val pagingState by viewModel.observeUiState().collectAsStateWithLifecycle()
+                val viewState by rememberUpdatedState(newValue = pagingState.data)
 
-    private val mapController by lazy {
-        MapController(
-            mapKit,
-            object : AddressResultClickListener {},
-            userLocationLayer,
-            mapViewModel,
-            requireContext(),
-            requireActivity(),
-            permissionsControllerFactory
-        ) {}
-    }
-
-    private val addressesController by lazy {
-        AddressesController(
-            viewModel = viewModel,
-            listener = getAddressesClickListener(),
-            context = requireContext()
-        )
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        viewModel.firstLoad()
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        //mapController.initMap(binding.mapView)
-        //mapController.initSearch()
-
-        addressesController.bind(binding.rvAddresses, binding.refreshContainer)
-        initToolbar(resources.getString(R.string.addresses_title))
-        //bindErrorRefresh { viewModel.refresh() }
-        initAddAddressButton()
-        observeUiState()
-        observeEvents()
-        observeRefresh()
-    }
-
-    override fun onStart() {
-        super.onStart()
-        //mapKit.onStart()
-        //binding.mapView.onStart()
-    }
-
-    override fun onStop() {
-        //binding.mapView.onStop()
-        //mapKit.onStop()
-        super.onStop()
-    }
-
-    private fun observeRefresh() {
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                tabManager
-                    .observeAddressesRefresh()
-                    .collect {
-                        if (it) {
-                            viewModel.refresh()
-                            tabManager.setAddressesRefreshState(false)
-                        }
-                    }
-            }
-        }
-    }
-
-    private fun observeUiState() {
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.observeUiState()
-                    .collect { state ->
-                        if (state.loadingPage) {
-                            showLoader()
-                        } else {
-                            hideLoader()
-                        }
-
-                        if (state.data.fullList.isNotEmpty()) {
-                            addressesController.submitList(state.data.fullList)
-                        }
-
-                    }
-            }
-        }
-    }
-
-    private fun observeEvents() {
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.observeEvent()
-                    .collect {
-                        when (it) {
-                            is AddressesFlowViewModel.AddressesEvents.DeleteEvent -> {
-                                requireActivity().snack(it.message)
-                            }
-                            is AddressesFlowViewModel.AddressesEvents.OnAddressClick -> {
-                                findNavController().previousBackStackEntry?.savedStateHandle?.set(
-                                    SELECTED_ADDRESS, it.address
-                                )
-                                findNavController().popBackStack(R.id.orderingFragment, false)
-                            }
-                            is AddressesFlowViewModel.AddressesEvents.UpdateAddress -> {
-                                //mapController.searchForUpdate(it.address)
-                            }
-                        }
-                    }
-            }
-        }
-
-       // lifecycleScope.launch {
-       //     repeatOnLifecycle(Lifecycle.State.STARTED) {
-       //         mapViewModel.observeEvent()
-       //             .collect {
-       //                 when (it) {
-       //                     is MapFlowViewModel.MapFlowEvents.Submit -> {
-       //                         it.list.forEach { point ->
-       //                             mapController.submitRequest(point, it.startPoint)
-       //                         }
-       //                     }
-       //                     is MapFlowViewModel.MapFlowEvents.UpdatePendingAddressUISuccess -> {
-       //                         findNavController().previousBackStackEntry?.savedStateHandle?.set(
-       //                             SELECTED_ADDRESS, it.address
-       //                         )
-       //                         findNavController().popBackStack(R.id.orderingFragment, false)
-       //                     }
-       //                     else -> {}
-       //                 }
-       //             }
-       //     }
-       // }
-    }
-
-    private fun getAddressesClickListener(): AddressesClickListener {
-        return object : AddressesClickListener {
-            override fun onAddressClick(item: AddressUI) {
-                viewModel.onAddressClick(item)
-            }
-
-            override fun onEditClick(item: AddressUI) {
-                findNavController().navigate(
-                    AddressesFragmentDirections.actionToMapDialogFragment(
-                        item
+                VodovozTheme {
+                    AddressesScreen(
+                        viewModel = viewModel,
+                        viewState = viewState
                     )
-                )
-            }
+                }
 
-            override fun onDelete(item: AddressUI) {
-                showDeleteAddressDialog(item.id)
+                LifecycleEffect {
+                    observeEvents()
+                }
+
+                LifecycleEffect {
+                    observeRefresh()
+                }
             }
         }
     }
 
-    private fun initAddAddressButton() {
-        binding.btnAddAddress.setOnClickListener {
-            findNavController().navigate(AddressesFragmentDirections.actionToMapDialogFragment())
-        }
+    private suspend fun observeRefresh() {
+        tabManager
+            .observeAddressesRefresh()
+            .collect { refreshAddress ->
+                if (refreshAddress) {
+                    viewModel.refresh()
+                    tabManager.setAddressesRefreshState(false)
+                }
+            }
     }
 
-    internal fun showDeleteAddressDialog(addressId: Long) {
-        MaterialAlertDialogBuilder(requireContext())
-            .setMessage("Удалить адрес?")
-            .setNegativeButton(resources.getString(R.string.cancel)) { dialog, _ ->
-                dialog.cancel()
+    private suspend fun observeEvents() {
+        viewModel.observeEvent()
+            .collect {
+                when (it) {
+                    is AddressesFlowViewModel.AddressesEvents.DeleteEvent -> {
+                        requireActivity().snack(it.message)
+                    }
+
+                    is AddressesFlowViewModel.AddressesEvents.OnAddressClick -> {
+                        findNavController().previousBackStackEntry?.savedStateHandle?.set(
+                            SELECTED_ADDRESS, it.address
+                        )
+                        findNavController().popBackStack(R.id.orderingFragment, false)
+                    }
+
+                    is AddressesFlowViewModel.AddressesEvents.UpdateAddress -> {
+
+                    }
+
+                    AddressesFlowViewModel.AddressesEvents.GoBack -> {
+                        findNavController().popBackStack()
+                    }
+                }
             }
-            .setPositiveButton(resources.getString(R.string.confirm)) { dialog, _ ->
-                viewModel.deleteAddress(addressId)
-                dialog.cancel()
-            }
-            .show()
     }
 
-
 }
 
-enum class AddressType {
-    Personal, Company
-}
-
-enum class OpenMode {
-    SelectAddress
-}

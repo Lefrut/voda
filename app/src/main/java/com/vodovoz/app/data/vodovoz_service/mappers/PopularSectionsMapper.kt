@@ -1,6 +1,6 @@
 package com.vodovoz.app.data.vodovoz_service.mappers
 
-import com.vodovoz.app.data.vodovoz_service.di.toFullUrl
+import com.vodovoz.app.data.vodovoz_service.di.toVodovozUrl
 import com.vodovoz.app.data.vodovoz_service.model.POPULAR_CATEGORY_DTO
 import com.vodovoz.app.data.vodovoz_service.model.PopularCategoriesDTO
 import com.vodovoz.app.domain.general.model.PopularCategoryModel
@@ -18,7 +18,7 @@ fun POPULAR_CATEGORY_DTO.toDomain(): PopularCategoryModel? {
     return PopularCategoryModel(
         id = this.IDRAZDEL ?: return null,
         name = this.NAMERAZDEL ?: return null,
-        picture = this.PICTURE?.toFullUrl() ?: return null,
+        picture = this.PICTURE?.toVodovozUrl() ?: return null,
         action = this.UF_SILKAPEREXOD?.toDataAllAction()
     )
 }

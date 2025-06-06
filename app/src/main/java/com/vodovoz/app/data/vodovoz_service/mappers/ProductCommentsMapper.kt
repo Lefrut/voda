@@ -1,6 +1,6 @@
 package com.vodovoz.app.data.vodovoz_service.mappers
 
-import com.vodovoz.app.data.vodovoz_service.di.toFullUrl
+import com.vodovoz.app.data.vodovoz_service.di.toVodovozUrl
 import com.vodovoz.app.data.vodovoz_service.model.ProductCommentsDTO
 import com.vodovoz.app.data.vodovoz_service.model.SORT_DTO
 import com.vodovoz.app.data.vodovoz_service.model.WaitFeedbackProductDTO
@@ -45,6 +45,6 @@ fun WaitFeedbackProductDTO.toDomain(): WaitFeedbackProductModel? {
     return WaitFeedbackProductModel(
         id = id ?: return null,
         name = name ?: return null,
-        image = image?.toFullUrl() ?: return null
+        image = image?.toVodovozUrl() ?: return null
     )
 }

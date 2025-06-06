@@ -1,6 +1,6 @@
 package com.vodovoz.app.data.vodovoz_service.mappers
 
-import com.vodovoz.app.data.vodovoz_service.di.toFullUrl
+import com.vodovoz.app.data.vodovoz_service.di.toVodovozUrl
 import com.vodovoz.app.data.vodovoz_service.model.APP_UPDATE_INFO_DTO
 import com.vodovoz.app.data.vodovoz_service.model.PopupWindowDTO
 import com.vodovoz.app.data.vodovoz_service.model.SPECTIAL_PROMOTION_DTO
@@ -21,7 +21,7 @@ fun SPECTIAL_PROMOTION_DTO.toDomain(): SpecialPromotionModel? {
         id = ID ?: -1,
         name = NAME ?: "",
         text = TEXT ?: "",
-        picture = KARTINKA?.toFullUrl() ?: return null,
+        picture = KARTINKA?.toVodovozUrl() ?: return null,
         actionWithButton = HARAKTERISTIK?.toDomain() ?: return null
     )
 }
@@ -33,7 +33,7 @@ fun APP_UPDATE_INFO_DTO.toDomain(): AppUpdateInfoModel {
         text = TEXT ?: "",
         playMarketUrl = SILKA_ANDROID ?: "",
         androidVersion = VERSIYA_ANDROID.toString(),
-        picture = KARTINKA?.toFullUrl() ?: "",
+        picture = KARTINKA?.toVodovozUrl() ?: "",
         colorfulButton = HARAKTERISTIK?.KNOPKA?.toDomain()!!
     )
 }

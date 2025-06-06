@@ -1,6 +1,6 @@
 package com.vodovoz.app.data.vodovoz_service.mappers
 
-import com.vodovoz.app.data.vodovoz_service.di.toFullUrl
+import com.vodovoz.app.data.vodovoz_service.di.toVodovozUrl
 import com.vodovoz.app.data.vodovoz_service.model.services.AllServicesDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.services.SERVICE_DETAILS_BUTTON_DTO
 import com.vodovoz.app.data.vodovoz_service.model.services.SERVICE_DTO
@@ -40,7 +40,7 @@ fun SERVICE_DTO.toDomain(): ServiceModel? {
     return ServiceModel(
         id = ID ?: return null,
         name = NAME ?: return null,
-        image = PREVIEW_PICTURE?.toFullUrl() ?: return null
+        image = PREVIEW_PICTURE?.toVodovozUrl() ?: return null
     )
 }
 
@@ -49,7 +49,7 @@ fun ServiceDetailsDTO.toDomain(): ServiceDetailsModel{
         id = ID ?: throw IllegalArgumentException("Service id can't be null"),
         name = NAME ?: "",
         html = DETAIL_TEXT ?: "",
-        image = PREVIEW_PICTURE?.toFullUrl() ?: "",
+        image = PREVIEW_PICTURE?.toVodovozUrl() ?: "",
         productsSection = TOVAR?.toDomain(),
         button = KNOPKA?.toDomain()
     )

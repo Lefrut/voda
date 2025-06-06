@@ -144,23 +144,15 @@ dependencies {
     //MapKit
     implementation("com.yandex.android:maps.mobile:4.0.0-full")
 
-
-    //TabSync
-    implementation 'io.github.ahmad-hamwi:tabsync:1.0.1'
-
     //Paging
     implementation "androidx.paging:paging-runtime-ktx:3.3.6"
     implementation("androidx.paging:paging-compose:3.3.6")
-
-    //ZoomableImageView
-    implementation 'com.jsibbold:zoomage:1.3.1'
 
     //Sdp/Ssp
     implementation 'com.intuit.ssp:ssp-android:1.1.0'
     implementation 'com.intuit.sdp:sdp-android:1.1.0'
 
     //Hilt
-
     implementation "com.google.dagger:hilt-android:2.51.1"
     ksp "com.google.dagger:hilt-compiler:2.51.1"
     implementation('androidx.hilt:hilt-navigation-fragment:1.0.0')
@@ -225,8 +217,6 @@ dependencies {
     implementation "androidx.camera:camera-view:1.4.1"
     implementation "com.google.mlkit:barcode-scanning:17.3.0"
 
-    implementation("io.coil-kt:coil:2.6.0")
-    implementation("io.coil-kt:coil-svg:2.6.0")
     implementation("io.coil-kt.coil3:coil-compose:3.0.4")
     implementation("io.coil-kt.coil3:coil-network-okhttp:3.0.4")
 

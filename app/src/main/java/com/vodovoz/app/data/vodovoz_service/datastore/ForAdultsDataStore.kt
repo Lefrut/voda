@@ -1,5 +1,4 @@
 package com.vodovoz.app.data.vodovoz_service.datastore
-
 import kotlinx.coroutines.flow.Flow
 
 interface ForAdultsDataStore {

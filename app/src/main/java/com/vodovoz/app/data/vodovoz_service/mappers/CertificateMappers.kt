@@ -1,6 +1,6 @@
 package com.vodovoz.app.data.vodovoz_service.mappers
 
-import com.vodovoz.app.data.vodovoz_service.di.toFullUrl
+import com.vodovoz.app.data.vodovoz_service.di.toVodovozUrl
 import com.vodovoz.app.data.vodovoz_service.model.CertificateActivationDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.CertificateButtonDTO
 import com.vodovoz.app.data.vodovoz_service.model.CertificateFieldDTO
@@ -82,7 +82,7 @@ fun BuyCertificateDetailsDTO.toDomain(): BuyCertificateDetailsModel {
 fun FAQ_DTO.toDomain(): FAQModel {
     return FAQModel(
         name = NAME ?: "",
-        image = KARTINKA?.toFullUrl() ?: "",
+        image = KARTINKA?.toVodovozUrl() ?: "",
         items = DATA?.mapToDomain() ?: emptyList()
     )
 }
@@ -103,7 +103,7 @@ fun SERTIFICAT_VID_DTO.toDomain(): CertificateModel? {
     return CertificateModel(
         id = ID ?: return null,
         name = NAME ?: return null,
-        image = PICTURE?.toFullUrl() ?: ""
+        image = PICTURE?.toVodovozUrl() ?: ""
     )
 }
 
@@ -137,7 +137,7 @@ fun List<BUY_CERTIFICATE_OPLATA_VID_DTO>.mapToDomain(): List<PaymentTypeModel> {
 fun BUY_CERTIFICATE_OPLATA_VID_DTO.toDomain(): PaymentTypeModel? {
     return PaymentTypeModel(
         id = VALUE ?: return null,
-        image = KARTINKA?.toFullUrl() ?: "",
+        image = KARTINKA?.toVodovozUrl() ?: "",
         name = TEXT ?: return null
     )
 }

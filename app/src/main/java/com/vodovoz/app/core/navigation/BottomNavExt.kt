@@ -22,14 +22,6 @@ import java.util.LinkedList
  * This sample is a workaround until the Navigation Component supports multiple back stacks.
  */
 
-fun NavController.tryNavigate(navDirections: NavDirections, updatedNavController: () -> NavController) {
-    kotlin.runCatching {
-        navigate(navDirections)
-    }.onFailure {
-        updatedNavController().tryNavigate(navDirections, updatedNavController)
-    }
-}
-
 fun ExtendedBottomNavigationView.setupWithNavController(
     navGraphIds: List<Int>,
     fragmentManager: FragmentManager,

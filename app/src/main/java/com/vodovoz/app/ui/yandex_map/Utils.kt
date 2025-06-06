@@ -57,3 +57,11 @@ fun Map.minusZoom(animation: Animation = Animation(Animation.Type.LINEAR, 0.2f))
         null
     )
 }
+
+
+fun CameraPosition.copy(
+    target: Point = this.target,
+    zoom: Float = this.zoom,
+    azimuth: Float = this.azimuth,
+    tilt: Float = this.tilt
+) = CameraPosition(target, zoom, azimuth, tilt)

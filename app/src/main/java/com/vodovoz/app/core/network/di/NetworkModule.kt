@@ -4,10 +4,11 @@ import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import com.vodovoz.app.BuildConfig
 import com.vodovoz.app.core.network.ApiConfig
+import com.vodovoz.app.core.network.interceptor.BaseUrlInterceptor
 import com.vodovoz.app.core.network.interceptor.ChangeUrlInterceptor
 import com.vodovoz.app.core.network.interceptor.VodovozInterceptor
 import com.vodovoz.app.data.MainApi
-import com.vodovoz.app.feature.map.api.MapKitFlowApi
+import com.vodovoz.app.data.maps.MapKitFlowApi
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -29,6 +30,14 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 abstract class NetworkModule {
 
+
+    @Binds
+    @Singleton
+    @IntoSet
+    abstract fun providerBaseUrlInterceptor(
+        baseUrlInterceptor: BaseUrlInterceptor,
+    ): Interceptor
+
     @Binds
     @Singleton
     @IntoSet
@@ -39,7 +48,7 @@ abstract class NetworkModule {
     @Binds
     @Singleton
     @IntoSet
-    abstract fun providerHeaderInterceptor(
+    abstract fun providerCookieInterceptor(
         vodovozInterceptor: VodovozInterceptor,
     ): Interceptor
 

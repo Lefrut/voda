@@ -7,16 +7,19 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import com.kizitonwose.calendar.core.CalendarDay
+import com.kizitonwose.calendar.core.DayPosition
 import com.vodovoz.app.R
 import com.vodovoz.app.design_system.composables.dialogs.VodovozDialog
 import com.vodovoz.app.design_system.composables.snackbar.VodovozSnackbarHost
 import com.vodovoz.app.design_system.composables.top_bar.VodovozTopBar
 import com.vodovoz.app.feature.profile.user_data.composables.UserDataBody
+import com.vodovoz.app.util.formatters.VodovozDateFormatters
 import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 
 @Composable
 fun UserDataScreen(
@@ -100,13 +103,19 @@ fun UserDataScreen(
 
     if (viewState.showDatePicker) {
         val dateString = viewState.fields.firstOrNull { it.id == "data" }?.value ?: ""
-        val date = runCatching {
-            LocalDate.parse(dateString, DateTimeFormatter.ofPattern("dd.MM.yyyy"))
-        }.getOrNull()
-        val today = LocalDate.now()
+
+        val currentDay = rememberSaveable(dateString) {
+            val localDate = runCatching {
+                LocalDate.parse(dateString, VodovozDateFormatters.DMY)
+            }.getOrNull() ?: LocalDate.now().minusYears(30)
+
+            return@rememberSaveable CalendarDay(localDate, DayPosition.MonthDate)
+        }
+
+        val today = remember { LocalDate.now() }
 
         VodovozCalendarDialog(
-            initialDate = date ?: today,
+            initialDate = currentDay,
             isSelectableDate = { currentDate ->
                 currentDate < today
             },

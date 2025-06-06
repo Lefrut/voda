@@ -10,7 +10,7 @@ import com.vodovoz.app.data.parser.response.order.RepeatOrderResponseJsonParser.
 import com.vodovoz.app.data.parser.response.ordering.RegOrderResponseJsonParser.parseRegOrderResponse
 import com.vodovoz.app.data.parser.response.shipping.FreeShippingDaysResponseJsonParser.parseFreeShippingDaysResponse
 import com.vodovoz.app.data.parser.response.shipping.ShippingInfoResponseJsonParser.parseShippingInfoResponse
-import com.vodovoz.app.feature.map.api.MapKitFlowApi
+import com.vodovoz.app.data.maps.MapKitFlowApi
 import javax.inject.Inject
 
 class MainRepository @Inject constructor(
@@ -42,7 +42,7 @@ class MainRepository @Inject constructor(
     suspend fun fetchAddressByGeocodeResponse(
         latitude: Double,
         longitude: Double,
-    ) = mapKitApi.fetchAddressByGeocodeResponse(
+    ) = mapKitApi.getAddressByGeo(
         apiKey = "346ef353-b4b2-44b3-b597-210d62eeb66b",
         geocode = "$longitude,$latitude",
         format = "json"

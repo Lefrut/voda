@@ -1,6 +1,6 @@
 package com.vodovoz.app.data.vodovoz_service.mappers
 
-import com.vodovoz.app.data.vodovoz_service.di.toFullUrl
+import com.vodovoz.app.data.vodovoz_service.di.toVodovozUrl
 import com.vodovoz.app.data.vodovoz_service.model.cart.CART_KNOPKA_DTO
 import com.vodovoz.app.data.vodovoz_service.model.cart.CartDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.cart.ITOG_ITEM_DTO
@@ -54,7 +54,7 @@ fun KNOPKA_PROMOKOD_DTO.toDomain(): CartPromoButtonModel {
         textColor = VALUE?.TEXT?.COLOR ?: "",
         text = VALUE?.TEXT?.TITLE ?: "",
         coupon = VALUE?.COUPON ?: "",
-        image = IMAGE?.toFullUrl() ?: "",
+        image = IMAGE?.toVodovozUrl() ?: "",
         id = ID ?: "",
         popupWindow = OKNO?.toDomain() ?: CartPromoPopupWindowModel.Empty
     )
@@ -73,7 +73,7 @@ fun OKNO_PROMOKOD_DTO.toDomain(): CartPromoPopupWindowModel {
 fun CART_KNOPKA_DTO.toDomain(): CartButtonModel {
     return CartButtonModel(
         id = ID ?: "",
-        image = IMAGE?.toFullUrl() ?: "",
+        image = IMAGE?.toVodovozUrl() ?: "",
         name = TITLE ?: ""
     )
 }
@@ -83,7 +83,7 @@ fun PODAROK_DTO.toDomain(): CartPresentModel {
         id = ID ?: -1,
         title = TITLE ?: "",
         description = OPIS ?: "",
-        image = KARTINKA?.toFullUrl() ?: "",
+        image = KARTINKA?.toVodovozUrl() ?: "",
         leftToGift = MAXSYMMA ?: OPIS?.filter { it.isDigit() }?.toIntOrNull() ?: 0,
         button = KNOPKA?.toDomain(),
         popupWindow = OKNOPODAROK?.toDomain()
@@ -106,7 +106,7 @@ fun PRODUCT_PRODAROK_DTO.toDomain(): CartPresentItemModel? {
     return CartPresentItemModel(
         id = ID ?: return null,
         name = NAME ?: "",
-        image = DETAIL_PICTURE?.toFullUrl() ?: ""
+        image = DETAIL_PICTURE?.toVodovozUrl() ?: ""
     )
 }
 
@@ -135,7 +135,7 @@ fun KORZINA_PRODUCT_DTO.toDomain(): CartItemModel? {
         canBuy = CAN_BUY == "Y",
         discountPrice = DISCOUNT_PRICE ?: 0f,
         discountPercentsText = DISCOUNT_PRICE_PERCENT ?: "",
-        image = PODROBNO.DETAIL_PICTURE?.toFullUrl() ?: "",
+        image = PODROBNO.DETAIL_PICTURE?.toVodovozUrl() ?: "",
         leftItems = PODROBNO.CATALOG_QUANTITY ?: 0,
         label = PODROBNO.NALICHIE_MORE?.toDomain(),
         hasDiscount = DISCOUNTS_APPLY ?: false,

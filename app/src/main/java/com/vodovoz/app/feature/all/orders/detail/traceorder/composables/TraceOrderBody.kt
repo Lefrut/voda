@@ -5,8 +5,6 @@ import android.graphics.PointF
 import androidx.compose.animation.core.AnimationVector2D
 import androidx.compose.animation.core.TwoWayConverter
 import androidx.compose.animation.core.animateValueAsState
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.waitForUpOrCancellation
@@ -14,38 +12,32 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.vodovoz.app.R
+import com.vodovoz.app.design_system.composables.decoration.MapIcon
+import com.vodovoz.app.design_system.composables.decoration.MapIconsColumn
 import com.vodovoz.app.design_system.model.MapPointUi
-import com.vodovoz.app.feature.home.composables.dropShadow
+import com.vodovoz.app.ui.yandex_map.YandexMapUi
 import com.vodovoz.app.util.extensions.getBitmap
 import com.yandex.mapkit.geometry.Point
 import com.yandex.mapkit.map.IconStyle
-import com.yandex.mapkit.mapview.MapView
 import com.yandex.runtime.image.ImageProvider
 
 @SuppressLint("ClickableViewAccessibility")
 @Composable
 fun TraceOrderBody(
     modifier: Modifier = Modifier,
-    mapView: () -> MapView,
+    yandexMap: YandexMapUi,
     deliveryPoint: MapPointUi?,
     carPoint: MapPointUi?,
     onZoomPlus: () -> Unit,
@@ -99,7 +91,7 @@ fun TraceOrderBody(
                     }
                 },
             factory = {
-                val view = mapView()
+                val view = yandexMap.mapView
                 view
             },
             update = { view ->
@@ -137,61 +129,12 @@ fun TraceOrderBody(
             }
         )
 
-        Column(
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .padding(top = 8.dp, end = 20.dp)
-        ) {
-            MapIcon(
-                painter = painterResource(id = R.drawable.ic_plus),
-                onClick = onZoomPlus
-            )
-
-            MapIcon(
-                modifier = Modifier.padding(top = 8.dp),
-                painter = painterResource(id = R.drawable.ic_minus),
-                onClick = onZoomMinus
-            )
-
-            MapIcon(
-                modifier = Modifier.padding(top = 32.dp),
-                painter = painterResource(id = R.drawable.ic_geo),
-                tint = MaterialTheme.colorScheme.primary,
-                onClick = onGeoClick
-            )
-
-        }
-    }
-
-}
-
-@Composable
-private fun MapIcon(
-    modifier: Modifier = Modifier,
-    painter: Painter,
-    tint: Color = MaterialTheme.colorScheme.onBackground,
-    onClick: () -> Unit,
-) {
-    Box(
-        modifier = modifier
-            .size(40.dp)
-            .clip(CircleShape)
-            .dropShadow(
-                shape = CircleShape,
-                color = MaterialTheme.colorScheme.onBackground,
-                blur = 2.dp,
-                offsetY = 1.dp,
-                offsetX = 0.dp
-            )
-            .background(MaterialTheme.colorScheme.background)
-            .clickable(onClick = onClick),
-        contentAlignment = Alignment.Center
-    ) {
-        Icon(
-            modifier = Modifier.size(24.dp),
-            painter = painter,
-            contentDescription = null,
-            tint = tint
+        MapIconsColumn(
+            modifier = Modifier.align(Alignment.TopEnd),
+            onZoomPlus = onZoomPlus,
+            onZoomMinus = onZoomMinus,
+            onGeoClick = onGeoClick
         )
     }
+
 }

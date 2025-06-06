@@ -1,6 +1,6 @@
 package com.vodovoz.app.data.vodovoz_service.mappers
 
-import com.vodovoz.app.data.vodovoz_service.di.toFullUrl
+import com.vodovoz.app.data.vodovoz_service.di.toVodovozUrl
 import com.vodovoz.app.data.vodovoz_service.model.catalog.CATALOG_CATEGORY_DTO
 import com.vodovoz.app.data.vodovoz_service.model.catalog.CatalogDetailsDTO
 import com.vodovoz.app.domain.general.model.CatalogDetailsModel
@@ -17,7 +17,7 @@ fun CATALOG_CATEGORY_DTO.toDomain(): ParentCategoryModel? {
     return ParentCategoryModel(
         id = ID ?: return null,
         name = NAME ?: "",
-        picture = PICTURE?.toFullUrl() ?: "",
+        picture = PICTURE?.toVodovozUrl() ?: "",
         action = UF_SILKAPEREXOD?.toDataAllAction(),
         parentId = IBLOCK_SECTION_ID,
         depthLevel = DEPTH_LEVEL ?: 1,

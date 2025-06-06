@@ -10,8 +10,12 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
-import com.vodovoz.app.util.formatters.DateFormatters
+import com.kizitonwose.calendar.core.CalendarDay
+import com.kizitonwose.calendar.core.DayPosition
+import com.vodovoz.app.util.formatters.VodovozDateFormatters
 import com.vodovoz.app.design_system.composables.snackbar.VodovozSnackbarHost
 import com.vodovoz.app.design_system.composables.top_bar.VodovozTopBar
 import com.vodovoz.app.feature.questionnaires.components.QuestionnairesBody
@@ -72,17 +76,24 @@ fun QuestionnairesScreen(
 
 
     val currentDateField = viewState.currentDateField
-    if (viewState.showDatePicker && currentDateField != null ) {
-        val date = runCatching {
-            LocalDate.parse(currentDateField.ui.value, DateFormatters.DMY)
-        }.getOrNull()
 
-        val today = LocalDate.now()
+    if (viewState.showDatePicker && currentDateField != null ) {
+
+        val currentDay = rememberSaveable(currentDateField.ui.value) {
+            val localDate = runCatching {
+                LocalDate.parse(currentDateField.ui.value, VodovozDateFormatters.DMY)
+            }.getOrNull() ?: LocalDate.now().minusYears(36)
+
+            return@rememberSaveable CalendarDay(localDate, DayPosition.MonthDate)
+        }
+
+
+        val today = remember { LocalDate.now() }
 
         VodovozCalendarDialog(
-            initialDate = date ?: today,
-            isSelectableDate = { currentDate ->
-                currentDate < today
+            initialDate = currentDay,
+            isSelectableDate = { date ->
+                date < today
             },
             onDateSelected = { selectedDate ->
                 viewModel.changeDate(selectedDate)

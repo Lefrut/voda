@@ -47,9 +47,7 @@ class WaterAppViewModel @Inject constructor(
 
         launch {
             waterAppHelper.observeWaterAppUserData().collectLatest { userData ->
-                uiStateListener.updateData { s ->
-                    s.copy(userData = userData ?: s.userData)
-                }
+                uiStateListener.updateData { s -> s.copy(userData = userData ?: s.userData) }
             }
         }
 
@@ -57,9 +55,7 @@ class WaterAppViewModel @Inject constructor(
             waterAppHelper.observeWaterAppRateData().collectLatest {
                 uiStateListener.updateData { s ->
                     val rateData = it ?: s.rateData
-                    s.copy(
-                        rateData = rateData,
-                    )
+                    s.copy(rateData = rateData,)
                 }
             }
         }
@@ -167,17 +163,15 @@ class WaterAppViewModel @Inject constructor(
     }
 
     fun goToWaterApp() = viewModelScope.launch {
+        waterAppHelper.setNotificationFirstShow()
+        waterAppHelper.fetchWaterAppUserData()
+        waterAppHelper.fetchWaterAppNotificationData()
+
+        delay(150L)
         uiStateListener.updateData { s ->
             s.copy(uiState = WaterAppUiState.Main)
         }
 
-        delay(200L)
-
-        waterAppHelper.fetchWaterAppUserData()
-        if (!dataState.notificationData.firstShow) {
-            waterAppHelper.setNotificationFirstShow()
-            waterAppHelper.saveWaterAppNotificationData()
-        }
 
     }
 
@@ -226,9 +220,7 @@ class WaterAppViewModel @Inject constructor(
     private fun goToGoalCompleted() = viewModelScope.launch {
         delay(1000)
         if (waterAppHelper.observeWaterAppRateData().value?.canFill == false) {
-            uiStateListener.updateData { s ->
-                s.copy(uiState = WaterAppUiState.GoalCompleted)
-            }
+            uiStateListener.updateData { s -> s.copy(uiState = WaterAppUiState.GoalCompleted) }
         }
     }
 
@@ -272,7 +264,7 @@ class WaterAppViewModel @Inject constructor(
         val uiState: WaterAppUiState = WaterAppUiState.Welcome,
         val reminderIntervals: List<ReminderIntervalUi> = emptyList(),
         val changeWaterStep: Int = 250,
-        val showNotificationSettingsDialog: Boolean = false
+        val showNotificationSettingsDialog: Boolean = false,
     ) : State
 
     @Immutable

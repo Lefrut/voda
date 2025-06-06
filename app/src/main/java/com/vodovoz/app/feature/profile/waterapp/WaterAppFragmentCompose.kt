@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -22,6 +23,8 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.fragment.findNavController
+import androidx.work.WorkInfo
+import androidx.work.WorkManager
 import com.vodovoz.app.R
 import com.vodovoz.app.common.tab.TabManager
 import com.vodovoz.app.design_system.VodovozTheme
@@ -38,6 +41,7 @@ import com.vodovoz.app.util.extensions.debugLog
 import com.vodovoz.app.util.extensions.openAppNotificationSettings
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
+import java.util.concurrent.ExecutionException
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -84,9 +88,9 @@ class WaterAppFragment : Fragment() {
 
     override fun onStop() {
         super.onStop()
-        debugLog { "save water rate" }
         waterAppHelper.saveWaterAppRateData()
         tabManager.changeTabVisibility(true)
+
     }
 
     override fun onCreateView(

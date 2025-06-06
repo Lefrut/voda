@@ -1,6 +1,6 @@
 package com.vodovoz.app.data.vodovoz_service.mappers
 
-import com.vodovoz.app.data.vodovoz_service.di.toFullUrl
+import com.vodovoz.app.data.vodovoz_service.di.toVodovozUrl
 import com.vodovoz.app.data.vodovoz_service.model.user_data.FOTO_DTO
 import com.vodovoz.app.data.vodovoz_service.model.user_data.POLE_DTO
 import com.vodovoz.app.data.vodovoz_service.model.user_data.UserDataDTO
@@ -21,7 +21,7 @@ fun UserDataDTO.toDomain(): UserDataModel {
 
 fun FOTO_DTO.toDomain(): UserDataPhotoModel {
     return UserDataPhotoModel(
-        imageUrl = IMG?.toFullUrl() ?: "",
+        imageUrl = IMG?.toVodovozUrl() ?: "",
         title = TITLE ?: "",
         description = OPISANIE ?: ""
     )
