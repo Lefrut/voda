@@ -2,7 +2,7 @@ package com.vodovoz.app.data.vodovoz_service.mappers
 
 import com.vodovoz.app.common.model.VodovozBoolean
 import com.vodovoz.app.common.model.equalsTo
-import com.vodovoz.app.data.vodovoz_service.di.toFullUrl
+import com.vodovoz.app.data.vodovoz_service.di.toVodovozUrl
 import com.vodovoz.app.data.vodovoz_service.model.CancelOrderDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.KNOPKA_ORDER_DTO
 import com.vodovoz.app.data.vodovoz_service.model.OPLATA_DTO
@@ -76,7 +76,7 @@ fun OrderPlaceholderDTO.toVodovozPlaceholder(): VodovozPlaceholderModel {
         title = title ?: "",
         headerHtml = header ?: "",
         descriptionHtml = message ?: "",
-        imageUrl = imageUrl?.toFullUrl() ?: "",
+        imageUrl = imageUrl?.toVodovozUrl() ?: "",
         button = ColorfulButtonModel(
             name = button?.text ?: "",
             backgroundColor = button?.background ?: "",
@@ -158,7 +158,7 @@ fun ORDER_DETAILS_TOVAR_DTO.toDomain(): OrderProductModel? {
         depositText = PROPERTY_ZALOG_VALUE,
         price = EXTENDED_PRICE?.minByOrNull { (it?.PRICE ?: Int.MAX_VALUE) }?.toDomain(),
         isShowcaseProduct = URL == true,
-        image = DETAIL_PICTURE?.toFullUrl() ?: "",
+        image = DETAIL_PICTURE?.toVodovozUrl() ?: "",
         labels = NALICHIE_MORE?.mapToDomain() ?: emptyList(),
         present = PODAROK?.toDomain(),
         pricePerUnit = PROPERTY_TSENA_ZA_EDINITSU_TOVARA_VALUE.takeIf { (it ?: 0) > 0 },
@@ -186,11 +186,11 @@ fun ORDER_DETAILS_KNOPKA_DTO.toDomain(): OrderDetailsButtonModel {
         name = NAME ?: "",
         description = OPIS ?: "",
         id = ID ?: "",
-        image = IMAGE?.toFullUrl() ?: "",
+        image = IMAGE?.toVodovozUrl() ?: "",
         popupWindow = OKNO?.toDomain(),
         backgroundColor = COLOR_BACKGROUND ?: "",
         textColor = COLOR_TEXT ?: "",
-        url = URL?.toFullUrl() ?: "",
+        url = URL?.toVodovozUrl() ?: "",
         browser = (BRAYZER == "Y").takeIf { useBrowser -> useBrowser },
         driverId = VODITEL
     )
@@ -205,7 +205,7 @@ fun ABOUT_ORDER_OKNO_DTO.toDomain(): AboutOrderPopupWindowModel {
 
 fun ABOUT_ORDER_ITEM_DTO.toDomain(): AboutOrderItemModel {
     return AboutOrderItemModel(
-        image = IMAGE?.toFullUrl() ?: "",
+        image = IMAGE?.toVodovozUrl() ?: "",
         name = NAME ?: "",
         description = OPIS ?: ""
     )
@@ -221,7 +221,7 @@ fun ORDER_STATUS_DTO.toDomain(): OrderStatusModel? {
     return OrderStatusModel(
         name = NAME ?: return null,
         background = BACKGROUND ?: "",
-        image = IMAGE?.toFullUrl() ?: "",
+        image = IMAGE?.toVodovozUrl() ?: "",
         color = COLOR ?: ""
     )
 }
@@ -262,7 +262,7 @@ fun ORDERS_HISTORY_KNOPKA_DTO.toDomain(): OrdersHistoryButtonModel? {
         name = NAME ?: "",
         color = COLOR_TEXT ?: "",
         background = COLOR_BACKGROUND ?: "",
-        image = IMAGE?.toFullUrl() ?: "",
+        image = IMAGE?.toVodovozUrl() ?: "",
         url = URL ?: "",
         browserUrl = BRAYZER == "Y"
     )
@@ -277,7 +277,7 @@ fun List<ORDERS_HISTORY_PRODUCT_DTO>.mapToDomain(): List<OrdersHistoryProductMod
 fun ORDERS_HISTORY_PRODUCT_DTO.toDomain(): OrdersHistoryProductModel? {
     return OrdersHistoryProductModel(
         showcaseProduct = ACTIVE == "Y",
-        image = DETAIL_PICTURE?.toFullUrl() ?: return null,
+        image = DETAIL_PICTURE?.toVodovozUrl() ?: return null,
         id = ID ?: return null,
         quantity = QUANTITY ?: 1
     )

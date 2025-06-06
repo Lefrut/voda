@@ -1,7 +1,7 @@
 package com.vodovoz.app.data.vodovoz_service.mappers
 
 import com.vodovoz.app.core.network.VodovozWebConfig
-import com.vodovoz.app.data.vodovoz_service.di.toFullUrl
+import com.vodovoz.app.data.vodovoz_service.di.toVodovozUrl
 import com.vodovoz.app.data.vodovoz_service.model.profile.CHAT_MENU_DTO
 import com.vodovoz.app.data.vodovoz_service.model.profile.DENIGI_DTO
 import com.vodovoz.app.data.vodovoz_service.model.profile.PROFILE_BLOCK_DTO
@@ -44,7 +44,7 @@ fun DENIGI_DTO.toDomain(): ProfileWalletItemModel {
         title = ZAGALOVOK?.TITLE ?: "",
         description = OPISANIE?.TITLE ?: "",
         descriptionColor = OPISANIE?.TEXTCOLOR ?: "",
-        imageUrl = IMAGE?.toFullUrl() ?: "",
+        imageUrl = IMAGE?.toVodovozUrl() ?: "",
         id = ID ?: "",
         popupWindow = TEXT_OKNO?.toDomain()
     )
@@ -64,7 +64,7 @@ fun PROFILE_BLOCK_DTO.toDomain(): ProfileCardModel {
         titleColor = ZAGALOVOK?.TEXTCOLOR ?: "",
         description = OPISANIE?.TITLE ?: "",
         descriptionColor = OPISANIE?.TEXTCOLOR ?: "",
-        imageUrl = IMAGE?.toFullUrl() ?: "",
+        imageUrl = IMAGE?.toVodovozUrl() ?: "",
         id = ID ?: "",
         popupWindow = TEXT_OKNO?.toDomain()
     )
@@ -75,7 +75,7 @@ fun PROFIL_DTO.toDomain(): UserInfoBlockModel {
     return UserInfoBlockModel(
         phoneNumber = this.FIO ?: "",
         fullName = this.FIO ?: "",
-        imageUrl = this.IMAGE?.toFullUrl() ?: "",
+        imageUrl = this.IMAGE?.toVodovozUrl() ?: "",
         textButton = this.TEXT_KNOPKA?.toDomain() ?: TextButtonModel.Empty
     )
 }
@@ -92,7 +92,7 @@ fun TEXT_KNOPKA_DTO.toDomain(): TextButtonModel {
 fun PROFILE_MINI_MENU_DTO.toDomain(): ProfileMenuItemModel {
     return ProfileMenuItemModel(
         text = this.TEXT ?: "",
-        imageUrl = this.IMAGE?.toFullUrl() ?: "",
+        imageUrl = this.IMAGE?.toVodovozUrl() ?: "",
         id = this.ID ?: "",
         description = "",
         popupWindow = null
@@ -102,7 +102,7 @@ fun PROFILE_MINI_MENU_DTO.toDomain(): ProfileMenuItemModel {
 fun PROFILE_NORMAL_MENU_DTO.toDomain(): ProfileMenuItemModel {
     return ProfileMenuItemModel(
         text = this.TEXT ?: "",
-        imageUrl = this.IMAGE?.toFullUrl() ?: "",
+        imageUrl = this.IMAGE?.toVodovozUrl() ?: "",
         id = this.ID ?: "",
         description = this.OPISANIE ?: "",
         popupWindow = this.TEXT_OKNO?.toDomain()

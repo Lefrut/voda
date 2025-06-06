@@ -50,9 +50,7 @@ class MainFragment : Fragment(R.layout.fragment_main) {
     @Inject
     lateinit var appUpdateFactory: AppUpdateController.Factory
     private val appUpdateController by lazy {
-        appUpdateFactory.create {
-            popupSnackbarForCompleteUpdate()
-        }
+        appUpdateFactory.create { popupSnackbarForCompleteUpdate() }
     }
 
     private val viewModel: MainViewModel by viewModels()
@@ -228,7 +226,6 @@ class MainFragment : Fragment(R.layout.fragment_main) {
         val navGraphIds = listOfNotNull(
             R.navigation.nav_graph_home,
             R.navigation.nav_graph_catalog,
-            R.navigation.nav_graph_promotions,
             R.navigation.nav_graph_cart,
             R.navigation.nav_graph_favorite,
             R.navigation.nav_graph_profile

@@ -54,7 +54,7 @@
 
     <fragment
         android:id="@+id/cancelOrderFragment"
-        android:name="com.vodovoz.app.feature.cancel_order_fragment.CancelOrderFragment"
+        android:name="com.vodovoz.app.feature.cancel_order.CancelOrderFragment"
         android:label="CancelOrderFragment">
 
         <argument
@@ -412,15 +412,23 @@
             android:id="@+id/action_to_userDataFragment"
             app:destination="@id/userDataFragment" />
         <action
-            android:id="@+id/action_to_questionnairesFragment"
-            app:destination="@id/questionnairesFragment2" />
-        <action
             android:id="@+id/action_to_serviceDetailFragment"
             app:destination="@id/serviceDetailFragment" />
         <action
             android:id="@+id/action_profileFragment_to_buyCertificateFragment"
             app:destination="@id/buyCertificateFragment" />
     </fragment>
+
+    <fragment
+        android:id="@+id/questionnairesFragment"
+        android:name="com.vodovoz.app.feature.questionnaires.QuestionnairesFlowFragment"
+        android:label="QuestionnairesFragment">
+
+        <action
+            android:id="@+id/action_to_webViewFragment"
+            app:destination="@id/webViewFragment" />
+    </fragment>
+
 
     <fragment
         android:id="@+id/fullScreenHistorySliderFragment"
@@ -507,19 +515,18 @@
             app:destination="@id/serviceDetailFragment" />
 
     </fragment>
+
     <fragment
-        android:id="@+id/mapDialogFragment"
-        android:name="com.vodovoz.app.feature.map.MapDialogFragment"
-        android:label="MapDialogFragment">
-        <action
-            android:id="@+id/action_to_addAddressFragment"
-            app:destination="@id/addAddressFragment" />
+        android:id="@+id/mapFragment"
+        android:name="com.vodovoz.app.feature.map.MapFragment"
+        android:label="MapFragment">
         <argument
             android:name="address"
             android:defaultValue="@null"
             app:argType="com.vodovoz.app.ui.model.AddressUI"
             app:nullable="true" />
     </fragment>
+
     <fragment
         android:id="@+id/addAddressFragment"
         android:name="com.vodovoz.app.feature.addresses.add.AddAddressFragment"
@@ -536,7 +543,7 @@
         android:label="SavedAddressesDialogFragment">
         <action
             android:id="@+id/action_to_mapDialogFragment"
-            app:destination="@id/mapDialogFragment" />
+            app:destination="@id/mapFragment" />
         <argument
             android:name="openMode"
             android:defaultValue="null"

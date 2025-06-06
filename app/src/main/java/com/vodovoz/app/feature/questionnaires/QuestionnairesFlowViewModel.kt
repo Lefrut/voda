@@ -7,7 +7,7 @@ import com.vodovoz.app.common.content.Event
 import com.vodovoz.app.common.content.PagingContractViewModel
 import com.vodovoz.app.common.content.State
 import com.vodovoz.app.common.content.updateData
-import com.vodovoz.app.util.formatters.DateFormatters
+import com.vodovoz.app.util.formatters.VodovozDateFormatters
 import com.vodovoz.app.common.resources.ResourcesProvider
 import com.vodovoz.app.design_system.model.ColorfulButtonUi
 import com.vodovoz.app.design_system.model.VodovozPlaceholderUi
@@ -348,13 +348,11 @@ class QuestionnairesFlowViewModel @Inject constructor(
     }
 
     fun changeDate(selectedDate: LocalDate) = viewModelScope.launch {
-        val value = kotlin.runCatching { selectedDate.format(DateFormatters.DMY) }
+        val value = kotlin.runCatching { selectedDate.format(VodovozDateFormatters.DMY) }
             .getOrElse { "" }
         val currentDateField = dataState.currentDateField ?: return@launch
         val updatedCurrentDateField = currentDateField.copy(
-            ui = currentDateField.ui.copy(
-                value = value
-            )
+            ui = currentDateField.ui.copy(value = value, isError = false)
         )
 
         uiStateListener.updateData { s ->

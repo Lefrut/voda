@@ -20,7 +20,6 @@ import com.vodovoz.app.common.content.BaseFragment
 import com.vodovoz.app.common.content.ErrorState
 import com.vodovoz.app.databinding.FragmentOrderingFlowBinding
 import com.vodovoz.app.feature.addresses.AddressesFragment
-import com.vodovoz.app.feature.addresses.OpenMode
 import com.vodovoz.app.ui.extensions.TextBuilderExtensions.setPriceText
 import com.vodovoz.app.ui.extensions.TextViewExtensions.setPhoneValidator
 import com.vodovoz.app.ui.model.AddressUI
@@ -259,14 +258,14 @@ class OrderingFragment : BaseFragment() {
                         }
 
                         is OrderingFlowViewModel.OrderingEvents.OnAddressBtnClick -> {
-                            if (findNavController().currentDestination?.id == R.id.orderingFragment) {
-                                findNavController().navigate(
-                                    OrderingFragmentDirections.actionToSavedAddressesDialogFragment(
-                                        OpenMode.SelectAddress.name,
-                                        it.typeName
-                                    )
-                                )
-                            }
+//                            if (findNavController().currentDestination?.id == R.id.orderingFragment) {
+//                                findNavController().navigate(
+//                                    OrderingFragmentDirections.actionToSavedAddressesDialogFragment(
+//                                        OpenMode.SelectAddress.name,
+//                                        it.typeName
+//                                    )
+//                                )
+//                            }
                         }
 
                         is OrderingFlowViewModel.OrderingEvents.OnFreeShippingClick -> {

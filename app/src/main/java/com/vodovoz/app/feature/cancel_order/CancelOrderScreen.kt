@@ -1,4 +1,4 @@
-package com.vodovoz.app.feature.cancel_order_fragment
+package com.vodovoz.app.feature.cancel_order
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -25,7 +25,7 @@ import androidx.compose.ui.unit.dp
 import com.vodovoz.app.design_system.composables.button.VodovozButtonsColumn
 import com.vodovoz.app.design_system.composables.text_fields.VodovozTextField
 import com.vodovoz.app.design_system.composables.top_bar.ClosingTopBar
-import com.vodovoz.app.feature.cancel_order_fragment.model.CancelOrderState
+import com.vodovoz.app.feature.cancel_order.model.CancelOrderState
 
 @Composable
 fun CancelOrderScreen(viewModel: CancelOrderViewModel, viewState: CancelOrderState) {

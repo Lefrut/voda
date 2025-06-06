@@ -1,6 +1,6 @@
 package com.vodovoz.app.data.vodovoz_service.mappers
 
-import com.vodovoz.app.data.vodovoz_service.di.toFullUrl
+import com.vodovoz.app.data.vodovoz_service.di.toVodovozUrl
 import com.vodovoz.app.data.vodovoz_service.model.QuestionnairesDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.QuestionnairesItemDTO
 import com.vodovoz.app.data.vodovoz_service.model.QuestionnairesWelcomeDetailsDTO
@@ -13,7 +13,7 @@ import com.vodovoz.app.domain.general.model.QuestionnairesWelcomeDetailsModel
 fun QuestionnairesWelcomeDetailsDTO.toDomain(): QuestionnairesWelcomeDetailsModel {
     return QuestionnairesWelcomeDetailsModel(
         title = TITLE ?: "",
-        image = KARTINKA?.toFullUrl() ?: "",
+        image = KARTINKA?.toVodovozUrl() ?: "",
         header = ZAGOLOVOK ?: "",
         description = OPISANIE ?: "",
         buttons = KNOPKA?.map { it.toDomain() }

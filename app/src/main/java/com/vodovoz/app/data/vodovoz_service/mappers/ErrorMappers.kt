@@ -1,6 +1,6 @@
 package com.vodovoz.app.data.vodovoz_service.mappers
 
-import com.vodovoz.app.data.vodovoz_service.di.toFullUrl
+import com.vodovoz.app.data.vodovoz_service.di.toVodovozUrl
 import com.vodovoz.app.data.vodovoz_service.model.VodovozButtonDTO
 import com.vodovoz.app.data.vodovoz_service.model.VodovozPlaceholderDTO
 import com.vodovoz.app.domain.general.model.ColorfulButtonModel
@@ -11,7 +11,7 @@ fun VodovozPlaceholderDTO.toDomain(): VodovozPlaceholderModel {
     return VodovozPlaceholderModel(
         headerHtml = header ?: "",
         descriptionHtml = message ?: "",
-        imageUrl = imageUrl?.toFullUrl() ?: "",
+        imageUrl = imageUrl?.toVodovozUrl() ?: "",
         title = title ?: "",
         button = button?.toDomain()
     )

@@ -1,0 +1,136 @@
+package com.vodovoz.app.feature.addresses.composables
+
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.vodovoz.app.R
+import com.vodovoz.app.design_system.composables.button.VodovozRadioButton
+import com.vodovoz.app.design_system.composables.decoration.VodovozHorizontalDivider
+import com.vodovoz.app.design_system.model.SectionUi
+import com.vodovoz.app.feature.addresses.model.AddressUi
+
+@Suppress("NonSkippableComposable")
+@Composable
+fun AddressBody(
+    modifier: Modifier = Modifier,
+    contentPadding: PaddingValues,
+    addressSections: List<SectionUi<AddressUi>>,
+    selectedAddress: AddressUi,
+    onAddressSelect: (AddressUi) -> Unit,
+    onEditAddressClick: (AddressUi) -> Unit,
+) {
+    LazyColumn(
+        modifier = modifier.fillMaxSize(),
+        contentPadding = contentPadding
+    ) {
+        addressSections.forEachIndexed { index, addressSection ->
+            item {
+                Text(
+                    modifier = Modifier.padding(
+                        horizontal = 16.dp,
+                        vertical = 8.dp
+                    ),
+                    text = addressSection.title,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    style = MaterialTheme.typography.headlineSmall
+                )
+            }
+
+            items(
+                items = addressSection.items,
+                key = { item: AddressUi -> item.id }
+            ) { address ->
+                AddressItemCard(
+                    address = address,
+                    selected = selectedAddress == address,
+                    onClick = onAddressSelect,
+                    onEditClick = onEditAddressClick
+                )
+            }
+
+            if (index != addressSections.lastIndex) {
+                item {
+                    VodovozHorizontalDivider()
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun AddressItemCard(
+    modifier: Modifier = Modifier,
+    address: AddressUi,
+    selected: Boolean,
+    onClick: (AddressUi) -> Unit,
+    onEditClick: (AddressUi) -> Unit,
+) {
+    Row(
+        modifier = modifier
+            .heightIn(56.dp)
+            .fillMaxWidth()
+            .clickable(onClick = { onClick(address) })
+            .padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        VodovozRadioButton(
+            selected = selected,
+            onClick = { onClick(address) }
+        )
+        Column(
+            modifier = Modifier
+                .padding(start = 16.dp)
+                .weight(1f),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            if (address.description.isNotEmpty()) {
+                Text(
+                    text = address.description,
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        fontWeight = FontWeight.Medium,
+                        letterSpacing = 0.15.sp
+                    ),
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+            }
+
+            Text(
+                text = address.address,
+                style = MaterialTheme.typography.bodyMedium.copy(letterSpacing = 0.sp),
+                color = MaterialTheme.colorScheme.onBackground
+            )
+        }
+
+        Icon(
+            imageVector = ImageVector.vectorResource(id = R.drawable.icon_edit),
+            contentDescription = null,
+            modifier = Modifier
+                .padding(start = 16.dp)
+                .clip(MaterialTheme.shapes.small)
+                .size(24.dp)
+                .clickable { onEditClick(address) },
+            tint = MaterialTheme.colorScheme.surfaceTint
+        )
+    }
+}

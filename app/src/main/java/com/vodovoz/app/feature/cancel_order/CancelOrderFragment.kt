@@ -1,4 +1,4 @@
-package com.vodovoz.app.feature.cancel_order_fragment
+package com.vodovoz.app.feature.cancel_order
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -16,8 +16,8 @@ import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.composables.placeholders.LoadingPlaceholder
 import com.vodovoz.app.design_system.composables.placeholders.NetworkErrorPlaceholder
 import com.vodovoz.app.design_system.effects.LifecycleEffect
-import com.vodovoz.app.feature.cancel_order_fragment.model.CancelOrderEvent
-import com.vodovoz.app.feature.cancel_order_fragment.model.CancelOrderUiState
+import com.vodovoz.app.feature.cancel_order.model.CancelOrderEvent
+import com.vodovoz.app.feature.cancel_order.model.CancelOrderUiState
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 

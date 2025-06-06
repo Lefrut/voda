@@ -1,6 +1,7 @@
 package com.vodovoz.app.feature.addresses
 
-import android.app.Application
+import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.Stable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.vodovoz.app.R
@@ -11,13 +12,24 @@ import com.vodovoz.app.common.content.PagingContractViewModel
 import com.vodovoz.app.common.content.State
 import com.vodovoz.app.common.content.itemadapter.Item
 import com.vodovoz.app.common.content.toErrorState
+import com.vodovoz.app.common.content.updateData
+import com.vodovoz.app.common.resources.ResourcesProvider
 import com.vodovoz.app.data.MainRepository
 import com.vodovoz.app.data.model.common.ResponseEntity
+import com.vodovoz.app.design_system.model.SectionUi
+import com.vodovoz.app.design_system.model.VodovozPlaceholderUi
+import com.vodovoz.app.design_system.model.toUi
+import com.vodovoz.app.domain.general.model.EmptyResultException
+import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
+import com.vodovoz.app.feature.addresses.model.AddressScreenTypeUi
+import com.vodovoz.app.feature.addresses.model.AddressUi
+import com.vodovoz.app.feature.addresses.model.mapToUi
 import com.vodovoz.app.feature.cart.ordering.OrderType
 import com.vodovoz.app.mapper.AddressMapper.mapToUI
 import com.vodovoz.app.ui.model.AddressFlowTitle
 import com.vodovoz.app.ui.model.AddressUI
 import com.vodovoz.app.util.extensions.debugLog
+import com.vodovoz.app.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.catch
@@ -29,17 +41,23 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
+@Stable
 class AddressesFlowViewModel @Inject constructor(
     savedState: SavedStateHandle,
     private val repository: MainRepository,
     private val accountManager: AccountManager,
-    private val application: Application,
+    private val resourcesProvider: ResourcesProvider,
+    private val vodovozServiceRepository: VodovozServiceRepository,
 ) : PagingContractViewModel<AddressesFlowViewModel.AddressesState, AddressesFlowViewModel.AddressesEvents>(
     AddressesState()
 ) {
 
     private val openMode = savedState.get<String>("openMode")
     private val addressType = savedState.get<String>("addressType")
+
+    init {
+        fetchAddresses()
+    }
 
     fun firstLoad() {
         if (!state.isFirstLoad) {
@@ -53,8 +71,42 @@ class AddressesFlowViewModel @Inject constructor(
         fetchAddresses()
     }
 
-    private fun fetchAddresses() {
-        val userId = accountManager.fetchAccountId() ?: return
+    fun fetchAddresses() = viewModelScope.launch {
+        val addressesResult = vodovozServiceRepository.getAddresses().singleResult()
+
+        addressesResult.onSuccess { sections ->
+
+            val addressSections = sections.map { section ->
+                section.toUi { addressModelList ->
+                    addressModelList.mapToUi()
+                }
+            }
+
+            uiStateListener.updateData { s ->
+                s.copy(
+                    addressSections = addressSections,
+                    selectedAddress = addressSections.firstOrNull()?.items?.firstOrNull()
+                        ?: AddressUi.Empty,
+                    uiState = AddressesUiState.Success
+                )
+            }
+        }.onFailure { t ->
+            val uiState = if (t is EmptyResultException && t.placeholder != null) {
+                AddressesUiState.Empty(t.placeholder.toUi())
+            } else AddressesUiState.Error
+
+            uiStateListener.updateData { s ->
+                s.copy(
+                    uiState = if (s.uiState != AddressesUiState.Success || uiState is AddressesUiState.Empty) {
+                        uiState
+                    } else {
+                        s.uiState
+                    }
+                )
+            }
+        }
+
+        val userId = accountManager.fetchAccountId() ?: return@launch
         val type = when (addressType) {
             OrderType.PERSONAL.name -> 1
             OrderType.COMPANY.name -> 2
@@ -105,19 +157,19 @@ class AddressesFlowViewModel @Inject constructor(
                             //        error = null
                             //    )
                             //} else {
-                                val addresses = if(type == OrderType.PERSONAL.value){
-                                    data.filter { it.type == OrderType.PERSONAL.value }
-                                } else {
-                                    data.filter { it.type == OrderType.COMPANY.value }
-                                }
-                                uiStateListener.value = state.copy(
-                                    data = state.data.copy(
-                                        items = data,
-                                        fullList = addresses
-                                    ),
-                                    loadingPage = false,
-                                    error = null
-                                )
+                            val addresses = if (type == OrderType.PERSONAL.value) {
+                                data.filter { it.type == OrderType.PERSONAL.value }
+                            } else {
+                                data.filter { it.type == OrderType.COMPANY.value }
+                            }
+                            uiStateListener.value = state.copy(
+                                data = state.data.copy(
+                                    items = data,
+                                    fullList = addresses
+                                ),
+                                loadingPage = false,
+                                error = null
+                            )
                             //}
                         } else {
                             uiStateListener.value = state.copy(
@@ -161,7 +213,7 @@ class AddressesFlowViewModel @Inject constructor(
                                 fullList.addAll(
                                     listOf(
                                         AddressFlowTitle(
-                                            application.resources.getString(
+                                            resourcesProvider.getString(
                                                 R.string.personal_addresses_title
                                             )
                                         )
@@ -172,9 +224,7 @@ class AddressesFlowViewModel @Inject constructor(
                                 fullList.addAll(
                                     listOf(
                                         AddressFlowTitle(
-                                            application.resources.getString(
-                                                R.string.company_addresses_title
-                                            )
+                                            resourcesProvider.getString(R.string.company_addresses_title)
                                         )
                                     ) + company
                                 )
@@ -190,9 +240,11 @@ class AddressesFlowViewModel @Inject constructor(
                             )
                             eventListener.emit(AddressesEvents.DeleteEvent("Удалено"))
                         }
+
                         is ResponseEntity.Error -> {
                             eventListener.emit(AddressesEvents.DeleteEvent(response.errorMessage))
                         }
+
                         is ResponseEntity.Hide -> {
                             eventListener.emit(AddressesEvents.DeleteEvent("Неизвестная ошибка"))
                         }
@@ -209,7 +261,7 @@ class AddressesFlowViewModel @Inject constructor(
     }
 
     fun onAddressClick(address: AddressUI) {
-        if (openMode != OpenMode.SelectAddress.name) return
+        //if (openMode != OpenMode.SelectAddress.name) return
         viewModelScope.launch {
             debugLog { "full ${address.fullAddress} length ${address.length} latitude ${address.latitude} longitude ${address.longitude}" }
             if (address.length.isNotEmpty()) {
@@ -220,16 +272,53 @@ class AddressesFlowViewModel @Inject constructor(
         }
     }
 
+    fun navigateBack() = viewModelScope.launch {
+        eventListener.emit(AddressesEvents.GoBack)
+    }
+
+    fun addAddress() = viewModelScope.launch {
+
+    }
+
+    fun goToOrderRecipient() = viewModelScope.launch {
+
+    }
+
+    fun editAddress(address: AddressUi) = viewModelScope.launch {
+
+    }
+
+    fun selectAddress(address: AddressUi) = viewModelScope.launch {
+        uiStateListener.updateData { s ->
+            s.copy(selectedAddress = address)
+        }
+    }
+
     sealed class AddressesEvents : Event {
+        data object GoBack : AddressesEvents()
+
         data class DeleteEvent(val message: String) : AddressesEvents()
         data class OnAddressClick(val address: AddressUI) : AddressesEvents()
         data class UpdateAddress(val address: AddressUI) : AddressesEvents()
     }
 
+    @Immutable
     data class AddressesState(
         val items: List<AddressUI> = emptyList(),
         val companyItems: List<AddressUI> = emptyList(),
         val personalItems: List<AddressUI> = emptyList(),
         val fullList: List<Item> = emptyList(),
+
+        val screenType: AddressScreenTypeUi = AddressScreenTypeUi.Add,
+        val addressSections: List<SectionUi<AddressUi>> = emptyList(),
+        val selectedAddress: AddressUi = AddressUi.Empty,
+        val uiState: AddressesUiState = AddressesUiState.Loading,
     ) : State
+
+    sealed interface AddressesUiState {
+        data object Loading : AddressesUiState
+        data object Error : AddressesUiState
+        data object Success : AddressesUiState
+        data class Empty(val placeholder: VodovozPlaceholderUi) : AddressesUiState
+    }
 }

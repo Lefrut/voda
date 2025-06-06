@@ -1,6 +1,6 @@
 package com.vodovoz.app.data.vodovoz_service.mappers
 
-import com.vodovoz.app.data.vodovoz_service.di.toFullUrl
+import com.vodovoz.app.data.vodovoz_service.di.toVodovozUrl
 import com.vodovoz.app.data.vodovoz_service.model.order_details.IMAGE_AND_TEXT_DTO
 import com.vodovoz.app.data.vodovoz_service.model.order_details.TOCHKA_DTO
 import com.vodovoz.app.data.vodovoz_service.model.order_details.WHERE_ORDER_BUTTON_DTO
@@ -29,7 +29,7 @@ fun List<IMAGE_AND_TEXT_DTO>.mapToDomain(): List<ImageAndTextModel> {
 fun IMAGE_AND_TEXT_DTO.toDomain(): ImageAndTextModel? {
     return ImageAndTextModel(
         text = POLE ?: return null,
-        image = KARTINKA?.toFullUrl() ?: return null
+        image = KARTINKA?.toVodovozUrl() ?: return null
     )
 }
 
@@ -44,7 +44,7 @@ fun WHERE_ORDER_BUTTON_DTO.toDomain(): ImageButtonModel? {
         backgroundColor = BACKGROUND ?: "",
         textColor = COLOR ?: "",
         id = ID ?: return null,
-        image = IMAGE?.toFullUrl() ?: ""
+        image = IMAGE?.toVodovozUrl() ?: ""
     )
 }
 

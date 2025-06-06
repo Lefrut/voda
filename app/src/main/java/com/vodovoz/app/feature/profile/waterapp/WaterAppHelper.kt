@@ -13,6 +13,7 @@ import com.squareup.moshi.Moshi
 import com.vodovoz.app.common.account.AccountManager
 import com.vodovoz.app.common.datastore.DataStoreRepository
 import com.vodovoz.app.feature.profile.waterapp.worker.WaterAppWorker
+import com.vodovoz.app.util.extensions.debugLog
 import com.vodovoz.app.util.extensions.fetchCurrentDayInTimeMillis
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -195,6 +196,8 @@ class WaterAppHelper @Inject constructor(
         val data = waterAppRateDataListener.value
         val json = rateJsonAdapter.toJson(data)
         dataStoreRepository.putString(WATER_APP_RATE, json)
+
+        debugLog { "save water rate" }
     }
 
     private fun calculateRate(): Int {
@@ -271,13 +274,15 @@ class WaterAppHelper @Inject constructor(
 
         workManager.cancelAllWorkByTag(waterTag)
         if (data.switch) {
+            val minutes = data.time.toLong()
+
             val work = PeriodicWorkRequest.Builder(
                 WaterAppWorker::class.java,
-                data.time.toLong(),
+                minutes,
                 TimeUnit.MINUTES
             )
                 .setConstraints(Constraints.NONE)
-                .setInitialDelay(data.time.toLong(), TimeUnit.MINUTES)
+                .setInitialDelay(minutes, TimeUnit.MINUTES)
                 .addTag(waterTag)
                 .build()
             workManager.enqueueUniquePeriodicWork(waterTag, ExistingPeriodicWorkPolicy.UPDATE, work)

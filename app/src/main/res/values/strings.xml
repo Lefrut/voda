@@ -358,5 +358,10 @@
 
     <string name="notification_settings_save_error">Не удалось сохранить изменения, попробуйте снова.</string>
     <string name="notification_settings_validation_error">Не удалось сохранить изменения, ошибка валидации полей.</string>
+    <string name="search_address">Поиск адреса</string>
+    <string name="delivery">Доставка</string>
+    <string name="add_address">Добавить адрес</string>
+    <string name="addresses">Адреса</string>
+    <string name="delivery_address">Адрес доставки</string>
 
 </resources>

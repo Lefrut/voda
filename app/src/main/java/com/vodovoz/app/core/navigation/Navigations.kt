@@ -197,7 +197,7 @@ fun NavController.navigateToNotificationSettings() {
 
 
 fun NavController.navigateToQuestionnaires() {
-    navigate(R.id.questionnairesFragment2, Bundle.EMPTY, SlideNavOptions)
+    navigate(R.id.questionnairesFragment, Bundle.EMPTY, SlideNavOptions)
 }
 
 fun NavController.navigateToPastPurchases() {

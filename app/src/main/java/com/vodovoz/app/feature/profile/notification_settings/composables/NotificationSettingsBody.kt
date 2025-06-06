@@ -60,8 +60,10 @@ fun NotificationSettingsBody(
 
         VodovozButtonsColumn(
             modifier = Modifier.padding(
-                vertical = 8.dp,
-                horizontal = 16.dp
+                top = 8.dp,
+                start = 16.dp,
+                end = 16.dp,
+                bottom = 24.dp
             ),
             buttons = listOf(button),
             onButtonClick = { onSaveClick() }

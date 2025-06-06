@@ -1,16 +1,15 @@
-package com.vodovoz.app.feature.cancel_order_fragment
+package com.vodovoz.app.feature.cancel_order
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.vodovoz.app.design_system.model.ColorfulButtonUi
 import com.vodovoz.app.design_system.model.toUi
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
-import com.vodovoz.app.feature.cancel_order_fragment.model.CancelOrderEvent
-import com.vodovoz.app.feature.cancel_order_fragment.model.CancelOrderState
-import com.vodovoz.app.feature.cancel_order_fragment.model.CancelOrderUiState
+import com.vodovoz.app.feature.cancel_order.model.CancelOrderEvent
+import com.vodovoz.app.feature.cancel_order.model.CancelOrderState
+import com.vodovoz.app.feature.cancel_order.model.CancelOrderUiState
 import com.vodovoz.app.design_system.model.widgets.FieldUi
 import com.vodovoz.app.design_system.model.widgets.toUi
-import com.vodovoz.app.feature.preorder.model.toUi
 import com.vodovoz.app.design_system.model.widgets.updateFieldAndResetError
 import com.vodovoz.app.ui.mvi.MviViewModel
 import com.vodovoz.app.util.extensions.singleResult

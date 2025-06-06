@@ -1,4 +1,4 @@
-package com.vodovoz.app.feature.map.api
+package com.vodovoz.app.data.maps
 
 import okhttp3.ResponseBody
 import retrofit2.http.GET
@@ -8,10 +8,10 @@ interface MapKitFlowApi {
 
     //Получить Cookie Session Id
     @GET("/1.x/")
-    suspend fun fetchAddressByGeocodeResponse(
+    suspend fun getAddressByGeo(
         @Query("apikey") apiKey: String? = null,
         @Query("geocode") geocode: String? = null,
-        @Query("format") format: String? = null
+        @Query("format") format: String? = "json"
     ): ResponseBody
 
 }

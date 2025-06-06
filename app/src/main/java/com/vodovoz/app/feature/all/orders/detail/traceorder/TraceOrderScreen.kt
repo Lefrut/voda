@@ -6,7 +6,7 @@ import androidx.compose.foundation.gestures.DraggableAnchors
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.anchoredDraggable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
@@ -29,9 +29,14 @@ import androidx.compose.material3.SheetValue.PartiallyExpanded
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
@@ -51,7 +56,9 @@ import com.vodovoz.app.design_system.model.ImageAndTextUi
 import com.vodovoz.app.design_system.model.ImageButtonUi
 import com.vodovoz.app.feature.all.orders.detail.traceorder.composables.TraceOrderBody
 import com.vodovoz.app.feature.home.composables.dropShadow
-import com.yandex.mapkit.mapview.MapView
+import com.vodovoz.app.ui.yandex_map.YandexMapUi
+import com.yandex.mapkit.ScreenPoint
+import com.yandex.mapkit.ScreenRect
 import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -60,8 +67,10 @@ fun TraceOrderScreen(
     viewModel: TraceOrderViewModel,
     viewState: TraceOrderViewModel.TraceOrderState,
     anchoredDraggableState: AnchoredDraggableState<SheetValue>,
-    mapView: () -> MapView,
+    yandexMap: YandexMapUi,
 ) {
+    val density = LocalDensity.current
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -72,10 +81,13 @@ fun TraceOrderScreen(
             title = stringResource(R.string.where_is_my_order)
         )
 
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter) {
+        BoxWithConstraints(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.BottomCenter
+        ) {
 
             TraceOrderBody(
-                mapView = mapView,
+                yandexMap = yandexMap,
                 carPoint = viewState.carPoint,
                 deliveryPoint = viewState.finishPoint,
                 onGeoClick = {
@@ -95,8 +107,12 @@ fun TraceOrderScreen(
                 }
             )
 
+            var sheetHeightPx by remember { mutableIntStateOf(0) }
+
             TraceOrderBottomSheet(
-                modifier = Modifier,
+                modifier = Modifier.onSizeChanged { size ->
+                    sheetHeightPx = size.height
+                },
                 state = anchoredDraggableState,
                 title = viewState.bottomSheetTitle,
                 buttons = viewState.bottomSheetButtons,
@@ -105,6 +121,20 @@ fun TraceOrderScreen(
                     viewModel.activateButton(imageButton)
                 }
             )
+
+
+            LaunchedEffect(sheetHeightPx) {
+                val screenWidthPx = with(density) { maxWidth.toPx() }
+                val screenHeightPx = with(density) { maxHeight.toPx() - sheetHeightPx }
+
+                yandexMap.mapView.focusRect = ScreenRect(
+                    ScreenPoint(0f, 0f),
+                    ScreenPoint(
+                        screenWidthPx,
+                        screenHeightPx
+                    )
+                )
+            }
         }
     }
 
@@ -157,11 +187,14 @@ fun TraceOrderBottomSheet(
             .fillMaxWidth()
             .heightIn(max = partiallyExpandedDp + (partiallyExpandedDp / 2))
             .offset {
-                IntOffset(
-                    x = 0,
-                    y = state
+                val offsetY = runCatching {
+                    state
                         .requireOffset()
                         .roundToInt()
+                }.getOrNull() ?: 0
+                IntOffset(
+                    x = 0,
+                    y = offsetY
                 )
             }
             .anchoredDraggable(
@@ -195,9 +228,12 @@ fun TraceOrderBottomSheet(
             ),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        VodovozDragHandle()
+        if (title.isNotEmpty() || buttons.isNotEmpty() || items.isNotEmpty()) {
+            VodovozDragHandle()
 
-        Spacer(Modifier.height(20.dp))
+            Spacer(Modifier.height(20.dp))
+        }
+
 
         if (title.isNotEmpty()) {
             Text(

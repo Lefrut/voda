@@ -1,4 +1,4 @@
-package com.vodovoz.app.feature.cancel_order_fragment.model
+package com.vodovoz.app.feature.cancel_order.model
 
 sealed interface CancelOrderUiState {
 

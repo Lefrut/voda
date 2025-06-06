@@ -18,7 +18,6 @@ import com.vodovoz.app.design_system.composables.floating.BottomFloatingContaine
 import com.vodovoz.app.design_system.composables.top_bar.HybridSearchTopBar
 import com.vodovoz.app.feature.cart.bottles.composables.AllBottlesBody
 
-@Suppress("NonSkippableComposable")
 @Composable
 fun AllBottlesScreen(
     viewModel: AllBottlesFlowViewModel,

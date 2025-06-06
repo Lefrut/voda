@@ -174,8 +174,7 @@ fun BasicSearchField(
     readOnly: Boolean = false,
     interactionSource: MutableInteractionSource? = null,
     textStyle: TextStyle = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onBackground),
-    decorationBox: @Composable (innerTextField: @Composable () -> Unit) -> Unit =
-        @Composable { innerTextField -> innerTextField() },
+    decorationBox: @Composable (innerTextField: @Composable (() -> Unit)) -> Unit = @Composable { innerTextField -> innerTextField() },
 ) {
     var textField by rememberSaveable(stateSaver = TextFieldValue.Saver) {
         mutableStateOf(TextFieldValue(""))
@@ -213,9 +212,9 @@ fun BasicSearchField(
 
 }
 
-@Preview
+@Preview(apiLevel = 34)
 @Composable
-private fun StaticSearchTopBarPreview() {
+private fun VodovozSearchTopBarPreview() {
     VodovozTheme {
         VodovozSearchTopBar(
             value = "",

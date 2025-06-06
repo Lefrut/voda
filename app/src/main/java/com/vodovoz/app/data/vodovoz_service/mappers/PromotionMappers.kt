@@ -1,7 +1,7 @@
 package com.vodovoz.app.data.vodovoz_service.mappers
 
 import android.text.Html
-import com.vodovoz.app.data.vodovoz_service.di.toFullUrl
+import com.vodovoz.app.data.vodovoz_service.di.toVodovozUrl
 import com.vodovoz.app.data.vodovoz_service.model.AKCIYA_DTO
 import com.vodovoz.app.data.vodovoz_service.model.HIT_DTO
 import com.vodovoz.app.data.vodovoz_service.model.OREKLAME_DTO
@@ -19,7 +19,7 @@ import com.vodovoz.app.domain.general.model.emptyLabelModel
 fun AKCIYA_DTO.toDomain(): PromotionDetailsModel? {
     return PromotionDetailsModel(
         id = ID ?: return null,
-        picture = DETAIL_PICTURE?.toFullUrl() ?: return null,
+        picture = DETAIL_PICTURE?.toVodovozUrl() ?: return null,
         name = NAME ?: return null,
         description = DETAIL_TEXT ?: "",
         endDate = mapToZonedDateTime(DATAOUT ?: return null) ?: return null,
@@ -66,7 +66,7 @@ fun PROMOTION_DATA_DTO.toDomain(): PromotionModel? {
         name = NAME ?: return null,
         blockId = IBLOCK_ID ?: -1,
         sectionId = IBLOCK_SECTION_ID ?: -1,
-        detailPicture = DETAIL_PICTURE?.toFullUrl() ?: return null,
+        detailPicture = DETAIL_PICTURE?.toVodovozUrl() ?: return null,
         endDate = mapToZonedDateTime(DATA_OUT ?: return null) ?: return null,
         label = HIT?.toDomain() ?: emptyLabelModel(),
         advertising = OREKLAME?.toDomain()

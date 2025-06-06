@@ -1,6 +1,7 @@
 package com.vodovoz.app.feature.cart.bottles
 
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.Stable
 import androidx.lifecycle.viewModelScope
 import com.vodovoz.app.common.cart.CartManager
 import com.vodovoz.app.common.content.Event
@@ -18,6 +19,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+@Stable
 @HiltViewModel
 class AllBottlesFlowViewModel @Inject constructor(
     private val cartManager: CartManager,
@@ -166,6 +168,7 @@ class AllBottlesFlowViewModel @Inject constructor(
         val buttonIsLoading: Boolean = false,
     ) : State
 
+    @Immutable
     sealed interface BottlesUiState {
         data object Loading : BottlesUiState
         data object Error : BottlesUiState

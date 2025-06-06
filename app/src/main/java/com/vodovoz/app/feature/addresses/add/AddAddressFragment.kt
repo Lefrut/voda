@@ -208,6 +208,7 @@ class AddAddressFragment : BaseFragment() {
                                 )
                             }
                             is MapFlowViewModel.MapFlowEvents.ShowSearchError -> {
+
                             }
                             is MapFlowViewModel.MapFlowEvents.Submit -> {
                                 it.list.forEach { point ->
