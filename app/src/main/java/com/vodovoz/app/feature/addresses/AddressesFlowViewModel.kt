@@ -49,7 +49,9 @@ class AddressesFlowViewModel @Inject constructor(
     private val resourcesProvider: ResourcesProvider,
     private val vodovozServiceRepository: VodovozServiceRepository,
 ) : PagingContractViewModel<AddressesFlowViewModel.AddressesState, AddressesFlowViewModel.AddressesEvents>(
-    AddressesState()
+    AddressesState(
+        screenType = savedState.get<AddressScreenTypeUi>("screenType") ?: AddressScreenTypeUi.Add
+    )
 ) {
 
     private val openMode = savedState.get<String>("openMode")
@@ -309,7 +311,7 @@ class AddressesFlowViewModel @Inject constructor(
         val personalItems: List<AddressUI> = emptyList(),
         val fullList: List<Item> = emptyList(),
 
-        val screenType: AddressScreenTypeUi = AddressScreenTypeUi.Add,
+        val screenType: AddressScreenTypeUi,
         val addressSections: List<SectionUi<AddressUi>> = emptyList(),
         val selectedAddress: AddressUi = AddressUi.Empty,
         val uiState: AddressesUiState = AddressesUiState.Loading,

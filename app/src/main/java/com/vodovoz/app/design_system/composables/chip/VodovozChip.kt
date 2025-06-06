@@ -22,6 +22,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
@@ -42,15 +43,17 @@ fun VodovozChip(
     contentPadding: PaddingValues = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
     containerColor: Color = if (selected) MaterialTheme.colorScheme.surfaceTint else MaterialTheme.colorScheme.surface,
     contentColor: Color = if (selected) MaterialTheme.colorScheme.background else MaterialTheme.colorScheme.onBackground,
+    shape: Shape = MaterialTheme.shapes.small,
+    borderStroke: BorderStroke? = BorderStroke(
+        width = 1.dp,
+        color = MaterialTheme.colorScheme.surfaceVariant
+    )
 ) {
     Box(
         modifier = modifier
             .vodovozSurface(
-                border = if (selected) null else BorderStroke(
-                    width = 1.dp,
-                    color = MaterialTheme.colorScheme.surfaceVariant
-                ),
-                shape = MaterialTheme.shapes.small,
+                border = if (selected) null else borderStroke,
+                shape = shape,
                 backgroundColor = containerColor,
                 shadowElevation = 0f
             )

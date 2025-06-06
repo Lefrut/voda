@@ -17,7 +17,6 @@ import com.vodovoz.app.R
 import com.vodovoz.app.common.content.BaseFragment
 import com.vodovoz.app.common.permissions.PermissionsController
 import com.vodovoz.app.common.tab.TabManager
-import com.vodovoz.app.data.config.AddressConfig
 import com.vodovoz.app.databinding.FragmentAddAddressSearchBinding
 import com.vodovoz.app.feature.map.MapController
 import com.vodovoz.app.feature.map.MapFlowViewModel
@@ -133,8 +132,8 @@ class AddAddressFragment : BaseFragment() {
     private fun initButtons() {
         binding.btnAdd.setOnClickListener {
             val type = when (binding.cbHouse.isChecked) {
-                true -> AddressConfig.PERSONAL_ADDRESS_TYPE
-                false -> AddressConfig.OFFICE_ADDRESS_TYPE
+                true -> 1
+                false -> 2
             }
 
             val entrance = binding.etEntrance.text.toString()

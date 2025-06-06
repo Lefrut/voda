@@ -42,7 +42,7 @@ import java.util.Locale
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class OrderingFragment : BaseFragment() {
+class OrderingFragment1 : BaseFragment() {
 
     companion object {
         const val SELECTED_PAY_METHOD = "SELECTED_PAY_METHOD"
@@ -379,6 +379,7 @@ class OrderingFragment : BaseFragment() {
 //                                }
 //                            }
                         }
+                        else -> {}
                     }
                 }
         }

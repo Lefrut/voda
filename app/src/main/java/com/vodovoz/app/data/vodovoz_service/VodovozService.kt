@@ -47,6 +47,7 @@ import com.vodovoz.app.data.vodovoz_service.model.notification_settings.Notifica
 import com.vodovoz.app.data.vodovoz_service.model.order_details.OrderDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.order_details.WhereMyOrderDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.order_history.OrdersHistoryDetailsDTO
+import com.vodovoz.app.data.vodovoz_service.model.ordering.OrderingDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.product_details.ProductDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.profile.ProfileDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.services.AllServicesDetailsDTO
@@ -126,6 +127,12 @@ interface VodovozService {
     /**
      * Order requests
      * */
+
+    @GET("oformlenie/oformlenie.php?action=glav")
+    suspend fun getOrderingDetails(
+        @Query("userid") userId: Long?
+    ): Response<VodovozResponseDTO<OrderingDetailsDTO>>
+
     @GET("profile/historyorder/voditel.php")
     suspend fun getWhereMyOrderDetails(
         @Query("userid") userId: Long?,
@@ -184,6 +191,7 @@ interface VodovozService {
     suspend fun getAddresses(
         @Query("userid") userId: Long?
     ): Response<VodovozResponseDTO<AddressesDTO>>
+
 
     /**
      * Brand requests

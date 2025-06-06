@@ -12,14 +12,15 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import by.kirich1409.viewbindingdelegate.viewBinding
+import coil3.load
 import com.bumptech.glide.Glide
 import com.vodovoz.app.R
 import com.vodovoz.app.common.content.BaseFragment
-import com.vodovoz.app.common.content.ErrorState
-import com.vodovoz.app.data.util.ImagePathParser.parseImagePath
+import com.vodovoz.app.data.vodovoz_service.di.toVodovozUrl
 import com.vodovoz.app.databinding.FragmentBlockAppBinding
 import com.vodovoz.app.feature.sitestate.SiteStateManager
 import com.vodovoz.app.util.extensions.addOnBackPressedCallback
+import com.vodovoz.app.util.extensions.dialPhoneNumber
 import com.vodovoz.app.util.extensions.disableFullScreen
 import com.vodovoz.app.util.extensions.fromHtml
 import com.vodovoz.app.util.extensions.startJivo
@@ -76,7 +77,7 @@ class BlockAppFragment : BaseFragment() {
 
 
                         Glide.with(requireContext())
-                            .load(siteState.data?.logo?.parseImagePath())
+                            .load(siteState.data?.logo?.toVodovozUrl())
                             .placeholder(R.drawable.pic_product_placeholder)
                             .error(R.drawable.pic_product_placeholder)
                             .into(binding.imageBlockApp)
@@ -92,32 +93,33 @@ class BlockAppFragment : BaseFragment() {
                             siteState.data.desc.fromHtml()
                         }
 
+
                         Glide.with(requireContext())
-                            .load(siteState.data?.whatsUp?.image?.parseImagePath())
+                            .load(siteState.data?.whatsUp?.image?.toVodovozUrl())
                             .placeholder(R.drawable.pic_product_placeholder)
                             .error(R.drawable.pic_product_placeholder)
                             .into(binding.whatsUp)
 
                         Glide.with(requireContext())
-                            .load(siteState.data?.viber?.image?.parseImagePath())
+                            .load(siteState.data?.viber?.image?.toVodovozUrl())
                             .placeholder(R.drawable.pic_product_placeholder)
                             .error(R.drawable.pic_product_placeholder)
                             .into(binding.viber)
 
                         Glide.with(requireContext())
-                            .load(siteState.data?.telegram?.image?.parseImagePath())
+                            .load(siteState.data?.telegram?.image?.toVodovozUrl())
                             .placeholder(R.drawable.pic_product_placeholder)
                             .error(R.drawable.pic_product_placeholder)
                             .into(binding.telegram)
 
                         Glide.with(requireContext())
-                            .load(siteState.data?.chat?.image?.parseImagePath())
+                            .load(siteState.data?.chat?.image?.toVodovozUrl())
                             .placeholder(R.drawable.pic_product_placeholder)
                             .error(R.drawable.pic_product_placeholder)
                             .into(binding.chat)
 
                         Glide.with(requireContext())
-                            .load(siteState.data?.phone?.image?.parseImagePath())
+                            .load(siteState.data?.phone?.image?.toVodovozUrl())
                             .placeholder(R.drawable.pic_product_placeholder)
                             .error(R.drawable.pic_product_placeholder)
                             .into(binding.imageCall)
@@ -148,10 +150,8 @@ class BlockAppFragment : BaseFragment() {
                         }
 
                         binding.imageCall.setOnClickListener {
-                            val url = siteState.data?.phone?.url ?: return@setOnClickListener
-                            val intent =
-                                Intent(Intent.ACTION_DIAL, Uri.fromParts("tel", url, null))
-                            startActivity(intent)
+                            val phone = siteState.data?.phone?.url ?: return@setOnClickListener
+                            requireContext().dialPhoneNumber(phone)
                         }
 
                     } else {
