@@ -42,6 +42,7 @@ import com.vodovoz.app.data.vodovoz_service.model.cart.BottomCartDTO
 import com.vodovoz.app.data.vodovoz_service.model.cart.CartDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.catalog.CatalogDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.certificate.BuyCertificateDetailsDTO
+import com.vodovoz.app.data.vodovoz_service.model.delivery_date.DeliveryDateDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.filters.FiltersDTO
 import com.vodovoz.app.data.vodovoz_service.model.notification_settings.NotificationSettingsDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.order_details.OrderDetailsDTO
@@ -70,13 +71,13 @@ interface VodovozService {
 
 
     /**
-    * Past purchases requests
-    * */
+     * Past purchases requests
+     * */
     @GET("profile/historyorder/proshlpokipki.php?action=getLastFifty")
     suspend fun getPastPurchasesDetails(
         @Query("userid") userId: Long?,
         @Query("nav") page: Int = 1,
-        @Query("sort") sort: String?= null,
+        @Query("sort") sort: String? = null,
         @Query("ascdesc") order: String? = null,
         @Query("sect") categoryId: Int? = null,
     ): Response<VodovozResponseDTO<ProductsSectionDTO>>
@@ -87,13 +88,13 @@ interface VodovozService {
     @GET("osnova/userpushapi.php?action=token")
     suspend fun sendFirebaseToken(
         @Query("userid") userId: Long?,
-        @Query("token") token: String
+        @Query("token") token: String,
     ): Response<VodovozResponseDTO<String>>
 
     @GET("osnova/userpushapi.php?action=del")
     suspend fun removeFirebaseToken(
         @Query("userid") userId: Long?,
-        @Query("token") token: String
+        @Query("token") token: String,
     ): Response<VodovozResponseDTO<String>>
 
     /**
@@ -113,24 +114,30 @@ interface VodovozService {
     @GET("osnova/form/yslygiform.php?action=detail")
     suspend fun getServiceOrderDetails(
         @Query("userid") userId: Long?,
-        @Query("tip") serviceType: String
+        @Query("tip") serviceType: String,
     ): Response<VodovozResponseDTO<ServiceOrderDetailsDTO>>
 
     @GET("osnova/form/yslygiform.php?action=otpravka")
     suspend fun orderService(
         @Query("userid") userId: Long?,
         @Query("tip") serviceType: String,
-        @QueryMap queries: Map<String, String>
+        @QueryMap queries: Map<String, String>,
     ): Response<VodovozResponseDTO<VodovozPlaceholderDTO>>
 
 
     /**
      * Order requests
      * */
+    @GET("oformlenie/oplata.php?action=glav")
+    suspend fun getDeliveryDateDetails(
+        @Query("userid") userId: Long?,
+        @Query("adresid") addressId: Int,
+        @Query("date") date: String? = null,
+    ): Response<VodovozResponseDTO<DeliveryDateDetailsDTO>>
 
     @GET("oformlenie/oformlenie.php?action=glav")
     suspend fun getOrderingDetails(
-        @Query("userid") userId: Long?
+        @Query("userid") userId: Long?,
     ): Response<VodovozResponseDTO<OrderingDetailsDTO>>
 
     @GET("profile/historyorder/voditel.php")
@@ -150,7 +157,7 @@ interface VodovozService {
     suspend fun cancelOrder(
         @Query("userid") userId: Long?,
         @Query("idzakaz") orderId: Long,
-        @QueryMap queries: Map<String, String>
+        @QueryMap queries: Map<String, String>,
     ): Response<VodovozResponseDTO<String>>
 
     @GET("osnova/form/voprosozakaze.php?action=otpravka")
@@ -189,7 +196,7 @@ interface VodovozService {
      * */
     @GET("oformlenie/address.php?action=get")
     suspend fun getAddresses(
-        @Query("userid") userId: Long?
+        @Query("userid") userId: Long?,
     ): Response<VodovozResponseDTO<AddressesDTO>>
 
 
@@ -481,7 +488,7 @@ interface VodovozService {
     @GET("profile/otzyvy.php?action=glav")
     suspend fun getWaitFeedbackProducts(
         @Query("userid") userId: Long?,
-        @Query("nav") page: Int = 1
+        @Query("nav") page: Int = 1,
     ): Response<VodovozResponseDTO<WaitFeedbackProductsDTO>>
 
 

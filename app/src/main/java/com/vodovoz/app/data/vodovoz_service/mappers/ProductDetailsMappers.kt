@@ -18,7 +18,6 @@ import com.vodovoz.app.data.vodovoz_service.model.product_details.DOCUMENT_DTO
 import com.vodovoz.app.data.vodovoz_service.model.product_details.HARAKTERISTIKI_DTO
 import com.vodovoz.app.data.vodovoz_service.model.product_details.HARAKTERISTIK_BIND_DTO
 import com.vodovoz.app.data.vodovoz_service.model.product_details.INFORMATIONS_DTO
-import com.vodovoz.app.data.vodovoz_service.model.product_details.KNOPKA_ANALOG_DTO
 import com.vodovoz.app.data.vodovoz_service.model.product_details.KNOPKA_DESHEVLE_DTO
 import com.vodovoz.app.data.vodovoz_service.model.product_details.KNOPKA_KUPIT_DTO
 import com.vodovoz.app.data.vodovoz_service.model.product_details.PRICE_DTO
@@ -235,15 +234,6 @@ private fun KNOPKA_DESHEVLE_DTO.toDomain(): ColorfulButtonModel {
         name = NAME ?: "",
         backgroundColor = BACKGROUND ?: "",
         textColor = TEXTCOLOR ?: "",
-    )
-}
-
-fun KNOPKA_ANALOG_DTO.toDomain(): ColorfulButtonModel {
-    return ColorfulButtonModel(
-        name = NAME ?: "",
-        backgroundColor = BACKGROUND ?: "",
-        textColor = TEXTCOLOR ?: "",
-        id = ID ?: ""
     )
 }
 

@@ -24,7 +24,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.vodovoz.app.R
 import com.vodovoz.app.design_system.composables.button.ProductBottomFloatingButton
-import com.vodovoz.app.design_system.composables.tab_row.TabTitle
+import com.vodovoz.app.design_system.composables.tab_row.VodovozTab
 import com.vodovoz.app.design_system.composables.tab_row.VodovozTabRow
 import com.vodovoz.app.design_system.composables.top_bar.VodovozTopBar
 import com.vodovoz.app.design_system.model.ProductDetailsTabUi
@@ -85,7 +85,7 @@ fun AboutProductScreen(
                 selectedTabPosition = viewState.selectedTabIndex
             ) {
                 viewState.tabs.forEachIndexed { i, tab ->
-                    TabTitle(
+                    VodovozTab(
                         title = tab.title,
                         position = i,
                         selected = viewState.selectedTabIndex == i,
