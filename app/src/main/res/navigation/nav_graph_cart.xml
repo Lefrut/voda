@@ -6,6 +6,12 @@
     app:startDestination="@id/cartFragment">
 
     <fragment
+        android:id="@+id/deliveryDateFragment"
+        android:name="com.vodovoz.app.feature.delivery_date.DeliveryDateFragment"
+        android:label="DeliveryDateFragment"
+        />
+
+    <fragment
         android:id="@+id/cartFragment"
         android:name="com.vodovoz.app.feature.cart.CartFragment"
         android:label="fragment_cart">

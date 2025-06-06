@@ -74,6 +74,10 @@ class OrderingFragment : Fragment() {
                     findNavController().navigateToAddresses(AddressScreenTypeUi.Choose)
                 }
 
+                is OrderingFlowViewModel.OrderingEvents.GoToDeliveryDate -> {
+                    findNavController()
+                }
+
                 else -> {
 
                 }

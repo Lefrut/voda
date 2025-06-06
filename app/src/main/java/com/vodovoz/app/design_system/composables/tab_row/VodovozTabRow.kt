@@ -1,6 +1,5 @@
 package com.vodovoz.app.design_system.composables.tab_row
 
-import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateDpAsState
@@ -156,7 +155,7 @@ private fun Modifier.tabIndicator(
 }
 
 @Composable
-fun TabTitle(
+fun VodovozTab(
     title: String,
     position: Int,
     selected: Boolean,
@@ -196,7 +195,7 @@ private fun TabView() {
             selectedTabPosition = selectedTabPosition
         ) {
             items.forEachIndexed { index, s ->
-                TabTitle(
+                VodovozTab(
                     title = s,
                     position = index,
                     selected = selectedTabPosition == index

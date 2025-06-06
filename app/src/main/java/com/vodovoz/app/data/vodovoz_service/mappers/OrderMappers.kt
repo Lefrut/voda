@@ -9,6 +9,10 @@ import com.vodovoz.app.data.vodovoz_service.model.OPLATA_DTO
 import com.vodovoz.app.data.vodovoz_service.model.OrderPlaceholderDTO
 import com.vodovoz.app.data.vodovoz_service.model.OrderQuestionDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.cart.BottomCartDTO
+import com.vodovoz.app.data.vodovoz_service.model.delivery_date.DATE_INTERVALS_DTO
+import com.vodovoz.app.data.vodovoz_service.model.delivery_date.DATE_INTERVAL_DTO
+import com.vodovoz.app.data.vodovoz_service.model.delivery_date.DELIVERY_DATE_DTO
+import com.vodovoz.app.data.vodovoz_service.model.delivery_date.DeliveryDateDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.order_details.ABOUT_ORDER_ITEM_DTO
 import com.vodovoz.app.data.vodovoz_service.model.order_details.ABOUT_ORDER_OKNO_DTO
 import com.vodovoz.app.data.vodovoz_service.model.order_details.ORDER_DETAILS_ITOG_DTO
@@ -38,6 +42,9 @@ import com.vodovoz.app.domain.general.model.cart.BottomCartModel
 import com.vodovoz.app.domain.general.model.certificate.BuyCertificateModel
 import com.vodovoz.app.domain.general.model.order.AboutOrderItemModel
 import com.vodovoz.app.domain.general.model.order.AboutOrderPopupWindowModel
+import com.vodovoz.app.domain.general.model.order.DeliveryDateDetailsModel
+import com.vodovoz.app.domain.general.model.order.DeliveryDateOptionModel
+import com.vodovoz.app.domain.general.model.order.DeliveryTimeIntervalModel
 import com.vodovoz.app.domain.general.model.order.OrderDetailsButtonModel
 import com.vodovoz.app.domain.general.model.order.OrderDetailsModel
 import com.vodovoz.app.domain.general.model.order.OrderDetailsSummaryModel
@@ -55,21 +62,74 @@ import com.vodovoz.app.domain.general.model.order.OrdersHistoryDetailsModel
 import com.vodovoz.app.domain.general.model.order.OrdersHistoryItemModel
 import com.vodovoz.app.domain.general.model.order.OrdersHistoryProductModel
 
+fun DeliveryDateDetailsDTO.toDomain(): DeliveryDateDetailsModel {
+    return DeliveryDateDetailsModel(
+        title = TITLE ?: "",
+        options = DATE?.mapToDomain() ?: emptyList(),
+        button = KNOPKA?.toDomain() ?: throw IllegalArgumentException("DeliveryDate button can't be null"),
+        timeSections = INTERVAL?.mapToDomain() ?: throw IllegalArgumentException("DeliveryDate intervals can't be null")
+    )
+}
+
+
+@JvmName("mapToDeliveryTimeIntervalModelSectionModelList")
+fun List<DATE_INTERVALS_DTO>.mapToDomain(): List<SectionModel<DeliveryTimeIntervalModel>>{
+    return mapNotNull { it.toDomain() }
+}
+
+fun DATE_INTERVALS_DTO.toDomain(): SectionModel<DeliveryTimeIntervalModel>? {
+    return SectionModel(
+        title = NAME ?: return null,
+        items = INTERVAL?.mapToDomain() ?: return null,
+        button = null
+    )
+}
+
+fun List<DATE_INTERVAL_DTO>.mapToDomain(): List<DeliveryTimeIntervalModel>{
+    return mapNotNull { it.toDomain() }
+}
+
+fun DATE_INTERVAL_DTO.toDomain(): DeliveryTimeIntervalModel? {
+    return DeliveryTimeIntervalModel(
+        name = NAME ?: return null,
+        value = VALUE ?: return null,
+        code = CODE ?: return null,
+        blocked = VodovozBoolean.True equalsTo BLOCK,
+        priceText = MONEY ?: ""
+    )
+}
+
+
+@JvmName("mapToDeliveryDateOptionModelList")
+fun List<DELIVERY_DATE_DTO>.mapToDomain(): List<DeliveryDateOptionModel> {
+    return mapNotNull { it.toDomain() }
+}
+
+fun DELIVERY_DATE_DTO.toDomain(): DeliveryDateOptionModel? {
+    return DeliveryDateOptionModel(
+        code = CODE ?: return null,
+        name = NAME ?: return null,
+        value = VALUE ?: return null
+    )
+}
 
 fun OrderingDetailsDTO.toDomain(): OrderingDetailsModel {
     return OrderingDetailsModel(
         title = TITLE ?: "",
         commentField = KOMMENT?.KOMMENTARY?.toDomain(),
-        recipientSection = POLYSHATEL?.toDomain() ?: throw IllegalArgumentException("Ordering recipient can't be null"),
+        recipientSection = POLYSHATEL?.toDomain()
+            ?: throw IllegalArgumentException("Ordering recipient can't be null"),
         notifySection = KOMMENT?.PREDYP?.toDomain() ?: SectionModel.empty(),
-        paymentSection = OPLATA?.toDomain() ?: throw IllegalArgumentException("Ordering payment can't be null"),
+        paymentSection = OPLATA?.toDomain()
+            ?: throw IllegalArgumentException("Ordering payment can't be null"),
         totals = ITOG?.mapToDomain() ?: emptyList(),
-        button = KNOPKA?.toDomain() ?: throw IllegalArgumentException("Ordering button can't be null")
+        button = KNOPKA?.toDomain()
+            ?: throw IllegalArgumentException("Ordering button can't be null")
     )
 }
 
 
-fun ORDER_OPLATA_DTO.toDomain(): SectionModel<OrderPaymentItemModel>{
+fun ORDER_OPLATA_DTO.toDomain(): SectionModel<OrderPaymentItemModel> {
     return SectionModel(
         title = ZAGOLOVOK ?: "",
         items = DANNYE?.mapToDomain() ?: emptyList(),
@@ -78,12 +138,12 @@ fun ORDER_OPLATA_DTO.toDomain(): SectionModel<OrderPaymentItemModel>{
 }
 
 @JvmName("OrderPaymentItemModelList")
-fun List<ORDER_OPLATA_ITEM_DTO>.mapToDomain(): List<OrderPaymentItemModel>{
+fun List<ORDER_OPLATA_ITEM_DTO>.mapToDomain(): List<OrderPaymentItemModel> {
     return mapNotNull { it -> it.toDomain() }
 }
 
 
-fun ORDER_OPLATA_ITEM_DTO.toDomain(): OrderPaymentItemModel{
+fun ORDER_OPLATA_ITEM_DTO.toDomain(): OrderPaymentItemModel {
     return OrderPaymentItemModel(
         image = KARTINKA?.toVodovozUrl() ?: "",
         name = NAME ?: "",
@@ -93,7 +153,7 @@ fun ORDER_OPLATA_ITEM_DTO.toDomain(): OrderPaymentItemModel{
 }
 
 
-fun ORDER_POLYSHATEL_DTO.toDomain(): SectionModel<OrderRecipientItemModel>{
+fun ORDER_POLYSHATEL_DTO.toDomain(): SectionModel<OrderRecipientItemModel> {
     return SectionModel(
         title = ZAGOLOVOK ?: "",
         items = DANNYE?.mapToDomain() ?: emptyList(),
@@ -102,7 +162,7 @@ fun ORDER_POLYSHATEL_DTO.toDomain(): SectionModel<OrderRecipientItemModel>{
 }
 
 @JvmName("mapToOrderRecipientItemModelList")
-fun List<ORDER_POLYSHATEL_ITEM_DTO>.mapToDomain(): List<OrderRecipientItemModel>{
+fun List<ORDER_POLYSHATEL_ITEM_DTO>.mapToDomain(): List<OrderRecipientItemModel> {
     return mapNotNull { it.toDomain() }
 }
 

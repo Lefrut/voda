@@ -96,6 +96,5 @@ fun OrderingBody(
             onClick = onButtonClick
         )
 
-
     }
 }

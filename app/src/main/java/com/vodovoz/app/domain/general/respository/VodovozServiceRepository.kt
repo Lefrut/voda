@@ -50,6 +50,7 @@ import com.vodovoz.app.domain.general.model.login.AuthDetailsModel
 import com.vodovoz.app.domain.general.model.login.RequestCodeModel
 import com.vodovoz.app.domain.general.model.login.UserAuthInfoModel
 import com.vodovoz.app.domain.general.model.notification_settings.NotificationSettingsDetailsModel
+import com.vodovoz.app.domain.general.model.order.DeliveryDateDetailsModel
 import com.vodovoz.app.domain.general.model.order.OrderDetailsModel
 import com.vodovoz.app.domain.general.model.order.OrderQuestionDetailsModel
 import com.vodovoz.app.domain.general.model.order.OrderingDetailsModel
@@ -61,12 +62,21 @@ import com.vodovoz.app.domain.general.model.service.ServiceDetailsModel
 import com.vodovoz.app.domain.general.model.service.ServiceOrderDetailsModel
 import kotlinx.coroutines.flow.Flow
 import java.io.File
+import java.time.LocalDate
 
 interface VodovozServiceRepository {
 
+    fun getDeliveryDateDetails(
+        addressId: Int,
+        date: LocalDate? = null
+    ): Flow<Result<DeliveryDateDetailsModel>>
+
     fun getOrderingDetails(): Flow<Result<OrderingDetailsModel>>
 
-    fun orderService(serviceType: String, fields: List<FieldModel>): Flow<Result<VodovozPlaceholderModel>>
+    fun orderService(
+        serviceType: String,
+        fields: List<FieldModel>,
+    ): Flow<Result<VodovozPlaceholderModel>>
 
     fun getServiceOrderDetails(serviceType: String): Flow<Result<ServiceOrderDetailsModel>>
 
@@ -76,7 +86,10 @@ interface VodovozServiceRepository {
 
     fun getOrdersHistoryDetails(): Flow<Result<OrdersHistoryDetailsModel>>
 
-    fun getOrdersHistoryItemsPaged(statuses: String, searchQuery: String): Flow<PagingData<OrdersHistoryItemModel>>
+    fun getOrdersHistoryItemsPaged(
+        statuses: String,
+        searchQuery: String,
+    ): Flow<PagingData<OrdersHistoryItemModel>>
 
     fun getWaitFeedbackProductsTitle(): Flow<Result<String>>
 
@@ -92,13 +105,13 @@ interface VodovozServiceRepository {
 
     fun requestPhoneCode(
         url: String,
-        phone: String
+        phone: String,
     ): Flow<Result<RequestCodeModel>>
 
     fun loginByPhone(
         url: String,
         code: String,
-        phone: String
+        phone: String,
     ): Flow<Result<UserAuthInfoModel>>
 
     fun getAllServicesDetails(): Flow<Result<AllServicesDetailsModel>>
@@ -109,7 +122,10 @@ interface VodovozServiceRepository {
 
     fun getQuestionnairesDetails(who: String): Flow<Result<QuestionnairesDetailsModel>>
 
-    fun sendQuestionnairesAnswers(who: String, answers: String): Flow<Result<VodovozPlaceholderModel>>
+    fun sendQuestionnairesAnswers(
+        who: String,
+        answers: String,
+    ): Flow<Result<VodovozPlaceholderModel>>
 
     fun getCancelOrderDetails(orderId: Long): Flow<Result<CancelOrderDetailsModel>>
 
@@ -128,7 +144,7 @@ interface VodovozServiceRepository {
 
     fun getWhereMyOrderDetails(
         orderId: Long,
-        driverId: String
+        driverId: String,
     ): Flow<Result<WhereOrderDetailsModel>>
 
     fun getAddresses(): Flow<Result<List<SectionModel<AddressModel>>>>

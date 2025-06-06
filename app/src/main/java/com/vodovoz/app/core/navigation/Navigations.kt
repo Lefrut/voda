@@ -176,6 +176,14 @@ fun NavController.navigateToAddresses(addressScreenType: AddressScreenTypeUi) {
     )
 }
 
+fun NavController.navigateToDeliveryDate(addressId: Int) {
+    navigate(
+        R.id.deliveryDateFragment,
+        bundleOf("addressId" to addressId),
+        SlideNavOptions
+    )
+}
+
 fun NavController.navigateToRecoverPassword() {
     navigate(R.id.recoverPasswordFragment, Bundle.EMPTY, SlideNavOptions)
 }

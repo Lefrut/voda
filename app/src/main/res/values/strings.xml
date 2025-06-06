@@ -363,5 +363,6 @@
     <string name="add_address">Добавить адрес</string>
     <string name="addresses">Адреса</string>
     <string name="delivery_address">Адрес доставки</string>
+    <string name="delivery_time_and_date">Время и дата доставки</string>
 
 </resources>

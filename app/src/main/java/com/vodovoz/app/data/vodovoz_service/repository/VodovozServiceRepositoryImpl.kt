@@ -82,6 +82,7 @@ import com.vodovoz.app.domain.general.model.login.AuthDetailsModel
 import com.vodovoz.app.domain.general.model.login.RequestCodeModel
 import com.vodovoz.app.domain.general.model.login.UserAuthInfoModel
 import com.vodovoz.app.domain.general.model.notification_settings.NotificationSettingsDetailsModel
+import com.vodovoz.app.domain.general.model.order.DeliveryDateDetailsModel
 import com.vodovoz.app.domain.general.model.order.OrderDetailsModel
 import com.vodovoz.app.domain.general.model.order.OrderQuestionDetailsModel
 import com.vodovoz.app.domain.general.model.order.OrderingDetailsModel
@@ -94,6 +95,7 @@ import com.vodovoz.app.domain.general.model.service.ServiceOrderDetailsModel
 import com.vodovoz.app.domain.general.model.toQueries
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.util.extensions.singleResult
+import com.vodovoz.app.util.formatters.VodovozDateFormatters
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
@@ -103,6 +105,7 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import java.io.File
+import java.time.LocalDate
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -114,6 +117,24 @@ class VodovozServiceRepositoryImpl @Inject constructor(
     private val cookieManager: CookieManager,
     private val moshi: Moshi,
 ) : VodovozServiceRepository {
+
+    override fun getDeliveryDateDetails(
+        addressId: Int,
+        date: LocalDate?,
+    ): Flow<Result<DeliveryDateDetailsModel>> {
+        return executeRequest(
+            request = {
+                vodovozService.getDeliveryDateDetails(
+                    accountManager.fetchAccountId(),
+                    addressId,
+                    date?.format(VodovozDateFormatters.DMY)
+                )
+            },
+            mapper = {
+                it.data!!.toDomain()
+            }
+        )
+    }
 
     override fun getOrderingDetails(): Flow<Result<OrderingDetailsModel>> {
         return executeRequest(
@@ -538,7 +559,8 @@ class VodovozServiceRepositoryImpl @Inject constructor(
             },
             onFail = { response ->
                 val body = response.stringBody()
-                val placeholder = moshi.fromJson<VodovozResponseDTO<VodovozPlaceholderDTO>>(body).data!!
+                val placeholder =
+                    moshi.fromJson<VodovozResponseDTO<VodovozPlaceholderDTO>>(body).data!!
                 throw EmptyResultException(placeholder = placeholder.toDomain())
             }
         )

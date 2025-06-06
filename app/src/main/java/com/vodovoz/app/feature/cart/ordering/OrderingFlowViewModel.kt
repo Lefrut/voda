@@ -657,8 +657,12 @@ class OrderingFlowViewModel @Inject constructor(
             OrderingEvents()
 
         data object ClearFields : OrderingEvents()
+
+
+
         data object GoBack : OrderingEvents()
         data object GoToAddresses: OrderingEvents()
+        data class GoToDeliveryDate(val addressId: Long): OrderingEvents()
     }
 
     @Immutable
