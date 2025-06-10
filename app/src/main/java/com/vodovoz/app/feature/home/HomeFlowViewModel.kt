@@ -275,7 +275,7 @@ class HomeFlowViewModel @Inject constructor(
                 specialPromotion = specialPromotion ?: s.specialPromotion,
                 showSpecialPromotionBS = specialPromotion != null,
                 sectionUnratedProducts = sectionUnratedProducts?.toUi() ?: s.sectionUnratedProducts,
-                )
+            )
         }
 
         return sectionViewedProducts != null
@@ -306,9 +306,6 @@ class HomeFlowViewModel @Inject constructor(
             s.copy(showRefreshIndicator = false)
         }
     }
-
-
-
 
 
     fun goToProfile() {
@@ -510,11 +507,14 @@ class HomeFlowViewModel @Inject constructor(
 
     fun showUnratedProducts() = viewModelScope.launch {
         uiStateListener.updateData { s ->
-            s.copy(showUnratedProductsBS = true, showedUnratedProducts = true)
+            s.copy(
+                showUnratedProductsBS = s.sectionUnratedProducts.products.isNotEmpty(),
+                showedUnratedProducts = true
+            )
         }
     }
 
-    @Immutable
+    @Stable
     sealed class HomeEvents : Event {
         data class GoToPreOrder(val id: Long, val name: String, val detailPicture: String) :
             HomeEvents()
@@ -547,7 +547,7 @@ class HomeFlowViewModel @Inject constructor(
         data class ShowSnackbar(val message: String) : HomeEvents()
     }
 
-    @Immutable
+    @Stable
     sealed class HomeUiState {
         data object Success : HomeUiState()
         data object Loading : HomeUiState()

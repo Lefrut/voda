@@ -1,6 +1,7 @@
 package com.vodovoz.app.feature.stories_fragment
 
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.Stable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.vodovoz.app.common.content.Event
@@ -19,6 +20,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
+@Stable
 class StoriesViewModel @Inject constructor(
     savedState: SavedStateHandle,
     private val vodovozServiceRepository: VodovozServiceRepository,

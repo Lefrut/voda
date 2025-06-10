@@ -11,6 +11,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.vodovoz.app.R
 import com.vodovoz.app.design_system.composables.button.VodovozButton
+import com.vodovoz.app.design_system.composables.dialogs.VodovozDialog
 import com.vodovoz.app.design_system.composables.placeholders.LoadingPlaceholder
 import com.vodovoz.app.design_system.composables.placeholders.NetworkErrorPlaceholder
 import com.vodovoz.app.design_system.composables.placeholders.VodovozPlaceholder
@@ -98,6 +99,7 @@ fun AddressesScreen(
                     contentPadding = PaddingValues(
                         bottom = paddingValues.calculateBottomPadding() + 24.dp
                     ),
+                    screenTypeUi = viewState.screenType,
                     addressSections = viewState.addressSections,
                     selectedAddress = viewState.selectedAddress,
                     onEditAddressClick = { address ->
@@ -106,8 +108,30 @@ fun AddressesScreen(
                     onAddressSelect = { address ->
                         viewModel.selectAddress(address)
                     },
+                    onRemoveAddressSwipe = { address ->
+                        viewModel.showRemoveAddressDialog(address)
+                    }
                 )
+
             }
         }
     }
+
+    if(viewState.showRemoveAddressDialog && viewState.currentRemoveAddress != null){
+        VodovozDialog(
+            title = stringResource(id = R.string.remove_address_title),
+            description = stringResource(
+                id = R.string.remove_address_description,
+            ),
+            acceptButtonText = stringResource(id = R.string.delete),
+            cancelButtonText = stringResource(id = R.string.cancel),
+            onDismiss = {
+                viewModel.hideRemoveAddressDialog()
+            },
+            onAccept = {
+                viewModel.removeAddress(viewState.currentRemoveAddress)
+            }
+        )
+    }
+
 }

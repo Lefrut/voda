@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.core.os.bundleOf
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
+import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.navOptions
 import com.vodovoz.app.R
 import com.vodovoz.app.design_system.model.ColorfulButtonUi
@@ -19,14 +20,17 @@ import com.vodovoz.app.feature.cart.model.CartPresentPopupWindowUi
 import com.vodovoz.app.feature.cart.model.CartPresentUi
 import com.vodovoz.app.feature.home.model.CategoryUi
 import com.vodovoz.app.feature.product_catalog.ProductCatalogFragment
+import java.time.LocalDate
 
 
-private val SlideNavOptions = NavOptions.Builder()
-    .setEnterAnim(R.anim.slide_in_right)
-    .setExitAnim(R.anim.fade_out)
-    .setPopExitAnim(R.anim.slide_out_right)
-    .build()
-
+private fun NavOptionsBuilder.slideAnim() {
+    anim {
+        exit = R.anim.fade_out
+        enter = R.anim.slide_in_right
+        popExit = R.anim.slide_in_left
+        popExit = R.anim.slide_out_right
+    }
+}
 
 fun NavController.navigateToAboutProduct(
     productId: Long,
@@ -42,7 +46,9 @@ fun NavController.navigateToAboutProduct(
             "analogButton" to analogButton,
             "isAvailable" to isAvailable
         ),
-        SlideNavOptions
+        navOptions {
+            slideAnim()
+        }
     )
 }
 
@@ -63,7 +69,9 @@ fun NavController.navigateToTraceOrder(dividerId: String, orderId: Long) {
     navigate(
         R.id.traceOrderFragment,
         bundleOf("driverId" to dividerId, "orderId" to orderId),
-        SlideNavOptions
+        navOptions {
+            slideAnim()
+        }
     )
 }
 
@@ -86,7 +94,9 @@ fun NavController.navigateToWaitFeedbackProducts() {
     navigate(
         R.id.waitFeedbackProductsFragment,
         null,
-        SlideNavOptions
+        navOptions {
+            slideAnim()
+        }
     )
 }
 
@@ -101,7 +111,9 @@ fun NavController.navigateToServiceDetails(serviceId: Int) {
     navigate(
         R.id.serviceDetailFragment,
         bundleOf("serviceId" to serviceId),
-        SlideNavOptions
+        navOptions {
+            slideAnim()
+        }
     )
 }
 
@@ -109,7 +121,9 @@ fun NavController.navigateToFAQ(faq: FAQUi) {
     navigate(
         R.id.faqFragment,
         bundleOf("faq" to faq),
-        SlideNavOptions
+        navOptions {
+            slideAnim()
+        }
     )
 }
 
@@ -118,12 +132,9 @@ fun NavController.navigateToCancelOrder(orderId: Long) {
     navigate(
         R.id.cancelOrderFragment,
         bundleOf("orderId" to orderId),
-        NavOptions.Builder()
-            .setEnterAnim(R.anim.slide_in_botton)
-            .setExitAnim(R.anim.fade_out)
-            .setPopExitAnim(R.anim.slide_out_botton)
-            .setPopEnterAnim(R.anim.fade_in)
-            .build()
+        navOptions {
+            slideAnim()
+        }
     )
 }
 
@@ -132,12 +143,9 @@ fun NavController.navigateToOrderQuestion(orderId: Long) {
     navigate(
         R.id.orderQuestionFragment,
         bundleOf("orderId" to orderId),
-        NavOptions.Builder()
-            .setEnterAnim(R.anim.slide_in_botton)
-            .setExitAnim(R.anim.fade_out)
-            .setPopExitAnim(R.anim.slide_out_botton)
-            .setPopEnterAnim(R.anim.fade_in)
-            .build()
+        navOptions {
+            slideAnim()
+        }
     )
 }
 
@@ -145,11 +153,9 @@ fun NavController.navigateToAllBottles() {
     navigate(
         R.id.allBottlesFragment,
         Bundle.EMPTY,
-        NavOptions.Builder()
-            .setEnterAnim(R.anim.slide_in_right)
-            .setExitAnim(R.anim.fade_out)
-            .setPopExitAnim(R.anim.slide_out_right)
-            .build()
+        navOptions {
+            slideAnim()
+        }
     )
 }
 
@@ -160,11 +166,9 @@ fun NavController.navigateToGifts(
     navigate(
         R.id.giftsFragment,
         bundleOf("present" to present, "popupWindow" to popupWindow),
-        NavOptions.Builder()
-            .setEnterAnim(R.anim.slide_in_right)
-            .setExitAnim(R.anim.fade_out)
-            .setPopExitAnim(R.anim.slide_out_right)
-            .build()
+        navOptions {
+            slideAnim()
+        }
     )
 }
 
@@ -172,7 +176,9 @@ fun NavController.navigateToAddresses(addressScreenType: AddressScreenTypeUi) {
     navigate(
         R.id.savedAddressesDialogFragment,
         bundleOf("screenType" to addressScreenType),
-        SlideNavOptions
+        navOptions {
+            slideAnim()
+        }
     )
 }
 
@@ -180,12 +186,34 @@ fun NavController.navigateToDeliveryDate(addressId: Int) {
     navigate(
         R.id.deliveryDateFragment,
         bundleOf("addressId" to addressId),
-        SlideNavOptions
+        navOptions {
+            slideAnim()
+        }
     )
 }
 
+fun NavController.navigateToPaymentMethod(addressId: Int, date: LocalDate) {
+    navigate(
+        R.id.paymentMethodFragment,
+        bundleOf(
+            "addressId" to addressId,
+            "date" to date.toEpochDay()
+        ),
+        navOptions {
+            slideAnim()
+        }
+    )
+
+}
+
 fun NavController.navigateToRecoverPassword() {
-    navigate(R.id.recoverPasswordFragment, Bundle.EMPTY, SlideNavOptions)
+    navigate(
+        R.id.recoverPasswordFragment,
+        Bundle.EMPTY,
+        navOptions {
+            slideAnim()
+        }
+    )
 }
 
 fun NavController.navigateToButtonProductList(buttonId: Int) {
@@ -200,27 +228,48 @@ fun NavController.navigateToButtonProductList(buttonId: Int) {
 }
 
 fun NavController.navigateToAboutApp() {
-    navigate(R.id.aboutAppFragment, Bundle.EMPTY, SlideNavOptions)
+    navigate(
+        R.id.aboutAppFragment,
+        Bundle.EMPTY,
+        navOptions {
+            slideAnim()
+        }
+    )
 }
 
 
 fun NavController.navigateToNotificationSettings() {
-    navigate(R.id.notificationSettingsFragment, Bundle.EMPTY, SlideNavOptions)
+    navigate(
+        R.id.notificationSettingsFragment, Bundle.EMPTY,
+        navOptions {
+            slideAnim()
+        }
+    )
 }
 
 
 fun NavController.navigateToQuestionnaires() {
-    navigate(R.id.questionnairesFragment, Bundle.EMPTY, SlideNavOptions)
+    navigate(
+        R.id.questionnairesFragment,
+        Bundle.EMPTY,
+        navOptions {
+            slideAnim()
+        }
+    )
 }
 
 fun NavController.navigateToPastPurchases() {
     navigate(
-        R.id.pastPurchasesFragment, Bundle.EMPTY, SlideNavOptions
+        R.id.pastPurchasesFragment, Bundle.EMPTY, navOptions {
+            slideAnim()
+        }
     )
 }
 
 fun NavController.navigateToOrdersHistory() {
-    navigate(R.id.allOrdersFragment, Bundle.EMPTY, SlideNavOptions)
+    navigate(R.id.allOrdersFragment, Bundle.EMPTY, navOptions {
+        slideAnim()
+    })
 }
 
 fun NavController.navigateToOrderDetails(orderId: Long) {
@@ -247,11 +296,15 @@ fun NavController.navigateToDetailMedia(media: ProductMediaUi, mediaList: List<P
 fun NavController.navigateToStories(storyId: Long) {
     val bundle = bundleOf("startHistoryId" to storyId)
     navigate(
-        R.id.fullScreenHistorySliderFragment, bundle, NavOptions.Builder()
-            .setEnterAnim(R.anim.scale_in)
-            .setExitAnim(R.anim.fade_out)
-            .setPopExitAnim(R.anim.slide_out_botton)
-            .build()
+        R.id.fullScreenHistorySliderFragment,
+        bundle,
+        navOptions {
+            anim {
+                popExit = R.anim.slide_out_botton
+                exit = R.anim.fade_out
+                enter = R.anim.scale_in
+            }
+        }
     )
 }
 
@@ -271,12 +324,9 @@ fun NavController.navigateToLoginByPhone(phone: String, waitSeconds: Int) {
 
 fun NavController.navigateToChangePassword() {
     navigate(
-        R.id.changePasswordFragment, bundleOf(), NavOptions.Builder()
-            .setEnterAnim(R.anim.slide_in_right)
-            .setExitAnim(R.anim.fade_out)
-            .setPopExitAnim(R.anim.slide_out_right)
-            .build()
-    )
+        R.id.changePasswordFragment, bundleOf(), navOptions {
+            slideAnim()
+        })
 }
 
 
@@ -352,11 +402,11 @@ fun NavController.navigateToProductAnalogs(productId: Long) {
 
 fun NavController.navigateToCertificateActivation() {
     navigate(
-        R.id.certificateActivationFragment, bundleOf(), NavOptions.Builder()
-            .setEnterAnim(R.anim.slide_in_right)
-            .setExitAnim(R.anim.fade_out)
-            .setPopExitAnim(R.anim.slide_out_right)
-            .build()
+        R.id.certificateActivationFragment,
+        Bundle.EMPTY,
+        navOptions {
+            slideAnim()
+        }
     )
 }
 
@@ -489,5 +539,7 @@ fun NavController.navigateToWebView(url: String, title: String = "") {
 }
 
 fun NavController.navigateToAllServices() {
-    navigate(R.id.aboutServicesFragment, null, SlideNavOptions)
+    navigate(R.id.aboutServicesFragment, null, navOptions {
+        slideAnim()
+    })
 }

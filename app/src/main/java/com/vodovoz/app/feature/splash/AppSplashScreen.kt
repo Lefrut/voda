@@ -44,12 +44,12 @@ import kotlinx.coroutines.flow.take
 @Composable
 fun AppSplashScreen(viewModel: SplashViewModel, viewState: SplashState) {
     val context = LocalContext.current
-    val composition by rememberLottieComposition(
+    val composition = rememberLottieComposition(
         LottieCompositionSpec.File(viewState.filePath)
     )
 
     val lottieAnimationState = animateLottieCompositionAsState(
-        composition = composition,
+        composition = composition.value,
         iterations = LottieConstants.IterateForever
     )
 
@@ -64,7 +64,7 @@ fun AppSplashScreen(viewModel: SplashViewModel, viewState: SplashState) {
 
             SplashUiState.Animation -> {
                 LottieAnimation(
-                    composition = composition,
+                    composition = composition.value,
                     progress = { lottieAnimationState.progress },
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.FillBounds

@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
@@ -49,8 +50,10 @@ fun Modifier.vodovozSurface(
 
 
 fun Modifier.bottomLine(color: Color, thickness: Dp = 1.dp): Modifier = this.then(
-    Modifier.drawBehind {
+    Modifier.drawWithContent {
         val y = size.height - thickness.toPx() / 2
+
+        drawContent()
         drawLine(
             color = color,
             start = Offset(0f, y),

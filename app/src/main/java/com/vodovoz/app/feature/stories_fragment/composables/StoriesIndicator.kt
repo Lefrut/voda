@@ -21,7 +21,7 @@ fun StoriesIndicator(
     modifier: Modifier = Modifier,
     countPages: Int,
     pageIndex: Int,
-    progress: Float,
+    progress: () -> Float,
 ) {
     Row(
         modifier = modifier
@@ -32,7 +32,11 @@ fun StoriesIndicator(
         repeat(countPages) {
             PageIndicator(
                 modifier = Modifier.weight(1f),
-                progress = { if (pageIndex == it) progress else if (it > pageIndex) 0f else 1f }
+                progress = when {
+                    pageIndex == it -> progress
+                    it > pageIndex -> { { 0f } }
+                    else -> { { 1f } }
+                }
             )
         }
     }
@@ -45,7 +49,7 @@ private fun StoriesIndicatorPreview() {
         StoriesIndicator(
             countPages = 3,
             pageIndex = 1,
-            progress = 0.5f
+            progress = { 0.5f }
         )
     }
 }
@@ -62,7 +66,7 @@ private fun PageIndicator(
             .height(2.dp)
             .clip(RoundedCornerShape(1.dp))
             .background(MaterialTheme.colorScheme.surfaceVariant.copy(0.25f)),
-        progress = { progress() },
+        progress = progress,
         trackColor = MaterialTheme.colorScheme.surfaceVariant.copy(0.25f),
         gapSize = 0.dp,
         drawStopIndicator = { }

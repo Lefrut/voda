@@ -88,6 +88,7 @@ import com.vodovoz.app.domain.general.model.order.OrderQuestionDetailsModel
 import com.vodovoz.app.domain.general.model.order.OrderingDetailsModel
 import com.vodovoz.app.domain.general.model.order.OrdersHistoryDetailsModel
 import com.vodovoz.app.domain.general.model.order.OrdersHistoryItemModel
+import com.vodovoz.app.domain.general.model.order.PaymentMethodDetailsModel
 import com.vodovoz.app.domain.general.model.order.WhereOrderDetailsModel
 import com.vodovoz.app.domain.general.model.service.AllServicesDetailsModel
 import com.vodovoz.app.domain.general.model.service.ServiceDetailsModel
@@ -117,6 +118,35 @@ class VodovozServiceRepositoryImpl @Inject constructor(
     private val cookieManager: CookieManager,
     private val moshi: Moshi,
 ) : VodovozServiceRepository {
+
+    override fun removeAddress(addressId: Int): Flow<Result<String>> {
+        return executeRequest(
+            request = {
+                vodovozService.deleteAddress(addressId, accountManager.fetchAccountId())
+            },
+            mapper = {
+                it.data!!
+            }
+        )
+    }
+
+    override fun getPaymentMethodDetails(
+        addressId: Int,
+        date: LocalDate,
+    ): Flow<Result<PaymentMethodDetailsModel>> {
+        return executeRequest(
+            request = {
+                vodovozService.getPaymentMethodDetails(
+                    userId = accountManager.fetchAccountId(),
+                    addressId = addressId,
+                    date = VodovozDateFormatters.DMY.format(date)
+                )
+            },
+            mapper = {
+                it.data!!.toDomain()
+            }
+        )
+    }
 
     override fun getDeliveryDateDetails(
         addressId: Int,

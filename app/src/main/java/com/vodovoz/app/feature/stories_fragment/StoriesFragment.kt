@@ -7,8 +7,10 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
@@ -38,16 +40,6 @@ class StoriesFragment : Fragment() {
     @Inject
     lateinit var cookieManager: CookieManager
 
-    override fun onStart() {
-        super.onStart()
-        tabManager.changeTabVisibility(false)
-    }
-
-    override fun onPause() {
-        super.onPause()
-        tabManager.changeTabVisibility(true)
-    }
-
     @SuppressLint("UnsafeRepeatOnLifecycleDetector")
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -55,20 +47,27 @@ class StoriesFragment : Fragment() {
         savedInstanceState: Bundle?,
     ): View {
         return ComposeView(requireContext()).apply {
-            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnDetachedFromWindowOrReleasedFromPool)
 
             setContent {
+                DisposableEffect(Unit) {
+                    tabManager.changeTabVisibility(false)
+                    onDispose { tabManager.changeTabVisibility(true) }
+                }
+
                 VodovozTheme {
-                    val viewState by viewModel.observeUiState().collectAsStateWithLifecycle()
-                    val data = viewState.data
+                    val pagingState by viewModel.observeUiState().collectAsStateWithLifecycle()
+                    val viewState by rememberUpdatedState(pagingState.data)
 
                     val pagerState =
-                        if (data.uiState !is StoriesViewModel.StoriesUiState.Success) rememberPagerState(
-                            data.currentStoryIndex
-                        ) { data.stories.size } else rememberPagerState(data.currentStoryIndex) { data.stories.size }
+                        if (viewState.uiState !is StoriesViewModel.StoriesUiState.Success) {
+                            rememberPagerState(viewState.currentStoryIndex) { viewState.stories.size }
+                        } else {
+                            rememberPagerState(viewState.currentStoryIndex) { viewState.stories.size }
+                        }
 
 
-                    when (viewState.data.uiState) {
+                    when (viewState.uiState) {
                         StoriesViewModel.StoriesUiState.Loading -> {
                             LoadingPlaceholder(
                                 modifier = Modifier,
@@ -78,7 +77,7 @@ class StoriesFragment : Fragment() {
 
                         StoriesViewModel.StoriesUiState.Success -> {
                             StoriesScreen(
-                                viewState = viewState.data,
+                                viewState = viewState,
                                 viewModel = viewModel,
                                 pagerState = pagerState
                             )
@@ -86,9 +85,12 @@ class StoriesFragment : Fragment() {
                     }
 
 
+
+
                     SystemBarsEffect(
                         statusBarColor = MaterialTheme.colorScheme.onBackground,
-                        navigationBarColor = MaterialTheme.colorScheme.onBackground
+                        navigationBarColor = MaterialTheme.colorScheme.onBackground,
+                        handleDecorFitsSystemWindows = false
                     )
 
                     LaunchedEffect(pagerState.currentPage) {

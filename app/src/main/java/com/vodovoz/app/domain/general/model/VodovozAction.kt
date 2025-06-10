@@ -1,5 +1,8 @@
 package com.vodovoz.app.domain.general.model
 
+import androidx.compose.runtime.Immutable
+
+
 sealed interface VodovozAction {
     data class Product(val id: Long) : VodovozAction
     data class Products(val blockId: Long, val bannerId: Long) : VodovozAction
@@ -31,9 +34,13 @@ enum class DataAllAction : VodovozAction {
 }
 
 
+@Immutable
 sealed class ButtonAction {
 
+    @Immutable
     data class Id(val id: Int) : ButtonAction()
+
+    @Immutable
     data class Action(val value: DataAllAction) : ButtonAction()
 
 }

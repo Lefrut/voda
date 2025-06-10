@@ -10,6 +10,7 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -38,6 +39,8 @@ fun HomeTopProducts(
 ) {
 
     val button = sectionCategoriesWithProducts.button
+    val items = sectionCategoriesWithProducts.items
+
     Column(modifier = modifier) {
         TitleAndButton(
             title = sectionCategoriesWithProducts.title,
@@ -49,18 +52,20 @@ fun HomeTopProducts(
             modifier = Modifier
                 .padding(top = 16.dp)
                 .fillMaxWidth(),
-            selectedTabIndex = sectionCategoriesWithProducts.items.indexOfOrNull(
+            selectedTabIndex = items.indexOfOrNull(
                 currentCategoryWithProducts
             ) ?: 0,
             edgePadding = 16.dp,
             spacing = 8.dp
         ) {
-            sectionCategoriesWithProducts.items.forEach { sectionWithProducts ->
-                VodovozChip(
-                    text = sectionWithProducts.name,
-                    selected = currentCategoryWithProducts == sectionWithProducts,
-                    onSelect = { onCategorySelect(sectionWithProducts) }
-                )
+            items.forEach { sectionWithProducts ->
+                key(sectionWithProducts.id) {
+                    VodovozChip(
+                        text = sectionWithProducts.name,
+                        selected = currentCategoryWithProducts == sectionWithProducts,
+                        onSelect = { onCategorySelect(sectionWithProducts) }
+                    )
+                }
             }
         }
 
@@ -71,7 +76,10 @@ fun HomeTopProducts(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            items(currentCategoryWithProducts.products) { product ->
+            items(
+                items = currentCategoryWithProducts.products,
+                key = { it.id }
+            ) { product ->
                 GridProductCard(
                     modifier = Modifier.width(160.dp),
                     product = product,

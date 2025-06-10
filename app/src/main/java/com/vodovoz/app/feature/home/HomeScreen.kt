@@ -16,6 +16,8 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.Indicator
 import androidx.compose.material3.pulltorefresh.PullToRefreshState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.PointerEventPass
@@ -26,6 +28,8 @@ import com.vodovoz.app.feature.home.composables.HomeBody
 import com.vodovoz.app.feature.home.composables.HomeLoadingPlaceholder
 import com.vodovoz.app.feature.home.composables.HomeTopBar
 import com.vodovoz.app.feature.home.composables.SpecialPromotionBottomSheet
+import com.vodovoz.app.feature.home.composables.UnratedProductsBottomSheet
+import kotlinx.coroutines.currentCoroutineContext
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -85,22 +89,29 @@ fun HomeScreen(
                 }
 
                 HomeFlowViewModel.HomeUiState.Success -> {
+
+                    val showedUnratedProducts =
+                        rememberUpdatedState(newValue = viewState.showedUnratedProducts)
+
                     HomeBody(
-                        modifier = Modifier.pointerInput(viewState.showedUnratedProducts) {
-                            if (viewState.showedUnratedProducts) return@pointerInput
-                            awaitEachGesture {
-                                val down = awaitFirstDown(pass = PointerEventPass.Initial)
-                                var drag: PointerInputChange? =
-                                    awaitVerticalDragOrCancellation(down.id)
-                                awaitDragOrCancellation(down.id)
+                        modifier = Modifier.pointerInput(Unit) {
+                            awaitPointerEventScope {
+                                while (!showedUnratedProducts.value) {
+                                    if (showedUnratedProducts.value) break
+                                    val down = awaitFirstDown(pass = PointerEventPass.Initial)
+                                    var drag: PointerInputChange? =
+                                        awaitVerticalDragOrCancellation(down.id)
+                                    awaitDragOrCancellation(down.id)
 
-                                while (drag != null) {
-                                    drag = awaitVerticalDragOrCancellation(drag.id)
+                                    while (drag != null) {
+                                        drag = awaitVerticalDragOrCancellation(drag.id)
+                                    }
+                                    waitForUpOrCancellation(PointerEventPass.Initial)
+
+                                    viewModel.showUnratedProducts()
                                 }
-                                waitForUpOrCancellation(PointerEventPass.Initial)
-
-                                viewModel.showUnratedProducts()
                             }
+
                         },
                         topProductsLazyListState = topProductsLazyListState,
                         banners = viewState.banners,
@@ -181,4 +192,17 @@ fun HomeScreen(
             }
         )
     }
+
+    if(viewState.showUnratedProductsBS && !viewState.showedUnratedProducts) {
+        UnratedProductsBottomSheet(
+            sectionUnratedProducts = viewState.sectionUnratedProducts,
+            onProductRatingChanged = { product, rating ->
+                viewModel.changeUnratedProductRating(product, rating)
+            },
+            onDispose = {
+                viewModel.closeUnratedProductsBottomSheet()
+            }
+        )
+    }
+
 }

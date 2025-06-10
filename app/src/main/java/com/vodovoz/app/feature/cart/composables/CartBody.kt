@@ -31,6 +31,7 @@ import com.vodovoz.app.R
 import com.vodovoz.app.design_system.composables.bottomLine
 import com.vodovoz.app.design_system.composables.button.VodovozButton
 import com.vodovoz.app.design_system.composables.decoration.OrderSummaryColumn
+import com.vodovoz.app.design_system.composables.decoration.VodovozSwipeToDismiss
 import com.vodovoz.app.domain.general.model.cart.OrderSummaryItemUi
 import com.vodovoz.app.feature.cart.model.CartButtonUi
 import com.vodovoz.app.feature.cart.model.CartItemUi
@@ -41,7 +42,6 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
 
-@OptIn(FlowPreview::class)
 @Suppress("NonSkippableComposable")
 @Composable
 fun CartBody(
@@ -64,14 +64,11 @@ fun CartBody(
     onBottlesButtonClick: () -> Unit,
     onOrderClick: () -> Unit
 ) {
-    val density = LocalDensity.current
-
-
     LazyColumn(
         modifier = modifier.fillMaxSize(),
         contentPadding = PaddingValues(top = 8.dp, bottom = 28.dp),
     ) {
-        item {
+        item(contentType = { "CartPresentCard" }) {
             cartPresent?.let {
                 CartPresentCard(
                     modifier = Modifier
@@ -86,7 +83,7 @@ fun CartBody(
             }
         }
 
-        item {
+        item(contentType = { "ClearCartRow" }) {
             Row(modifier = Modifier.padding(bottom = 24.dp, start = 16.dp, end = 16.dp)) {
                 Text(
                     modifier = Modifier.weight(1f),
@@ -124,51 +121,15 @@ fun CartBody(
             }
 
 
-            val swipeToDismissBoxState = rememberSwipeToDismissBoxState(
-                positionalThreshold = with(density) {
-                    { 104.dp.toPx() }
-                },
-                confirmValueChange = { boxValue ->
-                    if (boxValue == SwipeToDismissBoxValue.EndToStart) {
-                        onRemoveCartItem(cartItem)
-                    }
-                    true
-                }
-            )
-
-            LaunchedEffect(swipeToDismissBoxState) {
-                snapshotFlow { swipeToDismissBoxState.currentValue }.debounce(300).collectLatest {
-                    if (swipeToDismissBoxState.currentValue != SwipeToDismissBoxValue.Settled) {
-                        swipeToDismissBoxState.reset()
-                    }
-                }
-
-            }
-
 
             val restriction = cartItem.restriction
+            val notHaveDeleteRestriction = restriction != ProductRestrictionUi.FULL_RESTRICTION
+                    && restriction != ProductRestrictionUi.NO_DELETE
 
-            SwipeToDismissBox(
-                state = swipeToDismissBoxState,
-                enableDismissFromStartToEnd = false,
-                enableDismissFromEndToStart = restriction != ProductRestrictionUi.FULL_RESTRICTION
-                        && restriction != ProductRestrictionUi.NO_DELETE,
-                backgroundContent = {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(MaterialTheme.colorScheme.error)
-                            .padding(horizontal = 24.dp),
-                        contentAlignment = Alignment.CenterEnd
-                    ) {
-                        Icon(
-                            modifier = Modifier.size(24.dp),
-                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_delete),
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.background
-                        )
-                    }
-                }
+            VodovozSwipeToDismiss(
+                enableDismissFromEndToStart = notHaveDeleteRestriction,
+                gesturesEnabled = notHaveDeleteRestriction,
+                onRemove = { onRemoveCartItem(cartItem) }
             ) {
                 CartItemCard(
                     modifier = Modifier

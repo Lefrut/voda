@@ -159,7 +159,7 @@ class AddressesFragment1 : BaseFragment() {
                                 findNavController().popBackStack(R.id.orderingFragment, false)
                             }
                             is AddressesFlowViewModel.AddressesEvents.UpdateAddress -> {
-                                //mapController.searchForUpdate(it.address)
+                                mapController.searchForUpdate(it.address)
                             }
                             else -> {
 

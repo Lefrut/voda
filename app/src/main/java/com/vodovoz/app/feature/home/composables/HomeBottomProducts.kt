@@ -26,7 +26,7 @@ fun HomeBottomProducts(
     onShowAllClick: (ButtonAction) -> Unit,
     onIncrementToCart: (ProductUi) -> Unit,
     onDecrementToCart: (ProductUi) -> Unit,
-    onProductAnalogsClick: (ProductUi) -> Unit
+    onProductAnalogsClick: (ProductUi) -> Unit,
 ) {
     Column(modifier = modifier) {
         TitleAndButton(
@@ -47,7 +47,7 @@ fun HomeBottomProducts(
             contentPadding = PaddingValues(horizontal = 16.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            items(products) { item ->
+            items(products, key = { it.id }) { item ->
                 GridProductCard(
                     modifier = Modifier.width(160.dp),
                     product = item,

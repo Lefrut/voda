@@ -43,7 +43,7 @@ fun OrderingBody(
             .verticalScroll(scrollState)
     ) {
         if (recipientSection.items.isNotEmpty()) {
-            RecipientColumn(
+            OrderingRecipientColumn(
                 modifier = Modifier.padding(top = 16.dp),
                 title = recipientSection.title,
                 items = recipientSection.items,
@@ -54,7 +54,7 @@ fun OrderingBody(
         VodovozHorizontalDivider()
 
         if (comment != null) {
-            CommentColumn(
+            OrderingCommentColumn(
                 modifier = Modifier.padding(top = 8.dp),
                 comment = comment,
                 onFieldChange = onCommentChange
@@ -63,7 +63,7 @@ fun OrderingBody(
 
 
         if (recipientSection.items.isNotEmpty()) {
-            NotifyChips(
+            OrderingNotifyChips(
                 modifier = Modifier.padding(top = 24.dp),
                 title = notifySection.title,
                 notifyOptions = notifySection.items,
@@ -77,7 +77,7 @@ fun OrderingBody(
         )
 
         if (paymentSection.items.isNotEmpty()) {
-            PaymentColumn(
+            OrderingPaymentColumn(
                 modifier = Modifier.padding(bottom = 24.dp),
                 title = paymentSection.title,
                 items = paymentSection.items,

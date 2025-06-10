@@ -1,7 +1,9 @@
 package com.vodovoz.app.feature.cart.model
 
+import androidx.compose.runtime.Immutable
 import com.vodovoz.app.domain.general.model.cart.CartButtonModel
 
+@Immutable
 data class CartButtonUi(
     val id: String,
     val image: String,

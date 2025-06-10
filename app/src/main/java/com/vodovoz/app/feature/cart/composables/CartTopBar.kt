@@ -40,14 +40,14 @@ fun CartTopBar(modifier: Modifier = Modifier, title: String, onShareClick: () ->
             overflow = TextOverflow.Ellipsis
         )
 
-        Icon(
-            painter = painterResource(id = R.drawable.icon_share),
-            contentDescription = null,
-            modifier = Modifier
-                .size(24.dp)
-                .clip(MaterialTheme.shapes.small)
-                .clickable(onClick = onShareClick)
-        )
+//        Icon(
+//            painter = painterResource(id = R.drawable.icon_share),
+//            contentDescription = null,
+//            modifier = Modifier
+//                .size(24.dp)
+//                .clip(MaterialTheme.shapes.small)
+//                .clickable(onClick = onShareClick)
+//        )
     }
 
 }

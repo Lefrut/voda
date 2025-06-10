@@ -296,6 +296,37 @@ class AddressesFlowViewModel @Inject constructor(
         }
     }
 
+    fun showRemoveAddressDialog(address: AddressUi) = viewModelScope.launch {
+        uiStateListener.updateData { s ->
+            s.copy(
+                currentRemoveAddress = address,
+                showRemoveAddressDialog = true
+            )
+        }
+    }
+
+    fun hideRemoveAddressDialog() = viewModelScope.launch {
+        uiStateListener.updateData { s ->
+            s.copy(
+                currentRemoveAddress = null,
+                showRemoveAddressDialog = false
+            )
+        }
+    }
+
+    fun removeAddress(currentRemoveAddress: AddressUi) = viewModelScope.launch {
+        uiStateListener.updateData { state ->
+            state.copy(
+                addressSections = state.addressSections.map { section ->
+                    section.copy(items = section.items.filter { it.id != currentRemoveAddress.id })
+                },
+                showRemoveAddressDialog = false,
+                currentRemoveAddress = null
+            )
+        }
+        vodovozServiceRepository.removeAddress(currentRemoveAddress.id.toInt()).singleResult()
+    }
+
     sealed class AddressesEvents : Event {
         data object GoBack : AddressesEvents()
 
@@ -315,8 +346,11 @@ class AddressesFlowViewModel @Inject constructor(
         val addressSections: List<SectionUi<AddressUi>> = emptyList(),
         val selectedAddress: AddressUi = AddressUi.Empty,
         val uiState: AddressesUiState = AddressesUiState.Loading,
+        val showRemoveAddressDialog: Boolean = false,
+        val currentRemoveAddress: AddressUi? = null,
     ) : State
 
+    @Stable
     sealed interface AddressesUiState {
         data object Loading : AddressesUiState
         data object Error : AddressesUiState

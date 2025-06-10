@@ -554,7 +554,8 @@ class OrderingFlowViewModel @Inject constructor(
             }
 
             "time" -> {
-
+                //todo - put actual address id
+                eventListener.emit(OrderingEvents.GoToDeliveryDate(212504))
             }
         }
     }
@@ -579,7 +580,8 @@ class OrderingFlowViewModel @Inject constructor(
     fun navigateByPaymentItem(orderPaymentItem: OrderPaymentItemUi) = viewModelScope.launch {
         when (orderPaymentItem.id) {
             "oplata" -> {
-
+                //todo - put actual address id and chosen local date
+                eventListener.emit(OrderingEvents.GoToPaymentMethod(212504, LocalDate.now().plusDays(1)))
             }
 
             else -> {
@@ -659,10 +661,10 @@ class OrderingFlowViewModel @Inject constructor(
         data object ClearFields : OrderingEvents()
 
 
-
         data object GoBack : OrderingEvents()
-        data object GoToAddresses: OrderingEvents()
-        data class GoToDeliveryDate(val addressId: Long): OrderingEvents()
+        data object GoToAddresses : OrderingEvents()
+        data class GoToDeliveryDate(val addressId: Int) : OrderingEvents()
+        data class GoToPaymentMethod(val addressId: Int, val date: LocalDate) : OrderingEvents()
     }
 
     @Immutable

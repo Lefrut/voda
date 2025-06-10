@@ -7,7 +7,6 @@ import androidx.annotation.Keep
 import com.vodovoz.app.data.vodovoz_service.model.auth.KNOPKA_AUTH_DTO
 
 @Keep
-@JsonClass(generateAdapter = true)
 data class DeliveryDateDetailsDTO(
     @Json(name = "TITLE")
     val TITLE: String?,

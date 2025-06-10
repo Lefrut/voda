@@ -33,6 +33,9 @@ import com.vodovoz.app.data.vodovoz_service.model.ordering.ORDER_POLYSHATEL_ITEM
 import com.vodovoz.app.data.vodovoz_service.model.ordering.ORDER_PREDYP_DTO
 import com.vodovoz.app.data.vodovoz_service.model.ordering.ORDER_PREDYP_ITEM_DTO
 import com.vodovoz.app.data.vodovoz_service.model.ordering.OrderingDetailsDTO
+import com.vodovoz.app.data.vodovoz_service.model.payment_method.PaymentMethodDetailsDTO
+import com.vodovoz.app.data.vodovoz_service.model.payment_method.PaymentMethodItemDTO
+import com.vodovoz.app.data.vodovoz_service.model.payment_method.PaymentMethodSectionDTO
 import com.vodovoz.app.domain.general.model.CancelOrderDetailsModel
 import com.vodovoz.app.domain.general.model.ColorfulButtonModel
 import com.vodovoz.app.domain.general.model.PaymentInfoModel
@@ -61,19 +64,65 @@ import com.vodovoz.app.domain.general.model.order.OrdersHistoryButtonModel
 import com.vodovoz.app.domain.general.model.order.OrdersHistoryDetailsModel
 import com.vodovoz.app.domain.general.model.order.OrdersHistoryItemModel
 import com.vodovoz.app.domain.general.model.order.OrdersHistoryProductModel
+import com.vodovoz.app.domain.general.model.order.PaymentMethodDetailsModel
+import com.vodovoz.app.domain.general.model.order.PaymentMethodItemModel
+
+
+fun PaymentMethodDetailsDTO.toDomain(): PaymentMethodDetailsModel {
+    return PaymentMethodDetailsModel(
+        title = TITLE ?: "",
+        items = DANNYE?.mapToDomain() ?: throw IllegalArgumentException("Payment method items can't be null"),
+        button = KNOPKA?.toDomain()
+            ?: throw IllegalArgumentException("Payment method button can't be null")
+    )
+}
+
+
+@JvmName("mapToPaymentMethodItemModelSectionModelList")
+fun List<PaymentMethodSectionDTO>.mapToDomain(): List<SectionModel<PaymentMethodItemModel>> {
+    return map { it.toDomain() }
+}
+
+
+fun PaymentMethodSectionDTO.toDomain(): SectionModel<PaymentMethodItemModel> {
+    return SectionModel(
+        title = ZAGALOVOK ?: "",
+        items = OPLATA?.mapToDomain() ?: emptyList(),
+        button = null
+    )
+}
+
+@JvmName("mapToPaymentMethodItemModelList")
+fun List<PaymentMethodItemDTO>.mapToDomain(): List<PaymentMethodItemModel> {
+    return map { it.toDomain() }
+}
+
+
+fun PaymentMethodItemDTO.toDomain(): PaymentMethodItemModel {
+    return PaymentMethodItemModel(
+        title = NAME ?: "",
+        image = KARTINKA?.toVodovozUrl() ?: "",
+        code = CODE ?: "",
+        id = ID ?: "",
+        field = POLE?.toDomain()
+    )
+}
+
 
 fun DeliveryDateDetailsDTO.toDomain(): DeliveryDateDetailsModel {
     return DeliveryDateDetailsModel(
         title = TITLE ?: "",
         options = DATE?.mapToDomain() ?: emptyList(),
-        button = KNOPKA?.toDomain() ?: throw IllegalArgumentException("DeliveryDate button can't be null"),
-        timeSections = INTERVAL?.mapToDomain() ?: throw IllegalArgumentException("DeliveryDate intervals can't be null")
+        button = KNOPKA?.toDomain()
+            ?: throw IllegalArgumentException("DeliveryDate button can't be null"),
+        timeSections = INTERVAL?.mapToDomain()
+            ?: throw IllegalArgumentException("DeliveryDate intervals can't be null")
     )
 }
 
 
 @JvmName("mapToDeliveryTimeIntervalModelSectionModelList")
-fun List<DATE_INTERVALS_DTO>.mapToDomain(): List<SectionModel<DeliveryTimeIntervalModel>>{
+fun List<DATE_INTERVALS_DTO>.mapToDomain(): List<SectionModel<DeliveryTimeIntervalModel>> {
     return mapNotNull { it.toDomain() }
 }
 
@@ -85,7 +134,8 @@ fun DATE_INTERVALS_DTO.toDomain(): SectionModel<DeliveryTimeIntervalModel>? {
     )
 }
 
-fun List<DATE_INTERVAL_DTO>.mapToDomain(): List<DeliveryTimeIntervalModel>{
+@JvmName("mapToDeliveryTimeIntervalModelList")
+fun List<DATE_INTERVAL_DTO>.mapToDomain(): List<DeliveryTimeIntervalModel> {
     return mapNotNull { it.toDomain() }
 }
 
@@ -363,6 +413,7 @@ fun ABOUT_ORDER_ITEM_DTO.toDomain(): AboutOrderItemModel {
     )
 }
 
+@JvmName("mapToOrderStatusModelList")
 fun List<ORDER_STATUS_DTO>.mapToDomain(): List<OrderStatusModel> {
     return mapNotNull {
         it.toDomain()

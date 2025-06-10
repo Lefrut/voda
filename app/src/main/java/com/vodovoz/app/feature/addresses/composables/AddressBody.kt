@@ -1,5 +1,6 @@
 package com.vodovoz.app.feature.addresses.composables
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -11,7 +12,8 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -25,9 +27,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.vodovoz.app.R
+import com.vodovoz.app.design_system.composables.bottomLine
 import com.vodovoz.app.design_system.composables.button.VodovozRadioButton
 import com.vodovoz.app.design_system.composables.decoration.VodovozHorizontalDivider
+import com.vodovoz.app.design_system.composables.decoration.VodovozSwipeToDismiss
 import com.vodovoz.app.design_system.model.SectionUi
+import com.vodovoz.app.feature.addresses.model.AddressScreenTypeUi
 import com.vodovoz.app.feature.addresses.model.AddressUi
 
 @Suppress("NonSkippableComposable")
@@ -36,42 +41,63 @@ fun AddressBody(
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues,
     addressSections: List<SectionUi<AddressUi>>,
+    screenTypeUi: AddressScreenTypeUi,
     selectedAddress: AddressUi,
     onAddressSelect: (AddressUi) -> Unit,
     onEditAddressClick: (AddressUi) -> Unit,
+    onRemoveAddressSwipe: (AddressUi) -> Unit,
 ) {
     LazyColumn(
         modifier = modifier.fillMaxSize(),
         contentPadding = contentPadding
     ) {
         addressSections.forEachIndexed { index, addressSection ->
-            item {
-                Text(
-                    modifier = Modifier.padding(
-                        horizontal = 16.dp,
-                        vertical = 8.dp
-                    ),
-                    text = addressSection.title,
-                    color = MaterialTheme.colorScheme.onBackground,
-                    style = MaterialTheme.typography.headlineSmall
-                )
+            if (screenTypeUi == AddressScreenTypeUi.Choose) {
+                item {
+                    Text(
+                        modifier = Modifier.padding(
+                            horizontal = 16.dp,
+                            vertical = 8.dp
+                        ),
+                        text = addressSection.title,
+                        color = MaterialTheme.colorScheme.onBackground,
+                        style = MaterialTheme.typography.headlineSmall
+                    )
+                }
             }
 
-            items(
+            itemsIndexed(
                 items = addressSection.items,
-                key = { item: AddressUi -> item.id }
-            ) { address ->
-                AddressItemCard(
-                    address = address,
-                    selected = selectedAddress == address,
-                    onClick = onAddressSelect,
-                    onEditClick = onEditAddressClick
-                )
+                key = { _, address -> address.id }
+            ) { i, address ->
+
+                VodovozSwipeToDismiss(
+                    onRemove = { onRemoveAddressSwipe(address) }
+                ) {
+                    AddressItemCard(
+                        modifier = if (i != addressSection.items.lastIndex) Modifier.bottomLine(
+                            MaterialTheme.colorScheme.surfaceVariant
+                        ) else Modifier,
+                        address = address,
+                        screenTypeUi = screenTypeUi,
+                        selected = selectedAddress.id == address.id,
+                        onClick = onAddressSelect,
+                        onEditClick = onEditAddressClick
+                    )
+
+                }
             }
 
-            if (index != addressSections.lastIndex) {
+            if (index != addressSections.lastIndex && screenTypeUi != AddressScreenTypeUi.Add) {
                 item {
                     VodovozHorizontalDivider()
+                }
+            } else {
+                item {
+                    HorizontalDivider(
+                        thickness = 1.dp,
+                        color = MaterialTheme.colorScheme.surfaceVariant
+                    )
                 }
             }
         }
@@ -81,6 +107,7 @@ fun AddressBody(
 @Composable
 private fun AddressItemCard(
     modifier: Modifier = Modifier,
+    screenTypeUi: AddressScreenTypeUi,
     address: AddressUi,
     selected: Boolean,
     onClick: (AddressUi) -> Unit,
@@ -88,16 +115,21 @@ private fun AddressItemCard(
 ) {
     Row(
         modifier = modifier
+            .background(MaterialTheme.colorScheme.background)
             .heightIn(56.dp)
             .fillMaxWidth()
             .clickable(onClick = { onClick(address) })
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        VodovozRadioButton(
-            selected = selected,
-            onClick = { onClick(address) }
-        )
+        if (screenTypeUi == AddressScreenTypeUi.Choose) {
+            VodovozRadioButton(
+                modifier = Modifier.padding(end = 16.dp),
+                selected = selected,
+                onClick = { onClick(address) }
+            )
+        }
+
         Column(
             modifier = Modifier
                 .padding(start = 16.dp)

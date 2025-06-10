@@ -119,7 +119,7 @@ fun UserDataScreen(
             isSelectableDate = { currentDate ->
                 currentDate < today
             },
-            onDateSelected = { selectedDate ->
+            onDateSelect = { selectedDate ->
                 viewModel.changeDate(selectedDate)
             },
             onDismiss = {

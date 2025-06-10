@@ -1,10 +1,12 @@
 package com.vodovoz.app.feature.cart.model
 
+import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
 import com.vodovoz.app.domain.general.model.cart.CartPromoButtonModel
 import com.vodovoz.app.ui.graphics.fromHexOrUnspecified
 
 
+@Immutable
 data class CartPromoButtonUi(
     val title: String,
     val text: String,
