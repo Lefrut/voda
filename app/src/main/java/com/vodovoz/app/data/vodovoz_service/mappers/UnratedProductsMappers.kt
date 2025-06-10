@@ -4,8 +4,8 @@ import com.vodovoz.app.data.vodovoz_service.di.toVodovozUrl
 import com.vodovoz.app.data.vodovoz_service.model.unrated_products.UnratedProductDTO
 import com.vodovoz.app.data.vodovoz_service.model.unrated_products.UnratedProductsSectionDTO
 import com.vodovoz.app.domain.general.model.EmptyResultException
-import com.vodovoz.app.domain.general.model.UnratedProductModel
-import com.vodovoz.app.domain.general.model.UnratedProductsSectionModel
+import com.vodovoz.app.domain.general.model.product.UnratedProductModel
+import com.vodovoz.app.domain.general.model.product.UnratedProductsSectionModel
 
 fun UnratedProductsSectionDTO.toDomain(): UnratedProductsSectionModel {
     return UnratedProductsSectionModel(

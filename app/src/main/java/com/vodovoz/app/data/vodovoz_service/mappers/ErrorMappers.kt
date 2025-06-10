@@ -3,7 +3,7 @@ package com.vodovoz.app.data.vodovoz_service.mappers
 import com.vodovoz.app.data.vodovoz_service.di.toVodovozUrl
 import com.vodovoz.app.data.vodovoz_service.model.VodovozButtonDTO
 import com.vodovoz.app.data.vodovoz_service.model.VodovozPlaceholderDTO
-import com.vodovoz.app.domain.general.model.ColorfulButtonModel
+import com.vodovoz.app.domain.general.model.promotion.ColorfulButtonModel
 import com.vodovoz.app.domain.general.model.VodovozPlaceholderModel
 
 

@@ -7,7 +7,7 @@ import com.vodovoz.app.data.vodovoz_service.model.order_details.WHERE_ORDER_BUTT
 import com.vodovoz.app.data.vodovoz_service.model.order_details.WhereMyOrderDetailsDTO
 import com.vodovoz.app.domain.general.model.ImageAndTextModel
 import com.vodovoz.app.domain.general.model.ImageButtonModel
-import com.vodovoz.app.domain.general.model.MapPointModel
+import com.vodovoz.app.domain.general.model.location.MapPointModel
 import com.vodovoz.app.domain.general.model.order.WhereOrderDetailsModel
 
 fun WhereMyOrderDetailsDTO.toDomain(): WhereOrderDetailsModel {

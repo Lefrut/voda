@@ -14,7 +14,7 @@ import com.vodovoz.app.design_system.composables.decoration.VodovozHorizontalDiv
 import com.vodovoz.app.design_system.model.ColorfulButtonUi
 import com.vodovoz.app.design_system.model.SectionUi
 import com.vodovoz.app.design_system.model.widgets.FieldUi
-import com.vodovoz.app.domain.general.model.cart.OrderSummaryItemUi
+import com.vodovoz.app.design_system.model.order.OrderSummaryItemUi
 import com.vodovoz.app.feature.cart.ordering.model.OrderNotifyItemUi
 import com.vodovoz.app.feature.cart.ordering.model.OrderPaymentItemUi
 import com.vodovoz.app.feature.cart.ordering.model.OrderRecipientItemUi

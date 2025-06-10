@@ -4,9 +4,9 @@ import com.vodovoz.app.data.vodovoz_service.di.toVodovozUrl
 import com.vodovoz.app.data.vodovoz_service.model.APP_UPDATE_INFO_DTO
 import com.vodovoz.app.data.vodovoz_service.model.PopupWindowDTO
 import com.vodovoz.app.data.vodovoz_service.model.SPECTIAL_PROMOTION_DTO
-import com.vodovoz.app.domain.general.model.AppUpdateInfoModel
-import com.vodovoz.app.domain.general.model.PopupWindowInfoModel
-import com.vodovoz.app.domain.general.model.SpecialPromotionModel
+import com.vodovoz.app.domain.general.model.promotion.AppUpdateInfoModel
+import com.vodovoz.app.domain.general.model.promotion.PopupWindowInfoModel
+import com.vodovoz.app.domain.general.model.promotion.SpecialPromotionModel
 
 fun PopupWindowDTO.toDomain(): PopupWindowInfoModel {
     return PopupWindowInfoModel(

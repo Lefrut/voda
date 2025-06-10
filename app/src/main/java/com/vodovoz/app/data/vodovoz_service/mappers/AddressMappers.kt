@@ -3,14 +3,14 @@ package com.vodovoz.app.data.vodovoz_service.mappers
 import com.vodovoz.app.data.vodovoz_service.model.address.ADDRESSES_SECTION_DTO
 import com.vodovoz.app.data.vodovoz_service.model.address.ADDRESS_ITEM_DTO
 import com.vodovoz.app.data.vodovoz_service.model.address.AddressesDTO
-import com.vodovoz.app.domain.general.model.SectionModel
-import com.vodovoz.app.domain.general.model.addresses.AddressModel
+import com.vodovoz.app.domain.general.model.product.SectionModel
+import com.vodovoz.app.domain.general.model.location.AddressModel
 
 fun AddressesDTO.toDomain(): List<SectionModel<AddressModel>>{
     return listOf(FIZLICO?.toDomain(), YRLICO?.toDomain()).mapNotNull { section -> section }
 }
 
-fun ADDRESSES_SECTION_DTO.toDomain(): SectionModel<AddressModel>{
+fun ADDRESSES_SECTION_DTO.toDomain(): SectionModel<AddressModel> {
     return SectionModel(
         title = NAME ?: "",
         items = DANNYE?.mapNotNull { it.toDomain() } ?: emptyList(),

@@ -1,8 +1,8 @@
 package com.vodovoz.app.design_system.model
 
 import androidx.compose.runtime.Immutable
-import com.vodovoz.app.domain.general.model.BannerModel
-import com.vodovoz.app.domain.general.model.VodovozAction
+import com.vodovoz.app.domain.general.model.promotion.BannerModel
+import com.vodovoz.app.common.model.VodovozAction
 
 @Immutable
 data class BannerUi(

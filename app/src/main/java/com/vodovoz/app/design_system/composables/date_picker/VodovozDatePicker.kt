@@ -187,7 +187,7 @@ fun VodovozCalendarDialog(
                     animateFloatAsState(
                         targetValue = if (yearPickerVisible) 1f else 0f,
                         label = "",
-                        animationSpec = tween(180)
+                        animationSpec = tween(240)
                     )
 
                 if (yearPickerVisible) {

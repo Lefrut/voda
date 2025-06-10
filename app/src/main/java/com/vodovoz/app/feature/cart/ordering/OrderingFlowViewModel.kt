@@ -22,8 +22,8 @@ import com.vodovoz.app.design_system.model.SectionUi
 import com.vodovoz.app.design_system.model.toUi
 import com.vodovoz.app.design_system.model.widgets.FieldUi
 import com.vodovoz.app.design_system.model.widgets.toUi
-import com.vodovoz.app.domain.general.model.cart.OrderSummaryItemUi
-import com.vodovoz.app.domain.general.model.cart.mapToUi
+import com.vodovoz.app.design_system.model.order.OrderSummaryItemUi
+import com.vodovoz.app.design_system.model.order.mapToUi
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.feature.cart.ordering.model.OrderNotifyItemUi
 import com.vodovoz.app.feature.cart.ordering.model.OrderPaymentItemUi

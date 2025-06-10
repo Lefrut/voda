@@ -4,7 +4,7 @@ import android.os.Parcelable
 import androidx.compose.runtime.Immutable
 import com.vodovoz.app.design_system.model.ParentCategoryUi
 import com.vodovoz.app.domain.general.model.CategoryModel
-import com.vodovoz.app.domain.general.model.DataAllAction
+import com.vodovoz.app.common.model.DataAllAction
 import com.vodovoz.app.domain.general.model.PopularCategoryModel
 import kotlinx.parcelize.Parcelize
 

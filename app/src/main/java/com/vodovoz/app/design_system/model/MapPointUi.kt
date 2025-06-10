@@ -1,7 +1,7 @@
 package com.vodovoz.app.design_system.model
 
 import androidx.compose.runtime.Immutable
-import com.vodovoz.app.domain.general.model.MapPointModel
+import com.vodovoz.app.domain.general.model.location.MapPointModel
 import com.yandex.mapkit.geometry.Point
 
 @Immutable

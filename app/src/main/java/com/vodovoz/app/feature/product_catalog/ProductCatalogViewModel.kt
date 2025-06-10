@@ -30,10 +30,10 @@ import com.vodovoz.app.design_system.model.withUpdatedFavorites
 import com.vodovoz.app.design_system.model.withUpdatedLoading
 import com.vodovoz.app.domain.general.model.EmptyResultException
 import com.vodovoz.app.domain.general.model.FiltersModel
-import com.vodovoz.app.domain.general.model.ProductModel
-import com.vodovoz.app.domain.general.model.ProductsSectionModel
-import com.vodovoz.app.domain.general.model.ProductsSectionUi
-import com.vodovoz.app.domain.general.model.toUi
+import com.vodovoz.app.domain.general.model.product.ProductModel
+import com.vodovoz.app.domain.general.model.product.ProductsSectionModel
+import com.vodovoz.app.domain.general.model.product.ProductsSectionUi
+import com.vodovoz.app.domain.general.model.product.toUi
 import com.vodovoz.app.domain.general.respository.UserPreferencesRepository
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.feature.home.model.CategoryUi

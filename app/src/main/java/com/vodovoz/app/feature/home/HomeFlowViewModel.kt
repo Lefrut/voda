@@ -30,10 +30,10 @@ import com.vodovoz.app.design_system.model.toUi
 import com.vodovoz.app.design_system.model.withUpdatedCart
 import com.vodovoz.app.design_system.model.withUpdatedFavorites
 import com.vodovoz.app.design_system.model.withUpdatedLoading
-import com.vodovoz.app.domain.general.model.ButtonAction
-import com.vodovoz.app.domain.general.model.DataAllAction
-import com.vodovoz.app.domain.general.model.VodovozAction
-import com.vodovoz.app.domain.general.model.toUi
+import com.vodovoz.app.common.model.ButtonAction
+import com.vodovoz.app.common.model.DataAllAction
+import com.vodovoz.app.common.model.VodovozAction
+import com.vodovoz.app.domain.general.model.promotion.toUi
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.feature.home.model.HomeOrderUi
 import com.vodovoz.app.feature.home.model.MenuItemTypeUi

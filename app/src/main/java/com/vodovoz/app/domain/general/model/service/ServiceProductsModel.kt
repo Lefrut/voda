@@ -1,6 +1,6 @@
 package com.vodovoz.app.domain.general.model.service
 
-import com.vodovoz.app.domain.general.model.ProductModel
+import com.vodovoz.app.domain.general.model.product.ProductModel
 
 data class ServiceProductsModel(
     val title: String,

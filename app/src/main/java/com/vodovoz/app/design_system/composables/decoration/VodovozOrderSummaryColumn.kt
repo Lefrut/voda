@@ -14,7 +14,7 @@ import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.vodovoz.app.domain.general.model.cart.OrderSummaryItemUi
+import com.vodovoz.app.design_system.model.order.OrderSummaryItemUi
 
 @Suppress("NonSkippableComposable")
 @Composable

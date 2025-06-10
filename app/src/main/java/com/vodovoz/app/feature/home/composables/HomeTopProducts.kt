@@ -20,7 +20,7 @@ import com.vodovoz.app.design_system.composables.tab_row.VodovozScrollableTabRow
 import com.vodovoz.app.design_system.model.CategoryWithProductsUi
 import com.vodovoz.app.design_system.model.ProductUi
 import com.vodovoz.app.design_system.model.SectionUi
-import com.vodovoz.app.domain.general.model.ButtonAction
+import com.vodovoz.app.common.model.ButtonAction
 import com.vodovoz.app.util.extensions.indexOfOrNull
 
 @Composable

@@ -1,11 +1,11 @@
 package com.vodovoz.app.design_system.model
 
 import androidx.compose.runtime.Immutable
-import com.vodovoz.app.domain.general.model.AboutAdvertisingModel
-import com.vodovoz.app.domain.general.model.PromotionDetailsModel
-import com.vodovoz.app.domain.general.model.PromotionCategoryModel
-import com.vodovoz.app.domain.general.model.PromotionModel
-import com.vodovoz.app.domain.general.model.SpecialPromotionModel
+import com.vodovoz.app.domain.general.model.promotion.AboutAdvertisingModel
+import com.vodovoz.app.domain.general.model.promotion.PromotionDetailsModel
+import com.vodovoz.app.domain.general.model.promotion.PromotionCategoryModel
+import com.vodovoz.app.domain.general.model.promotion.PromotionModel
+import com.vodovoz.app.domain.general.model.promotion.SpecialPromotionModel
 import java.time.Duration
 import java.time.ZonedDateTime
 import java.util.Locale

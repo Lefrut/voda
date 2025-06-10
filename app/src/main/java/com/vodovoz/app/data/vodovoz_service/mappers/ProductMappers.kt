@@ -10,12 +10,12 @@ import com.vodovoz.app.data.vodovoz_service.model.ProductsSectionDTO
 import com.vodovoz.app.data.vodovoz_service.model.TOVAR_18_DTO
 import com.vodovoz.app.data.vodovoz_service.model.TOVAR_DATA_DTO
 import com.vodovoz.app.domain.general.model.CategoryModel
-import com.vodovoz.app.domain.general.model.ForAdultsModel
-import com.vodovoz.app.domain.general.model.LabelModel
-import com.vodovoz.app.domain.general.model.PriceModel
-import com.vodovoz.app.domain.general.model.ProductModel
-import com.vodovoz.app.domain.general.model.ProductsSectionModel
-import com.vodovoz.app.domain.general.model.ShareModel
+import com.vodovoz.app.domain.general.model.user.ForAdultsModel
+import com.vodovoz.app.domain.general.model.promotion.LabelModel
+import com.vodovoz.app.domain.general.model.product.PriceModel
+import com.vodovoz.app.domain.general.model.product.ProductModel
+import com.vodovoz.app.domain.general.model.product.ProductsSectionModel
+import com.vodovoz.app.domain.general.model.product.ShareModel
 
 fun ProductsSectionDTO.toDomain(): ProductsSectionModel {
 

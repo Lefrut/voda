@@ -1,7 +1,7 @@
 package com.vodovoz.app.domain.general.model.order
 
-import com.vodovoz.app.domain.general.model.ColorfulButtonModel
-import com.vodovoz.app.domain.general.model.SectionModel
+import com.vodovoz.app.domain.general.model.promotion.ColorfulButtonModel
+import com.vodovoz.app.domain.general.model.product.SectionModel
 
 data class PaymentMethodDetailsModel(
     val title: String,

@@ -22,9 +22,9 @@ import com.vodovoz.app.core.navigation.navigateToServiceDetails
 import com.vodovoz.app.core.navigation.navigateToWaterApp
 import com.vodovoz.app.core.navigation.navigateToWebView
 import com.vodovoz.app.core.network.VodovozWebConfig
-import com.vodovoz.app.domain.general.model.ButtonAction
-import com.vodovoz.app.domain.general.model.DataAllAction
-import com.vodovoz.app.domain.general.model.VodovozAction
+import com.vodovoz.app.common.model.ButtonAction
+import com.vodovoz.app.common.model.DataAllAction
+import com.vodovoz.app.common.model.VodovozAction
 
 fun DataAllAction.activate(
     navController: NavController,

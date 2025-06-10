@@ -1,8 +1,8 @@
 package com.vodovoz.app.data.vodovoz_service.mappers
 
 import com.vodovoz.app.data.vodovoz_service.model.ACTION_DTO
-import com.vodovoz.app.domain.general.model.DataAllAction
-import com.vodovoz.app.domain.general.model.VodovozAction
+import com.vodovoz.app.common.model.DataAllAction
+import com.vodovoz.app.common.model.VodovozAction
 
 
 fun ACTION_DTO.toAction(blockId: Long): VodovozAction? {

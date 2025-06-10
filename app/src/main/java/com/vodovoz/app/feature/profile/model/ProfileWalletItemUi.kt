@@ -2,8 +2,8 @@ package com.vodovoz.app.feature.profile.model
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
-import com.vodovoz.app.domain.general.model.ProfileWalletItemModel
-import com.vodovoz.app.domain.general.model.ProfilePopupWindowModel
+import com.vodovoz.app.domain.general.model.user.ProfileWalletItemModel
+import com.vodovoz.app.domain.general.model.user.ProfilePopupWindowModel
 import com.vodovoz.app.ui.graphics.fromHexOrUnspecified
 
 @Immutable

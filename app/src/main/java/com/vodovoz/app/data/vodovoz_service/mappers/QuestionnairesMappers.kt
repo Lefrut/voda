@@ -5,10 +5,10 @@ import com.vodovoz.app.data.vodovoz_service.model.QuestionnairesDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.QuestionnairesItemDTO
 import com.vodovoz.app.data.vodovoz_service.model.QuestionnairesWelcomeDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.USLOVIE_DTO
-import com.vodovoz.app.domain.general.model.ConditionModel
-import com.vodovoz.app.domain.general.model.QuestionnairesDetailsModel
-import com.vodovoz.app.domain.general.model.QuestionnairesItemModel
-import com.vodovoz.app.domain.general.model.QuestionnairesWelcomeDetailsModel
+import com.vodovoz.app.domain.general.model.user.ConditionModel
+import com.vodovoz.app.domain.general.model.user.QuestionnairesDetailsModel
+import com.vodovoz.app.domain.general.model.user.QuestionnairesItemModel
+import com.vodovoz.app.domain.general.model.user.QuestionnairesWelcomeDetailsModel
 
 fun QuestionnairesWelcomeDetailsDTO.toDomain(): QuestionnairesWelcomeDetailsModel {
     return QuestionnairesWelcomeDetailsModel(
