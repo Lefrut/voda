@@ -5,7 +5,7 @@ import com.vodovoz.app.design_system.model.ColorfulButtonUi
 import com.vodovoz.app.design_system.model.toUi
 import com.vodovoz.app.design_system.model.widgets.FieldUi
 import com.vodovoz.app.design_system.model.widgets.toUi
-import com.vodovoz.app.domain.general.model.PreOrderSectionModel
+import com.vodovoz.app.domain.general.model.order.PreOrderSectionModel
 
 @Immutable
 data class PreOrderSectionUi(

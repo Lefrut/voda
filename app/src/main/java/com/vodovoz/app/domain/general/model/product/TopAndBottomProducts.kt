@@ -1,0 +1,31 @@
+package com.vodovoz.app.domain.general.model.product
+
+import com.vodovoz.app.common.model.ButtonAction
+
+data class TopAndBottomSectionsModel(
+    val topSection: SectionModel<CategoryWithProductsModel>,
+    val bottomSection: SectionModel<CategoryWithProductsModel>,
+)
+
+
+data class SectionModel<E>(
+    val title: String,
+    val items: List<E>,
+    val button: ButtonModel?,
+){
+    companion object{
+        fun<T> empty() = SectionModel<T>("", emptyList(), null)
+    }
+}
+
+data class ButtonModel(
+    val name: String,
+    val action: ButtonAction,
+)
+
+
+data class CategoryWithProductsModel(
+    val id: Long,
+    val name: String,
+    val products: List<ProductModel>,
+)

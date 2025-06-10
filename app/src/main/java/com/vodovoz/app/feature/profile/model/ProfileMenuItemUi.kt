@@ -1,9 +1,9 @@
 package com.vodovoz.app.feature.profile.model
 
 import androidx.compose.runtime.Immutable
-import com.vodovoz.app.domain.general.model.ProfileChatItemModel
-import com.vodovoz.app.domain.general.model.ProfileChatsPopupWindowModel
-import com.vodovoz.app.domain.general.model.ProfileMenuItemModel
+import com.vodovoz.app.domain.general.model.user.ProfileChatItemModel
+import com.vodovoz.app.domain.general.model.user.ProfileChatsPopupWindowModel
+import com.vodovoz.app.domain.general.model.user.ProfileMenuItemModel
 
 
 @Immutable

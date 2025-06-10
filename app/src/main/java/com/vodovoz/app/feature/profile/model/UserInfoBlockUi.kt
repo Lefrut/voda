@@ -3,7 +3,7 @@ package com.vodovoz.app.feature.profile.model
 import androidx.compose.runtime.Immutable
 import com.vodovoz.app.design_system.model.TextButtonUi
 import com.vodovoz.app.design_system.model.toUi
-import com.vodovoz.app.domain.general.model.UserInfoBlockModel
+import com.vodovoz.app.domain.general.model.user.UserInfoBlockModel
 
 @Immutable
 data class UserInfoBlockUi(

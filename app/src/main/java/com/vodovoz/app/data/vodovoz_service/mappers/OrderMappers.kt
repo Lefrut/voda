@@ -36,10 +36,10 @@ import com.vodovoz.app.data.vodovoz_service.model.ordering.OrderingDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.payment_method.PaymentMethodDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.payment_method.PaymentMethodItemDTO
 import com.vodovoz.app.data.vodovoz_service.model.payment_method.PaymentMethodSectionDTO
-import com.vodovoz.app.domain.general.model.CancelOrderDetailsModel
-import com.vodovoz.app.domain.general.model.ColorfulButtonModel
+import com.vodovoz.app.domain.general.model.order.CancelOrderDetailsModel
+import com.vodovoz.app.domain.general.model.promotion.ColorfulButtonModel
 import com.vodovoz.app.domain.general.model.PaymentInfoModel
-import com.vodovoz.app.domain.general.model.SectionModel
+import com.vodovoz.app.domain.general.model.product.SectionModel
 import com.vodovoz.app.domain.general.model.VodovozPlaceholderModel
 import com.vodovoz.app.domain.general.model.cart.BottomCartModel
 import com.vodovoz.app.domain.general.model.certificate.BuyCertificateModel

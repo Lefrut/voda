@@ -1,6 +1,6 @@
 package com.vodovoz.app.feature.sub_categories.model
 
-import com.vodovoz.app.domain.general.model.DataAllAction
+import com.vodovoz.app.common.model.DataAllAction
 import com.vodovoz.app.design_system.model.ParentCategoryUi
 
 sealed interface SubCategoriesEvent {

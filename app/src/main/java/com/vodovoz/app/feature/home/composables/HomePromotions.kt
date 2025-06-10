@@ -10,7 +10,7 @@ import com.vodovoz.app.design_system.composables.decoration.AdvertisingChip
 import com.vodovoz.app.design_system.model.AboutAdvertisingUi
 import com.vodovoz.app.design_system.model.PromotionUi
 import com.vodovoz.app.design_system.model.SectionUi
-import com.vodovoz.app.domain.general.model.ButtonAction
+import com.vodovoz.app.common.model.ButtonAction
 
 @Composable
 fun HomePromotions(

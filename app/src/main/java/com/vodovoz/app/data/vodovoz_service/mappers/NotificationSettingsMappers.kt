@@ -5,10 +5,10 @@ import com.vodovoz.app.common.model.equalsTo
 import com.vodovoz.app.data.vodovoz_service.model.notification_settings.NOTIFICATION_SECTION_DTO
 import com.vodovoz.app.data.vodovoz_service.model.notification_settings.NOTIFICATION_SECTION_ITEM_DTO
 import com.vodovoz.app.data.vodovoz_service.model.notification_settings.NotificationSettingsDetailsDTO
-import com.vodovoz.app.domain.general.model.ColorfulButtonModel
-import com.vodovoz.app.domain.general.model.SectionModel
-import com.vodovoz.app.domain.general.model.notification_settings.NotificationSectionItemModel
-import com.vodovoz.app.domain.general.model.notification_settings.NotificationSettingsDetailsModel
+import com.vodovoz.app.domain.general.model.promotion.ColorfulButtonModel
+import com.vodovoz.app.domain.general.model.product.SectionModel
+import com.vodovoz.app.domain.general.model.user.NotificationSectionItemModel
+import com.vodovoz.app.domain.general.model.user.NotificationSettingsDetailsModel
 
 fun NotificationSettingsDetailsDTO.toDomain(): NotificationSettingsDetailsModel {
     return NotificationSettingsDetailsModel(

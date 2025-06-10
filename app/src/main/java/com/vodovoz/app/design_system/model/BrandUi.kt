@@ -1,6 +1,6 @@
 package com.vodovoz.app.design_system.model
 
-import com.vodovoz.app.domain.general.model.BrandModel
+import com.vodovoz.app.domain.general.model.brand.BrandModel
 
 data class BrandUi(
     val name: String,

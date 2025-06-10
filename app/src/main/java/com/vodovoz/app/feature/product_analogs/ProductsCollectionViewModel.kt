@@ -8,7 +8,7 @@ import com.vodovoz.app.design_system.model.ProductUi
 import com.vodovoz.app.design_system.model.withUpdatedCart
 import com.vodovoz.app.design_system.model.withUpdatedFavorites
 import com.vodovoz.app.design_system.model.withUpdatedLoading
-import com.vodovoz.app.domain.general.model.toUi
+import com.vodovoz.app.domain.general.model.product.toUi
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.feature.product_comments.model.SortUi
 import com.vodovoz.app.feature.product_comments.model.toDomain

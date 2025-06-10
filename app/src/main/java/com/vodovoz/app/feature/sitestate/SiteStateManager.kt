@@ -2,11 +2,9 @@ package com.vodovoz.app.feature.sitestate
 
 import com.vodovoz.app.common.agreement.AgreementController
 import com.vodovoz.app.common.jivochat.JivoChatController
-import com.vodovoz.app.data.MainRepository
 import com.vodovoz.app.data.parser.common.safeString
-import com.vodovoz.app.domain.general.model.SiteState
+import com.vodovoz.app.common.model.VodovozSiteState
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
-import com.vodovoz.app.feature.sitestate.model.SiteStateResponse
 import com.vodovoz.app.util.extensions.debugLog
 import com.vodovoz.app.util.extensions.singleResult
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,7 +18,7 @@ import javax.inject.Singleton
 class SiteStateManager @Inject constructor(
     private val vodovozServiceRepository: VodovozServiceRepository,
 ) {
-    private val _siteStateFlow = MutableStateFlow<SiteState?>(null)
+    private val _siteStateFlow = MutableStateFlow<VodovozSiteState?>(null)
     val siteStateFlow = _siteStateFlow.asStateFlow()
 
     val siteStateSnapshot get() = siteStateFlow.value
@@ -31,7 +29,7 @@ class SiteStateManager @Inject constructor(
     private val pushListener = MutableStateFlow<PushData?>(null)
     fun observePush() = pushListener.asStateFlow()
 
-    suspend fun requestSiteState(): SiteState? {
+    suspend fun requestSiteState(): VodovozSiteState? {
         if (siteStateSnapshot != null) return siteStateSnapshot
 
         val siteStateResult = vodovozServiceRepository.getSiteState().singleResult()

@@ -4,9 +4,9 @@ import com.vodovoz.app.data.vodovoz_service.model.MiniSearchRecommendationsDTO
 import com.vodovoz.app.data.vodovoz_service.model.SearchRecommendationsDTO
 import com.vodovoz.app.data.vodovoz_service.model.TOVARY_DTO
 import com.vodovoz.app.data.vodovoz_service.model.product_details.TOVAR_SECTION_DTO
-import com.vodovoz.app.domain.general.model.ProductModel
+import com.vodovoz.app.domain.general.model.product.ProductModel
 import com.vodovoz.app.domain.general.model.SearchRecommendationsModel
-import com.vodovoz.app.domain.general.model.SectionModel
+import com.vodovoz.app.domain.general.model.product.SectionModel
 
 fun SearchRecommendationsDTO.toDomain(): SearchRecommendationsModel {
     return SearchRecommendationsModel(

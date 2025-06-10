@@ -6,8 +6,8 @@ import com.vodovoz.app.data.vodovoz_service.model.user_data.POLE_DTO
 import com.vodovoz.app.data.vodovoz_service.model.user_data.UserDataDTO
 import com.vodovoz.app.domain.general.model.FieldModel
 import com.vodovoz.app.domain.general.model.FieldOptionModel
-import com.vodovoz.app.domain.general.model.UserDataModel
-import com.vodovoz.app.domain.general.model.UserDataPhotoModel
+import com.vodovoz.app.domain.general.model.user.UserDataModel
+import com.vodovoz.app.domain.general.model.user.UserDataPhotoModel
 
 fun UserDataDTO.toDomain(): UserDataModel {
     return UserDataModel(

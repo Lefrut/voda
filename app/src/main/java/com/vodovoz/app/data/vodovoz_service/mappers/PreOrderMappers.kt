@@ -3,7 +3,7 @@ package com.vodovoz.app.data.vodovoz_service.mappers
 import com.vodovoz.app.data.vodovoz_service.model.FIELD_DTO
 import com.vodovoz.app.data.vodovoz_service.model.PreOrderDTO
 import com.vodovoz.app.domain.general.model.FieldModel
-import com.vodovoz.app.domain.general.model.PreOrderSectionModel
+import com.vodovoz.app.domain.general.model.order.PreOrderSectionModel
 
 fun PreOrderDTO.toDomain(): PreOrderSectionModel {
     return PreOrderSectionModel(

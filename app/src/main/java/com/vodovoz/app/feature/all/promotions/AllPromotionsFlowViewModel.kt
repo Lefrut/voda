@@ -14,7 +14,7 @@ import com.vodovoz.app.design_system.model.PromotionUi
 import com.vodovoz.app.design_system.model.mapToDomain
 import com.vodovoz.app.design_system.model.mapToUi
 import com.vodovoz.app.design_system.model.toUi
-import com.vodovoz.app.domain.general.model.PromotionsSectionModel
+import com.vodovoz.app.domain.general.model.promotion.PromotionsSectionModel
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel

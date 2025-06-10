@@ -1,6 +1,6 @@
 package com.vodovoz.app.domain.general.model.service
 
-import com.vodovoz.app.domain.general.model.ColorfulButtonModel
+import com.vodovoz.app.domain.general.model.promotion.ColorfulButtonModel
 import com.vodovoz.app.domain.general.model.FieldModel
 
 data class ServiceOrderDetailsModel(

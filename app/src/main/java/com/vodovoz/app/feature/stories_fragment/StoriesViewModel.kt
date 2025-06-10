@@ -10,7 +10,7 @@ import com.vodovoz.app.common.content.State
 import com.vodovoz.app.common.content.updateData
 import com.vodovoz.app.design_system.model.StoryUi
 import com.vodovoz.app.design_system.model.mapToUi
-import com.vodovoz.app.domain.general.model.VodovozAction
+import com.vodovoz.app.common.model.VodovozAction
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay

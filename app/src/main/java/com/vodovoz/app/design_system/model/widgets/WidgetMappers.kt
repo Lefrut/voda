@@ -4,8 +4,8 @@ import com.vodovoz.app.common.model.VodovozBoolean
 import com.vodovoz.app.common.model.equalsTo
 import com.vodovoz.app.design_system.model.SectionUi
 import com.vodovoz.app.domain.general.model.FieldModel
-import com.vodovoz.app.domain.general.model.SectionModel
-import com.vodovoz.app.domain.general.model.notification_settings.NotificationSectionItemModel
+import com.vodovoz.app.domain.general.model.product.SectionModel
+import com.vodovoz.app.domain.general.model.user.NotificationSectionItemModel
 
 fun SectionModel<NotificationSectionItemModel>.toUi(): SectionUi<WidgetUi> {
     return SectionUi(

@@ -2,7 +2,7 @@ package com.vodovoz.app.data.vodovoz_service.mappers
 
 import com.vodovoz.app.data.vodovoz_service.di.toVodovozUrl
 import com.vodovoz.app.data.vodovoz_service.model.BannerDTO
-import com.vodovoz.app.domain.general.model.BannerModel
+import com.vodovoz.app.domain.general.model.promotion.BannerModel
 
 
 fun List<BannerDTO>.mapToDomain(): List<BannerModel> {

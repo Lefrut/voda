@@ -17,7 +17,7 @@ import com.vodovoz.app.design_system.model.VodovozPlaceholderUi
 import com.vodovoz.app.design_system.model.mapToUi
 import com.vodovoz.app.design_system.model.toUi
 import com.vodovoz.app.domain.general.model.UserNotLoginException
-import com.vodovoz.app.domain.general.model.VodovozAction
+import com.vodovoz.app.common.model.VodovozAction
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.feature.profile.model.ProfileCardUi
 import com.vodovoz.app.feature.profile.model.ProfileChatItemUi

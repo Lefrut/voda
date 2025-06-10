@@ -1,5 +1,7 @@
 package com.vodovoz.app.domain.general.model
 
+import com.vodovoz.app.domain.general.model.promotion.ColorfulButtonModel
+
 
 open class RequestException(
     message: String = "",

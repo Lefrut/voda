@@ -5,10 +5,10 @@ import com.vodovoz.app.data.vodovoz_service.model.auth.KNOPKA_AUTH_DTO
 import com.vodovoz.app.data.vodovoz_service.model.auth.LoginByPhoneDTO
 import com.vodovoz.app.data.vodovoz_service.model.auth.RequestCodeDTO
 import com.vodovoz.app.data.vodovoz_service.model.auth.UserAuthInfoDTO
-import com.vodovoz.app.domain.general.model.ColorfulButtonModel
-import com.vodovoz.app.domain.general.model.login.AuthDetailsModel
-import com.vodovoz.app.domain.general.model.login.RequestCodeModel
-import com.vodovoz.app.domain.general.model.login.UserAuthInfoModel
+import com.vodovoz.app.domain.general.model.promotion.ColorfulButtonModel
+import com.vodovoz.app.domain.general.model.user.AuthDetailsModel
+import com.vodovoz.app.domain.general.model.user.RequestCodeModel
+import com.vodovoz.app.domain.general.model.user.UserAuthInfoModel
 import java.time.Duration
 import java.time.LocalDateTime
 

@@ -2,8 +2,8 @@ package com.vodovoz.app.data.vodovoz_service.mappers
 
 import com.vodovoz.app.data.vodovoz_service.model.AllBottlesDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.TARA_DTO
-import com.vodovoz.app.domain.general.model.AllBottlesDetailsModel
-import com.vodovoz.app.domain.general.model.BottleModel
+import com.vodovoz.app.domain.general.model.product.AllBottlesDetailsModel
+import com.vodovoz.app.domain.general.model.product.BottleModel
 
 fun AllBottlesDetailsDTO.toDomain(): AllBottlesDetailsModel {
     return AllBottlesDetailsModel(

@@ -12,16 +12,16 @@ import com.vodovoz.app.data.vodovoz_service.model.profile.PROFILE_TEXT_OKNO_DTO
 import com.vodovoz.app.data.vodovoz_service.model.profile.PROFIL_DTO
 import com.vodovoz.app.data.vodovoz_service.model.profile.ProfileDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.profile.TEXT_KNOPKA_DTO
-import com.vodovoz.app.domain.general.model.ProfileCardModel
-import com.vodovoz.app.domain.general.model.ProfileChatItemModel
-import com.vodovoz.app.domain.general.model.ProfileChatsPopupWindowModel
-import com.vodovoz.app.domain.general.model.ProfileDetailsModel
-import com.vodovoz.app.domain.general.model.ProfileMenuItemModel
-import com.vodovoz.app.domain.general.model.ProfilePopupWindowModel
-import com.vodovoz.app.domain.general.model.ProfileWalletItemModel
-import com.vodovoz.app.domain.general.model.SectionModel
-import com.vodovoz.app.domain.general.model.TextButtonModel
-import com.vodovoz.app.domain.general.model.UserInfoBlockModel
+import com.vodovoz.app.domain.general.model.user.ProfileCardModel
+import com.vodovoz.app.domain.general.model.user.ProfileChatItemModel
+import com.vodovoz.app.domain.general.model.user.ProfileChatsPopupWindowModel
+import com.vodovoz.app.domain.general.model.user.ProfileDetailsModel
+import com.vodovoz.app.domain.general.model.user.ProfileMenuItemModel
+import com.vodovoz.app.domain.general.model.user.ProfilePopupWindowModel
+import com.vodovoz.app.domain.general.model.user.ProfileWalletItemModel
+import com.vodovoz.app.domain.general.model.product.SectionModel
+import com.vodovoz.app.domain.general.model.user.TextButtonModel
+import com.vodovoz.app.domain.general.model.user.UserInfoBlockModel
 
 
 fun ProfileDetailsDTO.toDomain(): ProfileDetailsModel {

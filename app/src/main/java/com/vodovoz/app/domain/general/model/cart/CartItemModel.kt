@@ -1,6 +1,6 @@
 package com.vodovoz.app.domain.general.model.cart
 
-import com.vodovoz.app.domain.general.model.LabelModel
+import com.vodovoz.app.domain.general.model.promotion.LabelModel
 
 data class CartItemModel(
     val id: Long,

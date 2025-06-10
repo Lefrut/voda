@@ -1,7 +1,7 @@
 package com.vodovoz.app.feature.addresses.model
 
 import androidx.compose.runtime.Immutable
-import com.vodovoz.app.domain.general.model.addresses.AddressModel
+import com.vodovoz.app.domain.general.model.location.AddressModel
 
 @Immutable
 data class AddressUi(

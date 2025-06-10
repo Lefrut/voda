@@ -8,13 +8,12 @@ import com.vodovoz.app.data.vodovoz_service.model.OREKLAME_DTO
 import com.vodovoz.app.data.vodovoz_service.model.PROMOTION_DATA_DTO
 import com.vodovoz.app.data.vodovoz_service.model.PROMOTION_RAZDEL_DTO
 import com.vodovoz.app.data.vodovoz_service.model.PromotionsDTO
-import com.vodovoz.app.domain.general.model.AboutAdvertisingModel
-import com.vodovoz.app.domain.general.model.LabelModel
-import com.vodovoz.app.domain.general.model.PromotionCategoryModel
-import com.vodovoz.app.domain.general.model.PromotionDetailsModel
-import com.vodovoz.app.domain.general.model.PromotionModel
-import com.vodovoz.app.domain.general.model.PromotionsSectionModel
-import com.vodovoz.app.domain.general.model.emptyLabelModel
+import com.vodovoz.app.domain.general.model.promotion.AboutAdvertisingModel
+import com.vodovoz.app.domain.general.model.promotion.LabelModel
+import com.vodovoz.app.domain.general.model.promotion.PromotionCategoryModel
+import com.vodovoz.app.domain.general.model.promotion.PromotionDetailsModel
+import com.vodovoz.app.domain.general.model.promotion.PromotionModel
+import com.vodovoz.app.domain.general.model.promotion.PromotionsSectionModel
 
 fun AKCIYA_DTO.toDomain(): PromotionDetailsModel? {
     return PromotionDetailsModel(
@@ -68,7 +67,7 @@ fun PROMOTION_DATA_DTO.toDomain(): PromotionModel? {
         sectionId = IBLOCK_SECTION_ID ?: -1,
         detailPicture = DETAIL_PICTURE?.toVodovozUrl() ?: return null,
         endDate = mapToZonedDateTime(DATA_OUT ?: return null) ?: return null,
-        label = HIT?.toDomain() ?: emptyLabelModel(),
+        label = HIT?.toDomain() ?: LabelModel.Empty,
         advertising = OREKLAME?.toDomain()
     )
 }

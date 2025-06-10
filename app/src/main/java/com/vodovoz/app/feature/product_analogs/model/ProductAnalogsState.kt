@@ -1,7 +1,7 @@
 package com.vodovoz.app.feature.product_analogs.model
 
 import androidx.compose.runtime.Immutable
-import com.vodovoz.app.domain.general.model.ProductsSectionUi
+import com.vodovoz.app.domain.general.model.product.ProductsSectionUi
 import com.vodovoz.app.feature.product_comments.model.SortUi
 
 @Immutable

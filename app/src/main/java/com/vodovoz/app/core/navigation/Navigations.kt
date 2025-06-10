@@ -27,7 +27,7 @@ private fun NavOptionsBuilder.slideAnim() {
     anim {
         exit = R.anim.fade_out
         enter = R.anim.slide_in_right
-        popExit = R.anim.slide_in_left
+        popEnter = R.anim.slide_in_left
         popExit = R.anim.slide_out_right
     }
 }

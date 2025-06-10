@@ -6,9 +6,9 @@ import com.vodovoz.app.data.vodovoz_service.model.SORT_DTO
 import com.vodovoz.app.data.vodovoz_service.model.WaitFeedbackProductDTO
 import com.vodovoz.app.data.vodovoz_service.model.WaitFeedbackProductsDTO
 import com.vodovoz.app.domain.general.model.ProductCommentsInfoModel
-import com.vodovoz.app.domain.general.model.SectionModel
+import com.vodovoz.app.domain.general.model.product.SectionModel
 import com.vodovoz.app.domain.general.model.SortModel
-import com.vodovoz.app.domain.general.model.WaitFeedbackProductModel
+import com.vodovoz.app.domain.general.model.product.WaitFeedbackProductModel
 
 fun ProductCommentsDTO.toDomain(): ProductCommentsInfoModel {
     return ProductCommentsInfoModel(

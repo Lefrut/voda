@@ -1,8 +1,8 @@
 package com.vodovoz.app.feature.home.model
 
 import androidx.compose.runtime.Immutable
-import com.vodovoz.app.domain.general.model.UnratedProductModel
-import com.vodovoz.app.domain.general.model.UnratedProductsSectionModel
+import com.vodovoz.app.domain.general.model.product.UnratedProductModel
+import com.vodovoz.app.domain.general.model.product.UnratedProductsSectionModel
 
 
 @Immutable

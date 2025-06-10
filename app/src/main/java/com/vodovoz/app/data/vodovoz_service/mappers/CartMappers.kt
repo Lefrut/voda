@@ -11,7 +11,7 @@ import com.vodovoz.app.data.vodovoz_service.model.cart.OKNO_PROMOKOD_DTO
 import com.vodovoz.app.data.vodovoz_service.model.cart.PODAROK_DTO
 import com.vodovoz.app.data.vodovoz_service.model.cart.PODAROK_KNOPKA_DTO
 import com.vodovoz.app.data.vodovoz_service.model.cart.PRODUCT_PRODAROK_DTO
-import com.vodovoz.app.domain.general.model.ColorfulButtonModel
+import com.vodovoz.app.domain.general.model.promotion.ColorfulButtonModel
 import com.vodovoz.app.domain.general.model.cart.CartButtonModel
 import com.vodovoz.app.domain.general.model.cart.CartDetailsModel
 import com.vodovoz.app.domain.general.model.cart.CartItemModel

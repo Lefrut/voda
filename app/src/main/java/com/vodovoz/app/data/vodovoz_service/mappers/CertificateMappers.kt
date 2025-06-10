@@ -10,8 +10,8 @@ import com.vodovoz.app.data.vodovoz_service.model.certificate.BuyCertificateDeta
 import com.vodovoz.app.data.vodovoz_service.model.certificate.FAQ_DTO
 import com.vodovoz.app.data.vodovoz_service.model.certificate.FAQ_ITEM_DTO
 import com.vodovoz.app.data.vodovoz_service.model.certificate.SERTIFICAT_VID_DTO
-import com.vodovoz.app.domain.general.model.CertificateActivationDetailsModel
-import com.vodovoz.app.domain.general.model.ColorfulButtonModel
+import com.vodovoz.app.domain.general.model.certificate.CertificateActivationDetailsModel
+import com.vodovoz.app.domain.general.model.promotion.ColorfulButtonModel
 import com.vodovoz.app.domain.general.model.FieldModel
 import com.vodovoz.app.domain.general.model.certificate.BuyCertificateCodesModel
 import com.vodovoz.app.domain.general.model.certificate.BuyCertificateDetailsModel

@@ -27,15 +27,15 @@ import com.vodovoz.app.data.vodovoz_service.model.order_details.OrderDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.order_history.OrdersHistoryDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.paging.VodovozPagingSource
 import com.vodovoz.app.design_system.model.widgets.FieldUi
-import com.vodovoz.app.domain.general.model.AllBottlesDetailsModel
-import com.vodovoz.app.domain.general.model.BannerModel
-import com.vodovoz.app.domain.general.model.BrandModel
-import com.vodovoz.app.domain.general.model.BrandSectionModel
-import com.vodovoz.app.domain.general.model.CancelOrderDetailsModel
+import com.vodovoz.app.domain.general.model.product.AllBottlesDetailsModel
+import com.vodovoz.app.domain.general.model.promotion.BannerModel
+import com.vodovoz.app.domain.general.model.brand.BrandModel
+import com.vodovoz.app.domain.general.model.brand.BrandSectionModel
+import com.vodovoz.app.domain.general.model.order.CancelOrderDetailsModel
 import com.vodovoz.app.domain.general.model.CatalogDetailsModel
-import com.vodovoz.app.domain.general.model.CertificateActivationDetailsModel
-import com.vodovoz.app.domain.general.model.ChangePasswordDetailsModel
-import com.vodovoz.app.domain.general.model.CommentModel
+import com.vodovoz.app.domain.general.model.certificate.CertificateActivationDetailsModel
+import com.vodovoz.app.domain.general.model.user.ChangePasswordDetailsModel
+import com.vodovoz.app.domain.general.model.product.CommentModel
 import com.vodovoz.app.domain.general.model.EmptyResultException
 import com.vodovoz.app.domain.general.model.FieldModel
 import com.vodovoz.app.domain.general.model.FilterValueModel
@@ -43,45 +43,45 @@ import com.vodovoz.app.domain.general.model.FiltersModel
 import com.vodovoz.app.domain.general.model.OrderWithMenuModel
 import com.vodovoz.app.domain.general.model.ParentCategoryModel
 import com.vodovoz.app.domain.general.model.PopularCategoryModel
-import com.vodovoz.app.domain.general.model.PopupWindowInfoModel
-import com.vodovoz.app.domain.general.model.PreOrderSectionModel
+import com.vodovoz.app.domain.general.model.promotion.PopupWindowInfoModel
+import com.vodovoz.app.domain.general.model.order.PreOrderSectionModel
 import com.vodovoz.app.domain.general.model.PresentInfoModel
 import com.vodovoz.app.domain.general.model.ProductCommentsInfoModel
-import com.vodovoz.app.domain.general.model.ProductDetailsScreenModel
-import com.vodovoz.app.domain.general.model.ProductModel
-import com.vodovoz.app.domain.general.model.ProductsSectionModel
-import com.vodovoz.app.domain.general.model.ProductsTitle
-import com.vodovoz.app.domain.general.model.ProfileDetailsModel
-import com.vodovoz.app.domain.general.model.PromotionDetailsModel
-import com.vodovoz.app.domain.general.model.PromotionModel
-import com.vodovoz.app.domain.general.model.PromotionsSectionModel
-import com.vodovoz.app.domain.general.model.QuestionnairesDetailsModel
-import com.vodovoz.app.domain.general.model.QuestionnairesWelcomeDetailsModel
+import com.vodovoz.app.domain.general.model.product.ProductDetailsScreenModel
+import com.vodovoz.app.domain.general.model.product.ProductModel
+import com.vodovoz.app.domain.general.model.product.ProductsSectionModel
+import com.vodovoz.app.domain.general.model.promotion.ProductsTitle
+import com.vodovoz.app.domain.general.model.user.ProfileDetailsModel
+import com.vodovoz.app.domain.general.model.promotion.PromotionDetailsModel
+import com.vodovoz.app.domain.general.model.promotion.PromotionModel
+import com.vodovoz.app.domain.general.model.promotion.PromotionsSectionModel
+import com.vodovoz.app.domain.general.model.user.QuestionnairesDetailsModel
+import com.vodovoz.app.domain.general.model.user.QuestionnairesWelcomeDetailsModel
 import com.vodovoz.app.domain.general.model.RequestException
 import com.vodovoz.app.domain.general.model.SearchRecommendationsModel
-import com.vodovoz.app.domain.general.model.SectionModel
-import com.vodovoz.app.domain.general.model.SiteState
+import com.vodovoz.app.domain.general.model.product.SectionModel
+import com.vodovoz.app.common.model.VodovozSiteState
 import com.vodovoz.app.domain.general.model.SortModel
-import com.vodovoz.app.domain.general.model.StoryModel
+import com.vodovoz.app.domain.general.model.promotion.StoryModel
 import com.vodovoz.app.domain.general.model.TooManyRequestsException
-import com.vodovoz.app.domain.general.model.TopAndBottomSectionsModel
-import com.vodovoz.app.domain.general.model.UnratedProductsSectionModel
+import com.vodovoz.app.domain.general.model.product.TopAndBottomSectionsModel
+import com.vodovoz.app.domain.general.model.product.UnratedProductsSectionModel
 import com.vodovoz.app.domain.general.model.UserBlockedException
-import com.vodovoz.app.domain.general.model.UserDataModel
+import com.vodovoz.app.domain.general.model.user.UserDataModel
 import com.vodovoz.app.domain.general.model.UserNotLoginException
 import com.vodovoz.app.domain.general.model.ValidationException
 import com.vodovoz.app.domain.general.model.VodovozPlaceholderModel
-import com.vodovoz.app.domain.general.model.WaitFeedbackProductModel
-import com.vodovoz.app.domain.general.model.addresses.AddressModel
+import com.vodovoz.app.domain.general.model.product.WaitFeedbackProductModel
+import com.vodovoz.app.domain.general.model.location.AddressModel
 import com.vodovoz.app.domain.general.model.cart.BottomCartModel
 import com.vodovoz.app.domain.general.model.cart.CartDetailsModel
 import com.vodovoz.app.domain.general.model.certificate.BuyCertificateDetailsModel
 import com.vodovoz.app.domain.general.model.certificate.BuyCertificateModel
 import com.vodovoz.app.domain.general.model.format
-import com.vodovoz.app.domain.general.model.login.AuthDetailsModel
-import com.vodovoz.app.domain.general.model.login.RequestCodeModel
-import com.vodovoz.app.domain.general.model.login.UserAuthInfoModel
-import com.vodovoz.app.domain.general.model.notification_settings.NotificationSettingsDetailsModel
+import com.vodovoz.app.domain.general.model.user.AuthDetailsModel
+import com.vodovoz.app.domain.general.model.user.RequestCodeModel
+import com.vodovoz.app.domain.general.model.user.UserAuthInfoModel
+import com.vodovoz.app.domain.general.model.user.NotificationSettingsDetailsModel
 import com.vodovoz.app.domain.general.model.order.DeliveryDateDetailsModel
 import com.vodovoz.app.domain.general.model.order.OrderDetailsModel
 import com.vodovoz.app.domain.general.model.order.OrderQuestionDetailsModel
@@ -1356,7 +1356,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
         )
     }
 
-    override fun getSiteState(): Flow<Result<SiteState>> {
+    override fun getSiteState(): Flow<Result<VodovozSiteState>> {
         return executeRequest(
             request = {
                 vodovozService.getSiteState()
@@ -1368,7 +1368,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
             onFail = onFail@{ response ->
                 val code = response.code()
                 return@onFail when (code) {
-                    402 -> Result.success(SiteState.Blocked)
+                    402 -> Result.success(VodovozSiteState.Blocked)
                     else -> Result.failure(RequestException(response.messageWithCode()))
                 }
             }

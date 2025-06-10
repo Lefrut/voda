@@ -6,12 +6,12 @@ import com.vodovoz.app.data.vodovoz_service.model.KNOPKA_DTO
 import com.vodovoz.app.data.vodovoz_service.model.KNOPKA_INT_DTO
 import com.vodovoz.app.data.vodovoz_service.model.RAZDEL_DTO
 import com.vodovoz.app.data.vodovoz_service.model.SuperTopAndBottomSectionsDTO
-import com.vodovoz.app.domain.general.model.ButtonAction
-import com.vodovoz.app.domain.general.model.ButtonModel
-import com.vodovoz.app.domain.general.model.CategoryWithProductsModel
-import com.vodovoz.app.domain.general.model.ProductModel
-import com.vodovoz.app.domain.general.model.SectionModel
-import com.vodovoz.app.domain.general.model.TopAndBottomSectionsModel
+import com.vodovoz.app.common.model.ButtonAction
+import com.vodovoz.app.domain.general.model.product.ButtonModel
+import com.vodovoz.app.domain.general.model.product.CategoryWithProductsModel
+import com.vodovoz.app.domain.general.model.product.ProductModel
+import com.vodovoz.app.domain.general.model.product.SectionModel
+import com.vodovoz.app.domain.general.model.product.TopAndBottomSectionsModel
 
 fun SuperTopAndBottomSectionsDTO.toDomain(): TopAndBottomSectionsModel? {
     return TopAndBottomSectionsModel(

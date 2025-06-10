@@ -15,7 +15,7 @@ import com.vodovoz.app.design_system.composables.card.GridProductCard
 import com.vodovoz.app.design_system.model.CategoryWithProductsUi
 import com.vodovoz.app.design_system.model.ProductUi
 import com.vodovoz.app.design_system.model.SectionUi
-import com.vodovoz.app.domain.general.model.ButtonAction
+import com.vodovoz.app.common.model.ButtonAction
 
 @Composable
 fun HomeBottomProducts(

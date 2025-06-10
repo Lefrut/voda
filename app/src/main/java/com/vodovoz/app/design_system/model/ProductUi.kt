@@ -2,12 +2,12 @@ package com.vodovoz.app.design_system.model
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
-import com.vodovoz.app.domain.general.model.ButtonAction
-import com.vodovoz.app.domain.general.model.ButtonModel
-import com.vodovoz.app.domain.general.model.CategoryWithProductsModel
-import com.vodovoz.app.domain.general.model.LabelModel
-import com.vodovoz.app.domain.general.model.ProductModel
-import com.vodovoz.app.domain.general.model.SectionModel
+import com.vodovoz.app.common.model.ButtonAction
+import com.vodovoz.app.domain.general.model.product.ButtonModel
+import com.vodovoz.app.domain.general.model.product.CategoryWithProductsModel
+import com.vodovoz.app.domain.general.model.promotion.LabelModel
+import com.vodovoz.app.domain.general.model.product.ProductModel
+import com.vodovoz.app.domain.general.model.product.SectionModel
 import com.vodovoz.app.ui.graphics.fromHexOrUnspecified
 
 

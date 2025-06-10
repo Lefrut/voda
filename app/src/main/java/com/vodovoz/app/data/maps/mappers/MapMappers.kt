@@ -1,8 +1,8 @@
 package com.vodovoz.app.data.maps.mappers
 
 import com.vodovoz.app.data.maps.model.YandexGeoResponseDTO
-import com.vodovoz.app.domain.general.model.MapPointModel
-import com.vodovoz.app.domain.general.model.map.MapAddressModel
+import com.vodovoz.app.domain.general.model.location.MapPointModel
+import com.vodovoz.app.domain.general.model.location.MapAddressModel
 
 fun YandexGeoResponseDTO.toDomain(): MapAddressModel? {
 

@@ -4,13 +4,13 @@ import com.vodovoz.app.data.vodovoz_service.model.CHATJIVO_DTO
 import com.vodovoz.app.data.vodovoz_service.model.GENERATION_DTO
 import com.vodovoz.app.data.vodovoz_service.model.SOGLASHENIE_DTO
 import com.vodovoz.app.data.vodovoz_service.model.SiteStateResponseDTO
-import com.vodovoz.app.domain.general.model.AgreementModel
-import com.vodovoz.app.domain.general.model.JivoChatModel
-import com.vodovoz.app.domain.general.model.SiteState
-import com.vodovoz.app.domain.general.model.TrackingConfig
+import com.vodovoz.app.common.model.AgreementModel
+import com.vodovoz.app.common.model.JivoChatModel
+import com.vodovoz.app.common.model.VodovozSiteState
+import com.vodovoz.app.common.model.TrackingConfig
 
-fun SiteStateResponseDTO.toDomain(): SiteState {
-    return SiteState(
+fun SiteStateResponseDTO.toDomain(): VodovozSiteState {
+    return VodovozSiteState(
         //TODO - mb replace to "Y"
         isActive = ACTIVE == "N",
         testUrl = TESTSAITSSILKA ?: "",

@@ -3,10 +3,10 @@ package com.vodovoz.app.design_system.model
 import android.os.Parcelable
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
-import com.vodovoz.app.domain.general.model.ActionWithButtonModel
-import com.vodovoz.app.domain.general.model.ColorfulButtonModel
-import com.vodovoz.app.domain.general.model.StoryModel
-import com.vodovoz.app.domain.general.model.VodovozAction
+import com.vodovoz.app.domain.general.model.promotion.ActionWithButtonModel
+import com.vodovoz.app.domain.general.model.promotion.ColorfulButtonModel
+import com.vodovoz.app.domain.general.model.promotion.StoryModel
+import com.vodovoz.app.common.model.VodovozAction
 import com.vodovoz.app.ui.graphics.fromHexOrUnspecified
 import kotlinx.parcelize.Parcelize
 
