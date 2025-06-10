@@ -56,6 +56,7 @@ import com.vodovoz.app.domain.general.model.order.OrderQuestionDetailsModel
 import com.vodovoz.app.domain.general.model.order.OrderingDetailsModel
 import com.vodovoz.app.domain.general.model.order.OrdersHistoryDetailsModel
 import com.vodovoz.app.domain.general.model.order.OrdersHistoryItemModel
+import com.vodovoz.app.domain.general.model.order.PaymentMethodDetailsModel
 import com.vodovoz.app.domain.general.model.order.WhereOrderDetailsModel
 import com.vodovoz.app.domain.general.model.service.AllServicesDetailsModel
 import com.vodovoz.app.domain.general.model.service.ServiceDetailsModel
@@ -66,9 +67,16 @@ import java.time.LocalDate
 
 interface VodovozServiceRepository {
 
+    fun removeAddress(addressId: Int): Flow<Result<String>>
+
+    fun getPaymentMethodDetails(
+        addressId: Int,
+        date: LocalDate,
+    ): Flow<Result<PaymentMethodDetailsModel>>
+
     fun getDeliveryDateDetails(
         addressId: Int,
-        date: LocalDate? = null
+        date: LocalDate? = null,
     ): Flow<Result<DeliveryDateDetailsModel>>
 
     fun getOrderingDetails(): Flow<Result<OrderingDetailsModel>>

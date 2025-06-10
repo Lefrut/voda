@@ -26,7 +26,7 @@ import com.vodovoz.app.feature.cart.ordering.model.OrderRecipientItemUi
 
 @Suppress("NonSkippableComposable")
 @Composable
-fun RecipientColumn(
+fun OrderingRecipientColumn(
     modifier: Modifier = Modifier,
     title: String,
     items: List<OrderRecipientItemUi>,

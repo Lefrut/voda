@@ -17,7 +17,7 @@ import com.vodovoz.app.util.extensions.indexOfOrNull
 
 @Suppress("NonSkippableComposable")
 @Composable
-fun NotifyChips(
+fun OrderingNotifyChips(
     modifier: Modifier = Modifier,
     title: String,
     notifyOptions: List<OrderNotifyItemUi>,

@@ -26,7 +26,7 @@ fun HomeProductsRow(
     onProductLike: (ProductUi) -> Unit,
     onIncrementToCart: (ProductUi) -> Unit,
     onDecrementToCart: (ProductUi) -> Unit,
-    onAnalogsClick: (ProductUi) -> Unit
+    onAnalogsClick: (ProductUi) -> Unit,
 ) {
     if (sectionProducts.items.isNotEmpty()) {
         Column(modifier = modifier) {
@@ -43,7 +43,7 @@ fun HomeProductsRow(
                 contentPadding = PaddingValues(horizontal = 16.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                items(sectionProducts.items) { item ->
+                items(sectionProducts.items, key = { it.id }) { item ->
                     GridProductCard(
                         modifier = Modifier.width(160.dp),
                         product = item,

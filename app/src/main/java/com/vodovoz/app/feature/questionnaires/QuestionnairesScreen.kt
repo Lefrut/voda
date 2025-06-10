@@ -95,7 +95,7 @@ fun QuestionnairesScreen(
             isSelectableDate = { date ->
                 date < today
             },
-            onDateSelected = { selectedDate ->
+            onDateSelect = { selectedDate ->
                 viewModel.changeDate(selectedDate)
             },
             onDismiss = {

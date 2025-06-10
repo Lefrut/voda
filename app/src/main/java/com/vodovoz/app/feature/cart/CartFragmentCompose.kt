@@ -79,16 +79,17 @@ class CartFragment : Fragment() {
 
                     when (val uiState = viewState.uiState) {
                         CartFlowViewModel.CartUiState.Cart -> {
-                            CartScreen(viewModel = viewModel, viewState = viewState)
+                            CartScreen(
+                                viewModel = viewModel,
+                                viewState = viewState
+                            )
                         }
 
                         is CartFlowViewModel.CartUiState.Empty -> {
                             val placeholder = uiState.placeholder
                             Column(modifier = Modifier.background(MaterialTheme.colorScheme.background)) {
                                 Text(
-                                    text = placeholder.title.ifEmpty {
-                                        stringResource(R.string.cart)
-                                    },
+                                    text = placeholder.title.ifEmpty { stringResource(R.string.cart) },
                                     color = MaterialTheme.colorScheme.onBackground,
                                     style = MaterialTheme.typography.headlineSmall,
                                     modifier = Modifier.padding(16.dp)
@@ -115,38 +116,6 @@ class CartFragment : Fragment() {
 
                     LifecycleEffect {
                         observeEvents()
-                    }
-
-                    if (viewState.showClearCartDialog) {
-                        VodovozDialog(
-                            title = stringResource(id = R.string.clear_cart_title),
-                            description = stringResource(id = R.string.clear_cart_description),
-                            acceptButtonText = stringResource(id = R.string.clear_cart_accept_text).uppercase(),
-                            cancelButtonText = stringResource(id = R.string.clear_cart_cancel_text).uppercase(),
-                            onDismiss = {
-                                viewModel.closeClearCartDialog()
-                            },
-                            onAccept = {
-                                viewModel.clearCart()
-                            }
-                        )
-                    }
-
-                    val currentRemoveItem = viewState.currentRemoveItem
-                    if (viewState.showRemoveItemDialog && currentRemoveItem != null) {
-                        VodovozDialog(
-                            title = stringResource(id = R.string.delete_item_title),
-                            description = stringResource(id = R.string.delete_item_description),
-                            acceptButtonText = stringResource(id = R.string.delete_item_accept_text).uppercase(),
-                            cancelButtonText = stringResource(id = R.string.delete_item_cancel_text).uppercase(),
-                            onDismiss = {
-                                viewModel.closeTrashDialog()
-                            },
-                            onAccept = {
-                                viewModel.removeCartItem(currentRemoveItem)
-                            }
-                        )
-
                     }
                 }
             }

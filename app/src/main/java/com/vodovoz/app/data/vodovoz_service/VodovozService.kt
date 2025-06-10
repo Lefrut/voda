@@ -49,6 +49,7 @@ import com.vodovoz.app.data.vodovoz_service.model.order_details.OrderDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.order_details.WhereMyOrderDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.order_history.OrdersHistoryDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.ordering.OrderingDetailsDTO
+import com.vodovoz.app.data.vodovoz_service.model.payment_method.PaymentMethodDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.product_details.ProductDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.profile.ProfileDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.services.AllServicesDetailsDTO
@@ -128,7 +129,21 @@ interface VodovozService {
     /**
      * Order requests
      * */
+
+    @GET("oformlenie/address.php?action=del")
+    suspend fun deleteAddress(
+        @Query("addressid") addressId: Int,
+        @Query("userid") userId: Long?
+    ): Response<VodovozResponseDTO<String>>
+
     @GET("oformlenie/oplata.php?action=glav")
+    suspend fun getPaymentMethodDetails(
+        @Query("userid") userId: Long?,
+        @Query("adresid") addressId: Int,
+        @Query("date") date: String,
+    ): Response<VodovozResponseDTO<PaymentMethodDetailsDTO>>
+
+    @GET("oformlenie/date.php?action=glav")
     suspend fun getDeliveryDateDetails(
         @Query("userid") userId: Long?,
         @Query("adresid") addressId: Int,

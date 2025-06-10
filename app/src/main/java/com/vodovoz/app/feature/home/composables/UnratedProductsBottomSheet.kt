@@ -155,7 +155,8 @@ fun UnratedProductsBottomSheet(
                 label = "UpdatedProductsTransition",
                 transitionSpec = {
                     fadeIn(tween(250)) togetherWith fadeOut(tween(250))
-                }
+                },
+                contentKey = { it.name }
             ) { targetState ->
                 when (targetState) {
                     SheetValue.Hidden -> {

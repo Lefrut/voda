@@ -49,7 +49,7 @@ fun HomePopularCategories(
             contentPadding = PaddingValues(horizontal = 16.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            items(sectionPopularCategories.items) { popularCategory ->
+            items(sectionPopularCategories.items, key = { it.id }) { popularCategory ->
                 HomeSectionItem(category = popularCategory, onClick = onPopularCategoryClick)
             }
         }

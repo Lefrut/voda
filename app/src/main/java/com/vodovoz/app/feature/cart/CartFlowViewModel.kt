@@ -1,6 +1,7 @@
 package com.vodovoz.app.feature.cart
 
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.Stable
 import androidx.lifecycle.viewModelScope
 import com.vodovoz.app.common.account.AccountManager
 import com.vodovoz.app.common.cart.CartManager
@@ -35,6 +36,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
+@Stable
 class CartFlowViewModel @Inject constructor(
     private val cartManager: CartManager,
     private val likeManager: LikeManager,
@@ -158,8 +160,6 @@ class CartFlowViewModel @Inject constructor(
         }
     }
 
-    fun isLoginAlready() = accountManager.isAlreadyLogin()
-
     fun navigateToProductDetails(cartItem: CartItemUi) = viewModelScope.launch {
         eventListener.emit(CartEvents.GoToProductDetails(cartItem.productId))
     }
@@ -200,13 +200,21 @@ class CartFlowViewModel @Inject constructor(
     }
 
     fun removeCartItem(currentRemoveItem: CartItemUi) = viewModelScope.launch {
-        uiStateListener.updateData { s -> s.copy(blockCart = true, showRemoveItemDialog = false) }
+        uiStateListener.updateData { s ->
+            s.copy(
+                blockCart = true,
+                showRemoveItemDialog = false,
+                currentRemoveItem = null
+            )
+        }
 
         vodovozServiceRepository.updateProductInCart(currentRemoveItem.productId, 0).singleResult()
         fetchCartDetails().join()
 
         uiStateListener.updateData { s ->
-            s.copy(blockCart = false)
+            s.copy(
+                blockCart = false
+            )
         }
     }
 
@@ -302,6 +310,7 @@ class CartFlowViewModel @Inject constructor(
     ) : State {
     }
 
+    @Stable
     sealed interface CartUiState {
         data object Loading : CartUiState
         data object Cart : CartUiState
@@ -327,12 +336,5 @@ class CartFlowViewModel @Inject constructor(
         data object GoToAllBottles : CartEvents()
 
         data class GoToProductDetails(val productId: Long) : CartEvents()
-    }
-
-    companion object {
-        private const val CART_EMPTY_ID = -1
-        private const val CART_AVAILABLE_PRODUCTS_ID = 1
-        private const val CART_NOT_AVAILABLE_PRODUCTS_ID = 2
-        private const val CART_TOTAL_ID = 3
     }
 }

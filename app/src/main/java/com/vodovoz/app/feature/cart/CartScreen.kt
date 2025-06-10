@@ -19,13 +19,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.vodovoz.app.R
+import com.vodovoz.app.design_system.composables.dialogs.VodovozDialog
 import com.vodovoz.app.feature.cart.composables.CartBody
 import com.vodovoz.app.feature.cart.composables.CartTopBar
 import com.vodovoz.app.feature.cart.composables.PromotionCodeBottomSheet
 
 @OptIn(ExperimentalMaterial3Api::class)
-@Suppress("NonSkippableComposable")
 @Composable
 fun CartScreen(viewModel: CartFlowViewModel, viewState: CartFlowViewModel.CartState) {
     val pullRefreshState = rememberPullToRefreshState()
@@ -46,7 +48,10 @@ fun CartScreen(viewModel: CartFlowViewModel, viewState: CartFlowViewModel.CartSt
         }
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
-            CartTopBar(title = viewState.title, onShareClick = { })
+            CartTopBar(
+                title = viewState.title,
+                onShareClick = { /*todo - do if going to support cart share*/ }
+            )
             CartBody(
                 cartItems = viewState.cartItems,
                 cartPresent = viewState.present,
@@ -129,5 +134,37 @@ fun CartScreen(viewModel: CartFlowViewModel, viewState: CartFlowViewModel.CartSt
                 viewModel.applyPromoCode()
             }
         )
+    }
+
+    if (viewState.showClearCartDialog) {
+        VodovozDialog(
+            title = stringResource(id = R.string.clear_cart_title),
+            description = stringResource(id = R.string.clear_cart_description),
+            acceptButtonText = stringResource(id = R.string.clear_cart_accept_text).uppercase(),
+            cancelButtonText = stringResource(id = R.string.clear_cart_cancel_text).uppercase(),
+            onDismiss = {
+                viewModel.closeClearCartDialog()
+            },
+            onAccept = {
+                viewModel.clearCart()
+            }
+        )
+    }
+
+    val currentRemoveItem = viewState.currentRemoveItem
+    if (viewState.showRemoveItemDialog && currentRemoveItem != null) {
+        VodovozDialog(
+            title = stringResource(id = R.string.delete_item_title),
+            description = stringResource(id = R.string.delete_item_description),
+            acceptButtonText = stringResource(id = R.string.delete_item_accept_text).uppercase(),
+            cancelButtonText = stringResource(id = R.string.delete_item_cancel_text).uppercase(),
+            onDismiss = {
+                viewModel.closeTrashDialog()
+            },
+            onAccept = {
+                viewModel.removeCartItem(currentRemoveItem)
+            }
+        )
+
     }
 }

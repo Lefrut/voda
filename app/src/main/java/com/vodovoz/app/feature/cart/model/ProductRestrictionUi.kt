@@ -1,5 +1,8 @@
 package com.vodovoz.app.feature.cart.model
 
+import androidx.compose.runtime.Stable
+
+@Stable
 enum class ProductRestrictionUi(val code: Int) {
     NONE(0),
     NO_FAVORITES(1),

@@ -12,5 +12,7 @@ data class DeliveryDateState(
     val selectedOption: DeliveryDateOptionUi = DeliveryDateOptionUi.Empty,
     val timeSections: List<SectionUi<DeliveryTimeIntervalUi>> = emptyList(),
     val selectedTimeSection: SectionUi<DeliveryTimeIntervalUi> = SectionUi.empty(),
-    val uiState: DeliveryDateUiState = DeliveryDateUiState.Loading
+    val selectedTimeInterval: DeliveryTimeIntervalUi = DeliveryTimeIntervalUi.Empty,
+    val uiState: DeliveryDateUiState = DeliveryDateUiState.Loading,
+    val showCalendarDialog: Boolean = false
 )

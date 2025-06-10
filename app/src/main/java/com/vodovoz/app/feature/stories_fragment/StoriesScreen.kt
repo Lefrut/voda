@@ -27,7 +27,9 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -52,7 +54,6 @@ enum class DragAnchor(val value: Float) {
 
 
 @SuppressLint("RestrictedApi")
-@Suppress("NonSkippableComposable")
 @Composable
 fun StoriesScreen(
     viewState: StoriesViewModel.HistoriesSliderState,
@@ -113,8 +114,10 @@ fun StoriesScreen(
         state = pagerState,
         beyondViewportPageCount = stories.size
     ) { i ->
-        val story = stories[i]
-        val storyPage = story.pages.getOrNull(viewState.currentPageIndex) ?: story.pages.first()
+        val story = stories.getOrNull(i) ?: return@HorizontalPager
+        val storyPage =
+            story.pages.getOrNull(viewState.currentPageIndex) ?: story.pages.firstOrNull()
+            ?: return@HorizontalPager
 
         Box(
             modifier = Modifier
@@ -154,6 +157,10 @@ fun StoriesScreen(
                 contentScale = ContentScale.FillBounds,
                 alignment = Alignment.Center
             )
+
+            val timePassed = rememberUpdatedState(newValue = viewState.timePassed.toFloat())
+            val storyDuration = rememberUpdatedState(newValue = storyPage.durationMillis)
+
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -164,7 +171,9 @@ fun StoriesScreen(
                         .padding(top = 8.dp),
                     countPages = story.pages.size,
                     pageIndex = viewState.currentPageIndex,
-                    progress = (viewState.timePassed.toFloat() / storyPage.durationMillis)
+                    progress = {
+                        timePassed.value / storyDuration.value
+                    }
                 )
                 CloseButton(
                     modifier = Modifier

@@ -15,6 +15,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.fragment.findNavController
 import com.vodovoz.app.common.account.AccountManager
 import com.vodovoz.app.core.navigation.navigateToAddresses
+import com.vodovoz.app.core.navigation.navigateToDeliveryDate
+import com.vodovoz.app.core.navigation.navigateToPaymentMethod
 import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.effects.LifecycleEffect
 import com.vodovoz.app.feature.addresses.model.AddressScreenTypeUi
@@ -75,7 +77,11 @@ class OrderingFragment : Fragment() {
                 }
 
                 is OrderingFlowViewModel.OrderingEvents.GoToDeliveryDate -> {
-                    findNavController()
+                    findNavController().navigateToDeliveryDate(event.addressId)
+                }
+
+                is OrderingFlowViewModel.OrderingEvents.GoToPaymentMethod ->{
+                    findNavController().navigateToPaymentMethod(event.addressId, event.date)
                 }
 
                 else -> {

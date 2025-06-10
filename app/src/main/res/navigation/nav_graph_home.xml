@@ -6,6 +6,18 @@
     app:startDestination="@id/homeFragment">
 
     <fragment
+        android:id="@+id/paymentMethodFragment"
+        android:name="com.vodovoz.app.feature.payment_method.PaymentMethodFragment"
+        android:label="PaymentMethodFragment"
+        />
+
+    <fragment
+        android:id="@+id/deliveryDateFragment"
+        android:name="com.vodovoz.app.feature.delivery_date.DeliveryDateFragment"
+        android:label="DeliveryDateFragment"
+        />
+
+    <fragment
         android:id="@+id/aboutAppFragment"
         android:name="com.vodovoz.app.feature.about_app.AboutAppFragment"
         android:label="AboutAppFragment" />

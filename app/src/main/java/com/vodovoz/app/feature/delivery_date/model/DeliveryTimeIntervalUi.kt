@@ -10,7 +10,11 @@ data class DeliveryTimeIntervalUi(
     val code: String,
     val blocked: Boolean,
     val priceText: String,
-)
+){
+    companion object{
+        val Empty = DeliveryTimeIntervalUi("", "", "" , false, "")
+    }
+}
 
 fun List<DeliveryTimeIntervalModel>.mapToUi(): List<DeliveryTimeIntervalUi> {
     return map { it.toUi() }

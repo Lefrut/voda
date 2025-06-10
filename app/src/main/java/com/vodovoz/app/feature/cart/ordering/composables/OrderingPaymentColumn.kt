@@ -14,7 +14,7 @@ import com.vodovoz.app.feature.cart.ordering.model.OrderPaymentItemUi
 
 @Suppress("NonSkippableComposable")
 @Composable
-fun PaymentColumn(
+fun OrderingPaymentColumn(
     modifier: Modifier = Modifier,
     title: String,
     items: List<OrderPaymentItemUi>,

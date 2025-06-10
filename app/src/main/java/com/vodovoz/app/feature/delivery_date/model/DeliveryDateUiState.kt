@@ -8,5 +8,6 @@ sealed interface DeliveryDateUiState {
     data object Loading: DeliveryDateUiState
     data object Success: DeliveryDateUiState
     data object Error: DeliveryDateUiState
+    data object BodyLoading: DeliveryDateUiState
 
 }

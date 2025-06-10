@@ -11,6 +11,7 @@ import java.time.ZonedDateTime
 import java.util.Locale
 
 
+@Immutable
 data class SpecialPromotionUi(
     val id: Int,
     val name: String,

@@ -16,6 +16,7 @@ fun SystemBarsEffect(
     navigationBarColor: Color,
     navigationBarContrastEnforced: Boolean = true,
     darkIcons: Boolean = false,
+    handleDecorFitsSystemWindows: Boolean = true
 ) {
     val context = LocalContext.current
     val window = context.window() ?: return
@@ -27,7 +28,9 @@ fun SystemBarsEffect(
     val prevNavBarColor    = window.navigationBarColor
 
     DisposableEffect(window, statusBarColor, navigationBarColor, darkIcons) {
-        WindowCompat.setDecorFitsSystemWindows(window, false)
+        if(handleDecorFitsSystemWindows){
+            WindowCompat.setDecorFitsSystemWindows(window, false)
+        }
 
         systemUiController.setStatusBarColor(
             color = statusBarColor,
@@ -49,7 +52,9 @@ fun SystemBarsEffect(
                 navigationBarContrastEnforced = navigationBarContrastEnforced
             )
 
-            WindowCompat.setDecorFitsSystemWindows(window, true)
+            if(handleDecorFitsSystemWindows){
+                WindowCompat.setDecorFitsSystemWindows(window, true)
+            }
         }
     }
 }

@@ -123,7 +123,7 @@ class HomeFragment : Fragment() {
                     val pullRefreshState = rememberPullToRefreshState()
                     val snackbarHostState = remember { SnackbarHostState() }
 
-                    when (pagingState.data.uiState) {
+                    when (viewState.uiState) {
                         HomeFlowViewModel.HomeUiState.NetworkError -> {
                             NetworkErrorPlaceholder(
                                 onTryAgainClick = { viewModel.refresh() }
@@ -140,17 +140,6 @@ class HomeFragment : Fragment() {
                         }
                     }
 
-                    if(viewState.showUnratedProductsBS && viewState.sectionUnratedProducts.products.isNotEmpty()) {
-                        UnratedProductsBottomSheet(
-                            sectionUnratedProducts = viewState.sectionUnratedProducts,
-                            onProductRatingChanged = { product, rating ->
-                                viewModel.changeUnratedProductRating(product, rating)
-                            },
-                            onDispose = {
-                                viewModel.closeUnratedProductsBottomSheet()
-                            }
-                        )
-                    }
 
 
                     Box(

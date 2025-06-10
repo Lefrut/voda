@@ -1,8 +1,10 @@
 package com.vodovoz.app.domain.general.model.cart
 
+import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
 import com.vodovoz.app.ui.graphics.fromHexOrUnspecified
 
+@Immutable
 data class OrderSummaryItemUi(
     val name: String,
     val value: String,

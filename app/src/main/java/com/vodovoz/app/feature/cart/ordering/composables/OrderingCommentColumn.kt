@@ -11,7 +11,7 @@ import com.vodovoz.app.design_system.composables.text_fields.VodovozTextField
 import com.vodovoz.app.design_system.model.widgets.FieldUi
 
 @Composable
-fun CommentColumn(
+fun OrderingCommentColumn(
     modifier: Modifier = Modifier,
     comment: FieldUi,
     onFieldChange: (FieldUi, FieldUi) -> Unit,
