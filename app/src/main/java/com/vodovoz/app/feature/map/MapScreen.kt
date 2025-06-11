@@ -1,17 +1,20 @@
 package com.vodovoz.app.feature.map
 
-import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.AnchoredDraggableState
 import androidx.compose.foundation.gestures.DraggableAnchors
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.anchoredDraggable
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -20,45 +23,52 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.SheetValue.Hidden
 import androidx.compose.material3.SheetValue.PartiallyExpanded
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import com.valentinilk.shimmer.ShimmerBounds
+import com.valentinilk.shimmer.rememberShimmer
 import com.vodovoz.app.R
 import com.vodovoz.app.design_system.composables.bottom_sheet.VodovozDragHandle
+import com.vodovoz.app.design_system.composables.button.VodovozButton
 import com.vodovoz.app.design_system.composables.decoration.MapIconsColumn
-import com.vodovoz.app.design_system.model.MapPointUi
+import com.vodovoz.app.design_system.composables.decoration.SkeletonBox
 import com.vodovoz.app.design_system.model.toMapPoint
 import com.vodovoz.app.feature.home.composables.dropShadow
 import com.vodovoz.app.feature.map.composables.DeliveryCard
 import com.vodovoz.app.feature.map.composables.MapTopBar
 import com.vodovoz.app.ui.yandex_map.YandexMapUi
-import com.vodovoz.app.util.extensions.getBitmap
 import com.yandex.mapkit.ScreenPoint
 import com.yandex.mapkit.ScreenRect
 import kotlin.math.roundToInt
@@ -69,27 +79,24 @@ fun MapScreen(
     viewModel: MapFlowViewModel,
     viewState: MapFlowViewModel.MapFlowState,
     yandexMap: YandexMapUi,
+    anchoredDraggableState: AnchoredDraggableState<SheetValue>,
 ) {
-    val context = LocalContext.current
     val density = LocalDensity.current
 
     var targetOffset by remember { mutableStateOf(0.dp) }
 
     val animatedOffset by animateDpAsState(
         targetValue = targetOffset,
-        animationSpec = spring(stiffness = Spring.StiffnessMedium), label = ""
+        animationSpec = tween(180),
+        label = ""
     )
 
-    var markerGeoPoint by remember { mutableStateOf<MapPointUi?>(null) }
-
-    val deliveryImageBitmap = remember {
-        context.getBitmap(R.drawable.ic_delivery).asImageBitmap()
+    var mapBottomSheetHeightPx by rememberSaveable {
+        mutableFloatStateOf(0f)
     }
 
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .systemBarsPadding()
+        modifier = Modifier.fillMaxSize()
     ) {
         MapTopBar(
             query = viewState.query,
@@ -97,42 +104,51 @@ fun MapScreen(
             onSearchClick = viewModel::searchAddressByQuery
         )
         BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
-            var mapBottomSheetHeightPx by rememberSaveable {
-                mutableFloatStateOf(0f)
-            }
-
             val focusMapWidth = maxWidth
             val focusMapHeight = maxHeight - with(density) { mapBottomSheetHeightPx.toDp() }
 
-            val focusMapWidthPx = with(density) { focusMapWidth.toPx() }
-            val focusMapHeightPx = with(density) { focusMapHeight.toPx() }
+            val focusMapWidthPx = rememberUpdatedState(with(density) { focusMapWidth.toPx() })
+            val focusMapHeightPx = rememberUpdatedState(with(density) { focusMapHeight.toPx() })
 
-            AndroidView(
-                modifier = Modifier.fillMaxSize(),
-                factory = {
-                    val mapView = yandexMap.mapView
-
-                    mapView.map.addCameraListener { _, _, _, finished ->
-                        targetOffset = if (!finished) (-12).dp else 0.dp
-
-                        val centerX = focusMapWidthPx / 2f
-                        val centerY = focusMapHeightPx / 2f
+            Box(
+                modifier = Modifier.pointerInput(Unit) {
+                    awaitEachGesture {
+                        awaitFirstDown(pass = PointerEventPass.Initial)
+                        viewModel.hideAddressBottomSheet()
+                        targetOffset = (-16).dp
+                        waitForUpOrCancellation(pass = PointerEventPass.Initial)
+                        targetOffset = 0.dp
+                        viewModel.showAddressBottomSheet()
+                        val centerX = focusMapWidthPx.value / 2f
+                        val centerY = focusMapHeightPx.value / 2f
 
                         val screenPoint = ScreenPoint(
                             centerX, centerY + with(density) { targetOffset.toPx() }
                         )
-                        markerGeoPoint = mapView.mapWindow.screenToWorld(screenPoint)?.toMapPoint()
-                    }
+                        val point = yandexMap.mapView.mapWindow
+                            .screenToWorld(screenPoint)
+                            ?.toMapPoint()
 
-                    mapView
+                        viewModel.changeMarkerPoint(point)
+                    }
                 }
-            )
+            ) {
+                AndroidView(
+                    modifier = Modifier
+                        .fillMaxSize(),
+                    factory = {
+                        val mapView = yandexMap.mapView
+                        mapView
+                    }
+                )
+
+            }
 
             LaunchedEffect(focusMapHeightPx) {
                 val mapView = yandexMap.mapView
                 mapView.focusRect = ScreenRect(
                     ScreenPoint(0f, 0f),
-                    ScreenPoint(focusMapWidthPx, focusMapHeightPx)
+                    ScreenPoint(focusMapWidthPx.value, focusMapHeightPx.value)
                 )
             }
 
@@ -142,14 +158,21 @@ fun MapScreen(
                     .height(focusMapHeight),
                 contentAlignment = Alignment.Center
             ) {
+                val markerHeight = 43.dp
+                val markerWidth = 21.dp
+
                 Image(
                     imageVector = ImageVector.vectorResource(id = R.drawable.ic_delivery),
                     contentDescription = "Delivery Marker",
                     modifier = Modifier
-                        .width(21.dp)
-                        .height(43.dp)
+                        .width(markerWidth)
+                        .height(markerHeight)
+                        .offset(y = 43.dp / 2)
                         .offset {
-                            IntOffset(x = 0, y = animatedOffset.roundToPx())
+                            IntOffset(
+                                x = 0,
+                                y = animatedOffset.roundToPx()
+                            )
                         },
                     contentScale = ContentScale.FillBounds
                 )
@@ -180,10 +203,11 @@ fun MapScreen(
                     .align(Alignment.BottomCenter)
                     .onSizeChanged { size ->
                         mapBottomSheetHeightPx = size.height.toFloat()
-                    }
+                    },
+                state = anchoredDraggableState,
+                addressIsLoading = viewState.addressIsLoading,
+                addressName = viewState.address?.name ?: ""
             )
-
-
         }
     }
 }
@@ -192,20 +216,22 @@ fun MapScreen(
 @Composable
 private fun MapBottomSheet(
     modifier: Modifier = Modifier,
-    state: AnchoredDraggableState<SheetValue> = remember {
+    addressName: String,
+    addressIsLoading: Boolean,
+    state: AnchoredDraggableState<SheetValue> = rememberSaveable(saver = AnchoredDraggableState.Saver()) {
         AnchoredDraggableState(initialValue = PartiallyExpanded)
     },
 ) {
     val density = LocalDensity.current
 
-    val partiallyExpandedDp = 220.dp
+    val partiallyExpandedDp = 300.dp
     val partiallyExpandedPx = with(density) { partiallyExpandedDp.toPx() }
 
 
     LaunchedEffect(Unit) {
         state.updateAnchors(
             DraggableAnchors {
-                Hidden at partiallyExpandedPx
+                Hidden at partiallyExpandedPx * 0.7f
                 PartiallyExpanded at 0f
             }
         )
@@ -243,11 +269,65 @@ private fun MapBottomSheet(
                     bottomStart = CornerSize(0.dp)
                 )
             ),
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.Start
     ) {
-        VodovozDragHandle()
+        VodovozDragHandle(modifier = Modifier.align(Alignment.CenterHorizontally))
         Spacer(Modifier.height(20.dp))
-        Box(modifier = Modifier.size(700.dp))
+        Text(
+            text = stringResource(id = R.string.delivery_address),
+            color = MaterialTheme.colorScheme.onBackground,
+            style = MaterialTheme.typography.headlineSmall,
+            modifier = Modifier.padding(horizontal = 16.dp)
+        )
+
+        val shimmer = rememberShimmer(ShimmerBounds.View)
+
+        Row(
+            modifier = Modifier
+                .padding(top = 16.dp, start = 16.dp, end = 16.dp)
+                .weight(weight = 1f, fill = false),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = ImageVector.vectorResource(id = R.drawable.icon_location),
+                contentDescription = null,
+                modifier = Modifier
+                    .padding(end = 16.dp)
+                    .size(24.dp),
+                tint = MaterialTheme.colorScheme.secondary
+            )
+
+            when (addressIsLoading) {
+                true -> {
+                    SkeletonBox(
+                        shimmerState = shimmer,
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(24.dp)
+                    )
+                }
+
+                false -> {
+                    Text(
+                        modifier = Modifier.weight(1f),
+                        text = addressName,
+                        color = MaterialTheme.colorScheme.onBackground,
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            letterSpacing = 0.sp
+                        ),
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
+        }
+
+        VodovozButton(
+            modifier = Modifier.padding(start = 16.dp, top = 20.dp, end = 16.dp, bottom = 16.dp),
+            text = stringResource(id = R.string.bring_here_btn_text),
+            onClick = {
+
+            }
+        )
     }
 
 }

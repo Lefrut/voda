@@ -26,12 +26,11 @@ import com.vodovoz.app.ui.model.AddressUI
 import com.vodovoz.app.ui.model.PayMethodUI
 import com.vodovoz.app.ui.model.ShippingIntervalUI
 import com.vodovoz.app.ui.model.custom.OrderingCompletedInfoBundleUI
-import com.vodovoz.app.util.FieldValidationSettings
-import com.vodovoz.app.util.PhoneSingleFormatUtil.convertPhoneToBaseFormat
-import com.vodovoz.app.util.PhoneSingleFormatUtil.convertPhoneToFullFormat
+import com.vodovoz.app.util.ValidationUtils
 import com.vodovoz.app.util.extensions.debugLog
 import com.vodovoz.app.util.extensions.scrollViewToTop
 import com.vodovoz.app.util.extensions.snack
+import com.vodovoz.app.util.formatRussianPhoneNumber
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -188,7 +187,7 @@ class OrderingFragment1 : BaseFragment() {
                             binding.etEmail.setText(addressUI.email)
                         binding.etPhone.setPhoneValidator { }
                         binding.etPhone.setText(
-                            addressUI.phone.convertPhoneToBaseFormat().convertPhoneToFullFormat()
+                            formatRussianPhoneNumber(addressUI.phone)
                         )
                     }
 
@@ -813,7 +812,7 @@ class OrderingFragment1 : BaseFragment() {
     }
 
     private fun validateEmail(name: TextView, input: String) =
-        when (FieldValidationSettings.EMAIL_REGEX.matches(input)) {
+        when (ValidationUtils.EMAIL_REGEX.matches(input)) {
             false -> {
                 name.setTextColor(ContextCompat.getColor(requireContext(), R.color.red))
                 false
@@ -826,7 +825,7 @@ class OrderingFragment1 : BaseFragment() {
         }
 
     private fun validatePhone(name: TextView, input: String) =
-        when (FieldValidationSettings.PHONE_REGEX.matches(input)) {
+        when (ValidationUtils.PHONE_REGEX.matches(input)) {
             false -> {
                 name.setTextColor(ContextCompat.getColor(requireContext(), R.color.red))
                 false

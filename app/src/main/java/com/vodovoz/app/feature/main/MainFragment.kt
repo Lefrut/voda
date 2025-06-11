@@ -130,11 +130,9 @@ class MainFragment : Fragment(R.layout.fragment_main) {
 
     private fun observeTabVisibility() = lifecycleScope.launch {
         repeatOnLifecycle(Lifecycle.State.STARTED) {
-            tabManager
-                .observeTabVisibility()
-                .collect { isVisible ->
-                    binding.nvNavigation.isVisible = isVisible
-                }
+            tabManager.observeTabVisibility().collect { isVisible ->
+                binding.nvNavigation.visibility = if (isVisible) View.VISIBLE else View.GONE
+            }
         }
 
     }
@@ -145,9 +143,7 @@ class MainFragment : Fragment(R.layout.fragment_main) {
                 .observeTabWindowInsets()
                 .collect { has ->
                     val insets = ViewCompat.getRootWindowInsets(binding.root)
-                    val bottomPadding = insets?.getInsets(
-                        WindowInsetsCompat.Type.navigationBars()
-                    )?.bottom ?: 0
+                    val bottomPadding = insets?.getInsetsIgnoringVisibility(WindowInsetsCompat.Type.navigationBars())?.bottom ?: 0
                     binding.root.updatePadding(bottom = if (has) bottomPadding else 0)
                 }
         }

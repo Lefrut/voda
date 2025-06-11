@@ -18,21 +18,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.paging.CombinedLoadStates
 import androidx.paging.LoadState
-import androidx.paging.compose.LazyPagingItems
-import androidx.paging.compose.itemContentType
-import androidx.paging.compose.itemKey
 import com.valentinilk.shimmer.Shimmer
-import com.vodovoz.app.R
 import com.vodovoz.app.design_system.composables.card.GridProductCard
 import com.vodovoz.app.design_system.composables.card.LinearProductCard
 import com.vodovoz.app.design_system.composables.decoration.SkeletonBox
-import com.vodovoz.app.design_system.composables.placeholders.EmptyResultPlaceholder
 import com.vodovoz.app.design_system.model.ProductUi
+import com.vodovoz.app.util.extensions.indexOfOrNull
 
 
 @Suppress("NonSkippableComposable")
@@ -45,7 +40,7 @@ fun ProductLazyList(
     onProductLike: (ProductUi) -> Unit,
     onIncrementProductToCart: (ProductUi) -> Unit,
     onDecrementProductToCart: (ProductUi) -> Unit,
-    onProductAnalogsClick: (ProductUi) -> Unit
+    onProductAnalogsClick: (ProductUi) -> Unit,
 ) {
 
     LazyVerticalGrid(
@@ -100,7 +95,7 @@ fun LazyGridScope.linearProducts(
     onProductLike: (ProductUi) -> Unit,
     onProductAnalogsClick: (ProductUi) -> Unit,
     onIncrementProductToCart: (ProductUi) -> Unit,
-    onDecrementProductToCart: (ProductUi) -> Unit
+    onDecrementProductToCart: (ProductUi) -> Unit,
 ) {
 
     when (loadState.refresh) {
@@ -108,10 +103,11 @@ fun LazyGridScope.linearProducts(
             items(
                 items = products,
                 span = { GridItemSpan(2) },
+                key = { product -> product.id }
             ) { product ->
-                val currentIndex = products.indexOf(product)
+                val currentIndex = products.indexOfOrNull(product) ?: return@items
 
-                SideEffect {
+                LaunchedEffect(Unit) {
                     onProductSee(currentIndex)
                 }
 
@@ -181,12 +177,16 @@ fun LazyGridScope.gridProducts(
     onProductLike: (ProductUi) -> Unit,
     onProductAnalogsClick: (ProductUi) -> Unit,
     onIncrementProductToCart: (ProductUi) -> Unit,
-    onDecrementProductToCart: (ProductUi) -> Unit
+    onDecrementProductToCart: (ProductUi) -> Unit,
 ) {
 
     when (loadState.refresh) {
         is LoadState.NotLoading -> {
-            items(products.size, span = { GridItemSpan(1) }) { index ->
+            items(
+                count = products.size,
+                span = { GridItemSpan(1) },
+                key = { i -> products[i].id }
+            ) { index ->
                 LaunchedEffect(index) {
                     onProductSee(index)
                 }

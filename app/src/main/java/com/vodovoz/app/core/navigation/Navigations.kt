@@ -23,13 +23,23 @@ import com.vodovoz.app.feature.product_catalog.ProductCatalogFragment
 import java.time.LocalDate
 
 
-private fun NavOptionsBuilder.slideAnim() {
+fun NavOptionsBuilder.slideAnim() {
     anim {
         exit = R.anim.fade_out
         enter = R.anim.slide_in_right
         popEnter = R.anim.slide_in_left
         popExit = R.anim.slide_out_right
     }
+}
+
+fun NavController.navigateToMap() {
+    navigate(
+        R.id.mapFragment,
+        Bundle.EMPTY,
+        navOptions {
+            slideAnim()
+        }
+    )
 }
 
 fun NavController.navigateToAboutProduct(
@@ -425,12 +435,14 @@ fun NavController.navigateToSubCategories(category: ParentCategoryUi) {
     navigate(
         R.id.subCategoriesFragment,
         bundleOf("category" to category),
-        NavOptions.Builder()
-            .setEnterAnim(R.anim.slide_in_right)
-            .setExitAnim(R.anim.slide_out_left)
-            .setPopEnterAnim(R.anim.slide_in_left)
-            .setPopExitAnim(R.anim.slide_out_right)
-            .build()
+        navOptions {
+            anim {
+                enter = R.anim.slide_in_right
+                exit = R.anim.slide_out_left
+                popEnter = R.anim.slide_in_left
+                popExit = R.anim.slide_out_right
+            }
+        }
     )
 }
 
@@ -539,7 +551,9 @@ fun NavController.navigateToWebView(url: String, title: String = "") {
 }
 
 fun NavController.navigateToAllServices() {
-    navigate(R.id.aboutServicesFragment, null, navOptions {
-        slideAnim()
-    })
+    navigate(
+        R.id.aboutServicesFragment,
+        null,
+        navOptions { slideAnim() }
+    )
 }

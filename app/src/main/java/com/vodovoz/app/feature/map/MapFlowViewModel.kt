@@ -19,6 +19,7 @@ import com.vodovoz.app.design_system.model.MapPointUi
 import com.vodovoz.app.domain.general.respository.MapServiceRepository
 import com.vodovoz.app.feature.map.manager.DeliveryZonesManager
 import com.vodovoz.app.feature.map.model.MapAddressUi
+import com.vodovoz.app.feature.map.model.toUi
 import com.vodovoz.app.mapper.AddressMapper.mapToUI
 import com.vodovoz.app.ui.model.AddressUI
 import com.vodovoz.app.ui.model.custom.DeliveryZonesBundleUI
@@ -97,7 +98,7 @@ class MapFlowViewModel @Inject constructor(
     }
 
     fun fetchAddressByGeo() = viewModelScope.launch {
-        val address = dataState.addressPoint ?: return@launch
+        val address = dataState.markerPoint ?: return@launch
 
         val addressResult = mapServiceRepository.getAddressByGeo(
             address.lat,
@@ -114,11 +115,9 @@ class MapFlowViewModel @Inject constructor(
         longitude: Double,
     ) {
         uiStateListener.updateData { s ->
-            s.copy(addressPoint = MapPointUi(latitude, longitude))
+            s.copy(markerPoint = MapPointUi(latitude, longitude))
         }
         uiStateListener.value = state.copy(loadingPage = true)
-
-        fetchAddressByGeo()
 
         viewModelScope.launch {
             flow { emit(repository.fetchAddressByGeocodeResponse(latitude, longitude)) }
@@ -546,7 +545,7 @@ class MapFlowViewModel @Inject constructor(
     }
 
     fun moveToAvailableGeo() = viewModelScope.launch {
-        val addressPoint = dataState.addressPoint
+        val addressPoint = dataState.markerPoint
 
         if (addressPoint != null) {
             eventListener.emit(MapFlowEvents.MoveToAddress(addressPoint))
@@ -568,6 +567,37 @@ class MapFlowViewModel @Inject constructor(
     fun closeSettingsDialog() = viewModelScope.launch {
         uiStateListener.updateData { s ->
             s.copy(showSettingsDialog = false)
+        }
+    }
+
+    fun showAddressBottomSheet() = viewModelScope.launch {
+        eventListener.emit(MapFlowEvents.ShowAddressBottomSheet)
+    }
+
+    fun hideAddressBottomSheet() = viewModelScope.launch {
+        eventListener.emit(MapFlowEvents.HideAddressBottomSheet)
+    }
+
+    fun changeMarkerPoint(point: MapPointUi?) = viewModelScope.launch {
+        uiStateListener.updateData { s ->
+            s.copy(
+                markerPoint = point,
+                addressIsLoading = true
+            )
+        }
+
+        if (point == null) return@launch
+
+        val addressByGeoResult =
+            mapServiceRepository.getAddressByGeo(point.lat, point.lon).singleResult()
+
+        addressByGeoResult.onSuccess { address ->
+            uiStateListener.updateData { s ->
+                s.copy(
+                    address = address.toUi(),
+                    addressIsLoading = false
+                )
+            }
         }
     }
 
@@ -598,9 +628,10 @@ class MapFlowViewModel @Inject constructor(
         val pendingUpdateAddressUI: AddressUI? = null,
 
         val query: String = "",
-        val address: MapAddressUi? = null,
-        val addressPoint: MapPointUi? = null,
         val showSettingsDialog: Boolean = false,
+        val address: MapAddressUi? = null,
+        val markerPoint: MapPointUi? = null,
+        val addressIsLoading: Boolean = false,
     ) : State
 
     sealed class MapFlowEvents : Event {
@@ -621,6 +652,8 @@ class MapFlowViewModel @Inject constructor(
         data object CheckGeo : MapFlowEvents()
         data object MoveCameraMinus : MapFlowEvents()
         data object MoveCameraPlus : MapFlowEvents()
+        data object ShowAddressBottomSheet : MapFlowEvents()
+        data object HideAddressBottomSheet : MapFlowEvents()
 
         data class MoveToAddress(val addressPoint: MapPointUi) : MapFlowEvents()
     }

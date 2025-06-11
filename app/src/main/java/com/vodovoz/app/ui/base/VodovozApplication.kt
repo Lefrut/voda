@@ -6,8 +6,8 @@ import androidx.work.Configuration
 import com.vodovoz.app.BuildConfig
 import com.vodovoz.app.common.notification.NotificationChannels
 import com.vodovoz.app.core.network.ApiConfig
-import com.vodovoz.app.util.Keys
-import com.vodovoz.app.util.Keys.YANDEX_METRICA_KEY
+import com.vodovoz.app.common.constants.AppKeys
+import com.vodovoz.app.common.constants.AppKeys.YANDEX_METRICA_KEY
 import com.yandex.mapkit.MapKitFactory
 import com.yandex.metrica.YandexMetrica
 import com.yandex.metrica.YandexMetricaConfig
@@ -30,7 +30,7 @@ class VodovozApplication : Application(), Configuration.Provider {
     override fun onCreate() {
         super.onCreate()
         //initYandexMetrica() //todo релиз
-        MapKitFactory.setApiKey(Keys.MAPKIT_API_KEY)
+        MapKitFactory.setApiKey(AppKeys.MAPKIT_API_KEY)
         Timber.plant(Timber.DebugTree())
         NotificationChannels.create(this)
     }

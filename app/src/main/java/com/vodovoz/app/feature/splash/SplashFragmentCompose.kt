@@ -11,10 +11,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.navOptions
@@ -98,13 +96,19 @@ class SplashFragment : Fragment() {
 
                     LifecycleEffect {
                         splashFileViewModel.fileState.collectLatest { fileState ->
-                            when(fileState){
+                            when (fileState) {
                                 SplashFileState.Error -> {
                                     splashViewModel.hideAndroidSplash()
                                 }
+
                                 SplashFileState.Success -> {
-                                    splashViewModel.changeToAnimation(SplashFileConfig.getSplashFile(context))
+                                    splashViewModel.changeToAnimation(
+                                        SplashFileConfig.getSplashFile(
+                                            context
+                                        )
+                                    )
                                 }
+
                                 SplashFileState.Loading -> {}
                             }
                         }
@@ -157,7 +161,7 @@ class SplashFragment : Fragment() {
                 }
 
                 AppState.Blocked -> {
-                    if(androidSplash){
+                    if (androidSplash) {
                         splashViewModel.hideAndroidSplash()
                     }
 
@@ -168,7 +172,7 @@ class SplashFragment : Fragment() {
 
                 AppState.ErrorLoading -> {
                     splashViewModel.setErrorUiState()
-                    if(androidSplash){
+                    if (androidSplash) {
                         splashViewModel.hideAndroidSplash()
                     }
                 }
@@ -212,9 +216,7 @@ class SplashFragment : Fragment() {
             ?.also { debugLog { "splash push extra: $it" } }
             ?.takeIf { arg -> arg.isNotBlank() }
             ?.let { extra ->
-                repeatOnLifecycle(Lifecycle.State.CREATED) {
-                    siteStateManager.savePushData(JSONObject(extra))
-                }
+                siteStateManager.savePushData(JSONObject(extra))
             }
     }
 }

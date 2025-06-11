@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.core.view.ViewCompat
@@ -83,7 +84,7 @@ class SearchFragment : Fragment() {
             setContent {
                 VodovozTheme {
                     val pagingState by viewModel.observeUiState().collectAsStateWithLifecycle()
-                    val viewState = pagingState.data
+                    val viewState by rememberUpdatedState(pagingState.data)
 
                     when (viewState.uiState) {
                         SearchFlowViewModel.UiState.Error -> {

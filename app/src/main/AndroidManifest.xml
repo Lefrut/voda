@@ -52,30 +52,38 @@
 
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
-
-                <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <!--TODO - change schemes-->
+                <data
+                    android:scheme="htt"
+                    android:host="vodovoz.ru"
+                    android:pathPrefix="/mobile_app/" />
 
                 <data
-                    android:scheme="@string/new_app_ssl_not"
-                    android:host="@string/new_app"
-                    android:path="/mobile_app/"/>
+                    android:scheme="htt"
+                    android:host="vodovoz.ru"
+                    android:pathPrefix="/gl/" />
 
                 <data
-                    android:scheme="@string/new_app_ssl_not"
-                    android:host="@string/new_app"
-                    android:path="/gl/"/>
+                    android:scheme="htt"
+                    android:host="vodovoz.ru"
+                    android:pathPrefix="/landings/kalkulyator_vody/"
+                    />
 
                 <data
-                    android:scheme="@string/new_app_ssl_not"
-                    android:host="@string/new_app"
-                    android:path="/landings/kalkulyator_vody/"/>
+                    android:scheme="htt"
+                    android:host="vodovoz.ru"
+                    android:pathPrefix="/catalog/"
+                    />
+
+
             </intent-filter>
 
         </activity>
@@ -90,7 +98,7 @@
         </service>
 
         <service
-            android:name=".common.notification.NotificationManager"
+            android:name=".common.notification.FirebaseNotificationManager"
             android:exported="false">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />

@@ -130,21 +130,6 @@ fun Snackbar.action(action: String, color: Int? = null, listener: (View) -> Unit
 }
 
 
-
-fun View.isKeyboardOpen(): Boolean {
-    return ViewCompat.getRootWindowInsets(this)
-        ?.isVisible(WindowInsetsCompat.Type.ime())
-        ?: false
-}
-
-fun Context.unwrap(): Activity? {
-    return when (this) {
-        is Activity -> this
-        is ContextThemeWrapper -> this.unwrap()
-        else -> null
-    }
-}
-
 fun NestedScrollView.scrollViewToTop() {
     this.post {
         this.fling(0)
@@ -220,22 +205,6 @@ fun Activity.disableFullScreen() {
 
     insetsController.show(WindowInsetsCompat.Type.statusBars())
     insetsController.show(WindowInsetsCompat.Type.navigationBars())
-}
-
-inline fun <T : View> T.preDraw(crossinline callBack: (isReady: Boolean) -> Unit) {
-
-    viewTreeObserver.addOnPreDrawListener(object : ViewTreeObserver.OnPreDrawListener {
-
-        override fun onPreDraw(): Boolean {
-            if (measuredWidth > 0 && measuredHeight > 0) {
-                viewTreeObserver.removeOnPreDrawListener(this)
-                callBack(true)
-            } else {
-                callBack(false)
-            }
-            return true
-        }
-    })
 }
 
 

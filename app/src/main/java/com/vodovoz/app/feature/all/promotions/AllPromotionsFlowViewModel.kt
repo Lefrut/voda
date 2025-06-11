@@ -1,5 +1,7 @@
 package com.vodovoz.app.feature.all.promotions
 
+import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.Stable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
@@ -122,16 +124,18 @@ class AllPromotionsFlowViewModel @Inject constructor(
         eventListener.emit(AllPromotionsEvent.GoBack)
     }
 
+    @Immutable
     data class AllPromotionsState(
+        val title: String = "",
         val categories: List<PromotionCategoryUi> = emptyList(),
         val currentCategory: PromotionCategoryUi = PromotionCategoryUi.Empty,
-        val title: String = "",
         val pagedPromotions: Flow<PagingData<PromotionUi>> = emptyFlow(),
         val showAdvertisingBottomSheet: Boolean = false,
         val currentAdvertising: AboutAdvertisingUi = AboutAdvertisingUi.Empty,
         val uiState: UiState = UiState.Loading,
     ) : State
 
+    @Stable
     sealed interface UiState {
         data object Loading : UiState
         data object Success : UiState

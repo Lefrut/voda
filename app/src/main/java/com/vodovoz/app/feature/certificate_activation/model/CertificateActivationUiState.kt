@@ -1,5 +1,8 @@
 package com.vodovoz.app.feature.certificate_activation.model
 
+import androidx.compose.runtime.Stable
+
+@Stable
 sealed interface CertificateActivationUiState {
 
     data object Loading: CertificateActivationUiState

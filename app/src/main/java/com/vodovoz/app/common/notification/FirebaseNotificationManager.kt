@@ -1,6 +1,7 @@
 package com.vodovoz.app.common.notification
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.os.Build
 import androidx.core.app.ActivityCompat
@@ -16,7 +17,8 @@ import com.vodovoz.app.util.extensions.debugLog
 import com.vodovoz.app.util.extensions.fromHtml
 import org.json.JSONObject
 
-class NotificationManager : FirebaseMessagingService() {
+@SuppressLint("MissingFirebaseInstanceTokenRefresh")
+class FirebaseNotificationManager : FirebaseMessagingService() {
 
     override fun onMessageReceived(message: RemoteMessage) {
         super.onMessageReceived(message)

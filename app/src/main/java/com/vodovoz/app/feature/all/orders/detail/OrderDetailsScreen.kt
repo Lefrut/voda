@@ -2,13 +2,13 @@ package com.vodovoz.app.feature.all.orders.detail
 
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.vodovoz.app.feature.all.orders.detail.composables.OrderDetailsBody
 import com.vodovoz.app.feature.all.orders.detail.composables.OrderDetailsTopBar
 
-@Suppress("NonSkippableComposable")
 @Composable
 fun OrderDetailsScreen(
     viewModel: OrderDetailsFlowViewModel,

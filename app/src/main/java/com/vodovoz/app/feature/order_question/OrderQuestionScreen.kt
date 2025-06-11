@@ -6,7 +6,9 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Scaffold
@@ -27,7 +29,7 @@ fun OrderQuestionScreen(
     snackbarHostState: SnackbarHostState,
 ) {
     Scaffold(
-        modifier = Modifier.systemBarsPadding(),
+        modifier = Modifier.windowInsetsPadding(WindowInsets.statusBars),
         snackbarHost = {
             VodovozSnackbarHost(hostState = snackbarHostState)
         },

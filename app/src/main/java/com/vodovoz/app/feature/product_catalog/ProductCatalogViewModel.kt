@@ -656,6 +656,7 @@ class ProductCatalogViewModel @Inject constructor(
     data class ProductCatalogState(
         val productsSection: ProductsSectionUi = ProductsSectionUi.Empty,
         val products: List<ProductUi> = emptyList(),
+        @Stable
         val productsLoadStates: CombinedLoadStates = emptyCombinedLoadStates,
         val categoryTree: List<ParentCategoryUi> = emptyList(),
 
@@ -675,6 +676,7 @@ class ProductCatalogViewModel @Inject constructor(
         val showEmptyCategory: Boolean = false,
     ) : State
 
+    @Stable
     sealed interface ProductCatalogUiState {
         data class Empty(val placeholder: VodovozPlaceholderUi) : ProductCatalogUiState
         data object Error : ProductCatalogUiState

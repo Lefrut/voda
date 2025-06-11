@@ -219,6 +219,8 @@
             android:name="productId"
             app:argType="long" />
 
+        <deepLink app:uri="https://vodovoz.ru/catalog/{category}/{productId}"/>
+
         <action
             android:id="@+id/action_to_aboutProductFragment"
             app:destination="@id/aboutProductFragment" />

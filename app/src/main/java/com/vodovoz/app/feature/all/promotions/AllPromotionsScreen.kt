@@ -21,7 +21,6 @@ import com.vodovoz.app.feature.all.promotions.composables.AllPromotionsBody
 import com.vodovoz.app.feature.all.promotions.composables.PromotionsLoadingPlaceholder
 
 @OptIn(ExperimentalMaterial3Api::class)
-@Suppress("NonSkippableComposable")
 @Composable
 fun AllPromotionsScreen(
     viewModel: AllPromotionsFlowViewModel,
