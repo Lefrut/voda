@@ -20,13 +20,11 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SheetValue.Hidden
 import androidx.compose.material3.SheetValue.PartiallyExpanded
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
@@ -36,7 +34,7 @@ import androidx.navigation.fragment.findNavController
 import com.google.android.gms.location.LocationServices
 import com.vodovoz.app.core.android.handleLocationAvailability
 import com.vodovoz.app.core.android.locationPermissions
-import com.vodovoz.app.core.android.locationPermissionsGranted
+import com.vodovoz.app.core.android.locationPermissionGranted
 import com.vodovoz.app.core.navigation.navigateToWebView
 import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.effects.LifecycleEffect
@@ -50,8 +48,6 @@ import com.vodovoz.app.util.extensions.dialPhoneNumber
 import com.yandex.mapkit.Animation
 import com.yandex.mapkit.MapKit
 import com.yandex.mapkit.MapKitFactory
-import com.yandex.mapkit.ScreenPoint
-import com.yandex.mapkit.ScreenRect
 import com.yandex.mapkit.geometry.Point
 import com.yandex.mapkit.map.CameraPosition
 import com.yandex.mapkit.map.Map
@@ -164,7 +160,7 @@ class TraceOrderFragment : Fragment() {
 
 
                     LaunchedEffect(Unit) {
-                        if (context.locationPermissionsGranted) return@LaunchedEffect
+                        if (context.locationPermissionGranted) return@LaunchedEffect
 
                         locationPermissionLauncher.launch(locationPermissions)
                     }

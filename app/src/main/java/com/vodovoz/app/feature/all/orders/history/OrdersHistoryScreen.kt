@@ -59,6 +59,7 @@ fun OrdersHistoryScreen(
             OrdersHistoryViewModel.AllOrdersUiState.Body -> {
                 OrdersHistoryBody(
                     items = viewState.items,
+                    itemsLoading = viewState.loadStates.refresh is LoadState.Loading,
                     appendItems = viewState.loadStates.append is LoadState.Loading,
                     searchMode = viewState.searchMode,
                     currentFilters = viewState.currentFilters,

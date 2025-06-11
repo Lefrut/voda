@@ -12,7 +12,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.fragment.findNavController
 import com.vodovoz.app.common.tab.TabManager
-import com.vodovoz.app.core.ui.activate
+import com.vodovoz.app.core.navigation.activate
 import com.vodovoz.app.core.navigation.navigateToCategoryProductList
 import com.vodovoz.app.core.navigation.navigateToSearch
 import com.vodovoz.app.core.navigation.navigateToSubCategories

@@ -16,7 +16,7 @@ import com.vodovoz.app.R
 import com.vodovoz.app.common.account.AccountManager
 import com.vodovoz.app.common.cookie.CookieManager
 import com.vodovoz.app.common.tab.TabManager
-import com.vodovoz.app.core.ui.activate
+import com.vodovoz.app.core.navigation.activate
 import com.vodovoz.app.core.navigation.navigateToCategoryProductList
 import com.vodovoz.app.core.navigation.navigateToSubCategories
 import com.vodovoz.app.design_system.VodovozTheme

@@ -24,8 +24,6 @@ import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.feature.addresses.model.AddressScreenTypeUi
 import com.vodovoz.app.feature.addresses.model.AddressUi
 import com.vodovoz.app.feature.addresses.model.mapToUi
-import com.vodovoz.app.feature.cart.ordering.OrderType
-import com.vodovoz.app.mapper.AddressMapper.mapToUI
 import com.vodovoz.app.ui.model.AddressFlowTitle
 import com.vodovoz.app.ui.model.AddressUI
 import com.vodovoz.app.util.extensions.debugLog
@@ -54,18 +52,8 @@ class AddressesFlowViewModel @Inject constructor(
     )
 ) {
 
-    private val openMode = savedState.get<String>("openMode")
-    private val addressType = savedState.get<String>("addressType")
-
     init {
         fetchAddresses()
-    }
-
-    fun firstLoad() {
-        if (!state.isFirstLoad) {
-            uiStateListener.value = state.copy(isFirstLoad = true, loadingPage = true)
-            fetchAddresses()
-        }
     }
 
     fun refresh() {
@@ -106,94 +94,6 @@ class AddressesFlowViewModel @Inject constructor(
                     }
                 )
             }
-        }
-
-        val userId = accountManager.fetchAccountId() ?: return@launch
-        val type = when (addressType) {
-            OrderType.PERSONAL.name -> 1
-            OrderType.COMPANY.name -> 2
-            else -> null
-        }
-        viewModelScope.launch {
-            flow { emit(repository.fetchAddressesSaved(userId, type)) }
-                .onEach { response ->
-                    if (response is ResponseEntity.Success) {
-                        val data = response.data.mapToUI()
-
-                        if (data.isNotEmpty()) {
-                            //if(type == null) {
-                            //    val personal = data.filter { it.type == OrderType.PERSONAL.value }
-                            //    val company = data.filter { it.type == OrderType.COMPANY.value }
-                            //    val fullList = mutableListOf<Item>()
-                            //    if (personal.isNotEmpty()) {
-                            //        fullList.addAll(
-                            //            listOf(
-                            //                AddressFlowTitle(
-                            //                    application.resources.getString(
-                            //                        R.string.personal_addresses_title
-                            //                    )
-                            //                )
-                            //            ) + personal
-                            //        )
-                            //    }
-                            //    if (company.isNotEmpty()) {
-                            //        fullList.addAll(
-                            //            listOf(
-                            //                AddressFlowTitle(
-                            //                    application.resources.getString(
-                            //                        R.string.company_addresses_title
-                            //                    )
-                            //                )
-                            //            ) + company
-                            //        )
-                            //    }
-//
-                            //    uiStateListener.value = state.copy(
-                            //        data = state.data.copy(
-                            //            items = data,
-                            //            companyItems = company,
-                            //            personalItems = personal,
-                            //            fullList = fullList
-                            //        ),
-                            //        loadingPage = false,
-                            //        error = null
-                            //    )
-                            //} else {
-                            val addresses = if (type == OrderType.PERSONAL.value) {
-                                data.filter { it.type == OrderType.PERSONAL.value }
-                            } else {
-                                data.filter { it.type == OrderType.COMPANY.value }
-                            }
-                            uiStateListener.value = state.copy(
-                                data = state.data.copy(
-                                    items = data,
-                                    fullList = addresses
-                                ),
-                                loadingPage = false,
-                                error = null
-                            )
-                            //}
-                        } else {
-                            uiStateListener.value = state.copy(
-                                error = ErrorState.Empty(),
-                                loadingPage = false
-                            )
-                        }
-                    } else {
-                        uiStateListener.value =
-                            state.copy(
-                                loadingPage = false,
-                                error = ErrorState.Error()
-                            )
-                    }
-                }
-                .flowOn(Dispatchers.Default)
-                .catch {
-                    debugLog { "fetch addresses error ${it.localizedMessage}" }
-                    uiStateListener.value =
-                        state.copy(error = it.toErrorState(), loadingPage = false)
-                }
-                .collect()
         }
     }
 

@@ -1,5 +1,6 @@
 package com.vodovoz.app.feature.main
 
+import android.Manifest
 import android.app.Activity
 import android.os.Build
 import android.os.Bundle
@@ -25,9 +26,11 @@ import by.kirich1409.viewbindingdelegate.viewBinding
 import com.google.android.material.snackbar.Snackbar
 import com.vodovoz.app.R
 import com.vodovoz.app.common.account.AccountManager
-import com.vodovoz.app.common.permissions.PermissionsController
 import com.vodovoz.app.common.tab.TabManager
 import com.vodovoz.app.common.update.AppUpdateController
+import com.vodovoz.app.core.android.locationPermissionGranted
+import com.vodovoz.app.core.android.locationPermissions
+import com.vodovoz.app.core.android.notificationPermissionGranted
 import com.vodovoz.app.core.navigation.setupWithNavController
 import com.vodovoz.app.databinding.FragmentMainBinding
 import dagger.hilt.android.AndroidEntryPoint
@@ -37,12 +40,22 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class MainFragment : Fragment(R.layout.fragment_main) {
 
-    @Inject
-    lateinit var tabManager: TabManager
+    private val locationPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) {}
+
+
+    private val notificationPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { _ ->
+        if (!requireContext().locationPermissionGranted) {
+            locationPermissionLauncher.launch(locationPermissions)
+        }
+    }
+
 
     @Inject
-    lateinit var permissionsControllerFactory: PermissionsController.Factory
-    private val permissionsController by lazy { permissionsControllerFactory.create(requireActivity()) }
+    lateinit var tabManager: TabManager
 
     @Inject
     lateinit var accountManager: AccountManager
@@ -55,28 +68,17 @@ class MainFragment : Fragment(R.layout.fragment_main) {
 
     private val viewModel: MainViewModel by viewModels()
 
-    private fun popupSnackbarForCompleteUpdate() {
-        val snackbar = Snackbar.make(
-            requireView(),
-            "Обновление скачано",
-            Snackbar.LENGTH_INDEFINITE
-        )
-        snackbar.setAction("Обновить") { _ ->
-            appUpdateController.completeUpdate()
-        }
-        snackbar.setDuration(5000)
-        snackbar.setActionTextColor(
-            ContextCompat.getColor(
-                requireContext(),
-                R.color.bluePrimary
-            )
-        )
-        snackbar.show()
-    }
-
-
     private val binding: FragmentMainBinding by viewBinding {
         FragmentMainBinding.bind(it.view ?: View(requireContext()))
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && !requireContext().notificationPermissionGranted) {
+            notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+        } else if (!requireContext().locationPermissionGranted) {
+            locationPermissionLauncher.launch(locationPermissions)
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -84,7 +86,6 @@ class MainFragment : Fragment(R.layout.fragment_main) {
 
         observeTabState()
         observeCartState()
-        observeProfileState()
 
         observeTabVisibility()
         observeTabWindowInsets()
@@ -143,7 +144,9 @@ class MainFragment : Fragment(R.layout.fragment_main) {
                 .observeTabWindowInsets()
                 .collect { has ->
                     val insets = ViewCompat.getRootWindowInsets(binding.root)
-                    val bottomPadding = insets?.getInsetsIgnoringVisibility(WindowInsetsCompat.Type.navigationBars())?.bottom ?: 0
+                    val bottomPadding =
+                        insets?.getInsetsIgnoringVisibility(WindowInsetsCompat.Type.navigationBars())?.bottom
+                            ?: 0
                     binding.root.updatePadding(bottom = if (has) bottomPadding else 0)
                 }
         }
@@ -182,17 +185,6 @@ class MainFragment : Fragment(R.layout.fragment_main) {
         }
     }
 
-    private fun observeProfileState() {
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                tabManager
-                    .observeBottomNavProfileState()
-                    .collect { state ->
-                    }
-            }
-        }
-    }
-
     private fun observeTabState() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -205,13 +197,9 @@ class MainFragment : Fragment(R.layout.fragment_main) {
         }
     }
 
+
     override fun onResume() {
         super.onResume()
-        permissionsController.methodRequiresLocationsPermission()
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            permissionsController.methodRequiresNotificationPermission()
-        }
-
         appUpdateController.onResumeAction()
     }
 
@@ -219,7 +207,7 @@ class MainFragment : Fragment(R.layout.fragment_main) {
     private fun setupBottomNavigationBar() = lifecycleScope.launch {
         viewModel.isBottomBarInitialized = true
 
-        val navGraphIds = listOfNotNull(
+        val navGraphIds = listOf(
             R.navigation.nav_graph_home,
             R.navigation.nav_graph_catalog,
             R.navigation.nav_graph_cart,
@@ -227,19 +215,41 @@ class MainFragment : Fragment(R.layout.fragment_main) {
             R.navigation.nav_graph_profile
         )
 
-        // Setup the bottom navigation view with a list of navigation graphs
+        val activity = requireActivity()
+
         binding.nvNavigation.setupWithNavController(
             navGraphIds = navGraphIds,
             fragmentManager = childFragmentManager,
             containerId = R.id.fgvContainer,
-            intent = requireActivity().intent,
-            recyclerViewToTop = {
-                tabManager.reselect(it)
-            },
-            activity = requireActivity(),
-            lifecycleOwner = viewLifecycleOwner
+            intent = activity.intent,
+            activity = activity,
+            lifecycleOwner = viewLifecycleOwner,
+            recyclerViewToTop = { menuId ->
+                tabManager.reselect(menuId)
+            }
         ).observe(viewLifecycleOwner) { navController ->
             Navigation.setViewNavController(requireView(), navController)
         }
     }
+
+
+    private fun popupSnackbarForCompleteUpdate() {
+        val snackbar = Snackbar.make(
+            requireView(),
+            "Обновление скачано",
+            Snackbar.LENGTH_INDEFINITE
+        )
+        snackbar.setAction("Обновить") { _ ->
+            appUpdateController.completeUpdate()
+        }
+        snackbar.setDuration(5000)
+        snackbar.setActionTextColor(
+            ContextCompat.getColor(
+                requireContext(),
+                R.color.bluePrimary
+            )
+        )
+        snackbar.show()
+    }
+
 }

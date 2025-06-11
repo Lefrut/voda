@@ -51,11 +51,13 @@ import com.vodovoz.app.design_system.ExtendedTheme
 import com.vodovoz.app.design_system.composables.chip.OrderStatusChip
 import com.vodovoz.app.design_system.composables.chip.VodovozChip
 import com.vodovoz.app.design_system.composables.chip.VodovozColorChip
+import com.vodovoz.app.design_system.composables.placeholders.LoadingPlaceholder
 import com.vodovoz.app.design_system.composables.tab_row.VodovozScrollableTabRow
 import com.vodovoz.app.feature.all.orders.history.model.OrderFilterUi
 import com.vodovoz.app.feature.all.orders.history.model.OrdersHistoryButtonUi
 import com.vodovoz.app.feature.all.orders.history.model.OrdersHistoryItemUi
 import com.vodovoz.app.feature.all.orders.history.model.OrdersHistoryProductUi
+import com.vodovoz.app.feature.home.composables.dropShadow
 
 @Suppress("NonSkippableComposable")
 @Composable
@@ -64,6 +66,7 @@ fun OrdersHistoryBody(
     searchMode: Boolean,
     currentFilters: List<OrderFilterUi>,
     items: List<OrdersHistoryItemUi>,
+    itemsLoading: Boolean,
     appendItems: Boolean,
     filters: List<OrderFilterUi>,
     onProductSee: (Int) -> Unit,
@@ -88,6 +91,12 @@ fun OrdersHistoryBody(
             ) {
                 VodovozScrollableTabRow(
                     modifier = Modifier
+                        .dropShadow(
+                            shape = MaterialTheme.shapes.large,
+                            color = Color.Black.copy(0.1f),
+                            blur = 20.dp,
+                            offsetY = 2.dp
+                        )
                         .background(
                             MaterialTheme.colorScheme.background,
                             shape = MaterialTheme.shapes.large.copy(
@@ -119,32 +128,43 @@ fun OrdersHistoryBody(
             }
         }
 
-        itemsIndexed(
-            items = items,
-            key = { _, ordersHistoryItemUi -> ordersHistoryItemUi.id }
-        ) { index, item ->
-
-            LaunchedEffect(index) {
-                onProductSee(index)
-            }
-
-            OrdersHistoryItemCard(
-                orderHistoryItem = item,
-                onClick = onItemClick,
-                onButtonClick = onItemButtonClick
-            )
-        }
-
-        if (appendItems) {
+        if (itemsLoading) {
             item {
-                CircularProgressIndicator(
-                    color = MaterialTheme.colorScheme.primary,
-                    strokeWidth = 3.dp,
-                    modifier = Modifier.padding(vertical = 2.dp).fillParentMaxWidth().wrapContentWidth().size(26.dp),
-                    trackColor = Color.Transparent
+                LoadingPlaceholder(modifier = Modifier.fillParentMaxSize())
+            }
+        } else {
+            itemsIndexed(
+                items = items,
+                key = { _, ordersHistoryItemUi -> ordersHistoryItemUi.id }
+            ) { index, item ->
+
+                LaunchedEffect(index) {
+                    onProductSee(index)
+                }
+
+                OrdersHistoryItemCard(
+                    orderHistoryItem = item,
+                    onClick = onItemClick,
+                    onButtonClick = onItemButtonClick
                 )
             }
+
+            if (appendItems) {
+                item {
+                    CircularProgressIndicator(
+                        color = MaterialTheme.colorScheme.primary,
+                        strokeWidth = 3.dp,
+                        modifier = Modifier
+                            .padding(vertical = 2.dp)
+                            .fillParentMaxWidth()
+                            .wrapContentWidth()
+                            .size(26.dp),
+                        trackColor = Color.Transparent
+                    )
+                }
+            }
         }
+
     }
 }
 

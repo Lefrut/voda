@@ -1,7 +1,9 @@
 package com.vodovoz.app.feature.all.orders.history.model
 
+import androidx.compose.runtime.Immutable
 import com.vodovoz.app.domain.general.model.order.OrderFilterModel
 
+@Immutable
 data class OrderFilterUi(
     val id: String,
     val name: String,
