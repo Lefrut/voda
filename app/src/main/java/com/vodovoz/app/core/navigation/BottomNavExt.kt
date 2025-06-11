@@ -10,19 +10,11 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.navigation.NavController
-import androidx.navigation.NavDirections
 import androidx.navigation.fragment.NavHostFragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.vodovoz.app.ui.view.ExtendedBottomNavigationView
 import java.util.LinkedList
 
-/**
- * Manages the various graphs needed for a [BottomNavigationView].
- *
- * This sample is a workaround until the Navigation Component supports multiple back stacks.
- */
-
-fun ExtendedBottomNavigationView.setupWithNavController(
+fun BottomNavigationView.setupWithNavController(
     navGraphIds: List<Int>,
     fragmentManager: FragmentManager,
     containerId: Int,
@@ -41,21 +33,19 @@ fun ExtendedBottomNavigationView.setupWithNavController(
 
     val graphsBackStack = LinkedList<String>()
 
-    fun last(): String? = graphsBackStack.lastOrNull()
-
     fun moveToTop(id: String) {
         graphsBackStack.remove(id)
         graphsBackStack.add(id)
     }
 
     backPressedCallback(activity = activity, lifecycleOwner = lifecycleOwner) {
-        if (last() != null) {
+        if (graphsBackStack.lastOrNull() != null) {
             if (graphsBackStack.size > 1) {
                 graphsBackStack.removeLast()
             }
-            this.selectedItemId = graphIdToTagMap.keyAt(graphIdToTagMap.indexOfValue(last()))
+            selectedItemId = graphIdToTagMap.keyAt(graphIdToTagMap.indexOfValue(graphsBackStack.lastOrNull()))
         } else {
-            this.selectedItemId = firstFragmentGraphId
+            selectedItemId = firstFragmentGraphId
         }
     }
 
@@ -168,7 +158,7 @@ fun ExtendedBottomNavigationView.setupWithNavController(
     return selectedNavController
 }
 
-private fun ExtendedBottomNavigationView.setupDeepLinks(
+private fun BottomNavigationView.setupDeepLinks(
     navGraphIds: List<Int>,
     fragmentManager: FragmentManager,
     containerId: Int,
@@ -193,7 +183,7 @@ private fun ExtendedBottomNavigationView.setupDeepLinks(
     }
 }
 
-private fun ExtendedBottomNavigationView.setupItemReselected(
+private fun BottomNavigationView.setupItemReselected(
     graphIdToTagMap: SparseArray<String>,
     fragmentManager: FragmentManager,
     recyclerViewToTop: (id: Int) -> Unit

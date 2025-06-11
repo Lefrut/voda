@@ -9,7 +9,7 @@
     android:theme="@style/Theme.Vodovoz"
     android:background="@color/white">
 
-    <com.vodovoz.app.ui.view.ExtendedBottomNavigationView
+    <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/nvNavigation"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"

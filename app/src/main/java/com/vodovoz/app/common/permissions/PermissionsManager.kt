@@ -14,9 +14,4 @@ class PermissionsManager @Inject constructor(
         debugLog { "Permissions getPermissionChecked: $permissionRequestCode -> $ret" }
         return ret
     }
-
-    fun setPermissionChecked(permissionRequestCode: Int, isChecked: Boolean) {
-        debugLog { "Permissions setPermissionChecked: $permissionRequestCode -> $isChecked" }
-        dataStoreRepository.putBoolean("permissionCode_$permissionRequestCode", isChecked)
-    }
 }

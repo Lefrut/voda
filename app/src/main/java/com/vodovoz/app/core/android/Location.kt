@@ -44,7 +44,7 @@ fun Activity.handleLocationAvailability(
 ) {
     val locationManager = getSystemService(Context.LOCATION_SERVICE) as? LocationManager
 
-    val locationPermissionGranted = locationPermissionsGranted
+    val locationPermissionGranted = locationPermissionGranted
 
     val canRequestPermission =
         Build.VERSION.SDK_INT < Build.VERSION_CODES.M

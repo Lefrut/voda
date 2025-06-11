@@ -20,7 +20,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.fragment.findNavController
 import com.vodovoz.app.common.cookie.CookieManager
 import com.vodovoz.app.common.tab.TabManager
-import com.vodovoz.app.core.ui.activate
+import com.vodovoz.app.core.navigation.activate
 import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.composables.placeholders.LoadingPlaceholder
 import com.vodovoz.app.design_system.effects.LifecycleEffect

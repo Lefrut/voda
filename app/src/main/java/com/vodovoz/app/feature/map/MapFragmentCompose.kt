@@ -30,7 +30,7 @@ import com.google.android.gms.location.LocationServices
 import com.vodovoz.app.core.android.getLocationOrNull
 import com.vodovoz.app.core.android.handleLocationAvailability
 import com.vodovoz.app.core.android.locationPermissions
-import com.vodovoz.app.core.android.locationPermissionsGranted
+import com.vodovoz.app.core.android.locationPermissionGranted
 import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.effects.LifecycleEffect
 import com.vodovoz.app.design_system.model.toPoint
@@ -190,7 +190,7 @@ class MapFragment : Fragment() {
 
                     MapFlowViewModel.MapFlowEvents.MoveToGeoOrMoscow -> {
 
-                        if (requireContext().locationPermissionsGranted
+                        if (requireContext().locationPermissionGranted
                             && locationManager?.isProviderEnabled(LocationManager.GPS_PROVIDER) == true
                         ) {
                             val location = fusedLocationClient.getLocationOrNull(requireContext())

@@ -1,4 +1,4 @@
-package com.vodovoz.app.core.ui
+package com.vodovoz.app.core.navigation
 
 import android.content.Context
 import android.content.Intent
@@ -7,20 +7,6 @@ import android.webkit.CookieManager
 import androidx.navigation.NavController
 import com.vodovoz.app.R
 import com.vodovoz.app.common.tab.TabManager
-import com.vodovoz.app.core.navigation.navigateToAllServices
-import com.vodovoz.app.core.navigation.navigateToBannerProductList
-import com.vodovoz.app.core.navigation.navigateToBrandProductList
-import com.vodovoz.app.core.navigation.navigateToButtonProductList
-import com.vodovoz.app.core.navigation.navigateToBuyCertificate
-import com.vodovoz.app.core.navigation.navigateToCategoryProductList
-import com.vodovoz.app.core.navigation.navigateToHurryBuyUpProducts
-import com.vodovoz.app.core.navigation.navigateToNewProducts
-import com.vodovoz.app.core.navigation.navigateToProductDetails
-import com.vodovoz.app.core.navigation.navigateToPromotionDetails
-import com.vodovoz.app.core.navigation.navigateToPromotions
-import com.vodovoz.app.core.navigation.navigateToServiceDetails
-import com.vodovoz.app.core.navigation.navigateToWaterApp
-import com.vodovoz.app.core.navigation.navigateToWebView
 import com.vodovoz.app.core.network.VodovozWebConfig
 import com.vodovoz.app.common.model.ButtonAction
 import com.vodovoz.app.common.model.DataAllAction

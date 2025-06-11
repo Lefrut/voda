@@ -53,7 +53,7 @@ import com.vodovoz.app.core.navigation.navigateToWebView
 import com.vodovoz.app.core.navigation.navigateToWriteComment
 import com.vodovoz.app.core.network.ApiConfig
 import com.vodovoz.app.core.network.VodovozWebConfig
-import com.vodovoz.app.core.ui.activate
+import com.vodovoz.app.core.navigation.activate
 import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.composables.placeholders.NetworkErrorPlaceholder
 import com.vodovoz.app.design_system.composables.snackbar.VodovozSnackbarHost
