@@ -1,6 +1,7 @@
 package com.vodovoz.app.feature.all.orders.detail
 
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.Stable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.vodovoz.app.common.account.AccountManager
@@ -42,6 +43,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
+@Stable
 class OrderDetailsFlowViewModel @Inject constructor(
     savedState: SavedStateHandle,
     private val repository: MainRepository,
@@ -240,7 +242,7 @@ class OrderDetailsFlowViewModel @Inject constructor(
         data class GoToTraceOrder(val dividerId: String, val orderId: Long) : OrderDetailsEvent()
     }
 
-    @Immutable
+    @Stable
     sealed interface OrderDetailsUiState {
         data object Loading : OrderDetailsUiState
         data object Error : OrderDetailsUiState

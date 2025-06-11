@@ -1,6 +1,7 @@
 package com.vodovoz.app.feature.buy_certificate
 
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.Stable
 import androidx.lifecycle.viewModelScope
 import com.vodovoz.app.R
 import com.vodovoz.app.common.content.Event
@@ -13,6 +14,12 @@ import com.vodovoz.app.design_system.model.PaymentTypeUi
 import com.vodovoz.app.design_system.model.VodovozPlaceholderUi
 import com.vodovoz.app.design_system.model.mapToUi
 import com.vodovoz.app.design_system.model.toUi
+import com.vodovoz.app.design_system.model.widgets.FieldUi
+import com.vodovoz.app.design_system.model.widgets.checkFields
+import com.vodovoz.app.design_system.model.widgets.getErrorText
+import com.vodovoz.app.design_system.model.widgets.mapToDomain
+import com.vodovoz.app.design_system.model.widgets.updateFieldAndResetError
+import com.vodovoz.app.design_system.model.widgets.vodovozValidators
 import com.vodovoz.app.domain.general.model.toQueries
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.feature.buy_certificate.model.BuyCertificateCodesUi
@@ -23,12 +30,6 @@ import com.vodovoz.app.feature.buy_certificate.model.FAQUi
 import com.vodovoz.app.feature.buy_certificate.model.PaymentInfoUi
 import com.vodovoz.app.feature.buy_certificate.model.mapToUi
 import com.vodovoz.app.feature.buy_certificate.model.toUi
-import com.vodovoz.app.design_system.model.widgets.FieldUi
-import com.vodovoz.app.design_system.model.widgets.checkFields
-import com.vodovoz.app.design_system.model.widgets.getErrorText
-import com.vodovoz.app.design_system.model.widgets.mapToDomain
-import com.vodovoz.app.design_system.model.widgets.updateFieldAndResetError
-import com.vodovoz.app.design_system.model.widgets.vodovozValidators
 import com.vodovoz.app.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -44,12 +45,6 @@ class BuyCertificateViewModel @Inject constructor(
 
 
     fun fetchBuyCertificateDetails() = viewModelScope.launch {
-        if (dataState.uiState is BuyCertificateUiState.Success) return@launch
-
-        uiStateListener.updateData { s ->
-            s.copy(uiState = BuyCertificateUiState.Loading)
-        }
-
         val buyCertificateDetailsResult =
             vodovozServiceRepository.getBuyCertificateDetails().singleResult()
 
@@ -60,7 +55,7 @@ class BuyCertificateViewModel @Inject constructor(
                 val paymentTypes = buyCertificateDetails.paymentTypes.mapToUi()
 
                 s.copy(
-                    uiState = BuyCertificateUiState.Body,
+                    uiState = if (s.uiState is BuyCertificateUiState.Success) s.uiState else BuyCertificateUiState.Body,
                     title = buyCertificateDetails.title,
                     certificates = buyCertificateDetails.certificates.mapToUi(),
                     certificatesTitle = buyCertificateDetails.certificatesTitle,
@@ -251,7 +246,7 @@ class BuyCertificateViewModel @Inject constructor(
     }
 
 
-    @Immutable
+    @Stable
     sealed interface BuyCertificateUiState {
         data object Loading : BuyCertificateUiState
         data object Error : BuyCertificateUiState

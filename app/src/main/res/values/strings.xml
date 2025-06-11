@@ -3,6 +3,7 @@
 
     <string name="new_app">vodovoz.ru</string>
     <string name="new_app_ssl_not">http</string>
+    <string name="new_app_ssl">https</string>
 
     <string name="app_name" translatable="false">Vodovoz</string>
 
@@ -368,5 +369,7 @@
 
     <string name="remove_address_title">Удалить адрес</string>
     <string name="remove_address_description">Вы действительно хотите удалить адрес?</string>
+    <string name="contact_us">Связаться с нами</string>
+    <string name="about_store">О магазине</string>
 
 </resources>

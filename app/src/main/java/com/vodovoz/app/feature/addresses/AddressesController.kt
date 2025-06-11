@@ -1,7 +1,6 @@
 package com.vodovoz.app.feature.addresses
 
 import android.content.Context
-import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
@@ -10,8 +9,6 @@ import com.vodovoz.app.R
 import com.vodovoz.app.common.content.itemadapter.Item
 import com.vodovoz.app.feature.addresses.adapter.AddressesClickListener
 import com.vodovoz.app.feature.addresses.adapter.AddressesFlowAdapter
-import com.vodovoz.app.ui.model.AddressUI
-import com.vodovoz.app.util.SwipeToRemoveCallback
 
 class AddressesController(
     private val viewModel: AddressesFlowViewModel,
@@ -49,14 +46,7 @@ class AddressesController(
     }
 
     private fun bindSwipeToRemove(recyclerView: RecyclerView) {
-        ItemTouchHelper(object : SwipeToRemoveCallback(context) {
-            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, i: Int) {
-                super.onSwiped(viewHolder, i)
-                val item = addressesAdapter.getItem(viewHolder.bindingAdapterPosition) as? AddressUI
-                    ?: return
-                showDeleteAddressDialog(item.id)
-            }
-        }).attachToRecyclerView(recyclerView)
+
     }
 
     internal fun showDeleteAddressDialog(addressId: Long) {

@@ -46,6 +46,7 @@ import com.vodovoz.app.core.navigation.navigateToProductDetails
 import com.vodovoz.app.core.navigation.navigateToPromotionDetails
 import com.vodovoz.app.core.navigation.navigateToPromotions
 import com.vodovoz.app.core.navigation.navigateToSearch
+import com.vodovoz.app.core.navigation.navigateToServiceDetails
 import com.vodovoz.app.core.navigation.navigateToStories
 import com.vodovoz.app.core.navigation.navigateToWaterApp
 import com.vodovoz.app.core.navigation.navigateToWebView
@@ -57,12 +58,12 @@ import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.composables.placeholders.NetworkErrorPlaceholder
 import com.vodovoz.app.design_system.composables.snackbar.VodovozSnackbarHost
 import com.vodovoz.app.design_system.effects.LifecycleEffect
-import com.vodovoz.app.feature.home.composables.UnratedProductsBottomSheet
 import com.vodovoz.app.feature.sitestate.SiteStateManager
 import com.vodovoz.app.util.extensions.debugLog
 import com.vodovoz.app.util.extensions.isVpnActive
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onSubscription
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -176,20 +177,6 @@ class HomeFragment : Fragment() {
             }
         }
     }
-
-    private fun observeTabReselect() {
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                tabManager.observeTabReselect()
-                    .collect {
-                        if (it != TabManager.DEFAULT_STATE && it == R.id.homeFragment) {
-                            tabManager.setDefaultState()
-                        }
-                    }
-            }
-        }
-    }
-
 
     private suspend fun listenEvents(
         mainCoroutineScope: CoroutineScope,
@@ -310,210 +297,251 @@ class HomeFragment : Fragment() {
             }
         }
 
-
-    //todo - change actions to nav functions
-    private fun observeDeepLinkFromSiteState() {
+    private fun observeTabReselect() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                siteStateManager
-                    .observeDeepLinkPath()
-                    .collect { path ->
-                        when (path) {
-                            "mobile_app/" -> {
-                                findNavController().navigateToAboutApp()
-                            }
-
-                            "gl/" -> {
-
-                            }
-
-                            "kalkulyator_vody/" -> {
-                                accountManager.reportEvent("trekervodi_ssilka")
-                                findNavController().navigateToWaterApp()
-                            }
+                tabManager.observeTabReselect()
+                    .collect {
+                        if (it != TabManager.DEFAULT_STATE && it == R.id.homeFragment) {
+                            tabManager.setDefaultState()
                         }
-
-                        siteStateManager.clearDeepLinkListener()
                     }
             }
         }
     }
 
 
-    //todo - change navigation functions
-    private fun observePushFromSiteState() {
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                siteStateManager
-                    .observePush()
-                    .collect {
-                        debugLog { "push ${it?.path} $siteStateManager" }
-                        when (it?.path) {
-                            "AKCII" -> {
-                                val promotionId = it.id
+    private fun observeDeepLinkFromSiteState() = lifecycleScope.launch {
+        repeatOnLifecycle(Lifecycle.State.STARTED) {
+            siteStateManager.observeDeepLinkPath()
+                .mapNotNull { path -> path }
+                .collect { path ->
+                    debugLog { "observeDeepLinkFromSiteState: $path" }
 
-
-                                if (promotionId.isNullOrEmpty()) return@collect
-
-
-                                val eventParameters = "\"ID_AKCII\": \"$promotionId\""
-                                accountManager.reportEvent(
-                                    "Зашел в акцию (push)",
-                                    eventParameters
-                                )
-
-                                findNavController().navigateToPromotionDetails(promotionId.toLong())
-
-                            }
-
-                            "TOVAR" -> {
-                                val productId = it.id
-                                if (!productId.isNullOrEmpty()) {
-                                    val eventParameters = "\"ID_Product\": \"$productId\""
-                                    accountManager.reportEvent(
-                                        "Зашел в товар (push)",
-                                        eventParameters
-                                    )
-
-
-                                    findNavController().navigateToProductDetails(productId.toLong())
-                                }
-                            }
-
-                            "RAZDEL" -> {
-                                val sectionId = it.id
-                                if (!sectionId.isNullOrEmpty()) {
-                                    val eventParameters = "\"Secition_ID\": \"$sectionId\""
-                                    accountManager.reportEvent(
-                                        "Зашел в раздел (push)",
-                                        eventParameters
-                                    )
-
-                                    findNavController().navigateToCategoryProductList(
-                                        sectionId.toLong()
-                                    )
-                                }
-                            }
-
-                            "Karta" -> {
-                                val orderId = it.orderId
-                                if (!orderId.isNullOrEmpty()) {
-                                    val eventParameters = "\"ID_Zakaz\": \"$orderId\""
-                                    accountManager.reportEvent(
-                                        "Зашел в заказ, статус в пути (push)",
-                                        eventParameters
-                                    )
-
-                                    findNavController().navigateToOrderDetails(orderId.toLong())
-                                }
-                            }
-
-                            "vsenovinki" -> {
-                                findNavController().navigateToNewProducts()
-                            }
-
-                            "vseskidki" -> {
-                                findNavController().navigateToHurryBuyUpProducts()
-                            }
-
-                            "BRAND" -> {
-                                val brandId = it.id
-                                if (!brandId.isNullOrEmpty()) {
-                                    findNavController().navigateToBrandProductList(brandId.toLong())
-                                } else {
-                                    findNavController().navigateToAllBrands()
-                                }
-                            }
-
-                            "BRANDY" -> {
-                                findNavController().navigateToAllBrands()
-                                siteStateManager.clearPushListener()
-                            }
-
-                            "about" -> {
-                                val section = it.section ?: return@collect
-                                if (section == "О магазине") {
-                                    findNavController().navigateToWebView(
-                                        VodovozWebConfig.ABOUT_SHOP_URL,
-                                        "О магазине"
-                                    )
-                                }
-                                if (section == "Связаться с нами") {
-                                    //findNavController().navigate(HomeFragmentDirections.actionToContactsFragment())
-                                }
-                            }
-
-                            "dostavka" -> {
-                                findNavController().navigate(
-                                    HomeFragmentDirections.actionToWebViewFragment(
-                                        ApiConfig.ABOUT_DELIVERY_URL,
-                                        "О доставке"
-                                    )
-                                )
-                            }
-
-                            "service" -> {
-                                findNavController().navigateToAllServices()
-                            }
-
-                            "remont_kulerov" -> {
-                                findNavController().navigateToAllServices()
-                            }
-
-                            "feedback" -> {
-                                //findNavController().navigate(HomeFragmentDirections.actionToContactsFragment())
-                            }
-
-                            "TOVARY" -> {
-
-                            }
-
-                            "ACTIONS" -> {
-
-                            }
-
-                            "vseakcii" -> {
-                                findNavController().navigateToPromotions()
-                            }
-
-                            "URL" -> {
-                                val url = it.id ?: return@collect
-
-                                findNavController().navigateToWebView(
-                                    url,
-                                    requireContext().getString(R.string.space)
-                                )
-                            }
-
-                            "trekervodi" -> {
-                                val eventName = "trekervodi_push"
-                                accountManager.reportEvent(eventName)
-                                findNavController().navigateToWaterApp()
-                            }
-
-                            "profil" -> {
-                                viewModel.goToProfile()
-                            }
-
-                            "pokypkasertificat" -> {
-                                debugLog { "pokypkasertificat push" }
-                                findNavController().navigateToBuyCertificate()
-                            }
-
-                            null -> {}
+                    when(path) {
+                        "catalog" -> {
+                            tabManager.selectTab(R.id.graph_catalog)
                         }
-                        it?.action?.let { action ->
-                            if (action.contains("SOBNEW")) {
-                                val eventParameters = "\"SOBNEW_NAME\": \"${it.id}\""
-                                accountManager.reportEvent(
-                                    "Зашел в приложение (push)",
-                                    eventParameters
-                                )
-                            }
+
+                        "action" -> {
+                            findNavController().navigateToPromotions()
                         }
-                        debugLog { "clear push" }
+
+                        "brand" -> {
+                            findNavController().navigateToAllBrands()
+                        }
+
+                        "about" -> {
+                            findNavController().navigateToWebView(
+                                ApiConfig.ABOUT_SHOP_URL,
+                                getString(R.string.about_store)
+                            )
+                        }
+
+                        "dostavka" -> {
+                            findNavController().navigateToWebView(
+                                VodovozWebConfig.ABOUT_DELIVERY_URL,
+                                getString(R.string.about_delivery)
+                            )
+                        }
+
+                        "service" -> {
+                            findNavController().navigateToAllServices()
+                        }
+
+                        "remont_kulerov" -> {
+                            findNavController().navigateToServiceDetails(98886)
+                        }
+
+                        "feedback" -> {
+                            tabManager.selectTab(R.id.graph_profile)
+                        }
+
+                        "basket" -> {
+                            tabManager.selectTab(R.id.graph_cart)
+                        }
+                        "mobile_app" -> {
+                            findNavController().navigateToAboutApp()
+                        }
+
+                        "kalkulyator_vody" -> {
+                            accountManager.reportEvent("trekervodi_ssilka")
+                            findNavController().navigateToWaterApp()
+                        }
+
+                        else -> {
+                            val productId = path.removeSuffix("/").takeLastWhile { it.isDigit() }
+                                .toLongOrNull() ?: return@collect
+                            findNavController().navigateToProductDetails(productId)
+                        }
+
+                    }
+                    siteStateManager.clearDeepLinkListener()
+                }
+        }
+    }
+
+
+    private fun observePushFromSiteState() = lifecycleScope.launch {
+        repeatOnLifecycle(Lifecycle.State.RESUMED) {
+            siteStateManager.observePush().collect { pushData ->
+                debugLog { "push ${pushData?.path} $siteStateManager" }
+                when (pushData?.path) {
+                    "AKCII" -> {
+                        val promotionId = pushData.id
+                        if (promotionId.isNullOrEmpty()) return@collect
+
+                        val eventParameters = "\"ID_AKCII\": \"$promotionId\""
+                        accountManager.reportEvent("Зашел в акцию (push)", eventParameters)
+                        findNavController().navigateToPromotionDetails(promotionId.toLong())
+
+                    }
+
+                    "TOVAR" -> {
+                        val productId = pushData.id
+                        if (!productId.isNullOrEmpty()) {
+                            val eventParameters = "\"ID_Product\": \"$productId\""
+                            accountManager.reportEvent(
+                                "Зашел в товар (push)",
+                                eventParameters
+                            )
+
+
+                            findNavController().navigateToProductDetails(productId.toLong())
+                        }
+                    }
+
+                    "RAZDEL" -> {
+                        val sectionId = pushData.id
+                        if (sectionId.isNullOrEmpty()) return@collect
+
+                        val eventParameters = "\"Secition_ID\": \"$sectionId\""
+                        accountManager.reportEvent(
+                            "Зашел в раздел (push)",
+                            eventParameters
+                        )
+
+                        findNavController().navigateToCategoryProductList(sectionId.toLong())
+
+                    }
+
+                    "Karta" -> {
+                        val orderId = pushData.orderId
+                        if (orderId.isNullOrEmpty()) return@collect
+
+                        val eventParameters = "\"ID_Zakaz\": \"$orderId\""
+                        accountManager.reportEvent(
+                            "Зашел в заказ, статус в пути (push)",
+                            eventParameters
+                        )
+
+                        findNavController().navigateToOrderDetails(orderId.toLong())
+
+                    }
+
+                    "vsenovinki" -> {
+                        findNavController().navigateToNewProducts()
+                    }
+
+                    "vseskidki" -> {
+                        findNavController().navigateToHurryBuyUpProducts()
+                    }
+
+                    "BRAND" -> {
+                        val brandId = pushData.id
+                        if (!brandId.isNullOrEmpty()) {
+                            findNavController().navigateToBrandProductList(brandId.toLong())
+                        } else {
+                            findNavController().navigateToAllBrands()
+                        }
+                    }
+
+                    "BRANDY" -> {
+                        findNavController().navigateToAllBrands()
                         siteStateManager.clearPushListener()
                     }
+
+                    "about" -> {
+                        val section = pushData.section ?: return@collect
+                        if (section == getString(R.string.about_store)) {
+                            findNavController().navigateToWebView(
+                                VodovozWebConfig.ABOUT_SHOP_URL,
+                                getString(R.string.about_store)
+                            )
+                        }
+                        if (section == getString(R.string.contact_us)) {
+                            viewModel.goToProfile()
+                        }
+                    }
+
+                    "dostavka" -> {
+                        findNavController().navigateToWebView(
+                            ApiConfig.ABOUT_DELIVERY_URL,
+                            "О доставке"
+                        )
+                    }
+
+                    "service" -> {
+                        findNavController().navigateToAllServices()
+                    }
+
+                    "remont_kulerov" -> {
+                        findNavController().navigateToAllServices()
+                    }
+
+                    "feedback" -> {
+                        viewModel.goToProfile()
+                    }
+
+                    "TOVARY" -> {
+                        findNavController().navigateToCategoryProductList(
+                            pushData.id?.toLongOrNull() ?: return@collect
+                        )
+                    }
+
+                    "ACTIONS" -> {
+                        findNavController().navigateToPromotions()
+                    }
+
+                    "vseakcii" -> {
+                        findNavController().navigateToPromotions()
+                    }
+
+                    "URL" -> {
+                        val url = pushData.id ?: return@collect
+
+                        findNavController().navigateToWebView(
+                            url, requireContext().getString(R.string.space)
+                        )
+                    }
+
+                    "trekervodi" -> {
+                        val eventName = "trekervodi_push"
+                        accountManager.reportEvent(eventName)
+                        findNavController().navigateToWaterApp()
+                    }
+
+                    "profil" -> {
+                        viewModel.goToProfile()
+                    }
+
+                    "pokypkasertificat" -> {
+                        findNavController().navigateToBuyCertificate()
+                    }
+
+                    null -> {}
+                }
+                pushData?.action?.let { action ->
+                    if (action.contains("SOBNEW")) {
+                        val eventParameters = "\"SOBNEW_NAME\": \"${pushData.id}\""
+                        accountManager.reportEvent(
+                            "Зашел в приложение (push)",
+                            eventParameters
+                        )
+                    }
+                }
+
+                siteStateManager.clearPushListener()
             }
         }
     }

@@ -5,8 +5,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import com.vodovoz.app.R
 import com.vodovoz.app.domain.general.model.FieldModel
 import com.vodovoz.app.domain.general.model.FieldOptionModel
-import com.vodovoz.app.util.FieldValidationSettings
-import com.vodovoz.app.util.FieldValidationSettings.PASSWORD_LENGTH
+import com.vodovoz.app.util.ValidationUtils
+import com.vodovoz.app.util.ValidationUtils.PASSWORD_LENGTH
 import com.vodovoz.app.util.isValidRussianPhoneNumber
 
 enum class FieldValidationResult {
@@ -121,7 +121,7 @@ val KeyboardTypeValidator = FieldValidator { field ->
         }
 
         KeyboardType.Email -> {
-            FieldValidationResult.from(FieldValidationSettings.EMAIL_REGEX.matches(value))
+            FieldValidationResult.from(ValidationUtils.EMAIL_REGEX.matches(value))
         }
 
         KeyboardType.Password -> {

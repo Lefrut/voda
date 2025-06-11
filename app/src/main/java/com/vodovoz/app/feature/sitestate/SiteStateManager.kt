@@ -2,8 +2,8 @@ package com.vodovoz.app.feature.sitestate
 
 import com.vodovoz.app.common.agreement.AgreementController
 import com.vodovoz.app.common.jivochat.JivoChatController
-import com.vodovoz.app.data.parser.common.safeString
 import com.vodovoz.app.common.model.VodovozSiteState
+import com.vodovoz.app.data.parser.common.safeString
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.util.extensions.debugLog
 import com.vodovoz.app.util.extensions.singleResult
@@ -60,9 +60,8 @@ class SiteStateManager @Inject constructor(
     fun smsEnabled(): Boolean = siteStateSnapshot?.isSmsEnabled == true
 
     fun saveDeepLinkPath(path: String?) {
-        if (path != null) {
-            deepLinkPathListener.value = path
-        }
+        if (path == null) return
+        deepLinkPathListener.value = path
     }
 
     fun savePushData(json: JSONObject) {

@@ -17,6 +17,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -150,15 +151,19 @@ fun LinearProductCard(
                             .size(18.dp),
                     )
 
+                    val ratingText = remember(product.rating) {
+                        String.format(
+                            Locale.getDefault(),
+                            "%.1f",
+                            product.rating
+                        )
+                    }
+
                     Text(
                         modifier = Modifier
                             .align(Alignment.CenterVertically)
                             .padding(start = 2.dp),
-                        text = if (product.rating > 0) String.format(
-                            Locale.getDefault(),
-                            "%.1f",
-                            product.rating
-                        ) else 0.toString(),
+                        text = if (product.rating > 0) ratingText else 0.toString(),
                         color = if (product.rating <= 0.0f) MaterialTheme.colorScheme.surfaceTint else MaterialTheme.colorScheme.onBackground,
                         style = ExtendedTheme.typography.labelMediumVariant,
                         maxLines = 1
@@ -166,11 +171,10 @@ fun LinearProductCard(
                 }
 
 
-                val pricePerUnitText =
-                    if (product.pricePerUnit != null && product.unitOfMeasurement != null) stringResource(
+                val pricePerUnitText = if (product.pricePerUnit != null && product.unitOfMeasurement != null) stringResource(
                         R.string.unit_of_measurement,
-                        product.pricePerUnit ?: 0,
-                        product.unitOfMeasurement ?: ""
+                        product.pricePerUnit,
+                        product.unitOfMeasurement
                     )
                     else ""
 

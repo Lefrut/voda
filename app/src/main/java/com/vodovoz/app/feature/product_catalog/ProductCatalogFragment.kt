@@ -11,6 +11,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.ViewCompositionStrategy
@@ -81,8 +82,8 @@ class ProductCatalogFragment : Fragment() {
 
             setContent {
                 VodovozTheme {
-                    val pagingState by viewModel.observeUiState().collectAsStateWithLifecycle()
-                    val viewState = pagingState.data
+                    val pagingState = viewModel.observeUiState().collectAsStateWithLifecycle()
+                    val viewState by rememberUpdatedState(pagingState.value.data)
                     val lazyGridState = rememberLazyGridState()
                     val context = LocalContext.current
 
@@ -185,7 +186,7 @@ class ProductCatalogFragment : Fragment() {
     }
 
 
-    @Immutable
+    @Stable
     sealed class DataSource : Parcelable {
         @Parcelize
         @Immutable

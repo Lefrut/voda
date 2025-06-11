@@ -1,7 +1,9 @@
 package com.vodovoz.app.feature.all.orders.detail.model
 
+import androidx.compose.runtime.Immutable
 import com.vodovoz.app.domain.general.model.order.OrderDetailsSummaryModel
 
+@Immutable
 data class OrderDetailsSummaryUi(
     val finalPriceText: String,
     val productsPriceText: String,

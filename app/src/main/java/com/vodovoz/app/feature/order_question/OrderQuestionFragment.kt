@@ -36,17 +36,11 @@ class OrderQuestionFragment : Fragment() {
 
     override fun onStart() {
         super.onStart()
-        WindowCompat.setDecorFitsSystemWindows(requireActivity().window, false)
         tabManager.changeTabVisibility(false)
     }
 
     override fun onStop() {
         super.onStop()
-        WindowCompat.setDecorFitsSystemWindows(requireActivity().window, true)
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
         tabManager.changeTabVisibility(true)
     }
 
@@ -56,10 +50,11 @@ class OrderQuestionFragment : Fragment() {
         savedInstanceState: Bundle?,
     ): View {
         return ComposeView(requireContext()).apply {
-            setViewCompositionStrategy(ViewCompositionStrategy.Default)
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
 
             setContent {
                 VodovozTheme {
+
                     val viewState by viewModel.state.collectAsStateWithLifecycle()
                     val snackbarHostState = remember { SnackbarHostState() }
 

@@ -1,6 +1,7 @@
 package com.vodovoz.app.feature.profile
 
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.Stable
 import androidx.lifecycle.viewModelScope
 import com.vodovoz.app.common.account.AccountManager
 import com.vodovoz.app.common.cart.CartManager
@@ -37,14 +38,9 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
+@Stable
 class ProfileFlowViewModel @Inject constructor(
-    private val repository: MainRepository,
-    private val cookieManager: CookieManager,
-    private val cartManager: CartManager,
-    private val accountManager: AccountManager,
     private val siteStateManager: SiteStateManager,
-    private val tabManager: TabManager,
-    private val waterAppHelper: WaterAppHelper,
     private val vodovozServiceRepository: VodovozServiceRepository,
 ) : PagingContractViewModel<ProfileFlowViewModel.ProfileState, ProfileFlowViewModel.ProfileEvents>(
     ProfileState()
@@ -232,7 +228,7 @@ class ProfileFlowViewModel @Inject constructor(
         val currentAdvertising: AboutAdvertisingUi = AboutAdvertisingUi.Empty,
         ) : State
 
-    @Immutable
+    @Stable
     sealed interface ProfileUiState {
 
         data object Loading : ProfileUiState

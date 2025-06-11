@@ -1,13 +1,16 @@
 package com.vodovoz.app.feature.certificate_activation
 
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.vodovoz.app.design_system.composables.placeholders.LoadingPlaceholder
-import com.vodovoz.app.design_system.composables.placeholders.NetworkErrorPlaceholder
 import com.vodovoz.app.design_system.composables.top_bar.VodovozTopBar
 import com.vodovoz.app.feature.certificate_activation.composables.CertificateActivationBody
 import com.vodovoz.app.feature.certificate_activation.model.CertificateActivationState
@@ -19,16 +22,19 @@ fun CertificateActivationScreen(
     viewState: CertificateActivationState,
 ) {
     Scaffold(
+        modifier = Modifier.consumeWindowInsets(WindowInsets.systemBars),
         topBar = {
             VodovozTopBar(onBack = { viewModel.navigateBack() }, title = viewState.title)
         },
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
-        containerColor = MaterialTheme.colorScheme.background
+        containerColor = MaterialTheme.colorScheme.background,
     ) { paddingValues ->
         when (viewState.uiState) {
             CertificateActivationUiState.Details -> {
                 CertificateActivationBody(
-                    modifier = Modifier.padding(paddingValues),
+                    modifier = Modifier
+                        .verticalScroll(rememberScrollState())
+                        .padding(paddingValues),
                     descriptionHtml = viewState.descriptionHtml,
                     secondDescriptionHtml = viewState.secondDescriptionHtml,
                     button = viewState.activationButton,
@@ -46,6 +52,7 @@ fun CertificateActivationScreen(
                     }
                 )
             }
+
             CertificateActivationUiState.Loading -> {
                 LoadingPlaceholder(modifier = Modifier.padding(paddingValues))
             }

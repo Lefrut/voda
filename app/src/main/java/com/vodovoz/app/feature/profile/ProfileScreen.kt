@@ -3,10 +3,12 @@ package com.vodovoz.app.feature.profile
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.pager.rememberPagerState
@@ -35,21 +37,17 @@ import com.vodovoz.app.feature.profile.composables.ProfileWalletItemsRow
 import com.vodovoz.app.feature.profile.composables.SupportingBottomSheet
 
 @OptIn(ExperimentalMaterial3Api::class)
-@Suppress("NonSkippableComposable")
 @Composable
 fun ProfileScreen(
     viewModel: ProfileFlowViewModel,
     viewState: ProfileFlowViewModel.ProfileState,
     pullRefreshState: PullToRefreshState,
 ) {
+
     PullToRefreshBox(
-        modifier = Modifier
-            .windowInsetsPadding(WindowInsets.statusBars)
-            .fillMaxSize(),
+        modifier = Modifier.fillMaxSize(),
         isRefreshing = viewState.showRefreshIndicator,
-        onRefresh = {
-            viewModel.refresh()
-        },
+        onRefresh = { viewModel.refresh() },
         state = pullRefreshState,
         indicator = {
             Indicator(

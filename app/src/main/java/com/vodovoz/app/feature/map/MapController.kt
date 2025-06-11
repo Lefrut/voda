@@ -120,9 +120,7 @@ class MapController(
         Point(center.latitude + boxSize, center.longitude + boxSize)
     )
     private val searchOptions = SuggestOptions().setSuggestTypes(
-        SuggestType.GEO.value or
-                SuggestType.BIZ.value or
-                SuggestType.TRANSIT.value
+        SuggestType.GEO.value or SuggestType.BIZ.value or SuggestType.TRANSIT.value
     )
 
     private var lastPlaceMark: PlacemarkMapObject? = null
@@ -345,6 +343,8 @@ class MapController(
     }
 
     fun searchForUpdate(address: AddressUI) {
+
+
         viewModel.clearState()
         searchManager.submit(
             address.fullAddress,

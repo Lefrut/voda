@@ -16,6 +16,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.navOptions
 import com.vodovoz.app.R
 import com.vodovoz.app.common.media.ImagePickerFragment
 import com.vodovoz.app.common.tab.TabManager
@@ -28,6 +29,7 @@ import com.vodovoz.app.feature.catalog.CatalogFlowViewModel
 import com.vodovoz.app.feature.home.HomeFlowViewModel
 import com.vodovoz.app.feature.profile.ProfileFlowViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -100,7 +102,19 @@ class UserDataFragment : Fragment() {
                                     catalogViewModel.refresh()
                                     profileViewModel.refresh()
 
-                                    findNavController().popBackStack(R.id.profileFragment, false)
+                                    delay(200)
+
+                                    findNavController().navigate(
+                                        resId = R.id.profileFragment,
+                                        args = Bundle.EMPTY,
+                                        navOptions = navOptions {
+                                            popUpTo(R.id.profileFragment) { inclusive = true }
+                                            anim {
+                                                enter = R.anim.fade_in
+                                                exit = R.anim.fade_out
+                                            }
+                                        }
+                                    )
                                 }
 
                                 UserDataFlowViewModel.UserDataEvents.UpdateProfile -> {

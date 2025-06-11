@@ -35,6 +35,7 @@ fun ProductCommentsInfoUi.toDomain(): ProductCommentsInfoModel {
     )
 }
 
+@Immutable
 data class SortUi(
     val name: String,
     val value: String,

@@ -4,22 +4,20 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.viewModelScope
 import com.vodovoz.app.R
+import com.vodovoz.app.common.account.LogoutManager
 import com.vodovoz.app.common.content.Event
 import com.vodovoz.app.common.content.PagingContractViewModel
 import com.vodovoz.app.common.content.State
 import com.vodovoz.app.common.content.updateData
-import com.vodovoz.app.common.account.LogoutManager
 import com.vodovoz.app.common.media.MediaManager
 import com.vodovoz.app.common.resources.ResourcesProvider
-import com.vodovoz.app.domain.general.model.UserNotLoginException
-import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.design_system.model.widgets.FieldUi
 import com.vodovoz.app.design_system.model.widgets.checkFields
 import com.vodovoz.app.design_system.model.widgets.mapToDomain
 import com.vodovoz.app.design_system.model.widgets.mapToUi
-import com.vodovoz.app.feature.preorder.model.toUi
 import com.vodovoz.app.design_system.model.widgets.updateFieldAndResetError
-import com.vodovoz.app.design_system.model.widgets.updateFieldValueAndResetError
+import com.vodovoz.app.domain.general.model.UserNotLoginException
+import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -45,9 +43,7 @@ class UserDataFlowViewModel @Inject constructor(
             mediaManager
                 .observeAvatarImage()
                 .collect { imageFile ->
-                    imageFile ?: return@collect
-
-                    updateUserAvatar(imageFile)
+                    updateUserAvatar(imageFile ?: return@collect)
                     mediaManager.removeAvatarImage()
                 }
         }
@@ -132,18 +128,14 @@ class UserDataFlowViewModel @Inject constructor(
         logoutManager.logout().singleResult().onSuccess {
             eventListener.emit(UserDataEvents.RefreshAllAndGoBack)
         }.onFailure {
+            uiStateListener.updateData { s ->
+                s.copy(showLogoutDialog = false, uiState = UserDataUiState.Success)
+            }
+
             eventListener.emit(
                 UserDataEvents.ShowSnackbar(resourcesProvider.getString(R.string.logout_error))
             )
         }
-
-        uiStateListener.updateData { s ->
-            s.copy(
-                showLogoutDialog = false,
-                uiState = UserDataUiState.Success
-            )
-        }
-
     }
 
     fun deleteAccount() = viewModelScope.launch {

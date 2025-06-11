@@ -5,6 +5,8 @@ import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
@@ -57,6 +59,7 @@ fun VodovozTheme(
 ) {
     val colorScheme = if (isDarkTheme) lightColors else lightColors
 
+    WindowInsets.statusBars
     MaterialTheme(
         colorScheme = colorScheme,
         typography = vodovozTypography,

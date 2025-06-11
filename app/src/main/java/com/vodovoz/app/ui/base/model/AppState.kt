@@ -1,5 +1,8 @@
 package com.vodovoz.app.ui.base.model
 
+import androidx.compose.runtime.Stable
+
+@Stable
 sealed interface AppState {
 
     data object Loading: AppState

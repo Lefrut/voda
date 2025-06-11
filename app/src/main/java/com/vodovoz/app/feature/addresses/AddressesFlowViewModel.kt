@@ -279,7 +279,7 @@ class AddressesFlowViewModel @Inject constructor(
     }
 
     fun addAddress() = viewModelScope.launch {
-
+        eventListener.emit(AddressesEvents.GoToMap)
     }
 
     fun goToOrderRecipient() = viewModelScope.launch {
@@ -329,6 +329,7 @@ class AddressesFlowViewModel @Inject constructor(
 
     sealed class AddressesEvents : Event {
         data object GoBack : AddressesEvents()
+        data object GoToMap : AddressesEvents()
 
         data class DeleteEvent(val message: String) : AddressesEvents()
         data class OnAddressClick(val address: AddressUI) : AddressesEvents()

@@ -10,7 +10,7 @@ import java.net.URL
 object SplashFileConfig {
 
     private const val FILE_NAME = "splash.json"
-    const val DEFAULT_LINK = "https://vodovoz.ru/images/zastavka/zastavkamobil.json"
+    private const val FILE_LINK = "https://vodovoz.ru/images/zastavka/zastavkamobil.json"
 
     fun getSplashFile(context: Context): File {
         return File(context.filesDir, FILE_NAME)
@@ -18,7 +18,7 @@ object SplashFileConfig {
 
     suspend fun downloadSplashFile(
         context: Context,
-        link: String = DEFAULT_LINK,
+        link: String = FILE_LINK,
     ): Result<Unit> = runCatching {
         val file = getSplashFile(context)
         if (file.exists()) return@runCatching Unit
