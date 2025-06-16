@@ -529,6 +529,7 @@ class ProductDetailsFlowViewModel @Inject constructor(
         val multiProductTotalPrice: Int = productDetails.firstPrice.price.toInt(),
     ) : State
 
+    @Stable
     sealed class ProductDetailsUiState {
         data object Loading : ProductDetailsUiState()
         data object Success : ProductDetailsUiState()

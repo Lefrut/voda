@@ -72,6 +72,7 @@ fun AddressBody(
             ) { i, address ->
 
                 VodovozSwipeToDismiss(
+                    modifier = Modifier.animateItem(fadeInSpec = null, fadeOutSpec = null),
                     onRemove = { onRemoveAddressSwipe(address) }
                 ) {
                     AddressItemCard(

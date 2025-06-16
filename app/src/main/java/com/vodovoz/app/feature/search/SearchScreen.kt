@@ -17,7 +17,6 @@ import com.vodovoz.app.feature.search.composables.SearchLoadingPlaceholder
 import com.vodovoz.app.feature.search.composables.SearchScreenBody
 import com.vodovoz.app.feature.search.composables.SearchTopBar
 
-@Suppress("NonSkippableComposable")
 @Composable
 fun SearchScreen(viewModel: SearchFlowViewModel, viewState: SearchFlowViewModel.SearchState) {
     Scaffold(

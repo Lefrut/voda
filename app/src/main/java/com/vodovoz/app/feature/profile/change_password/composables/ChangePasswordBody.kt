@@ -22,7 +22,6 @@ import com.vodovoz.app.design_system.composables.button.VodovozButton
 import com.vodovoz.app.design_system.composables.text_fields.VodovozTextFieldsColumn
 import com.vodovoz.app.design_system.model.widgets.FieldUi
 
-@Suppress("NonSkippableComposable")
 @Composable
 fun ChangePasswordBody(
     modifier: Modifier = Modifier,

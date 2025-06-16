@@ -16,7 +16,6 @@ import javax.inject.Singleton
 @Singleton
 class LogoutManager @Inject constructor(
     private val accountManager: AccountManager,
-    private val tabManager: TabManager,
     private val cartManager: CartManager,
     private val waterAppHelper: WaterAppHelper,
     private val vodovozServiceRepository: VodovozServiceRepository,
@@ -33,7 +32,6 @@ class LogoutManager @Inject constructor(
         cookieManager.removeCookieSessionId()
         accountManager.removeUserId()
         accountManager.removeUserToken()
-        tabManager.clearBottomNavProfileState()
         cartManager.clearCart()
         waterAppHelper.clearData()
         firebaseTokenManager.removeFirebaseToken()

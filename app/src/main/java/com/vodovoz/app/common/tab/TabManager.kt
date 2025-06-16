@@ -1,5 +1,6 @@
 package com.vodovoz.app.common.tab
 
+import androidx.compose.runtime.Immutable
 import com.vodovoz.app.R
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import kotlinx.coroutines.CoroutineScope
@@ -27,19 +28,15 @@ class TabManager @Inject constructor(
     private val bottomNavCartStateListener = MutableStateFlow<BottomNavCartState?>(null)
     fun observeBottomNavCartState() = bottomNavCartStateListener.asStateFlow()
 
-    private val bottomNavProfileStateListener = MutableStateFlow<Int?>(null)
-    fun observeBottomNavProfileState() = bottomNavProfileStateListener.asStateFlow()
 
     private val tabReselectListener = MutableStateFlow(DEFAULT_STATE)
     fun observeTabReselect() = tabReselectListener.asStateFlow()
-    fun setDefaultState() {
-        tabReselectListener.value = DEFAULT_STATE
-    }
+    fun setDefaultState() { tabReselectListener.value = DEFAULT_STATE }
 
     private val tabAuthRedirectListener = MutableStateFlow<Int>(DEFAULT_AUTH_REDIRECT)
     fun fetchAuthRedirect() = tabAuthRedirectListener.value
 
-    private val addressesRefreshListener = MutableStateFlow(ADDRESSES_DEFAULT_STATE)
+    private val addressesRefreshListener = MutableStateFlow(false)
     fun observeAddressesRefresh() = addressesRefreshListener.asStateFlow()
 
     private val tabVisibilityListener = MutableStateFlow(true)
@@ -80,10 +77,6 @@ class TabManager @Inject constructor(
     }.launchIn(scope)
 
 
-    fun saveBottomNavProfileState(amount: Int?) {
-        bottomNavProfileStateListener.value = amount
-    }
-
     fun changeTabVisibility(vis: Boolean) {
         tabVisibilityListener.value = vis
     }
@@ -96,10 +89,7 @@ class TabManager @Inject constructor(
         bottomNavCartStateListener.value = null
     }
 
-    fun clearBottomNavProfileState() {
-        bottomNavProfileStateListener.value = null
-    }
-
+    @Immutable
     data class BottomNavCartState(
         val count: Int,
         val total: Int,
@@ -110,6 +100,5 @@ class TabManager @Inject constructor(
 
         @JvmField
         val DEFAULT_AUTH_REDIRECT = R.id.graph_profile
-        const val ADDRESSES_DEFAULT_STATE = false
     }
 }

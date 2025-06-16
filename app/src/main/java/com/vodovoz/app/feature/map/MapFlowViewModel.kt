@@ -69,6 +69,10 @@ class MapFlowViewModel @Inject constructor(
         }
     }
 
+    fun navigateBack() = viewModelScope.launch {
+        eventListener.emit(MapFlowEvents.GoBack)
+    }
+
     fun plusZoom() = viewModelScope.launch {
         eventListener.emit(MapFlowEvents.MoveCameraPlus)
     }
@@ -579,14 +583,14 @@ class MapFlowViewModel @Inject constructor(
     }
 
     fun changeMarkerPoint(point: MapPointUi?) = viewModelScope.launch {
+        if (point == null || point == dataState.markerPoint) return@launch
+
         uiStateListener.updateData { s ->
             s.copy(
                 markerPoint = point,
                 addressIsLoading = true
             )
         }
-
-        if (point == null) return@launch
 
         val addressByGeoResult =
             mapServiceRepository.getAddressByGeo(point.lat, point.lon).singleResult()
@@ -598,6 +602,12 @@ class MapFlowViewModel @Inject constructor(
                     addressIsLoading = false
                 )
             }
+        }
+    }
+
+    fun changeToSearchMode() {
+        uiStateListener.updateData { s ->
+            s.copy(mode = MapUiMode.Search)
         }
     }
 
@@ -631,8 +641,16 @@ class MapFlowViewModel @Inject constructor(
         val showSettingsDialog: Boolean = false,
         val address: MapAddressUi? = null,
         val markerPoint: MapPointUi? = null,
-        val addressIsLoading: Boolean = false,
+        val addressIsLoading: Boolean = true,
+        val mode: MapUiMode = MapUiMode.OnlyMap,
     ) : State
+
+
+    @Stable
+    sealed interface MapUiMode {
+        data object OnlyMap : MapUiMode
+        data object Search : MapUiMode
+    }
 
     sealed class MapFlowEvents : Event {
 
@@ -654,6 +672,7 @@ class MapFlowViewModel @Inject constructor(
         data object MoveCameraPlus : MapFlowEvents()
         data object ShowAddressBottomSheet : MapFlowEvents()
         data object HideAddressBottomSheet : MapFlowEvents()
+        data object GoBack : MapFlowEvents()
 
         data class MoveToAddress(val addressPoint: MapPointUi) : MapFlowEvents()
     }

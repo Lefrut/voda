@@ -31,8 +31,10 @@ fun VodovozSwipeToDismiss(
         positionalThreshold = with(LocalDensity.current) {
             { 120.dp.toPx() }
         },
-        confirmValueChange = {
-            onRemove()
+        confirmValueChange = { boxValue ->
+            if (boxValue == SwipeToDismissBoxValue.EndToStart) {
+                onRemove()
+            }
             true
         }
     ),
