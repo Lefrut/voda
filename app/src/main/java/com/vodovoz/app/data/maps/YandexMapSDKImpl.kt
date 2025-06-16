@@ -1,15 +1,11 @@
 package com.vodovoz.app.data.maps
 
-import com.vodovoz.app.R
 import com.yandex.mapkit.geometry.BoundingBox
 import com.yandex.mapkit.geometry.Point
-import com.yandex.mapkit.map.VisibleRegionUtils
 import com.yandex.mapkit.search.Response
 import com.yandex.mapkit.search.SearchFactory
 import com.yandex.mapkit.search.SearchManager
 import com.yandex.mapkit.search.SearchManagerType
-import com.yandex.mapkit.search.SearchOptions
-import com.yandex.mapkit.search.Session
 import com.yandex.mapkit.search.SuggestItem
 import com.yandex.mapkit.search.SuggestOptions
 import com.yandex.mapkit.search.SuggestSession
@@ -25,11 +21,11 @@ typealias YandexSearchResponse = Response
 class YandexMapSDKImpl : YandexMapSDK {
 
     companion object{
-        private const val KILOMETERS = 1.0
+        private const val KILOMETERS = 1.0 /*100km*/
 
         private val moscowCenter = Point(55.75, 37.62)
 
-        private val suggestBox = BoundingBox(
+        private val moscowBoundingBox = BoundingBox(
             Point(moscowCenter.latitude - KILOMETERS, moscowCenter.longitude - KILOMETERS),
             Point(moscowCenter.latitude + KILOMETERS, moscowCenter.longitude + KILOMETERS)
         )
@@ -47,11 +43,11 @@ class YandexMapSDKImpl : YandexMapSDK {
         SuggestType.GEO.value or SuggestType.BIZ.value or SuggestType.TRANSIT.value
     )
 
-    override suspend fun getAddressesInMoscow(query: String): List<SuggestItem> =
+    override suspend fun getSuggestsInMoscow(query: String): List<SuggestItem> =
         suspendCancellableCoroutine { cont ->
             suggestSession.suggest(
                 query,
-                suggestBox,
+                moscowBoundingBox,
                 searchOptions,
                 object : SuggestListener {
                     override fun onResponse(items: MutableList<SuggestItem>) {
@@ -69,7 +65,7 @@ class YandexMapSDKImpl : YandexMapSDK {
             )
         }
 
-    override suspend fun getAddressInfo(address: String): YandexSearchResponse {
+    override suspend fun searchAddress(address: String): YandexSearchResponse {
         TODO("Not yet implemented")
     }
 

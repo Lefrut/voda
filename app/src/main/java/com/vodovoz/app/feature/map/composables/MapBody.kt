@@ -87,15 +87,7 @@ fun MapBody(
     onGeoClick: () -> Unit,
     onCenterChanged: (MapPointUi?) -> Unit,
 ) {
-
     val density = LocalDensity.current
-    var markerOffset by remember { mutableStateOf(0.dp) }
-
-    val animatedMarkerOffset by animateDpAsState(
-        targetValue = markerOffset,
-        animationSpec = tween(200, 0, LinearEasing),
-        label = ""
-    )
 
     BoxWithConstraints(modifier = modifier.fillMaxSize()) {
         val focusMapWidth = maxWidth
@@ -115,14 +107,9 @@ fun MapBody(
                     awaitFirstDown(pass = PointerEventPass.Initial)
 
                     onInputStart()
-                    markerOffset = (-24).dp
-
                     do {
                         val event = awaitPointerEvent()
-                    } while (event.changes.any { it.pressed })
-
-                    markerOffset = 0.dp
-
+                    } while (event.changes.any { change -> change.pressed })
                     onInputEnd()
 
                     val two = 2f.toBigDecimal()
@@ -170,13 +157,7 @@ fun MapBody(
                 modifier = Modifier
                     .width(markerWidth)
                     .height(markerHeight)
-                    .offset(y = -(43.dp / 2))
-                    .offset {
-                        IntOffset(
-                            x = 0,
-                            y = animatedMarkerOffset.roundToPx()
-                        )
-                    },
+                    .offset(y = -(43.dp / 2)),
                 contentScale = ContentScale.FillBounds
             )
         }
@@ -225,7 +206,7 @@ private fun MapBottomSheet(
     LaunchedEffect(Unit) {
         state.updateAnchors(
             DraggableAnchors {
-                Hidden at partiallyExpandedPx * 0.7f
+                Hidden at partiallyExpandedPx
                 PartiallyExpanded at 0f
             }
         )

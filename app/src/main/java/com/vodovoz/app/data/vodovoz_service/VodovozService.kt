@@ -214,6 +214,16 @@ interface VodovozService {
         @Query("userid") userId: Long?,
     ): Response<VodovozResponseDTO<AddressesDTO>>
 
+    @GET("https://vodovoz.net/newmobile_new/oformlenie/address.php?userid=515&action=add&polnadres=улицапушкина&tip=2")
+    suspend fun addAddress(
+        @Query("userid") userId: Long?,
+        @Query("polnadres") address: String,
+
+    )
+
+//    @GET("")
+//    suspend fun getAddAddressDetails(): Response<VodovozResponseDTO<>>
+
 
     /**
      * Brand requests
