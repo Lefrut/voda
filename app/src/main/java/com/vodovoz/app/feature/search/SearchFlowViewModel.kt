@@ -1,6 +1,7 @@
 package com.vodovoz.app.feature.search
 
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.Stable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.vodovoz.app.common.cart.CartManager
@@ -34,6 +35,7 @@ import kotlinx.coroutines.withTimeoutOrNull
 import javax.inject.Inject
 
 @HiltViewModel
+@Stable
 class SearchFlowViewModel @Inject constructor(
     private val cartManager: CartManager,
     private val likeManager: LikeManager,
@@ -295,6 +297,7 @@ class SearchFlowViewModel @Inject constructor(
         val searchHistory: List<String> = emptyList(),
     ) : State
 
+    @Stable
     sealed interface UiState {
         data object Loading : UiState
         data object Success : UiState

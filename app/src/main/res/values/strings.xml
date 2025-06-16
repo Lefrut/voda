@@ -371,5 +371,7 @@
     <string name="remove_address_description">Вы действительно хотите удалить адрес?</string>
     <string name="contact_us">Связаться с нами</string>
     <string name="about_store">О магазине</string>
+    <string name="update">Обновить</string>
+    <string name="update_is_downloaded">Обновление скачано</string>
 
 </resources>

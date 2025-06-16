@@ -103,15 +103,13 @@ fun CartScreen(viewModel: CartFlowViewModel, viewState: CartFlowViewModel.CartSt
                     awaitEachGesture {
                         awaitPointerEvent(PointerEventPass.Initial)
                             .changes
-                            .forEach { change ->
-                                change.consume()
-                            }
+                            .forEach { change -> change.consume() }
                     }
                 },
             contentAlignment = Alignment.Center
         ) {
             CircularProgressIndicator(
-                modifier = Modifier.size(45.dp),
+                modifier = Modifier.size(32.dp),
                 trackColor = Color.Transparent,
                 color = MaterialTheme.colorScheme.primary,
                 strokeCap = StrokeCap.Round,

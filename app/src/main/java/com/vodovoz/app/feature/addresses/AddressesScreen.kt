@@ -3,7 +3,9 @@ package com.vodovoz.app.feature.addresses
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -27,7 +29,6 @@ fun AddressesScreen(
     val uiState = viewState.uiState
 
     Scaffold(
-        modifier = Modifier.systemBarsPadding(),
         topBar = {
             VodovozTopBar(
                 onBack = {

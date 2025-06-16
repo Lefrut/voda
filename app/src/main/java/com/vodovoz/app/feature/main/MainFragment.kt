@@ -1,6 +1,7 @@
 package com.vodovoz.app.feature.main
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.os.Build
 import android.os.Bundle
@@ -100,20 +101,21 @@ class MainFragment : Fragment(R.layout.fragment_main) {
     }
 
     private fun checkForUpdate() {
-        appUpdateController.checkForUpdate(registerForActivityResult<IntentSenderRequest, ActivityResult>(
-            ActivityResultContracts.StartIntentSenderForResult(),
-            object : ActivityResultCallback<ActivityResult?> {
+        appUpdateController.checkForUpdate(
+            registerForActivityResult<IntentSenderRequest, ActivityResult>(
+                ActivityResultContracts.StartIntentSenderForResult(),
+                object : ActivityResultCallback<ActivityResult?> {
 
-                override fun onActivityResult(result: ActivityResult?) {
-                    if (result == null) return
-                    if (result.resultCode != Activity.RESULT_OK) {
-                        accountManager.reportError("Update flow failed! Result code: ${result.resultCode}")
-                    } else {
-                        accountManager.reportEvent("Success update!")
+                    override fun onActivityResult(result: ActivityResult?) {
+                        if (result == null) return
+                        if (result.resultCode != Activity.RESULT_OK) {
+                            accountManager.reportError("Update flow failed! Result code: ${result.resultCode}")
+                        } else {
+                            accountManager.reportEvent("Success update!")
+                        }
                     }
                 }
-            }
-        ))
+            ))
     }
 
 
@@ -153,6 +155,7 @@ class MainFragment : Fragment(R.layout.fragment_main) {
     }
 
 
+    @SuppressLint("UseKtx")
     private fun observeCartState() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -161,7 +164,7 @@ class MainFragment : Fragment(R.layout.fragment_main) {
                     .collect { state ->
                         if (state == null || state.count == 0) {
                             binding.circleAmount.isVisible = false
-                            binding.nvNavigation.menu.getItem(2).title = "Корзина"
+                            binding.nvNavigation.menu.getItem(2).title = getString(R.string.cart)
                         } else {
                             binding.circleAmount.text = state.count.toString()
                             binding.circleAmount.isVisible = true
@@ -178,7 +181,7 @@ class MainFragment : Fragment(R.layout.fragment_main) {
                                 }
                                 .start()
                             binding.nvNavigation.menu.getItem(2).title =
-                                state.total.toString() + " ₽"
+                                getString(R.string.price_text, state.total)
                         }
                     }
             }
@@ -236,10 +239,10 @@ class MainFragment : Fragment(R.layout.fragment_main) {
     private fun popupSnackbarForCompleteUpdate() {
         val snackbar = Snackbar.make(
             requireView(),
-            "Обновление скачано",
+            getString(R.string.update_is_downloaded),
             Snackbar.LENGTH_INDEFINITE
         )
-        snackbar.setAction("Обновить") { _ ->
+        snackbar.setAction(getString(R.string.update)) { _ ->
             appUpdateController.completeUpdate()
         }
         snackbar.setDuration(5000)

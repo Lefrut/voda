@@ -27,8 +27,6 @@ class MainRepository @Inject constructor(
         userId = userId
     ).parseRepeatOrderResponse()
 
-
-
     /**
      * map
      */
@@ -49,21 +47,9 @@ class MainRepository @Inject constructor(
     ).parseAddressByGeocodeResponse()
 
 
-
     /**
      * Addresses
      */
-
-    //Получить сохраненные адреса
-    suspend fun fetchAddressesSaved(
-        userId: Long?,
-        type: Int?,
-    ) = api.fetchAddressResponse(
-        blockId = 102,
-        action = "get",
-        userid = userId,
-        type = type
-    ).parseFetchAddressesSavedResponse()
 
     //Удалить адресс
     suspend fun deleteAddress(

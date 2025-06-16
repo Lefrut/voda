@@ -47,7 +47,8 @@ fun ProductDetailsScreen(
                 onShareClick = {
                     viewModel.share()
                 },
-                isFavoriteProduct = productDetails.isFavorite
+                isFavoriteProduct = productDetails.isFavorite,
+                isLoading = viewState.uiState is ProductDetailsFlowViewModel.ProductDetailsUiState.Loading
             )
         },
         bottomBar = {
