@@ -4,17 +4,12 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import com.vodovoz.app.common.account.AccountManager
 import com.vodovoz.app.common.cart.CartManager
-import com.vodovoz.app.common.content.ErrorState
 import com.vodovoz.app.common.content.Event
 import com.vodovoz.app.common.content.PagingContractViewModel
 import com.vodovoz.app.common.content.State
-import com.vodovoz.app.common.content.toErrorState
 import com.vodovoz.app.common.content.updateData
 import com.vodovoz.app.common.like.LikeManager
-import com.vodovoz.app.data.MainRepository
-import com.vodovoz.app.data.model.common.ResponseEntity
 import com.vodovoz.app.design_system.model.ColorfulButtonUi
 import com.vodovoz.app.design_system.model.OrderProductUi
 import com.vodovoz.app.design_system.model.mapToUi
@@ -26,19 +21,13 @@ import com.vodovoz.app.feature.all.orders.detail.model.OrderDetailsSummaryUi
 import com.vodovoz.app.feature.all.orders.detail.model.OrderStatusUi
 import com.vodovoz.app.feature.all.orders.detail.model.mapToUi
 import com.vodovoz.app.feature.all.orders.detail.model.toUi
-import com.vodovoz.app.util.extensions.debugLog
 import com.vodovoz.app.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -46,10 +35,8 @@ import javax.inject.Inject
 @Stable
 class OrderDetailsFlowViewModel @Inject constructor(
     savedState: SavedStateHandle,
-    private val repository: MainRepository,
     private val cartManager: CartManager,
     private val likeManager: LikeManager,
-    private val accountManager: AccountManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
 ) : PagingContractViewModel<OrderDetailsFlowViewModel.OrderDetailsState, OrderDetailsFlowViewModel.OrderDetailsEvent>(
     OrderDetailsState()
@@ -77,7 +64,7 @@ class OrderDetailsFlowViewModel @Inject constructor(
     }
 
     fun fetchOrderDetails() = viewModelScope.launch {
-        if(dataState.uiState !is OrderDetailsUiState.Body){
+        if (dataState.uiState !is OrderDetailsUiState.Body) {
             uiStateListener.updateData { s ->
                 s.copy(uiState = OrderDetailsUiState.Loading)
             }
@@ -111,46 +98,6 @@ class OrderDetailsFlowViewModel @Inject constructor(
         }
     }
 
-    fun repeatOrder() {
-        val userId = accountManager.fetchAccountId() ?: return
-        val id = orderId ?: return
-        uiStateListener.value = state.copy(loadingPage = true, error = null)
-        viewModelScope.launch {
-            flow {
-                emit(
-                    repository.repeatOrder(
-                        orderId = id,
-                        userId = userId
-                    )
-                )
-            }
-                .flowOn(Dispatchers.IO)
-                .onEach { response ->
-                    if (response is ResponseEntity.Success) {
-                        cartManager.updateCartListState(true)
-                        uiStateListener.value = state.copy(
-                            loadingPage = false, error = null,
-                            data = state.data.copy(ifRepeatOrder = true)
-                        )
-                    } else {
-                        uiStateListener.value =
-                            state.copy(
-                                loadingPage = false,
-                                error = ErrorState.Error()
-                            )
-                    }
-                }
-                .flowOn(Dispatchers.Default)
-                .catch {
-                    debugLog { "repeat order error ${it.localizedMessage}" }
-                    uiStateListener.value =
-                        state.copy(error = it.toErrorState(), loadingPage = false)
-                }
-                .collect()
-        }
-    }
-
-
     fun activateTopButton(orderDetailsButton: OrderDetailsButtonUi) = viewModelScope.launch {
         when (orderDetailsButton) {
             is OrderDetailsButtonUi.AboutOrderButton -> {
@@ -158,11 +105,21 @@ class OrderDetailsFlowViewModel @Inject constructor(
             }
 
             is OrderDetailsButtonUi.ImageButton -> {
-
+                if (orderDetailsButton.id == "povtorit") {
+                    vodovozServiceRepository.repeatOrder(orderId).singleResult().onSuccess {
+                        cartManager.updateCartListState(true)
+                        eventListener.emit(OrderDetailsEvent.GoToCart)
+                    }
+                }
             }
 
             is OrderDetailsButtonUi.PayButton -> {
-
+                val event = if (orderDetailsButton.browser) {
+                    OrderDetailsEvent.OpenUrl(orderDetailsButton.url)
+                } else {
+                    OrderDetailsEvent.GoToWebView(orderDetailsButton.url)
+                }
+                eventListener.emit(event)
             }
 
             is OrderDetailsButtonUi.TipsButton -> {
@@ -171,7 +128,12 @@ class OrderDetailsFlowViewModel @Inject constructor(
 
             is OrderDetailsButtonUi.WhereOrderButton -> {
                 orderDetailsButton.id
-                eventListener.emit(OrderDetailsEvent.GoToTraceOrder(orderDetailsButton.driverId, orderId))
+                eventListener.emit(
+                    OrderDetailsEvent.GoToTraceOrder(
+                        orderDetailsButton.driverId,
+                        orderId
+                    )
+                )
             }
         }
     }
@@ -234,12 +196,14 @@ class OrderDetailsFlowViewModel @Inject constructor(
 
     sealed class OrderDetailsEvent : Event {
         data object GoBack : OrderDetailsEvent()
-
+        data object GoToCart : OrderDetailsEvent()
         data class CopyText(val text: String) : OrderDetailsEvent()
         data class GoToOrderQuestion(val orderId: Long) : OrderDetailsEvent()
         data class GoToCancelOrder(val orderId: Long) : OrderDetailsEvent()
         data class GoToProductDetails(val productId: Long) : OrderDetailsEvent()
         data class GoToTraceOrder(val dividerId: String, val orderId: Long) : OrderDetailsEvent()
+        data class GoToWebView(val url: String) : OrderDetailsEvent()
+        data class OpenUrl(val url: String) : OrderDetailsEvent()
     }
 
     @Stable

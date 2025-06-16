@@ -79,6 +79,12 @@ class NotificationSettingsViewModel @Inject constructor(
     }
 
 
+    private val widgetUpdater = WidgetUpdaterHandler(
+        getString = { id ->
+            resourcesProvider.getString(id)
+        }
+    )
+
     fun changeWidget(widget: WidgetUi, updatedWidget: WidgetUi) = viewModelScope.launch {
 
         val currentSection =
@@ -88,7 +94,7 @@ class NotificationSettingsViewModel @Inject constructor(
 
         val updatedWidgets = WidgetUpdaterHandler(
             getString = { id -> resourcesProvider.getString(id) }
-        ).changeWidget(currentSection.items, widget, updatedWidget)
+        ).updateWidget(currentSection.items, widget, updatedWidget)
 
         uiStateListener.updateData { s ->
             s.copy(

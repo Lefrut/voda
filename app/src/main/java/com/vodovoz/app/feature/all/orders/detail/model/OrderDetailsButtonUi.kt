@@ -1,12 +1,14 @@
 package com.vodovoz.app.feature.all.orders.detail.model
 
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.Stable
 import androidx.compose.ui.graphics.Color
 import com.vodovoz.app.domain.general.model.order.OrderDetailsButtonModel
 import com.vodovoz.app.feature.all.orders.detail.composables.AboutOrderPopupWindowUi
 import com.vodovoz.app.feature.all.orders.detail.composables.toUi
 import com.vodovoz.app.ui.graphics.fromHexOrUnspecified
 
+@Stable
 sealed class OrderDetailsButtonUi {
 
     @Immutable

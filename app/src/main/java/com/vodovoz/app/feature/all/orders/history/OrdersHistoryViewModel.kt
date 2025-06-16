@@ -50,8 +50,6 @@ import javax.inject.Inject
 @HiltViewModel
 @Stable
 class OrdersHistoryViewModel @Inject constructor(
-    private val repository: MainRepository,
-    private val accountManager: AccountManager,
     private val cartManager: CartManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
 ) : PagingContractViewModel<OrdersHistoryViewModel.AllOrdersState, OrdersHistoryViewModel.AllOrdersEvent>(
@@ -156,42 +154,6 @@ class OrdersHistoryViewModel @Inject constructor(
         }
     }
 
-    fun repeatOrder(orderId: Long) {
-        val userId =
-            accountManager.fetchAccountId() ?: return
-        uiStateListener.value = state.copy(loadingPage = true, error = null)
-        viewModelScope.launch {
-            flow {
-                emit(
-                    repository.repeatOrder(
-                        userId = userId,
-                        orderId = orderId
-                    )
-                )
-            }
-                .onEach { response ->
-                    if (response is ResponseEntity.Success) {
-                        cartManager.updateCartListState(true)
-                        uiStateListener.value = state.copy(loadingPage = false, error = null)
-                        eventListener.emit(AllOrdersEvent.GoToCart)
-                    } else {
-                        uiStateListener.value =
-                            state.copy(
-                                loadingPage = false,
-                                error = ErrorState.Error()
-                            )
-                    }
-                }
-                .flowOn(Dispatchers.Default)
-                .catch {
-                    debugLog { "repeat order error ${it.localizedMessage}" }
-                    uiStateListener.value =
-                        state.copy(error = it.toErrorState(), loadingPage = false)
-                }
-                .collect()
-        }
-    }
-
     fun changeMode(searchMode: Boolean) = viewModelScope.launch {
         uiStateListener.updateData { s ->
             s.copy(
@@ -249,6 +211,32 @@ class OrdersHistoryViewModel @Inject constructor(
 
     fun activateOrderItemButton(ordersHistoryItem: OrdersHistoryItemUi) = viewModelScope.launch {
 
+        val button = ordersHistoryItem.button ?: return@launch
+
+        when {
+            button.id == "povtorit" -> {
+                vodovozServiceRepository.repeatOrder(ordersHistoryItem.id).singleResult()
+                    .onSuccess {
+                        cartManager.updateCartListState(true)
+                        eventListener.emit(AllOrdersEvent.GoToCart)
+                    }
+            }
+
+            button.url.isNotEmpty() -> {
+
+                val event = when {
+                    button.browserUrl -> AllOrdersEvent.OpenUrl(button.url)
+                    else -> AllOrdersEvent.GoToWebView(button.url)
+                }
+
+
+                eventListener.emit(event)
+            }
+
+            else -> {
+
+            }
+        }
     }
 
     @Immutable
@@ -269,6 +257,8 @@ class OrdersHistoryViewModel @Inject constructor(
         data object GoToCatalog : AllOrdersEvent()
 
         data class GoToOrderDetails(val id: Long) : AllOrdersEvent()
+        data class OpenUrl(val url: String) : AllOrdersEvent()
+        data class GoToWebView(val url: String) : AllOrdersEvent()
     }
 
     @Immutable

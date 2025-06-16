@@ -5,10 +5,6 @@ import androidx.compose.runtime.Immutable
 @Immutable
 sealed class WidgetUi(open val id: String)
 
-fun<T: WidgetUi> List<T>.replaceWidget(newWidget: T): List<T> {
-    return map { if (it.id == newWidget.id) newWidget else it }
-}
-
 interface WidgetUpdater {
     fun canHandle(widget: WidgetUi, updatedWidget: WidgetUi): Boolean
 
@@ -91,7 +87,7 @@ class WidgetUpdaterHandler(
     private val updaters: List<WidgetUpdater> = listOf(FieldWidgetUpdater(), SwitchWidgetUpdater()),
     private val getString: (Int) -> String
 ) {
-    fun changeWidget(
+    fun updateWidget(
         currentList: List<WidgetUi>,
         widget: WidgetUi,
         updatedWidget: WidgetUi

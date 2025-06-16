@@ -130,11 +130,12 @@ interface VodovozService {
      * Order requests
      * */
 
-    @GET("oformlenie/address.php?action=del")
-    suspend fun deleteAddress(
-        @Query("addressid") addressId: Int,
+    @GET("korzina/function/povtor/index.php")
+    suspend fun repeatOrder(
+        @Query("id") orderId: Long,
         @Query("userid") userId: Long?
     ): Response<VodovozResponseDTO<String>>
+
 
     @GET("oformlenie/oplata.php?action=glav")
     suspend fun getPaymentMethodDetails(
@@ -214,13 +215,47 @@ interface VodovozService {
         @Query("userid") userId: Long?,
     ): Response<VodovozResponseDTO<AddressesDTO>>
 
-    @GET("https://vodovoz.net/newmobile_new/oformlenie/address.php?userid=515&action=add&polnadres=улицапушкина&tip=2")
+    @GET("oformlenie/address.php?action=add&iblock_id=102")
     suspend fun addAddress(
         @Query("userid") userId: Long?,
         @Query("polnadres") address: String,
+        @Query("tip") type: String,
+        @Query("ktochka") geo: String? = null,
+        @Query("city") city: String? = null,
+        @Query("street") street: String? = null,
+        @Query("house") house: String? = null,
+        @Query("domofon") intercom: String? = null,
+        @Query("entrance") entrance: String? = null,
+        @Query("flat") flat: String? = null,
+        @Query("floor") floor: String? = null,
+        @Query("leghtkm") fromMoscowToAddressKm: String? = null,
+    ): Response<VodovozResponseDTO<Long>>
 
-    )
+    @GET("oformlenie/address.php?action=update&iblock_id=102")
+    suspend fun updateAddress(
+        @Query("userid") userId: Long?,
+        @Query("polnadres") address: String,
+        @Query("tip") type: String,
+        @Query("ktochka") geo: String? = null,
+        @Query("city") city: String? = null,
+        @Query("street") street: String? = null,
+        @Query("house") house: String? = null,
+        @Query("domofon") intercom: String? = null,
+        @Query("entrance") entrance: String? = null,
+        @Query("flat") flat: String? = null,
+        @Query("floor") floor: String? = null,
+        @Query("leghtkm") fromMoscowToAddressKm: String? = null,
+    ): Response<VodovozResponseDTO<Long>>
 
+    @GET("oformlenie/address.php?action=del")
+    suspend fun deleteAddress(
+        @Query("addressid") addressId: Int,
+        @Query("userid") userId: Long?
+    ): Response<VodovozResponseDTO<String>>
+
+
+
+    //todo
 //    @GET("")
 //    suspend fun getAddAddressDetails(): Response<VodovozResponseDTO<>>
 

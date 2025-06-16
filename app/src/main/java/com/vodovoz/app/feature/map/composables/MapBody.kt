@@ -72,7 +72,6 @@ import com.yandex.mapkit.ScreenRect
 import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
-@SuppressLint("UnusedBoxWithConstraintsScope")
 @Composable
 fun MapBody(
     modifier: Modifier = Modifier,
