@@ -4,8 +4,8 @@ import com.yandex.mapkit.search.SuggestItem
 
 interface YandexMapSDK {
 
-    suspend fun getAddressesInMoscow(query: String): List<SuggestItem>
+    suspend fun getSuggestsInMoscow(query: String): List<SuggestItem>
 
-    suspend fun getAddressInfo(address: String): YandexSearchResponse
+    suspend fun searchAddress(address: String): YandexSearchResponse
 
 }

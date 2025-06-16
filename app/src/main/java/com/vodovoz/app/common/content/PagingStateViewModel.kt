@@ -26,9 +26,12 @@ abstract class PagingContractViewModel<S : State, E : Event>(
 
     protected val dataState get() = state.data
 
+    @Stable
     fun observeUiState() = uiStateListener.asStateFlow()
 
     protected open val eventListener = MutableSharedFlow<E>()
+
+    @Stable
     fun observeEvent() = eventListener.asSharedFlow()
 }
 
@@ -66,6 +69,7 @@ data class PagingState<S>(
     }
 }
 
+@Stable
 sealed class ErrorState(
     val message: String,
     val description: String,
