@@ -7,11 +7,11 @@ import com.vodovoz.app.domain.general.model.location.MapAddressModel
 
 @Immutable
 data class MapAddressUi(
-    val point: MapPointUi,
     val name: String,
     val city: String,
     val street: String,
     val house: String,
+    val point: MapPointUi,
 )
 
 fun MapAddressModel.toUi(): MapAddressUi {

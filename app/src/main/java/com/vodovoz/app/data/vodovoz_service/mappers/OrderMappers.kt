@@ -461,7 +461,7 @@ fun ORDERS_HISTORY_ITEM_DTO.toDomain(): OrdersHistoryItemModel? {
 
 fun ORDERS_HISTORY_KNOPKA_DTO.toDomain(): OrdersHistoryButtonModel? {
     return OrdersHistoryButtonModel(
-        id = ID ?: return null,
+        id = ID ?: "",
         name = NAME ?: "",
         color = COLOR_TEXT ?: "",
         background = COLOR_BACKGROUND ?: "",

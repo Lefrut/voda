@@ -16,8 +16,10 @@ import com.vodovoz.app.R
 import com.vodovoz.app.common.account.AccountManager
 import com.vodovoz.app.common.tab.TabManager
 import com.vodovoz.app.core.navigation.navigateToOrderDetails
+import com.vodovoz.app.core.navigation.navigateToWebView
 import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.effects.LifecycleEffect
+import com.vodovoz.app.util.extensions.openUrl
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -76,7 +78,7 @@ class OrdersHistoryFragment : Fragment() {
         viewModel.observeEvent().collect { event ->
             when (event) {
                 is OrdersHistoryViewModel.AllOrdersEvent.GoToCart -> {
-                    //TODO
+                    tabManager.selectTab(R.id.graph_cart)
                 }
 
                 OrdersHistoryViewModel.AllOrdersEvent.GoBack -> {
@@ -90,6 +92,18 @@ class OrdersHistoryFragment : Fragment() {
 
                 is OrdersHistoryViewModel.AllOrdersEvent.GoToOrderDetails -> {
                     findNavController().navigateToOrderDetails(event.id)
+                }
+
+                is OrdersHistoryViewModel.AllOrdersEvent.GoToWebView -> {
+                    val space = requireContext().getString(R.string.space)
+                    findNavController().navigateToWebView(
+                        url = event.url,
+                        title = space
+                    )
+                }
+
+                is OrdersHistoryViewModel.AllOrdersEvent.OpenUrl -> {
+                    requireContext().openUrl(event.url)
                 }
             }
         }

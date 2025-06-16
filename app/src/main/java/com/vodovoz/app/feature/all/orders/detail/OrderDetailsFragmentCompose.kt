@@ -10,19 +10,20 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.fragment.findNavController
-import com.vodovoz.app.common.account.AccountManager
-import com.vodovoz.app.common.cart.CartManager
-import com.vodovoz.app.common.like.LikeManager
+import com.vodovoz.app.R
+import com.vodovoz.app.common.tab.TabManager
 import com.vodovoz.app.core.navigation.navigateToCancelOrder
 import com.vodovoz.app.core.navigation.navigateToOrderQuestion
 import com.vodovoz.app.core.navigation.navigateToProductDetails
 import com.vodovoz.app.core.navigation.navigateToTraceOrder
+import com.vodovoz.app.core.navigation.navigateToWebView
 import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.composables.placeholders.LoadingPlaceholder
 import com.vodovoz.app.design_system.composables.placeholders.NetworkErrorPlaceholder
 import com.vodovoz.app.design_system.effects.LifecycleEffect
 import com.vodovoz.app.feature.all.orders.detail.composables.AboutOrderBottomSheet
 import com.vodovoz.app.util.extensions.copyText
+import com.vodovoz.app.util.extensions.openUrl
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import javax.inject.Inject
@@ -33,14 +34,7 @@ class OrderDetailsFragment : Fragment() {
     internal val viewModel: OrderDetailsFlowViewModel by viewModels()
 
     @Inject
-    lateinit var cartManager: CartManager
-
-    @Inject
-    lateinit var likeManager: LikeManager
-
-    @Inject
-    lateinit var accountManager: AccountManager
-
+    lateinit var tabManager: TabManager
 
     override fun onResume() {
         super.onResume()
@@ -116,7 +110,25 @@ class OrderDetailsFragment : Fragment() {
                                 }
 
                                 is OrderDetailsFlowViewModel.OrderDetailsEvent.GoToTraceOrder -> {
-                                    findNavController().navigateToTraceOrder(event.dividerId, event.orderId)
+                                    findNavController().navigateToTraceOrder(
+                                        event.dividerId,
+                                        event.orderId
+                                    )
+                                }
+
+                                is OrderDetailsFlowViewModel.OrderDetailsEvent.GoToWebView -> {
+                                    val space = requireContext().getString(R.string.space)
+                                    findNavController().navigateToWebView(
+                                        event.url, space
+                                    )
+                                }
+
+                                is OrderDetailsFlowViewModel.OrderDetailsEvent.OpenUrl -> {
+                                    requireContext().openUrl(event.url)
+                                }
+
+                                OrderDetailsFlowViewModel.OrderDetailsEvent.GoToCart -> {
+                                    tabManager.selectTab(R.id.graph_cart)
                                 }
                             }
                         }

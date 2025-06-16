@@ -17,16 +17,6 @@ class MainRepository @Inject constructor(
     private val api: MainApi,
     private val mapKitApi: MapKitFlowApi,
 ) {
-
-
-    suspend fun repeatOrder(
-        orderId: Long?,
-        userId: Long?,
-    ) = api.repeatOrder(
-        orderId = orderId,
-        userId = userId
-    ).parseRepeatOrderResponse()
-
     /**
      * map
      */
@@ -35,17 +25,6 @@ class MainRepository @Inject constructor(
     suspend fun fetchDeliveryZonesResponse() = api.fetchMapResponse(
         action = "tochkakarta"
     ).parseDeliveryZonesBundleResponse()
-
-    //Адрес по координатам
-    suspend fun fetchAddressByGeocodeResponse(
-        latitude: Double,
-        longitude: Double,
-    ) = mapKitApi.getAddressByGeo(
-        apiKey = "346ef353-b4b2-44b3-b597-210d62eeb66b",
-        geocode = "$longitude,$latitude",
-        format = "json"
-    ).parseAddressByGeocodeResponse()
-
 
     /**
      * Addresses
@@ -131,22 +110,6 @@ class MainRepository @Inject constructor(
     /**
      * Ordering
      */
-
-    suspend fun fetchShippingInfo(
-        userId: Long?,
-        addressId: Long?,
-        date: String?,
-        appVersion: String?,
-    ) = api.fetchInfoAboutOrderingResponse(
-        userId = userId,
-        addressId = addressId,
-        date = date,
-        appVersion = appVersion
-    ).parseShippingInfoResponse()
-
-    suspend fun fetchFreeShippingDaysInfoResponse(
-        appVersion: String?,
-    ) = api.fetchInfoAboutOrderingResponse(appVersion = appVersion).parseFreeShippingDaysResponse()
 
     suspend fun regOrder(
         orderType: Int?, //Тип заказа (1/2)

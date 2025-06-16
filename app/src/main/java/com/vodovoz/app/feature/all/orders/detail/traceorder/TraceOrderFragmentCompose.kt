@@ -83,7 +83,7 @@ class TraceOrderFragment : Fragment() {
 
     private val mapView: MapView get() = yandexMap.mapView
     private val mapWindow: MapWindow get() = mapView.mapWindow
-    private val map: Map get() = mapView.mapWindow.map
+    private val map: Map get() = mapWindow.map
 
     private val userLocationLayer by lazy {
         mapKit.createUserLocationLayer(mapView.mapWindow)
@@ -97,8 +97,6 @@ class TraceOrderFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         MapKitFactory.initialize(requireContext())
-
-
     }
 
     override fun onStart() {

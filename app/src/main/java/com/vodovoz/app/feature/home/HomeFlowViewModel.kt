@@ -67,7 +67,6 @@ import kotlin.math.roundToInt
 @HiltViewModel
 @Stable
 class HomeFlowViewModel @Inject constructor(
-    private val repository: MainRepository,
     private val cartManager: CartManager,
     private val likeManager: LikeManager,
     private val accountManager: AccountManager,
@@ -313,43 +312,6 @@ class HomeFlowViewModel @Inject constructor(
             eventListener.emit(HomeEvents.GoToProfile)
         }
     }
-
-
-    fun repeatOrder(orderId: Long) {
-        val userId =
-            accountManager.fetchAccountId() ?: return
-        uiStateListener.value = state.copy(loadingPage = true, error = null)
-        viewModelScope.launch {
-            flow {
-                emit(
-                    repository.repeatOrder(
-                        userId = userId,
-                        orderId = orderId
-                    )
-                )
-            }.onEach { response ->
-                if (response is ResponseEntity.Success) {
-                    cartManager.updateCartListState(true)
-                    uiStateListener.value = state.copy(loadingPage = false, error = null)
-                    eventListener.emit(HomeEvents.GoToCart)
-                } else {
-                    uiStateListener.value =
-                        state.copy(
-                            loadingPage = false,
-                            error = ErrorState.Error()
-                        )
-                }
-            }
-                .flowOn(Dispatchers.Default)
-                .catch {
-                    debugLog { "repeat order error ${it.localizedMessage}" }
-                    uiStateListener.value =
-                        state.copy(error = it.toErrorState(), loadingPage = false)
-                }
-                .collect()
-        }
-    }
-
 
     fun selectCategory(categoryWithProductsUi: CategoryWithProductsUi) = viewModelScope.launch {
         uiStateListener.updateData { s ->
