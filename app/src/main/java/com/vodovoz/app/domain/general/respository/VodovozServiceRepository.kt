@@ -23,6 +23,7 @@ import com.vodovoz.app.domain.general.model.certificate.BuyCertificateDetailsMod
 import com.vodovoz.app.domain.general.model.certificate.BuyCertificateModel
 import com.vodovoz.app.domain.general.model.certificate.CertificateActivationDetailsModel
 import com.vodovoz.app.domain.general.model.location.AddressModel
+import com.vodovoz.app.domain.general.model.location.MapAddressModel
 import com.vodovoz.app.domain.general.model.order.CancelOrderDetailsModel
 import com.vodovoz.app.domain.general.model.order.DeliveryDateDetailsModel
 import com.vodovoz.app.domain.general.model.order.OrderDetailsModel
@@ -68,6 +69,8 @@ import java.time.LocalDate
 interface VodovozServiceRepository {
 
     fun removeAddress(addressId: Int): Flow<Result<String>>
+
+    fun addAddress(address: MapAddressModel): Flow<Result<Long>>
 
     fun getPaymentMethodDetails(
         addressId: Int,

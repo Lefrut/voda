@@ -22,6 +22,11 @@ fun MapPointModel.toUi(): MapPointUi {
     return MapPointUi(lat, lon)
 }
 
+fun MapPointUi.toDomain(): MapPointModel {
+    return MapPointModel(lat, lon)
+}
+
+
 fun MapPointUi.toPoint(): Point {
     return Point(lat, lon)
 }

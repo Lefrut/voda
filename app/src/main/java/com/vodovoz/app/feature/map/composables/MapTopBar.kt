@@ -33,7 +33,8 @@ fun MapTopBar(
     onBackClick: () -> Unit,
     onQueryChange: (String) -> Unit,
     onSearchClick: () -> Unit,
-    onFieldClick: () -> Unit
+    onFieldClick: () -> Unit,
+    onClearClick: () -> Unit,
 ) {
     Row(
         modifier = modifier
@@ -47,15 +48,18 @@ fun MapTopBar(
             imageVector = ImageVector.vectorResource(R.drawable.icon_back),
             tint = MaterialTheme.colorScheme.onBackground,
             contentDescription = null,
-            modifier = Modifier.size(24.dp).clip(CircleShape).clickable {
-                onBackClick()
-            }
+            modifier = Modifier
+                .size(24.dp)
+                .clip(CircleShape)
+                .clickable {
+                    onBackClick()
+                }
         )
         BasicSearchField(
             modifier = Modifier
                 .padding(start = 16.dp)
                 .fillMaxWidth()
-                .pointerInput(Unit){
+                .pointerInput(Unit) {
                     awaitEachGesture {
                         awaitPointerEvent(PointerEventPass.Initial)
                         onFieldClick()
@@ -69,7 +73,8 @@ fun MapTopBar(
                 modifier = Modifier
                     .height(46.dp)
                     .clip(MaterialTheme.shapes.large)
-                    .background(MaterialTheme.colorScheme.surface),
+                    .background(MaterialTheme.colorScheme.surface)
+                    .padding(end = 16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
@@ -94,8 +99,23 @@ fun MapTopBar(
                             color = MaterialTheme.colorScheme.surfaceTint,
                             style = MaterialTheme.typography.bodyMedium
                         )
-                        innerTextField()
                     }
+                    innerTextField()
+                }
+
+                if (query.isNotEmpty()) {
+                    Icon(
+                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_clean),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .padding(start = 4.dp)
+                            .size(24.dp)
+                            .clip(CircleShape)
+                            .clickable {
+                                onClearClick()
+                            },
+                        tint = MaterialTheme.colorScheme.surfaceTint
+                    )
                 }
             }
         }

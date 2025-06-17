@@ -58,9 +58,9 @@ fun Activity.handleLocationAvailability(
 
         locationPermissionGranted -> onPermissionHave()
 
-        !canRequestPermission -> onPermissionNotRational()
+        canRequestPermission && !locationPermissionGranted-> onPermissionNotHave()
 
-        else -> onPermissionNotHave()
+        else -> onPermissionNotRational()
     }
 
 }

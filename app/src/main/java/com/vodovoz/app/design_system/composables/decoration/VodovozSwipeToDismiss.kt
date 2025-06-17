@@ -60,7 +60,7 @@ fun VodovozSwipeToDismiss(
             ) {
                 Icon(
                     modifier = Modifier.size(24.dp),
-                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_delete),
+                    imageVector = ImageVector.vectorResource(id = R.drawable.icon_trash),
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.background
                 )

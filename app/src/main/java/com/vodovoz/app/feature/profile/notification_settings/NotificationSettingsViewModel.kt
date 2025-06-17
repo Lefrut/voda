@@ -132,13 +132,10 @@ class NotificationSettingsViewModel @Inject constructor(
 
             val queriesMap = widgets.mapNotNull { widget ->
                 when (widget) {
-                    is FieldUi -> {
-                        widget.id to widget.value
-                    }
+                    is FieldUi -> widget.id to widget.value
 
-                    is SwitchUi -> {
-                        widget.id to VodovozBoolean.from(widget.value).value
-                    }
+
+                    is SwitchUi -> widget.id to VodovozBoolean.from(widget.value).value
 
                     else -> null
                 }

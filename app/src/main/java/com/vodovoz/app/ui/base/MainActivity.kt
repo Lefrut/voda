@@ -9,8 +9,11 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.fragment.app.commit
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.NavHostFragment
 import com.google.firebase.messaging.RemoteMessage
+import com.vodovoz.app.R
 import com.vodovoz.app.databinding.ActivityMainBinding
 import com.vodovoz.app.feature.sitestate.SiteStateManager
 import com.vodovoz.app.util.extensions.debugLog
@@ -32,7 +35,6 @@ class MainActivity : AppCompatActivity() {
     private val viewModel: MainActivityViewModel by viewModels()
     private val splashFileViewModel: SplashFileViewModel by viewModels()
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags("ru"))
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
@@ -51,6 +53,11 @@ class MainActivity : AppCompatActivity() {
         MapKitFactory.initialize(this)
 
         binding = ActivityMainBinding.inflate(layoutInflater).apply { setContentView(root) }
+        supportFragmentManager.commit {
+            val navHostFragment = NavHostFragment.create(R.navigation.nav_graph)
+            replace(R.id.fcvMainContainer, navHostFragment)
+            setPrimaryNavigationFragment(navHostFragment)
+        }
 
         processIntent(intent)
     }

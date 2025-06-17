@@ -17,39 +17,57 @@ import com.vodovoz.app.data.MainRepository
 import com.vodovoz.app.data.model.common.ResponseEntity
 import com.vodovoz.app.design_system.model.MapPointUi
 import com.vodovoz.app.domain.general.respository.MapServiceRepository
+import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
+import com.vodovoz.app.feature.addresses.model.AddressUi
 import com.vodovoz.app.feature.map.manager.DeliveryZonesManager
 import com.vodovoz.app.feature.map.model.MapAddressUi
+import com.vodovoz.app.feature.map.model.toDomain
 import com.vodovoz.app.feature.map.model.toUi
 import com.vodovoz.app.mapper.AddressMapper.mapToUI
 import com.vodovoz.app.ui.model.AddressUI
 import com.vodovoz.app.ui.model.custom.DeliveryZonesBundleUI
+import com.vodovoz.app.util.extensions.debounceWithMax
 import com.vodovoz.app.util.extensions.debugLog
 import com.vodovoz.app.util.extensions.singleResult
 import com.yandex.mapkit.geometry.Point
 import com.yandex.mapkit.geometry.Polyline
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import okhttp3.ResponseBody
 import javax.inject.Inject
 import kotlin.math.roundToInt
 
-@Stable
 @HiltViewModel
+@Stable
 class MapFlowViewModel @Inject constructor(
     savedState: SavedStateHandle,
     private val repository: MainRepository,
     private val deliveryZonesManager: DeliveryZonesManager,
     private val accountManager: AccountManager,
     private val mapServiceRepository: MapServiceRepository,
+    private val vodovozServiceRepository: VodovozServiceRepository,
 ) : PagingContractViewModel<MapFlowViewModel.MapFlowState, MapFlowViewModel.MapFlowEvents>(
-    MapFlowState(addressUI = savedState.get<AddressUI>("address"))
+    MapFlowState()
 ) {
+
+    private val selectedAddress = savedState.get<AddressUi>("address")?.apply {
+        uiStateListener.updateData { s ->
+            s.copy(screenType = MapScreenTypeUi.Edit)
+        }
+    }
+
+    private val searchQueryFlow = MutableStateFlow(dataState.query)
 
     init {
         viewModelScope.launch {
@@ -67,10 +85,22 @@ class MapFlowViewModel @Inject constructor(
                     }
                 }
         }
+        handleSearchQueries()
     }
 
     fun navigateBack() = viewModelScope.launch {
-        eventListener.emit(MapFlowEvents.GoBack)
+        when (dataState.mode) {
+            MapUiMode.OnlyMap -> {
+                eventListener.emit(MapFlowEvents.GoBack)
+            }
+
+            MapUiMode.Search -> {
+                eventListener.emit(MapFlowEvents.HideKeyboard)
+                uiStateListener.updateData { s ->
+                    s.copy(mode = MapUiMode.OnlyMap)
+                }
+            }
+        }
     }
 
     fun plusZoom() = viewModelScope.launch {
@@ -93,24 +123,28 @@ class MapFlowViewModel @Inject constructor(
         )
     }
 
+
+    private fun handleSearchQueries() =
+        searchQueryFlow.filter { query -> query.isNotBlank() }.debounceWithMax(250L, 6)
+            .onEach { query ->
+                val addressesInMoscowByQueryResult =
+                    mapServiceRepository.getAddressesInMoscowByQuery(query).singleResult()
+
+
+                addressesInMoscowByQueryResult.onSuccess { addresses ->
+                    uiStateListener.updateData { s ->
+                        s.copy(recommendedAddresses = addresses)
+                    }
+                }
+            }.launchIn(viewModelScope)
+
+
     fun changeQuery(query: String) {
         viewModelScope.launch {
+            searchQueryFlow.emit(query)
             uiStateListener.updateData { s ->
                 s.copy(query = query)
             }
-        }
-    }
-
-    fun fetchAddressByGeo() = viewModelScope.launch {
-        val address = dataState.markerPoint ?: return@launch
-
-        val addressResult = mapServiceRepository.getAddressByGeo(
-            address.lat,
-            address.lon
-        ).singleResult()
-
-        addressResult.onSuccess { address ->
-            address
         }
     }
 
@@ -118,9 +152,6 @@ class MapFlowViewModel @Inject constructor(
         latitude: Double,
         longitude: Double,
     ) {
-        uiStateListener.updateData { s ->
-            s.copy(markerPoint = MapPointUi(latitude, longitude))
-        }
         uiStateListener.value = state.copy(loadingPage = true)
 
         viewModelScope.launch {
@@ -186,14 +217,6 @@ class MapFlowViewModel @Inject constructor(
             )
             eventListener.emit(MapFlowEvents.Submit(startPoint, listOnPoints))
         }
-    }
-
-    fun changeAddress() {
-        uiStateListener.value = state.copy(
-            data = state.data.copy(
-                addressUI = null
-            )
-        )
     }
 
     private fun savePointData(
@@ -543,16 +566,37 @@ class MapFlowViewModel @Inject constructor(
     }
 
     fun searchAddressByQuery() {
-        viewModelScope.launch {
-            //todo - search address by query
+        searchAddress(dataState.query)
+    }
+
+    fun searchAddress(addressName: String) = viewModelScope.launch {
+        if (addressName == dataState.currentAddress?.name || addressName.any { c -> c.isDigit() } || dataState.query == addressName) {
+
+            uiStateListener.updateData { s ->
+                s.copy(addressIsLoading = true)
+            }
+
+            val currentAddress = mapServiceRepository.searchAddressInMoscow(
+                addressName
+            ).singleResult().getOrNull()?.toUi()
+
+            currentAddress?.let {
+                changeAddress(currentAddress)
+                eventListener.emit(MapFlowEvents.HideKeyboard)
+                eventListener.emit(MapFlowEvents.MoveToAddress(currentAddress.point))
+            }
+
+        } else {
+            changeQuery(addressName)
         }
     }
 
     fun moveToAvailableGeo() = viewModelScope.launch {
-        val addressPoint = dataState.markerPoint
-
+        val addressPoint = dataState.currentAddress?.point
         if (addressPoint != null) {
             eventListener.emit(MapFlowEvents.MoveToAddress(addressPoint))
+        } else if (selectedAddress != null) {
+            searchAddress(selectedAddress.address)
         } else {
             eventListener.emit(MapFlowEvents.MoveToGeoOrMoscow)
         }
@@ -582,33 +626,75 @@ class MapFlowViewModel @Inject constructor(
         eventListener.emit(MapFlowEvents.HideAddressBottomSheet)
     }
 
-    fun changeMarkerPoint(point: MapPointUi?) = viewModelScope.launch {
-        if (point == null || point == dataState.markerPoint) return@launch
+    private var searchAddressJob: Job? = null
 
+    fun searchAddress(point: MapPointUi?) = viewModelScope.launch {
+        if (point == null || point == dataState.currentAddress?.point) return@launch
+
+        searchAddressJob?.cancel()
+
+        searchAddressJob = launch {
+            uiStateListener.updateData { s ->
+                s.copy(addressIsLoading = true)
+            }
+
+            delay(300L)
+
+            val addressByGeoResult =
+                mapServiceRepository.getAddressByGeo(point.lat, point.lon).singleResult()
+
+            addressByGeoResult.onSuccess { address ->
+                changeAddress(address.toUi())
+            }
+        }
+    }
+
+    private fun changeAddress(address: MapAddressUi) {
         uiStateListener.updateData { s ->
             s.copy(
-                markerPoint = point,
-                addressIsLoading = true
+                currentAddress = address,
+                mode = MapUiMode.OnlyMap,
+                addressIsLoading = false,
+                addressIsError = with(address) { street.isBlank() || city.isBlank() || house.isBlank() }
             )
         }
 
-        val addressByGeoResult =
-            mapServiceRepository.getAddressByGeo(point.lat, point.lon).singleResult()
-
-        addressByGeoResult.onSuccess { address ->
-            uiStateListener.updateData { s ->
-                s.copy(
-                    address = address.toUi(),
-                    addressIsLoading = false
-                )
-            }
-        }
     }
 
     fun changeToSearchMode() {
         uiStateListener.updateData { s ->
             s.copy(mode = MapUiMode.Search)
         }
+    }
+
+    fun navigateToLocationSettings() = viewModelScope.launch {
+        uiStateListener.updateData { s ->
+            s.copy(showSettingsDialog = false)
+        }
+        eventListener.emit(MapFlowEvents.GoToLocationSettings)
+    }
+
+    fun navigateToAddAddress() = viewModelScope.launch {
+        if (dataState.addressIsLoading || dataState.addressIsError || dataState.buttonIsLoading) return@launch
+
+        uiStateListener.updateData { s ->
+            s.copy(buttonIsLoading = true)
+        }
+
+        val addressId = selectedAddress?.id ?: dataState.currentAddress?.let { address ->
+            vodovozServiceRepository.addAddress(address.toDomain()).singleResult().onFailure { throwable ->
+
+            }.getOrNull()
+        }
+
+        addressId?.let {
+            eventListener.emit(MapFlowEvents.GoToAddAddress(addressId))
+        }
+
+        uiStateListener.updateData { s ->
+            s.copy(buttonIsLoading = false)
+        }
+
     }
 
     data class SavedPolylineData(
@@ -639,12 +725,20 @@ class MapFlowViewModel @Inject constructor(
 
         val query: String = "",
         val showSettingsDialog: Boolean = false,
-        val address: MapAddressUi? = null,
-        val markerPoint: MapPointUi? = null,
+        val currentAddress: MapAddressUi? = null,
         val addressIsLoading: Boolean = true,
+        val addressIsError: Boolean = false,
+        val buttonIsLoading: Boolean = false,
         val mode: MapUiMode = MapUiMode.OnlyMap,
+        val recommendedAddresses: List<String> = emptyList(),
+        val screenType: MapScreenTypeUi = MapScreenTypeUi.Add,
     ) : State
 
+
+    @Stable
+    enum class MapScreenTypeUi {
+        Add, Edit
+    }
 
     @Stable
     sealed interface MapUiMode {
@@ -673,6 +767,9 @@ class MapFlowViewModel @Inject constructor(
         data object ShowAddressBottomSheet : MapFlowEvents()
         data object HideAddressBottomSheet : MapFlowEvents()
         data object GoBack : MapFlowEvents()
+        data object HideKeyboard : MapFlowEvents()
+        data object GoToLocationSettings : MapFlowEvents()
+        data class GoToAddAddress(val addressId: Long) : MapFlowEvents()
 
         data class MoveToAddress(val addressPoint: MapPointUi) : MapFlowEvents()
     }

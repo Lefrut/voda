@@ -32,7 +32,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class AddAddressFragment : BaseFragment() {
+class AddAddressFragment1 : BaseFragment() {
 
     override fun layout(): Int = R.layout.fragment_add_address_search
 
@@ -200,7 +200,6 @@ class AddAddressFragment : BaseFragment() {
                                 requireActivity().snack(it.message)
                             }
                             is MapFlowViewModel.MapFlowEvents.AddAddressSuccess -> {
-                                tabManager.setAddressesRefreshState(true)
                                 findNavController().popBackStack(
                                     R.id.savedAddressesDialogFragment,
                                     false
