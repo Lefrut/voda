@@ -10,4 +10,12 @@ interface MapServiceRepository {
         lon: Double
     ): Flow<Result<MapAddressModel>>
 
+    fun getAddressesInMoscowByQuery(
+        query: String
+    ): Flow<Result<List<String>>>
+
+    fun searchAddressInMoscow(
+        address: String
+    ): Flow<Result<MapAddressModel>>
+
 }

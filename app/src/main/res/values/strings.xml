@@ -374,4 +374,7 @@
     <string name="update">Обновить</string>
     <string name="update_is_downloaded">Обновление скачано</string>
 
+    <string name="error_invalid_address">Некорректный адрес</string>
+    <string name="edit_address">Изменить адрес</string>
+
 </resources>

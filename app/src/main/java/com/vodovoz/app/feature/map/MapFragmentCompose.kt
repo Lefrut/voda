@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.Context
 import android.content.Intent
 import android.location.LocationManager
+import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
 import android.view.LayoutInflater
@@ -12,17 +13,22 @@ import android.view.ViewGroup
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.gestures.AnchoredDraggableState
 import androidx.compose.foundation.gestures.animateTo
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.SheetValue.PartiallyExpanded
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.SoftwareKeyboardController
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.res.stringResource
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -32,12 +38,15 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.google.android.gms.location.LocationServices
+import com.vodovoz.app.R
 import com.vodovoz.app.common.tab.TabManager
 import com.vodovoz.app.core.android.getLocationOrNull
 import com.vodovoz.app.core.android.handleLocationAvailability
-import com.vodovoz.app.core.android.locationPermissions
 import com.vodovoz.app.core.android.locationPermissionGranted
+import com.vodovoz.app.core.android.locationPermissions
+import com.vodovoz.app.core.navigation.navigateToAddAddress
 import com.vodovoz.app.design_system.VodovozTheme
+import com.vodovoz.app.design_system.composables.dialogs.VodovozDialog
 import com.vodovoz.app.design_system.effects.LifecycleEffect
 import com.vodovoz.app.design_system.model.toMapPoint
 import com.vodovoz.app.design_system.model.toPoint
@@ -46,7 +55,6 @@ import com.vodovoz.app.ui.yandex_map.YandexMapUi
 import com.vodovoz.app.ui.yandex_map.copy
 import com.vodovoz.app.ui.yandex_map.minusZoom
 import com.vodovoz.app.ui.yandex_map.plusZoom
-import com.vodovoz.app.util.extensions.enableFullScreen
 import com.yandex.mapkit.Animation
 import com.yandex.mapkit.MapKit
 import com.yandex.mapkit.MapKitFactory
@@ -56,7 +64,10 @@ import com.yandex.mapkit.map.MapWindow
 import com.yandex.mapkit.mapview.MapView
 import com.yandex.mapkit.user_location.UserLocationLayer
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.onCompletion
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -93,9 +104,7 @@ class MapFragment : Fragment() {
 
     private val userLocationListener by lazy { VodovozUserLocationListener(requireContext()) }
     private val userLocationLayer: UserLocationLayer by lazy {
-        mapKit.createUserLocationLayer(
-            mapWindow
-        )
+        mapKit.createUserLocationLayer(mapWindow)
     }
 
     private val moscowPoint = Point(55.75, 37.62)
@@ -117,7 +126,7 @@ class MapFragment : Fragment() {
 
             setContent {
                 val pagingState by viewModel.observeUiState().collectAsStateWithLifecycle()
-                val viewState by rememberUpdatedState(newValue = pagingState.data)
+                val viewState by rememberUpdatedState(pagingState.data)
                 val locationPermissionLauncher = rememberLauncherForActivityResult(
                     contract = ActivityResultContracts.RequestMultiplePermissions()
                 ) { result ->
@@ -144,13 +153,16 @@ class MapFragment : Fragment() {
                     )
                 }
 
-                LifecycleEffect(anchoredDraggableState) {
-                    observeEvents(locationPermissionLauncher, anchoredDraggableState)
-                }
+                val coroutineScope = rememberCoroutineScope()
+                val keyboardController = LocalSoftwareKeyboardController.current
 
-                LaunchedEffect(Unit) {
-                    delay(1000L)
-                    viewModel.moveToAvailableGeo()
+                LifecycleEffect(anchoredDraggableState) {
+                    observeEvents(
+                        locationLauncher = locationPermissionLauncher,
+                        anchoredDraggableState = anchoredDraggableState,
+                        mainScope = coroutineScope,
+                        keyboardController = keyboardController
+                    )
                 }
             }
         }
@@ -166,6 +178,7 @@ class MapFragment : Fragment() {
         ViewCompat.setOnApplyWindowInsetsListener(view) { _, insets ->
             val imeVisible = insets.isVisible(WindowInsetsCompat.Type.ime())
             tabManager.changeTabVisibility(!imeVisible)
+            tabManager.changeTabWindowInsets(!imeVisible)
             return@setOnApplyWindowInsetsListener insets
         }
     }
@@ -174,6 +187,11 @@ class MapFragment : Fragment() {
         super.onStart()
         mapKit.onStart()
 
+        lifecycleScope.launch {
+            delay(300L)
+            WindowCompat.setDecorFitsSystemWindows(requireActivity().window, false)
+            tabManager.changeTabWindowInsets(true)
+        }
     }
 
     override fun onPause() {
@@ -187,114 +205,133 @@ class MapFragment : Fragment() {
         super.onStop()
     }
 
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        lifecycleScope.launch {
-            delay(500L)
-            WindowCompat.setDecorFitsSystemWindows(requireActivity().window, false)
-            tabManager.changeTabWindowInsets(true)
-        }
-    }
-
     @OptIn(ExperimentalMaterial3Api::class)
     private suspend fun observeEvents(
         locationLauncher: ActivityResultLauncher<Array<String>>,
         anchoredDraggableState: AnchoredDraggableState<SheetValue>,
+        mainScope: CoroutineScope,
+        keyboardController: SoftwareKeyboardController?,
     ): Unit =
-        viewModel.observeEvent()
-            .collect { event ->
-                when (event) {
-                    is MapFlowViewModel.MapFlowEvents.MoveToAddress -> {
-                        val addressPoint = event.addressPoint.toPoint()
-                        map.move(
+        viewModel.observeEvent().onStart {
+            mainScope.launch {
+                delay(100L)
+                viewModel.moveToAvailableGeo()
+            }
+        }.collect { event ->
+            when (event) {
+                is MapFlowViewModel.MapFlowEvents.MoveToAddress -> {
+                    val addressPoint = event.addressPoint.toPoint()
+                    map.move(
+                        map.cameraPosition.copy(
+                            target = addressPoint,
+                            zoom = 16f,
+                        ),
+                        Animation(Animation.Type.LINEAR, 0.25f),
+                        null
+                    )
+                }
+
+                MapFlowViewModel.MapFlowEvents.MoveToGeoOrMoscow -> {
+                    val moscowCameraPosition = map.cameraPosition.copy(moscowPoint, 10f, 0f, 0f)
+
+                    if (requireContext().locationPermissionGranted
+                        && locationManager?.isProviderEnabled(LocationManager.GPS_PROVIDER) == true
+                    ) {
+                        val location = fusedLocationClient.getLocationOrNull(requireContext())
+
+                        val cameraPosition = location?.let {
                             map.cameraPosition.copy(
-                                target = addressPoint,
-                                zoom = 16f,
-                            ),
+                                Point(
+                                    location.latitude,
+                                    location.longitude
+                                ),
+                                16f,
+                                0f,
+                                0f
+                            )
+                        } ?: moscowCameraPosition
+
+                        map.move(
+                            cameraPosition,
                             Animation(Animation.Type.LINEAR, 0.25f),
                             null
                         )
-                    }
-
-                    MapFlowViewModel.MapFlowEvents.MoveToGeoOrMoscow -> {
-                        val moscowCameraPosition = map.cameraPosition.copy(moscowPoint, 10f, 0f, 0f)
-
-                        if (requireContext().locationPermissionGranted
-                            && locationManager?.isProviderEnabled(LocationManager.GPS_PROVIDER) == true
-                        ) {
-                            val location = fusedLocationClient.getLocationOrNull(requireContext())
-
-                            val cameraPosition = location?.let {
-                                map.cameraPosition.copy(
-                                    Point(
-                                        location.latitude,
-                                        location.longitude
-                                    ),
-                                    16f,
-                                    0f,
-                                    0f
-                                )
-                            } ?: moscowCameraPosition
-
-                            map.move(
-                                cameraPosition,
-                                Animation(Animation.Type.LINEAR, 0.25f),
-                                null
-                            )
-                            viewModel.changeMarkerPoint(cameraPosition.target.toMapPoint())
-                        } else {
-                            map.move(
-                                moscowCameraPosition,
-                                Animation(Animation.Type.LINEAR, 0.25f),
-                                null
-                            )
-                            viewModel.changeMarkerPoint(moscowCameraPosition.target.toMapPoint())
-                        }
-                    }
-
-                    MapFlowViewModel.MapFlowEvents.CheckGeo -> {
-                        requireActivity().handleLocationAvailability(
-                            onPermissionHave = {
-                                viewModel.moveToUserGeo()
-                            },
-                            onPermissionNotRational = {
-                                viewModel.showSettingDialog()
-                            },
-                            onPermissionNotHave = {
-                                locationLauncher.launch(locationPermissions)
-                            },
-                            onGpsDisabled = {
-                                Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS).also { intent ->
-                                    requireContext().startActivity(intent)
-                                }
-                            }
+                        viewModel.searchAddress(cameraPosition.target.toMapPoint())
+                    } else {
+                        map.move(
+                            moscowCameraPosition,
+                            Animation(Animation.Type.LINEAR, 0.25f),
+                            null
                         )
-                    }
-
-                    MapFlowViewModel.MapFlowEvents.MoveCameraMinus -> {
-                        map.minusZoom()
-                    }
-
-                    MapFlowViewModel.MapFlowEvents.MoveCameraPlus -> {
-                        map.plusZoom()
-                    }
-
-                    MapFlowViewModel.MapFlowEvents.ShowAddressBottomSheet -> {
-                        anchoredDraggableState.animateTo(PartiallyExpanded)
-                    }
-
-                    MapFlowViewModel.MapFlowEvents.HideAddressBottomSheet -> {
-                        anchoredDraggableState.animateTo(SheetValue.Hidden)
-                    }
-
-                    MapFlowViewModel.MapFlowEvents.GoBack -> {
-                        findNavController().popBackStack()
-                    }
-
-                    else -> {
-
+                        viewModel.searchAddress(moscowCameraPosition.target.toMapPoint())
                     }
                 }
+
+                MapFlowViewModel.MapFlowEvents.CheckGeo -> {
+                    requireActivity().handleLocationAvailability(
+                        onPermissionHave = {
+                            viewModel.moveToUserGeo()
+                        },
+                        onPermissionNotRational = {
+                            viewModel.showSettingDialog()
+                        },
+                        onPermissionNotHave = {
+                            locationLauncher.launch(locationPermissions)
+                        },
+                        onGpsDisabled = {
+                            Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS).also { intent ->
+                                requireContext().startActivity(intent)
+                            }
+                        }
+                    )
+                }
+
+                MapFlowViewModel.MapFlowEvents.MoveCameraMinus -> {
+                    map.minusZoom()
+                }
+
+                MapFlowViewModel.MapFlowEvents.MoveCameraPlus -> {
+                    map.plusZoom()
+                }
+
+                MapFlowViewModel.MapFlowEvents.ShowAddressBottomSheet -> {
+                    mainScope.launch {
+                        anchoredDraggableState.animateTo(PartiallyExpanded, tween(200, 250, LinearEasing))
+                    }
+                }
+
+                MapFlowViewModel.MapFlowEvents.HideAddressBottomSheet -> {
+                    mainScope.launch {
+                        anchoredDraggableState.animateTo(SheetValue.Hidden)
+                    }
+                }
+
+                MapFlowViewModel.MapFlowEvents.GoBack -> {
+                    findNavController().popBackStack()
+                }
+
+                MapFlowViewModel.MapFlowEvents.HideKeyboard -> {
+                    keyboardController?.hide()
+                }
+
+                MapFlowViewModel.MapFlowEvents.GoToLocationSettings -> {
+                    val context = requireContext()
+
+                    Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).also { intent ->
+                        intent.data =
+                            Uri.fromParts("package", context.packageName, null)
+                        context.startActivity(intent)
+                    }
+                }
+
+                is MapFlowViewModel.MapFlowEvents.GoToAddAddress -> {
+                    findNavController().navigateToAddAddress(event.addressId)
+                }
+
+                else -> {
+
+                }
             }
+        }
 
 }

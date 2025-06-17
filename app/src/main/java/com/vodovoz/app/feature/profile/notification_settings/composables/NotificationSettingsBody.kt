@@ -106,8 +106,12 @@ fun NotificationSectionColumn(
                 }
 
                 is SwitchUi -> {
-                    VodovozSwitch(switch = widget, onSwitchChange = onWidgetChange)
+                    VodovozSwitch(
+                        switch = widget,
+                        onSwitchChange = onWidgetChange
+                    )
                 }
+                else ->{}
             }
 
             HorizontalDivider(

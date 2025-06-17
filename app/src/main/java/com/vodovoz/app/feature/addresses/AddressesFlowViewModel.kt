@@ -6,7 +6,6 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.vodovoz.app.R
 import com.vodovoz.app.common.account.AccountManager
-import com.vodovoz.app.common.content.ErrorState
 import com.vodovoz.app.common.content.Event
 import com.vodovoz.app.common.content.PagingContractViewModel
 import com.vodovoz.app.common.content.State
@@ -42,9 +41,6 @@ import javax.inject.Inject
 @Stable
 class AddressesFlowViewModel @Inject constructor(
     savedState: SavedStateHandle,
-    private val repository: MainRepository,
-    private val accountManager: AccountManager,
-    private val resourcesProvider: ResourcesProvider,
     private val vodovozServiceRepository: VodovozServiceRepository,
 ) : PagingContractViewModel<AddressesFlowViewModel.AddressesState, AddressesFlowViewModel.AddressesEvents>(
     AddressesState(
@@ -53,11 +49,6 @@ class AddressesFlowViewModel @Inject constructor(
 ) {
 
     init {
-        fetchAddresses()
-    }
-
-    fun refresh() {
-        uiStateListener.value = state.copy(loadingPage = true)
         fetchAddresses()
     }
 
@@ -97,97 +88,20 @@ class AddressesFlowViewModel @Inject constructor(
         }
     }
 
-    fun deleteAddress(addressId: Long) {
-        val userId = accountManager.fetchAccountId() ?: return
-        viewModelScope.launch {
-            flow { emit(repository.deleteAddress(addressId = addressId, userId = userId)) }
-                .onEach { response ->
-
-                    when (response) {
-                        is ResponseEntity.Success -> {
-
-                            val list = state.data.items.filter { it.id != addressId }
-                            val personal = state.data.personalItems.filter { it.id != addressId }
-                            val company = state.data.companyItems.filter { it.id != addressId }
-
-                            val fullList = mutableListOf<Item>()
-                            if (personal.isNotEmpty()) {
-                                fullList.addAll(
-                                    listOf(
-                                        AddressFlowTitle(
-                                            resourcesProvider.getString(
-                                                R.string.personal_addresses_title
-                                            )
-                                        )
-                                    ) + personal
-                                )
-                            }
-                            if (company.isNotEmpty()) {
-                                fullList.addAll(
-                                    listOf(
-                                        AddressFlowTitle(
-                                            resourcesProvider.getString(R.string.company_addresses_title)
-                                        )
-                                    ) + company
-                                )
-                            }
-
-                            uiStateListener.value = state.copy(
-                                data = state.data.copy(
-                                    items = list,
-                                    companyItems = company,
-                                    personalItems = personal,
-                                    fullList = fullList
-                                )
-                            )
-                            eventListener.emit(AddressesEvents.DeleteEvent("Удалено"))
-                        }
-
-                        is ResponseEntity.Error -> {
-                            eventListener.emit(AddressesEvents.DeleteEvent(response.errorMessage))
-                        }
-
-                        is ResponseEntity.Hide -> {
-                            eventListener.emit(AddressesEvents.DeleteEvent("Неизвестная ошибка"))
-                        }
-                    }
-                }
-                .flowOn(Dispatchers.Default)
-                .catch {
-                    debugLog { "fetch addresses error ${it.localizedMessage}" }
-                    uiStateListener.value =
-                        state.copy(error = it.toErrorState(), loadingPage = false)
-                }
-                .collect()
-        }
-    }
-
-    fun onAddressClick(address: AddressUI) {
-        //if (openMode != OpenMode.SelectAddress.name) return
-        viewModelScope.launch {
-            debugLog { "full ${address.fullAddress} length ${address.length} latitude ${address.latitude} longitude ${address.longitude}" }
-            if (address.length.isNotEmpty()) {
-                eventListener.emit(AddressesEvents.OnAddressClick(address))
-            } else {
-                eventListener.emit(AddressesEvents.UpdateAddress(address))
-            }
-        }
-    }
-
     fun navigateBack() = viewModelScope.launch {
         eventListener.emit(AddressesEvents.GoBack)
     }
 
     fun addAddress() = viewModelScope.launch {
-        eventListener.emit(AddressesEvents.GoToMap)
+        eventListener.emit(AddressesEvents.GoToMap(null))
     }
 
-    fun goToOrderRecipient() = viewModelScope.launch {
+    fun navigateToOrdering() = viewModelScope.launch {
 
     }
 
     fun editAddress(address: AddressUi) = viewModelScope.launch {
-
+        eventListener.emit(AddressesEvents.GoToMap(address))
     }
 
     fun selectAddress(address: AddressUi) = viewModelScope.launch {
@@ -229,20 +143,11 @@ class AddressesFlowViewModel @Inject constructor(
 
     sealed class AddressesEvents : Event {
         data object GoBack : AddressesEvents()
-        data object GoToMap : AddressesEvents()
-
-        data class DeleteEvent(val message: String) : AddressesEvents()
-        data class OnAddressClick(val address: AddressUI) : AddressesEvents()
-        data class UpdateAddress(val address: AddressUI) : AddressesEvents()
+        data class GoToMap(val address: AddressUi?) : AddressesEvents()
     }
 
     @Immutable
     data class AddressesState(
-        val items: List<AddressUI> = emptyList(),
-        val companyItems: List<AddressUI> = emptyList(),
-        val personalItems: List<AddressUI> = emptyList(),
-        val fullList: List<Item> = emptyList(),
-
         val screenType: AddressScreenTypeUi,
         val addressSections: List<SectionUi<AddressUi>> = emptyList(),
         val selectedAddress: AddressUi = AddressUi.Empty,

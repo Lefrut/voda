@@ -147,8 +147,7 @@ class MainFragment : Fragment(R.layout.fragment_main) {
                 .collect { has ->
                     val insets = ViewCompat.getRootWindowInsets(binding.root)
                     val bottomPadding =
-                        insets?.getInsetsIgnoringVisibility(WindowInsetsCompat.Type.navigationBars())?.bottom
-                            ?: 0
+                        insets?.getInsetsIgnoringVisibility(WindowInsetsCompat.Type.navigationBars())?.bottom ?: 0
                     binding.root.updatePadding(bottom = if (has) bottomPadding else 0)
                 }
         }

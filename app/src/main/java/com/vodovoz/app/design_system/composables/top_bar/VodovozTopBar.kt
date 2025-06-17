@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.vodovoz.app.R
@@ -23,6 +24,7 @@ fun VodovozTopBar(
     onBack: () -> Unit,
     title: String,
     actionIconId: Int? = null,
+    actionIconTint: Color = MaterialTheme.colorScheme.onBackground,
     onActionClick: () -> Unit = {},
 ) {
     Row(
@@ -54,7 +56,7 @@ fun VodovozTopBar(
             ClickableIcon(
                 modifier = Modifier.clip(MaterialTheme.shapes.small),
                 iconId = actionIconId,
-                tint = MaterialTheme.colorScheme.onBackground,
+                tint = actionIconTint,
                 onClick = onActionClick
             )
         }

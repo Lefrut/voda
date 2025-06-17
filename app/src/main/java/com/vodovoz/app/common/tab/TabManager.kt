@@ -36,18 +36,11 @@ class TabManager @Inject constructor(
     private val tabAuthRedirectListener = MutableStateFlow<Int>(DEFAULT_AUTH_REDIRECT)
     fun fetchAuthRedirect() = tabAuthRedirectListener.value
 
-    private val addressesRefreshListener = MutableStateFlow(false)
-    fun observeAddressesRefresh() = addressesRefreshListener.asStateFlow()
-
     private val tabVisibilityListener = MutableStateFlow(true)
     fun observeTabVisibility() = tabVisibilityListener.asStateFlow()
 
     private val tabWindowInsetsListener = MutableStateFlow(false)
     fun observeTabWindowInsets() = tabWindowInsetsListener.asStateFlow()
-
-    fun setAddressesRefreshState(refresh: Boolean) {
-        addressesRefreshListener.value = refresh
-    }
 
     fun setAuthRedirect(graphId: Int) {
         tabAuthRedirectListener.value = graphId

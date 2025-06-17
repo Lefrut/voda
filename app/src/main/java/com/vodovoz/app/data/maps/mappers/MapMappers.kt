@@ -1,8 +1,11 @@
 package com.vodovoz.app.data.maps.mappers
 
 import com.vodovoz.app.data.maps.model.YandexGeoResponseDTO
-import com.vodovoz.app.domain.general.model.location.MapPointModel
 import com.vodovoz.app.domain.general.model.location.MapAddressModel
+import com.vodovoz.app.domain.general.model.location.MapPointModel
+import com.vodovoz.app.util.extensions.debugLog
+import com.yandex.mapkit.geometry.Point
+import com.yandex.mapkit.search.SuggestItem
 
 fun YandexGeoResponseDTO.toDomain(): MapAddressModel? {
 
@@ -14,8 +17,8 @@ fun YandexGeoResponseDTO.toDomain(): MapAddressModel? {
 
     return MapAddressModel(
         point = MapPointModel(
-            geo.first().toDouble(),
-            geo.last().toDouble()
+            geo.last().toDouble(),
+            geo.first().toDouble()
         ),
         name = address.formatted ?: "",
         city = byKind["locality"] ?: byKind["province"] ?: "",
@@ -23,4 +26,17 @@ fun YandexGeoResponseDTO.toDomain(): MapAddressModel? {
         street = byKind["street"] ?: "",
         house = byKind["house"] ?: ""
     )
+}
+
+
+fun List<SuggestItem>.mapToDomain(): List<String> {
+    return mapNotNull { suggestItem -> suggestItem.toDomain() }
+}
+
+fun SuggestItem.toDomain(): String? {
+    if (uri?.contains("geo") == false) return null
+    return displayText.toString().ifBlank { return null }}
+
+fun Point.toDomain(): MapPointModel {
+    return MapPointModel(latitude, longitude)
 }

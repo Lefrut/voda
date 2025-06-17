@@ -59,6 +59,7 @@ import com.vodovoz.app.data.vodovoz_service.model.unrated_products.UnratedProduc
 import com.vodovoz.app.data.vodovoz_service.model.user_data.UserDataDTO
 import okhttp3.MultipartBody
 import retrofit2.Response
+import retrofit2.http.Field
 import retrofit2.http.GET
 import retrofit2.http.Headers
 import retrofit2.http.Multipart
@@ -219,7 +220,7 @@ interface VodovozService {
     suspend fun addAddress(
         @Query("userid") userId: Long?,
         @Query("polnadres") address: String,
-        @Query("tip") type: String,
+        @Query("tip") type: Int,
         @Query("ktochka") geo: String? = null,
         @Query("city") city: String? = null,
         @Query("street") street: String? = null,
@@ -229,6 +230,7 @@ interface VodovozService {
         @Query("flat") flat: String? = null,
         @Query("floor") floor: String? = null,
         @Query("leghtkm") fromMoscowToAddressKm: String? = null,
+        @Query("propusk") needPass: String? = null
     ): Response<VodovozResponseDTO<Long>>
 
     @GET("oformlenie/address.php?action=update&iblock_id=102")
@@ -245,6 +247,7 @@ interface VodovozService {
         @Query("flat") flat: String? = null,
         @Query("floor") floor: String? = null,
         @Query("leghtkm") fromMoscowToAddressKm: String? = null,
+        @Query("propusk") needPass: String? = null
     ): Response<VodovozResponseDTO<Long>>
 
     @GET("oformlenie/address.php?action=del")

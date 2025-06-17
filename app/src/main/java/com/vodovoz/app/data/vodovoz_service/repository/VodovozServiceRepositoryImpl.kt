@@ -7,6 +7,7 @@ import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
 import com.vodovoz.app.common.account.AccountManager
 import com.vodovoz.app.common.cookie.CookieManager
+import com.vodovoz.app.common.model.VodovozAddressType
 import com.vodovoz.app.common.model.VodovozSiteState
 import com.vodovoz.app.core.network.retrofit.messageWithCode
 import com.vodovoz.app.core.network.retrofit.stringBody
@@ -55,6 +56,7 @@ import com.vodovoz.app.domain.general.model.certificate.BuyCertificateModel
 import com.vodovoz.app.domain.general.model.certificate.CertificateActivationDetailsModel
 import com.vodovoz.app.domain.general.model.format
 import com.vodovoz.app.domain.general.model.location.AddressModel
+import com.vodovoz.app.domain.general.model.location.MapAddressModel
 import com.vodovoz.app.domain.general.model.order.CancelOrderDetailsModel
 import com.vodovoz.app.domain.general.model.order.DeliveryDateDetailsModel
 import com.vodovoz.app.domain.general.model.order.OrderDetailsModel
@@ -123,6 +125,26 @@ class VodovozServiceRepositoryImpl @Inject constructor(
         return executeRequest(
             request = {
                 vodovozService.deleteAddress(addressId, accountManager.fetchAccountId())
+            },
+            mapper = {
+                it.data!!
+            }
+        )
+    }
+
+    override fun addAddress(address: MapAddressModel): Flow<Result<Long>> {
+        return executeRequest(
+            request = {
+                val point = address.point
+                vodovozService.addAddress(
+                    userId = accountManager.fetchAccountId(),
+                    address = address.name,
+                    type = VodovozAddressType.Personal.value,
+                    geo = "${point.lat},${point.lon}",
+                    city = address.city,
+                    street = address.street,
+                    house = address.house,
+                )
             },
             mapper = {
                 it.data!!

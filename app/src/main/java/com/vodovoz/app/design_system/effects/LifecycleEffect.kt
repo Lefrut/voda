@@ -18,18 +18,17 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 
-@NonRestartableComposable
+@Suppress("NonSkippableComposable")
 @Composable
 fun LifecycleEffect(
     vararg keys: Any?,
     block: suspend CoroutineScope.() -> Unit,
 ) {
-    val currentBlock by rememberUpdatedState(block)
     val coroutineScope = rememberCoroutineScope()
 
     LifecycleStartEffect(*keys) {
         val job = coroutineScope.launch {
-            currentBlock()
+            block()
         }
         onStopOrDispose {
             job.cancel()

@@ -88,7 +88,6 @@ class AddressesFragment1 : BaseFragment() {
         initAddAddressButton()
         observeUiState()
         observeEvents()
-        observeRefresh()
     }
 
     override fun onStart() {
@@ -103,21 +102,6 @@ class AddressesFragment1 : BaseFragment() {
         super.onStop()
     }
 
-    private fun observeRefresh() {
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                tabManager
-                    .observeAddressesRefresh()
-                    .collect {
-                        if (it) {
-                            viewModel.refresh()
-                            tabManager.setAddressesRefreshState(false)
-                        }
-                    }
-            }
-        }
-    }
-
     private fun observeUiState() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -127,10 +111,6 @@ class AddressesFragment1 : BaseFragment() {
                             showLoader()
                         } else {
                             hideLoader()
-                        }
-
-                        if (state.data.fullList.isNotEmpty()) {
-                            addressesController.submitList(state.data.fullList)
                         }
 
                     }
@@ -144,18 +124,18 @@ class AddressesFragment1 : BaseFragment() {
                 viewModel.observeEvent()
                     .collect {
                         when (it) {
-                            is AddressesFlowViewModel.AddressesEvents.DeleteEvent -> {
-                                requireActivity().snack(it.message)
-                            }
-                            is AddressesFlowViewModel.AddressesEvents.OnAddressClick -> {
-                                findNavController().previousBackStackEntry?.savedStateHandle?.set(
-                                    SELECTED_ADDRESS, it.address
-                                )
-                                findNavController().popBackStack(R.id.orderingFragment, false)
-                            }
-                            is AddressesFlowViewModel.AddressesEvents.UpdateAddress -> {
-                                mapController.searchForUpdate(it.address)
-                            }
+//                            is AddressesFlowViewModel.AddressesEvents.DeleteEvent -> {
+//                                requireActivity().snack(it.message)
+//                            }
+//                            is AddressesFlowViewModel.AddressesEvents.OnAddressClick -> {
+//                                findNavController().previousBackStackEntry?.savedStateHandle?.set(
+//                                    SELECTED_ADDRESS, it.address
+//                                )
+//                                findNavController().popBackStack(R.id.orderingFragment, false)
+//                            }
+//                            is AddressesFlowViewModel.AddressesEvents.UpdateAddress -> {
+//                                mapController.searchForUpdate(it.address)
+//                            }
                             else -> {
 
                             }
@@ -190,7 +170,6 @@ class AddressesFragment1 : BaseFragment() {
     private fun getAddressesClickListener(): AddressesClickListener {
         return object : AddressesClickListener {
             override fun onAddressClick(item: AddressUI) {
-                viewModel.onAddressClick(item)
             }
 
             override fun onEditClick(item: AddressUI) {
@@ -220,7 +199,6 @@ class AddressesFragment1 : BaseFragment() {
                 dialog.cancel()
             }
             .setPositiveButton(resources.getString(R.string.confirm)) { dialog, _ ->
-                viewModel.deleteAddress(addressId)
                 dialog.cancel()
             }
             .show()

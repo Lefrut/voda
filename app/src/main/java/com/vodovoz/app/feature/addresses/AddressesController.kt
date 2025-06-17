@@ -40,7 +40,6 @@ class AddressesController(
 
     private fun bindRefresh(refresh: SwipeRefreshLayout) {
         refresh.setOnRefreshListener {
-            viewModel.refresh()
             refresh.isRefreshing = false
         }
     }
@@ -57,7 +56,6 @@ class AddressesController(
                 dialog.cancel()
             }
             .setPositiveButton(context.resources.getString(R.string.confirm)) { dialog, _ ->
-                viewModel.deleteAddress(addressId)
                 dialog.cancel()
             }
             .show()

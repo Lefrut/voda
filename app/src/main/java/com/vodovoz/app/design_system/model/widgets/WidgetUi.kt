@@ -1,8 +1,8 @@
 package com.vodovoz.app.design_system.model.widgets
 
-import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.Stable
 
-@Immutable
+@Stable
 sealed class WidgetUi(open val id: String)
 
 interface WidgetUpdater {

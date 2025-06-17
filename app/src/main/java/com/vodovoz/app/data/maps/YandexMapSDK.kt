@@ -6,6 +6,6 @@ interface YandexMapSDK {
 
     suspend fun getSuggestsInMoscow(query: String): List<SuggestItem>
 
-    suspend fun searchAddress(address: String): YandexSearchResponse
+    suspend fun searchAddressInMoscow(address: String): YandexSearchResponse
 
 }

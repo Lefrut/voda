@@ -1,15 +1,9 @@
 package com.vodovoz.app.feature.map
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.FastOutLinearInEasing
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.LinearOutSlowInEasing
-import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.gestures.AnchoredDraggableState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,12 +13,10 @@ import androidx.compose.foundation.layout.statusBars
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SheetValue
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
+import com.vodovoz.app.R
+import com.vodovoz.app.design_system.composables.dialogs.VodovozDialog
 import com.vodovoz.app.design_system.modifiers.lifecycleWindowInsets
 import com.vodovoz.app.feature.map.composables.MapBody
 import com.vodovoz.app.feature.map.composables.MapSearchList
@@ -40,6 +32,21 @@ fun MapScreen(
     anchoredDraggableState: AnchoredDraggableState<SheetValue>,
 ) {
 
+    if (viewState.showSettingsDialog) {
+        VodovozDialog(
+            title = stringResource(R.string.location_permission_title),
+            description = stringResource(R.string.location_permission_description),
+            acceptButtonText = stringResource(R.string.location_permission_accept),
+            cancelButtonText = stringResource(R.string.location_permission_cancel),
+            onDismiss = {
+                viewModel.closeSettingsDialog()
+            },
+            onAccept = {
+                viewModel.navigateToLocationSettings()
+            }
+        )
+
+    }
 
     Column(
         modifier = Modifier
@@ -55,15 +62,21 @@ fun MapScreen(
             },
             onBackClick = {
                 viewModel.navigateBack()
+            },
+            onClearClick = {
+                viewModel.changeQuery("")
             }
         )
 
         Box {
             MapBody(
                 anchoredDraggableState = anchoredDraggableState,
-                addressName = viewState.address?.name ?: "",
+                addressName = viewState.currentAddress?.name ?: "",
                 addressIsLoading = viewState.addressIsLoading,
+                addressIsError = viewState.addressIsError,
+                screenType = viewState.screenType,
                 yandexMap = yandexMap,
+                buttonIsLoading = viewState.buttonIsLoading,
                 onInputStart = {
                     viewModel.hideAddressBottomSheet()
                 },
@@ -71,32 +84,35 @@ fun MapScreen(
                     viewModel.showAddressBottomSheet()
                 },
                 onGeoClick = {
-                    viewModel.moveToUserGeo()
+                    viewModel.checkGeo()
                 },
                 onCenterChanged = { point ->
-                    viewModel.changeMarkerPoint(point)
+                    viewModel.searchAddress(point)
                 },
                 onZoomPlusClick = {
                     viewModel.plusZoom()
                 },
                 onZoomMinusClick = {
                     viewModel.minusZoom()
+                },
+                onBottomSheetButtonClick = {
+                    viewModel.navigateToAddAddress()
                 }
             )
 
             Column(modifier = Modifier.fillMaxSize()) {
                 AnimatedVisibility(
-                    visible = viewState.mode == MapFlowViewModel.MapUiMode.Search,
-                    enter = slideInVertically(
-                        initialOffsetY = { fullHeight -> -fullHeight },
-                        animationSpec = tween(durationMillis = 150, easing = LinearOutSlowInEasing)
-                    ) + fadeIn(),
-                    exit = slideOutVertically(
-                        targetOffsetY = { fullHeight -> -fullHeight },
-                        animationSpec = tween(durationMillis = 250, easing = FastOutLinearInEasing)
-                    ) + fadeOut()
+                    modifier = Modifier.fillMaxSize(),
+                    visible = viewState.mode == MapFlowViewModel.MapUiMode.Search && viewState.query.isNotBlank() && viewState.recommendedAddresses.isNotEmpty(),
+                    enter = fadeIn(tween(150)),
+                    exit = fadeOut(tween(120))
                 ) {
-                    MapSearchList()
+                    MapSearchList(
+                        recommendedAddresses = viewState.recommendedAddresses,
+                        onAddressClick = { addressName ->
+                            viewModel.searchAddress(addressName)
+                        }
+                    )
                 }
             }
         }

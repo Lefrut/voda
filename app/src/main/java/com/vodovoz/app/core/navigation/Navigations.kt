@@ -14,6 +14,7 @@ import com.vodovoz.app.design_system.model.ProductMediaUi
 import com.vodovoz.app.design_system.model.filters.FilterUi
 import com.vodovoz.app.design_system.model.filters.FiltersUi
 import com.vodovoz.app.feature.addresses.model.AddressScreenTypeUi
+import com.vodovoz.app.feature.addresses.model.AddressUi
 import com.vodovoz.app.feature.all.promotions.AllPromotionsFragment
 import com.vodovoz.app.feature.buy_certificate.model.FAQUi
 import com.vodovoz.app.feature.cart.model.CartPresentPopupWindowUi
@@ -32,10 +33,18 @@ fun NavOptionsBuilder.slideAnim() {
     }
 }
 
-fun NavController.navigateToMap() {
+fun NavController.navigateToAddAddress(addressId: Long) {
+    navigate(
+        R.id.addAddressFragment,
+        bundleOf("addressId" to addressId),
+        navOptions {}
+    )
+}
+
+fun NavController.navigateToMap(address: AddressUi?) {
     navigate(
         R.id.mapFragment,
-        Bundle.EMPTY,
+        bundleOf("address" to address),
         navOptions {
             slideAnim()
         }

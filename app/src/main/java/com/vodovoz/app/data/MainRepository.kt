@@ -26,6 +26,17 @@ class MainRepository @Inject constructor(
         action = "tochkakarta"
     ).parseDeliveryZonesBundleResponse()
 
+    //Адрес по координатам
+    suspend fun fetchAddressByGeocodeResponse(
+        latitude: Double,
+        longitude: Double,
+    ) = mapKitApi.getAddressByGeo(
+        apiKey = "346ef353-b4b2-44b3-b597-210d62eeb66b",
+        geocode = "$longitude,$latitude",
+        format = "json"
+    ).parseAddressByGeocodeResponse()
+
+
     /**
      * Addresses
      */

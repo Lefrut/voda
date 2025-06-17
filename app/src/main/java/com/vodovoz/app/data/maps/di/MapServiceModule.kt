@@ -4,11 +4,10 @@ import com.vodovoz.app.core.network.ApiConfig
 import com.vodovoz.app.core.network.retrofit.NoOpCallAdapterFactory
 import com.vodovoz.app.core.network.retrofit.NoOpConverterFactory
 import com.vodovoz.app.data.maps.YandexMapAPI
+import com.vodovoz.app.data.maps.YandexMapSDK
+import com.vodovoz.app.data.maps.YandexMapSDKImpl
 import com.vodovoz.app.data.maps.repository.MapServiceRepositoryImpl
-import com.vodovoz.app.data.vodovoz_service.VodovozService
-import com.vodovoz.app.data.vodovoz_service.repository.VodovozServiceRepositoryImpl
 import com.vodovoz.app.domain.general.respository.MapServiceRepository
-import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -26,8 +25,12 @@ abstract class MapServiceModule {
     @Singleton
     abstract fun bindMapServiceRepository(mapServiceRepository: MapServiceRepositoryImpl): MapServiceRepository
 
+    @Binds
+    @Singleton
+    abstract fun bindYandexMapSDK(yandexMapSDK: YandexMapSDKImpl): YandexMapSDK
 
-    companion object{
+
+    companion object {
         @Provides
         @Singleton
         @Named("yandex_map")
@@ -45,8 +48,6 @@ abstract class MapServiceModule {
             return retrofit.create(YandexMapAPI::class.java)
         }
     }
-
-
 
 
 }

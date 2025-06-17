@@ -205,8 +205,6 @@ class TraceOrderFragment : Fragment() {
 
                                 is TraceOrderViewModel.TraceOrderEvents.MoveToDeliveryGeo -> {
 
-                                    //todo - need tests focus rect
-
                                     val bounds = calculateBounds(
                                         event.finishPoint?.toPoint() ?: return@collect,
                                         event.driverPoint?.toPoint() ?: return@collect

@@ -2,6 +2,7 @@ package com.vodovoz.app.feature.map.model
 
 import androidx.compose.runtime.Immutable
 import com.vodovoz.app.design_system.model.MapPointUi
+import com.vodovoz.app.design_system.model.toDomain
 import com.vodovoz.app.design_system.model.toUi
 import com.vodovoz.app.domain.general.model.location.MapAddressModel
 
@@ -12,7 +13,11 @@ data class MapAddressUi(
     val street: String,
     val house: String,
     val point: MapPointUi,
-)
+) {
+    companion object {
+        val Empty = MapAddressUi("", "", "", "", MapPointUi.Empty)
+    }
+}
 
 fun MapAddressModel.toUi(): MapAddressUi {
     return MapAddressUi(
@@ -23,3 +28,22 @@ fun MapAddressModel.toUi(): MapAddressUi {
         house = house
     )
 }
+
+fun MapAddressUi.toDomain(): MapAddressModel {
+    return MapAddressModel(
+        point = point.toDomain(),
+        name = name,
+        city = city,
+        street = street,
+        house = house
+    )
+}
+
+
+fun List<MapAddressModel>.mapToUi(): List<MapAddressUi> {
+    return mapNotNull { address ->
+        address.toUi()
+    }
+}
+
+
