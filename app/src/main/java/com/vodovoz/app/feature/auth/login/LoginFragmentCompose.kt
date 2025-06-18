@@ -151,7 +151,7 @@ class LoginFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        //todo - mb do something
+        //todo - mb uncomment checkShowFingerPrint()
         //checkShowFingerPrint()
     }
 

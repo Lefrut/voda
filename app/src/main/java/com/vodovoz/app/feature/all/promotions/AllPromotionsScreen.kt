@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.vodovoz.app.R
+import com.vodovoz.app.design_system.composables.placeholders.NetworkErrorPlaceholder
 import com.vodovoz.app.design_system.composables.top_bar.VodovozTopBar
 import com.vodovoz.app.feature.all.promotions.composables.AdvertisingInfoBottomSheet
 import com.vodovoz.app.feature.all.promotions.composables.AllPromotionsBody
@@ -27,7 +28,6 @@ fun AllPromotionsScreen(
     viewState: AllPromotionsFlowViewModel.AllPromotionsState,
     lazyListState: LazyListState,
 ) {
-    val lazyPagingPromotions = viewState.pagedPromotions.collectAsLazyPagingItems()
 
     Column(
         modifier = Modifier
@@ -37,11 +37,15 @@ fun AllPromotionsScreen(
     ) {
         VodovozTopBar(
             onBack = { viewModel.navigateBack() },
-            title = viewState.title.ifEmpty { stringResource(id = R.string.promotions) }
+            title = viewState.title
         )
 
         when (viewState.uiState) {
-            AllPromotionsFlowViewModel.UiState.Error -> {}
+            AllPromotionsFlowViewModel.UiState.Error -> {
+                NetworkErrorPlaceholder {
+                    viewModel.fetchPromotions()
+                }
+            }
             AllPromotionsFlowViewModel.UiState.Loading -> {
                 PromotionsLoadingPlaceholder()
             }
@@ -50,8 +54,9 @@ fun AllPromotionsScreen(
                 AllPromotionsBody(
                     categories = viewState.categories,
                     currentCategory = viewState.currentCategory,
-                    lazyPagingPromotions = lazyPagingPromotions,
+                    promotions = viewState.promotions,
                     lazyListState = lazyListState,
+                    appendState = viewState.appendState,
                     onSectionSelect = { section ->
                         viewModel.selectSection(section)
                     },

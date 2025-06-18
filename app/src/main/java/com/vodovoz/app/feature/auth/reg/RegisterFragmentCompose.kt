@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.core.os.bundleOf
@@ -67,7 +68,7 @@ class RegisterFragment : Fragment() {
             setContent {
                 VodovozTheme {
                     val pagingState by viewModel.observeUiState().collectAsStateWithLifecycle()
-                    val viewState = pagingState.data
+                    val viewState by rememberUpdatedState(pagingState.data)
                     val snackbarHostState = remember { SnackbarHostState() }
 
                     RegisterScreen(

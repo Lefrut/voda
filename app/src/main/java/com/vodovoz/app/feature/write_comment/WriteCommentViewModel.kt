@@ -83,7 +83,7 @@ class WriteCommentViewModel @Inject constructor(
     }
 
     fun writeComment() = viewModelScope.launch {
-
+        //todo - need back realization
     }
 
     fun changeComment(field: FieldUi) = viewModelScope.launch {

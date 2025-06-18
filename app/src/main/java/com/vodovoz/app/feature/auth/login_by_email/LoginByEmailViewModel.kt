@@ -36,7 +36,7 @@ class LoginByEmailViewModel @Inject constructor(
     private val siteStateManager: SiteStateManager,
     private val accountManager: AccountManager,
     private val resourcesProvider: ResourcesProvider,
-    private val loginManager: LoginManager
+    private val loginManager: LoginManager,
 ) : MviViewModel<LoginByEmailState, LoginByEmailEvent>(LoginByEmailState()) {
 
     companion object {
@@ -131,16 +131,9 @@ class LoginByEmailViewModel @Inject constructor(
 
         val loginByEmailResult = vodovozServiceRepository.getLoginByEmailDetails().singleResult()
 
-        siteStateManager.requestSiteState()
 
         loginByEmailResult.onSuccess { loginDetails ->
-
-            if (!siteStateManager.smsEnabled()) {
-                _state.update { s ->
-                    s.copy(uiState = LoginByEmailUiState.Error)
-                }
-                return@launch
-            }
+            val siteState = siteStateManager.siteStateSnapshot
 
             val buttons = loginDetails.buttons.map { colorfulButtonModel ->
                 colorfulButtonModel.toUi()
@@ -150,8 +143,11 @@ class LoginByEmailViewModel @Inject constructor(
                 s.copy(
                     description = loginDetails.description,
                     title = loginDetails.title,
-                    buttons = buttons.updateButton(LOGIN_BY_EMAIL_BUTTON) { btn ->
-                        btn.copy(enabled = false)
+                    buttons = buildList {
+                        addAll(buttons)
+                        if (siteState?.isSmsEnabled == true) {
+                            removeIf { btn -> btn.id == NAVIGATION_BUTTON }
+                        }
                     },
                     fields = loginDetails.fields.mapToUi(),
                     uiState = LoginByEmailUiState.Success,

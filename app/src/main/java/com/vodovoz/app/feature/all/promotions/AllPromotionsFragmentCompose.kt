@@ -6,7 +6,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
@@ -15,7 +17,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.fragment.findNavController
 import com.vodovoz.app.core.navigation.navigateToPromotionDetails
 import com.vodovoz.app.design_system.VodovozTheme
-import com.vodovoz.app.design_system.composables.placeholders.NetworkErrorPlaceholder
 import com.vodovoz.app.design_system.effects.LifecycleEffect
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.parcelize.Parcelize
@@ -35,22 +36,17 @@ class AllPromotionsFragment : Fragment() {
 
             setContent {
                 VodovozTheme {
-                    val viewState by viewModel.observeUiState().collectAsStateWithLifecycle()
+                    val pagingState by viewModel.observeUiState().collectAsStateWithLifecycle()
+                    val viewState by rememberUpdatedState(pagingState.data)
+
                     val lazyListState = rememberLazyListState()
 
-                    when (viewState.data.uiState) {
-                        AllPromotionsFlowViewModel.UiState.Error -> {
-                            NetworkErrorPlaceholder { viewModel.fetchPromotions() }
-                        }
 
-                        else -> {
-                            AllPromotionsScreen(
-                                viewModel = viewModel,
-                                viewState = viewState.data,
-                                lazyListState = lazyListState
-                            )
-                        }
-                    }
+                    AllPromotionsScreen(
+                        viewModel = viewModel,
+                        viewState = viewState,
+                        lazyListState = lazyListState
+                    )
 
                     LifecycleEffect {
                         viewModel.observeEvent().collect { event ->
@@ -71,12 +67,14 @@ class AllPromotionsFragment : Fragment() {
                         }
                     }
 
-
                 }
+
+
             }
         }
     }
 
+    @Stable
     sealed class DataSource : Parcelable {
         @Parcelize
         class ByBanner(val bannerId: Long, val blockId: Long) : DataSource()
@@ -84,5 +82,6 @@ class AllPromotionsFragment : Fragment() {
         @Parcelize
         data object All : DataSource()
     }
-
 }
+
+
