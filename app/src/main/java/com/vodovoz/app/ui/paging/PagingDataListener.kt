@@ -22,6 +22,7 @@ class PagingDataListener<T : Any>(
     }
 
 
+
     operator fun get(index: Int): T? = kotlin.runCatching { pagingDataPresenter[index] }.getOrNull()
 
     suspend fun collectPagingData(pagingData: PagingData<T>) {

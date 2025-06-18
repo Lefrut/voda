@@ -3,15 +3,10 @@ package com.vodovoz.app.feature.profile
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.viewModelScope
-import com.vodovoz.app.common.account.AccountManager
-import com.vodovoz.app.common.cart.CartManager
 import com.vodovoz.app.common.content.Event
 import com.vodovoz.app.common.content.PagingContractViewModel
 import com.vodovoz.app.common.content.State
 import com.vodovoz.app.common.content.updateData
-import com.vodovoz.app.common.cookie.CookieManager
-import com.vodovoz.app.common.tab.TabManager
-import com.vodovoz.app.data.MainRepository
 import com.vodovoz.app.design_system.model.AboutAdvertisingUi
 import com.vodovoz.app.design_system.model.BannerUi
 import com.vodovoz.app.design_system.model.VodovozPlaceholderUi
@@ -29,7 +24,6 @@ import com.vodovoz.app.feature.profile.model.ProfilePopupWindowUi
 import com.vodovoz.app.feature.profile.model.UserInfoBlockUi
 import com.vodovoz.app.feature.profile.model.mapToUi
 import com.vodovoz.app.feature.profile.model.toUi
-import com.vodovoz.app.feature.profile.waterapp.WaterAppHelper
 import com.vodovoz.app.feature.sitestate.SiteStateManager
 import com.vodovoz.app.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -102,7 +96,7 @@ class ProfileFlowViewModel @Inject constructor(
 
     fun navigateToLoginOrRegister() = viewModelScope.launch {
         if (!siteStateManager.smsEnabled()) {
-            eventListener.emit(ProfileEvents.GoToRegister)
+            eventListener.emit(ProfileEvents.GoToLoginByEmail)
         } else {
             eventListener.emit(ProfileEvents.GoToLogin)
         }
@@ -242,7 +236,7 @@ class ProfileFlowViewModel @Inject constructor(
     sealed class ProfileEvents : Event {
         data object GoToLogin : ProfileEvents()
         data object GoToUserData : ProfileEvents()
-        data object GoToRegister : ProfileEvents()
+        data object GoToLoginByEmail : ProfileEvents()
         data object GoToWaterApp : ProfileEvents()
         data object GoToWaitFeedbackProducts : ProfileEvents()
 

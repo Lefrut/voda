@@ -38,9 +38,6 @@ class LoginByEmailFragment : Fragment() {
     @Inject
     lateinit var tabManager: TabManager
 
-    @Inject
-    lateinit var accountManager: AccountManager
-
     private val viewModel: LoginByEmailViewModel by viewModels()
     private val profileViewModel: ProfileFlowViewModel by activityViewModels()
     private val homeViewModel: HomeFlowViewModel by activityViewModels()

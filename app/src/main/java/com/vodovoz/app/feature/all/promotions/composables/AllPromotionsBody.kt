@@ -13,7 +13,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
-import androidx.paging.compose.LazyPagingItems
 import com.valentinilk.shimmer.ShimmerBounds
 import com.valentinilk.shimmer.rememberShimmer
 import com.vodovoz.app.design_system.composables.chip.VodovozChip
@@ -29,7 +28,8 @@ fun AllPromotionsBody(
     modifier: Modifier = Modifier,
     categories: List<PromotionCategoryUi>,
     currentCategory: PromotionCategoryUi,
-    lazyPagingPromotions: LazyPagingItems<PromotionUi>,
+    promotions: List<PromotionUi>,
+    appendState: LoadState,
     lazyListState: LazyListState,
     onSectionSelect: (PromotionCategoryUi) -> Unit,
     onAdvertisingClick: (PromotionUi) -> Unit,
@@ -62,8 +62,6 @@ fun AllPromotionsBody(
         }
 
 
-        val refreshState = lazyPagingPromotions.loadState.refresh
-        val appendState = lazyPagingPromotions.loadState.append
         val shimmerState = rememberShimmer(shimmerBounds = ShimmerBounds.View)
 
         LazyColumn(
@@ -72,17 +70,15 @@ fun AllPromotionsBody(
             state = lazyListState
         ) {
 
-            when (refreshState) {
-                is LoadState.NotLoading -> {
-                    items(count = lazyPagingPromotions.itemCount) { i ->
-                        val promotion = lazyPagingPromotions[i]
-                        if (promotion != null) {
-                            PromotionCard(
-                                promotion = promotion,
-                                onClick = onPromotionClick,
-                                onAdvertisingClick = onAdvertisingClick
-                            )
-                        }
+            when {
+                promotions.isNotEmpty() -> {
+                    items(count = promotions.size) { i ->
+                        val promotion = promotions[i]
+                        PromotionCard(
+                            promotion = promotion,
+                            onClick = onPromotionClick,
+                            onAdvertisingClick = onAdvertisingClick
+                        )
                     }
                 }
 

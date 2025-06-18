@@ -29,11 +29,11 @@ import com.vodovoz.app.R
 import com.vodovoz.app.common.tab.TabManager
 import com.vodovoz.app.core.navigation.ProfileMainNavigator
 import com.vodovoz.app.core.navigation.navigateToLogin
-import com.vodovoz.app.core.navigation.navigateToRegister
 import com.vodovoz.app.core.navigation.navigateToUserData
 import com.vodovoz.app.core.navigation.navigateToWaitFeedbackProducts
 import com.vodovoz.app.core.navigation.navigateToWaterApp
 import com.vodovoz.app.core.navigation.activate
+import com.vodovoz.app.core.navigation.navigateToLoginByEmail
 import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.composables.placeholders.LoadingPlaceholder
 import com.vodovoz.app.design_system.composables.placeholders.NetworkErrorPlaceholder
@@ -155,8 +155,8 @@ class ProfileFragment : Fragment() {
                             )
                         }
 
-                        ProfileFlowViewModel.ProfileEvents.GoToRegister -> {
-                            findNavController().navigateToRegister()
+                        ProfileFlowViewModel.ProfileEvents.GoToLoginByEmail -> {
+                            findNavController().navigateToLoginByEmail()
                         }
 
                         is ProfileFlowViewModel.ProfileEvents.Copy -> {
