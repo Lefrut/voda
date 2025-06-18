@@ -23,7 +23,7 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class ProductsCollectionFragment : Fragment() {
 
-    private val viewModel: ProductsCollectionViewModel by viewModels()
+    private val viewModel: ProductAnalogsViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

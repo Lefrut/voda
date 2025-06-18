@@ -55,6 +55,7 @@ import com.vodovoz.app.domain.general.model.certificate.BuyCertificateDetailsMod
 import com.vodovoz.app.domain.general.model.certificate.BuyCertificateModel
 import com.vodovoz.app.domain.general.model.certificate.CertificateActivationDetailsModel
 import com.vodovoz.app.domain.general.model.format
+import com.vodovoz.app.domain.general.model.location.AddressDetailsModel
 import com.vodovoz.app.domain.general.model.location.AddressModel
 import com.vodovoz.app.domain.general.model.location.MapAddressModel
 import com.vodovoz.app.domain.general.model.order.CancelOrderDetailsModel
@@ -152,6 +153,31 @@ class VodovozServiceRepositoryImpl @Inject constructor(
         )
     }
 
+    override fun updateAddress(address: AddressDetailsModel): Flow<Result<Long>> {
+        return executeRequest(
+            request = {
+                vodovozService.updateAddress(
+                    userId = accountManager.fetchAccountId(),
+                    addressId = address.id,
+                    address = address.name,
+                    type = VodovozAddressType.Personal.value,
+                    geo = "${address.lat},${address.lon}",
+                    city = address.city,
+                    street = address.street,
+                    house = address.house,
+                    intercom = address.intercom,
+                    entrance = address.entrance,
+                    flat = address.flat,
+                    floor = address.floor,
+                    needPass = address.needPass.value
+                )
+            },
+            mapper = {
+                it.data!!
+            }
+        )
+    }
+
     override fun getPaymentMethodDetails(
         addressId: Int,
         date: LocalDate,
@@ -177,9 +203,9 @@ class VodovozServiceRepositoryImpl @Inject constructor(
         return executeRequest(
             request = {
                 vodovozService.getDeliveryDateDetails(
-                    accountManager.fetchAccountId(),
-                    addressId,
-                    date?.format(VodovozDateFormatters.DMY)
+                    userId = accountManager.fetchAccountId(),
+                    addressId = addressId,
+                    date = date?.format(VodovozDateFormatters.DMY)
                 )
             },
             mapper = {
@@ -668,7 +694,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
                     clazz = ProductsSectionDTO::class,
                     request = { page, _ ->
                         vodovozService.getPastPurchasesDetails(
-                            userId = 1, //todo - change
+                            userId = accountId,
                             page = page,
                             sort = sort.value,
                             order = sort.order,

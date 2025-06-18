@@ -29,14 +29,12 @@ import javax.inject.Inject
 
 @HiltViewModel
 class AllBrandsFlowViewModel @Inject constructor(
-    savedState: SavedStateHandle,
     private val accountManager: AccountManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
 ) : PagingContractViewModel<AllBrandsFlowViewModel.AllBrandsState, AllBrandsFlowViewModel.AllBrandsEvents>(
     AllBrandsState()
 ) {
 
-    private var dataSource= savedState.get<LongArray>("brandIdList")
 
     private fun fetchBrands() = viewModelScope.launch {
 
@@ -56,7 +54,6 @@ class AllBrandsFlowViewModel @Inject constructor(
                     )
                 }
             }.onFailure {
-                //todo - fix this logic
                 navigateBack()
             }
 
@@ -74,13 +71,6 @@ class AllBrandsFlowViewModel @Inject constructor(
         }
     }
 
-    fun refreshSorted() {
-        uiStateListener.value =
-            state.copy(loadingPage = true, page = 1, loadMore = false, bottomItem = null)
-        fetchBrands()
-    }
-
-    fun isLoginAlready() = accountManager.isAlreadyLogin()
 
     fun changeSearchMode(searchMode: Boolean) = viewModelScope.launch {
         if (!searchMode) searchQueriesStateFlow.value = ""

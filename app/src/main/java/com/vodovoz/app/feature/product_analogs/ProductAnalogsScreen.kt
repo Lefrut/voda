@@ -18,10 +18,9 @@ import com.vodovoz.app.feature.product_analogs.composables.ProductsCollectionPla
 import com.vodovoz.app.feature.product_analogs.model.ProductAnalogsState
 import com.vodovoz.app.feature.product_analogs.model.ProductAnalogsUiState
 
-@Suppress("NonSkippableComposable")
 @Composable
 fun ProductAnalogsScreen(
-    viewModel: ProductsCollectionViewModel,
+    viewModel: ProductAnalogsViewModel,
     viewState: ProductAnalogsState,
 ) {
     val productsSection = viewState.productsSection

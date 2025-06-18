@@ -143,10 +143,6 @@ class MapFragment1 : BaseFragment() {
                 .collect { it ->
                     when (it) {
                         is MapFlowViewModel.MapFlowEvents.ShowAddAddressBottomDialog -> {
-                            //todo - uncomment and fix graph
-//                            findNavController().navigate(
-//                                MapDialogFragmentDirections.actionToAddAddressFragment(it.address)
-//                            )
                         }
                         is MapFlowViewModel.MapFlowEvents.Submit -> {
                             it.list.forEach { point ->

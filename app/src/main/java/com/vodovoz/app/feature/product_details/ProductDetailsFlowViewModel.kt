@@ -319,7 +319,14 @@ class ProductDetailsFlowViewModel @Inject constructor(
     }
 
     fun showAllComments() = viewModelScope.launch {
-        eventListener.emit(ProductDetailsEvents.GoToProductComments(state.productDetails.id))
+        val productDetails = state.productDetails
+        eventListener.emit(
+            ProductDetailsEvents.GoToProductComments(
+                productDetails.id,
+                productDetails.name,
+                productDetails.detailPicture
+            )
+        )
     }
 
     fun navigateToProductAnalogs() = viewModelScope.launch {
@@ -484,7 +491,12 @@ class ProductDetailsFlowViewModel @Inject constructor(
         data object GoBack : ProductDetailsEvents()
         data class Share(val text: String) : ProductDetailsEvents()
 
-        data class GoToProductComments(val productId: Long) : ProductDetailsEvents()
+        data class GoToProductComments(
+            val productId: Long,
+            val productName: String,
+            val productImage: String,
+        ) : ProductDetailsEvents()
+
         data class GoToProductAnalogs(val productId: Long) : ProductDetailsEvents()
         data class GoToSearch(val query: String) : ProductDetailsEvents()
         data class GoToProductDetails(val productId: Long) : ProductDetailsEvents()

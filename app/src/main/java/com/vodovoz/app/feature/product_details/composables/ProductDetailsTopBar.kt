@@ -93,8 +93,8 @@ fun ProductDetailsTopBar(
 private fun ProductDetailTopBarPreview() {
     VodovozTheme {
         ProductDetailsTopBar(
-            onNavigationClick = { /*TODO*/ },
-            onLikeClick = { /*TODO*/ },
+            onNavigationClick = { },
+            onLikeClick = { },
             isFavoriteProduct = true,
             onShareClick = {},
             isLoading = true

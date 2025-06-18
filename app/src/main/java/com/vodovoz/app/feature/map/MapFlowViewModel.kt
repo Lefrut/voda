@@ -681,10 +681,15 @@ class MapFlowViewModel @Inject constructor(
             s.copy(buttonIsLoading = true)
         }
 
-        val addressId = selectedAddress?.id ?: dataState.currentAddress?.let { address ->
-            vodovozServiceRepository.addAddress(address.toDomain()).singleResult().onFailure { throwable ->
+        val currentAddress = dataState.currentAddress
 
-            }.getOrNull()
+        val addressId = selectedAddress?.id?.let { selectedAddressId ->
+            if(selectedAddress.address != currentAddress?.name){
+                //vodovozServiceRepository.updateAddress()
+            }
+            selectedAddressId
+        } ?: dataState.currentAddress?.let { address ->
+            vodovozServiceRepository.addAddress(address.toDomain()).singleResult().getOrNull()
         }
 
         addressId?.let {
@@ -695,6 +700,12 @@ class MapFlowViewModel @Inject constructor(
             s.copy(buttonIsLoading = false)
         }
 
+    }
+
+    fun changeScreenTypeToEdit() {
+        uiStateListener.updateData { s ->
+            s.copy(screenType = MapScreenTypeUi.Edit)
+        }
     }
 
     data class SavedPolylineData(

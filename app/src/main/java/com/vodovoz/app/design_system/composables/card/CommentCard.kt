@@ -87,6 +87,7 @@ fun CommentCard(
                     style = MaterialTheme.typography.labelSmall
                 )
 
+                /**Likes and dislikes*/
 //                Icon(
 //                    painter = painterResource(id = R.drawable.ic_dislike),
 //                    contentDescription = null,
@@ -96,7 +97,7 @@ fun CommentCard(
 //                    tint = MaterialTheme.colorScheme.surfaceTint
 //                )
 //
-//                //todo dislikes
+//
 //                Text(
 //                    modifier = Modifier.padding(start = 4.dp),
 //                    text = "0",
@@ -114,7 +115,7 @@ fun CommentCard(
 //                    tint = MaterialTheme.colorScheme.surfaceTint
 //
 //                )
-//                //todo likes
+//
 //                Text(
 //                    modifier = Modifier.padding(start = 4.dp),
 //                    text = "0",

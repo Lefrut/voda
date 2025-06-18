@@ -170,7 +170,7 @@ fun UnratedProductsBottomSheet(
                             products = sectionUnratedProducts.products,
                             onProductRatingChanged = onProductRatingChanged,
                             onNoRateProductClick = {
-                                //TODO
+                                //todo - no rate product
                             },
                             onClose = {
                                 onDispose()

@@ -376,5 +376,12 @@
 
     <string name="error_invalid_address">Некорректный адрес</string>
     <string name="edit_address">Изменить адрес</string>
+    <string name="need_pass">Нужен пропуск</string>
+    
+    <string name="flat">Квартира</string>
+    <string name="entrance">Подъезд</string>
+    <string name="intercom">Домофон</string>
+    <string name="floor">Этаж</string>
+    <string name="redact_address">Редактирование адреса</string>
 
 </resources>

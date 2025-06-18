@@ -9,16 +9,16 @@ interface WidgetUpdater {
     fun canHandle(widget: WidgetUi, updatedWidget: WidgetUi): Boolean
 
     fun update(
-        currentList: List<WidgetUi>,
+        widgets: List<WidgetUi>,
         widget: WidgetUi,
         updatedWidget: WidgetUi,
-        getString: (Int) -> String
+        getString: (Int) -> String,
     ): List<WidgetUi>
 }
 
 
 class FieldWidgetUpdater(
-    private val validators: List<FieldValidator> = vodovozValidators
+    private val validators: List<FieldValidator> = vodovozValidators,
 ) : WidgetUpdater {
 
     override fun canHandle(widget: WidgetUi, updatedWidget: WidgetUi): Boolean {
@@ -26,41 +26,49 @@ class FieldWidgetUpdater(
     }
 
     override fun update(
-        currentList: List<WidgetUi>,
+        widgets: List<WidgetUi>,
         widget: WidgetUi,
         updatedWidget: WidgetUi,
-        getString: (Int) -> String
+        getString: (Int) -> String,
     ): List<WidgetUi> {
-        val field = updatedWidget as FieldUi
-        val isLocallyValid = field.checkField(validators)
+        val field = updatedWidget as? FieldUi ?: return widgets
 
-        val withLocalError = if (!isLocallyValid) {
-            field.copy(
-                isError = true,
-                supportingText = field.getErrorText(getString)
-            )
-        } else {
-            field.resetError()
+        val isValid = field.checkField(validators)
+
+        val fieldWithError = if (isValid) field.resetError() else field
+
+        var newList: List<WidgetUi> = widgets.map { it ->
+            if (it.id == fieldWithError.id) fieldWithError else it
         }
-
-        var newList: List<WidgetUi> = currentList
-            .map { if (it.id == withLocalError.id) withLocalError else it }
 
         val allFields = newList.filterIsInstance<FieldUi>()
-        allFields.checkFields(
-            putErrors = true,
-            validators = validators,
-            getSupportingText = { it.getErrorText(getString) }
-        ) { checkedFields, _ ->
-            checkedFields.forEach { cf ->
-                newList = newList.map { if (it.id == cf.id) cf else it }
-            }
-        }
 
+        allFields.forEach { fieldOfAll ->
+            newList = newList.map { if (it.id == fieldOfAll.id) fieldOfAll else it }
+        }
         return newList
+
     }
 }
 
+class RadioGroupUpdater : WidgetUpdater {
+    override fun canHandle(widget: WidgetUi, updatedWidget: WidgetUi): Boolean {
+        return widget is RadioButtonGroupUi<*> && updatedWidget is RadioButtonGroupUi<*>
+    }
+
+    override fun update(
+        widgets: List<WidgetUi>,
+        widget: WidgetUi,
+        updatedWidget: WidgetUi,
+        getString: (Int) -> String,
+    ): List<WidgetUi> {
+        return widgets.map { mappingWidget ->
+            if (mappingWidget.id == widget.id) updatedWidget
+            else mappingWidget
+        }
+    }
+
+}
 
 class SwitchWidgetUpdater : WidgetUpdater {
     override fun canHandle(widget: WidgetUi, updatedWidget: WidgetUi): Boolean {
@@ -68,34 +76,40 @@ class SwitchWidgetUpdater : WidgetUpdater {
     }
 
     override fun update(
-        currentList: List<WidgetUi>,
+        widgets: List<WidgetUi>,
         widget: WidgetUi,
         updatedWidget: WidgetUi,
-        getString: (Int) -> String
+        getString: (Int) -> String,
     ): List<WidgetUi> {
-        return currentList
+        return widgets
             .map { mapWidget ->
                 if (mapWidget.id == updatedWidget.id) {
                     updatedWidget
-                } else { mapWidget }
+                } else {
+                    mapWidget
+                }
             }
     }
 }
 
 
 class WidgetUpdaterHandler(
-    private val updaters: List<WidgetUpdater> = listOf(FieldWidgetUpdater(), SwitchWidgetUpdater()),
-    private val getString: (Int) -> String
+    private val updaters: List<WidgetUpdater> = listOf(
+        FieldWidgetUpdater(),
+        SwitchWidgetUpdater(),
+        RadioGroupUpdater()
+    ),
+    private val getString: (Int) -> String,
 ) {
     fun updateWidget(
-        currentList: List<WidgetUi>,
+        widgets: List<WidgetUi>,
         widget: WidgetUi,
-        updatedWidget: WidgetUi
+        updatedWidget: WidgetUi,
     ): List<WidgetUi> {
         val updater = updaters.firstOrNull { widgetUpdater ->
             widgetUpdater.canHandle(widget, updatedWidget)
-        } ?: return currentList
+        } ?: return widgets
 
-        return updater.update(currentList, widget, updatedWidget, getString)
+        return updater.update(widgets, widget, updatedWidget, getString)
     }
 }
