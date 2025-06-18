@@ -222,7 +222,7 @@ private fun buildPriceAnnotatedString(count: Int, currentPrice: Int): AnnotatedS
 @Composable
 private fun QuantityButtonSmallPreview() {
     VodovozTheme {
-        QuantityButtonSmall(isLoading = false, quantity = 3, onPlus = { /*TODO*/ }) {
+        QuantityButtonSmall(isLoading = false, quantity = 3, onPlus = { }) {
 
         }
     }

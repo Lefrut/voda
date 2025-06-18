@@ -93,16 +93,14 @@ val EmptyTextValidator = FieldValidator { field ->
 
 val NoRequiredValidator = FieldValidator { field ->
     return@FieldValidator when {
-        !field.isRequired && field.value.isBlank() -> FieldValidationResult.VALID
+        !field.isRequired && field.value.isBlank() && field.value.length < 500 -> FieldValidationResult.VALID
         else -> FieldValidationResult.NOT_APPLICABLE
     }
 }
 
 val PhoneNumberValidator = FieldValidator { field ->
     return@FieldValidator when (field.keyboardType) {
-        KeyboardType.Phone -> {
-            FieldValidationResult.from(field.value.isValidRussianPhoneNumber())
-        }
+        KeyboardType.Phone -> FieldValidationResult.from(field.value.isValidRussianPhoneNumber())
 
         else -> FieldValidationResult.NOT_APPLICABLE
     }
@@ -146,7 +144,7 @@ val NameValidator = FieldValidator { field ->
 val MessageValidator = FieldValidator { field ->
     val value = field.value
     when {
-        field.id == "dr127" || field.id.contains("message") || field.id == "dr53" -> {
+        field.id == "dr127" || field.id.contains("message") || field.id == "dr53" || field.id == "comment" -> {
             FieldValidationResult.from(value.length in 15..1000 && value.isNotBlank())
         }
 
@@ -154,17 +152,10 @@ val MessageValidator = FieldValidator { field ->
     }
 }
 
-fun List<FieldUi>.updateFieldValueAndResetError(field: FieldUi, newValue: String): List<FieldUi> {
-    return updateFieldAndResetError(field, field.copy(value = newValue))
-}
-
 fun List<FieldUi>.updateFieldAndResetError(field: FieldUi, newField: FieldUi): List<FieldUi> {
     val fieldIndex = indexOfFirst { field.id == it.id }
     return toMutableList().apply {
-        set(
-            fieldIndex,
-            newField.resetError()
-        )
+        set(fieldIndex, newField.resetError())
     }
 }
 

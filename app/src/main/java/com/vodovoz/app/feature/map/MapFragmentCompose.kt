@@ -28,7 +28,6 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.SoftwareKeyboardController
 import androidx.compose.ui.platform.ViewCompositionStrategy
-import androidx.compose.ui.res.stringResource
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -38,7 +37,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.google.android.gms.location.LocationServices
-import com.vodovoz.app.R
 import com.vodovoz.app.common.tab.TabManager
 import com.vodovoz.app.core.android.getLocationOrNull
 import com.vodovoz.app.core.android.handleLocationAvailability
@@ -46,7 +44,6 @@ import com.vodovoz.app.core.android.locationPermissionGranted
 import com.vodovoz.app.core.android.locationPermissions
 import com.vodovoz.app.core.navigation.navigateToAddAddress
 import com.vodovoz.app.design_system.VodovozTheme
-import com.vodovoz.app.design_system.composables.dialogs.VodovozDialog
 import com.vodovoz.app.design_system.effects.LifecycleEffect
 import com.vodovoz.app.design_system.model.toMapPoint
 import com.vodovoz.app.design_system.model.toPoint
@@ -66,7 +63,6 @@ import com.yandex.mapkit.user_location.UserLocationLayer
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -213,6 +209,9 @@ class MapFragment : Fragment() {
         keyboardController: SoftwareKeyboardController?,
     ): Unit =
         viewModel.observeEvent().onStart {
+            findNavController().currentBackStackEntry?.savedStateHandle?.remove<MapFlowViewModel.MapScreenTypeUi>(
+                "screenType"
+            )?.let { viewModel.changeScreenTypeToEdit() }
             mainScope.launch {
                 delay(100L)
                 viewModel.moveToAvailableGeo()
@@ -296,7 +295,10 @@ class MapFragment : Fragment() {
 
                 MapFlowViewModel.MapFlowEvents.ShowAddressBottomSheet -> {
                     mainScope.launch {
-                        anchoredDraggableState.animateTo(PartiallyExpanded, tween(200, 250, LinearEasing))
+                        anchoredDraggableState.animateTo(
+                            PartiallyExpanded,
+                            tween(200, 250, LinearEasing)
+                        )
                     }
                 }
 

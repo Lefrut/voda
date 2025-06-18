@@ -22,6 +22,7 @@ import com.vodovoz.app.domain.general.model.cart.CartDetailsModel
 import com.vodovoz.app.domain.general.model.certificate.BuyCertificateDetailsModel
 import com.vodovoz.app.domain.general.model.certificate.BuyCertificateModel
 import com.vodovoz.app.domain.general.model.certificate.CertificateActivationDetailsModel
+import com.vodovoz.app.domain.general.model.location.AddressDetailsModel
 import com.vodovoz.app.domain.general.model.location.AddressModel
 import com.vodovoz.app.domain.general.model.location.MapAddressModel
 import com.vodovoz.app.domain.general.model.order.CancelOrderDetailsModel
@@ -71,6 +72,8 @@ interface VodovozServiceRepository {
     fun removeAddress(addressId: Int): Flow<Result<String>>
 
     fun addAddress(address: MapAddressModel): Flow<Result<Long>>
+
+    fun updateAddress(address: AddressDetailsModel): Flow<Result<Long>>
 
     fun getPaymentMethodDetails(
         addressId: Int,

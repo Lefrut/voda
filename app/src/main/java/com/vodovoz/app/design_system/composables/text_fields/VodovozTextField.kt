@@ -49,7 +49,6 @@ import com.vodovoz.app.design_system.model.widgets.FieldUi
 import com.vodovoz.app.design_system.text.PhoneNumberVisualTransformation
 import com.vodovoz.app.util.formatRussianPhoneNumber
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun VodovozTextField(
     modifier: Modifier = Modifier,
@@ -64,7 +63,10 @@ fun VodovozTextField(
         MutableInteractionSource()
     }
     val isFocused by interactionSource.collectIsFocusedAsState()
-    val isMessage = field.id.contains("message", true) || field.id == "dr127" || field.id == "dr53"
+    val isMessage = field.id.contains(
+        "message",
+        true
+    ) || field.id == "dr127" || field.id == "dr53" || field.id == "comment"
 
     val visualTransformation = when (field.keyboardType) {
         KeyboardType.Phone -> PhoneNumberVisualTransformation()
@@ -263,8 +265,6 @@ fun VodovozTextField(
     prefix: String? = null,
     trailingIcon: @Composable (() -> Unit)? = null,
     isError: Boolean = false,
-    //todo - need or not need?
-    isDate: Boolean = false,
     visualTransformation: VisualTransformation = VisualTransformation.None,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     keyboardActions: KeyboardActions = KeyboardActions.Default,

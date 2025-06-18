@@ -182,7 +182,7 @@ private fun SearchTopBarPreview() {
         SearchTopBar(
             value = "",
             onValueChange = {},
-            onScanClick = { /*TODO*/ },
+            onScanClick = { },
             onClearClick = {},
             onSearchClick = {},
             onNavigationClick = {}

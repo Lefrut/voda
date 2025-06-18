@@ -16,6 +16,8 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import com.vodovoz.app.R
 import com.vodovoz.app.design_system.composables.button.VodovozButton
+import com.vodovoz.app.design_system.composables.core.VodovozWidget
+import com.vodovoz.app.design_system.composables.detectTap
 import com.vodovoz.app.design_system.composables.text_fields.VodovozTextField
 import com.vodovoz.app.design_system.model.widgets.FieldUi
 import com.vodovoz.app.design_system.model.widgets.WidgetUi
@@ -26,7 +28,9 @@ fun AddAddressBody(
     modifier: Modifier = Modifier,
     fields: List<FieldUi>,
     widgets: List<WidgetUi>,
+    withoutSpaceWidgets: List<WidgetUi>,
     onWidgetChange: (WidgetUi, WidgetUi) -> Unit,
+    onWidgetClick: (WidgetUi) -> Unit,
     onSaveClick: () -> Unit,
 ) {
     val firstWidget = widgets.firstOrNull()
@@ -40,22 +44,34 @@ fun AddAddressBody(
     ) {
 
         Column(
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-
-
+            firstWidget?.let {
+                VodovozWidget(
+                    modifier = Modifier.detectTap {
+                        onWidgetClick(firstWidget)
+                    },
+                    widget = firstWidget,
+                    onWidgetChange = onWidgetChange
+                )
+            }
 
             FlowRow(
+                modifier = Modifier.padding(horizontal = 16.dp),
                 maxItemsInEachRow = 2,
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 fields.forEach { field ->
                     VodovozTextField(
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier
+                            .weight(1f)
+                            .detectTap {
+                                onWidgetClick(field)
+                            },
                         field = field,
                         onFieldChange = onWidgetChange,
-                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
+                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
                     )
 
                     if (fields.size % 2 == 1) {
@@ -63,7 +79,32 @@ fun AddAddressBody(
                     }
                 }
             }
+
+            Column {
+                withoutSpaceWidgets.forEach { widget ->
+                    VodovozWidget(
+                        modifier = Modifier.detectTap {
+                            onWidgetClick(widget)
+                        },
+                        widget = widget,
+                        onWidgetChange = onWidgetChange
+                    )
+                }
+            }
+
+            otherWidgets.forEach { widget ->
+                VodovozWidget(
+                    modifier = Modifier.detectTap {
+                        onWidgetClick(widget)
+                    },
+                    widget = widget,
+                    onWidgetChange = onWidgetChange
+                )
+            }
         }
+
+
+        Spacer(modifier = Modifier.weight(1f))
 
         VodovozButton(
             modifier = Modifier.padding(

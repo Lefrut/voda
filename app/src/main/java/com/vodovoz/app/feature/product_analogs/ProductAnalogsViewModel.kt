@@ -1,5 +1,6 @@
 package com.vodovoz.app.feature.product_analogs
 
+import androidx.compose.runtime.Stable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.vodovoz.app.common.cart.CartManager
@@ -30,8 +31,10 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+//todo - review item click listeners
 @HiltViewModel
-class ProductsCollectionViewModel @Inject constructor(
+@Stable
+class ProductAnalogsViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val cartManager: CartManager,

@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.ComposeView
@@ -37,13 +38,17 @@ class AddressesFragment : Fragment() {
 
             setContent {
                 val pagingState by viewModel.observeUiState().collectAsStateWithLifecycle()
-                val viewState by rememberUpdatedState(newValue = pagingState.data)
+                val viewState by rememberUpdatedState(pagingState.data)
 
                 VodovozTheme {
                     AddressesScreen(
                         viewModel = viewModel,
                         viewState = viewState
                     )
+                }
+
+                LaunchedEffect(Unit) {
+                    viewModel.fetchAddresses()
                 }
 
                 LifecycleEffect {

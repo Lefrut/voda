@@ -7,7 +7,6 @@ import android.view.ViewGroup
 import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.ComposeView
-import androidx.core.view.ViewCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -18,6 +17,7 @@ import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.effects.LifecycleEffect
 import com.vodovoz.app.feature.addresses.add.composables.AddAddressScreen
 import com.vodovoz.app.feature.addresses.add.model.AddAddressEvent
+import com.vodovoz.app.feature.map.MapFlowViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -71,6 +71,12 @@ class AddAddressFragment : Fragment() {
                         R.id.savedAddressesDialogFragment,
                         false
                     )
+                }
+
+                AddAddressEvent.GoToMap -> {
+                    val navController = findNavController()
+                    navController.previousBackStackEntry?.savedStateHandle?.set("screenType", MapFlowViewModel.MapScreenTypeUi.Edit)
+                    navController.popBackStack()
                 }
             }
         }

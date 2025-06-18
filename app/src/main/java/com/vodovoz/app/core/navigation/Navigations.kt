@@ -390,10 +390,14 @@ fun NavController.navigateToProductFilters(categoryId: Long, filters: FiltersUi)
     )
 }
 
-fun NavController.navigateToProductComments(productId: Long) {
+fun NavController.navigateToProductComments(productId: Long, productName: String, productImage: String) {
     navigate(
         R.id.productCommentsFragment,
-        bundleOf("productId" to productId)
+        bundleOf(
+            "productId" to productId,
+            "productName" to productName,
+            "productImage" to productImage,
+        )
     )
 
 }

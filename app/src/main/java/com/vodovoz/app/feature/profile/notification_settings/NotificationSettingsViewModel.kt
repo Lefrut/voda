@@ -80,9 +80,7 @@ class NotificationSettingsViewModel @Inject constructor(
 
 
     private val widgetUpdater = WidgetUpdaterHandler(
-        getString = { id ->
-            resourcesProvider.getString(id)
-        }
+        getString = { id -> resourcesProvider.getString(id) }
     )
 
     fun changeWidget(widget: WidgetUi, updatedWidget: WidgetUi) = viewModelScope.launch {
@@ -92,9 +90,7 @@ class NotificationSettingsViewModel @Inject constructor(
                 section.items.firstOrNull { widgetUi -> widgetUi.id == widget.id } != null
             } ?: return@launch
 
-        val updatedWidgets = WidgetUpdaterHandler(
-            getString = { id -> resourcesProvider.getString(id) }
-        ).updateWidget(currentSection.items, widget, updatedWidget)
+        val updatedWidgets = widgetUpdater.updateWidget(currentSection.items, widget, updatedWidget)
 
         uiStateListener.updateData { s ->
             s.copy(

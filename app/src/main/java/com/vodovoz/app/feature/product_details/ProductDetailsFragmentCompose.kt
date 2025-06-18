@@ -143,7 +143,11 @@ class ProductDetailsFragment : Fragment() {
             }
 
             is ProductDetailsFlowViewModel.ProductDetailsEvents.GoToProductComments -> {
-                findNavController().navigateToProductComments(event.productId)
+                findNavController().navigateToProductComments(
+                    productId = event.productId,
+                    productName = event.productName,
+                    productImage = event.productImage
+                )
             }
 
             is ProductDetailsFlowViewModel.ProductDetailsEvents.GoToProductAnalogs -> {

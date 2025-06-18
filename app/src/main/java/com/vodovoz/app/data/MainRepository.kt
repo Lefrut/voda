@@ -41,17 +41,6 @@ class MainRepository @Inject constructor(
      * Addresses
      */
 
-    //Удалить адресс
-    suspend fun deleteAddress(
-        addressId: Long?,
-        userId: Long?,
-    ) = api.fetchAddressResponse(
-        addressId = addressId,
-        userid = userId,
-        action = "del",
-        blockId = 102
-    ).parseDeleteAddressResponse()
-
     //Добавить адрес в сохраненные
     suspend fun addAddress(
         locality: String?,

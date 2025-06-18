@@ -21,7 +21,7 @@ fun AddAddressScreen(viewModel: AddAddressViewModel, viewState: AddAddressState)
             .background(MaterialTheme.colorScheme.background)
     ) {
         VodovozTopBar(
-            title = "",
+            title = stringResource(R.string.redact_address),
             actionIconId = R.drawable.icon_trash,
             actionIconTint = MaterialTheme.colorScheme.surfaceTint,
             onActionClick = {
@@ -35,8 +35,12 @@ fun AddAddressScreen(viewModel: AddAddressViewModel, viewState: AddAddressState)
         AddAddressBody(
             fields = viewState.fields,
             widgets = viewState.widgets,
+            withoutSpaceWidgets = viewState.withoutSpaceWidgets,
             onWidgetChange = { widget, updatedWidget ->
                 viewModel.changeWidget(widget, updatedWidget)
+            },
+            onWidgetClick = { widget ->
+                viewModel.checkWidgetOnAddress(widget)
             },
             onSaveClick = {
                 viewModel.updateAddress()

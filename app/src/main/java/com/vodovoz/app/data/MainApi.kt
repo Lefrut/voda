@@ -15,17 +15,6 @@ import retrofit2.http.Url
 
 interface MainApi {
 
-
-    /**
-     * repeat order && order details
-     */
-
-    @GET("/newmobile/korzina/function/povtor/index.php")
-    suspend fun repeatOrder(
-        @Query("orderID") orderId: Long? = null,
-        @Query("userid") userId: Long? = null,
-    ): ResponseBody
-
     /**
      * map
      */
