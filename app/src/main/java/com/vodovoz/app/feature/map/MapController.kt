@@ -44,9 +44,7 @@ import com.yandex.mapkit.directions.driving.DrivingRouter
 import com.yandex.mapkit.directions.driving.DrivingSession
 import com.yandex.mapkit.directions.driving.VehicleOptions
 import com.yandex.mapkit.geometry.BoundingBox
-import com.yandex.mapkit.geometry.BoundingBoxHelper
 import com.yandex.mapkit.geometry.Geo
-import com.yandex.mapkit.geometry.Geometry
 import com.yandex.mapkit.geometry.LinearRing
 import com.yandex.mapkit.geometry.Point
 import com.yandex.mapkit.geometry.Polygon
@@ -437,7 +435,7 @@ class MapController(
     override fun onObjectAdded(userLocationView: UserLocationView) {
         userLocationView.arrow.setIcon(
             ImageProvider.fromResource(
-                context, R.drawable.svg_gps_outline
+                context, R.drawable.pic_gps
             ), IconStyle().setScale(0.1f).setRotationType(RotationType.ROTATE).setZIndex(1f)
         )
 
@@ -445,7 +443,7 @@ class MapController(
 
         pinIcon.setIcon(
             "icon",
-            ImageProvider.fromResource(context, R.drawable.svg_gps_outline),
+            ImageProvider.fromResource(context, R.drawable.pic_gps),
             IconStyle().setAnchor(PointF(0.5f, 0.5f))
                 .setRotationType(RotationType.ROTATE)
                 .setZIndex(0f)
@@ -454,7 +452,7 @@ class MapController(
 
         pinIcon.setIcon(
             "pin",
-            ImageProvider.fromResource(context, R.drawable.svg_gps_outline),
+            ImageProvider.fromResource(context, R.drawable.pic_gps),
             IconStyle()
                 .setAnchor(PointF(0.5f, 0.5f))
                 .setRotationType(RotationType.ROTATE)

@@ -1,58 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="bluePrimary">#05A4FF</color>
-    <color name="blueLight">#85d4ff</color>
-    <color name="blueDark">#0075c4</color>
-    <color name="accentPrimary">#ffa700</color>
 
     <color name="blackTextDark">#262626</color>
-    <color name="blackTextPrimary">#828282</color>
-    <color name="blackTextLight">#BDBDBD</color>
 
-    <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="gray">#E1E1E1</color>
 
-    <color name="dark_white">#EFF1F3</color>
-    <color name="light_gray">#F2F2F2</color>
     <color name="light_bg">#F3F3F3</color>
-    <color name="color_transparent">#00000000</color>
-    <color name="transparent_half">#88000000</color>
 
-    <color name="orange">#FF8D00</color>
-    <color name="green">#7CBA00</color>
-    <color name="micro">#889295</color>
-    <color name="red">#ED4842</color>
-    <color name="yellow">#ffd600</color>
-
-
-    //Status
-    <color name="color_status_in_processing">#F47B07</color>
-    <color name="color_status_completed">#7ABA05</color>
-    <color name="color_status_in_delivery">#9C0993</color>
-    <color name="color_status_accepted">#F7D107</color>
-    <color name="color_status_canceled">#d3d3d3</color>
-    <color name="color_status_delivered">#d3d3d3</color>
-
-    //Text
     <color name="text_black">#434343</color>
     <color name="text_gray">#555555</color>
-    <color name="text_gray_light">#808080</color>
     <color name="text_new_black">#80000000</color>
 
 
-    <color name="divider_gray_color">@color/light_gray</color>
-    <color name="divider_light_gray_color">#F5F5F5</color>
 
     <color name="color_search">#889295</color>
 
-    <color name="gray_unselected">#f1f1f1</color>
-    <color name="gray_unavailable">#889aa4</color>
-
-    //new
     <color name="promo_red">#F91155</color>
-    <color name="hit_green">#32CB5D</color>
-    <color name="promo_purple">#A56FFD</color>
     <color name="new_product_blue">#05A4FF</color>
     <color name="new_product_light_blue">#96D9FF</color>
 
@@ -60,7 +25,6 @@
     <color name="text_grey_composable">#8689A2</color>
 
     <color name="border_blue">#DCECF6</color>
-    <color name="solid_blue">#EEF8FE</color>
     <color name="divider">#EAEAEA</color>
     <color name="extra_light_grey">#EFEFF4</color>
 </resources>

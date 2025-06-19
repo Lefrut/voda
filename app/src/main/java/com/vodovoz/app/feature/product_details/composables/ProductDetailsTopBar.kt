@@ -59,7 +59,7 @@ fun ProductDetailsTopBar(
                 SkeletonBox(shimmerState = shimmer, modifier = Modifier.height(28.dp).width(124.dp))
             } else {
                 Icon(
-                    painter = painterResource(id = if (isFavoriteProduct) R.drawable.ic_filled_like else R.drawable.ic_like),
+                    painter = painterResource(id = if (isFavoriteProduct) R.drawable.ic_favorite_filled else R.drawable.ic_favorite_outline),
                     contentDescription = null,
                     modifier = Modifier
                         .size(24.dp)

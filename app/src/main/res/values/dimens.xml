@@ -1,49 +1,20 @@
 <resources>
     //Corners
-    <dimen name="corner_5">5dp</dimen>
-    <dimen name="corner_6">6dp</dimen>
-    <dimen name="corner_10">@dimen/_10sdp</dimen>
-    <dimen name="corner_12">@dimen/_12sdp</dimen>
 
     //Margin
-    <dimen name="space_2">@dimen/_2sdp</dimen>
-    <dimen name="space_4">4dp</dimen>
-    <dimen name="space_6">@dimen/_6sdp</dimen>
     <dimen name="space_8">8dp</dimen>
-    <dimen name="space_10">10dp</dimen>
-    <dimen name="space_12">12dp</dimen>
     <dimen name="space_16">16dp</dimen>
-    <dimen name="space_24">@dimen/_24sdp</dimen>
-    <dimen name="space_32">@dimen/_32sdp</dimen>
     <dimen name="last_item_bottom_normal_space">@dimen/_72sdp</dimen>
 
     //Elevation
-    <dimen name="elevation_1">@dimen/_1sdp</dimen>
     <dimen name="elevation_3">@dimen/_3sdp</dimen>
 
-    //Text
-    <dimen name="header_text_size">@dimen/_16ssp</dimen>
-    <dimen name="large_text_size">@dimen/_15ssp</dimen>
     <dimen name="normal_text_size">@dimen/_12ssp</dimen>
-
-    //Buttons
-    <dimen name="button_small_height">@dimen/_30sdp</dimen>
-    <dimen name="button_normal_height">48dp</dimen>
-    <dimen name="field_height">30dp</dimen>
-    <dimen name="field_ex_height">35dp</dimen>
-    <dimen name="field_super_ex_height">68dp</dimen>
-
-    //Action image
-
-    //Card size
-    <dimen name="brand_slider_card_width">@dimen/_94sdp</dimen>
-    <dimen name="brand_slider_card_height">@dimen/_50sdp</dimen>
 
     //Text
     <dimen name="line_spacing_multiplier">1.3</dimen>
     <dimen name="line_spacing_extra">0.8dp</dimen>
 
-    <dimen name="title_text_size_cat">17sp</dimen>
 
 
 

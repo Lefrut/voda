@@ -22,7 +22,7 @@ fun AddAddressScreen(viewModel: AddAddressViewModel, viewState: AddAddressState)
     ) {
         VodovozTopBar(
             title = stringResource(R.string.redact_address),
-            actionIconId = R.drawable.icon_trash,
+            actionIconId = R.drawable.ic_trash,
             actionIconTint = MaterialTheme.colorScheme.surfaceTint,
             onActionClick = {
                 viewModel.showRemoveAddressDialog()

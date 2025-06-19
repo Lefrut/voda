@@ -94,7 +94,7 @@ fun CartItemCard(
 
                 if (restriction != ProductRestrictionUi.NO_FAVORITES && restriction != ProductRestrictionUi.FULL_RESTRICTION && restriction != ProductRestrictionUi.NO_FAVORITES_QUANTITY) {
                     Icon(
-                        painter = painterResource(id = if (cartItem.isFavorite) R.drawable.ic_filled_like else R.drawable.ic_like),
+                        painter = painterResource(id = if (cartItem.isFavorite) R.drawable.ic_favorite_filled else R.drawable.ic_favorite_outline),
                         contentDescription = null,
                         tint = if (cartItem.isFavorite) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.surfaceTint,
                         modifier = Modifier
@@ -219,7 +219,7 @@ private fun TrashButton(modifier: Modifier = Modifier, onClick: () -> Unit) {
         shape = MaterialTheme.shapes.large
     ) {
         Icon(
-            painter = painterResource(id = R.drawable.icon_trash),
+            painter = painterResource(id = R.drawable.ic_trash),
             contentDescription = null,
             modifier = Modifier.size(18.dp),
             tint = MaterialTheme.colorScheme.primary

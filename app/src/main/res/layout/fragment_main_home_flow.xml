@@ -110,21 +110,6 @@
                         android:layout_weight="20"
                         android:background="@color/white" />
 
-                    <com.tbuonomo.viewpagerdotsindicator.DotsIndicator
-                        android:id="@+id/dots_indicator"
-                        android:layout_width="wrap_content"
-                        android:layout_height="10dp"
-                        android:layout_gravity="center"
-                        android:layout_marginHorizontal="16dp"
-                        android:layout_marginTop="@dimen/_30sdp"
-                        android:layout_marginBottom="10dp"
-                        android:layout_weight="1"
-                        app:dotsColor="#BDBDBD"
-                        app:dotsCornerRadius="16dp"
-                        app:dotsSize="7.5dp"
-                        app:dotsSpacing="4dp"
-                        app:dotsWidthFactor="1"
-                        app:selectedDotColor="@color/bluePrimary" />
                 </LinearLayout>
 
             </LinearLayout>

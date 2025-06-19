@@ -13,7 +13,6 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import by.kirich1409.viewbindingdelegate.viewBinding
 import coil3.load
-import com.bumptech.glide.Glide
 import com.vodovoz.app.R
 import com.vodovoz.app.common.content.BaseFragment
 import com.vodovoz.app.data.vodovoz_service.di.toVodovozUrl
@@ -76,12 +75,8 @@ class BlockAppFragment : BaseFragment() {
                         }
 
 
-                        Glide.with(requireContext())
-                            .load(siteState.data?.logo?.toVodovozUrl())
-                            .placeholder(R.drawable.pic_product_placeholder)
-                            .error(R.drawable.pic_product_placeholder)
-                            .into(binding.imageBlockApp)
 
+                        binding.imageBlockApp.load(siteState.data?.logo?.toVodovozUrl())
 
                         initToolbar(showNavBtn = false, titleText = siteState.data?.title ?: "")
 
@@ -93,36 +88,15 @@ class BlockAppFragment : BaseFragment() {
                             siteState.data.desc.fromHtml()
                         }
 
+                        binding.whatsUp.load(siteState.data?.whatsUp?.image?.toVodovozUrl())
 
-                        Glide.with(requireContext())
-                            .load(siteState.data?.whatsUp?.image?.toVodovozUrl())
-                            .placeholder(R.drawable.pic_product_placeholder)
-                            .error(R.drawable.pic_product_placeholder)
-                            .into(binding.whatsUp)
+                        binding.viber.load(siteState.data?.viber?.image?.toVodovozUrl())
 
-                        Glide.with(requireContext())
-                            .load(siteState.data?.viber?.image?.toVodovozUrl())
-                            .placeholder(R.drawable.pic_product_placeholder)
-                            .error(R.drawable.pic_product_placeholder)
-                            .into(binding.viber)
+                        binding.telegram.load(siteState.data?.telegram?.image?.toVodovozUrl())
 
-                        Glide.with(requireContext())
-                            .load(siteState.data?.telegram?.image?.toVodovozUrl())
-                            .placeholder(R.drawable.pic_product_placeholder)
-                            .error(R.drawable.pic_product_placeholder)
-                            .into(binding.telegram)
+                        binding.chat.load(siteState.data?.chat?.image?.toVodovozUrl())
 
-                        Glide.with(requireContext())
-                            .load(siteState.data?.chat?.image?.toVodovozUrl())
-                            .placeholder(R.drawable.pic_product_placeholder)
-                            .error(R.drawable.pic_product_placeholder)
-                            .into(binding.chat)
-
-                        Glide.with(requireContext())
-                            .load(siteState.data?.phone?.image?.toVodovozUrl())
-                            .placeholder(R.drawable.pic_product_placeholder)
-                            .error(R.drawable.pic_product_placeholder)
-                            .into(binding.imageCall)
+                        binding.imageCall.load(siteState.data?.phone?.image?.toVodovozUrl())
 
                         binding.whatsUp.setOnClickListener {
                             val url = siteState.data?.whatsUp?.url ?: return@setOnClickListener

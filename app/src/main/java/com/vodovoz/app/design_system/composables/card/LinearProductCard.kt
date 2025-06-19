@@ -244,7 +244,7 @@ private fun ImageSection(
 
         Row(verticalAlignment = Alignment.Top) {
             Icon(
-                painter = painterResource(id = if (isFavorite) R.drawable.ic_filled_like else R.drawable.ic_like),
+                painter = painterResource(id = if (isFavorite) R.drawable.ic_favorite_filled else R.drawable.ic_favorite_outline),
                 contentDescription = null,
                 tint = if (isFavorite) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.surfaceTint,
                 modifier = Modifier

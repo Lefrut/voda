@@ -5,16 +5,10 @@
         <item name="colorPrimaryDark">@color/white</item>
         <item name="colorOnPrimary">@color/white</item>
         <item name="colorAccent">@color/new_product_blue</item>
-        <item name="bottomSheetDialogTheme">@style/BottomSheetDialog</item>
         <item name="materialAlertDialogTheme">@style/AlertDialog</item>
         <item name="colorControlActivated">@color/new_product_blue</item>
         <item name="android:statusBarColor">@color/white</item>
         <item name="android:windowLightStatusBar">true</item>
-    </style>
-
-    <style name="Theme.Vodovoz.DarkStatusBar" parent="Theme.Vodovoz">
-
-        <item name="colorPrimaryDark">@color/bluePrimary</item>
     </style>
 
     <style name="Theme.AppSplash" parent="Theme.SplashScreen">
@@ -24,22 +18,5 @@
         <item name="windowSplashScreenAnimationDuration">0</item>
         <item name="postSplashScreenTheme">@style/Theme.Vodovoz</item>
     </style>
-
-    <style name="AlertDialog" parent="ThemeOverlay.MaterialComponents.MaterialAlertDialog">
-        <item name="materialAlertDialogBodyTextStyle">@style/TextViewNormalBlack</item>
-    </style>
-
-    <style name="MapDialog" parent="Theme.MaterialComponents.Light.Dialog">
-        <item name="colorPrimaryDark">@color/white</item>
-        <item name="android:windowIsFloating">false</item>
-        <item name="android:windowBackground">@android:color/white</item>
-
-    </style>
-
-    <style name="RoundedImagePlusComment" parent="">
-        <item name="cornerFamily">rounded</item>
-        <item name="cornerSize">12dp</item>
-    </style>
-
 
 </resources>

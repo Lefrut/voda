@@ -38,6 +38,7 @@ android {
             //todo - debuggable false
             debuggable true
             minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.release
         }
@@ -89,12 +90,6 @@ dependencies {
 
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
 
-    def room_version = "2.7.0"
-    implementation("androidx.room:room-runtime:$room_version")
-    implementation("androidx.room:room-ktx:$room_version")
-    ksp("androidx.room:room-compiler:$room_version")
-
-
     implementation("io.github.afreakyelf:Pdf-Viewer:2.1.1")
 
     implementation 'androidx.core:core-ktx:1.13.1'
@@ -134,13 +129,6 @@ dependencies {
     implementation "com.squareup.moshi:moshi-kotlin:$moshiVersion"
     ksp("com.squareup.moshi:moshi-kotlin-codegen:$moshiVersion")
 
-    //Glide
-    implementation 'com.github.bumptech.glide:glide:4.16.0'
-    ksp("com.github.bumptech.glide:compiler:4.13.0")
-    implementation("com.google.accompanist:accompanist-glide:0.15.0")
-    implementation("com.github.bumptech.glide:compose:1.0.0-beta01")
-
-
     //MapKit
     implementation("com.yandex.android:maps.mobile:4.0.0-full")
 
@@ -153,8 +141,8 @@ dependencies {
     implementation 'com.intuit.sdp:sdp-android:1.1.0'
 
     //Hilt
-    implementation "com.google.dagger:hilt-android:2.51.1"
-    ksp "com.google.dagger:hilt-compiler:2.51.1"
+    implementation("com.google.dagger:hilt-android:2.51.1")
+    ksp("com.google.dagger:hilt-compiler:2.51.1")
     implementation('androidx.hilt:hilt-navigation-fragment:1.0.0')
     implementation("androidx.hilt:hilt-work:1.2.0")
     ksp("androidx.hilt:hilt-compiler:1.2.0")
@@ -164,9 +152,6 @@ dependencies {
 
     //View binding delegate
     implementation 'com.github.kirich1409:viewbindingpropertydelegate-noreflection:1.5.6'
-
-    //View Pager Dots
-    implementation("com.tbuonomo:dotsindicator:4.3")
 
     //EasyPermissions
     implementation 'pub.devrel:easypermissions:3.0.0'
@@ -222,8 +207,6 @@ dependencies {
 
     implementation("com.google.accompanist:accompanist-systemuicontroller:0.27.0")
     implementation("mx.platacard:compose-pager-indicator:0.0.8")
-
-    implementation "ru.tinkoff.scrollingpagerindicator:scrollingpagerindicator:1.2.5"
 
     implementation 'com.google.android.play:app-update:2.1.0'
     implementation 'com.google.android.play:app-update-ktx:2.1.0'
