@@ -1,7 +1,6 @@
 package com.vodovoz.app.feature.home
 
 import androidx.compose.foundation.gestures.awaitDragOrCancellation
-import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.awaitVerticalDragOrCancellation
 import androidx.compose.foundation.gestures.waitForUpOrCancellation
@@ -16,20 +15,19 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.Indicator
 import androidx.compose.material3.pulltorefresh.PullToRefreshState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.PointerInputChange
 import androidx.compose.ui.input.pointer.pointerInput
+import com.vodovoz.app.design_system.composables.placeholders.NetworkErrorPlaceholder
 import com.vodovoz.app.feature.all.promotions.composables.AdvertisingInfoBottomSheet
 import com.vodovoz.app.feature.home.composables.HomeBody
 import com.vodovoz.app.feature.home.composables.HomeLoadingPlaceholder
 import com.vodovoz.app.feature.home.composables.HomeTopBar
 import com.vodovoz.app.feature.home.composables.SpecialPromotionBottomSheet
 import com.vodovoz.app.feature.home.composables.UnratedProductsBottomSheet
-import kotlinx.coroutines.currentCoroutineContext
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -85,7 +83,9 @@ fun HomeScreen(
                 }
 
                 HomeFlowViewModel.HomeUiState.NetworkError -> {
-
+                    NetworkErrorPlaceholder {
+                        viewModel.fetchHomeDetails()
+                    }
                 }
 
                 HomeFlowViewModel.HomeUiState.Success -> {
@@ -187,8 +187,8 @@ fun HomeScreen(
         SpecialPromotionBottomSheet(
             specialPromotionUi = viewState.specialPromotion,
             onDismissRequest = { viewModel.closeSpecialPromotionBottomSheet() },
-            onButtonClick = {
-                viewModel.activateAction(it.actionWithButton.action)
+            onButtonClick = { specialPromotion ->
+                viewModel.activateSpecialPromotionAction(specialPromotion.actionWithButton.action)
             }
         )
     }

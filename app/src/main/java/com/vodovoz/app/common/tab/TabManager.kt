@@ -66,8 +66,10 @@ class TabManager @Inject constructor(
                 count = bottomCartModel.count,
                 total = bottomCartModel.total
             )
+        }.onFailure {
+            bottomNavCartStateListener.value = null
         }
-    }.launchIn(scope)
+    }.collect{}
 
 
     fun changeTabVisibility(vis: Boolean) {

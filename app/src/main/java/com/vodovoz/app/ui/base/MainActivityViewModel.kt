@@ -25,7 +25,7 @@ class MainActivityViewModel @Inject constructor(
     private val _appState = MutableStateFlow<AppState>(AppState.Loading)
     val appState = _appState.asStateFlow()
 
-    private val _androidSplash = MutableStateFlow<Boolean>(true)
+    private val _androidSplash = MutableStateFlow(true)
     val androidSplash = _androidSplash.asStateFlow()
 
     fun checkAppState() = viewModelScope.launch {

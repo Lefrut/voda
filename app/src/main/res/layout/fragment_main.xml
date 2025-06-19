@@ -15,7 +15,6 @@
         android:layout_height="?attr/actionBarSize"
         android:layout_alignParentBottom="true"
         android:background="@color/white"
-        android:translationZ="@dimen/elevation_3"
         app:itemIconTint="@drawable/bottom_nav_colors"
         app:itemTextAppearanceActive="@style/BottomNavigationView.Active"
         app:itemTextAppearanceInactive="@style/BottomNavigationView"
@@ -25,6 +24,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:menu="@menu/bottom_nav_menu"
+        android:translationZ="4dp"
         />
 
     <TextView
@@ -32,6 +32,7 @@
         android:id="@+id/circleAmount"
         android:layout_width="16dp"
         android:layout_height="16dp"
+        android:elevation="10dp"
         android:background="@drawable/bkg_number"
         android:fontFamily="@font/rotonda_normal"
         android:gravity="center"

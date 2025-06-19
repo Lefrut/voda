@@ -36,12 +36,10 @@ class MainActivity : AppCompatActivity() {
     private val splashFileViewModel: SplashFileViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags("ru"))
         super.onCreate(savedInstanceState)
         installSplashScreen().setKeepOnScreenCondition {
             viewModel.androidSplash.value
         }
-        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
         supportActionBar?.hide()
         splashFileViewModel.downloadSplashFile()
 

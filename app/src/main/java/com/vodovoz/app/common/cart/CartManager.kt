@@ -118,7 +118,6 @@ class CartManager @Inject constructor(
             return@withLock
         }
         updateCart(newCart)
-
         tabManager.updateBottomNavCartState()
     }
 

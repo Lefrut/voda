@@ -30,6 +30,7 @@ import com.vodovoz.app.R
 import com.vodovoz.app.common.account.AccountManager
 import com.vodovoz.app.common.tab.TabManager
 import com.vodovoz.app.core.navigation.ContentSearchNavigator
+import com.vodovoz.app.core.navigation.activate
 import com.vodovoz.app.core.navigation.navigateToAboutApp
 import com.vodovoz.app.core.navigation.navigateToAllBrands
 import com.vodovoz.app.core.navigation.navigateToAllServices
@@ -53,9 +54,7 @@ import com.vodovoz.app.core.navigation.navigateToWebView
 import com.vodovoz.app.core.navigation.navigateToWriteComment
 import com.vodovoz.app.core.network.ApiConfig
 import com.vodovoz.app.core.network.VodovozWebConfig
-import com.vodovoz.app.core.navigation.activate
 import com.vodovoz.app.design_system.VodovozTheme
-import com.vodovoz.app.design_system.composables.placeholders.NetworkErrorPlaceholder
 import com.vodovoz.app.design_system.composables.snackbar.VodovozSnackbarHost
 import com.vodovoz.app.design_system.effects.LifecycleEffect
 import com.vodovoz.app.feature.sitestate.SiteStateManager
@@ -124,22 +123,12 @@ class HomeFragment : Fragment() {
                     val pullRefreshState = rememberPullToRefreshState()
                     val snackbarHostState = remember { SnackbarHostState() }
 
-                    when (viewState.uiState) {
-                        HomeFlowViewModel.HomeUiState.NetworkError -> {
-                            NetworkErrorPlaceholder(
-                                onTryAgainClick = { viewModel.refresh() }
-                            )
-                        }
-
-                        else -> {
-                            HomeScreen(
-                                viewState = viewState,
-                                viewModel = viewModel,
-                                pullRefreshState = pullRefreshState,
-                                topProductsLazyListState = topProductLazyListState,
-                            )
-                        }
-                    }
+                    HomeScreen(
+                        viewState = viewState,
+                        viewModel = viewModel,
+                        pullRefreshState = pullRefreshState,
+                        topProductsLazyListState = topProductLazyListState,
+                    )
 
 
 
@@ -164,9 +153,7 @@ class HomeFragment : Fragment() {
                     }
 
                     LifecycleEffect {
-                        viewModel.listenFavorites(
-                            this
-                        )
+                        viewModel.listenFavorites(this)
                     }
 
                     LifecycleEffect {
@@ -318,7 +305,7 @@ class HomeFragment : Fragment() {
                 .collect { path ->
                     debugLog { "observeDeepLinkFromSiteState: $path" }
 
-                    when(path) {
+                    when (path) {
                         "catalog" -> {
                             tabManager.selectTab(R.id.graph_catalog)
                         }
@@ -360,6 +347,7 @@ class HomeFragment : Fragment() {
                         "basket" -> {
                             tabManager.selectTab(R.id.graph_cart)
                         }
+
                         "mobile_app" -> {
                             findNavController().navigateToAboutApp()
                         }
