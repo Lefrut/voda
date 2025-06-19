@@ -14,10 +14,12 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.fragment.findNavController
 import com.vodovoz.app.common.tab.TabManager
+import com.vodovoz.app.core.navigation.navigateToAddAddress
 import com.vodovoz.app.core.navigation.navigateToMap
 import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.effects.LifecycleEffect
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.onStart
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -66,8 +68,12 @@ class AddressesFragment : Fragment() {
                     findNavController().popBackStack()
                 }
 
-                is AddressesFlowViewModel.AddressesEvents.GoToMap -> {
-                    findNavController().navigateToMap(event.address)
+                AddressesFlowViewModel.AddressesEvents.GoToMap -> {
+                    findNavController().navigateToMap(null)
+                }
+
+                is AddressesFlowViewModel.AddressesEvents.GoToEditAddress -> {
+                    findNavController().navigateToAddAddress(event.addressId, event.addressName)
                 }
             }
         }

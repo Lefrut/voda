@@ -30,7 +30,9 @@ import androidx.compose.material3.SheetValue.PartiallyExpanded
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -41,6 +43,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -56,6 +59,15 @@ import com.vodovoz.app.feature.home.composables.dropShadow
 import com.vodovoz.app.feature.map.MapFlowViewModel
 import com.vodovoz.app.ui.yandex_map.YandexMapUi
 import kotlin.math.roundToInt
+
+private val Dp.Companion.Saver: Saver<Dp, Float>
+    @Stable
+    get() {
+        return Saver(
+            save = { it.value },
+            restore = { it.dp }
+        )
+    }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -79,10 +91,12 @@ fun MapBody(
     val density = LocalDensity.current
 
     BoxWithConstraints(modifier = modifier.fillMaxSize()) {
+        val mapHeight = rememberSaveable(saver = Dp.Saver) { maxHeight }
         val focusMapWidth = remember { maxWidth }
-        val focusMapHeight = remember { maxHeight - 220.dp }
+        val focusMapHeight = remember { mapHeight - 220.dp }
 
         YandexMapView(
+            modifier = Modifier.size(focusMapWidth, mapHeight),
             yandexMap = yandexMap,
             focusMapWidthPx = with(density) { focusMapWidth.toPx() },
             focusMapHeightPx = with(density) { focusMapHeight.toPx() },

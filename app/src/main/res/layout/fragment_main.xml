@@ -28,7 +28,7 @@
         />
 
     <TextView
-        android:translationZ="@dimen/_10sdp"
+        android:translationZ="10dp"
         android:id="@+id/circleAmount"
         android:layout_width="16dp"
         android:layout_height="16dp"

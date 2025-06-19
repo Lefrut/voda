@@ -20,6 +20,14 @@ fun calculateBounds(
     )
 }
 
+fun Map.animMove(cameraPosition: CameraPosition){
+    move(
+        cameraPosition,
+        Animation(Animation.Type.LINEAR, 0.25f),
+        null
+    )
+}
+
 fun BoundingBox.pad(factor: Double): BoundingBox {
     val latSpan = northEast.latitude - southWest.latitude
     val lonSpan = northEast.longitude - southWest.longitude

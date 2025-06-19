@@ -32,9 +32,11 @@ class AddAddressViewModel @Inject constructor(
     private val resourcesProvider: ResourcesProvider,
 ) : MviViewModel<AddAddressState, AddAddressEvent>(AddAddressState()) {
 
-    private val addressId = savedStateHandle.get<Long>("addressId") ?: (-1L).also {
-        navigateBack()
-    }
+    private val addressId = savedStateHandle.get<Long>("addressId") ?: (-1L)
+    private val firstAddressName = savedStateHandle.get<String>("addressName").also { address ->
+        _state.update { s -> s.copy(addressName = address ?: "") }
+    } ?: ""
+
 
     init {
         initUi()
@@ -65,7 +67,7 @@ class AddAddressViewModel @Inject constructor(
     }
 
     fun updateAddress() = viewModelScope.launch {
-
+        //todo - update address
     }
 
     private val widgetUpdaterHandler = WidgetUpdaterHandler(
@@ -216,9 +218,13 @@ class AddAddressViewModel @Inject constructor(
     }
 
     fun checkWidgetOnAddress(widget: WidgetUi) = viewModelScope.launch {
-        if(widget.id == "polnadres"){
-            _events.emit(AddAddressEvent.GoToMap)
+        if (widget.id == "polnadres") {
+            _events.emit(AddAddressEvent.GoToMap(addressId, stateSnapshot.addressName))
         }
+    }
+
+    fun changeAddressName(addressName: String) = viewModelScope.launch {
+        _state.update { s -> s.copy(addressName = addressName) }
     }
 
 }

@@ -2,20 +2,14 @@ package com.vodovoz.app.data
 
 import com.vodovoz.app.data.parser.response.map.AddAddressResponseJsonParser.parseAddAddressResponse
 import com.vodovoz.app.data.parser.response.map.AddressByGeocodeResponseJsonParser.parseAddressByGeocodeResponse
-import com.vodovoz.app.data.parser.response.map.DeleteAddressResponseJsonParser.parseDeleteAddressResponse
 import com.vodovoz.app.data.parser.response.map.DeliveryZonesBundleResponseJsonParser.parseDeliveryZonesBundleResponse
-import com.vodovoz.app.data.parser.response.map.FetchAddressesSavedResponseJsonParser.parseFetchAddressesSavedResponse
 import com.vodovoz.app.data.parser.response.map.UpdateAddressResponseJsonParser.parseUpdateAddressResponse
-import com.vodovoz.app.data.parser.response.order.RepeatOrderResponseJsonParser.parseRepeatOrderResponse
 import com.vodovoz.app.data.parser.response.ordering.RegOrderResponseJsonParser.parseRegOrderResponse
-import com.vodovoz.app.data.parser.response.shipping.FreeShippingDaysResponseJsonParser.parseFreeShippingDaysResponse
-import com.vodovoz.app.data.parser.response.shipping.ShippingInfoResponseJsonParser.parseShippingInfoResponse
-import com.vodovoz.app.data.maps.MapKitFlowApi
+import com.vodovoz.app.data.maps.YandexMapAPI
 import javax.inject.Inject
 
 class MainRepository @Inject constructor(
     private val api: MainApi,
-    private val mapKitApi: MapKitFlowApi,
 ) {
     /**
      * map
@@ -25,17 +19,6 @@ class MainRepository @Inject constructor(
     suspend fun fetchDeliveryZonesResponse() = api.fetchMapResponse(
         action = "tochkakarta"
     ).parseDeliveryZonesBundleResponse()
-
-    //Адрес по координатам
-    suspend fun fetchAddressByGeocodeResponse(
-        latitude: Double,
-        longitude: Double,
-    ) = mapKitApi.getAddressByGeo(
-        apiKey = "346ef353-b4b2-44b3-b597-210d62eeb66b",
-        geocode = "$longitude,$latitude",
-        format = "json"
-    ).parseAddressByGeocodeResponse()
-
 
     /**
      * Addresses

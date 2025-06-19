@@ -10,11 +10,7 @@ import com.vodovoz.app.common.content.Event
 import com.vodovoz.app.common.content.PagingContractViewModel
 import com.vodovoz.app.common.content.State
 import com.vodovoz.app.common.content.itemadapter.Item
-import com.vodovoz.app.common.content.toErrorState
 import com.vodovoz.app.common.content.updateData
-import com.vodovoz.app.common.resources.ResourcesProvider
-import com.vodovoz.app.data.MainRepository
-import com.vodovoz.app.data.model.common.ResponseEntity
 import com.vodovoz.app.design_system.model.SectionUi
 import com.vodovoz.app.design_system.model.VodovozPlaceholderUi
 import com.vodovoz.app.design_system.model.toUi
@@ -23,17 +19,8 @@ import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.feature.addresses.model.AddressScreenTypeUi
 import com.vodovoz.app.feature.addresses.model.AddressUi
 import com.vodovoz.app.feature.addresses.model.mapToUi
-import com.vodovoz.app.ui.model.AddressFlowTitle
-import com.vodovoz.app.ui.model.AddressUI
-import com.vodovoz.app.util.extensions.debugLog
 import com.vodovoz.app.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -47,10 +34,6 @@ class AddressesFlowViewModel @Inject constructor(
         screenType = savedState.get<AddressScreenTypeUi>("screenType") ?: AddressScreenTypeUi.Add
     )
 ) {
-
-    init {
-        fetchAddresses()
-    }
 
     fun fetchAddresses() = viewModelScope.launch {
         val addressesResult = vodovozServiceRepository.getAddresses().singleResult()
@@ -93,7 +76,7 @@ class AddressesFlowViewModel @Inject constructor(
     }
 
     fun addAddress() = viewModelScope.launch {
-        eventListener.emit(AddressesEvents.GoToMap(null))
+        eventListener.emit(AddressesEvents.GoToMap)
     }
 
     fun navigateToOrdering() = viewModelScope.launch {
@@ -101,7 +84,7 @@ class AddressesFlowViewModel @Inject constructor(
     }
 
     fun editAddress(address: AddressUi) = viewModelScope.launch {
-        eventListener.emit(AddressesEvents.GoToMap(address))
+        eventListener.emit(AddressesEvents.GoToEditAddress(address.id, address.address))
     }
 
     fun selectAddress(address: AddressUi) = viewModelScope.launch {
@@ -139,11 +122,12 @@ class AddressesFlowViewModel @Inject constructor(
             )
         }
         vodovozServiceRepository.removeAddress(currentRemoveAddress.id.toInt()).singleResult()
+        fetchAddresses()
     }
-
     sealed class AddressesEvents : Event {
         data object GoBack : AddressesEvents()
-        data class GoToMap(val address: AddressUi?) : AddressesEvents()
+        data object GoToMap : AddressesEvents()
+        data class GoToEditAddress(val addressId: Long, val addressName: String) : AddressesEvents()
     }
 
     @Immutable

@@ -54,14 +54,6 @@ interface MainApi {
      * Ordering
      */
 
-    @GET("newmobile/getActualDelivery.php")
-    suspend fun fetchInfoAboutOrderingResponse(
-        @Query("address_id") addressId: Long? = null,
-        @Query("userid") userId: Long? = null,
-        @Query("curDate") date: String? = null,
-        @Query("versiyaan") appVersion: String?,
-    ): ResponseBody
-
     @GET("newmobile/doorder.php")
     suspend fun fetchRegOrderResponse(
         @Query("type") orderType: Int?, //Тип заказа (1/2)

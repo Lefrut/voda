@@ -1,19 +1,22 @@
 package com.vodovoz.app.feature.map.model
 
+import android.os.Parcelable
 import androidx.compose.runtime.Immutable
 import com.vodovoz.app.design_system.model.MapPointUi
 import com.vodovoz.app.design_system.model.toDomain
 import com.vodovoz.app.design_system.model.toUi
 import com.vodovoz.app.domain.general.model.location.MapAddressModel
+import kotlinx.parcelize.Parcelize
 
 @Immutable
+@Parcelize
 data class MapAddressUi(
     val name: String,
     val city: String,
     val street: String,
     val house: String,
     val point: MapPointUi,
-) {
+): Parcelable {
     companion object {
         val Empty = MapAddressUi("", "", "", "", MapPointUi.Empty)
     }

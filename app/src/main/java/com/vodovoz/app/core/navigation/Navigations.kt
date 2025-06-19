@@ -33,10 +33,13 @@ fun NavOptionsBuilder.slideAnim() {
     }
 }
 
-fun NavController.navigateToAddAddress(addressId: Long) {
+fun NavController.navigateToAddAddress(addressId: Long, addressName: String) {
     navigate(
         R.id.addAddressFragment,
-        bundleOf("addressId" to addressId),
+        bundleOf(
+            "addressId" to addressId,
+            "addressName" to addressName
+        ),
         navOptions {}
     )
 }

@@ -5,33 +5,28 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-        android:id="@+id/refreshContainer"
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/homeRv"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:clipToPadding="false" />
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/homeRv"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:clipToPadding="false" />
-
-    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
     <LinearLayout
+        android:id="@+id/rateBottom"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/rateBottom"
-        android:padding="16dp"
-        app:behavior_hideable="false"
-        android:elevation="20dp"
         android:background="@color/white"
-
-        android:clipToPadding="false"
         android:clipChildren="false"
-        tools:visibility="gone"
+        android:clipToPadding="false"
+        android:elevation="20dp"
+
+        android:padding="16dp"
+        android:visibility="gone"
+        app:behavior_hideable="false"
         app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
-        android:visibility="gone">
+        tools:visibility="gone">
 
         <androidx.core.widget.NestedScrollView
             android:layout_width="match_parent"
@@ -46,15 +41,14 @@
                 <View
                     android:layout_width="40dp"
                     android:layout_height="2dp"
-                    android:layout_gravity="center"
-                    />
+                    android:layout_gravity="center" />
 
                 <LinearLayout
                     android:id="@+id/collapsedLL"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginHorizontal="@dimen/space_16"
-                    android:layout_marginBottom="@dimen/_30sdp"
+                    android:layout_marginBottom="30dp"
                     android:orientation="vertical">
 
                     <com.google.android.material.textview.MaterialTextView

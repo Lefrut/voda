@@ -6,7 +6,6 @@ import androidx.compose.runtime.Stable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.vodovoz.app.common.account.AccountManager
-import com.vodovoz.app.common.content.ErrorState
 import com.vodovoz.app.common.content.Event
 import com.vodovoz.app.common.content.PagingContractViewModel
 import com.vodovoz.app.common.content.State
@@ -23,7 +22,6 @@ import com.vodovoz.app.feature.map.manager.DeliveryZonesManager
 import com.vodovoz.app.feature.map.model.MapAddressUi
 import com.vodovoz.app.feature.map.model.toDomain
 import com.vodovoz.app.feature.map.model.toUi
-import com.vodovoz.app.mapper.AddressMapper.mapToUI
 import com.vodovoz.app.ui.model.AddressUI
 import com.vodovoz.app.ui.model.custom.DeliveryZonesBundleUI
 import com.vodovoz.app.util.extensions.debounceWithMax
@@ -62,9 +60,7 @@ class MapFlowViewModel @Inject constructor(
 ) {
 
     private val selectedAddress = savedState.get<AddressUi>("address")?.apply {
-        uiStateListener.updateData { s ->
-            s.copy(screenType = MapScreenTypeUi.Edit)
-        }
+        uiStateListener.updateData { s -> s.copy(screenType = MapScreenTypeUi.Edit) }
     }
 
     private val searchQueryFlow = MutableStateFlow(dataState.query)
@@ -152,37 +148,7 @@ class MapFlowViewModel @Inject constructor(
         latitude: Double,
         longitude: Double,
     ) {
-        uiStateListener.value = state.copy(loadingPage = true)
 
-        viewModelScope.launch {
-            flow { emit(repository.fetchAddressByGeocodeResponse(latitude, longitude)) }
-                .onEach { response ->
-                    if (response is ResponseEntity.Success) {
-                        val data = response.data.mapToUI().copy(id = state.data.addressUI?.id ?: 0)
-                        uiStateListener.value = state.copy(
-                            data = state.data.copy(
-                                addressUI = data
-                            ),
-                            error = null,
-                            loadingPage = false
-                        )
-
-                    } else {
-                        uiStateListener.value =
-                            state.copy(
-                                loadingPage = false,
-                                error = ErrorState.Error()
-                            )
-                    }
-                }
-                .flowOn(Dispatchers.Default)
-                .catch {
-                    debugLog { "fetch address by geocode error ${it.localizedMessage}" }
-                    uiStateListener.value =
-                        state.copy(error = it.toErrorState(), loadingPage = false)
-                }
-                .collect()
-        }
     }
 
     fun showAddAddressBottomDialog() {
@@ -655,7 +621,7 @@ class MapFlowViewModel @Inject constructor(
                 currentAddress = address,
                 mode = MapUiMode.OnlyMap,
                 addressIsLoading = false,
-                addressIsError = with(address) { street.isBlank() || city.isBlank() || house.isBlank() }
+                addressIsError = with(address) { house.isBlank() }
             )
         }
 
@@ -683,29 +649,39 @@ class MapFlowViewModel @Inject constructor(
 
         val currentAddress = dataState.currentAddress
 
-        val addressId = selectedAddress?.id?.let { selectedAddressId ->
-            if(selectedAddress.address != currentAddress?.name){
-                //vodovozServiceRepository.updateAddress()
-            }
-            selectedAddressId
-        } ?: dataState.currentAddress?.let { address ->
+        //todo - need different backend realization(update address separately) || need all correct data in edit address details
+        //vodovozServiceRepository.updateAddress()
+
+        val addressId = selectedAddress?.id ?: dataState.currentAddress?.let { address ->
             vodovozServiceRepository.addAddress(address.toDomain()).singleResult().getOrNull()
         }
 
-        addressId?.let {
-            eventListener.emit(MapFlowEvents.GoToAddAddress(addressId))
+        val addressName = currentAddress?.name ?: selectedAddress?.address
+
+        if (addressId != null && addressName != null) {
+            when (dataState.screenType) {
+                MapScreenTypeUi.Add -> {
+                    eventListener.emit(
+                        MapFlowEvents.GoToAddAddress(
+                            addressId = addressId,
+                            addressName = addressName
+                        )
+                    )
+
+                }
+
+                MapScreenTypeUi.Edit -> {
+                    eventListener.emit(
+                        MapFlowEvents.BackToAddAddress(addressName)
+                    )
+                }
+            }
         }
 
         uiStateListener.updateData { s ->
             s.copy(buttonIsLoading = false)
         }
 
-    }
-
-    fun changeScreenTypeToEdit() {
-        uiStateListener.updateData { s ->
-            s.copy(screenType = MapScreenTypeUi.Edit)
-        }
     }
 
     data class SavedPolylineData(
@@ -780,7 +756,8 @@ class MapFlowViewModel @Inject constructor(
         data object GoBack : MapFlowEvents()
         data object HideKeyboard : MapFlowEvents()
         data object GoToLocationSettings : MapFlowEvents()
-        data class GoToAddAddress(val addressId: Long) : MapFlowEvents()
+        data class GoToAddAddress(val addressId: Long, val addressName: String) : MapFlowEvents()
+        data class BackToAddAddress(val addressName: String) : MapFlowEvents()
 
         data class MoveToAddress(val addressPoint: MapPointUi) : MapFlowEvents()
     }
