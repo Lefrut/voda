@@ -169,7 +169,9 @@ fun FieldUi.resetError(): FieldUi {
 
 fun List<FieldUi>.updateField(field: FieldUi, newField: FieldUi): List<FieldUi> {
     val fieldIndex = indexOfFirst { field.id == it.id }
-    return toMutableList().apply { set(fieldIndex, newField) }
+    return toMutableList().apply {
+        set(fieldIndex, newField)
+    }
 }
 
 
@@ -253,6 +255,7 @@ fun FieldModel.toUi(): FieldUi {
         "tel", "dr124", "phone", "dr50", "dr171" -> KeyboardType.Phone
         "pass", "parol" -> KeyboardType.Password
         "data", "date" -> KeyboardType.Decimal
+        "oplata" -> KeyboardType.Number
         else -> when (valueType.lowercase()) {
             "text" -> KeyboardType.Text
             "phone" -> KeyboardType.Phone

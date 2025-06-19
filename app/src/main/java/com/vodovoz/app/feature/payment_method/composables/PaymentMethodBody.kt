@@ -1,7 +1,9 @@
 package com.vodovoz.app.feature.payment_method.composables
 
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -23,7 +25,10 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.vodovoz.app.design_system.composables.button.VodovozRadioButton
 import com.vodovoz.app.design_system.composables.swich.vodovozColors
+import com.vodovoz.app.design_system.composables.text_fields.VodovozTextField
 import com.vodovoz.app.design_system.model.SectionUi
+import com.vodovoz.app.design_system.model.widgets.FieldUi
+import com.vodovoz.app.design_system.model.widgets.WidgetUi
 import com.vodovoz.app.feature.payment_method.model.PaymentMethodItemUi
 
 @Suppress("NonSkippableComposable")
@@ -33,6 +38,7 @@ fun PaymentMethodBody(
     contentPadding: PaddingValues = PaddingValues(0.dp),
     paymentSections: List<SectionUi<PaymentMethodItemUi>>,
     onPaymentItemClick: (PaymentMethodItemUi) -> Unit,
+    onFieldChange: (PaymentMethodItemUi, FieldUi, FieldUi) -> Unit,
 ) {
     LazyColumn(
         modifier = modifier.fillMaxSize(),
@@ -56,11 +62,19 @@ fun PaymentMethodBody(
                 key = { _, item -> (item.id + item.code + item.name) },
                 contentType = { _, _ -> "PaymentMethodItemUi" }
             ) { i, item ->
-                PaymentMethodItemRow(item = item, onItemClick = onPaymentItemClick)
+                PaymentMethodItemRow(
+                    item = item,
+                    onItemClick = onPaymentItemClick,
+                    onFieldChange = { field, updatedField ->
+                        onFieldChange(item, field, updatedField)
+                    }
+                )
 
                 if (i != section.items.lastIndex) {
                     HorizontalDivider(
-                        modifier = Modifier.fillParentMaxWidth().padding(horizontal = 8.dp),
+                        modifier = Modifier
+                            .fillParentMaxWidth()
+                            .padding(horizontal = 8.dp),
                         thickness = 1.dp,
                         color = MaterialTheme.colorScheme.surfaceVariant
                     )
@@ -85,48 +99,61 @@ private fun PaymentMethodItemRow(
     modifier: Modifier = Modifier,
     item: PaymentMethodItemUi,
     onItemClick: (PaymentMethodItemUi) -> Unit,
+    onFieldChange: (FieldUi, FieldUi) -> Unit,
 ) {
-    Row(
-        modifier = modifier
-            .clickable { onItemClick(item) }
-            .fillMaxWidth()
+    Column(
+        Modifier
             .background(MaterialTheme.colorScheme.background)
-            .padding(vertical = 10.dp, horizontal = 16.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        AsyncImage(
-            model = item.image,
-            contentDescription = null,
-            modifier = Modifier.size(40.dp)
-        )
+            .animateContentSize()) {
+        Row(
+            modifier = modifier
+                .clickable { onItemClick(item) }
+                .fillMaxWidth()
+                .padding(vertical = 10.dp, horizontal = 16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            AsyncImage(
+                model = item.image,
+                contentDescription = null,
+                modifier = Modifier.size(40.dp)
+            )
 
-        Text(
-            modifier = Modifier
-                .weight(1f)
-                .padding(horizontal = 16.dp),
-            text = item.name,
-            color = MaterialTheme.colorScheme.onBackground,
-            style = MaterialTheme.typography.bodyMedium
-        )
+            Text(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(horizontal = 16.dp),
+                text = item.name,
+                color = MaterialTheme.colorScheme.onBackground,
+                style = MaterialTheme.typography.bodyMedium
+            )
 
-        when (item.isSwitch) {
-            true -> {
-                Switch(
-                    modifier = Modifier.requiredHeight(32.dp),
-                    checked = item.value,
-                    onCheckedChange = {
-                        onItemClick(item)
-                    },
-                    colors = SwitchDefaults.vodovozColors()
-                )
+            when (item.isSwitch) {
+                true -> {
+                    Switch(
+                        modifier = Modifier.requiredHeight(32.dp),
+                        checked = item.value,
+                        onCheckedChange = {
+                            onItemClick(item)
+                        },
+                        colors = SwitchDefaults.vodovozColors()
+                    )
+                }
+
+                false -> {
+                    VodovozRadioButton(
+                        selected = item.value,
+                        onClick = { onItemClick(item) }
+                    )
+                }
             }
+        }
 
-            false -> {
-                VodovozRadioButton(
-                    selected = item.value,
-                    onClick = { onItemClick(item) }
-                )
-            }
+        if (item.field != null && item.value) {
+            VodovozTextField(
+                modifier = Modifier.padding(start = 16.dp, top = 8.dp, end = 16.dp, bottom = 16.dp),
+                field = item.field,
+                onFieldChange = onFieldChange
+            )
         }
     }
 }

@@ -14,5 +14,5 @@ data class DeliveryDateState(
     val selectedTimeSection: SectionUi<DeliveryTimeIntervalUi> = SectionUi.empty(),
     val selectedTimeInterval: DeliveryTimeIntervalUi = DeliveryTimeIntervalUi.Empty,
     val uiState: DeliveryDateUiState = DeliveryDateUiState.Loading,
-    val showCalendarDialog: Boolean = false
+    val showCalendarDialog: Boolean = true
 )

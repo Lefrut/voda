@@ -217,7 +217,6 @@ fun VodovozCalendarDialog(
                 onDismiss = onDismiss,
                 onDateSelect = {
                     onDateSelect(selectedCalendarDay.date)
-                    onDismiss()
                 }
             )
         }
@@ -316,7 +315,6 @@ private fun CalendarButtons(
         TextButton(
             onClick = {
                 onDateSelect()
-                onDismiss()
             },
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp)
         ) {

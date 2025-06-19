@@ -106,8 +106,12 @@ fun DeliveryDateScreen(
     if (viewState.showCalendarDialog) {
 
         val initialCalendarDay = remember {
-            val initialDate =
+
+            val initialDate = try {
                 LocalDate.parse(viewState.selectedOption.value, VodovozDateFormatters.DMY)
+            } catch (_: Throwable){
+                LocalDate.now()
+            }
 
             CalendarDay(initialDate, DayPosition.InDate)
         }

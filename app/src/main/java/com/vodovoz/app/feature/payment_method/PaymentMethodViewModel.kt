@@ -3,7 +3,10 @@ package com.vodovoz.app.feature.payment_method
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import com.vodovoz.app.R
+import com.vodovoz.app.common.resources.ResourcesProvider
 import com.vodovoz.app.design_system.model.toUi
+import com.vodovoz.app.design_system.model.widgets.FieldUi
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.feature.payment_method.model.PaymentMethodEvent
 import com.vodovoz.app.feature.payment_method.model.PaymentMethodItemUi
@@ -23,6 +26,7 @@ import javax.inject.Inject
 class PaymentMethodViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val vodovozServiceRepository: VodovozServiceRepository,
+    private val resourcesProvider: ResourcesProvider,
 ) : MviViewModel<PaymentMethodState, PaymentMethodEvent>(PaymentMethodState()) {
 
     private val addressId = savedStateHandle.get<Int>("addressId") ?: navigateBack().let { -1 }
@@ -85,6 +89,44 @@ class PaymentMethodViewModel @Inject constructor(
 
             s.copy(
                 paymentSections = sections
+            )
+        }
+    }
+
+    fun changeField(item: PaymentMethodItemUi, field: FieldUi, updatedField: FieldUi) {
+
+
+        _state.update { s ->
+            s.copy(
+                paymentSections = s.paymentSections.map { section ->
+                    section.copy(
+                        items = section.items.map { sectionItem ->
+                            if (sectionItem.id == item.id) {
+                                sectionItem.copy(
+                                    field = when (field.id) {
+                                        "oplata" -> {
+                                            val number = updatedField.value.filter { c ->
+                                                c.isDigit()
+                                            }.toIntOrNull()
+                                            val value = number?.takeIf { it > 0 }?.let { price ->
+                                                resourcesProvider.getString(
+                                                    R.string.price_text,
+                                                    price
+                                                )
+                                            } ?: ""
+
+                                            updatedField.copy(value = value)
+                                        }
+
+                                        else -> {
+                                            updatedField
+                                        }
+                                    }
+                                )
+                            } else sectionItem
+                        }
+                    )
+                }
             )
         }
     }

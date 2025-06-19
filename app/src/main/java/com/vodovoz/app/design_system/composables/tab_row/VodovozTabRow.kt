@@ -71,7 +71,7 @@ fun VodovozTabRow(
             val spacingPx = tabSpacing.roundToPx()
             val tabsWidth = preMeasured.map { placeable -> placeable.width }
             val totalSpacing = if (tabsCount > 1) (tabsCount - 1) * spacingPx else 0
-            val paddingWidth = (constraints.maxWidth - tabsWidth.sum() - totalSpacing) / tabsCount
+            val paddingWidth = (constraints.maxWidth - tabsWidth.sum() - totalSpacing) / tabsCount.coerceAtLeast(1)
             val maxItemHeight = preMeasured.maxOf { it.height }
 
 
