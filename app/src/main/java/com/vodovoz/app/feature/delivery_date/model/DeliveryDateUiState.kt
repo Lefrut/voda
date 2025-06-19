@@ -1,8 +1,9 @@
 package com.vodovoz.app.feature.delivery_date.model
 
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.Stable
 
-@Immutable
+@Stable
 sealed interface DeliveryDateUiState {
 
     data object Loading: DeliveryDateUiState

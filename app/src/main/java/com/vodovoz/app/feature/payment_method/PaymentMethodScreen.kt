@@ -59,6 +59,9 @@ fun PaymentMethodScreen(viewModel: PaymentMethodViewModel, viewState: PaymentMet
                         paymentSections = viewState.paymentSections,
                         onPaymentItemClick = { paymentMethod ->
                             viewModel.changePaymentMethodItem(paymentMethod)
+                        },
+                        onFieldChange = { item ,field, updatedField ->
+                            viewModel.changeField(item, field, updatedField)
                         }
                     )
                 }

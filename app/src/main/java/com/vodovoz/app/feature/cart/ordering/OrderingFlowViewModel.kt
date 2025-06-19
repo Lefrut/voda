@@ -231,7 +231,7 @@ class OrderingFlowViewModel @Inject constructor(
 
             "time" -> {
                 //todo - put actual address id
-                eventListener.emit(OrderingEvents.GoToDeliveryDate(212504))
+                eventListener.emit(OrderingEvents.GoToDeliveryDate(212553))
             }
         }
     }
@@ -257,7 +257,7 @@ class OrderingFlowViewModel @Inject constructor(
         when (orderPaymentItem.id) {
             "oplata" -> {
                 //todo - put actual address id and chosen local date
-                eventListener.emit(OrderingEvents.GoToPaymentMethod(212504, LocalDate.now().plusDays(1)))
+                eventListener.emit(OrderingEvents.GoToPaymentMethod(212553, LocalDate.now().plusDays(1)))
             }
 
             else -> {
