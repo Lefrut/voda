@@ -6,17 +6,13 @@ import androidx.lifecycle.viewModelScope
 import com.vodovoz.app.R
 import com.vodovoz.app.common.account.AccountManager
 import com.vodovoz.app.common.cart.CartManager
-import com.vodovoz.app.common.content.ErrorState
 import com.vodovoz.app.common.content.Event
 import com.vodovoz.app.common.content.PagingContractViewModel
 import com.vodovoz.app.common.content.State
-import com.vodovoz.app.common.content.toErrorState
 import com.vodovoz.app.common.content.updateData
 import com.vodovoz.app.common.like.LikeManager
 import com.vodovoz.app.common.resources.ResourcesProvider
 import com.vodovoz.app.core.network.VodovozWebConfig
-import com.vodovoz.app.data.MainRepository
-import com.vodovoz.app.data.model.common.ResponseEntity
 import com.vodovoz.app.design_system.model.AboutAdvertisingUi
 import com.vodovoz.app.design_system.model.BannerUi
 import com.vodovoz.app.design_system.model.CategoryWithProductsUi
@@ -43,7 +39,6 @@ import com.vodovoz.app.feature.home.model.PopularCategoryUi
 import com.vodovoz.app.feature.home.model.UnratedProductUi
 import com.vodovoz.app.feature.home.model.UnratedProductsSectionUi
 import com.vodovoz.app.feature.home.model.toUi
-import com.vodovoz.app.util.extensions.debugLog
 import com.vodovoz.app.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
@@ -51,15 +46,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.math.roundToInt
@@ -419,7 +410,8 @@ class HomeFlowViewModel @Inject constructor(
         eventListener.emit(HomeEvents.ActivateVodovozAction(banner.action))
     }
 
-    fun activateAction(action: VodovozAction) = viewModelScope.launch {
+    fun activateSpecialPromotionAction(action: VodovozAction) = viewModelScope.launch {
+        uiStateListener.updateData { s -> s.copy(showSpecialPromotionBS = false) }
         eventListener.emit(HomeEvents.ActivateVodovozAction(action))
     }
 

@@ -1,6 +1,8 @@
 package com.vodovoz.app.ui.base
 
 import android.app.Application
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.os.LocaleListCompat
 import androidx.hilt.work.HiltWorkerFactory
 import androidx.work.Configuration
 import com.vodovoz.app.BuildConfig
@@ -29,6 +31,8 @@ class VodovozApplication : Application(), Configuration.Provider {
 
     override fun onCreate() {
         super.onCreate()
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+        AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags("ru"))
         //initYandexMetrica() //todo релиз
         MapKitFactory.setApiKey(AppKeys.MAPKIT_API_KEY)
         Timber.plant(Timber.DebugTree())

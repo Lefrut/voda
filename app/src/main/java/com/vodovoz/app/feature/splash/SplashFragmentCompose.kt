@@ -72,8 +72,8 @@ class SplashFragment : Fragment() {
 
     override fun onStop() {
         super.onStop()
-        requireActivity().disableFullScreen()
         activityViewModel.finishAndroidSplash()
+        requireActivity().disableFullScreen()
     }
 
     override fun onCreateView(
