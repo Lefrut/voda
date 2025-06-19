@@ -93,7 +93,7 @@ fun AddressBody(
                 item {
                     VodovozHorizontalDivider()
                 }
-            } else {
+            } else if(addressSections.lastOrNull()?.items?.lastOrNull() != null) {
                 item {
                     HorizontalDivider(
                         thickness = 1.dp,

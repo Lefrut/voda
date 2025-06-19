@@ -12,4 +12,5 @@ data class AddAddressState(
     val withoutSpaceWidgets: List<WidgetUi> = emptyList(),
     val details: AddressDetailsUi? = null,
     val showRemoveAddressDialog: Boolean = false,
+    val addressName: String = "",
 )

@@ -29,7 +29,7 @@ data class AddressUI(
 ): Parcelable, Item {
 
     override fun getItemViewType(): Int {
-        return R.layout.view_holder_address
+        return 444444444
     }
 
     override fun areItemsTheSame(item: Item): Boolean {
@@ -39,22 +39,4 @@ data class AddressUI(
     }
 
 }
-
-@Parcelize
-data class AddressFlowTitle(
-    val title: String
-): Parcelable, Item {
-
-    override fun getItemViewType(): Int {
-        return R.layout.view_holder_addresses_type_title
-    }
-
-    override fun areItemsTheSame(item: Item): Boolean {
-        if (item !is AddressFlowTitle) return false
-
-        return this == item
-    }
-
-}
-
 

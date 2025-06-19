@@ -8,7 +8,6 @@ import com.vodovoz.app.core.network.interceptor.BaseUrlInterceptor
 import com.vodovoz.app.core.network.interceptor.ChangeUrlInterceptor
 import com.vodovoz.app.core.network.interceptor.VodovozInterceptor
 import com.vodovoz.app.data.MainApi
-import com.vodovoz.app.data.maps.MapKitFlowApi
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -19,7 +18,6 @@ import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
-//import retrofit2.adapter.rxjava3.RxJava3CallAdapterFactory
 import retrofit2.converter.moshi.MoshiConverterFactory
 import retrofit2.create
 import java.util.concurrent.TimeUnit
@@ -94,16 +92,7 @@ abstract class NetworkModule {
                 .build()
         }
 
-        @Provides
-        @Singleton
-        @Named("mapkit")
-        fun providesMapKitRetrofit(okHttpClient: OkHttpClient): Retrofit {
-            return Retrofit.Builder()
-                .baseUrl(ApiConfig.MAPKIT_URL)
-                .addConverterFactory(MoshiConverterFactory.create())
-                .client(okHttpClient)
-                .build()
-        }
+
 
         @Provides
         @Singleton
@@ -116,10 +105,5 @@ abstract class NetworkModule {
         @Provides
         @Singleton
         fun provideMainApi(@Named("main") retrofit: Retrofit): MainApi = retrofit.create()
-
-        @Provides
-        @Singleton
-        fun provideMapKitFlowApi(@Named("mapkit") retrofit: Retrofit): MapKitFlowApi =
-            retrofit.create()
     }
 }

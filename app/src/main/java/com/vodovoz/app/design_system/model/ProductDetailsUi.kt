@@ -2,6 +2,7 @@ package com.vodovoz.app.design_system.model
 
 import android.os.Parcelable
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.Stable
 import androidx.compose.ui.graphics.Color
 import com.vodovoz.app.domain.general.model.product.BlockPromoDataModel
 import com.vodovoz.app.domain.general.model.product.BrandCategoryBlockModel
@@ -51,6 +52,7 @@ fun ProductDetailsButtonsModel.toUi(): ProductDetailsButtonsUi {
     )
 }
 
+@Immutable
 data class ProductDetailsButtonsUi(
     val blockButton: ButtonBlockUi?,
     val blockDesignButton: ButtonDesignBlockUi?,
@@ -142,7 +144,7 @@ data class ProductDetailsUi(
     }
 }
 
-@Immutable
+@Stable
 @Parcelize
 sealed interface ProductMediaUi : Parcelable {
     @Immutable
@@ -286,6 +288,7 @@ fun BuyButtonModel.toUi(): BuyButtonUi {
     )
 }
 
+@Immutable
 data class DepositUi(
     val price: Float,
     val description: ContentBlockUi<String>,
@@ -417,7 +420,7 @@ data class CharacteristicUi(
     val hint: String?,
 )
 
-@Immutable
+@Stable
 data class ContentBlockUi<T>(
     val title: String,
     val content: T,

@@ -644,7 +644,9 @@ class VodovozServiceRepositoryImpl @Inject constructor(
                 vodovozService.getAddresses(accountManager.fetchAccountId())
             },
             mapper = {
-                it.data!!.toDomain()
+                it.data!!.toDomain().ifEmpty {
+                    throw IllegalArgumentException("Addresses can't be empty")
+                }
             },
             onFail = { response ->
                 val body = response.stringBody()
@@ -662,8 +664,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
         return executeRequest(
             request = {
                 vodovozService.getPastPurchasesDetails(
-                    userId = 1,
-                    page = 1,
+                    userId = accountManager.fetchAccountId(),
                     sort = sort.value,
                     order = sort.order,
                     categoryId = categoryId.takeIf { id -> id > 0 }

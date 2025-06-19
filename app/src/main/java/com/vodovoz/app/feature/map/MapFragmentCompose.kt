@@ -37,6 +37,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.google.android.gms.location.LocationServices
+import com.vodovoz.app.R
 import com.vodovoz.app.common.tab.TabManager
 import com.vodovoz.app.core.android.getLocationOrNull
 import com.vodovoz.app.core.android.handleLocationAvailability
@@ -49,6 +50,7 @@ import com.vodovoz.app.design_system.model.toMapPoint
 import com.vodovoz.app.design_system.model.toPoint
 import com.vodovoz.app.ui.yandex_map.VodovozUserLocationListener
 import com.vodovoz.app.ui.yandex_map.YandexMapUi
+import com.vodovoz.app.ui.yandex_map.animMove
 import com.vodovoz.app.ui.yandex_map.copy
 import com.vodovoz.app.ui.yandex_map.minusZoom
 import com.vodovoz.app.ui.yandex_map.plusZoom
@@ -56,6 +58,7 @@ import com.yandex.mapkit.Animation
 import com.yandex.mapkit.MapKit
 import com.yandex.mapkit.MapKitFactory
 import com.yandex.mapkit.geometry.Point
+import com.yandex.mapkit.map.CameraPosition
 import com.yandex.mapkit.map.Map
 import com.yandex.mapkit.map.MapWindow
 import com.yandex.mapkit.mapview.MapView
@@ -78,10 +81,6 @@ class MapFragment : Fragment() {
     private val fusedLocationClient by lazy {
         LocationServices.getFusedLocationProviderClient(requireContext())
     }
-    private val locationManager by lazy {
-        requireContext().getSystemService(Context.LOCATION_SERVICE) as? LocationManager
-    }
-
     private val mapKit: MapKit by lazy { MapKitFactory.getInstance() }
 
     private val yandexMap by lazy {
@@ -209,61 +208,39 @@ class MapFragment : Fragment() {
         keyboardController: SoftwareKeyboardController?,
     ): Unit =
         viewModel.observeEvent().onStart {
-            findNavController().currentBackStackEntry?.savedStateHandle?.remove<MapFlowViewModel.MapScreenTypeUi>(
-                "screenType"
-            )?.let { viewModel.changeScreenTypeToEdit() }
             mainScope.launch {
-                delay(100L)
+                delay(250L)
                 viewModel.moveToAvailableGeo()
             }
         }.collect { event ->
             when (event) {
                 is MapFlowViewModel.MapFlowEvents.MoveToAddress -> {
                     val addressPoint = event.addressPoint.toPoint()
-                    map.move(
+                    map.animMove(
                         map.cameraPosition.copy(
                             target = addressPoint,
                             zoom = 16f,
-                        ),
-                        Animation(Animation.Type.LINEAR, 0.25f),
-                        null
+                        )
                     )
                 }
 
                 MapFlowViewModel.MapFlowEvents.MoveToGeoOrMoscow -> {
                     val moscowCameraPosition = map.cameraPosition.copy(moscowPoint, 10f, 0f, 0f)
 
-                    if (requireContext().locationPermissionGranted
-                        && locationManager?.isProviderEnabled(LocationManager.GPS_PROVIDER) == true
-                    ) {
-                        val location = fusedLocationClient.getLocationOrNull(requireContext())
+                    val location = fusedLocationClient.getLocationOrNull(requireContext())
 
-                        val cameraPosition = location?.let {
-                            map.cameraPosition.copy(
-                                Point(
-                                    location.latitude,
-                                    location.longitude
-                                ),
-                                16f,
-                                0f,
-                                0f
-                            )
-                        } ?: moscowCameraPosition
+                    val cameraPosition = location?.let {
+                        CameraPosition(
+                            Point(location.latitude, location.longitude),
+                            16f,
+                            0f,
+                            0f
+                        )
+                    } ?: moscowCameraPosition
 
-                        map.move(
-                            cameraPosition,
-                            Animation(Animation.Type.LINEAR, 0.25f),
-                            null
-                        )
-                        viewModel.searchAddress(cameraPosition.target.toMapPoint())
-                    } else {
-                        map.move(
-                            moscowCameraPosition,
-                            Animation(Animation.Type.LINEAR, 0.25f),
-                            null
-                        )
-                        viewModel.searchAddress(moscowCameraPosition.target.toMapPoint())
-                    }
+                    map.animMove(cameraPosition)
+
+                    viewModel.searchAddress(cameraPosition.target.toMapPoint())
                 }
 
                 MapFlowViewModel.MapFlowEvents.CheckGeo -> {
@@ -327,7 +304,13 @@ class MapFragment : Fragment() {
                 }
 
                 is MapFlowViewModel.MapFlowEvents.GoToAddAddress -> {
-                    findNavController().navigateToAddAddress(event.addressId)
+                    findNavController().navigateToAddAddress(event.addressId, event.addressName)
+                }
+
+                is MapFlowViewModel.MapFlowEvents.BackToAddAddress -> {
+                    val navController = findNavController()
+                    navController.previousBackStackEntry?.savedStateHandle?.set("addressName", event.addressName)
+                    navController.popBackStack()
                 }
 
                 else -> {
