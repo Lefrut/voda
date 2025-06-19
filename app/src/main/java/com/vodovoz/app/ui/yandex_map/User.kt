@@ -16,7 +16,7 @@ class VodovozUserLocationListener(
 ) : UserLocationObjectListener {
     override fun onObjectAdded(p0: UserLocationView) {
 
-        val imageProvider = ImageProvider.fromResource(context, R.drawable.svg_gps_outline)
+        val imageProvider = ImageProvider.fromResource(context, R.drawable.pic_gps)
 
         p0.arrow.setIcon(
             imageProvider,

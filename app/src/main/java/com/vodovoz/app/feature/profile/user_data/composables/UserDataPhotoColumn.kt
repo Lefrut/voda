@@ -51,7 +51,7 @@ fun UserDataPhotoColumn(
                 error = painterResource(id = R.drawable.pic_avatar)
             )
             Image(
-                painter = painterResource(id = R.drawable.icon_cam),
+                painter = painterResource(id = R.drawable.svg_cam),
                 contentDescription = null,
                 modifier = Modifier
                     .align(Alignment.BottomEnd)

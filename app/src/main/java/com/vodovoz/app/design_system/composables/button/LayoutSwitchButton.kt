@@ -36,7 +36,7 @@ fun LayoutSwitchButton(
         animationSpec = tween(durationMillis = 500, easing = LinearEasing)
     ) { state ->
         Icon(
-            painter = painterResource(id = if (!state) R.drawable.ic_grid_view_24 else R.drawable.ic_linear_view_24),
+            painter = painterResource(id = if (!state) R.drawable.ic_grid_orientation else R.drawable.ic_linear_orientation),
             contentDescription = null,
             tint = MaterialTheme.colorScheme.onBackground,
             modifier = modifier

@@ -236,7 +236,6 @@
             android:id="@+id/btnAdd"
             android:layout_width="match_parent"
             android:layout_height="48dp"
-            style="@style/BlueButton"
             android:textSize="17sp"
             android:visibility="gone"
             android:layout_marginHorizontal="@dimen/space_16"
@@ -245,7 +244,6 @@
         <androidx.appcompat.widget.AppCompatButton
             android:layout_width="match_parent"
             android:layout_height="48dp"
-            style="@style/BlueButton"
             android:backgroundTint="@color/new_product_light_blue"
             android:enabled="false"
             android:textSize="17sp"

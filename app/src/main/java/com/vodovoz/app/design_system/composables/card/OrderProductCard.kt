@@ -85,7 +85,7 @@ fun OrderProductCard(
 
                 if (restrictions != ProductRestrictionUi.NO_FAVORITES && restrictions != ProductRestrictionUi.FULL_RESTRICTION && restrictions != ProductRestrictionUi.NO_FAVORITES_QUANTITY) {
                     Icon(
-                        painter = painterResource(id = if (product.isFavorite) R.drawable.ic_filled_like else R.drawable.ic_like),
+                        painter = painterResource(id = if (product.isFavorite) R.drawable.ic_favorite_filled else R.drawable.ic_favorite_outline),
                         contentDescription = null,
                         tint = if (product.isFavorite) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.surfaceTint,
                         modifier = Modifier

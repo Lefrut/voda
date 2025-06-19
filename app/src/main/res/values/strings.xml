@@ -5,147 +5,190 @@
     <string name="new_app_ssl_not">http</string>
     <string name="new_app_ssl">https</string>
 
-    <string name="app_name" translatable="false">Vodovoz</string>
+    <string name="app_name">Vodovoz</string>
 
+    <string name="auth_title">Вход и регистрация</string>
+    <string name="enter_code_title">Ввести код</string>
+    <string name="enter_code_description">Введите код из SMS, отправленный на номер %s</string>
+    <string name="resend_sms_hint">Повторно получить SMS с кодом можно через:</string>
+
+    <string name="enter_email_title">Вход</string>
+
+    <string name="error_site_login">Не удалось войти. Попробуйте снова или войдите по почте.</string>
+
+    <string name="email_hint_text">Email</string>
+    <string name="password_title">Пароль</string>
+    <string name="enter_password_hint">Введите пароль</string>
+    <string name="wrong_password">Пароль неверный</string>
+    <string name="forgot_password">Забыли пароль?</string>
+
+    <string name="sms_code_hint_text">Код</string>
+    <string name="your_id">Ваш ID:</string>
+    <string name="id_desc">Необходим при обращении в службу поддержки</string>
+
+    <string name="have_not_account_text">Нет аккаунта?</string>
+    <string name="create_account_btn_text">Создайте</string>
+    
     //BottomNavMenu
-    <string name="home" translatable="false">Главный</string>
-    <string name="catalog" translatable="false">Каталог</string>
-    <string name="cart" translatable="false">Корзина</string>
-    <string name="favorite" translatable="false">Избранное</string>
-    <string name="account" translatable="false">Профиль</string>
-    <string name="search_hint" translatable="false">Искать в Vodovoz</string>
-    <string name="update_label" translatable="false">Обновить</string>
-
-    //Section
+    <string name="home">Главный</string>
+    <string name="catalog">Каталог</string>
+    <string name="cart">Корзина</string>
+    <string name="favorite">Избранное</string>
+    <string name="account">Профиль</string>
+    <string name="search_hint">Искать в Vodovoz</string>
+    <string name="update_label">Обновить</string>
 
     //Additional Info
-    <string name="about_shop" translatable="false">О магазине</string>
-    <string name="about_delivery" translatable="false">О доставке</string>
-    <string name="about_pay" translatable="false">Об оплате</string>
-    <string name="about_contacts" translatable="false">Связаться с нами</string>
-    <string name="about_how_to_order" translatable="false">Как заказать</string>
-    <string name="about_services" translatable="false">Услуги</string>
-    <string name="about_app" translatable="false">О приложении</string>
-    <string name="show_all" translatable="false">СМ.ВСЕ</string>
-    <string name="last_purchases" translatable="false">Прошлые покупки</string>
-    <string name="additional_navigation_favorite" translatable="false">Избранное</string>
-    <string name="additional_navigation_order_history" translatable="false">История заказов</string>
-    <string name="not_available" translatable="false">Нет в наличии</string>
-    <string name="cancel" translatable="false">Отмена</string>
-    <string name="confirm" translatable="false">Подтвердить</string>
+    <string name="about_shop">О магазине</string>
+    <string name="about_delivery">О доставке</string>
+    <string name="about_pay">Об оплате</string>
+    <string name="about_contacts">Связаться с нами</string>
+    <string name="about_how_to_order">Как заказать</string>
+    <string name="about_services">Услуги</string>
+    <string name="about_app">О приложении</string>
+    <string name="show_all">СМ.ВСЕ</string>
+    <string name="last_purchases">Прошлые покупки</string>
+    <string name="additional_navigation_favorite">Избранное</string>
+    <string name="additional_navigation_order_history">История заказов</string>
+    <string name="not_available">Нет в наличии</string>
+    <string name="cancel">Отмена</string>
+    <string name="confirm">Подтвердить</string>
+    <string name="ordering_title_text">Оформление заказа</string>
 
+    <string name="addresses_title">Адреса</string>
+    <string name="personal_addresses_title">Частное лицо</string>
+    <string name="company_addresses_title">Компания</string>
+    <string name="add_address_btn_text">Добавить адрес</string>
+    <string name="bring_here_btn_text">Доставить сюда</string>
+    <string name="write_comment_btn_text">Написать отзыв</string>
 
-    //New Strings
+    <string name="about_app_title" >О приложении</string>
+    <string name="app_version_text" >Версия %s</string>
+    <string name="write_to_developers" >Написать разработчикам</string>
+    <string name="rate_app_text" >Оценить приложение</string>
+    <string name="share_app_text" >Поделиться приложением</string>
+
+    //Services
+    <string name="services_title" >Услуги</string>
+    <string name="more_details_about_service_btn_text" >Подробнее</string>
+
+    <string name="cart_title">Корзина</string>
+
+    //How to Order
+    <string name="how_order_title" >Как заказать</string>
+
+    <string name="personal_house_delivery_text">Доставка в частный дом</string>
+    <string name="company_office_delivery_text">Доставка в офис</string>
 
     //Base
     <string name="russian_phone_code">+7</string>
-    <string name="article" translatable="false">Артикул:</string>
-    <string name="depose_price" translatable="false">Залоговая стоимость за бутыль</string>
-    <string name="product_absent" translatable="false">Товар закончился</string>
-    <string name="price_text" translatable="false">%d ₽</string>
-    <string name="email" translatable="false">Войти через почту</string>
-    <string name="enter_your_phone_number" translatable="false">Укажите номер телефона, чтобы войти или зарегистрироваться, если у вас нет аккаунта.</string>
-    <string name="enter_code" translatable="false">Введите код из SMS, отправленный на номер</string>
-    <string name="registered_only" translatable="false">Только для зарегистрированных \nпользователей</string>
-    <string name="i_confirm_personal_data" translatable="false">Продолжая, вы соглашаетесь с <a href="#">политикой конфиденциальности</a> и с <a href="#">публичной афертой</a></string>
-    <string name="subscribe_on_mailing_list" translatable="false">Подписаться на рассылку</string>
-    <string name="send_code" translatable="false">Выслать код</string>
-    <string name="vvedite_INN" translatable="false">ИНН</string>
-    <string name="vvedite_nazvanie" translatable="false">Введите название</string>
-    <string name="address_text" translatable="false">Адрес</string>
-    <string name="nazvanie_kompanii" translatable="false">Название организации</string>
-    <string name="kuda_vopros" translatable="false">Куда?</string>
-    <string name="fio_text" translatable="false">ФИО</string>
-    <string name="email_text" translatable="false">Email</string>
-    <string name="telephone_text" translatable="false">Телефон</string>
-    <string name="kogda_vopros" translatable="false">Когда?</string>
-    <string name="data_text" translatable="false">Дата</string>
-    <string name="vremya_text" translatable="false">Время</string>
-    <string name="oplata_text" translatable="false">Оплата</string>
-    <string name="choose_pay_system_hint" translatable="false">Выберите способ оплаты</string>
-    <string name="sdacha_text" translatable="false">С какой суммы нужна сдача?</string>
-    <string name="call_title" translatable="false">Вам позвонить?</string>
-    <string name="neobhodimoe_deystvie" translatable="false">Выберите необходимое действие</string>
-    <string name="zvonok_operatore_text" translatable="false">Требуется звонок оператора</string>
-    <string name="predupredit_o_priezde" translatable="false">Предупредить о приезде водителя</string>
-    <string name="telephone_dlya_voditelya" translatable="false">Телефон по доставке</string>
-    <string name="kommentariy_k_zakazu" translatable="false">Комментарий к заказу</string>
-    <string name="kommentariy_dlya_kuriera" translatable="false">Комментарий для курьера</string>
-    <string name="tsena_text" translatable="false">Оплата</string>
-    <string name="stoimost_tovarov" translatable="false">Стоимость товаров</string>
-    <string name="zalog_text" translatable="false">Залог</string>
-    <string name="skidka_po_akciyam" translatable="false">Скидка по акциям</string>
-    <string name="dostavka_text" translatable="false">Доставка</string>
-    <string name="oplata_parkovki" translatable="false">Оплата парковки</string>
-    <string name="itogo_text" translatable="false">Итого</string>
-    <string name="spasibo_za_zakaz" translatable="false">Спасибо за заказ</string>
-    <string name="oplatit_text" translatable="false">Оплатить</string>
-    <string name="kategorii" translatable="false">Категории</string>
-    <string name="nastroiki" translatable="false">Настройки</string>
-    <string name="sbrosit_dannye" translatable="false">Сбросить данные</string>
-    <string name="nastroyki_uvedomleniy" translatable="false">Настройки уведомлений</string>
-    <string name="vasha_norma" translatable="false">Ваша норма</string>
-    <string name="vashe_pravilnoe_potreblenie" translatable="false">Ваше правильное ежедневное\nпотребление воды</string>
-    <string name="_2500ml" translatable="false">2500мл</string>
-    <string name="nachat" translatable="false">Начать</string>
-    <string name="vash_pol" translatable="false">Ваш пол</string>
-    <string name="dalee" translatable="false">Далее</string>
-    <string name="millilitres" translatable="false">%d мл</string>
-    <string name="reklama" translatable="false">Реклама</string>
-    <string name="from_" translatable="false">От</string>
-    <string name="to_" translatable="false">До</string>
-    <string name="warn_driver_title" translatable="false">Предупредить о приезде водителя</string>
-    <string name="antispam_warn" translatable="false">Уважаемый клиент, мы не дозвонимся до Вас,\nесли установлен АНТИСПАМ.</string>
-    <string name="close" translatable="false">Закрыть</string>
-    <string name="your_norm" translatable="false">Ваша норма</string>
-    <string name="target_daily" translatable="false">Цель ежедневного потребления</string>
-    <string name="_200ml" translatable="false">200 мл</string>
-    <string name="enter_for_add_water" translatable="false">Нажмите, чтобы добавить воду</string>
-    <string name="do_cancel" translatable="false">Отменить</string>
-    <string name="do_repeat" translatable="false">Повторить</string>
-    <string name="do_pay" translatable="false">Оплатить</string>
-    <string name="info_about_order" translatable="false">Информация о заказе</string>
-    <string name="recipient" translatable="false">Получатель</string>
-    <string name="name" translatable="false">Имя</string>
-    <string name="last_name" translatable="false">Фамилия</string>
-    <string name="name_hint" translatable="false">Введите имя</string>
-    <string name="family_hint" translatable="false">Введите фамилию</string>
-    <string name="save" translatable="false">Сохранить</string>
-    <string name="example_mail_com" translatable="false">example@mail.com</string>
-    <string name="fill_value" translatable="false">Заполнить</string>
-    <string name="send" translatable="false">Отправить</string>
-    <string name="repeat" translatable="false">Повторить</string>
-    <string name="details" translatable="false">Подробнее</string>
-    <string name="confirm_personal_data" translatable="false">Я подтверждаю свое согласие на <a href="#">обработку персональных данных </a></string>
-    <string name="order_history" translatable="false">История заказов</string>
-    <string name="categories" translatable="false">Категории</string>
-    <string name="no_products_available" translatable="false">Товары в заказе отсутствуют</string>
-    <string name="search_" translatable="false">Поиск...</string>
-    <string name="enter_phone" translatable="false">Введите телефон</string>
-    <string name="phone" translatable="false">Телефон</string>
-    <string name="phone_" translatable="false">Телефон*</string>
-    <string name="enter_email" translatable="false">Введите E-mail</string>
-    <string name="address_title" translatable="false">Адрес</string>
-    <string name="fio_" translatable="false">ФИО*</string>
-    <string name="fill_field" translatable="false">Заполнить</string>
-    <string name="email_" translatable="false">Почта*</string>
-    <string name="jivo_chat" translatable="false">Чат с поддержкой</string>
-    <string name="call_me_for_confirm" translatable="false">Позвоните мне для подтверждения заказа</string>
+    <string name="article">Артикул:</string>
+    <string name="depose_price">Залоговая стоимость за бутыль</string>
+    <string name="product_absent">Товар закончился</string>
+    <string name="price_text">%d ₽</string>
+    <string name="email">Войти через почту</string>
+    <string name="enter_your_phone_number">Укажите номер телефона, чтобы войти или зарегистрироваться, если у вас нет аккаунта.</string>
+    <string name="enter_code">Введите код из SMS, отправленный на номер</string>
+    <string name="registered_only">Только для зарегистрированных \nпользователей</string>
+    <string name="i_confirm_personal_data">Продолжая, вы соглашаетесь с <a href="#">политикой конфиденциальности</a> и с <a href="#">публичной афертой</a></string>
+    <string name="subscribe_on_mailing_list">Подписаться на рассылку</string>
+    <string name="send_code">Выслать код</string>
+    <string name="vvedite_INN">ИНН</string>
+    <string name="vvedite_nazvanie">Введите название</string>
+    <string name="address_text">Адрес</string>
+    <string name="nazvanie_kompanii">Название организации</string>
+    <string name="kuda_vopros">Куда?</string>
+    <string name="fio_text">ФИО</string>
+    <string name="email_text">Email</string>
+    <string name="telephone_text">Телефон</string>
+    <string name="kogda_vopros">Когда?</string>
+    <string name="data_text">Дата</string>
+    <string name="vremya_text">Время</string>
+    <string name="oplata_text">Оплата</string>
+    <string name="choose_pay_system_hint">Выберите способ оплаты</string>
+    <string name="sdacha_text">С какой суммы нужна сдача?</string>
+    <string name="call_title">Вам позвонить?</string>
+    <string name="neobhodimoe_deystvie">Выберите необходимое действие</string>
+    <string name="zvonok_operatore_text">Требуется звонок оператора</string>
+    <string name="predupredit_o_priezde">Предупредить о приезде водителя</string>
+    <string name="telephone_dlya_voditelya">Телефон по доставке</string>
+    <string name="kommentariy_k_zakazu">Комментарий к заказу</string>
+    <string name="kommentariy_dlya_kuriera">Комментарий для курьера</string>
+    <string name="tsena_text">Оплата</string>
+    <string name="stoimost_tovarov">Стоимость товаров</string>
+    <string name="zalog_text">Залог</string>
+    <string name="skidka_po_akciyam">Скидка по акциям</string>
+    <string name="dostavka_text">Доставка</string>
+    <string name="oplata_parkovki">Оплата парковки</string>
+    <string name="itogo_text">Итого</string>
+    <string name="spasibo_za_zakaz">Спасибо за заказ</string>
+    <string name="oplatit_text">Оплатить</string>
+    <string name="kategorii">Категории</string>
+    <string name="nastroiki">Настройки</string>
+    <string name="sbrosit_dannye">Сбросить данные</string>
+    <string name="nastroyki_uvedomleniy">Настройки уведомлений</string>
+    <string name="vasha_norma">Ваша норма</string>
+    <string name="vashe_pravilnoe_potreblenie">Ваше правильное ежедневное\nпотребление воды</string>
+    <string name="_2500ml">2500мл</string>
+    <string name="nachat">Начать</string>
+    <string name="vash_pol">Ваш пол</string>
+    <string name="dalee">Далее</string>
+    <string name="millilitres">%d мл</string>
+    <string name="reklama">Реклама</string>
+    <string name="from_">От</string>
+    <string name="to_">До</string>
+    <string name="warn_driver_title">Предупредить о приезде водителя</string>
+    <string name="antispam_warn">Уважаемый клиент, мы не дозвонимся до Вас,\nесли установлен АНТИСПАМ.</string>
+    <string name="close">Закрыть</string>
+    <string name="your_norm">Ваша норма</string>
+    <string name="target_daily">Цель ежедневного потребления</string>
+    <string name="_200ml">200 мл</string>
+    <string name="enter_for_add_water">Нажмите, чтобы добавить воду</string>
+    <string name="do_cancel">Отменить</string>
+    <string name="do_repeat">Повторить</string>
+    <string name="do_pay">Оплатить</string>
+    <string name="info_about_order">Информация о заказе</string>
+    <string name="recipient">Получатель</string>
+    <string name="name">Имя</string>
+    <string name="last_name">Фамилия</string>
+    <string name="name_hint">Введите имя</string>
+    <string name="family_hint">Введите фамилию</string>
+    <string name="save">Сохранить</string>
+    <string name="example_mail_com">example@mail.com</string>
+    <string name="fill_value">Заполнить</string>
+    <string name="send">Отправить</string>
+    <string name="repeat">Повторить</string>
+    <string name="details">Подробнее</string>
+    <string name="confirm_personal_data">Я подтверждаю свое согласие на <a href="#">обработку персональных данных </a></string>
+    <string name="order_history">История заказов</string>
+    <string name="categories">Категории</string>
+    <string name="no_products_available">Товары в заказе отсутствуют</string>
+    <string name="search_">Поиск…</string>
+    <string name="enter_phone">Введите телефон</string>
+    <string name="phone">Телефон</string>
+    <string name="phone_">Телефон*</string>
+    <string name="enter_email">Введите E-mail</string>
+    <string name="address_title">Адрес</string>
+    <string name="fio_">ФИО*</string>
+    <string name="fill_field">Заполнить</string>
+    <string name="email_">Почта*</string>
+    <string name="jivo_chat">Чат с поддержкой</string>
+    <string name="call_me_for_confirm">Позвоните мне для подтверждения заказа</string>
     <string name="empty_string" />
-    <string name="canceled" translatable="false">Отменен</string>
-    <string name="payed" translatable="false">Оплачен</string>
-    <string name="not_payed" translatable="false">Не оплачен</string>
-    <string name="comments" translatable="false">Отзывы</string>
-    <string name="wrong_code" translatable="false">Неверный код</string>
-    <string name="wrong_email" translatable="false">Неправильно указан email</string>
-    <string name="error_repeat" translatable="false">Ошибка. Попробуйте снова.</string>
-    <string name="password_recover_success" translatable="false">Пароль упешно изменен и выслан вам на почту: %1$s</string>
-    <string name="resend_code" translatable="false">Запросить код повторно</string>
-    <string name="wrong_phone" translatable="false">Неверный формат телефона</string>
-    <string name="enter" translatable="false">Войти</string>
-    <string name="choose" translatable="false">Выбрать</string>
-    <string name="ok" translatable="false">Ок</string>
-    <string name="biometric_fault" translatable="false">Вход по биометрии не выполнен</string>
+    <string name="canceled">Отменен</string>
+    <string name="payed">Оплачен</string>
+    <string name="not_payed">Не оплачен</string>
+    <string name="comments">Отзывы</string>
+    <string name="wrong_code">Неверный код</string>
+    <string name="wrong_email">Неправильно указан email</string>
+    <string name="error_repeat">Ошибка. Попробуйте снова.</string>
+    <string name="password_recover_success">Пароль упешно изменен и выслан вам на почту: %1$s</string>
+    <string name="resend_code">Запросить код повторно</string>
+    <string name="wrong_phone">Неверный формат телефона</string>
+    <string name="enter">Войти</string>
+    <string name="choose">Выбрать</string>
+    <string name="ok">Ок</string>
+    <string name="biometric_fault">Вход по биометрии не выполнен</string>
     <string name="my_data">Мои данные</string>
 
     <string name="delete_account">Удалить аккаунт</string>
@@ -291,7 +334,7 @@
         Устройство: %1$s\n
         Версия приложения: %2$s\n
         ID пользователя: %3$d
-</string>
+    </string>
     <string name="device_info">Android: %1$s, Версия: %2$s, %3$s.</string>
     <string name="tablet">Планшет</string>
     <string name="no_email_client">Нет почтового клиента</string>
@@ -343,7 +386,6 @@
     <string name="quantity_kg">%1$s кг</string>
 
 
-
     <string name="vpn_warning">Отключите VPN, если работа приложения замедляется</string>
 
     <string name="logout_error">Не удалось выйти из аккаунта, попробойте снова.</string>
@@ -377,7 +419,7 @@
     <string name="error_invalid_address">Некорректный адрес</string>
     <string name="edit_address">Изменить адрес</string>
     <string name="need_pass">Нужен пропуск</string>
-    
+
     <string name="flat">Квартира</string>
     <string name="entrance">Подъезд</string>
     <string name="intercom">Домофон</string>

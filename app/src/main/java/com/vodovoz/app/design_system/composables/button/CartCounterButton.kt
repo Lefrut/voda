@@ -54,7 +54,7 @@ fun CartCounterButton(
             contentAlignment = Alignment.Center
         ) {
             Icon(
-                painter = painterResource(id = if (cartQuantity <= 1 && haveTrash) R.drawable.icon_trash else R.drawable.ic_minus_rounded),
+                painter = painterResource(id = if (cartQuantity <= 1 && haveTrash) R.drawable.ic_trash else R.drawable.ic_minus_rounded),
                 contentDescription = null,
                 modifier = Modifier.size(18.dp),
                 tint = if (cartQuantity > 0) MaterialTheme.colorScheme.primary

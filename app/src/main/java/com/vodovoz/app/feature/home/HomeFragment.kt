@@ -105,7 +105,6 @@ class HomeFragment1 : BaseFragment() {
 
     private fun initViewPager() {
         binding.rateViewPager.orientation = ViewPager2.ORIENTATION_HORIZONTAL
-        binding.dotsIndicator.attachTo(binding.rateViewPager)
     }
 
 

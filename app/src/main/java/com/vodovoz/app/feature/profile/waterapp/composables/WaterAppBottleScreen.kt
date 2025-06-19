@@ -318,7 +318,7 @@ private fun WaterAppBottle(
         }
 
         Image(
-            painter = painterResource(R.drawable.empty_bottle),
+            painter = painterResource(R.drawable.svg_empty_bottle),
             contentDescription = null,
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.FillBounds
