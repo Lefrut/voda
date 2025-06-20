@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -72,7 +73,7 @@ fun LinearProductCard(
                 modifier = Modifier
                     .clip(MaterialTheme.shapes.small)
                     .width(144.dp)
-                    .height(132.dp),
+                    .fillMaxHeight(),
                 showBlur = forAdults != null,
                 text = forAdults?.textBlur ?: ""
             ) {
@@ -90,13 +91,12 @@ fun LinearProductCard(
                     .weight(1f)
                     .padding(start = 16.dp)
             ) {
-                val labelSmall = MaterialTheme.typography.labelSmall
                 Text(
                     text = product.name,
-                    modifier = Modifier.height(48.dp),
+                    minLines = 3,
                     maxLines = 3,
                     color = MaterialTheme.colorScheme.onBackground,
-                    style = labelSmall.copy(fontSize = (labelSmall.fontSize.value - 1).sp)
+                    style = ExtendedTheme.typography.labelSmallVariant
                 )
 
                 Row(
@@ -171,7 +171,8 @@ fun LinearProductCard(
                 }
 
 
-                val pricePerUnitText = if (product.pricePerUnit != null && product.unitOfMeasurement != null) stringResource(
+                val pricePerUnitText =
+                    if (product.pricePerUnit != null && product.unitOfMeasurement != null) stringResource(
                         R.string.unit_of_measurement,
                         product.pricePerUnit,
                         product.unitOfMeasurement
@@ -179,15 +180,14 @@ fun LinearProductCard(
                     else ""
 
                 Text(
-                    modifier = Modifier.width(10.dp),
                     maxLines = 1,
                     text = pricePerUnitText,
                     color = MaterialTheme.colorScheme.surfaceTint,
                     style = ExtendedTheme.typography.labelExtraSmallVariant
                 )
 
-                Spacer(modifier = Modifier.weight(1f))
 
+                Spacer(modifier = Modifier.height(8.dp))
                 val buttonIsLoading = product.cartLoading
 
                 when {
