@@ -29,7 +29,6 @@ import com.vodovoz.app.design_system.composables.placeholders.LoadingPlaceholder
 import com.vodovoz.app.design_system.composables.top_bar.HybridSearchTopBar
 import com.vodovoz.app.design_system.model.BrandUi
 
-@Suppress("NonSkippableComposable")
 @Composable
 fun AllBrandsScreen(
     viewModel: AllBrandsFlowViewModel,

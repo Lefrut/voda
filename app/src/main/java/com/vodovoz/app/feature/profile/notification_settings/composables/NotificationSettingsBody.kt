@@ -2,6 +2,7 @@ package com.vodovoz.app.feature.profile.notification_settings.composables
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -28,24 +29,24 @@ import com.vodovoz.app.design_system.model.widgets.WidgetUi
 @Composable
 fun NotificationSettingsBody(
     modifier: Modifier = Modifier,
+    contentPadding: PaddingValues,
     header: String,
     sections: List<SectionUi<WidgetUi>>,
-    button: ColorfulButtonUi,
     onWidgetChange: (WidgetUi, WidgetUi) -> Unit,
-    onSaveClick: () -> Unit,
 ) {
     Column(
         modifier = modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(vertical = 8.dp),
+            .padding(vertical = 8.dp)
+            .padding(contentPadding),
         verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
 
         Text(
             modifier = Modifier.padding(horizontal = 16.dp),
             text = header,
-            style = MaterialTheme.typography.bodyMedium,
+            style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onBackground,
         )
 
@@ -55,19 +56,6 @@ fun NotificationSettingsBody(
                 onWidgetChange = onWidgetChange
             )
         }
-
-        Spacer(modifier = Modifier.weight(1f))
-
-        VodovozButtonsColumn(
-            modifier = Modifier.padding(
-                top = 8.dp,
-                start = 16.dp,
-                end = 16.dp,
-                bottom = 24.dp
-            ),
-            buttons = listOf(button),
-            onButtonClick = { onSaveClick() }
-        )
     }
 }
 

@@ -15,10 +15,10 @@ android {
     compileSdk 35
 
     defaultConfig {
-        applicationId "com.vodovoz.app"
+        applicationId "com.m.vodovoz"
         minSdk 21
-        targetSdk 34
-        versionCode 165
+        targetSdk 35
+        versionCode 200
         versionName "2.0.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -36,7 +36,7 @@ android {
     buildTypes {
         release {
             //todo - debuggable false
-            debuggable true
+            debuggable false
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'

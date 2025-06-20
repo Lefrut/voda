@@ -119,7 +119,7 @@ class HomeFragment : Fragment() {
 
                 VodovozTheme {
                     val pagingState by viewModel.observeUiState().collectAsStateWithLifecycle()
-                    val viewState by rememberUpdatedState(newValue = pagingState.data)
+                    val viewState by rememberUpdatedState(pagingState.data)
                     val topProductLazyListState = rememberLazyListState()
                     val pullRefreshState = rememberPullToRefreshState()
                     val snackbarHostState = remember { SnackbarHostState() }
