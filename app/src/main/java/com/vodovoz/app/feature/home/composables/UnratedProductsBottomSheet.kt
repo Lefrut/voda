@@ -100,44 +100,38 @@ fun UnratedProductsBottomSheet(
 ) {
     val density = LocalDensity.current
 
-    val partiallyExpandedHeight = with(density) {
-        120.dp.toPx()
-    }
+    val partiallyExpandedHeight = with(density) { 120.dp.toPx() }
 
-    val expandedPaddingTopPx = with(density) {
-        8.dp.toPx()
-    }
+    val expandedPaddingTopPx = with(density) { 8.dp.toPx() }
 
     BoxWithConstraints(
         modifier = modifier.fillMaxSize()
     ) {
         val layoutHeight = constraints.maxHeight.toFloat()
 
-        val state = rememberSaveable(
-            layoutHeight, saver = AnchoredDraggableState.Saver()
-        ) {
-            AnchoredDraggableState(
-                initialValue = SheetValue.PartiallyExpanded,
-                anchors = DraggableAnchors {
-                    SheetValue.Hidden at layoutHeight - expandedPaddingTopPx
+        val state = rememberSaveable(layoutHeight, saver = AnchoredDraggableState.Saver()) {
+            AnchoredDraggableState(initialValue = SheetValue.PartiallyExpanded)
+        }
+
+        LaunchedEffect(layoutHeight) {
+            state.updateAnchors(
+                DraggableAnchors {
+                    SheetValue.Hidden at (layoutHeight - expandedPaddingTopPx).coerceAtLeast(0f)
                     SheetValue.PartiallyExpanded at layoutHeight - partiallyExpandedHeight
                     SheetValue.Expanded at expandedPaddingTopPx
-                },
+                }
             )
+
         }
 
         when (state.currentValue) {
-            SheetValue.Hidden -> {
-
-            }
+            SheetValue.Hidden -> {}
 
             SheetValue.Expanded -> {
                 BackHandler { onDispose() }
             }
 
-            SheetValue.PartiallyExpanded -> {
-
-            }
+            SheetValue.PartiallyExpanded -> {}
         }
 
         LaunchedEffect(state, layoutHeight) {
@@ -150,7 +144,9 @@ fun UnratedProductsBottomSheet(
                     SheetValue.Expanded -> {
                         state.updateAnchors(
                             DraggableAnchors {
-                                SheetValue.Hidden at layoutHeight - expandedPaddingTopPx
+                                SheetValue.Hidden at (layoutHeight - expandedPaddingTopPx).coerceAtLeast(
+                                    0f
+                                )
                                 SheetValue.Expanded at expandedPaddingTopPx
                             }
                         )

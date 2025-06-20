@@ -37,11 +37,11 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppSplash"
-        android:name=".ui.base.VodovozApplication"
+        android:name="com.vodovoz.app.ui.base.VodovozApplication"
         android:usesCleartextTraffic="true">
 
         <activity
-            android:name=".ui.base.MainActivity"
+            android:name="com.vodovoz.app.ui.base.MainActivity"
             android:exported="true"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustResize"
@@ -60,23 +60,23 @@
 
                 <!--TODO - change schemes-->
                 <data
-                    android:scheme="htt"
+                    android:scheme="https"
                     android:host="vodovoz.ru"
                     android:pathPrefix="/mobile_app/" />
 
                 <data
-                    android:scheme="htt"
+                    android:scheme="https"
                     android:host="vodovoz.ru"
                     android:pathPrefix="/gl/" />
 
                 <data
-                    android:scheme="htt"
+                    android:scheme="https"
                     android:host="vodovoz.ru"
                     android:pathPrefix="/landings/kalkulyator_vody/"
                     />
 
                 <data
-                    android:scheme="htt"
+                    android:scheme="https"
                     android:host="vodovoz.ru"
                     android:pathPrefix="/catalog/"
                     />
@@ -96,7 +96,7 @@
         </service>
 
         <service
-            android:name=".common.notification.FirebaseNotificationManager"
+            android:name="com.vodovoz.app.common.notification.FirebaseNotificationManager"
             android:exported="false">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
@@ -111,7 +111,10 @@
         <provider
             android:name="androidx.startup.InitializationProvider"
             android:authorities="com.vodovoz.app.androidx-startup"
-            tools:node="remove" />
+            tools:node="remove"
+            tools:replace="android:authorities"
+            android:exported="false"
+            />
 
     </application>
 
