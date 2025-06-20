@@ -1474,6 +1474,17 @@ class VodovozServiceRepositoryImpl @Inject constructor(
         )
     }
 
+    override fun removeUnratedProduct(productId: Long): Flow<Result<String>> {
+        return executeRequest(
+            request = {
+                vodovozService.removeUnratedProduct(productId, accountManager.fetchAccountId())
+            },
+            mapper = {
+                it.data ?: ""
+            }
+        )
+    }
+
     override fun getFavoriteProducts(productsIds: String): Flow<Result<ProductsSectionModel>> =
         executeRequest(
             request = {

@@ -9,7 +9,7 @@ data class VodovozSiteState(
     val jivoChat: JivoChatModel,
     val tracking: TrackingConfig,
     val agreement: AgreementModel,
-    val data: SiteStateDataModel? = null,
+    val data: SiteStateData? = null,
     val callPhoneNumber: String
 ){
     companion object{
@@ -42,7 +42,7 @@ data class TrackingConfig(
     val time: Int,
 )
 
-data class SiteStateDataModel(
+data class SiteStateData(
     val title: String?,
     val logo: String?,
     val desc: String?,

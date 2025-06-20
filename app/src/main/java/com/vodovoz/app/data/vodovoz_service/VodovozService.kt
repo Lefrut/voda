@@ -627,6 +627,12 @@ interface VodovozService {
         @Query("userid") userId: Long,
     ): Response<VodovozResponseDTO<UnratedProductsSectionDTO>>
 
+    @GET("glavnaya/otzivtovari.php?action=addblock")
+    suspend fun removeUnratedProduct(
+        @Query("id") productId: Long,
+        @Query("userid") userId: Long?
+    ): Response<VodovozResponseDTO<String>>
+
 
     @GET("glavnaya/stories/index.php?iblock_id=12&action=stories&platforma=android")
     suspend fun getStories(): Response<VodovozResponseDTO<StoriesDTO>>

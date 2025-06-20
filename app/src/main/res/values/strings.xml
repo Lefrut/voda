@@ -195,6 +195,9 @@
     <string name="delete_account_confirmation">Вы действительно хотите удалить аккаунт?</string>
     <string name="delete">Удалить</string>
 
+
+    <string name="exit_dialog_title">Выход</string>
+    <string name="exit_dialog_description">Вы действительно хотите выйти из приложения?</string>
     <string name="exit">Выйти</string>
     <string name="exit_confirmation">Вы уверены что хотите выйте из аккаунта?</string>
     <string name="article_number">Артикул: %1$s</string>
@@ -425,5 +428,6 @@
     <string name="intercom">Домофон</string>
     <string name="floor">Этаж</string>
     <string name="redact_address">Редактирование адреса</string>
+    <string name="speak">Говорите...</string>
 
 </resources>

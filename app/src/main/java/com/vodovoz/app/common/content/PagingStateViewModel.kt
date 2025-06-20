@@ -1,9 +1,7 @@
 package com.vodovoz.app.common.content
 
-import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.ViewModel
-import com.vodovoz.app.common.content.itemadapter.Item
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -49,21 +47,15 @@ interface Event
 @Stable
 data class PagingState<S>(
     val data: S,
-    val loadingPage: Boolean,
-    val isFirstLoad: Boolean,
+    val loadingPage: Boolean = false,
     val error: ErrorState?,
-    val loadMore: Boolean,
-    val bottomItem: Item? = null,
     val page: Int? = 1,
 ) {
     companion object {
         fun <S> idle(idleState: S): PagingState<S> {
             return PagingState(
                 data = idleState,
-                loadingPage = false,
-                isFirstLoad = false,
                 error = null,
-                false
             )
         }
     }

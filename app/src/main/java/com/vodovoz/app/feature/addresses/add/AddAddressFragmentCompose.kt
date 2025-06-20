@@ -22,6 +22,7 @@ import com.vodovoz.app.feature.addresses.model.AddressUi
 import com.vodovoz.app.feature.map.MapFlowViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.onSubscription
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -67,7 +68,7 @@ class AddAddressFragment : Fragment() {
     }
 
     private suspend fun observeEvents() {
-        viewModel.events.onStart {
+        viewModel.events.onSubscription {
             findNavController().currentBackStackEntry?.savedStateHandle?.remove<String>("addressName")?.let { name ->
                 viewModel.changeAddressName(name)
             }

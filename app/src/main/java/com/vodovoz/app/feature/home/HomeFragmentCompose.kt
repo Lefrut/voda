@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyListState
@@ -123,13 +124,16 @@ class HomeFragment : Fragment() {
                     val pullRefreshState = rememberPullToRefreshState()
                     val snackbarHostState = remember { SnackbarHostState() }
 
+                    BackHandler {
+                        viewModel.showExitDialog()
+                    }
+
                     HomeScreen(
                         viewState = viewState,
                         viewModel = viewModel,
                         pullRefreshState = pullRefreshState,
                         topProductsLazyListState = topProductLazyListState,
                     )
-
 
 
                     Box(
@@ -185,10 +189,6 @@ class HomeFragment : Fragment() {
                 is HomeFlowViewModel.HomeEvents.GoToProfile -> {
                     tabManager.setAuthRedirect(findNavController().graph.id)
                     tabManager.selectTab(R.id.graph_profile)
-                }
-
-                is HomeFlowViewModel.HomeEvents.GoToCart -> {
-
                 }
 
                 is HomeFlowViewModel.HomeEvents.GoToStories -> {
@@ -280,6 +280,10 @@ class HomeFragment : Fragment() {
                         event.productImage,
                         event.rating
                     )
+                }
+
+                HomeFlowViewModel.HomeEvents.CloseApp -> {
+                    requireActivity().finish()
                 }
             }
         }

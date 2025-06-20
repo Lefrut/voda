@@ -1,9 +1,7 @@
 package com.vodovoz.app.feature.home
 
-import androidx.compose.foundation.gestures.awaitDragOrCancellation
-import androidx.compose.foundation.gestures.awaitFirstDown
-import androidx.compose.foundation.gestures.awaitVerticalDragOrCancellation
-import androidx.compose.foundation.gestures.waitForUpOrCancellation
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -15,12 +13,21 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.Indicator
 import androidx.compose.material3.pulltorefresh.PullToRefreshState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.pointer.PointerEventPass
-import androidx.compose.ui.input.pointer.PointerInputChange
-import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.res.stringResource
+import com.vodovoz.app.R
+import com.vodovoz.app.design_system.composables.dialogs.VodovozDialog
 import com.vodovoz.app.design_system.composables.placeholders.NetworkErrorPlaceholder
 import com.vodovoz.app.feature.all.promotions.composables.AdvertisingInfoBottomSheet
 import com.vodovoz.app.feature.home.composables.HomeBody
@@ -38,6 +45,20 @@ fun HomeScreen(
     topProductsLazyListState: LazyListState,
 ) {
 
+    val showedUnratedProducts by rememberUpdatedState(newValue = viewState.showedUnratedProducts)
+
+    val homeNestedScrollConnection = remember {
+        object : NestedScrollConnection {
+            override fun onPostScroll(
+                consumed: Offset,
+                available: Offset,
+                source: NestedScrollSource,
+            ): Offset {
+                if (consumed.y < 0 && !showedUnratedProducts) { viewModel.showUnratedProducts() }
+                return super.onPostScroll(consumed, available, source)
+            }
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -89,30 +110,8 @@ fun HomeScreen(
                 }
 
                 HomeFlowViewModel.HomeUiState.Success -> {
-
-                    val showedUnratedProducts =
-                        rememberUpdatedState(newValue = viewState.showedUnratedProducts)
-
                     HomeBody(
-                        modifier = Modifier.pointerInput(Unit) {
-                            awaitPointerEventScope {
-                                while (!showedUnratedProducts.value) {
-                                    if (showedUnratedProducts.value) break
-                                    val down = awaitFirstDown(pass = PointerEventPass.Initial)
-                                    var drag: PointerInputChange? =
-                                        awaitVerticalDragOrCancellation(down.id)
-                                    awaitDragOrCancellation(down.id)
-
-                                    while (drag != null) {
-                                        drag = awaitVerticalDragOrCancellation(drag.id)
-                                    }
-                                    waitForUpOrCancellation(PointerEventPass.Initial)
-
-                                    viewModel.showUnratedProducts()
-                                }
-                            }
-
-                        },
+                        modifier = Modifier.nestedScroll(homeNestedScrollConnection),
                         topProductsLazyListState = topProductsLazyListState,
                         banners = viewState.banners,
                         stories = viewState.stories,
@@ -131,8 +130,8 @@ fun HomeScreen(
                         onMenuItemClick = { menuItem ->
                             viewModel.navigateByMenuItem(menuItem)
                         },
-                        onOrderClick = {
-                            viewModel.navigateToOrderDetails(it)
+                        onOrderClick = { homeOrder ->
+                            viewModel.navigateToOrderDetails(homeOrder)
                         },
                         onPopularCategoryClick = { popularCategory ->
                             viewModel.navigateToPopularCategory(popularCategory)
@@ -184,24 +183,55 @@ fun HomeScreen(
 
 
     if (viewState.showSpecialPromotionBS) {
-        SpecialPromotionBottomSheet(
-            specialPromotionUi = viewState.specialPromotion,
-            onDismissRequest = { viewModel.closeSpecialPromotionBottomSheet() },
-            onButtonClick = { specialPromotion ->
-                viewModel.activateSpecialPromotionAction(specialPromotion.actionWithButton.action)
-            }
-        )
+        key("SpecialPromotionBottomSheet") {
+            SpecialPromotionBottomSheet(
+                specialPromotionUi = viewState.specialPromotion,
+                onDismissRequest = { viewModel.closeSpecialPromotionBottomSheet() },
+                onButtonClick = { specialPromotion ->
+                    viewModel.activateSpecialPromotionAction(specialPromotion.actionWithButton.action)
+                }
+            )
+        }
     }
 
-    if(viewState.showUnratedProductsBS && !viewState.showedUnratedProducts) {
+    val animatedUnratedAlpha =
+        animateFloatAsState(
+            targetValue = if (viewState.showUnratedProductsBS && !viewState.showedUnratedProducts) 1f else 0f,
+            label = "animatedUnratedAlpha",
+            animationSpec = tween(300, 0),
+        )
+
+    val showUnratedProductBottomSheet by remember {
+        derivedStateOf { animatedUnratedAlpha.value > 0f }
+    }
+
+    if (showUnratedProductBottomSheet) {
+        //todo - need fix clicks on close
         UnratedProductsBottomSheet(
+            modifier = Modifier.graphicsLayer {
+                alpha = animatedUnratedAlpha.value
+            },
             sectionUnratedProducts = viewState.sectionUnratedProducts,
             onProductRatingChanged = { product, rating ->
                 viewModel.changeUnratedProductRating(product, rating)
             },
             onDispose = {
                 viewModel.closeUnratedProductsBottomSheet()
+            },
+            onProductNoRateClick = { product ->
+                viewModel.noRateProduct(product)
             }
+        )
+    }
+
+    if (viewState.showExitDialog) {
+        VodovozDialog(
+            title = stringResource(id = R.string.exit_dialog_title),
+            description = stringResource(id = R.string.exit_dialog_description),
+            acceptButtonText = stringResource(id = R.string.exit),
+            cancelButtonText = stringResource(id = R.string.cancel),
+            onDismiss = { viewModel.hideExitDialog() },
+            onAccept = { viewModel.closeApplication() }
         )
     }
 

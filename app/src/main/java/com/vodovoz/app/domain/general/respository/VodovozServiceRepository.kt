@@ -297,6 +297,8 @@ interface VodovozServiceRepository {
 
     fun getUnratedProductsDetails(): Flow<Result<UnratedProductsSectionModel>>
 
+    fun removeUnratedProduct(productId: Long): Flow<Result<String>>
+
     fun getFavoriteProducts(
         productsIds: String = "",
     ): Flow<Result<ProductsSectionModel>>

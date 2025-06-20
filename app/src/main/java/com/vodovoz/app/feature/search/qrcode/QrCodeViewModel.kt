@@ -1,10 +1,11 @@
 package com.vodovoz.app.feature.search.qrcode
 
+import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.Stable
 import androidx.lifecycle.viewModelScope
 import com.vodovoz.app.common.content.Event
 import com.vodovoz.app.common.content.PagingContractViewModel
 import com.vodovoz.app.common.content.State
-import com.vodovoz.app.common.content.itemadapter.Item
 import com.vodovoz.app.common.content.updateData
 import com.vodovoz.app.data.MainRepository
 import com.vodovoz.app.domain.general.model.EmptyResultException
@@ -16,8 +17,8 @@ import kotlinx.coroutines.sync.Mutex
 import javax.inject.Inject
 
 @HiltViewModel
+@Stable
 class QrCodeViewModel @Inject constructor(
-    private val repository: MainRepository,
     private val vodovozServiceRepository: VodovozServiceRepository,
 ) : PagingContractViewModel<QrCodeViewModel.QrCodeState, QrCodeViewModel.QrCodeEvents>(QrCodeState()) {
 
@@ -86,13 +87,14 @@ class QrCodeViewModel @Inject constructor(
     }
 
 
+    @Immutable
     data class QrCodeState(
-        val item: Item? = null,
         val flashOn: Boolean = false,
         val barCode: String = "",
         val uiState: QrCodeUiState = QrCodeUiState.Scanner,
     ) : State
 
+    @Stable
     sealed interface QrCodeUiState {
 
         data object Scanner : QrCodeUiState

@@ -1,7 +1,9 @@
 package com.vodovoz.app.design_system.model
 
+import androidx.compose.runtime.Immutable
 import com.vodovoz.app.domain.general.model.brand.BrandModel
 
+@Immutable
 data class BrandUi(
     val name: String,
     val id: Long,

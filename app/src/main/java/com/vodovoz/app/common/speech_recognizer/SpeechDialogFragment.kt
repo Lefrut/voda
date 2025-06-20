@@ -4,7 +4,9 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.speech.RecognizerIntent
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.DialogFragment
@@ -15,7 +17,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import java.util.Locale
 
 @AndroidEntryPoint
-class SpeechDialogFragment : DialogFragment(R.layout.fragment_speech_dialog) {
+class SpeechDialogFragment : DialogFragment() {
 
     private val getSpeechResultLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -37,6 +39,12 @@ class SpeechDialogFragment : DialogFragment(R.layout.fragment_speech_dialog) {
 
     }
 
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View = View(requireContext())
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -46,7 +54,7 @@ class SpeechDialogFragment : DialogFragment(R.layout.fragment_speech_dialog) {
                 RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
             )
             putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault())
-            putExtra(RecognizerIntent.EXTRA_PROMPT, "Говорите...")
+            putExtra(RecognizerIntent.EXTRA_PROMPT, getString(R.string.speak))
         }
 
         getSpeechResultLauncher.launch(speechRecognizerIntent)

@@ -7,26 +7,25 @@ import android.provider.Settings
 import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.biometric.BiometricManager
+import androidx.fragment.app.Fragment
 import by.kirich1409.viewbindingdelegate.viewBinding
 import com.vodovoz.app.R
 import com.vodovoz.app.common.account.AccountManager
-import com.vodovoz.app.common.content.BaseFragment
 import com.vodovoz.app.databinding.FragmentBiometricSettingsBinding
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class BiometricSettingsFragment : BaseFragment() {
+class BiometricSettingsFragment : Fragment(R.layout.fragment_biometric_settings) {
 
     @Inject
     lateinit var accountManager: AccountManager
 
     private val biometricManager by lazy { BiometricManager.from(requireContext()) }
 
-    override fun layout(): Int = R.layout.fragment_biometric_settings
+    private val binding: FragmentBiometricSettingsBinding by viewBinding { biometricSettingsFragment ->
+        FragmentBiometricSettingsBinding.bind(biometricSettingsFragment.requireView())
 
-    private val binding: FragmentBiometricSettingsBinding by viewBinding {
-        FragmentBiometricSettingsBinding.bind(contentView)
     }
 
     private val biometricResultLauncher =
@@ -45,8 +44,6 @@ class BiometricSettingsFragment : BaseFragment() {
         super.onViewCreated(view, savedInstanceState)
 
         binding.personalDataSwitch.isChecked = accountManager.fetchUseBio()
-
-        initToolbar("Безопасность")
 
         binding.personalDataSwitch.setOnCheckedChangeListener { _, p1 ->
             if (p1) {
