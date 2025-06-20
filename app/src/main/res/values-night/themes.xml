@@ -8,9 +8,6 @@
         <item name="colorControlActivated">@color/new_product_blue</item>
     </style>
 
-    <style name="Theme.Vodovoz.DarkStatusBar" parent="Theme.Vodovoz">
-    </style>
-
     <style name="Theme.AppSplash" parent="Theme.SplashScreen">
         <item name="windowSplashScreenBackground">@color/bluePrimary</item>
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_logo</item>

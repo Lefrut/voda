@@ -144,29 +144,6 @@ class MapFlowViewModel @Inject constructor(
         }
     }
 
-    fun fetchAddressByGeocode(
-        latitude: Double,
-        longitude: Double,
-    ) {
-
-    }
-
-    fun showAddAddressBottomDialog() {
-        viewModelScope.launch {
-            val mappedAddress = state.data.addressUI?.copy(
-                latitude = state.data.savedPointData?.latitude ?: "",
-                longitude = state.data.savedPointData?.longitude ?: "",
-                length = state.data.savedPointData?.length ?: ""
-            )
-            eventListener.emit(MapFlowEvents.ShowAddAddressBottomDialog(mappedAddress))
-        }
-    }
-
-    fun showInfoDialog() {
-        viewModelScope.launch {
-            eventListener.emit(MapFlowEvents.ShowInfoDialog(state.data.deliveryZonesBundleUI?.aboutDeliveryTimeUrl))
-        }
-    }
 
     fun fetchSeveralMinimalLineDistancesToMainPolygonPoints(
         startPoint: Point,
@@ -311,18 +288,6 @@ class MapFlowViewModel @Inject constructor(
                 )
             }
         }
-    }
-
-    fun clearState() {
-        amountControllerTimer.cancel()
-        uiStateListener.value = state.copy(
-            data = state.data.copy(
-                savedPointData = null,
-                distance = null,
-                listOnPoints = emptyList(),
-                listOfSavedPolylinesData = emptyList()
-            )
-        )
     }
 
     fun action(
@@ -735,10 +700,7 @@ class MapFlowViewModel @Inject constructor(
 
     sealed class MapFlowEvents : Event {
 
-        data class ShowAddAddressBottomDialog(val address: AddressUI?) : MapFlowEvents()
         data class Submit(val startPoint: Point, val list: List<Point>) : MapFlowEvents()
-        data class ShowInfoDialog(val url: String?) : MapFlowEvents()
-        data class ShowAlert(val response: ResponseBody) : MapFlowEvents()
         data class ShowPolyline(val polyline: Polyline? = null, val message: String? = null) :
             MapFlowEvents()
 

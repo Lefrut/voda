@@ -1,20 +1,12 @@
 package com.vodovoz.app.feature.all.orders.detail.traceorder
 
-import android.app.Application
-import android.graphics.Bitmap
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
-import com.vodovoz.app.common.account.AccountManager
 import com.vodovoz.app.common.content.Event
 import com.vodovoz.app.common.content.PagingContractViewModel
 import com.vodovoz.app.common.content.State
-import com.vodovoz.app.common.content.itemadapter.Item
 import com.vodovoz.app.common.content.updateData
 import com.vodovoz.app.common.jivochat.JivoChatController
 import com.vodovoz.app.design_system.model.ImageAndTextUi
@@ -23,13 +15,9 @@ import com.vodovoz.app.design_system.model.MapPointUi
 import com.vodovoz.app.design_system.model.mapToUi
 import com.vodovoz.app.design_system.model.toUi
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
-import com.vodovoz.app.feature.all.orders.detail.model.DriverPointsEntity
 import com.vodovoz.app.feature.sitestate.SiteStateManager
-import com.vodovoz.app.util.extensions.debugLog
 import com.vodovoz.app.util.extensions.singleResult
-import com.yandex.mapkit.geometry.Point
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow

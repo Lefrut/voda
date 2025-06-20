@@ -39,7 +39,6 @@ import androidx.compose.ui.unit.dp
 import com.vodovoz.app.R
 import com.vodovoz.app.feature.search.qrcode.composables.CameraView
 
-@Suppress("NonSkippableComposable")
 @Composable
 fun ScannerScreen(
     viewState: QrCodeViewModel.QrCodeState,

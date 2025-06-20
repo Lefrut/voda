@@ -11,6 +11,9 @@ import com.vodovoz.app.common.content.PagingContractViewModel
 import com.vodovoz.app.common.content.State
 import com.vodovoz.app.common.content.updateData
 import com.vodovoz.app.common.like.LikeManager
+import com.vodovoz.app.common.model.ButtonAction
+import com.vodovoz.app.common.model.DataAllAction
+import com.vodovoz.app.common.model.VodovozAction
 import com.vodovoz.app.common.resources.ResourcesProvider
 import com.vodovoz.app.core.network.VodovozWebConfig
 import com.vodovoz.app.design_system.model.AboutAdvertisingUi
@@ -26,9 +29,6 @@ import com.vodovoz.app.design_system.model.toUi
 import com.vodovoz.app.design_system.model.withUpdatedCart
 import com.vodovoz.app.design_system.model.withUpdatedFavorites
 import com.vodovoz.app.design_system.model.withUpdatedLoading
-import com.vodovoz.app.common.model.ButtonAction
-import com.vodovoz.app.common.model.DataAllAction
-import com.vodovoz.app.common.model.VodovozAction
 import com.vodovoz.app.domain.general.model.promotion.toUi
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.feature.home.model.HomeOrderUi
@@ -277,7 +277,7 @@ class HomeFlowViewModel @Inject constructor(
         fetchPrimaryDetails()
         fetchSecondaryDetails()
         if (
-            accountManager.isAlreadyLogin() && dataState.specialPromotion == SpecialPromotionUi.Empty
+            accountManager.fetchAccountId() != null && dataState.specialPromotion == SpecialPromotionUi.Empty
         ) {
             fetchOptionalDetails()
         }
@@ -347,7 +347,7 @@ class HomeFlowViewModel @Inject constructor(
 
     fun closeUnratedProductsBottomSheet() = viewModelScope.launch {
         uiStateListener.updateData { s ->
-            s.copy(showUnratedProductsBS = false)
+            s.copy(showUnratedProductsBS = false, showedUnratedProducts = true)
         }
     }
 
@@ -369,11 +369,14 @@ class HomeFlowViewModel @Inject constructor(
             )
             delay(300L)
             uiStateListener.updateData { s ->
-                val sectionUnratedProducts = s.sectionUnratedProducts
+                val sectionUnratedProducts = s.sectionUnratedProducts.copy(
+                    products = s.sectionUnratedProducts.products - product
+                )
+                val haveProducts = sectionUnratedProducts.products.isNotEmpty()
+
                 s.copy(
-                    sectionUnratedProducts = sectionUnratedProducts.copy(
-                        products = sectionUnratedProducts.products - product
-                    )
+                    sectionUnratedProducts = sectionUnratedProducts,
+                    showedUnratedProducts = if (haveProducts) s.showedUnratedProducts else true
                 )
             }
         }
@@ -463,9 +466,41 @@ class HomeFlowViewModel @Inject constructor(
         uiStateListener.updateData { s ->
             s.copy(
                 showUnratedProductsBS = s.sectionUnratedProducts.products.isNotEmpty(),
-                showedUnratedProducts = true
             )
         }
+    }
+
+    fun showExitDialog() = viewModelScope.launch {
+        uiStateListener.updateData { s ->
+            s.copy(showExitDialog = true)
+        }
+    }
+
+    fun hideExitDialog() = viewModelScope.launch {
+        uiStateListener.updateData { s ->
+            s.copy(showExitDialog = false)
+        }
+    }
+
+
+    fun closeApplication() = viewModelScope.launch {
+        uiStateListener.updateData { s -> s.copy(showExitDialog = false) }
+        eventListener.emit(HomeEvents.CloseApp)
+    }
+
+    fun noRateProduct(product: UnratedProductUi) = viewModelScope.launch {
+        uiStateListener.updateData { s ->
+            val sectionUnratedProducts = s.sectionUnratedProducts.copy(
+                products = s.sectionUnratedProducts.products - product
+            )
+            val haveProducts = sectionUnratedProducts.products.isNotEmpty()
+
+            s.copy(
+                sectionUnratedProducts = sectionUnratedProducts,
+                showedUnratedProducts = if (haveProducts) s.showedUnratedProducts else true
+            )
+        }
+        vodovozServiceRepository.removeUnratedProduct(productId = product.id).singleResult()
     }
 
     @Stable
@@ -476,11 +511,12 @@ class HomeFlowViewModel @Inject constructor(
         data object GoToSearch : HomeEvents()
 
         data object GoToProfile : HomeEvents()
-        data object GoToCart : HomeEvents()
         data object ScrollTopProductsToStart : HomeEvents()
         data object ShowSpeechRecognizer : HomeEvents()
         data object GoToOrdersHistory : HomeEvents()
         data object GoToQrCode : HomeEvents()
+        data object CloseApp : HomeEvents()
+
         data class WriteComment(
             val productId: Long,
             val productName: String,
@@ -532,6 +568,7 @@ class HomeFlowViewModel @Inject constructor(
         val showUnratedProductsBS: Boolean = false,
         val showAdvertisingBS: Boolean = false,
         val showRefreshIndicator: Boolean = false,
+        val showExitDialog: Boolean = false,
 
         val showedVpnWarning: Boolean = false,
         val showedUnratedProducts: Boolean = false,

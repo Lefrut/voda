@@ -1,6 +1,7 @@
 package com.vodovoz.app.feature.all.brands
 
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.Stable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
@@ -28,13 +29,16 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
+@Stable
 class AllBrandsFlowViewModel @Inject constructor(
-    private val accountManager: AccountManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
 ) : PagingContractViewModel<AllBrandsFlowViewModel.AllBrandsState, AllBrandsFlowViewModel.AllBrandsEvents>(
     AllBrandsState()
 ) {
 
+    init {
+        fetchBrands()
+    }
 
     private fun fetchBrands() = viewModelScope.launch {
 
@@ -61,14 +65,6 @@ class AllBrandsFlowViewModel @Inject constructor(
 
     fun navigateBack() = viewModelScope.launch {
         eventListener.emit(AllBrandsEvents.GoBack)
-    }
-
-    fun firstLoadSorted() {
-        if (!state.isFirstLoad) {
-            uiStateListener.value =
-                state.copy(isFirstLoad = true, loadingPage = true)
-            fetchBrands()
-        }
     }
 
 
@@ -110,6 +106,7 @@ class AllBrandsFlowViewModel @Inject constructor(
         data object GoBack : AllBrandsEvents()
     }
 
+    @Stable
     sealed interface AllBrandsUiState {
         data object Loading : AllBrandsUiState
         data object Success : AllBrandsUiState

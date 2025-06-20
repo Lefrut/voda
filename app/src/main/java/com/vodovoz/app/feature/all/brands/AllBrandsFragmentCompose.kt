@@ -28,11 +28,6 @@ class AllBrandsFragment : Fragment() {
     @Inject
     lateinit var tabManager: TabManager
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        viewModel.firstLoadSorted()
-    }
-
     override fun onStart() {
         super.onStart()
         tabManager.changeTabVisibility(false)
@@ -49,7 +44,7 @@ class AllBrandsFragment : Fragment() {
         savedInstanceState: Bundle?,
     ): View {
         return ComposeView(requireContext()).apply {
-            setViewCompositionStrategy(ViewCompositionStrategy.Default)
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
 
             setContent {
                 VodovozTheme {

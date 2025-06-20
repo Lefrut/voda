@@ -1,11 +1,15 @@
 package com.vodovoz.app.feature.home.composables
 
 import android.graphics.BlurMaskFilter
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.SizeTransform
+import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -13,24 +17,24 @@ import androidx.compose.foundation.gestures.AnchoredDraggableState
 import androidx.compose.foundation.gestures.DraggableAnchors
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.anchoredDraggable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PageSize
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.rememberOverscrollEffect
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -40,8 +44,8 @@ import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -57,24 +61,25 @@ import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.drawOutline
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.lerp
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
+import coil3.request.crossfade
 import com.gowtham.ratingbar.RatingBar
 import com.vodovoz.app.R
 import com.vodovoz.app.design_system.composables.bottom_sheet.VodovozDragHandle
 import com.vodovoz.app.feature.home.model.UnratedProductUi
 import com.vodovoz.app.feature.home.model.UnratedProductsSectionUi
-import kotlinx.coroutines.flow.drop
 import mx.platacard.pagerindicator.PagerWormIndicator
 
 private val shape = RoundedCornerShape(
@@ -91,6 +96,7 @@ fun UnratedProductsBottomSheet(
     sectionUnratedProducts: UnratedProductsSectionUi,
     onDispose: () -> Unit,
     onProductRatingChanged: (UnratedProductUi, Float) -> Unit,
+    onProductNoRateClick: (UnratedProductUi) -> Unit,
 ) {
     val density = LocalDensity.current
 
@@ -99,7 +105,7 @@ fun UnratedProductsBottomSheet(
     }
 
     val expandedPaddingTopPx = with(density) {
-        14.dp.toPx()
+        8.dp.toPx()
     }
 
     BoxWithConstraints(
@@ -107,44 +113,80 @@ fun UnratedProductsBottomSheet(
     ) {
         val layoutHeight = constraints.maxHeight.toFloat()
 
-        val state = remember(layoutHeight) {
+        val state = rememberSaveable(
+            layoutHeight, saver = AnchoredDraggableState.Saver()
+        ) {
             AnchoredDraggableState(
                 initialValue = SheetValue.PartiallyExpanded,
                 anchors = DraggableAnchors {
-                    SheetValue.Hidden at layoutHeight
+                    SheetValue.Hidden at layoutHeight - expandedPaddingTopPx
                     SheetValue.PartiallyExpanded at layoutHeight - partiallyExpandedHeight
                     SheetValue.Expanded at expandedPaddingTopPx
                 },
             )
         }
 
-        LaunchedEffect(state) {
-            snapshotFlow { state.currentValue }.drop(1).collect { currentValue ->
-                if (currentValue == SheetValue.PartiallyExpanded || currentValue == SheetValue.Hidden) {
-                    onDispose()
+        when (state.currentValue) {
+            SheetValue.Hidden -> {
+
+            }
+
+            SheetValue.Expanded -> {
+                BackHandler { onDispose() }
+            }
+
+            SheetValue.PartiallyExpanded -> {
+
+            }
+        }
+
+        LaunchedEffect(state, layoutHeight) {
+            snapshotFlow { state.currentValue }.collect { currentValue ->
+                when (currentValue) {
+                    SheetValue.Hidden -> {
+                        onDispose()
+                    }
+
+                    SheetValue.Expanded -> {
+                        state.updateAnchors(
+                            DraggableAnchors {
+                                SheetValue.Hidden at layoutHeight - expandedPaddingTopPx
+                                SheetValue.Expanded at expandedPaddingTopPx
+                            }
+                        )
+                    }
+
+                    SheetValue.PartiallyExpanded -> {}
                 }
             }
         }
 
+        val columnHeight = remember(layoutHeight) {
+            with(density) { (layoutHeight - expandedPaddingTopPx).toDp() }
+        }
+
         Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .height(with(density) { (layoutHeight - expandedPaddingTopPx).toDp() })
-                .offset {
-                    val sheetOffsetY = state.requireOffset()
-                    IntOffset(x = 0, y = sheetOffsetY.toInt())
-                }
                 .anchoredDraggable(
                     state = state,
                     orientation = Orientation.Vertical,
                 )
+                .fillMaxWidth()
+                .height(columnHeight)
+                .offset {
+                    val sheetOffsetY = kotlin
+                        .runCatching { state.requireOffset() }
+                        .getOrNull() ?: 0f
+                    IntOffset(x = 0, y = sheetOffsetY.toInt())
+                }
                 .dropShadow(
                     shape = shape,
-                    color = MaterialTheme.colorScheme.onBackground.copy(0.2f),
-                    blur = 15.dp,
+                    color = MaterialTheme.colorScheme.onBackground.copy(0.12f),
+                    blur = 20.dp,
                     offsetY = (-3).dp
                 )
-                .background(MaterialTheme.colorScheme.background, shape),
+                .background(MaterialTheme.colorScheme.background, shape)
+                .clip(shape),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             VodovozDragHandle()
@@ -154,34 +196,52 @@ fun UnratedProductsBottomSheet(
                 targetState = state.currentValue,
                 label = "UpdatedProductsTransition",
                 transitionSpec = {
-                    fadeIn(tween(250)) togetherWith fadeOut(tween(250))
+                    when (targetState) {
+                        SheetValue.Hidden -> {
+                            fadeIn(snap(500)) togetherWith fadeOut(snap(500))
+                        }
+
+                        SheetValue.Expanded -> {
+                            slideInVertically(initialOffsetY = { height -> height }) + fadeIn(
+                                tween(
+                                    250
+                                )
+                            ) togetherWith
+                                    slideOutVertically(targetOffsetY = { height -> -height }) + fadeOut(
+                                tween(250)
+                            )
+                        }
+
+                        SheetValue.PartiallyExpanded -> {
+                            fadeIn(snap(500)) togetherWith fadeOut(snap(500))
+                        }
+                    }.using(
+                        SizeTransform(clip = false)
+                    )
                 },
-                contentKey = { it.name }
+                contentKey = { sheetValue ->
+                    when (sheetValue) {
+                        SheetValue.Hidden -> SheetValue.Expanded.name
+                        SheetValue.Expanded -> SheetValue.Expanded.name
+                        SheetValue.PartiallyExpanded -> SheetValue.PartiallyExpanded.name
+                    }
+                }
             ) { targetState ->
                 when (targetState) {
-                    SheetValue.Hidden -> {
-                        Box(modifier = Modifier.fillMaxSize())
-                    }
-
-                    SheetValue.Expanded -> {
+                    SheetValue.Expanded, SheetValue.Hidden -> {
                         UpdatedProductsExpanded(
-                            modifier = Modifier.fillMaxHeight(),
+                            modifier = Modifier.fillMaxSize(),
                             title = sectionUnratedProducts.productTitle,
                             products = sectionUnratedProducts.products,
                             onProductRatingChanged = onProductRatingChanged,
-                            onNoRateProductClick = {
-                                //todo - no rate product
-                            },
-                            onClose = {
-                                onDispose()
-                            }
+                            onNoRateProductClick = onProductNoRateClick,
+                            onClose = onDispose
                         )
                     }
 
                     SheetValue.PartiallyExpanded -> {
                         UnratedProductsPartially(
-                            modifier = Modifier.fillMaxHeight(),
-                            anchorDraggableState = state,
+                            modifier = Modifier.fillMaxSize(),
                             title = sectionUnratedProducts.title,
                             countProductsText = sectionUnratedProducts.countProductsText,
                             products = sectionUnratedProducts.products
@@ -232,13 +292,15 @@ fun UpdatedProductsExpanded(
     onNoRateProductClick: (UnratedProductUi) -> Unit,
     onClose: () -> Unit,
 ) {
-    val pagerState = rememberPagerState() { products.size }
+    val pagerState = rememberPagerState { products.size }
 
     Column(modifier = modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
-
-
-        Row(modifier = Modifier.padding(horizontal = 16.dp)) {
-            Box(modifier = Modifier.size(24.dp))
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp)
+        ) {
+            Spacer(modifier = Modifier.size(24.dp))
 
             Text(
                 modifier = Modifier
@@ -251,18 +313,14 @@ fun UpdatedProductsExpanded(
             )
 
             Icon(
-                painter = painterResource(id = R.drawable.icon_close),
+                imageVector = ImageVector.vectorResource(id = R.drawable.icon_close),
                 contentDescription = null,
                 modifier = Modifier
                     .size(24.dp)
                     .clip(CircleShape)
-                    .clickable {
-                        onClose()
-                    }
+                    .clickable { onClose() }
             )
         }
-
-
 
         HorizontalPager(
             modifier = Modifier
@@ -273,23 +331,20 @@ fun UpdatedProductsExpanded(
             pageSize = PageSize.Fill,
             beyondViewportPageCount = 2,
             key = { page ->
-                products[page].id
+                products.getOrNull(page)?.id ?: -page
             },
             verticalAlignment = Alignment.CenterVertically
-        ) { page ->
-            val product = products[page]
+        ) lambda@{ page ->
+            val product = products.getOrNull(page) ?: return@lambda
             Column(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 AsyncImage(
-                    modifier = Modifier
-                        .size(300.dp),
+                    modifier = Modifier.size(300.dp),
                     model = ImageRequest.Builder(LocalContext.current)
                         .data(product.detailPicture)
-                        .placeholderMemoryCacheKey("image-key${product.id}")
-                        .memoryCacheKey("image-key${product.id}")
-                        .build(),
+                        .crossfade(true).build(),
                     contentDescription = null,
                     contentScale = ContentScale.Inside,
                 )
@@ -316,8 +371,8 @@ fun UpdatedProductsExpanded(
                     onValueChange = { newRating ->
                         rating = newRating
                     },
-                    onRatingChanged = {
-                        onProductRatingChanged(product, it)
+                    onRatingChanged = { newRating ->
+                        onProductRatingChanged(product, newRating)
                     }
                 )
             }
@@ -348,17 +403,13 @@ fun UpdatedProductsExpanded(
                     .padding(12.dp)
             )
         }
-
-
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Suppress("NonSkippableComposable")
 @Composable
 fun UnratedProductsPartially(
     modifier: Modifier = Modifier,
-    anchorDraggableState: AnchoredDraggableState<SheetValue>,
     title: String,
     countProductsText: String,
     products: List<UnratedProductUi>,
@@ -375,35 +426,28 @@ fun UnratedProductsPartially(
             style = MaterialTheme.typography.labelMedium
         )
 
-
-        val progressToExpanded by remember {
-            derivedStateOf {
-                val offset = anchorDraggableState.offset
-                val expandedOffset = anchorDraggableState.anchors.minPosition()
-                val hiddenOffset = anchorDraggableState.anchors.maxPosition()
-
-                ((offset - hiddenOffset) / (expandedOffset - hiddenOffset)).coerceIn(0f, 1f)
-            }
-        }
-
-
-        LazyRow(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
-            items(products) { product ->
-                val animatedSize by animateDpAsState(
-                    targetValue = lerp(110.dp, 280.dp, progressToExpanded),
-                    label = "imageSize"
-                )
-
-                AsyncImage(
-                    modifier = Modifier
-                        .size(animatedSize)
-                        .animateItem(fadeInSpec = null, fadeOutSpec = null),
-                    model = ImageRequest.Builder(LocalContext.current)
-                        .data(product.detailPicture)
-                        .build(),
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .horizontalScroll(
+                    rememberScrollState(),
+                    rememberOverscrollEffect()
+                ),
+            horizontalArrangement = Arrangement.Center
+        ) {
+            products.take(10).forEach { product ->
+                key(product.id) {
+                    AsyncImage(
+                        modifier = Modifier
+                            .size(120.dp),
+                        model = ImageRequest.Builder(LocalContext.current)
+                            .data(product.detailPicture)
+                            .crossfade(true)
+                            .build(),
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                    )
+                }
             }
         }
     }

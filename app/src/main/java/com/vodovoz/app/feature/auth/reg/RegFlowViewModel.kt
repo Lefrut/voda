@@ -10,7 +10,6 @@ import com.vodovoz.app.common.agreement.AgreementController
 import com.vodovoz.app.common.content.Event
 import com.vodovoz.app.common.content.PagingContractViewModel
 import com.vodovoz.app.common.content.State
-import com.vodovoz.app.common.content.itemadapter.Item
 import com.vodovoz.app.common.content.updateData
 import com.vodovoz.app.common.resources.ResourcesProvider
 import com.vodovoz.app.design_system.model.ColorfulButtonUi
@@ -231,8 +230,6 @@ class RegFlowViewModel @Inject constructor(
 
     @Immutable
     data class RegState(
-        val items: List<Item> = emptyList(),
-
         val agreementTextHtml: String = "",
         val showAgreement: Boolean = false,
         val agreementChecked: Boolean = true,

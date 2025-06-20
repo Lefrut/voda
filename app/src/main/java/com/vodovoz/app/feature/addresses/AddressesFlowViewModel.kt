@@ -4,12 +4,9 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import com.vodovoz.app.R
-import com.vodovoz.app.common.account.AccountManager
 import com.vodovoz.app.common.content.Event
 import com.vodovoz.app.common.content.PagingContractViewModel
 import com.vodovoz.app.common.content.State
-import com.vodovoz.app.common.content.itemadapter.Item
 import com.vodovoz.app.common.content.updateData
 import com.vodovoz.app.design_system.model.SectionUi
 import com.vodovoz.app.design_system.model.VodovozPlaceholderUi
