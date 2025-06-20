@@ -8,9 +8,10 @@ import com.vodovoz.app.common.content.Event
 import com.vodovoz.app.common.content.PagingContractViewModel
 import com.vodovoz.app.common.content.State
 import com.vodovoz.app.common.content.updateData
+import com.vodovoz.app.common.model.VodovozAction
 import com.vodovoz.app.design_system.model.StoryUi
 import com.vodovoz.app.design_system.model.mapToUi
-import com.vodovoz.app.common.model.VodovozAction
+import com.vodovoz.app.domain.general.respository.UserPreferencesRepository
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
@@ -24,18 +25,23 @@ import javax.inject.Inject
 class StoriesViewModel @Inject constructor(
     savedState: SavedStateHandle,
     private val vodovozServiceRepository: VodovozServiceRepository,
+    private val userPreferencesRepository: UserPreferencesRepository,
 ) : PagingContractViewModel<StoriesViewModel.HistoriesSliderState, StoriesViewModel.StoriesEvents>(
     HistoriesSliderState()
 ) {
 
     private val startStoryId = savedState.get<Long>("startHistoryId") ?: 0L
 
-    init { fetchStories() }
+    init {
+        fetchStories()
+    }
 
     private fun fetchStories() = viewModelScope.launch {
         uiStateListener.updateData { s ->
             s.copy(uiState = StoriesUiState.Loading)
         }
+
+        userPreferencesRepository.addViewedStoryId(startStoryId)
 
         vodovozServiceRepository.getStories().onEach { storiesResult ->
             val stories = storiesResult.getOrNull()
@@ -111,6 +117,7 @@ class StoriesViewModel @Inject constructor(
     }
 
     fun changeStoryIndex(currentStoryPage: Int) = viewModelScope.launch {
+
         if (currentStoryPage == state.data.currentStoryIndex) return@launch
 
         uiStateListener.updateData { s ->
@@ -119,6 +126,9 @@ class StoriesViewModel @Inject constructor(
                 currentPageIndex = 0,
                 timePassed = 0L
             )
+        }
+        dataState.stories.getOrNull(currentStoryPage)?.let { story ->
+            userPreferencesRepository.addViewedStoryId(story.id)
         }
     }
 
@@ -130,10 +140,12 @@ class StoriesViewModel @Inject constructor(
             isFirstPage && isFirstStory -> {
                 eventListener.emit(StoriesEvents.GoBack)
             }
+
             isFirstPage -> {
                 val prevStoryIndex = dataState.currentStoryIndex - 1
                 eventListener.emit(StoriesEvents.ChangePagerIndex(prevStoryIndex))
             }
+
             else -> {
                 uiStateListener.updateData { state ->
                     state.copy(
@@ -158,11 +170,13 @@ class StoriesViewModel @Inject constructor(
                 }
                 eventListener.emit(StoriesEvents.GoBack)
             }
+
             isLastPage -> {
                 eventListener.emit(
                     StoriesEvents.ChangePagerIndex(dataState.currentStoryIndex + 1)
                 )
             }
+
             else -> {
                 uiStateListener.updateData { state ->
                     state.copy(currentPageIndex = nextPageIndex, timePassed = 0L)
@@ -171,7 +185,7 @@ class StoriesViewModel @Inject constructor(
         }
     }
 
-    fun activateButtonAction(action: VodovozAction){
+    fun activateButtonAction(action: VodovozAction) {
         viewModelScope.launch {
             eventListener.emit(StoriesEvents.ActivateAction(action))
         }

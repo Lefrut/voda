@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -41,19 +42,21 @@ fun HomeStories(
         horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.Start)
     ) {
         stories.forEach { story ->
-            HomeStoryCard(
-                storyImage = story.image,
-                viewed = story.viewed,
-                onClick = {
-                    onStoryClick(story)
-                }
-            )
+            key(story.id) {
+                HomeStoryCard(
+                    storyImage = story.image,
+                    viewed = story.viewed,
+                    onClick = {
+                        onStoryClick(story)
+                    }
+                )
+            }
         }
     }
 }
 
 @Composable
-fun HomeStoryCard(
+private fun HomeStoryCard(
     modifier: Modifier = Modifier,
     storyImage: String,
     viewed: Boolean,

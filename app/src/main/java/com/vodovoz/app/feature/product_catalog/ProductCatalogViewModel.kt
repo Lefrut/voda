@@ -8,6 +8,7 @@ import androidx.paging.CombinedLoadStates
 import androidx.paging.LoadState
 import androidx.paging.PagingData
 import androidx.paging.map
+import com.vodovoz.app.R
 import com.vodovoz.app.common.cart.CartManager
 import com.vodovoz.app.common.content.Event
 import com.vodovoz.app.common.content.PagingContractViewModel
@@ -38,9 +39,9 @@ import com.vodovoz.app.domain.general.respository.UserPreferencesRepository
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.feature.home.model.CategoryUi
 import com.vodovoz.app.feature.home.model.toParentCategory
+import com.vodovoz.app.feature.product_catalog.ProductCatalogFragment.DataSource
 import com.vodovoz.app.feature.product_comments.model.SortUi
 import com.vodovoz.app.feature.product_comments.model.toDomain
-import com.vodovoz.app.feature.product_catalog.ProductCatalogFragment.DataSource
 import com.vodovoz.app.ui.paging.PagingDataListener
 import com.vodovoz.app.ui.paging.copy
 import com.vodovoz.app.ui.paging.emptyCombinedLoadStates
@@ -600,7 +601,12 @@ class ProductCatalogViewModel @Inject constructor(
     }
 
     fun shareProducts() = viewModelScope.launch {
-        eventListener.emit(ProductCatalogEvent.Share(dataState.productsSection.share.text))
+        val share = dataState.productsSection.share
+        eventListener.emit(
+            ProductCatalogEvent.Share(
+                resourcesProvider.getString(R.string.share, share.text, share.url)
+            )
+        )
     }
 
     fun showCategoriesBottomSheet() = viewModelScope.launch {

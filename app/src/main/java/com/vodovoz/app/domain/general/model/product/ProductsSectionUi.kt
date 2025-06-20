@@ -26,6 +26,7 @@ data class ProductsSectionUi(
     }
 }
 
+@Immutable
 data class ShareUi(
     val url: String,
     val text: String,

@@ -164,6 +164,10 @@ class HomeFragment : Fragment() {
                         viewModel.listenLoadingProducts()
                     }
 
+                    LifecycleEffect {
+                        viewModel.listenStories()
+                    }
+
                 }
             }
         }

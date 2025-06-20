@@ -35,8 +35,8 @@ data class ProductsSectionDTO(
     val DATA: List<TOVAR_DATA_DTO>?,
     @Json(name = "TOVAR")
     val TOVAR: List<TOVAR_DATA_DTO>? = null,
-    @Json(name = "PODELITCA")
-    val PODELITCA: PODELITCA_DTO? = null,
+    @Json(name = "SHARE")
+    val SHARE: PODELITCA_DTO? = null,
 )
 
 @Keep

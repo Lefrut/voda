@@ -205,15 +205,6 @@ fun StoriesScreen(
     }
 }
 
-fun PagerState.offsetForPage(page: Int) = (currentPage - page) + currentPageOffsetFraction
-
-fun PagerState.startOffsetForPage(page: Int): Float {
-    return offsetForPage(page).coerceAtLeast(0f)
-}
-
-fun PagerState.endOffsetForPage(page: Int): Float {
-    return offsetForPage(page).coerceAtMost(0f)
-}
 
 @Composable
 private fun CloseButton(modifier: Modifier = Modifier, onCloseClick: () -> Unit) {

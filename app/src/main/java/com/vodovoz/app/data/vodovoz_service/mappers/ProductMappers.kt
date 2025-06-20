@@ -33,7 +33,7 @@ fun ProductsSectionDTO.toDomain(): ProductsSectionModel {
         sorting = sorting,
         products = products,
         categories = RAZDEL?.LISTRAZDEL?.mapNotNull { it?.toDomain() } ?: emptyList(),
-        share = PODELITCA?.toDomain() ?: ShareModel.Empty,
+        share = SHARE?.toDomain() ?: ShareModel.Empty,
         forAdults = TOVAR18?.toDomain()
     )
 }

@@ -8,6 +8,8 @@ import com.vodovoz.app.core.network.retrofit.NoOpConverterFactory
 import com.vodovoz.app.data.vodovoz_service.VodovozService
 import com.vodovoz.app.data.vodovoz_service.datastore.ForAdultsDataStore
 import com.vodovoz.app.data.vodovoz_service.datastore.ForAdultsDataStoreImpl
+import com.vodovoz.app.data.vodovoz_service.datastore.StoriesDataStore
+import com.vodovoz.app.data.vodovoz_service.datastore.StoriesDataStoreImpl
 import com.vodovoz.app.data.vodovoz_service.repository.UserPreferencesRepositoryImpl
 import com.vodovoz.app.data.vodovoz_service.repository.VodovozServiceRepositoryImpl
 import com.vodovoz.app.domain.general.respository.UserPreferencesRepository
@@ -36,8 +38,14 @@ abstract class VodovozServiceModule {
     @Binds
     @Singleton
     abstract fun bindForAdultsDataStore(
-        impl: ForAdultsDataStoreImpl
+        forAdultsDataStore: ForAdultsDataStoreImpl
     ): ForAdultsDataStore
+
+    @Binds
+    @Singleton
+    abstract fun bindStoriesDataStore(
+        storiesDataStore: StoriesDataStoreImpl
+    ): StoriesDataStore
 
     @Binds
     @Singleton

@@ -2,6 +2,7 @@ package com.vodovoz.app.design_system.model
 
 import android.os.Parcelable
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.Stable
 import androidx.compose.ui.graphics.Color
 import com.vodovoz.app.domain.general.model.promotion.ActionWithButtonModel
 import com.vodovoz.app.domain.general.model.promotion.ColorfulButtonModel
@@ -25,7 +26,7 @@ data class StoryPage(
     val durationMillis: Int,
 )
 
-@Immutable
+@Stable
 data class ActionWithButtonUi(
     val action: VodovozAction,
     val colorfulButton: ColorfulButtonUi,

@@ -30,6 +30,7 @@ import com.vodovoz.app.design_system.model.withUpdatedCart
 import com.vodovoz.app.design_system.model.withUpdatedFavorites
 import com.vodovoz.app.design_system.model.withUpdatedLoading
 import com.vodovoz.app.domain.general.model.promotion.toUi
+import com.vodovoz.app.domain.general.respository.UserPreferencesRepository
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.feature.home.model.HomeOrderUi
 import com.vodovoz.app.feature.home.model.MenuItemTypeUi
@@ -63,7 +64,21 @@ class HomeFlowViewModel @Inject constructor(
     private val accountManager: AccountManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val resourcesProvider: ResourcesProvider,
+    private val userPreferencesRepository: UserPreferencesRepository,
 ) : PagingContractViewModel<HomeFlowViewModel.HomeState, HomeFlowViewModel.HomeEvents>(HomeState()) {
+
+    suspend fun listenStories() = uiStateListener.map { it.data.stories }
+        .combine(userPreferencesRepository.viewedStoryIds) { p1, p2 ->
+            p2
+        }.collectLatest { storyIds ->
+            uiStateListener.updateData { s ->
+                s.copy(
+                    stories = s.stories.map { story ->
+                        if (storyIds.contains(story.id)) story.copy(viewed = true) else story
+                    }.sortedBy { it.viewed }
+                )
+            }
+        }
 
     suspend fun listenLoadingProducts() =
         uiStateListener.map { pagingState -> pagingState.data.uiState }.combine(
