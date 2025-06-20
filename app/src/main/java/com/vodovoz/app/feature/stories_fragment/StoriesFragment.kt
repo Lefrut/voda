@@ -40,7 +40,6 @@ class StoriesFragment : Fragment() {
     @Inject
     lateinit var cookieManager: CookieManager
 
-    @SuppressLint("UnsafeRepeatOnLifecycleDetector")
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,

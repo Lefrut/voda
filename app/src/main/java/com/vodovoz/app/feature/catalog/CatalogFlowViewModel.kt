@@ -1,5 +1,6 @@
 package com.vodovoz.app.feature.catalog
 
+import androidx.compose.runtime.Stable
 import androidx.lifecycle.viewModelScope
 import com.vodovoz.app.common.content.Event
 import com.vodovoz.app.common.content.PagingContractViewModel
@@ -30,7 +31,7 @@ class CatalogFlowViewModel @Inject constructor(
 
     fun fetchCatalogDetails() = viewModelScope.launch {
         uiStateListener.updateData { s ->
-            s.copy(uiState = UiState.Loading)
+            s.copy(uiState = CatalogUiState.Loading)
         }
         vodovozServiceRepository.getCatalogDetails().collect { catalogDetailsResult ->
             catalogDetailsResult.onSuccess { catalogDetails ->
@@ -39,12 +40,12 @@ class CatalogFlowViewModel @Inject constructor(
                     s.copy(
                         categories = categories,
                         banners = banners,
-                        uiState = UiState.Success
+                        uiState = CatalogUiState.Success
                     )
                 }
             }.onFailure {
                 uiStateListener.updateData { s ->
-                    s.copy(uiState = UiState.Error)
+                    s.copy(uiState = CatalogUiState.Error)
                 }
             }
         }
@@ -107,14 +108,15 @@ class CatalogFlowViewModel @Inject constructor(
     data class CatalogState(
         val categories: List<ParentCategoryUi> = emptyList(),
         val banners: List<BannerUi> = emptyList(),
-        val uiState: UiState = UiState.Loading,
+        val uiState: CatalogUiState = CatalogUiState.Loading,
         val showAdvertisingBS: Boolean = false,
         val currentAdvertising: AboutAdvertisingUi = AboutAdvertisingUi.Empty,
     ) : State
 
-    sealed interface UiState {
-        data object Loading: UiState
-        data object Success : UiState
-        data object Error : UiState
+    @Stable
+    sealed interface CatalogUiState {
+        data object Loading: CatalogUiState
+        data object Success : CatalogUiState
+        data object Error : CatalogUiState
     }
 }

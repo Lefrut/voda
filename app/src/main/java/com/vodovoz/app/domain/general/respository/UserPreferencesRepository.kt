@@ -10,4 +10,12 @@ interface UserPreferencesRepository {
 
     suspend fun getCanViewAdultProducts(): Boolean
 
+    val viewedStoryIds: Flow<List<Long>>
+
+    suspend fun addViewedStoryId(storyId: Long)
+
+    suspend fun getViewedStoryIds(): List<Long>
+
+    suspend fun clearAll(): Result<Unit>
+
 }

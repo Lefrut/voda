@@ -33,6 +33,14 @@ fun NavOptionsBuilder.slideAnim() {
     }
 }
 
+fun NavOptionsBuilder.expandAnim() {
+    anim {
+        exit = R.anim.fade_out
+        enter = R.anim.slide_in_bottom
+        popExit = R.anim.slide_out_bottom
+    }
+}
+
 fun NavController.navigateToAddAddress(addressId: Long, addressName: String) {
     navigate(
         R.id.addAddressFragment,
@@ -155,7 +163,7 @@ fun NavController.navigateToCancelOrder(orderId: Long) {
         R.id.cancelOrderFragment,
         bundleOf("orderId" to orderId),
         navOptions {
-            slideAnim()
+            expandAnim()
         }
     )
 }
@@ -166,7 +174,7 @@ fun NavController.navigateToOrderQuestion(orderId: Long) {
         R.id.orderQuestionFragment,
         bundleOf("orderId" to orderId),
         navOptions {
-            slideAnim()
+            expandAnim()
         }
     )
 }
@@ -322,7 +330,7 @@ fun NavController.navigateToStories(storyId: Long) {
         bundle,
         navOptions {
             anim {
-                popExit = R.anim.slide_out_botton
+                popExit = R.anim.slide_out_bottom
                 exit = R.anim.fade_out
                 enter = R.anim.scale_in
             }
@@ -386,9 +394,9 @@ fun NavController.navigateToProductFilters(categoryId: Long, filters: FiltersUi)
             "filters" to filters
         ),
         NavOptions.Builder()
-            .setEnterAnim(R.anim.slide_in_botton)
+            .setEnterAnim(R.anim.slide_in_bottom)
             .setExitAnim(R.anim.fade_out)
-            .setPopExitAnim(R.anim.slide_out_botton)
+            .setPopExitAnim(R.anim.slide_out_bottom)
             .build()
     )
 }
@@ -410,10 +418,10 @@ fun NavController.navigateToPreOrder(productId: Long) {
         R.id.preOrderFragment,
         bundleOf("productId" to productId),
         NavOptions.Builder()
-            .setEnterAnim(R.anim.slide_in_botton)
-            .setExitAnim(R.anim.slide_out_botton)
-            .setPopEnterAnim(R.anim.slide_in_botton)
-            .setPopExitAnim(R.anim.slide_out_botton)
+            .setEnterAnim(R.anim.slide_in_bottom)
+            .setExitAnim(R.anim.slide_out_bottom)
+            .setPopEnterAnim(R.anim.slide_in_bottom)
+            .setPopExitAnim(R.anim.slide_out_bottom)
             .build()
     )
 

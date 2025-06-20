@@ -42,7 +42,7 @@ fun CatalogScreen(viewModel: CatalogFlowViewModel, viewState: CatalogFlowViewMod
                 .consumeWindowInsets(paddingValues)
         ) {
             when (viewState.uiState) {
-                CatalogFlowViewModel.UiState.Success -> {
+                CatalogFlowViewModel.CatalogUiState.Success -> {
                     CatalogBody(
                         categories = viewState.categories,
                         banners = viewState.banners,

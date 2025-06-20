@@ -1,5 +1,6 @@
 package com.vodovoz.app.feature.cancel_order
 
+import androidx.compose.runtime.Stable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.vodovoz.app.design_system.model.ColorfulButtonUi
@@ -20,6 +21,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
+@Stable
 class CancelOrderViewModel @Inject constructor(
     private val vodovozServiceRepository: VodovozServiceRepository,
     savedStateHandle: SavedStateHandle,

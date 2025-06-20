@@ -428,6 +428,7 @@
     <string name="intercom">Домофон</string>
     <string name="floor">Этаж</string>
     <string name="redact_address">Редактирование адреса</string>
-    <string name="speak">Говорите...</string>
+    <string name="speak">Говорите…</string>
+    <string name="share">%1$s %2$s</string>
 
 </resources>

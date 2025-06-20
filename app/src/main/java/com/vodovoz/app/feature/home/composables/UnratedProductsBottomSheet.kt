@@ -167,10 +167,6 @@ fun UnratedProductsBottomSheet(
 
         Column(
             modifier = Modifier
-                .anchoredDraggable(
-                    state = state,
-                    orientation = Orientation.Vertical,
-                )
                 .fillMaxWidth()
                 .height(columnHeight)
                 .offset {
@@ -186,7 +182,11 @@ fun UnratedProductsBottomSheet(
                     offsetY = (-3).dp
                 )
                 .background(MaterialTheme.colorScheme.background, shape)
-                .clip(shape),
+                .clip(shape)
+                .anchoredDraggable(
+                    state = state,
+                    orientation = Orientation.Vertical,
+                ),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             VodovozDragHandle()
