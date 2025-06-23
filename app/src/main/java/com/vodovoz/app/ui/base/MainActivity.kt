@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.core.view.WindowCompat
 import androidx.fragment.app.commit
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.NavHostFragment
@@ -48,11 +49,11 @@ class MainActivity : AppCompatActivity() {
         MapKitFactory.initialize(this)
 
         binding = ActivityMainBinding.inflate(layoutInflater).apply { setContentView(root) }
-        supportFragmentManager.commit {
-            val navHostFragment = NavHostFragment.create(R.navigation.nav_graph)
-            replace(R.id.fcvMainContainer, navHostFragment)
-            setPrimaryNavigationFragment(navHostFragment)
-        }
+
+        val navHostFragment = supportFragmentManager
+            .findFragmentById(binding.fcvMainContainer.id) as? NavHostFragment
+        val navController = navHostFragment?.navController
+        navController?.setGraph(R.navigation.nav_graph)
 
         processIntent(intent)
     }
