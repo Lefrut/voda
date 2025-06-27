@@ -309,7 +309,7 @@ fun UpdatedProductsExpanded(
             )
 
             Icon(
-                imageVector = ImageVector.vectorResource(id = R.drawable.icon_close),
+                imageVector = ImageVector.vectorResource(id = R.drawable.ic_close),
                 contentDescription = null,
                 modifier = Modifier
                     .size(24.dp)

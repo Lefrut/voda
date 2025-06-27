@@ -45,7 +45,7 @@ fun FavoriteTopBar(
 
         if (showSearch) {
             Icon(
-                painter = painterResource(id = R.drawable.icon_search),
+                painter = painterResource(id = R.drawable.ic_search),
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onBackground,
                 modifier = Modifier

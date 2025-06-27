@@ -38,7 +38,7 @@ fun DeliveryCard(modifier: Modifier = Modifier) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
-            imageVector = ImageVector.vectorResource(id = R.drawable.icon_delivery),
+            imageVector = ImageVector.vectorResource(id = R.drawable.ic_truck),
             contentDescription = null,
             modifier = Modifier.size(24.dp),
             tint = MaterialTheme.colorScheme.primary

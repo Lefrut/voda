@@ -235,7 +235,7 @@ fun WaterAppUserDataTopBar(
             }
         }
         Icon(
-            painter = painterResource(id = R.drawable.icon_close),
+            painter = painterResource(id = R.drawable.ic_close),
             modifier = Modifier
                 .size(24.dp)
                 .clip(CircleShape)

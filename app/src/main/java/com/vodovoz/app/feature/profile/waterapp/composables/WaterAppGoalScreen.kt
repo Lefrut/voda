@@ -123,7 +123,7 @@ fun WaterAppGoalScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Icon(
-                painter = painterResource(id = R.drawable.icon_close),
+                painter = painterResource(id = R.drawable.ic_close),
                 contentDescription = null,
                 modifier = Modifier
                     .align(Alignment.End)

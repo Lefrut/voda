@@ -17,14 +17,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.fromHtml
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImagePainter
-import coil3.compose.rememberAsyncImagePainter
 import com.vodovoz.app.R
 import com.vodovoz.app.design_system.composables.ClickableIcon
 
@@ -70,7 +67,7 @@ fun EmptyResultPlaceholder(
                     Spacer(modifier = Modifier.weight(1f))
                     ClickableIcon(
                         modifier = Modifier.clip(CircleShape),
-                        iconId = R.drawable.icon_close,
+                        iconId = R.drawable.ic_close,
                         tint = MaterialTheme.colorScheme.onBackground,
                         onClick = onItemClick
                     )

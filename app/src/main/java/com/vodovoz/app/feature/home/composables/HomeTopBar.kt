@@ -81,7 +81,7 @@ fun HomeTopBar(
                                 interactionSource = null,
                                 indication = null
                             ),
-                        painter = painterResource(id = R.drawable.icon_search),
+                        painter = painterResource(id = R.drawable.ic_search),
                         tint = MaterialTheme.colorScheme.surfaceTint,
                         contentDescription = null
                     )

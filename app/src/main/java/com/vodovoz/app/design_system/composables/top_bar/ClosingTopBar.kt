@@ -50,7 +50,7 @@ fun ClosingTopBar(modifier: Modifier = Modifier, title: String, onCloseClick: ()
         )
 
         Icon(
-            painter = painterResource(id = R.drawable.icon_close),
+            painter = painterResource(id = R.drawable.ic_close),
             contentDescription = null,
             tint = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier

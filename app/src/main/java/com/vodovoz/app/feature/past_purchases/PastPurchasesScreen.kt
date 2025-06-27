@@ -32,7 +32,7 @@ fun PastPurchasesScreen(
     ) {
         VodovozTopBar(
             title = viewState.title,
-            actionIconId = R.drawable.icon_search,
+            actionIconId = R.drawable.ic_search,
             onActionClick = {
                 viewModel.navigateToSearch()
             },

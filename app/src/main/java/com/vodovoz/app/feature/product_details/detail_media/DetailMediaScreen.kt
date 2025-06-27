@@ -44,7 +44,7 @@ fun DetailMediaScreen(
     ) {
         if (viewState.portraitOrientation) {
             Icon(
-                imageVector = ImageVector.vectorResource(id = R.drawable.icon_close),
+                imageVector = ImageVector.vectorResource(id = R.drawable.ic_close),
                 contentDescription = null,
                 modifier = Modifier
                     .align(Alignment.End)
