@@ -1,30 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="bluePrimary">#05A4FF</color>
-
-    <color name="blackTextDark">#262626</color>
-
     <color name="white">#FFFFFFFF</color>
-    <color name="gray">#E1E1E1</color>
-
-    <color name="light_bg">#F3F3F3</color>
-
     <color name="text_black">#434343</color>
-    <color name="text_gray">#555555</color>
-    <color name="text_new_black">#80000000</color>
-
-
-
-    <color name="color_search">#889295</color>
-
     <color name="promo_red">#F91155</color>
     <color name="new_product_blue">#05A4FF</color>
-    <color name="new_product_light_blue">#96D9FF</color>
-
     <color name="text_black_composable">#222222</color>
-    <color name="text_grey_composable">#8689A2</color>
-
-    <color name="border_blue">#DCECF6</color>
-    <color name="divider">#EAEAEA</color>
-    <color name="extra_light_grey">#EFEFF4</color>
 </resources>
