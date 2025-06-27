@@ -19,11 +19,6 @@
         <item name="postSplashScreenTheme">@style/Theme.Vodovoz</item>
     </style>
 
-    <style name="Theme.Vodovoz.DarkStatusBar" parent="Theme.Vodovoz">
-
-        <item name="colorPrimaryDark">@color/bluePrimary</item>
-    </style>
-
     <style name="AlertDialog" parent="ThemeOverlay.MaterialComponents.MaterialAlertDialog">
         <item name="materialAlertDialogBodyTextStyle">@style/TextViewNormalBlack</item>
     </style>
