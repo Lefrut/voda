@@ -21,6 +21,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
@@ -41,6 +42,7 @@ import coil3.request.crossfade
 import com.vodovoz.app.R
 import com.vodovoz.app.design_system.composables.button.VodovozButton
 import com.vodovoz.app.design_system.composables.decoration.VodovozRatingBar
+import com.vodovoz.app.design_system.composables.snackbar.VodovozSnackbarHost
 import com.vodovoz.app.design_system.composables.text_fields.VodovozTextField
 import com.vodovoz.app.design_system.model.widgets.FieldUi
 
@@ -55,6 +57,7 @@ fun WriteCommentBody(
     havePhotos: Boolean,
     images: List<String>,
     buttonIsLoading: Boolean,
+    snackbarHostState: SnackbarHostState,
     onRatingChange: (Float) -> Unit,
     onCommentChange: (FieldUi) -> Unit,
     onRateSend: () -> Unit,
@@ -141,6 +144,8 @@ fun WriteCommentBody(
         }
 
         Spacer(modifier = Modifier.weight(1f))
+
+        VodovozSnackbarHost(hostState = snackbarHostState)
 
         VodovozButton(
             modifier = Modifier.padding(vertical = 24.dp, horizontal = 16.dp),

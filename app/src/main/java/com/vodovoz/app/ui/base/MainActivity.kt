@@ -3,14 +3,10 @@ package com.vodovoz.app.ui.base
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.app.AppCompatDelegate
-import androidx.core.os.LocaleListCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
-import androidx.fragment.app.commit
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.NavHostFragment
 import com.google.firebase.messaging.RemoteMessage
@@ -18,7 +14,7 @@ import com.vodovoz.app.R
 import com.vodovoz.app.databinding.ActivityMainBinding
 import com.vodovoz.app.feature.sitestate.SiteStateManager
 import com.vodovoz.app.util.extensions.debugLog
-import com.yandex.mapkit.MapKitFactory
+import com.vodovoz.app.util.extensions.setSystemBarIconColors
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import org.json.JSONObject
@@ -38,15 +34,12 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        installSplashScreen().setKeepOnScreenCondition {
-            viewModel.androidSplash.value
-        }
+        installSplashScreen().setKeepOnScreenCondition { viewModel.androidSplash.value }
+        window.setSystemBarIconColors()
         supportActionBar?.hide()
         splashFileViewModel.downloadSplashFile()
 
         viewModel.checkAppState()
-
-        MapKitFactory.initialize(this)
 
         binding = ActivityMainBinding.inflate(layoutInflater).apply { setContentView(root) }
 
@@ -54,6 +47,7 @@ class MainActivity : AppCompatActivity() {
             .findFragmentById(binding.fcvMainContainer.id) as? NavHostFragment
         val navController = navHostFragment?.navController
         navController?.setGraph(R.navigation.nav_graph)
+        navController?.navigate(R.id.splashFragment)
 
         processIntent(intent)
     }

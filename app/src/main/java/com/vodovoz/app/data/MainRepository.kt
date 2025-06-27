@@ -153,10 +153,6 @@ class MainRepository @Inject constructor(
         checkDeliveryValue = checkDeliveryValue,
         useScore = useScore
     ).parseRegOrderResponse()
-
-
-    suspend fun logout(userId: Long) = api.logout(userId = userId)
-
 }
 
 

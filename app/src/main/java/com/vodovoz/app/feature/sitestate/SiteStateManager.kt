@@ -2,6 +2,7 @@ package com.vodovoz.app.feature.sitestate
 
 import com.vodovoz.app.common.agreement.AgreementController
 import com.vodovoz.app.common.jivochat.JivoChatController
+import com.vodovoz.app.common.model.SiteStateData
 import com.vodovoz.app.common.model.VodovozSiteState
 import com.vodovoz.app.data.parser.common.safeString
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
@@ -29,10 +30,27 @@ class SiteStateManager @Inject constructor(
     private val pushListener = MutableStateFlow<PushData?>(null)
     fun observePush() = pushListener.asStateFlow()
 
-    suspend fun requestSiteState(): VodovozSiteState? {
-        if (siteStateSnapshot != null) return siteStateSnapshot
+    private var currentAttempt = 0
 
-        val siteStateResult = vodovozServiceRepository.getSiteState().singleResult()
+    suspend fun requestSiteState(): VodovozSiteState? {
+        currentAttempt++
+
+        //todo - need extra fixes
+        val st = if (currentAttempt >= 3) {
+            VodovozSiteState.Blocked.copy(isActive = true)
+        } else {
+            VodovozSiteState.Blocked.copy(
+                isActive = false,
+                data = SiteStateData(
+                    time = "24.06.2025 12:59:00",
+                    logo = "https://play-lh.googleusercontent.com/rvhTjMa8J-EkZYAseFP299-P4b4_WxPQCgs_6KnPAe6lbugJXjl-Z153SaBHKQzh-P0=w240-h480-rw",
+                    title = "Блок"
+                )
+            )
+        }
+
+
+        val siteStateResult = vodovozServiceRepository.getSiteState().singleResult() //Result.success(st)
 
         siteStateResult.onSuccess { siteState ->
             val siteAgreement = siteState.agreement
@@ -56,7 +74,6 @@ class SiteStateManager @Inject constructor(
     }
 
 
-    fun siteActive(): Boolean = siteStateSnapshot?.isActive == true
     fun smsEnabled(): Boolean = siteStateSnapshot?.isSmsEnabled == true
 
     fun saveDeepLinkPath(path: String?) {

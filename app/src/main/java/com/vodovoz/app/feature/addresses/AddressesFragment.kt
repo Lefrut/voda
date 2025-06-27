@@ -19,7 +19,6 @@ import com.vodovoz.app.core.navigation.navigateToMap
 import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.effects.LifecycleEffect
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.flow.onStart
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -73,7 +72,16 @@ class AddressesFragment : Fragment() {
                 }
 
                 is AddressesFlowViewModel.AddressesEvents.GoToEditAddress -> {
-                    findNavController().navigateToAddAddress(event.addressId, event.addressName)
+                    findNavController().navigateToAddAddress(
+                        addressId = event.addressId,
+                        addressName = event.addressName
+                    )
+                }
+
+                is AddressesFlowViewModel.AddressesEvents.GoBackToOrdering -> {
+                    val navController = findNavController()
+                    navController.previousBackStackEntry?.savedStateHandle?.set("addressId", event.addressId)
+                    navController.popBackStack()
                 }
             }
         }

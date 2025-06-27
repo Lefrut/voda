@@ -10,7 +10,6 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -28,10 +27,11 @@ class TabManager @Inject constructor(
     private val bottomNavCartStateListener = MutableStateFlow<BottomNavCartState?>(null)
     fun observeBottomNavCartState() = bottomNavCartStateListener.asStateFlow()
 
-
     private val tabReselectListener = MutableStateFlow(DEFAULT_STATE)
     fun observeTabReselect() = tabReselectListener.asStateFlow()
-    fun setDefaultState() { tabReselectListener.value = DEFAULT_STATE }
+    fun setDefaultState() {
+        tabReselectListener.value = DEFAULT_STATE
+    }
 
     private val tabAuthRedirectListener = MutableStateFlow<Int>(DEFAULT_AUTH_REDIRECT)
     fun fetchAuthRedirect() = tabAuthRedirectListener.value
@@ -60,16 +60,17 @@ class TabManager @Inject constructor(
         tabReselectListener.value = id
     }
 
-    suspend fun updateBottomNavCartState() = vodovozServiceRepository.getBottomCart().onEach { result ->
-        result.onSuccess { bottomCartModel ->
-            bottomNavCartStateListener.value = BottomNavCartState(
-                count = bottomCartModel.count,
-                total = bottomCartModel.total
-            )
-        }.onFailure {
-            bottomNavCartStateListener.value = null
-        }
-    }.collect{}
+    suspend fun updateBottomNavCartState() =
+        vodovozServiceRepository.getBottomCart().onEach { result ->
+            result.onSuccess { bottomCartModel ->
+                bottomNavCartStateListener.value = BottomNavCartState(
+                    count = bottomCartModel.count,
+                    total = bottomCartModel.total
+                )
+            }.onFailure {
+                bottomNavCartStateListener.value = null
+            }
+        }.collect {}
 
 
     fun changeTabVisibility(vis: Boolean) {

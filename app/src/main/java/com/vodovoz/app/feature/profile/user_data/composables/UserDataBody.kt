@@ -73,7 +73,7 @@ fun UserDataBody(
 
         Text(
             modifier = Modifier
-                .padding(top = 16.dp, bottom = 32.dp)
+                .padding(top = 16.dp, bottom = 48.dp)
                 .align(Alignment.Start)
                 .clip(MaterialTheme.shapes.small)
                 .clickable(onClick = onDeleteAccountClick)

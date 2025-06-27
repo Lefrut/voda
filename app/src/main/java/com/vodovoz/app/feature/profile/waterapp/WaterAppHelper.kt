@@ -6,7 +6,6 @@ import androidx.compose.runtime.Stable
 import androidx.compose.ui.graphics.Color
 import androidx.work.Constraints
 import androidx.work.ExistingPeriodicWorkPolicy
-import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequest
 import androidx.work.WorkManager
 import com.squareup.moshi.Moshi
@@ -43,6 +42,10 @@ class WaterAppHelper @Inject constructor(
         const val WATER_APP_USER_DATA = "water app user data"
         const val WATER_APP_NOTIFICATION_DATA = "water app notification data"
         const val WATER_APP_RATE = "water app rate"
+
+        val waterCupLevels = listOf(
+            100, 250, 500, 750, 1000
+        )
 
         val reminderIntervals = listOf(
             15L, 30L, 60L, 90L, 120L, 180L, 240L, 300L
@@ -238,11 +241,12 @@ class WaterAppHelper @Inject constructor(
         val data = json?.takeIf { it.isNotEmpty() }?.let { rateJsonAdapter.fromJson(it) }
 
         val result = when {
-            data == null -> WaterAppRateData(lastSavedDate = currentDate)
+            data == null -> WaterAppRateData(lastSavedDate = currentDate, canFill = true)
             data.lastSavedDate == 0L -> data.copy(lastSavedDate = currentDate)
             data.lastSavedDate != currentDate -> data.copy(
                 lastSavedDate = currentDate,
-                currentLevel = 0
+                currentLevel = 0,
+                canFill = true
             )
 
             else -> data

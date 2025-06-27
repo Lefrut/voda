@@ -1,6 +1,8 @@
 package com.vodovoz.app.domain.general.respository
 
+import com.vodovoz.app.design_system.model.MapPointUi
 import com.vodovoz.app.domain.general.model.location.MapAddressModel
+import com.vodovoz.app.domain.general.model.location.MapPointModel
 import kotlinx.coroutines.flow.Flow
 
 interface MapServiceRepository {
@@ -17,5 +19,7 @@ interface MapServiceRepository {
     fun searchAddressInMoscow(
         address: String
     ): Flow<Result<MapAddressModel>>
+
+    fun getRoute(start: MapPointModel, end: MapPointModel): Flow<Result<List<MapPointModel>>>
 
 }

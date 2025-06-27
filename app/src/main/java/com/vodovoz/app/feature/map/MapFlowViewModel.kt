@@ -17,7 +17,6 @@ import com.vodovoz.app.data.model.common.ResponseEntity
 import com.vodovoz.app.design_system.model.MapPointUi
 import com.vodovoz.app.domain.general.respository.MapServiceRepository
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
-import com.vodovoz.app.feature.addresses.model.AddressUi
 import com.vodovoz.app.feature.map.manager.DeliveryZonesManager
 import com.vodovoz.app.feature.map.model.MapAddressUi
 import com.vodovoz.app.feature.map.model.toDomain
@@ -42,7 +41,6 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import okhttp3.ResponseBody
 import javax.inject.Inject
 import kotlin.math.roundToInt
 
@@ -54,12 +52,11 @@ class MapFlowViewModel @Inject constructor(
     private val deliveryZonesManager: DeliveryZonesManager,
     private val accountManager: AccountManager,
     private val mapServiceRepository: MapServiceRepository,
-    private val vodovozServiceRepository: VodovozServiceRepository,
 ) : PagingContractViewModel<MapFlowViewModel.MapFlowState, MapFlowViewModel.MapFlowEvents>(
     MapFlowState()
 ) {
 
-    private val selectedAddress = savedState.get<AddressUi>("address")?.apply {
+    private val addressName = savedState.get<String>("addressName")?.apply {
         uiStateListener.updateData { s -> s.copy(screenType = MapScreenTypeUi.Edit) }
     }
 
@@ -158,7 +155,6 @@ class MapFlowViewModel @Inject constructor(
                     listOnPoints = listOnPoints
                 )
             )
-            eventListener.emit(MapFlowEvents.Submit(startPoint, listOnPoints))
         }
     }
 
@@ -237,7 +233,7 @@ class MapFlowViewModel @Inject constructor(
         viewModelScope.launch {
             val pendingUpdateAddressUi = state.data.pendingUpdateAddressUI
             if (pendingUpdateAddressUi == null) {
-                eventListener.emit(MapFlowEvents.ShowPolyline(polyline = polyline))
+
             } else {
                 val userId = accountManager.fetchAccountId() ?: return@launch
                 updateAddress(
@@ -268,7 +264,7 @@ class MapFlowViewModel @Inject constructor(
                     .minByOrNull { it.distance }
             minDistancePolyline?.let {
                 if (it.polyline == null) {
-                    eventListener.emit(MapFlowEvents.ShowPolyline())
+
                     return@launch
                 }
                 val newDistance = (it.distance / 1000).roundToInt().toString()
@@ -310,7 +306,7 @@ class MapFlowViewModel @Inject constructor(
 
         if (house.isNullOrEmpty() || lat.isNullOrEmpty() || longitude.isNullOrEmpty() || length.isNullOrEmpty() || fullAddress.isNullOrEmpty()) {
             viewModelScope.launch {
-                eventListener.emit(MapFlowEvents.ShowSearchError)
+
             }
             return
         }
@@ -394,14 +390,17 @@ class MapFlowViewModel @Inject constructor(
                         error = null
                     )
                     when (response) {
-                        is ResponseEntity.Success -> eventListener.emit(MapFlowEvents.AddAddressSuccess)
-                        is ResponseEntity.Error -> eventListener.emit(
-                            MapFlowEvents.AddAddressError(
-                                response.errorMessage
-                            )
-                        )
+                        is ResponseEntity.Success -> {
 
-                        is ResponseEntity.Hide -> eventListener.emit(MapFlowEvents.AddAddressError("Неизвестная ошибка"))
+                        }
+
+                        is ResponseEntity.Error -> {
+
+                        }
+
+                        is ResponseEntity.Hide -> {
+
+                        }
                     }
                 }
                 .flowOn(Dispatchers.Default)
@@ -462,13 +461,7 @@ class MapFlowViewModel @Inject constructor(
                         is ResponseEntity.Success -> {
                             val pendingUpdateAddressUi = state.data.pendingUpdateAddressUI
                             if (pendingUpdateAddressUi == null) {
-                                eventListener.emit(MapFlowEvents.AddAddressSuccess)
                             } else {
-                                eventListener.emit(
-                                    MapFlowEvents.UpdatePendingAddressUISuccess(
-                                        pendingUpdateAddressUi
-                                    )
-                                )
                                 uiStateListener.value = state.copy(
                                     data = state.data.copy(
                                         pendingUpdateAddressUI = null
@@ -477,13 +470,13 @@ class MapFlowViewModel @Inject constructor(
                             }
                         }
 
-                        is ResponseEntity.Error -> eventListener.emit(
-                            MapFlowEvents.AddAddressError(
-                                response.errorMessage
-                            )
-                        )
+                        is ResponseEntity.Error -> {
 
-                        is ResponseEntity.Hide -> eventListener.emit(MapFlowEvents.AddAddressError("Неизвестная ошибка"))
+                        }
+
+                        is ResponseEntity.Hide -> {
+
+                        }
                     }
                 }
                 .flowOn(Dispatchers.Default)
@@ -526,8 +519,8 @@ class MapFlowViewModel @Inject constructor(
         val addressPoint = dataState.currentAddress?.point
         if (addressPoint != null) {
             eventListener.emit(MapFlowEvents.MoveToAddress(addressPoint))
-        } else if (selectedAddress != null) {
-            searchAddress(selectedAddress.address)
+        } else if (addressName != null) {
+            searchAddress(addressName)
         } else {
             eventListener.emit(MapFlowEvents.MoveToGeoOrMoscow)
         }
@@ -612,34 +605,17 @@ class MapFlowViewModel @Inject constructor(
             s.copy(buttonIsLoading = true)
         }
 
-        val currentAddress = dataState.currentAddress
+        val mapAddress = dataState.currentAddress
+        val screenType = dataState.screenType
 
-        //todo - need different backend realization(update address separately) || need all correct data in edit address details
-        //vodovozServiceRepository.updateAddress()
+        when {
+            screenType == MapScreenTypeUi.Add && mapAddress != null -> {
+                eventListener.emit(MapFlowEvents.GoToAddAddress(mapAddress))
 
-        val addressId = selectedAddress?.id ?: dataState.currentAddress?.let { address ->
-            vodovozServiceRepository.addAddress(address.toDomain()).singleResult().getOrNull()
-        }
+            }
 
-        val addressName = currentAddress?.name ?: selectedAddress?.address
-
-        if (addressId != null && addressName != null) {
-            when (dataState.screenType) {
-                MapScreenTypeUi.Add -> {
-                    eventListener.emit(
-                        MapFlowEvents.GoToAddAddress(
-                            addressId = addressId,
-                            addressName = addressName
-                        )
-                    )
-
-                }
-
-                MapScreenTypeUi.Edit -> {
-                    eventListener.emit(
-                        MapFlowEvents.BackToAddAddress(addressName)
-                    )
-                }
+            screenType == MapScreenTypeUi.Edit && mapAddress != null -> {
+                eventListener.emit(MapFlowEvents.BackToAddAddress(mapAddress))
             }
         }
 
@@ -700,15 +676,6 @@ class MapFlowViewModel @Inject constructor(
 
     sealed class MapFlowEvents : Event {
 
-        data class Submit(val startPoint: Point, val list: List<Point>) : MapFlowEvents()
-        data class ShowPolyline(val polyline: Polyline? = null, val message: String? = null) :
-            MapFlowEvents()
-
-        data object AddAddressSuccess : MapFlowEvents()
-        data class AddAddressError(val message: String) : MapFlowEvents()
-        data class UpdatePendingAddressUISuccess(val address: AddressUI) : MapFlowEvents()
-        data object ShowSearchError : MapFlowEvents()
-
         data object MoveToGeoOrMoscow : MapFlowEvents()
         data object CheckGeo : MapFlowEvents()
         data object MoveCameraMinus : MapFlowEvents()
@@ -718,8 +685,8 @@ class MapFlowViewModel @Inject constructor(
         data object GoBack : MapFlowEvents()
         data object HideKeyboard : MapFlowEvents()
         data object GoToLocationSettings : MapFlowEvents()
-        data class GoToAddAddress(val addressId: Long, val addressName: String) : MapFlowEvents()
-        data class BackToAddAddress(val addressName: String) : MapFlowEvents()
+        data class GoToAddAddress(val mapAddress: MapAddressUi) : MapFlowEvents()
+        data class BackToAddAddress(val mapAddress: MapAddressUi) : MapFlowEvents()
 
         data class MoveToAddress(val addressPoint: MapPointUi) : MapFlowEvents()
     }

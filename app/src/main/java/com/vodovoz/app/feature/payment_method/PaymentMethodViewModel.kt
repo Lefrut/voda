@@ -29,7 +29,7 @@ class PaymentMethodViewModel @Inject constructor(
     private val resourcesProvider: ResourcesProvider,
 ) : MviViewModel<PaymentMethodState, PaymentMethodEvent>(PaymentMethodState()) {
 
-    private val addressId = savedStateHandle.get<Int>("addressId") ?: navigateBack().let { -1 }
+    private val addressId = savedStateHandle.get<Long>("addressId") ?: navigateBack().let { -1 }
     private val orderDate = savedStateHandle.get<Long>("date")?.let { days ->
         LocalDate.ofEpochDay(days)
     } ?: navigateBack().let { LocalDate.now() }

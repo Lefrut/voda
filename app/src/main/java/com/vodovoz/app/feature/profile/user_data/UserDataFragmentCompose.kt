@@ -4,6 +4,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -26,6 +28,7 @@ import com.vodovoz.app.design_system.composables.placeholders.NetworkErrorPlaceh
 import com.vodovoz.app.design_system.effects.LifecycleEffect
 import com.vodovoz.app.feature.cart.CartFlowViewModel
 import com.vodovoz.app.feature.catalog.CatalogFlowViewModel
+import com.vodovoz.app.feature.favorite.FavoriteFlowViewModel
 import com.vodovoz.app.feature.home.HomeFlowViewModel
 import com.vodovoz.app.feature.profile.ProfileFlowViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -41,6 +44,7 @@ class UserDataFragment : Fragment() {
     private val homeViewModel: HomeFlowViewModel by activityViewModels()
     private val cartViewModel: CartFlowViewModel by activityViewModels()
     private val catalogViewModel: CatalogFlowViewModel by activityViewModels()
+    private val favoriteViewModel: FavoriteFlowViewModel by activityViewModels()
 
     @Inject
     lateinit var tabManager: TabManager
@@ -53,11 +57,6 @@ class UserDataFragment : Fragment() {
     override fun onStop() {
         super.onStop()
         tabManager.changeTabVisibility(true)
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        viewModel.fetchUserData()
     }
 
     override fun onCreateView(
@@ -101,6 +100,7 @@ class UserDataFragment : Fragment() {
                                     cartViewModel.refresh()
                                     catalogViewModel.refresh()
                                     profileViewModel.refresh()
+                                    favoriteViewModel.refresh()
 
                                     delay(200)
 

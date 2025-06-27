@@ -13,15 +13,14 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.fragment.findNavController
-import com.vodovoz.app.R
 import com.vodovoz.app.common.cart.CartManager
 import com.vodovoz.app.common.like.LikeManager
 import com.vodovoz.app.core.navigation.navigateToProductAnalogs
 import com.vodovoz.app.core.navigation.navigateToProductDetails
-import com.vodovoz.app.core.navigation.navigateToWebView
 import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.composables.placeholders.NetworkErrorPlaceholder
 import com.vodovoz.app.design_system.effects.LifecycleEffect
+import com.vodovoz.app.util.extensions.openUrl
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -85,11 +84,8 @@ class PromotionDetailsFragment : Fragment() {
                                     findNavController().popBackStack()
                                 }
 
-                                is PromotionDetailsViewModel.PromotionDetailEvent.GoToWebView -> {
-                                    findNavController().navigateToWebView(
-                                        event.url,
-                                        context.getString(R.string.space)
-                                    )
+                                is PromotionDetailsViewModel.PromotionDetailEvent.OpenUrl -> {
+                                    requireContext().openUrl(event.url)
                                 }
 
                                 is PromotionDetailsViewModel.PromotionDetailEvent.GoToProductAnalogs -> {

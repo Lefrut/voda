@@ -50,6 +50,7 @@ import com.vodovoz.app.core.navigation.navigateToPromotions
 import com.vodovoz.app.core.navigation.navigateToSearch
 import com.vodovoz.app.core.navigation.navigateToServiceDetails
 import com.vodovoz.app.core.navigation.navigateToStories
+import com.vodovoz.app.core.navigation.navigateToViewedProductList
 import com.vodovoz.app.core.navigation.navigateToWaterApp
 import com.vodovoz.app.core.navigation.navigateToWebView
 import com.vodovoz.app.core.navigation.navigateToWriteComment
@@ -63,6 +64,7 @@ import com.vodovoz.app.util.extensions.debugLog
 import com.vodovoz.app.util.extensions.isVpnActive
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onSubscription
 import kotlinx.coroutines.launch
@@ -100,9 +102,18 @@ class HomeFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        observeTabReselect()
         observePushFromSiteState()
         observeDeepLinkFromSiteState()
-        observeTabReselect()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        findNavController().currentBackStackEntry?.savedStateHandle?.remove<Long>("ratedProductId")
+            ?.let { productId ->
+                viewModel.removeUnratedProduct(productId)
+            }
+
     }
 
     @OptIn(ExperimentalMaterial3Api::class)
@@ -151,6 +162,8 @@ class HomeFragment : Fragment() {
                             context
                         )
                     }
+
+
 
                     LifecycleEffect {
                         viewModel.listenCart()
@@ -289,6 +302,10 @@ class HomeFragment : Fragment() {
                 HomeFlowViewModel.HomeEvents.CloseApp -> {
                     requireActivity().finish()
                 }
+
+                HomeFlowViewModel.HomeEvents.GoToViewedProductList -> {
+                    findNavController().navigateToViewedProductList()
+                }
             }
         }
 
@@ -307,12 +324,11 @@ class HomeFragment : Fragment() {
 
 
     private fun observeDeepLinkFromSiteState() = lifecycleScope.launch {
-        repeatOnLifecycle(Lifecycle.State.STARTED) {
-            siteStateManager.observeDeepLinkPath()
-                .mapNotNull { path -> path }
+        repeatOnLifecycle(Lifecycle.State.CREATED) {
+            delay(2000L)
+            siteStateManager.observeDeepLinkPath().mapNotNull { path -> path }
                 .collect { path ->
-                    debugLog { "observeDeepLinkFromSiteState: $path" }
-
+                    debugLog { "DeepLinkPath: $path" }
                     when (path) {
                         "catalog" -> {
                             tabManager.selectTab(R.id.graph_catalog)
@@ -366,8 +382,8 @@ class HomeFragment : Fragment() {
                         }
 
                         else -> {
-                            val productId = path.removeSuffix("/").takeLastWhile { it.isDigit() }
-                                .toLongOrNull() ?: return@collect
+                            val productId =
+                                path.filter { it.isDigit() }.toLongOrNull() ?: return@collect
                             findNavController().navigateToProductDetails(productId)
                         }
 
@@ -379,10 +395,12 @@ class HomeFragment : Fragment() {
 
 
     private fun observePushFromSiteState() = lifecycleScope.launch {
-        repeatOnLifecycle(Lifecycle.State.RESUMED) {
-            siteStateManager.observePush().collect { pushData ->
-                debugLog { "push ${pushData?.path} $siteStateManager" }
-                when (pushData?.path) {
+        repeatOnLifecycle(Lifecycle.State.CREATED) {
+            delay(2000L)
+            siteStateManager.observePush().mapNotNull { it }.collect { pushData ->
+                debugLog { "PushFromSiteState: $pushData" }
+
+                when (pushData.path) {
                     "AKCII" -> {
                         val promotionId = pushData.id
                         if (promotionId.isNullOrEmpty()) return@collect
@@ -473,8 +491,9 @@ class HomeFragment : Fragment() {
                     "dostavka" -> {
                         findNavController().navigateToWebView(
                             ApiConfig.ABOUT_DELIVERY_URL,
-                            "О доставке"
+                            requireContext().getString(R.string.about_delivery)
                         )
+
                     }
 
                     "service" -> {
@@ -525,9 +544,8 @@ class HomeFragment : Fragment() {
                         findNavController().navigateToBuyCertificate()
                     }
 
-                    null -> {}
                 }
-                pushData?.action?.let { action ->
+                pushData.action?.let { action ->
                     if (action.contains("SOBNEW")) {
                         val eventParameters = "\"SOBNEW_NAME\": \"${pushData.id}\""
                         accountManager.reportEvent(

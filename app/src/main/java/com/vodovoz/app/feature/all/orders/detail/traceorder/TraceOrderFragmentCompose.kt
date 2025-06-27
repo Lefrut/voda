@@ -96,7 +96,6 @@ class TraceOrderFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        MapKitFactory.initialize(requireContext())
     }
 
     override fun onStart() {
@@ -220,7 +219,7 @@ class TraceOrderFragment : Fragment() {
 
                                     val cameraPosition = CameraPosition(
                                         cameraPositionWithBounds.target,
-                                        cameraPositionWithBounds.zoom - 1f,
+                                        (cameraPositionWithBounds.zoom - 1f).coerceAtMost(17f),
                                         azimuth,
                                         tilt
                                     )

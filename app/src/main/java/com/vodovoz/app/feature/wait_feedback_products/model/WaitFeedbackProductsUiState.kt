@@ -1,7 +1,9 @@
 package com.vodovoz.app.feature.wait_feedback_products.model
 
+import androidx.compose.runtime.Stable
 import com.vodovoz.app.design_system.model.VodovozPlaceholderUi
 
+@Stable
 sealed interface WaitFeedbackProductsUiState {
 
     data object Loading: WaitFeedbackProductsUiState

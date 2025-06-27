@@ -29,7 +29,7 @@ class DeliveryDateViewModel @Inject constructor(
     private val vodovozServiceRepository: VodovozServiceRepository,
 ) : MviViewModel<DeliveryDateState, DeliveryDateEvent>(DeliveryDateState()) {
 
-    private val addressId = savedStateHandle.get<Int>("addressId") ?: -1
+    private val addressId = savedStateHandle.get<Long>("addressId") ?: -1
 
     fun navigateBack() = viewModelScope.launch {
         _events.emit(DeliveryDateEvent.GoBack)
@@ -38,9 +38,7 @@ class DeliveryDateViewModel @Inject constructor(
     fun fetchDeliveryDateDetails() = viewModelScope.launch {
         val selectedLocalDate = try {
             LocalDate.parse(stateSnapshot.selectedOption.value, VodovozDateFormatters.DMY)
-        } catch (_: Throwable) {
-            LocalDate.now().plusDays(1)
-        }
+        } catch (_: Throwable) { LocalDate.now() }
 
         val deliveryDateDetailsResult = vodovozServiceRepository.getDeliveryDateDetails(
             addressId = addressId,
@@ -101,9 +99,7 @@ class DeliveryDateViewModel @Inject constructor(
 
     fun selectDeliveryTimeInterval(deliveryTimeInterval: DeliveryTimeIntervalUi) {
         _state.update { s ->
-            s.copy(
-                selectedTimeInterval = deliveryTimeInterval
-            )
+            s.copy(selectedTimeInterval = deliveryTimeInterval)
         }
     }
 
@@ -140,7 +136,10 @@ class DeliveryDateViewModel @Inject constructor(
                 showCalendarDialog = false
             )
         }
-        if(stateSnapshot.uiState == DeliveryDateUiState.Loading){
+
+        val uiState = stateSnapshot.uiState
+
+        if(uiState == DeliveryDateUiState.Loading || uiState == DeliveryDateUiState.BodyLoading){
             fetchDeliveryDateDetails()
         }
     }

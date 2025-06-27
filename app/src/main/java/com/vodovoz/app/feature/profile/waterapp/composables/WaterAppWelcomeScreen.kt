@@ -48,12 +48,6 @@ fun WaterAppWelcomeScreen(
     onCloseClick: () -> Unit,
     onStartClick: () -> Unit,
 ) {
-
-    SystemBarsEffect(
-        statusBarColor = Color.Transparent,
-        navigationBarColor = Color.Transparent
-    )
-
     Column(
         modifier = modifier
             .fillMaxSize()

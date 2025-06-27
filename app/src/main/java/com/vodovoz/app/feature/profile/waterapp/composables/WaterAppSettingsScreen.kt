@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -63,14 +64,19 @@ fun WaterAppSettingsScreen(
     onReminderIntervalClick: (ReminderIntervalUi) -> Unit,
     onHaveNotificationsChange: () -> Unit,
     onSettingsSaveClick: () -> Unit,
-    onEditUserData: (WaterAppUiState.UserData) -> Unit
+    onEditUserData: (WaterAppUiState.UserData) -> Unit,
 ) {
     BackHandler {
         onCloseClick()
     }
 
 
-    Column(modifier = modifier.fillMaxSize()) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .systemBarsPadding()
+    ) {
         ClosingTopBar(
             title = stringResource(id = R.string.settings),
             onCloseClick = onCloseClick
@@ -170,8 +176,12 @@ fun WaterAppSettingsScreen(
                     WaterAppUiState.UserData.entries - WaterAppUiState.UserData.Gender - WaterAppUiState.UserData.ActivityLevel
 
                 parameters.forEachIndexed { index, param ->
-                    ParameterItem(userData = userData, uiState = param, onEditClick = onEditUserData)
-                    if(index != parameters.lastIndex){
+                    ParameterItem(
+                        userData = userData,
+                        uiState = param,
+                        onEditClick = onEditUserData
+                    )
+                    if (index != parameters.lastIndex) {
                         HorizontalDivider(
                             modifier = Modifier.padding(horizontal = 20.dp),
                             thickness = 1.dp,
@@ -205,7 +215,7 @@ private fun ParameterItem(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Image(
-            painter = when(uiState){
+            painter = when (uiState) {
                 WaterAppUiState.UserData.Height -> painterResource(id = R.drawable.pic_height)
                 WaterAppUiState.UserData.Weight -> painterResource(id = R.drawable.pic_weight)
                 WaterAppUiState.UserData.WakeUpTime -> painterResource(id = R.drawable.ic_sun)

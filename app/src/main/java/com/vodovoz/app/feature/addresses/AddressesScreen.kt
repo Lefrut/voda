@@ -44,31 +44,32 @@ fun AddressesScreen(
                 }
             )
         },
-        bottomBar = bottomBar@{
-            if (uiState !is AddressesFlowViewModel.AddressesUiState.Success) return@bottomBar
+        bottomBar = {
+            if (uiState is AddressesFlowViewModel.AddressesUiState.Success) {
+                VodovozButton(
+                    modifier = Modifier.padding(
+                        bottom = 24.dp,
+                        start = 16.dp,
+                        end = 16.dp
+                    ),
+                    text = when (viewState.screenType) {
+                        AddressScreenTypeUi.Add -> stringResource(R.string.add_address)
+                        AddressScreenTypeUi.Choose -> stringResource(R.string.choose)
+                    },
+                    onClick = {
+                        when (viewState.screenType) {
+                            AddressScreenTypeUi.Add -> {
+                                viewModel.addAddress()
+                            }
 
-            VodovozButton(
-                modifier = Modifier.padding(
-                    bottom = 24.dp,
-                    start = 16.dp,
-                    end = 16.dp
-                ),
-                text = when (viewState.screenType) {
-                    AddressScreenTypeUi.Add -> stringResource(R.string.add_address)
-                    AddressScreenTypeUi.Choose -> stringResource(R.string.choose)
-                },
-                onClick = {
-                    when (viewState.screenType) {
-                        AddressScreenTypeUi.Add -> {
-                            viewModel.addAddress()
-                        }
-
-                        AddressScreenTypeUi.Choose -> {
-                            viewModel.navigateToOrdering()
+                            AddressScreenTypeUi.Choose -> {
+                                viewModel.navigateToOrdering()
+                            }
                         }
                     }
-                }
-            )
+                )
+            }
+
         },
         contentWindowInsets = WindowInsets(0.dp)
     ) { paddingValues ->
@@ -115,7 +116,7 @@ fun AddressesScreen(
         }
     }
 
-    if(viewState.showRemoveAddressDialog && viewState.currentRemoveAddress != null){
+    if (viewState.showRemoveAddressDialog && viewState.currentRemoveAddress != null) {
         VodovozDialog(
             title = stringResource(id = R.string.remove_address_title),
             description = stringResource(

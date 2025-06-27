@@ -98,7 +98,6 @@ class ServiceOrderFragment : Fragment() {
 
         ViewCompat.setOnApplyWindowInsetsListener(view) { _, insets ->
             val imeVisible = insets.isVisible(WindowInsetsCompat.Type.ime())
-            tabManager.changeTabVisibility(!imeVisible)
             tabManager.changeTabWindowInsets(!imeVisible)
             return@setOnApplyWindowInsetsListener insets
         }

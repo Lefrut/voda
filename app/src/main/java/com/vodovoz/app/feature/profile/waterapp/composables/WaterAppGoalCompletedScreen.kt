@@ -34,13 +34,6 @@ import com.vodovoz.app.design_system.modifiers.radialGradientBackground
 
 @Composable
 fun WaterAppGoalCompletedScreen(goal: Int, onCloseClick: () -> Unit) {
-
-    SystemBarsEffect(
-        Color.Transparent,
-        Color.Transparent,
-        false
-    )
-
     Column(
         modifier = Modifier
             .fillMaxSize()

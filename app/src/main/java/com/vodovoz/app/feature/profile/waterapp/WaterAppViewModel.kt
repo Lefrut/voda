@@ -55,7 +55,7 @@ class WaterAppViewModel @Inject constructor(
             waterAppHelper.observeWaterAppRateData().collectLatest {
                 uiStateListener.updateData { s ->
                     val rateData = it ?: s.rateData
-                    s.copy(rateData = rateData,)
+                    s.copy(rateData = rateData)
                 }
             }
         }
@@ -203,10 +203,7 @@ class WaterAppViewModel @Inject constructor(
         val rateData = dataState.rateData
         val currentLevel = (progress * rateData.rate).toInt()
         waterAppHelper.setWaterLevel(currentLevel)
-
-        if (!rateData.canFill) return@launch
-
-        goToGoalCompleted()
+        checkGoalCompleted()
     }
 
     fun addWater() = viewModelScope.launch {
@@ -214,11 +211,11 @@ class WaterAppViewModel @Inject constructor(
 
         waterAppHelper.tryToAddWater(dataState.changeWaterStep)
 
-        goToGoalCompleted()
+        checkGoalCompleted()
     }
 
-    private fun goToGoalCompleted() = viewModelScope.launch {
-        delay(1000)
+    private fun checkGoalCompleted() = viewModelScope.launch {
+        delay(2000L)
         if (waterAppHelper.observeWaterAppRateData().value?.canFill == false) {
             uiStateListener.updateData { s -> s.copy(uiState = WaterAppUiState.GoalCompleted) }
         }
@@ -229,15 +226,32 @@ class WaterAppViewModel @Inject constructor(
     }
 
     fun addChangeWaterStep() = viewModelScope.launch {
-        val newStep = (dataState.changeWaterStep + 100).coerceAtMost(750)
-        uiStateListener.updateData { it.copy(changeWaterStep = newStep) }
+        val levels = WaterAppHelper.waterCupLevels
+        val currentValue = dataState.changeWaterStep
+
+        val nextStep = when (val currentIndex = levels.indexOf(currentValue)) {
+            -1 -> currentValue
+            in 0 until levels.lastIndex -> levels.getOrNull(currentIndex + 1)
+            else -> currentValue
+        } ?: 250
+
+        uiStateListener.updateData { state ->
+            state.copy(changeWaterStep = nextStep)
+        }
     }
 
     fun subtractChangeWaterStep() = viewModelScope.launch {
-        val newStep = (dataState.changeWaterStep - 100).coerceAtLeast(100)
-        uiStateListener.updateData { it.copy(changeWaterStep = newStep) }
-    }
+        val levels = WaterAppHelper.waterCupLevels
+        val currentValue = dataState.changeWaterStep
 
+        val prevStep = when (val currentIndex = levels.indexOf(currentValue)) {
+            -1 -> currentValue
+            in 1..levels.lastIndex -> levels.getOrNull(currentIndex - 1)
+            else -> currentValue
+        } ?: 250
+
+        uiStateListener.updateData { it.copy(changeWaterStep = prevStep) }
+    }
     fun showNotificationSettingsDialog() = viewModelScope.launch {
         uiStateListener.updateData { s ->
             s.copy(showNotificationSettingsDialog = true)

@@ -13,9 +13,12 @@ import com.vodovoz.app.design_system.model.ImageAndTextUi
 import com.vodovoz.app.design_system.model.ImageButtonUi
 import com.vodovoz.app.design_system.model.MapPointUi
 import com.vodovoz.app.design_system.model.mapToUi
+import com.vodovoz.app.design_system.model.toDomain
 import com.vodovoz.app.design_system.model.toUi
+import com.vodovoz.app.domain.general.respository.MapServiceRepository
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.feature.sitestate.SiteStateManager
+import com.vodovoz.app.ui.yandex_map.getNearestRoutePoint
 import com.vodovoz.app.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.awaitClose
@@ -32,6 +35,7 @@ class TraceOrderViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val siteStateManager: SiteStateManager,
+    private val mapServiceRepository: MapServiceRepository,
 ) : PagingContractViewModel<TraceOrderViewModel.TraceOrderState, TraceOrderViewModel.TraceOrderEvents>(
     TraceOrderState()
 ) {
@@ -54,20 +58,18 @@ class TraceOrderViewModel @Inject constructor(
         val ticker = launch {
 
             fetchWhereOrderDetails()
-
             moveToAvailableGeo()
 
-            delay(3_000)
+            delay(5_000)
 
             while (isActive) {
                 fetchWhereOrderDetails()
-                delay(4_000)
+                delay(3_500)
             }
         }
 
         awaitClose { ticker.cancel() }
     }
-
 
     private suspend fun fetchWhereOrderDetails() {
 
@@ -128,8 +130,6 @@ class TraceOrderViewModel @Inject constructor(
     }
 
     fun activateButton(imageButton: ImageButtonUi) = viewModelScope.launch {
-
-
         when (imageButton.id) {
             "chat" -> {
                 eventListener.emit(TraceOrderEvents.GoToJivoChat(JivoChatController.getLink()))
@@ -170,6 +170,7 @@ class TraceOrderViewModel @Inject constructor(
     data class TraceOrderState(
         val showSettingDialog: Boolean = false,
         val carPoint: MapPointUi? = null,
+        val currentRoutePoints: List<MapPointUi> = emptyList(),
         val finishPoint: MapPointUi? = null,
         val uiState: TraceOrderUiState = TraceOrderUiState.NotLoading,
         val title: String = "",
@@ -178,6 +179,7 @@ class TraceOrderViewModel @Inject constructor(
         val bottomSheetItems: List<ImageAndTextUi> = emptyList(),
     ) : State
 
+    @Stable
     sealed interface TraceOrderUiState {
         data object NotLoading : TraceOrderUiState
         data object Error : TraceOrderUiState

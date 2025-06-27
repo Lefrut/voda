@@ -25,7 +25,6 @@ import com.vodovoz.app.design_system.model.widgets.mapToUi
 import com.vodovoz.app.design_system.model.widgets.updateFieldAndResetError
 import com.vodovoz.app.domain.general.model.ValidationException
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
-import com.vodovoz.app.feature.sitestate.SiteStateManager
 import com.vodovoz.app.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -37,7 +36,6 @@ class RegFlowViewModel @Inject constructor(
     private val accountManager: AccountManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val resourceProvider: ResourcesProvider,
-    private val siteStateManager: SiteStateManager,
     private val loginManager: LoginManager
 ) : PagingContractViewModel<RegFlowViewModel.RegState, RegFlowViewModel.RegEvents>(RegState()) {
 
@@ -47,12 +45,11 @@ class RegFlowViewModel @Inject constructor(
     }
 
     init {
-        viewModelScope.launch { siteStateManager.requestSiteState() }
         fetchRegisterDetails()
     }
 
     fun fetchRegisterDetails() = viewModelScope.launch {
-        uiStateListener.updateData { s -> s.copy(uiState = UiState.Loading) }
+        uiStateListener.updateData { s -> s.copy(uiState = RegUiState.Loading) }
 
         val registerFieldsResult =
             vodovozServiceRepository.getRegisterDetails().singleResult()
@@ -60,7 +57,7 @@ class RegFlowViewModel @Inject constructor(
         registerFieldsResult.onSuccess { registerDetails ->
             uiStateListener.updateData { s ->
                 s.copy(
-                    uiState = UiState.Success,
+                    uiState = RegUiState.Success,
                     fields = registerDetails.fields.mapToUi(),
                     title = registerDetails.title,
                     showAgreement = registerDetails.haveAgreement,
@@ -74,7 +71,7 @@ class RegFlowViewModel @Inject constructor(
                 )
             }
         }.onFailure {
-            uiStateListener.updateData { s -> s.copy(uiState = UiState.Error) }
+            uiStateListener.updateData { s -> s.copy(uiState = RegUiState.Error) }
         }
     }
 
@@ -234,14 +231,15 @@ class RegFlowViewModel @Inject constructor(
         val showAgreement: Boolean = false,
         val agreementChecked: Boolean = true,
         val fields: List<FieldUi> = emptyList(),
-        val uiState: UiState = UiState.Loading,
+        val uiState: RegUiState = RegUiState.Loading,
         val title: String = "",
         val buttons: List<ColorfulButtonUi> = emptyList(),
     ) : State
 
-    sealed interface UiState {
-        data object Error : UiState
-        data object Loading : UiState
-        data object Success : UiState
+    @Stable
+    sealed interface RegUiState {
+        data object Error : RegUiState
+        data object Loading : RegUiState
+        data object Success : RegUiState
     }
 }

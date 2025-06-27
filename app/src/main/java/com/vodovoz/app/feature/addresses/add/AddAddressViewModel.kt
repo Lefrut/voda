@@ -1,25 +1,34 @@
 package com.vodovoz.app.feature.addresses.add
 
 import androidx.compose.runtime.Stable
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import com.vodovoz.app.R
 import com.vodovoz.app.common.model.VodovozAddressType
 import com.vodovoz.app.common.resources.ResourcesProvider
-import com.vodovoz.app.design_system.model.widgets.FieldTypeUi
+import com.vodovoz.app.design_system.model.toUi
 import com.vodovoz.app.design_system.model.widgets.FieldUi
-import com.vodovoz.app.design_system.model.widgets.RadioButtonGroupUi
-import com.vodovoz.app.design_system.model.widgets.RadioOptionUi
+import com.vodovoz.app.design_system.model.widgets.FieldWidgetUpdater
+import com.vodovoz.app.design_system.model.widgets.RadioGroupUpdater
+import com.vodovoz.app.design_system.model.widgets.SingleCheckboxGroupUpdater
 import com.vodovoz.app.design_system.model.widgets.SwitchUi
+import com.vodovoz.app.design_system.model.widgets.SwitchWidgetUpdater
 import com.vodovoz.app.design_system.model.widgets.WidgetUi
+import com.vodovoz.app.design_system.model.widgets.WidgetUpdater
 import com.vodovoz.app.design_system.model.widgets.WidgetUpdaterHandler
+import com.vodovoz.app.design_system.model.widgets.mapToUi
+import com.vodovoz.app.design_system.model.widgets.toUi
+import com.vodovoz.app.domain.general.respository.MapServiceRepository
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.feature.addresses.add.model.AddAddressEvent
 import com.vodovoz.app.feature.addresses.add.model.AddAddressState
+import com.vodovoz.app.feature.addresses.add.model.AddAddressUiState
+import com.vodovoz.app.feature.map.model.MapAddressUi
+import com.vodovoz.app.feature.map.model.toDomain
+import com.vodovoz.app.feature.map.model.toUi
 import com.vodovoz.app.ui.mvi.MviViewModel
 import com.vodovoz.app.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -30,16 +39,27 @@ class AddAddressViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val resourcesProvider: ResourcesProvider,
+    private val mapServiceRepository: MapServiceRepository,
 ) : MviViewModel<AddAddressState, AddAddressEvent>(AddAddressState()) {
 
-    private val addressId = savedStateHandle.get<Long>("addressId") ?: (-1L)
-    private val firstAddressName = savedStateHandle.get<String>("addressName").also { address ->
-        _state.update { s -> s.copy(addressName = address ?: "") }
-    } ?: ""
 
+    private val addressId = savedStateHandle.get<Long>("addressId")?.also { id ->
+        _state.update { s -> s.copy(addressId = id) }
+    }
+
+    private val addressName = savedStateHandle.get<String>("addressName")
+
+
+    companion object {
+        private const val TYPE_WIDGET_ID = "tip"
+    }
 
     init {
-        initUi()
+        savedStateHandle.get<MapAddressUi>("mapAddress").also { mapAddress ->
+            _state.update { s ->
+                s.copy(mapAddress = mapAddress)
+            }
+        }
     }
 
     fun navigateBack() = viewModelScope.launch {
@@ -59,6 +79,8 @@ class AddAddressViewModel @Inject constructor(
     }
 
     fun removeAddress() = viewModelScope.launch {
+        if (addressId == null) return@launch
+
         vodovozServiceRepository.removeAddress(addressId.toInt()).singleResult()
         _state.update { s ->
             s.copy(showRemoveAddressDialog = false)
@@ -67,164 +89,189 @@ class AddAddressViewModel @Inject constructor(
     }
 
     fun updateAddress() = viewModelScope.launch {
-        //todo - update address
-    }
+        if (addressId == null) return@launch
 
-    private val widgetUpdaterHandler = WidgetUpdaterHandler(
-        getString = { id -> resourcesProvider.getString(id) }
-    )
-
-    fun changeWidget(widget: WidgetUi, updatedWidget: WidgetUi) = viewModelScope.launch {
         _state.update { s ->
-            s.copy(
-                widgets = widgetUpdaterHandler.updateWidget(
-                    widgets = stateSnapshot.widgets,
-                    widget = widget,
-                    updatedWidget = updatedWidget
-                ),
-                withoutSpaceWidgets = widgetUpdaterHandler.updateWidget(
-                    widgets = stateSnapshot.withoutSpaceWidgets,
-                    widget = widget,
-                    updatedWidget = updatedWidget
-                ),
-                fields = widgetUpdaterHandler.updateWidget(
-                    widgets = stateSnapshot.fields,
-                    widget = widget,
-                    updatedWidget = updatedWidget
-                ).filterIsInstance<FieldUi>()
-            )
+            s.copy(button = s.button.copy(loading = true))
         }
-    }
 
-    private fun initUi() = viewModelScope.launch {
+        val params = (stateSnapshot.linearSwitches.associate { w ->
+            w.id to w.value()
+        } + stateSnapshot.linearFields.associate { w ->
+            w.id to w.value()
+        } + stateSnapshot.gridFields.associate { w ->
+            w.id to w.value()
+        } + with(stateSnapshot.addressField) { id to value() }).toMutableMap()
 
-        val radioOptions = listOf(
-            RadioOptionUi(
-                name = resourcesProvider.getString(
-                    R.string.personal_house_delivery_text,
-                ),
-                value = VodovozAddressType.Personal.value
-            ),
-            RadioOptionUi(
-                name = resourcesProvider.getString(
-                    R.string.company_office_delivery_text,
-                ),
-                value = VodovozAddressType.Company.value
-            )
-        )
+        if (params[TYPE_WIDGET_ID].isNullOrEmpty()) {
+            params[TYPE_WIDGET_ID] = VodovozAddressType.Personal.value.toString()
+        }
 
-        //todo - need to put original values
+        val mapAddress = stateSnapshot.mapAddress ?: run {
+            _state.update { s ->
+                s.copy(
+                    button = s.button.copy(
+                        loading = false,
+                        enabled = false
+                    )
+                )
+            }
+            return@launch
+        }
+
+        val updateAddressResult = vodovozServiceRepository.updateAddress(
+            addressId = addressId,
+            address = mapAddress.toDomain(),
+            params = params
+        ).singleResult()
+
+        updateAddressResult.onSuccess {
+            _events.emit(AddAddressEvent.GoBack)
+        }.onFailure { throwable ->
+            _events.emit(AddAddressEvent.ShowSnackbar(throwable.message ?: ""))
+        }
+
         _state.update { s ->
             s.copy(
-                withoutSpaceWidgets = listOf(
-                    RadioButtonGroupUi(
-                        id = "tip",
-                        options = radioOptions,
-                        option = radioOptions.firstOrNull() ?: RadioOptionUi("", 1)
-                    ),
-                    SwitchUi(
-                        id = "propusk",
-                        name = resourcesProvider.getString(R.string.need_pass),
-                        value = false,
-                        enabled = true
-                    )
-                ),
-                widgets = listOf(
-                    FieldUi(
-                        id = "polnadres",
-                        label = resourcesProvider.getString(R.string.address_title),
-                        value = "",
-                        keyboardType = KeyboardType.Text,
-                        isRequired = true,
-                        isError = false,
-                        readOnly = true,
-                        supportingText = "",
-                        hint = "",
-                        type = FieldTypeUi.Text,
-                        isValueVisible = true
-                    ),
-                    FieldUi(
-                        id = "comment",
-                        label = resourcesProvider.getString(R.string.comment),
-                        value = "",
-                        keyboardType = KeyboardType.Text,
-                        isRequired = false,
-                        isError = false,
-                        readOnly = false,
-                        supportingText = "",
-                        hint = resourcesProvider.getString(R.string.enter_comment),
-                        type = FieldTypeUi.Text,
-                        isValueVisible = true
-                    )
-                ),
-                fields = listOf(
-                    FieldUi(
-                        id = "flat",
-                        label = resourcesProvider.getString(R.string.flat),
-                        value = "",
-                        keyboardType = KeyboardType.Text,
-                        isRequired = false,
-                        isError = false,
-                        readOnly = false,
-                        supportingText = "",
-                        hint = "",
-                        type = FieldTypeUi.Text,
-                        isValueVisible = true
-                    ),
-                    FieldUi(
-                        id = "entrance",
-                        label = resourcesProvider.getString(R.string.entrance),
-                        value = "",
-                        keyboardType = KeyboardType.Number,
-                        isRequired = false,
-                        isError = false,
-                        readOnly = false,
-                        supportingText = "",
-                        hint = "",
-                        type = FieldTypeUi.Text,
-                        isValueVisible = true
-                    ),
-                    FieldUi(
-                        id = "domofon",
-                        label = resourcesProvider.getString(R.string.intercom),
-                        value = "",
-                        keyboardType = KeyboardType.Text,
-                        isRequired = false,
-                        isError = false,
-                        readOnly = false,
-                        supportingText = "",
-                        hint = "",
-                        type = FieldTypeUi.Text,
-                        isValueVisible = true
-                    ),
-                    FieldUi(
-                        id = "floor",
-                        label = resourcesProvider.getString(R.string.floor),
-                        value = "",
-                        keyboardType = KeyboardType.Number,
-                        isRequired = false,
-                        isError = false,
-                        readOnly = false,
-                        supportingText = "",
-                        hint = "",
-                        type = FieldTypeUi.Text,
-                        isValueVisible = true
-                    )
-
+                button = s.button.copy(
+                    loading = false,
+                    enabled = false
                 )
             )
         }
 
     }
 
-    fun checkWidgetOnAddress(widget: WidgetUi) = viewModelScope.launch {
-        if (widget.id == "polnadres") {
-            _events.emit(AddAddressEvent.GoToMap(addressId, stateSnapshot.addressName))
+    private val addressTypesSwitchUpdater = object : WidgetUpdater {
+
+        private val PRIVATE_HOUSE_ID = "chasdom"
+        private val DELIVERY_OFFICE_ID = "dostavkaofis"
+
+
+        override fun canHandle(widget: WidgetUi, updatedWidget: WidgetUi): Boolean {
+            return widget is SwitchUi && updatedWidget is SwitchUi
+                    && ((widget.id == PRIVATE_HOUSE_ID && updatedWidget.id == PRIVATE_HOUSE_ID)
+                    || (widget.id == DELIVERY_OFFICE_ID && updatedWidget.id == DELIVERY_OFFICE_ID))
+        }
+
+        override fun update(
+            widgets: List<WidgetUi>,
+            widget: WidgetUi,
+            updatedWidget: WidgetUi,
+            getString: (Int) -> String,
+        ): List<WidgetUi> {
+            val changed = updatedWidget as SwitchUi
+            val turningOn = changed.value
+
+            return widgets.map { current ->
+                when {
+                    current.id == changed.id -> changed
+
+                    turningOn && current is SwitchUi &&
+                            (current.id == PRIVATE_HOUSE_ID || current.id == DELIVERY_OFFICE_ID) ->
+                        current.copy(value = false)
+
+                    else -> current
+                }
+            }
+        }
+
+    }
+
+    private val widgetUpdaterHandler = WidgetUpdaterHandler(
+        updaters = listOf(
+            addressTypesSwitchUpdater,
+            FieldWidgetUpdater(),
+            SwitchWidgetUpdater(),
+            RadioGroupUpdater(),
+            SingleCheckboxGroupUpdater()
+        ),
+        getString = { id -> resourcesProvider.getString(id) }
+    )
+
+    fun changeWidget(widget: WidgetUi, updatedWidget: WidgetUi) {
+        _state.update { s ->
+            s.copy(
+                linearFields = widgetUpdaterHandler.updateWidget(
+                    widgets = stateSnapshot.linearFields,
+                    widget = widget,
+                    updatedWidget = updatedWidget
+                ).filterIsInstance<FieldUi>(),
+                linearSwitches = widgetUpdaterHandler.updateWidget(
+                    widgets = stateSnapshot.linearSwitches,
+                    widget = widget,
+                    updatedWidget = updatedWidget
+                ).filterIsInstance<SwitchUi>(),
+                gridFields = widgetUpdaterHandler.updateWidget(
+                    widgets = stateSnapshot.gridFields,
+                    widget = widget,
+                    updatedWidget = updatedWidget
+                ).filterIsInstance<FieldUi>(),
+                button = s.button.copy(enabled = true)
+            )
         }
     }
 
-    fun changeAddressName(addressName: String) = viewModelScope.launch {
-        _state.update { s -> s.copy(addressName = addressName) }
+    fun fetchAddressDetails() = viewModelScope.launch {
+        _state.update { s ->
+            s.copy(uiState = AddAddressUiState.Loading)
+        }
+
+        val mapAddressDeferred = async {
+            mapServiceRepository.searchAddressInMoscow(
+                addressName ?: stateSnapshot.mapAddress?.name ?: return@async null
+            ).singleResult().getOrNull()?.toUi()
+        }
+
+
+        val addAddressDetailsResult =
+            vodovozServiceRepository.getAddAddressDetails(addressId).singleResult()
+
+        addAddressDetailsResult.onSuccess { addAddressDetails ->
+
+            _state.update { s ->
+
+                val currentMapAddress = mapAddressDeferred.await()
+                val addressField = addAddressDetails.addressField.toUi()
+
+                s.copy(
+                    mapAddress = currentMapAddress,
+                    uiState = AddAddressUiState.Form,
+                    linearFields = addAddressDetails.linearFields.mapToUi(),
+                    gridFields = addAddressDetails.gridFields.mapToUi(),
+                    addressField = addressField.copy(value = currentMapAddress?.name ?: addressField.value),
+                    button = addAddressDetails.button.toUi().copy(enabled = false),
+                    linearSwitches = addAddressDetails.linearSwitches.mapToUi()
+                )
+            }
+        }.onFailure {
+            _state.update { s ->
+                s.copy(uiState = AddAddressUiState.Error)
+            }
+        }
+
+
+    }
+
+    fun checkWidgetOnAddress(widget: WidgetUi) = viewModelScope.launch {
+        _events.emit(
+            AddAddressEvent.GoToMap(widget.value())
+        )
+    }
+
+    fun changeMapAddress(mapAddress: MapAddressUi) = viewModelScope.launch {
+        _state.update { s ->
+            s.copy(
+                mapAddress = mapAddress,
+                addressField = s.addressField.copy(
+                    value = mapAddress.name
+                )
+            )
+        }
+    }
+
+    fun addAddress() {
+
     }
 
 }

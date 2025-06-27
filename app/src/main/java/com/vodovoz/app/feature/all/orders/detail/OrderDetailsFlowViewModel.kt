@@ -114,16 +114,21 @@ class OrderDetailsFlowViewModel @Inject constructor(
             }
 
             is OrderDetailsButtonUi.PayButton -> {
-                val event = if (orderDetailsButton.browser) {
+                val payButtonEvent = if (orderDetailsButton.browser) {
                     OrderDetailsEvent.OpenUrl(orderDetailsButton.url)
                 } else {
                     OrderDetailsEvent.GoToWebView(orderDetailsButton.url)
                 }
-                eventListener.emit(event)
+                eventListener.emit(payButtonEvent)
             }
 
             is OrderDetailsButtonUi.TipsButton -> {
-
+                val tipsButtonEvent = if (orderDetailsButton.browser) {
+                    OrderDetailsEvent.OpenUrl(orderDetailsButton.url)
+                } else {
+                    OrderDetailsEvent.GoToWebView(orderDetailsButton.url)
+                }
+                eventListener.emit(tipsButtonEvent)
             }
 
             is OrderDetailsButtonUi.WhereOrderButton -> {
@@ -175,10 +180,21 @@ class OrderDetailsFlowViewModel @Inject constructor(
         }
     }
 
+    fun refresh() = viewModelScope.launch {
+        uiStateListener.updateData { s ->
+            s.copy(showRefreshIndicator = true)
+        }
+
+        fetchOrderDetails().join()
+
+        uiStateListener.updateData { s ->
+            s.copy(showRefreshIndicator = false)
+        }
+
+    }
+
     @Immutable
     data class OrderDetailsState(
-        val ifRepeatOrder: Boolean = false,
-
         val title: String = "",
         val subtitle: String = "",
         val header: String = "",
@@ -192,6 +208,7 @@ class OrderDetailsFlowViewModel @Inject constructor(
         val currentAboutOrderBS: AboutOrderPopupWindowUi? = null,
         val showAboutOrderBS: Boolean = false,
         val uiState: OrderDetailsUiState = OrderDetailsUiState.Loading,
+        val showRefreshIndicator: Boolean = false
     ) : State
 
     sealed class OrderDetailsEvent : Event {

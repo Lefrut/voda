@@ -1,42 +1,29 @@
 package com.vodovoz.app.feature.cart.ordering
 
-import android.app.Application
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import com.vodovoz.app.BuildConfig
-import com.vodovoz.app.common.account.AccountManager
-import com.vodovoz.app.common.cart.CartManager
 import com.vodovoz.app.common.content.Event
 import com.vodovoz.app.common.content.PagingContractViewModel
 import com.vodovoz.app.common.content.State
-import com.vodovoz.app.common.content.toErrorState
 import com.vodovoz.app.common.content.updateData
-import com.vodovoz.app.data.MainRepository
-import com.vodovoz.app.data.model.common.ResponseEntity
 import com.vodovoz.app.design_system.model.ColorfulButtonUi
 import com.vodovoz.app.design_system.model.SectionUi
+import com.vodovoz.app.design_system.model.order.OrderSummaryItemUi
+import com.vodovoz.app.design_system.model.order.mapToUi
 import com.vodovoz.app.design_system.model.toUi
 import com.vodovoz.app.design_system.model.widgets.FieldUi
 import com.vodovoz.app.design_system.model.widgets.toUi
-import com.vodovoz.app.design_system.model.order.OrderSummaryItemUi
-import com.vodovoz.app.design_system.model.order.mapToUi
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.feature.cart.ordering.model.OrderNotifyItemUi
 import com.vodovoz.app.feature.cart.ordering.model.OrderPaymentItemUi
 import com.vodovoz.app.feature.cart.ordering.model.OrderRecipientItemUi
 import com.vodovoz.app.feature.cart.ordering.model.mapToUi
-import com.vodovoz.app.ui.model.AddressUI
-import com.vodovoz.app.ui.model.custom.OrderingCompletedInfoBundleUI
 import com.vodovoz.app.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.channels.BufferOverflow
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
 import java.time.LocalDate
-import java.util.Locale
 import javax.inject.Inject
 
 @HiltViewModel
@@ -225,12 +212,22 @@ class OrderingFlowViewModel @Inject constructor(
             }
 
             "klient" -> {
-
+                val currentAddressId = dataState.currentAddressId
+                if (currentAddressId == null) {
+                    //todo - handle
+                } else {
+                    eventListener.emit(OrderingEvents.GoToOrderRecipient(currentAddressId))
+                }
             }
 
             "time" -> {
-                //todo - put actual address id
-                eventListener.emit(OrderingEvents.GoToDeliveryDate(212553))
+                val currentAddressId = dataState.currentAddressId
+                if (currentAddressId == null) {
+                    //todo - handle
+                } else {
+                    eventListener.emit(OrderingEvents.GoToDeliveryDate(currentAddressId))
+                }
+
             }
         }
     }
@@ -253,13 +250,32 @@ class OrderingFlowViewModel @Inject constructor(
     }
 
     fun navigateByPaymentItem(orderPaymentItem: OrderPaymentItemUi) = viewModelScope.launch {
+        val addressId = dataState.currentAddressId
+
         when (orderPaymentItem.id) {
             "oplata" -> {
-                //todo - put actual address id and chosen local date
-                eventListener.emit(OrderingEvents.GoToPaymentMethod(212553, LocalDate.now().plusDays(1)))
+                if (addressId == null) {
+                    //todo - handle
+
+                } else {
+                    eventListener.emit(
+                        OrderingEvents.GoToPaymentMethod(
+                            addressId,
+                            LocalDate.now().plusDays(1)
+                        )
+                    )
+                }
+
             }
 
             else -> {
+                if (addressId == null) {
+                    //todo - handle
+
+                } else {
+                    eventListener.emit(OrderingEvents.GoToCallYou(addressId))
+                }
+
 
             }
         }
@@ -267,6 +283,25 @@ class OrderingFlowViewModel @Inject constructor(
 
     fun doOrder() = viewModelScope.launch {
 
+    }
+
+    fun refresh() = viewModelScope.launch {
+        uiStateListener.updateData { s ->
+            s.copy(showRefreshIndicator = true)
+        }
+
+        fetchOrderingDetails().join()
+
+        uiStateListener.updateData { s ->
+            s.copy(showRefreshIndicator = false)
+        }
+
+    }
+
+    fun setAddressId(addressId: Long) = viewModelScope.launch {
+        uiStateListener.updateData { s ->
+            s.copy(currentAddressId = addressId)
+        }
     }
 
     @Immutable
@@ -280,13 +315,17 @@ class OrderingFlowViewModel @Inject constructor(
         val totals: List<OrderSummaryItemUi> = emptyList(),
         val button: ColorfulButtonUi = ColorfulButtonUi.Empty,
         val uiState: OrderingUiState = OrderingUiState.Loading,
+        val showRefreshIndicator: Boolean = false,
+        val currentAddressId: Long? = null,
     ) : State
 
     sealed class OrderingEvents : Event {
         data object GoBack : OrderingEvents()
         data object GoToAddresses : OrderingEvents()
-        data class GoToDeliveryDate(val addressId: Int) : OrderingEvents()
-        data class GoToPaymentMethod(val addressId: Int, val date: LocalDate) : OrderingEvents()
+        data class GoToDeliveryDate(val addressId: Long) : OrderingEvents()
+        data class GoToPaymentMethod(val addressId: Long, val date: LocalDate) : OrderingEvents()
+        data class GoToOrderRecipient(val addressId: Long) : OrderingEvents()
+        data class GoToCallYou(val addressId: Long) : OrderingEvents()
     }
 
     @Stable

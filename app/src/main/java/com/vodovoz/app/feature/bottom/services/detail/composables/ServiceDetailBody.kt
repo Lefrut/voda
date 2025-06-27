@@ -41,7 +41,6 @@ import com.vodovoz.app.util.extensions.prepareServiceHtml
 import kotlinx.coroutines.launch
 
 @SuppressLint("SetJavaScriptEnabled")
-@Suppress("NonSkippableComposable")
 @Composable
 fun ServiceDetailBody(
     modifier: Modifier = Modifier,
@@ -59,9 +58,7 @@ fun ServiceDetailBody(
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
 
-    val webView = remember {
-        WebView(context)
-    }
+    val webView = remember { WebView(context) }
     val webViewBundle: Bundle = rememberSaveable { bundleOf() }
 
     Scaffold(
@@ -85,7 +82,6 @@ fun ServiceDetailBody(
             AsyncImage(
                 model = ImageRequest.Builder(context).data(image)
                     .crossfade(true)
-                    .coroutineContext(coroutineScope.coroutineContext)
                     .memoryCacheKey(image)
                     .build(),
                 contentDescription = null,

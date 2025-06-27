@@ -16,6 +16,8 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
@@ -30,7 +32,6 @@ import com.vodovoz.app.core.navigation.navigateToAllBottles
 import com.vodovoz.app.core.navigation.navigateToGifts
 import com.vodovoz.app.core.navigation.navigateToProductDetails
 import com.vodovoz.app.design_system.VodovozTheme
-import com.vodovoz.app.design_system.composables.dialogs.VodovozDialog
 import com.vodovoz.app.design_system.composables.placeholders.LoadingPlaceholder
 import com.vodovoz.app.design_system.composables.placeholders.NetworkErrorPlaceholder
 import com.vodovoz.app.design_system.composables.placeholders.VodovozPlaceholder
@@ -126,6 +127,12 @@ class CartFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         observeTabReselect()
         accountManager.reportEvent("Зашел в корзину")
+
+        ViewCompat.setOnApplyWindowInsetsListener(view) { _, insets ->
+            val imeVisible = insets.isVisible(WindowInsetsCompat.Type.ime())
+            tabManager.changeTabVisibility(!imeVisible)
+            return@setOnApplyWindowInsetsListener insets
+        }
     }
 
     private suspend fun observeEvents() {

@@ -66,7 +66,7 @@ fun VodovozTextField(
     val isMessage = field.id.contains(
         "message",
         true
-    ) || field.id == "dr127" || field.id == "dr53" || field.id == "comment"
+    ) || field.id == "dr127" || field.id == "dr53" || field.id == "comment" || field.id == "description"
 
     val visualTransformation = when (field.keyboardType) {
         KeyboardType.Phone -> PhoneNumberVisualTransformation()
@@ -115,7 +115,9 @@ fun VodovozTextField(
                         PasswordIcon(valueIsVisible = field.isValueVisible) {
                             onFieldChange(
                                 field,
-                                field.copy(isValueVisible = !field.isValueVisible)
+                                field.copy(
+                                    isValueVisible = !field.isValueVisible
+                                )
                             )
                         }
                     }

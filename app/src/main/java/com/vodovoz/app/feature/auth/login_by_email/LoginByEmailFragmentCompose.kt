@@ -30,6 +30,7 @@ import com.vodovoz.app.feature.favorite.FavoriteFlowViewModel
 import com.vodovoz.app.feature.home.HomeFlowViewModel
 import com.vodovoz.app.feature.profile.ProfileFlowViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.delay
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -62,7 +63,7 @@ class LoginByEmailFragment : Fragment() {
         savedInstanceState: Bundle?,
     ): View {
         return ComposeView(requireContext()).apply {
-            setViewCompositionStrategy(ViewCompositionStrategy.Default)
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
 
             setContent {
                 VodovozTheme {
@@ -102,6 +103,8 @@ class LoginByEmailFragment : Fragment() {
                                     homeViewModel.refresh()
                                     cartFlowViewModel.refresh()
                                     favoriteViewModel.refresh()
+
+                                    delay(100L)
 
                                     val redirect = tabManager.fetchAuthRedirect()
                                     if (redirect == TabManager.DEFAULT_AUTH_REDIRECT) {

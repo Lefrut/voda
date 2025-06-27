@@ -174,7 +174,7 @@ class PromotionDetailsViewModel @Inject constructor(
     }
 
     fun navigateToWebView(url: String) = viewModelScope.launch {
-        eventListener.emit(PromotionDetailEvent.GoToWebView(url))
+        eventListener.emit(PromotionDetailEvent.OpenUrl(url))
     }
 
     fun navigateToProductDetails(product: ProductUi) = viewModelScope.launch {
@@ -206,7 +206,7 @@ class PromotionDetailsViewModel @Inject constructor(
     }
 
     sealed class PromotionDetailEvent : Event {
-        data class GoToWebView(val url: String) : PromotionDetailEvent()
+        data class OpenUrl(val url: String) : PromotionDetailEvent()
         data class GoToProductAnalogs(val productId: Long) : PromotionDetailEvent()
         data class GoToProductDetails(val productId: Long) : PromotionDetailEvent()
         data object GoBack : PromotionDetailEvent()

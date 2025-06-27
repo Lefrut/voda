@@ -6,9 +6,10 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -16,8 +17,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.fragment.findNavController
 import com.vodovoz.app.common.tab.TabManager
 import com.vodovoz.app.design_system.VodovozTheme
+import com.vodovoz.app.design_system.composables.placeholders.VodovozLongPlaceholder
 import com.vodovoz.app.design_system.effects.LifecycleEffect
 import com.vodovoz.app.feature.write_comment.model.WriteCommentEvent
+import com.vodovoz.app.feature.write_comment.model.WriteCommentUiState
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -53,15 +56,31 @@ class WriteCommentFragment : Fragment() {
                         contract = ActivityResultContracts.OpenMultipleDocuments()
                     ) { uri -> viewModel.addUri(uri) }
 
+                    val snackbarHostState = remember { SnackbarHostState() }
+
 
                     val viewState by viewModel.state.collectAsStateWithLifecycle()
 
-                    WriteCommentScreen(
-                        viewModel = viewModel,
-                        viewState = viewState
-                    )
 
-                    LifecycleEffect {
+                    when (val uiState = viewState.uiState) {
+                        WriteCommentUiState.Comment -> {
+                            WriteCommentScreen(
+                                viewModel = viewModel,
+                                viewState = viewState,
+                                snackbarHostState = snackbarHostState
+                            )
+                        }
+
+                        is WriteCommentUiState.Success -> {
+                            VodovozLongPlaceholder(
+                                data = uiState.placeholder,
+                                onButtonClick = { viewModel.navigateBack() },
+                                onCloseClick = { viewModel.navigateBack() }
+                            )
+                        }
+                    }
+
+                    LifecycleEffect(snackbarHostState) {
                         viewModel.events.collect { event ->
                             when (event) {
                                 WriteCommentEvent.GoBack -> {
@@ -70,6 +89,18 @@ class WriteCommentFragment : Fragment() {
 
                                 WriteCommentEvent.OpenImagePicker -> {
                                     pickImagesLauncher.launch(arrayOf("image/*"))
+                                }
+
+                                is WriteCommentEvent.SetRatedProductResult -> {
+                                    val navController = findNavController()
+                                    navController.previousBackStackEntry?.savedStateHandle?.set(
+                                        key = "ratedProductId",
+                                        value = event.productId
+                                    )
+                                }
+
+                                is WriteCommentEvent.ShowSnackbar -> {
+                                    snackbarHostState.showSnackbar(event.message)
                                 }
                             }
                         }

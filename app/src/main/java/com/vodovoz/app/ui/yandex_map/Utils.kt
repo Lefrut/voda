@@ -1,5 +1,7 @@
 package com.vodovoz.app.ui.yandex_map
 
+import android.location.Location
+import com.vodovoz.app.design_system.model.MapPointUi
 import com.yandex.mapkit.Animation
 import com.yandex.mapkit.geometry.BoundingBox
 import com.yandex.mapkit.geometry.Point
@@ -20,7 +22,7 @@ fun calculateBounds(
     )
 }
 
-fun Map.animMove(cameraPosition: CameraPosition){
+fun Map.animMove(cameraPosition: CameraPosition) {
     move(
         cameraPosition,
         Animation(Animation.Type.LINEAR, 0.25f),
@@ -71,5 +73,29 @@ fun CameraPosition.copy(
     target: Point = this.target,
     zoom: Float = this.zoom,
     azimuth: Float = this.azimuth,
-    tilt: Float = this.tilt
+    tilt: Float = this.tilt,
 ) = CameraPosition(target, zoom, azimuth, tilt)
+
+
+fun MapPointUi.isOffRoute(
+    routePoints: List<MapPointUi>,
+    maxAllowedDistanceMeters: Double = 70.0,
+): Boolean {
+    val nearestDistance = routePoints.minOfOrNull { routePoint ->
+        routePoint.distanceBetween(this)
+    } ?: Double.MAX_VALUE
+
+    return nearestDistance > maxAllowedDistanceMeters
+}
+
+fun MapPointUi.distanceBetween(p2: MapPointUi): Double {
+    val result = FloatArray(1)
+    Location.distanceBetween(lat, lon, p2.lat, p2.lon, result)
+    return result.getOrNull(0)?.toDouble() ?: 0.0
+}
+
+fun List<MapPointUi>.getNearestRoutePoint(point: MapPointUi): MapPointUi {
+    return minByOrNull { routePoint ->
+        routePoint.distanceBetween(point)
+    } ?: point
+}

@@ -234,6 +234,8 @@ fun CalendarYearsColumn(
 ) {
     val lazyListState = rememberLazyListState()
     val yearsInRow = 3
+    val yearsRange = yearFrom..yearTo
+    val yearRows = yearsRange.chunked(yearsInRow)
 
     LazyColumn(
         modifier = modifier
@@ -242,8 +244,7 @@ fun CalendarYearsColumn(
             .padding(horizontal = 12.dp),
         state = lazyListState
     ) {
-        val years = yearFrom..yearTo
-        val yearRows = years.chunked(yearsInRow)
+
 
         itemsIndexed(yearRows) { i, rowYears ->
             Row(
@@ -287,7 +288,8 @@ fun CalendarYearsColumn(
 
 
     LaunchedEffect(lazyListState) {
-        lazyListState.scrollToItem((today.date.year / yearsInRow - yearsInRow).coerceAtLeast(0))
+        val currentYear = currentMonth.yearMonth.year
+        lazyListState.scrollToItem((currentYear - yearFrom) / yearsInRow - yearsInRow)
     }
 
 }

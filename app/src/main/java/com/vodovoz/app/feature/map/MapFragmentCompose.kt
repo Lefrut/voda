@@ -1,9 +1,7 @@
 package com.vodovoz.app.feature.map
 
 import android.Manifest
-import android.content.Context
 import android.content.Intent
-import android.location.LocationManager
 import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
@@ -36,14 +34,15 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.navOptions
 import com.google.android.gms.location.LocationServices
 import com.vodovoz.app.R
 import com.vodovoz.app.common.tab.TabManager
 import com.vodovoz.app.core.android.getLocationOrNull
 import com.vodovoz.app.core.android.handleLocationAvailability
-import com.vodovoz.app.core.android.locationPermissionGranted
 import com.vodovoz.app.core.android.locationPermissions
 import com.vodovoz.app.core.navigation.navigateToAddAddress
+import com.vodovoz.app.core.navigation.slideAnim
 import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.effects.LifecycleEffect
 import com.vodovoz.app.design_system.model.toMapPoint
@@ -54,7 +53,6 @@ import com.vodovoz.app.ui.yandex_map.animMove
 import com.vodovoz.app.ui.yandex_map.copy
 import com.vodovoz.app.ui.yandex_map.minusZoom
 import com.vodovoz.app.ui.yandex_map.plusZoom
-import com.yandex.mapkit.Animation
 import com.yandex.mapkit.MapKit
 import com.yandex.mapkit.MapKitFactory
 import com.yandex.mapkit.geometry.Point
@@ -66,7 +64,7 @@ import com.yandex.mapkit.user_location.UserLocationLayer
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.onSubscription
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -103,12 +101,6 @@ class MapFragment : Fragment() {
     }
 
     private val moscowPoint = Point(55.75, 37.62)
-
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        MapKitFactory.initialize(requireContext())
-    }
 
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreateView(
@@ -189,6 +181,7 @@ class MapFragment : Fragment() {
         }
     }
 
+
     override fun onPause() {
         super.onPause()
         WindowCompat.setDecorFitsSystemWindows(requireActivity().window, true)
@@ -207,11 +200,9 @@ class MapFragment : Fragment() {
         mainScope: CoroutineScope,
         keyboardController: SoftwareKeyboardController?,
     ): Unit =
-        viewModel.observeEvent().onStart {
-            mainScope.launch {
-                delay(250L)
-                viewModel.moveToAvailableGeo()
-            }
+        viewModel.observeEvent().onSubscription {
+            delay(150L)
+            viewModel.moveToAvailableGeo()
         }.collect { event ->
             when (event) {
                 is MapFlowViewModel.MapFlowEvents.MoveToAddress -> {
@@ -304,18 +295,29 @@ class MapFragment : Fragment() {
                 }
 
                 is MapFlowViewModel.MapFlowEvents.GoToAddAddress -> {
-                    findNavController().navigateToAddAddress(event.addressId, event.addressName)
+                    findNavController().navigateToAddAddress(
+                        mapAddress =  event.mapAddress,
+                        navOptions = navOptions {
+                            launchSingleTop = true
+                            restoreState = true
+                            popUpTo(R.id.mapFragment) {
+                                saveState = true
+                            }
+                            slideAnim()
+                        }
+                    )
                 }
 
                 is MapFlowViewModel.MapFlowEvents.BackToAddAddress -> {
                     val navController = findNavController()
-                    navController.previousBackStackEntry?.savedStateHandle?.set("addressName", event.addressName)
+                    navController.previousBackStackEntry?.savedStateHandle?.set(
+                        "mapAddress",
+                        event.mapAddress
+                    )
                     navController.popBackStack()
                 }
 
-                else -> {
 
-                }
             }
         }
 

@@ -14,6 +14,8 @@ data class POLE_DTO(
     val ID: String?,
     @Json(name = "CODE")
     val CODE: String?,
+    @Json(name = "PROP_CODE")
+    val PROP_CODE: String?,
     @Json(name = "OBYZATELNO")
     val OBYZATELNO: String?,
     @Json(name = "OBAZATELEN")

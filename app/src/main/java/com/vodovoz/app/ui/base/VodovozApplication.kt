@@ -31,10 +31,11 @@ class VodovozApplication : Application(), Configuration.Provider {
 
     override fun onCreate() {
         super.onCreate()
-        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
         AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags("ru"))
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
         //initYandexMetrica() //todo релиз
         MapKitFactory.setApiKey(AppKeys.MAPKIT_API_KEY)
+        MapKitFactory.initialize(this)
         Timber.plant(Timber.DebugTree())
         NotificationChannels.create(this)
     }

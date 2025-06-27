@@ -34,14 +34,12 @@ class MainActivityViewModel @Inject constructor(
         val siteStateDeferred = async { siteStateManager.requestSiteState() }
         val reloginResultDeferred = async { vodovozServiceRepository.relogin().singleResult() }
 
-        siteStateDeferred.await()
+        val siteState = siteStateDeferred.await()
 
-
-
-        if (siteStateManager.siteStateSnapshot == null) {
+        if (siteState == null) {
             _appState.update { AppState.ErrorLoading }
             return@launch
-        } else if (!siteStateManager.siteActive()) {
+        } else if (!siteState.isActive) {
             _appState.update { AppState.Blocked }
             return@launch
         }

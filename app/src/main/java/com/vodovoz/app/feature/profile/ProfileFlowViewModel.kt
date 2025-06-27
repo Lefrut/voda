@@ -7,20 +7,20 @@ import com.vodovoz.app.common.content.Event
 import com.vodovoz.app.common.content.PagingContractViewModel
 import com.vodovoz.app.common.content.State
 import com.vodovoz.app.common.content.updateData
+import com.vodovoz.app.common.model.VodovozAction
 import com.vodovoz.app.design_system.model.AboutAdvertisingUi
 import com.vodovoz.app.design_system.model.BannerUi
 import com.vodovoz.app.design_system.model.VodovozPlaceholderUi
 import com.vodovoz.app.design_system.model.mapToUi
 import com.vodovoz.app.design_system.model.toUi
 import com.vodovoz.app.domain.general.model.UserNotLoginException
-import com.vodovoz.app.common.model.VodovozAction
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.feature.profile.model.ProfileCardUi
 import com.vodovoz.app.feature.profile.model.ProfileChatItemUi
 import com.vodovoz.app.feature.profile.model.ProfileChatsPopupWindowUi
 import com.vodovoz.app.feature.profile.model.ProfileMenuItemUi
-import com.vodovoz.app.feature.profile.model.ProfileWalletItemUi
 import com.vodovoz.app.feature.profile.model.ProfilePopupWindowUi
+import com.vodovoz.app.feature.profile.model.ProfileWalletItemUi
 import com.vodovoz.app.feature.profile.model.UserInfoBlockUi
 import com.vodovoz.app.feature.profile.model.mapToUi
 import com.vodovoz.app.feature.profile.model.toUi
@@ -47,9 +47,8 @@ class ProfileFlowViewModel @Inject constructor(
     }
 
     fun fetchProfileDetails() = viewModelScope.launch {
-
         uiStateListener.updateData { s ->
-            s.copy(uiState = if (s.normalMenu.isEmpty()) ProfileUiState.Loading else s.uiState)
+            s.copy(uiState = if (dataState.uiState != ProfileUiState.Profile) ProfileUiState.Loading else s.uiState)
         }
         val profileDetailsResult = vodovozServiceRepository.getProfileDetails().singleResult()
 
@@ -82,14 +81,13 @@ class ProfileFlowViewModel @Inject constructor(
     }
 
 
-
     fun refresh() = viewModelScope.launch {
-        uiStateListener.updateData {s ->
+        uiStateListener.updateData { s ->
             s.copy(showRefreshIndicator = true)
         }
         fetchProfileDetails().join()
 
-        uiStateListener.updateData {s ->
+        uiStateListener.updateData { s ->
             s.copy(showRefreshIndicator = false)
         }
     }
@@ -189,13 +187,15 @@ class ProfileFlowViewModel @Inject constructor(
     }
 
     fun activateProfileCard(profileCard: ProfileCardUi) = viewModelScope.launch {
-        when(profileCard.id){
-            "otziv" ->{
+        when (profileCard.id) {
+            "otziv" -> {
                 eventListener.emit(ProfileEvents.GoToWaitFeedbackProducts)
             }
+
             "treker" -> {
                 eventListener.emit(ProfileEvents.GoToWaterApp)
             }
+
             "" -> {
                 showTextBottomSheet(profileCard.popupWindow ?: return@launch)
             }
@@ -215,12 +215,12 @@ class ProfileFlowViewModel @Inject constructor(
         val showAdvertisingBS: Boolean = false,
         val showSupportingBS: Boolean = false,
         val showTextBS: Boolean = false,
-        val showRefreshIndicator: Boolean =false,
+        val showRefreshIndicator: Boolean = false,
 
         val currentTextBSData: ProfilePopupWindowUi? = null,
         val currentSupportingBSData: ProfileChatsPopupWindowUi = ProfileChatsPopupWindowUi.Empty,
         val currentAdvertising: AboutAdvertisingUi = AboutAdvertisingUi.Empty,
-        ) : State
+    ) : State
 
     @Stable
     sealed interface ProfileUiState {

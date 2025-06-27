@@ -39,6 +39,7 @@ class UserDataFlowViewModel @Inject constructor(
 
 
     init {
+
         viewModelScope.launch {
             mediaManager
                 .observeAvatarImage()
@@ -47,6 +48,7 @@ class UserDataFlowViewModel @Inject constructor(
                     mediaManager.removeAvatarImage()
                 }
         }
+        fetchUserData()
     }
 
     fun fetchUserData() = viewModelScope.launch {
@@ -131,7 +133,6 @@ class UserDataFlowViewModel @Inject constructor(
             uiStateListener.updateData { s ->
                 s.copy(showLogoutDialog = false, uiState = UserDataUiState.Success)
             }
-
             eventListener.emit(
                 UserDataEvents.ShowSnackbar(resourcesProvider.getString(R.string.logout_error))
             )
@@ -139,7 +140,32 @@ class UserDataFlowViewModel @Inject constructor(
     }
 
     fun deleteAccount() = viewModelScope.launch {
-        //todo - make delete
+        uiStateListener.updateData { s ->
+            s.copy(
+                showDeleteAccountDialog = false,
+                uiState = UserDataUiState.Loading
+            )
+        }
+
+        val deleteAccountResult = vodovozServiceRepository.deleteAccount().singleResult()
+
+        deleteAccountResult.onSuccess {
+            logoutManager.logout().singleResult().onSuccess {
+                eventListener.emit(UserDataEvents.RefreshAllAndGoBack)
+            }.onFailure {
+                eventListener.emit(UserDataEvents.ShowSnackbar(resourcesProvider.getString(R.string.logout_after_delete_error)))
+            }
+        }.onFailure {
+            eventListener.emit(UserDataEvents.ShowSnackbar(resourcesProvider.getString(R.string.delete_account_error)))
+        }
+
+
+
+
+        uiStateListener.updateData { s ->
+            s.copy(uiState = UserDataUiState.Success)
+        }
+
     }
 
     fun chooseImage() = viewModelScope.launch {
@@ -227,6 +253,7 @@ class UserDataFlowViewModel @Inject constructor(
         data object OpenImagePicker : UserDataEvents()
     }
 
+    @Stable
     sealed interface UserDataUiState {
         data object Loading : UserDataUiState
         data object Error : UserDataUiState

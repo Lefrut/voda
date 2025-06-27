@@ -30,6 +30,7 @@ import com.vodovoz.app.feature.home.HomeFlowViewModel
 import com.vodovoz.app.feature.profile.ProfileFlowViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -135,6 +136,8 @@ class RegisterFragment : Fragment() {
                     homeViewModel.refresh()
                     cartFlowViewModel.refresh()
                     favoriteViewModel.refresh()
+
+                    delay(100L)
 
                     val redirect = tabManager.fetchAuthRedirect()
                     if (redirect == TabManager.DEFAULT_AUTH_REDIRECT) {

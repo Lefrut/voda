@@ -5,8 +5,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.compose.BackHandler
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -18,11 +22,13 @@ import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.effects.LifecycleEffect
 import com.vodovoz.app.feature.addresses.add.composables.AddAddressScreen
 import com.vodovoz.app.feature.addresses.add.model.AddAddressEvent
-import com.vodovoz.app.feature.addresses.model.AddressUi
-import com.vodovoz.app.feature.map.MapFlowViewModel
+import com.vodovoz.app.feature.map.model.MapAddressUi
+import com.yandex.mapkit.MapKit
+import com.yandex.mapkit.MapKitFactory
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.onSubscription
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -33,14 +39,27 @@ class AddAddressFragment : Fragment() {
     @Inject
     lateinit var tabManager: TabManager
 
+    private val mapKit: MapKit by lazy { MapKitFactory.getInstance() }
+
+    override fun onStart() {
+        super.onStart()
+        mapKit.onStart()
+    }
+
     override fun onResume() {
         super.onResume()
         tabManager.changeTabVisibility(false)
     }
 
     override fun onStop() {
+        mapKit.onStop()
         super.onStop()
         tabManager.changeTabVisibility(true)
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        viewModel.fetchAddressDetails()
     }
 
     override fun onCreateView(
@@ -49,14 +68,22 @@ class AddAddressFragment : Fragment() {
         savedInstanceState: Bundle?,
     ): View {
         return ComposeView(requireContext()).apply {
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+
             setContent {
                 VodovozTheme {
                     val viewState by viewModel.state.collectAsStateWithLifecycle()
+                    val mainScope = rememberCoroutineScope()
+                    val snackbarHostState = remember { SnackbarHostState() }
 
-                    AddAddressScreen(viewModel = viewModel, viewState = viewState)
+                    AddAddressScreen(
+                        viewModel = viewModel,
+                        viewState = viewState,
+                        snackbarHostState = snackbarHostState
+                    )
 
-                    LifecycleEffect {
-                        observeEvents()
+                    LifecycleEffect(snackbarHostState) {
+                        observeEvents(mainScope, snackbarHostState)
                     }
 
                     BackHandler {
@@ -67,29 +94,29 @@ class AddAddressFragment : Fragment() {
         }
     }
 
-    private suspend fun observeEvents() {
+    private suspend fun observeEvents(
+        mainScope: CoroutineScope,
+        snackbarHostState: SnackbarHostState,
+    ) {
         viewModel.events.onSubscription {
-            findNavController().currentBackStackEntry?.savedStateHandle?.remove<String>("addressName")?.let { name ->
-                viewModel.changeAddressName(name)
-            }
+            findNavController().currentBackStackEntry?.savedStateHandle?.remove<MapAddressUi>("mapAddress")
+                ?.let { mapAddress ->
+                    viewModel.changeMapAddress(mapAddress)
+                }
         }.collect { event ->
             when (event) {
                 AddAddressEvent.GoBack -> {
-                    findNavController().popBackStack(
-                        R.id.savedAddressesDialogFragment,
-                        false
-                    )
+                    findNavController().popBackStack()
                 }
 
                 is AddAddressEvent.GoToMap -> {
-                    findNavController().navigateToMap(
-                        AddressUi(
-                            id = event.addressId,
-                            address = event.addressName,
-                            personTypeId = -1,
-                            description = ""
-                        )
-                    )
+                    findNavController().navigateToMap(event.addressName)
+                }
+
+                is AddAddressEvent.ShowSnackbar -> {
+                    mainScope.launch {
+                        snackbarHostState.showSnackbar(event.message)
+                    }
                 }
             }
         }

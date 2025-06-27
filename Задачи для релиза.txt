@@ -1,5 +1,5 @@
-﻿Для релиза Kotlin: 
-
-1. Yandex Metrica //todo релиз
+﻿//todo релиз
+Для релиза Kotlin:
+1. Yandex Metrica
 2. Проверить SHA ключ для диплинков
 3. application id

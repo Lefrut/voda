@@ -144,7 +144,8 @@ fun ButtonModel.toUi(): ButtonUi {
 data class SectionUi<E>(
     val title: String,
     val items: List<E>,
-    val button: ButtonUi?,
+    val button: ButtonUi? = null,
+    val placeholder: VodovozPlaceholderUi? = null
 ) {
 
     companion object {
@@ -160,7 +161,8 @@ fun <E, E2> SectionModel<E>.toUi(
     return SectionUi(
         title = title,
         items = mapItems(items),
-        button = button?.toUi()
+        button = button?.toUi(),
+        placeholder = placeholder?.toUi()
     )
 }
 

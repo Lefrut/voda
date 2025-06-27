@@ -33,6 +33,7 @@ import com.vodovoz.app.data.vodovoz_service.model.VodovozErrorResponseDTO
 import com.vodovoz.app.data.vodovoz_service.model.VodovozPlaceholderDTO
 import com.vodovoz.app.data.vodovoz_service.model.VodovozResponseDTO
 import com.vodovoz.app.data.vodovoz_service.model.WaitFeedbackProductsDTO
+import com.vodovoz.app.data.vodovoz_service.model.address.AddAddressDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.address.AddressesDTO
 import com.vodovoz.app.data.vodovoz_service.model.auth.AuthDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.auth.LoginByPhoneDTO
@@ -48,7 +49,9 @@ import com.vodovoz.app.data.vodovoz_service.model.notification_settings.Notifica
 import com.vodovoz.app.data.vodovoz_service.model.order_details.OrderDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.order_details.WhereMyOrderDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.order_history.OrdersHistoryDetailsDTO
+import com.vodovoz.app.data.vodovoz_service.model.ordering.OrderCallYouDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.ordering.OrderingDetailsDTO
+import com.vodovoz.app.data.vodovoz_service.model.ordering.RecipientDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.payment_method.PaymentMethodDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.product_details.ProductDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.profile.ProfileDetailsDTO
@@ -59,7 +62,6 @@ import com.vodovoz.app.data.vodovoz_service.model.unrated_products.UnratedProduc
 import com.vodovoz.app.data.vodovoz_service.model.user_data.UserDataDTO
 import okhttp3.MultipartBody
 import retrofit2.Response
-import retrofit2.http.Field
 import retrofit2.http.GET
 import retrofit2.http.Headers
 import retrofit2.http.Multipart
@@ -131,24 +133,43 @@ interface VodovozService {
      * Order requests
      * */
 
+    @GET("oformlenie/zvonok.php?action=vampozvonit")
+    suspend fun getOrderCallYouDetails(
+        @Query("adresid") addressId: Long,
+        @Query("userid") userId: Long?,
+    ): Response<VodovozResponseDTO<OrderCallYouDetailsDTO>>
+
+    @GET("oformlenie/profil.php?action=glav")
+    suspend fun getRecipientDetails(
+        @Query("adresid") addressId: Long,
+        @Query("userid") userId: Long?,
+    ): Response<VodovozResponseDTO<RecipientDetailsDTO>>
+
+    @GET("oformlenie/profil.php?action=update")
+    suspend fun sendOrderRecipient(
+        @Query("adresid") addressId: Long,
+        @Query("userid") userId: Long?,
+        @QueryMap params: Map<String, String>,
+    ): Response<VodovozResponseDTO<String>>
+
     @GET("korzina/function/povtor/index.php")
     suspend fun repeatOrder(
         @Query("id") orderId: Long,
-        @Query("userid") userId: Long?
+        @Query("userid") userId: Long?,
     ): Response<VodovozResponseDTO<String>>
 
 
     @GET("oformlenie/oplata.php?action=glav")
     suspend fun getPaymentMethodDetails(
         @Query("userid") userId: Long?,
-        @Query("adresid") addressId: Int,
+        @Query("adresid") addressId: Long,
         @Query("date") date: String,
     ): Response<VodovozResponseDTO<PaymentMethodDetailsDTO>>
 
     @GET("oformlenie/date.php?action=glav")
     suspend fun getDeliveryDateDetails(
         @Query("userid") userId: Long?,
-        @Query("adresid") addressId: Int,
+        @Query("adresid") addressId: Long,
         @Query("date") date: String? = null,
     ): Response<VodovozResponseDTO<DeliveryDateDetailsDTO>>
 
@@ -230,38 +251,32 @@ interface VodovozService {
         @Query("flat") flat: String? = null,
         @Query("floor") floor: String? = null,
         @Query("leghtkm") fromMoscowToAddressKm: String? = null,
-        @Query("propusk") needPass: String? = null
+        @Query("propusk") needPass: String? = null,
     ): Response<VodovozResponseDTO<Long>>
 
     @GET("oformlenie/address.php?action=update&iblock_id=102")
     suspend fun updateAddress(
         @Query("userid") userId: Long?,
         @Query("addressid") addressId: Long,
-        @Query("polnadres") address: String,
-        @Query("tip") type: Int,
-        @Query("ktochka") geo: String? = null,
+        @Query("ktochka") geo: String,
         @Query("city") city: String? = null,
         @Query("street") street: String? = null,
-        @Query("house") house: String? = null,
-        @Query("domofon") intercom: String? = null,
-        @Query("entrance") entrance: String? = null,
-        @Query("flat") flat: String? = null,
-        @Query("floor") floor: String? = null,
         @Query("leghtkm") fromMoscowToAddressKm: String? = null,
-        @Query("propusk") needPass: String? = null
-    ): Response<VodovozResponseDTO<Long>>
+        @QueryMap params: Map<String, String>,
+    ): Response<VodovozResponseDTO<String?>>
 
     @GET("oformlenie/address.php?action=del")
     suspend fun deleteAddress(
         @Query("addressid") addressId: Int,
-        @Query("userid") userId: Long?
+        @Query("userid") userId: Long?,
     ): Response<VodovozResponseDTO<String>>
 
 
-
-    //todo
-//    @GET("")
-//    suspend fun getAddAddressDetails(): Response<VodovozResponseDTO<>>
+     @GET("oformlenie/address.php?action=edit")
+     suspend fun getAddAddressDetails(
+         @Query("userid") userId: Long?,
+         @Query("addressid") addressId: Long?
+     ): Response<VodovozResponseDTO<AddAddressDetailsDTO>>
 
 
     /**
@@ -304,6 +319,16 @@ interface VodovozService {
     suspend fun getUserData(
         @Query("userid") userId: Long,
     ): Response<VodovozResponseDTO<UserDataDTO>>
+
+    @GET("profile/index.php?action=logout")
+    suspend fun logout(
+        @Query("userid") userId: Long?,
+    ): Response<VodovozResponseDTO<String?>>
+
+    @GET("config/userclose.php?action=zakrituser")
+    suspend fun deleteAccount(
+        @Query("userid") userId: Long?
+    ): Response<VodovozResponseDTO<String?>>
 
     @GET("profile/index.php?action=edit")
     suspend fun updateUserData(
@@ -445,6 +470,7 @@ interface VodovozService {
     suspend fun requestPhoneCode(
         @Path("path", encoded = true) url: String,
         @Query("telefon") phone: String,
+        @Query("podpiska") newsletter: String?,
     ): Response<VodovozResponseDTO<RequestCodeDTO>>
 
     @GET("{path}?action=tochkakarta")
@@ -496,7 +522,7 @@ interface VodovozService {
      * Cart requests
      * */
 
-    @GET("https://vodovoz.net/newmobile_new/korzina/minikorzina.php?action=getbasketuser")
+    @GET("korzina/minikorzina.php?action=getbasketuser")
     suspend fun getBottomCart(): Response<VodovozResponseDTO<BottomCartDTO>>
 
     @GET("korzina/index.php?action=getbasket")
@@ -535,7 +561,7 @@ interface VodovozService {
 
 
     /**
-     * ProductComments screen
+     * Comment requests
      */
     @GET("comments.php?action=detail")
     suspend fun getComments(
@@ -545,16 +571,19 @@ interface VodovozService {
         @Query("ascdesc") order: String = "",
     ): Response<VodovozResponseDTO<ProductCommentsDTO>>
 
-    /**
-     * Wait comments
-     * */
-
     @GET("profile/otzyvy.php?action=glav")
     suspend fun getWaitFeedbackProducts(
         @Query("userid") userId: Long?,
         @Query("nav") page: Int = 1,
     ): Response<VodovozResponseDTO<WaitFeedbackProductsDTO>>
 
+    @GET("comments.php?action=add")
+    suspend fun sendComment(
+        @Query("userid") userId: Long?,
+        @Query("id") productId: Long?,
+        @Query("rating_value") rating: Int,
+        @Query("message") message: String,
+    ): Response<VodovozResponseDTO<VodovozPlaceholderDTO>>
 
     /**
      * ProductDetails screen
@@ -630,7 +659,7 @@ interface VodovozService {
     @GET("glavnaya/otzivtovari.php?action=addblock")
     suspend fun removeUnratedProduct(
         @Query("id") productId: Long,
-        @Query("userid") userId: Long?
+        @Query("userid") userId: Long?,
     ): Response<VodovozResponseDTO<String>>
 
 

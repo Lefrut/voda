@@ -49,6 +49,7 @@ fun HomeBody(
     onOrderClick: (HomeOrderUi) -> Unit,
     onMenuItemClick: (MenuItemUi) -> Unit,
     onShowAllClick: (ButtonAction) -> Unit,
+    onAllViewedProductsClick: () -> Unit,
     onProductCardClick: (ProductUi) -> Unit,
     onProductLike: (ProductUi) -> Unit,
     onPromotionClick: (PromotionUi) -> Unit,
@@ -177,7 +178,7 @@ fun HomeBody(
             HomeProductsRow(
                 modifier = Modifier.padding(top = 32.dp),
                 sectionProducts = sectionViewedProducts,
-                onShowAllClick = onShowAllClick,
+                onShowAllClick = { onAllViewedProductsClick() },
                 onProductClick = onProductCardClick,
                 onProductLike = onProductLike,
                 onDecrementToCart = onDecrementProductToCart,

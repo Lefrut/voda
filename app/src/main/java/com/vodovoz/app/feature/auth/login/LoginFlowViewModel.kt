@@ -63,9 +63,9 @@ class LoginFlowViewModel @Inject constructor(
 
         val loginDetailsDeferred =
             async { vodovozServiceRepository.getLoginDetails().singleResult() }
-        val siteState = siteStateManager.requestSiteState()
         val loginDetailsResult = loginDetailsDeferred.await()
 
+        val siteState = siteStateManager.siteStateSnapshot
         val agreementText = AgreementController.getText()
         val showRegisterText = siteState?.isSmsEnabled != true
 
@@ -102,17 +102,18 @@ class LoginFlowViewModel @Inject constructor(
 
         uiStateListener.updateData { s ->
             s.copy(
-                buttons = s.buttons.updateButton(AUTH_BUTTON) { it.copy(loading = true) }
+                buttons = s.buttons.updateButton(AUTH_BUTTON) { btn -> btn.copy(loading = true) }
             )
         }
 
-        val requestPhoneCodeUrl = siteStateManager.siteStateFlow.value?.smsUrl?.takeIf {
-            it.isNotBlank()
+        val requestPhoneCodeUrl = siteStateManager.siteStateFlow.value?.smsUrl?.takeIf { sms ->
+            sms.isNotBlank()
         } ?: kotlin.run {
-            siteStateManager.requestSiteState()
             uiStateListener.updateData { s ->
                 s.copy(
-                    buttons = s.buttons.updateButton(AUTH_BUTTON) { it.copy(loading = false) },
+                    buttons = s.buttons.updateButton(AUTH_BUTTON) { btn ->
+                        btn.copy(loading = false)
+                    },
                     errorText = resourcesProvider.getString(R.string.error_site_login)
                 )
             }
@@ -121,7 +122,9 @@ class LoginFlowViewModel @Inject constructor(
 
 
         val requestPhoneCodeResult = vodovozServiceRepository.requestPhoneCode(
-            requestPhoneCodeUrl, phoneField.value
+            url = requestPhoneCodeUrl,
+            phone = phoneField.value,
+            newsletter = dataState.subscribeChecked
         ).singleResult()
 
         uiStateListener.updateData { s ->
