@@ -115,7 +115,7 @@ fun MapBody(
             val markerWidth = 21.dp
 
             Image(
-                imageVector = ImageVector.vectorResource(id = R.drawable.ic_delivery),
+                imageVector = ImageVector.vectorResource(id = R.drawable.ic_marker),
                 contentDescription = "Delivery Marker",
                 modifier = Modifier
                     .width(markerWidth)
@@ -236,7 +236,7 @@ private fun MapBottomSheet(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
-                imageVector = ImageVector.vectorResource(id = R.drawable.icon_location),
+                imageVector = ImageVector.vectorResource(id = R.drawable.ic_location),
                 contentDescription = null,
                 modifier = Modifier
                     .padding(end = 16.dp)

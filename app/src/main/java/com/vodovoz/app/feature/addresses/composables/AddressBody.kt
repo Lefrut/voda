@@ -156,7 +156,7 @@ private fun AddressItemCard(
         }
 
         Icon(
-            imageVector = ImageVector.vectorResource(id = R.drawable.icon_edit),
+            imageVector = ImageVector.vectorResource(id = R.drawable.ic_edit),
             contentDescription = null,
             modifier = Modifier
                 .padding(start = 16.dp)

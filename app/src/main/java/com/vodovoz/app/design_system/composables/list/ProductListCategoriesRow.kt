@@ -13,7 +13,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.google.firebase.database.core.utilities.ImmutableTree
 import com.vodovoz.app.R
 import com.vodovoz.app.design_system.composables.chip.VodovozChip
 import com.vodovoz.app.design_system.composables.tab_row.VodovozScrollableTabRow
@@ -41,7 +40,7 @@ fun ProductListCategoriesRow(
 
         onCategoriesListClick?.let {
             Icon(
-                painter = painterResource(id = R.drawable.icon_category),
+                painter = painterResource(id = R.drawable.ic_category),
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onBackground,
                 modifier = Modifier

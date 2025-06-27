@@ -3,10 +3,7 @@ package com.vodovoz.app.feature.all.orders.detail.traceorder.composables
 import android.annotation.SuppressLint
 import android.graphics.PointF
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.AnimationVector2D
 import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.TwoWayConverter
-import androidx.compose.animation.core.animateValueAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
@@ -15,10 +12,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.PointerEventPass
@@ -51,7 +46,7 @@ fun TraceOrderBody(
     val context = LocalContext.current
 
     val deliveryImageProvider = remember {
-        ImageProvider.fromBitmap(context.getBitmap(R.drawable.ic_delivery))
+        ImageProvider.fromBitmap(context.getBitmap(R.drawable.ic_marker))
     }
 
     val carImageProvider = remember {

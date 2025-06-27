@@ -140,7 +140,7 @@ private fun SearchDecorationBox(
                 .size(24.dp)
                 .clip(CircleShape)
                 .clickable { onSearchClick() },
-            painter = painterResource(id = R.drawable.icon_search),
+            painter = painterResource(id = R.drawable.ic_search),
             tint = MaterialTheme.colorScheme.surfaceTint,
             contentDescription = null
         )

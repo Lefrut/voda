@@ -45,7 +45,7 @@ fun MapTopBar(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
-            imageVector = ImageVector.vectorResource(R.drawable.icon_back),
+            imageVector = ImageVector.vectorResource(R.drawable.ic_back),
             tint = MaterialTheme.colorScheme.onBackground,
             contentDescription = null,
             modifier = Modifier
@@ -78,7 +78,7 @@ fun MapTopBar(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
-                    imageVector = ImageVector.vectorResource(id = R.drawable.icon_search),
+                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_search),
                     contentDescription = null,
                     modifier = Modifier
                         .clip(CircleShape)

@@ -22,8 +22,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -122,7 +120,7 @@ fun HybridSearchTopBar(
 
             ClickableIcon(
                 modifier = Modifier.clip(CircleShape),
-                iconId = if (!isSearchMode) R.drawable.icon_search else R.drawable.ic_clean,
+                iconId = if (!isSearchMode) R.drawable.ic_search else R.drawable.ic_clean,
                 tint = if (!isSearchMode) MaterialTheme.colorScheme.onBackground
                     else MaterialTheme.colorScheme.surfaceTint,
                 onClick = { onSearchModeChange(!isSearchMode) }

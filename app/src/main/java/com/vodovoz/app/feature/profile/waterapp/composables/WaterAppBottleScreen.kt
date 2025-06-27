@@ -101,7 +101,7 @@ fun WaterAppBottleScreen(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
-                painter = painterResource(R.drawable.ic_back),
+                painter = painterResource(R.drawable.ic_water_app_back),
                 tint = MaterialTheme.colorScheme.onBackground,
                 contentDescription = null,
                 modifier = Modifier
@@ -118,7 +118,7 @@ fun WaterAppBottleScreen(
             )
 
             Icon(
-                painter = painterResource(R.drawable.icon_filters),
+                painter = painterResource(R.drawable.ic_filters),
                 tint = MaterialTheme.colorScheme.onBackground,
                 contentDescription = null,
                 modifier = Modifier

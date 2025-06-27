@@ -129,7 +129,7 @@ private fun VodovozSearchDecorationBox(
     ) {
         Icon(
             modifier = Modifier.size(24.dp),
-            painter = painterResource(id = R.drawable.icon_search),
+            painter = painterResource(id = R.drawable.ic_search),
             tint = MaterialTheme.colorScheme.surfaceTint,
             contentDescription = null
         )

@@ -3,12 +3,12 @@
 
     <item
         android:id="@+id/graph_home"
-        android:icon="@drawable/icon_home"
+        android:icon="@drawable/ic_home"
         android:title="@string/home" />
 
     <item
         android:id="@+id/graph_catalog"
-        android:icon="@drawable/icon_catalog"
+        android:icon="@drawable/ic_catalog"
         android:title="@string/catalog" />
 
     <item
@@ -18,12 +18,12 @@
 
     <item
         android:id="@+id/graph_favorite"
-        android:icon="@drawable/icon_like"
+        android:icon="@drawable/ic_like"
         android:title="@string/favorite" />
 
     <item
         android:id="@+id/graph_profile"
-        android:icon="@drawable/icon_profile"
+        android:icon="@drawable/ic_profile"
         android:title="@string/account" />
 
 </menu>

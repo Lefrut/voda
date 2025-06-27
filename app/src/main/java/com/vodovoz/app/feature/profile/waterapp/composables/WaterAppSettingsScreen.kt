@@ -255,7 +255,7 @@ private fun ParameterItem(
         )
 
         Icon(
-            painter = painterResource(id = R.drawable.icon_edit),
+            painter = painterResource(id = R.drawable.ic_edit),
             contentDescription = null,
             modifier = Modifier
                 .padding(start = 16.dp)

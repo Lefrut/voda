@@ -60,7 +60,7 @@ fun ProductListTitle(
             }
         }
         Icon(
-            painter = painterResource(id = R.drawable.icon_share),
+            painter = painterResource(id = R.drawable.ic_share),
             contentDescription = null,
             tint = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier
