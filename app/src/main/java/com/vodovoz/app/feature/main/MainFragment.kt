@@ -3,6 +3,7 @@ package com.vodovoz.app.feature.main
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.app.Activity.RESULT_OK
 import android.os.Build
 import android.os.Bundle
 import android.view.View
@@ -100,22 +101,17 @@ class MainFragment : Fragment(R.layout.fragment_main) {
         }
     }
 
-    private fun checkForUpdate() {
-        appUpdateController.checkForUpdate(
-            registerForActivityResult<IntentSenderRequest, ActivityResult>(
-                ActivityResultContracts.StartIntentSenderForResult(),
-                object : ActivityResultCallback<ActivityResult?> {
+    private val updateResultLauncher = registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result: ActivityResult ->
+        if (result.resultCode != RESULT_OK) {
+            accountManager.reportError("Update flow failed! Result code: ${result.resultCode}")
+        }
+        else{
+            accountManager.reportEvent("Success update!")
+        }
+    }
 
-                    override fun onActivityResult(result: ActivityResult?) {
-                        if (result == null) return
-                        if (result.resultCode != Activity.RESULT_OK) {
-                            accountManager.reportError("Update flow failed! Result code: ${result.resultCode}")
-                        } else {
-                            accountManager.reportEvent("Success update!")
-                        }
-                    }
-                }
-            ))
+    private fun checkForUpdate() {
+        appUpdateController.checkForUpdate(updateResultLauncher)
     }
 
 

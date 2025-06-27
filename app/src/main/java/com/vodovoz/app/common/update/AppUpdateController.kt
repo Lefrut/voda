@@ -9,6 +9,7 @@ import com.google.android.play.core.install.InstallStateUpdatedListener
 import com.google.android.play.core.install.model.AppUpdateType
 import com.google.android.play.core.install.model.InstallStatus
 import com.google.android.play.core.install.model.UpdateAvailability
+import com.vodovoz.app.util.extensions.debugLog
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -24,7 +25,7 @@ class AppUpdateController @AssistedInject constructor(
 
     private val appUpdateManager = AppUpdateManagerFactory.create(context)
 
-    private val listener = InstallStateUpdatedListener { state ->
+    private val installStateUpdatedListener = InstallStateUpdatedListener { state ->
         if (state.installStatus() == InstallStatus.DOWNLOADED) {
             onDownLoadComplete()
         }
@@ -38,19 +39,21 @@ class AppUpdateController @AssistedInject constructor(
                 && (appUpdateInfo.clientVersionStalenessDays() ?: -1) >= DAYS_FOR_FLEXIBLE_UPDATE
                 && appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.FLEXIBLE)
             ) {
-                appUpdateManager.registerListener(listener)
+                appUpdateManager.registerListener(installStateUpdatedListener)
                 appUpdateManager.startUpdateFlowForResult(
                     appUpdateInfo,
                     activityResultLauncher,
                     AppUpdateOptions.newBuilder(AppUpdateType.FLEXIBLE).build()
                 )
             }
+        }.addOnFailureListener { it ->
+            debugLog { it.toString() }
         }
     }
 
     fun completeUpdate() {
         appUpdateManager.completeUpdate()
-        appUpdateManager.unregisterListener(listener)
+        appUpdateManager.unregisterListener(installStateUpdatedListener)
     }
 
     fun onResumeAction() {
