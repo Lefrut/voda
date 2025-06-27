@@ -112,8 +112,6 @@ class CartFlowViewModel @Inject constructor(
 
         }.onFailure { t ->
 
-
-
             val uiState = when (t) {
                 is EmptyResultException -> {
                     cartManager.syncCart(emptyMap())

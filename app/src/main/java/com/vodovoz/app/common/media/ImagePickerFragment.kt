@@ -4,6 +4,7 @@ import android.Manifest
 import android.app.Activity
 import android.app.AlertDialog
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -11,6 +12,7 @@ import android.os.Environment
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
@@ -81,7 +83,7 @@ class ImagePickerFragment : Fragment(R.layout.fragment_image_picker) {
                     viewModel.saveAvatarImage(file)
                 }
             }
-            findNavController().navigateUp()
+            findNavController().popBackStack()
         }
 
     private val getMultiplePictureFromGalleryResultLauncher =
@@ -93,7 +95,7 @@ class ImagePickerFragment : Fragment(R.layout.fragment_image_picker) {
                 if (clipData != null && clipData.itemCount > 0) {
                     if (clipData.itemCount > 5) {
                         requireActivity().snack("Максимум 5 изображений")
-                        findNavController().navigateUp()
+                        findNavController().popBackStack()
 
                         return@registerForActivityResult
                     }
@@ -140,6 +142,15 @@ class ImagePickerFragment : Fragment(R.layout.fragment_image_picker) {
     }
 
     private fun onPermissionResult(isGranted: Boolean) {
+
+        val permission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            READ_IMAGES
+        } else {
+            READ_EXTERNAL
+        }
+
+        if (ContextCompat.checkSelfPermission(requireContext(), permission) != PackageManager.PERMISSION_GRANTED) { return }
+
         if (isGranted) {
             when (receiver) {
                 CREATE -> {
@@ -160,37 +171,7 @@ class ImagePickerFragment : Fragment(R.layout.fragment_image_picker) {
                 }
             }
         } else {
-            initPermissionRationale()
+            findNavController().popBackStack()
         }
-    }
-
-    private fun initPermissionRationale() {
-        val needPermissionRationale = ActivityCompat.shouldShowRequestPermissionRationale(
-            requireActivity(),
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                READ_IMAGES
-            } else {
-                READ_EXTERNAL
-            }
-        )
-        if (needPermissionRationale) {
-            showPermissionRationaleDialog()
-        }
-    }
-
-    private fun showPermissionRationaleDialog() {
-        AlertDialog.Builder(requireContext())
-            .setMessage("Чтобы добавить фото, нужен доступ к хранилищу")
-            .setPositiveButton("ОК") { _, _ ->
-                storagePermission.launch(
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                        READ_IMAGES
-                    } else {
-                        READ_EXTERNAL
-                    }
-                )
-            }
-            .setNegativeButton("Отмена", null)
-            .show()
     }
 }

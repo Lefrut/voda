@@ -163,6 +163,7 @@ class ServiceOrderViewModel @Inject constructor(
         data object GoBack : ServiceOrderEvent
     }
 
+    @Stable
     sealed interface ServiceOrderUiState {
         data object Loading : ServiceOrderUiState
         data object Form : ServiceOrderUiState

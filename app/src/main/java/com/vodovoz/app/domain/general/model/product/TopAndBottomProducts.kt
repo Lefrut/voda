@@ -1,6 +1,7 @@
 package com.vodovoz.app.domain.general.model.product
 
 import com.vodovoz.app.common.model.ButtonAction
+import com.vodovoz.app.domain.general.model.VodovozPlaceholderModel
 
 data class TopAndBottomSectionsModel(
     val topSection: SectionModel<CategoryWithProductsModel>,
@@ -11,7 +12,8 @@ data class TopAndBottomSectionsModel(
 data class SectionModel<E>(
     val title: String,
     val items: List<E>,
-    val button: ButtonModel?,
+    val button: ButtonModel? = null,
+    val placeholder: VodovozPlaceholderModel? = null
 ){
     companion object{
         fun<T> empty() = SectionModel<T>("", emptyList(), null)

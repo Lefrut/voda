@@ -7,7 +7,11 @@ data class RadioButtonGroupUi<out T : Any>(
     override val id: String,
     val option: RadioOptionUi<T>,
     val options: List<RadioOptionUi<T>>,
-) : WidgetUi(id)
+) : WidgetUi(id) {
+    override fun value(): String {
+        return option.value.toString() ?: ""
+    }
+}
 
 
 @Immutable

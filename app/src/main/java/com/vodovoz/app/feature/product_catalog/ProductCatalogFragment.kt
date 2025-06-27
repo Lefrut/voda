@@ -218,6 +218,7 @@ class ProductCatalogFragment : Fragment() {
         data class Category(val categoryId: Long) : DataSource()
 
         @Parcelize
+        @Immutable
         data object Missing : DataSource()
     }
 

@@ -52,37 +52,38 @@ class LoginFragment : Fragment() {
     @Inject
     lateinit var accountManager: AccountManager
 
-    private val executor: Executor by lazy { ContextCompat.getMainExecutor(requireContext()) }
 
-    private val biometricManager by lazy { BiometricManager.from(requireContext()) }
 
-    private val biometricPrompt: BiometricPrompt by lazy {
-        BiometricPrompt(this, executor,
-            object : BiometricPrompt.AuthenticationCallback() {
-                override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
-                    super.onAuthenticationError(errorCode, errString)
-                    requireActivity().snack(getString(R.string.biometric_fault))
-                }
-
-                override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
-                    super.onAuthenticationSucceeded(result)
-                    //todo - put auth method
-                }
-
-                override fun onAuthenticationFailed() {
-                    super.onAuthenticationFailed()
-                    requireActivity().snack(getString(R.string.biometric_fault))
-                }
-            })
-    }
-
-    private val promptInfo: BiometricPrompt.PromptInfo by lazy {
-        BiometricPrompt.PromptInfo.Builder()
-            .setTitle("Biometric login for my app")
-            .setSubtitle("Log in using your biometric credential")
-            .setNegativeButtonText("Use account password")
-            .build()
-    }
+    //todo - next time
+//    private val executor: Executor by lazy { ContextCompat.getMainExecutor(requireContext()) }
+//    private val biometricManager by lazy { BiometricManager.from(requireContext()) }
+//    private val biometricPrompt: BiometricPrompt by lazy {
+//        BiometricPrompt(this, executor,
+//            object : BiometricPrompt.AuthenticationCallback() {
+//                override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
+//                    super.onAuthenticationError(errorCode, errString)
+//                    requireActivity().snack(getString(R.string.biometric_fault))
+//                }
+//
+//                override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
+//                    super.onAuthenticationSucceeded(result)
+//                    //todo - put auth method
+//                }
+//
+//                override fun onAuthenticationFailed() {
+//                    super.onAuthenticationFailed()
+//                    requireActivity().snack(getString(R.string.biometric_fault))
+//                }
+//            })
+//    }
+//
+//    private val promptInfo: BiometricPrompt.PromptInfo by lazy {
+//        BiometricPrompt.PromptInfo.Builder()
+//            .setTitle("Biometric login for my app")
+//            .setSubtitle("Log in using your biometric credential")
+//            .setNegativeButtonText("Use account password")
+//            .build()
+//    }
 
 
     private val viewModel: LoginFlowViewModel by viewModels()
@@ -91,16 +92,16 @@ class LoginFragment : Fragment() {
     private val cartFlowViewModel: CartFlowViewModel by activityViewModels()
     private val favoriteViewModel: FavoriteFlowViewModel by activityViewModels()
 
-    private val biometricResultLauncher =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            val resultCode = result.resultCode
-            if (resultCode == Activity.RESULT_OK) {
-                biometricPrompt.authenticate(promptInfo)
-                accountManager.saveUseBio(true)
-            } else {
-                accountManager.saveUseBio(false)
-            }
-        }
+//    private val biometricResultLauncher =
+//        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+//            val resultCode = result.resultCode
+//            if (resultCode == Activity.RESULT_OK) {
+//                biometricPrompt.authenticate(promptInfo)
+//                accountManager.saveUseBio(true)
+//            } else {
+//                accountManager.saveUseBio(false)
+//            }
+//        }
 
     override fun onStart() {
         super.onStart()
@@ -151,16 +152,10 @@ class LoginFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        //todo - mb uncomment checkShowFingerPrint()
+        //todo - next time
         //checkShowFingerPrint()
     }
 
-    private fun checkShowFingerPrint() {
-        val userSettings = accountManager.fetchUserSettings()
-        val isSettingsCorrect =
-            userSettings.email.isNotEmpty() && userSettings.password.isNotEmpty()
-        if (isSettingsCorrect) checkBiometric()
-    }
 
     private suspend fun observeEvents(): Unit = viewModel.observeEvent().collect { events ->
         when (events) {
@@ -206,37 +201,46 @@ class LoginFragment : Fragment() {
     }
 
 
-    private fun checkBiometric() {
-        when (biometricManager.canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_STRONG or BiometricManager.Authenticators.DEVICE_CREDENTIAL)) {
-            BiometricManager.BIOMETRIC_SUCCESS -> {
-                biometricPrompt.authenticate(promptInfo)
-                accountManager.saveUseBio(true)
-            }
 
-            BiometricManager.BIOMETRIC_ERROR_NO_HARDWARE -> {
-                accountManager.saveUseBio(false)
-            }
+    //todo - next time
+//    private fun checkShowFingerPrint() {
+//        val userSettings = accountManager.fetchUserSettings()
+//        val isSettingsCorrect =
+//            userSettings.email.isNotEmpty() && userSettings.password.isNotEmpty()
+//        if (isSettingsCorrect) checkBiometric()
+//    }
 
-            BiometricManager.BIOMETRIC_ERROR_HW_UNAVAILABLE -> {
-                accountManager.saveUseBio(false)
-            }
-
-            BiometricManager.BIOMETRIC_ERROR_NONE_ENROLLED -> {
-                accountManager.saveUseBio(false)
-
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                    val enrollIntent = Intent(ACTION_BIOMETRIC_ENROLL).apply {
-                        putExtra(
-                            EXTRA_BIOMETRIC_AUTHENTICATORS_ALLOWED,
-                            BiometricManager.Authenticators.BIOMETRIC_STRONG or BiometricManager.Authenticators.DEVICE_CREDENTIAL
-                        )
-                    }
-                    biometricResultLauncher.launch(enrollIntent)
-                }
-            }
-            else -> {
-                accountManager.saveUseBio(false)
-            }
-        }
-    }
+//    private fun checkBiometric() {
+//        when (biometricManager.canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_STRONG or BiometricManager.Authenticators.DEVICE_CREDENTIAL)) {
+//            BiometricManager.BIOMETRIC_SUCCESS -> {
+//                biometricPrompt.authenticate(promptInfo)
+//                accountManager.saveUseBio(true)
+//            }
+//
+//            BiometricManager.BIOMETRIC_ERROR_NO_HARDWARE -> {
+//                accountManager.saveUseBio(false)
+//            }
+//
+//            BiometricManager.BIOMETRIC_ERROR_HW_UNAVAILABLE -> {
+//                accountManager.saveUseBio(false)
+//            }
+//
+//            BiometricManager.BIOMETRIC_ERROR_NONE_ENROLLED -> {
+//                accountManager.saveUseBio(false)
+//
+//                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+//                    val enrollIntent = Intent(ACTION_BIOMETRIC_ENROLL).apply {
+//                        putExtra(
+//                            EXTRA_BIOMETRIC_AUTHENTICATORS_ALLOWED,
+//                            BiometricManager.Authenticators.BIOMETRIC_STRONG or BiometricManager.Authenticators.DEVICE_CREDENTIAL
+//                        )
+//                    }
+//                    biometricResultLauncher.launch(enrollIntent)
+//                }
+//            }
+//            else -> {
+//                accountManager.saveUseBio(false)
+//            }
+//        }
+//    }
 }

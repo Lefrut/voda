@@ -14,12 +14,12 @@ import com.vodovoz.app.design_system.model.ProductMediaUi
 import com.vodovoz.app.design_system.model.filters.FilterUi
 import com.vodovoz.app.design_system.model.filters.FiltersUi
 import com.vodovoz.app.feature.addresses.model.AddressScreenTypeUi
-import com.vodovoz.app.feature.addresses.model.AddressUi
 import com.vodovoz.app.feature.all.promotions.AllPromotionsFragment
 import com.vodovoz.app.feature.buy_certificate.model.FAQUi
 import com.vodovoz.app.feature.cart.model.CartPresentPopupWindowUi
 import com.vodovoz.app.feature.cart.model.CartPresentUi
 import com.vodovoz.app.feature.home.model.CategoryUi
+import com.vodovoz.app.feature.map.model.MapAddressUi
 import com.vodovoz.app.feature.product_catalog.ProductCatalogFragment
 import java.time.LocalDate
 
@@ -41,21 +41,29 @@ fun NavOptionsBuilder.expandAnim() {
     }
 }
 
-fun NavController.navigateToAddAddress(addressId: Long, addressName: String) {
+fun NavController.navigateToAddAddress(
+    mapAddress: MapAddressUi? = null,
+    addressId: Long? = null,
+    addressName: String? = null,
+    navOptions: NavOptions? = null,
+) {
     navigate(
         R.id.addAddressFragment,
         bundleOf(
+            "mapAddress" to mapAddress,
             "addressId" to addressId,
-            "addressName" to addressName
+            "addressName" to addressName,
         ),
-        navOptions {}
+        navOptions ?: navOptions {
+            slideAnim()
+        }
     )
 }
 
-fun NavController.navigateToMap(address: AddressUi?) {
+fun NavController.navigateToMap(addressName: String?) {
     navigate(
         R.id.mapFragment,
-        bundleOf("address" to address),
+        bundleOf("addressName" to addressName),
         navOptions {
             slideAnim()
         }
@@ -212,7 +220,7 @@ fun NavController.navigateToAddresses(addressScreenType: AddressScreenTypeUi) {
     )
 }
 
-fun NavController.navigateToDeliveryDate(addressId: Int) {
+fun NavController.navigateToDeliveryDate(addressId: Long) {
     navigate(
         R.id.deliveryDateFragment,
         bundleOf("addressId" to addressId),
@@ -222,7 +230,7 @@ fun NavController.navigateToDeliveryDate(addressId: Int) {
     )
 }
 
-fun NavController.navigateToPaymentMethod(addressId: Int, date: LocalDate) {
+fun NavController.navigateToPaymentMethod(addressId: Long, date: LocalDate) {
     navigate(
         R.id.paymentMethodFragment,
         bundleOf(
@@ -233,7 +241,26 @@ fun NavController.navigateToPaymentMethod(addressId: Int, date: LocalDate) {
             slideAnim()
         }
     )
+}
 
+fun NavController.navigateToOrderCallYou(addressId: Long) {
+    navigate(
+        R.id.orderCallYouFragment,
+        bundleOf("addressId" to addressId),
+        navOptions {
+            slideAnim()
+        }
+    )
+}
+
+fun NavController.navigateToOrderRecipient(addressId: Long) {
+    navigate(
+        R.id.orderRecipientFragment,
+        bundleOf("addressId" to addressId),
+        navOptions {
+            slideAnim()
+        }
+    )
 }
 
 fun NavController.navigateToRecoverPassword() {
@@ -401,7 +428,11 @@ fun NavController.navigateToProductFilters(categoryId: Long, filters: FiltersUi)
     )
 }
 
-fun NavController.navigateToProductComments(productId: Long, productName: String, productImage: String) {
+fun NavController.navigateToProductComments(
+    productId: Long,
+    productName: String,
+    productImage: String,
+) {
     navigate(
         R.id.productCommentsFragment,
         bundleOf(
@@ -488,6 +519,15 @@ fun NavController.navigateToSearchProductList(query: String) {
             "dataSource" to ProductCatalogFragment.DataSource.Search(
                 query
             )
+        )
+    )
+}
+
+fun NavController.navigateToViewedProductList() {
+    navigate(
+        R.id.paginatedProductsCatalogWithoutFiltersFragment,
+        bundleOf(
+            "dataSource" to ProductCatalogFragment.DataSource.ViewedProducts
         )
     )
 }

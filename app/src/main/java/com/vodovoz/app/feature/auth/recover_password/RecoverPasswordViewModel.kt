@@ -33,7 +33,6 @@ import javax.inject.Inject
 class RecoverPasswordViewModel @Inject constructor(
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val resourcesProvider: ResourcesProvider,
-    private val siteStateManager: SiteStateManager,
 ) : MviViewModel<RecoverPasswordState, RecoverPasswordEvent>(
     RecoverPasswordState()
 ) {
@@ -70,7 +69,6 @@ class RecoverPasswordViewModel @Inject constructor(
         val recoverPasswordDeferred =
             async { vodovozServiceRepository.getRecoverPasswordDetails().singleResult() }
 
-        siteStateManager.requestSiteState()
 
         val recoverPasswordDetailsResult = recoverPasswordDeferred.await()
         val agreementText = AgreementController.getText()

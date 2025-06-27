@@ -3,7 +3,11 @@ package com.vodovoz.app.design_system.model.widgets
 import androidx.compose.runtime.Stable
 
 @Stable
-sealed class WidgetUi(open val id: String)
+sealed class WidgetUi(open val id: String){
+
+    abstract fun value(): String
+
+}
 
 interface WidgetUpdater {
     fun canHandle(widget: WidgetUi, updatedWidget: WidgetUi): Boolean
@@ -92,12 +96,31 @@ class SwitchWidgetUpdater : WidgetUpdater {
     }
 }
 
+class SingleCheckboxGroupUpdater : WidgetUpdater {
+    override fun canHandle(widget: WidgetUi, updatedWidget: WidgetUi): Boolean {
+        return widget is SingleCheckboxGroup<*> && updatedWidget is SingleCheckboxGroup<*>
+    }
+
+    override fun update(
+        widgets: List<WidgetUi>,
+        widget: WidgetUi,
+        updatedWidget: WidgetUi,
+        getString: (Int) -> String,
+    ): List<WidgetUi> {
+        return widgets
+            .map { mapWidget ->
+                if (mapWidget.id == updatedWidget.id) { updatedWidget } else { mapWidget }
+            }
+    }
+}
+
 
 class WidgetUpdaterHandler(
     private val updaters: List<WidgetUpdater> = listOf(
         FieldWidgetUpdater(),
         SwitchWidgetUpdater(),
-        RadioGroupUpdater()
+        RadioGroupUpdater(),
+        SingleCheckboxGroupUpdater()
     ),
     private val getString: (Int) -> String,
 ) {

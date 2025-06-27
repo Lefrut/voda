@@ -5,11 +5,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.vodovoz.app.design_system.composables.checkbox.VodovozSingleCheckboxColumn
 import com.vodovoz.app.design_system.composables.radio_button.VodovozRadioButtonColumn
 import com.vodovoz.app.design_system.composables.swich.VodovozSwitch
 import com.vodovoz.app.design_system.composables.text_fields.VodovozTextField
 import com.vodovoz.app.design_system.model.widgets.FieldUi
 import com.vodovoz.app.design_system.model.widgets.RadioButtonGroupUi
+import com.vodovoz.app.design_system.model.widgets.SingleCheckboxGroup
 import com.vodovoz.app.design_system.model.widgets.SwitchUi
 import com.vodovoz.app.design_system.model.widgets.WidgetUi
 
@@ -35,6 +37,13 @@ fun VodovozWidget(
 
             is SwitchUi -> {
                 VodovozSwitch(switch = widget, onSwitchChange = onWidgetChange)
+            }
+
+            is SingleCheckboxGroup<*> -> {
+                VodovozSingleCheckboxColumn(
+                    singleCheckboxGroup = widget,
+                    onCheckboxClick = onWidgetChange
+                )
             }
         }
     }

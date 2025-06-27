@@ -128,8 +128,27 @@ class WaitFeedbackProductsViewModel @Inject constructor(
         _events.emit(WaitFeedbackProductsEvent.GoToCatalog)
     }
 
-    fun navigateToWriteComment(product: WaitFeedbackProductUi, rating: Int) = viewModelScope.launch {
-        _events.emit(WaitFeedbackProductsEvent.GoToWriteComment(product.id, product.name, product.image, rating))
+    fun navigateToWriteComment(product: WaitFeedbackProductUi, rating: Int) =
+        viewModelScope.launch {
+            _events.emit(
+                WaitFeedbackProductsEvent.GoToWriteComment(
+                    product.id,
+                    product.name,
+                    product.image,
+                    rating
+                )
+            )
+        }
+
+    fun removeProduct(productId: Long) = viewModelScope.launch {
+        _state.update { s ->
+            val products = s.products
+            s.copy(
+                products = products - products.filter { product ->
+                    product.id == productId
+                }.toSet()
+            )
+        }
     }
 
 }

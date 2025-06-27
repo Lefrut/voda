@@ -1,9 +1,11 @@
 package com.vodovoz.app.feature.bottom.services.detail.model
 
+import androidx.compose.runtime.Immutable
 import com.vodovoz.app.design_system.model.ProductUi
 import com.vodovoz.app.design_system.model.mapToUi
 import com.vodovoz.app.domain.general.model.service.ServiceProductsModel
 
+@Immutable
 data class ServiceProductsUi(
     val title: String,
     val coefficient: Int,

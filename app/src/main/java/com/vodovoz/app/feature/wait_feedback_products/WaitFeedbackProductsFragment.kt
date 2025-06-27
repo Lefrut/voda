@@ -29,13 +29,20 @@ class WaitFeedbackProductsFragment : Fragment() {
     @Inject
     internal lateinit var tabManager: TabManager
 
+    override fun onResume() {
+        super.onResume()
+        findNavController().currentBackStackEntry?.savedStateHandle?.remove<Long>("ratedProductId")?.let { productId ->
+            viewModel.removeProduct(productId)
+        }
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View {
         return ComposeView(requireContext()).apply {
-            setViewCompositionStrategy(ViewCompositionStrategy.Default)
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
 
             setContent {
                 VodovozTheme {

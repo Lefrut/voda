@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -13,7 +14,7 @@ import com.vodovoz.app.feature.write_comment.composables.WriteCommentBody
 import com.vodovoz.app.feature.write_comment.model.WriteCommentState
 
 @Composable
-fun WriteCommentScreen(viewModel: WriteCommentViewModel, viewState: WriteCommentState) {
+fun WriteCommentScreen(viewModel: WriteCommentViewModel, viewState: WriteCommentState, snackbarHostState: SnackbarHostState) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -30,8 +31,9 @@ fun WriteCommentScreen(viewModel: WriteCommentViewModel, viewState: WriteComment
             rating = viewState.rating,
             buttonIsLoading = viewState.buttonIsLoading,
             commentField = viewState.field,
-            havePhotos = viewState.havePhotos,
+            havePhotos = viewState.takePhotos,
             images = viewState.imagesUri,
+            snackbarHostState = snackbarHostState,
             onRatingChange = { rating ->
                 viewModel.changeRating(rating)
             },

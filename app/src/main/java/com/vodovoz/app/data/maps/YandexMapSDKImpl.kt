@@ -1,5 +1,13 @@
 package com.vodovoz.app.data.maps
 
+import com.yandex.mapkit.RequestPoint
+import com.yandex.mapkit.RequestPointType
+import com.yandex.mapkit.directions.DirectionsFactory
+import com.yandex.mapkit.directions.driving.DrivingOptions
+import com.yandex.mapkit.directions.driving.DrivingRoute
+import com.yandex.mapkit.directions.driving.DrivingRouter
+import com.yandex.mapkit.directions.driving.DrivingSession
+import com.yandex.mapkit.directions.driving.VehicleOptions
 import com.yandex.mapkit.geometry.BoundingBox
 import com.yandex.mapkit.geometry.Geometry
 import com.yandex.mapkit.geometry.Point
@@ -35,6 +43,10 @@ class YandexMapSDKImpl @Inject constructor() : YandexMapSDK {
             Point(moscowCenter.latitude - KILOMETERS, moscowCenter.longitude - KILOMETERS),
             Point(moscowCenter.latitude + KILOMETERS, moscowCenter.longitude + KILOMETERS)
         )
+    }
+
+    private val drivingRouter: DrivingRouter by lazy {
+        DirectionsFactory.getInstance().createDrivingRouter()
     }
 
     private val searchManager: SearchManager by lazy {
@@ -89,6 +101,38 @@ class YandexMapSDKImpl @Inject constructor() : YandexMapSDK {
                     }
                 }
             )
+        }
+    }
+
+    private var drivingSession: DrivingSession? = null
+
+    override suspend fun getRoute(start: Point, end: Point): List<Point> {
+        return suspendCancellableCoroutine { cont ->
+            val requestPoints = listOf(
+                RequestPoint(start, RequestPointType.WAYPOINT, null),
+                RequestPoint(end, RequestPointType.WAYPOINT, null)
+            )
+
+            drivingSession = drivingRouter.requestRoutes(
+                requestPoints,
+                DrivingOptions(),
+                VehicleOptions(),
+                object : DrivingSession.DrivingRouteListener {
+                    override fun onDrivingRoutes(routes: MutableList<DrivingRoute>) {
+                        val route = routes.firstOrNull()
+                        if (route != null) {
+                            cont.resume(route.geometry.points) { _, _, _ -> }
+                        } else {
+                            cont.resumeWithException(IllegalStateException("Empty route list"))
+                        }
+                    }
+
+                    override fun onDrivingRoutesError(error: Error) {
+                        cont.resumeWithException(IllegalStateException("Driving routes exception"))
+                    }
+                }
+            )
+
         }
     }
 

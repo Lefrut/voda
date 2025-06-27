@@ -67,6 +67,10 @@ data class FieldUi(
             isValueVisible = true
         )
     }
+
+    override fun value(): String {
+        return value
+    }
 }
 
 
@@ -193,7 +197,7 @@ fun FieldUi.getErrorText(getStringResource: (Int) -> String): String {
             getStringResource(R.string.supporting_text_password)
         }
 
-        id == "message" || id == "dr127" || id == "dr53" -> {
+        id == "message" || id == "dr127" || id == "dr53" || id == "comment" -> {
             getStringResource(R.string.supporting_text_message)
         }
 
@@ -254,7 +258,7 @@ fun FieldModel.toUi(): FieldUi {
         "email", "emaildryg", "dr125", "dr51", "dr176" -> KeyboardType.Email
         "tel", "dr124", "phone", "dr50", "dr171" -> KeyboardType.Phone
         "pass", "parol" -> KeyboardType.Password
-        "data", "date" -> KeyboardType.Decimal
+        "data", "date" -> KeyboardType.Unspecified
         "oplata" -> KeyboardType.Number
         else -> when (valueType.lowercase()) {
             "text" -> KeyboardType.Text
@@ -268,6 +272,10 @@ fun FieldModel.toUi(): FieldUi {
     }
     val isDropDownField = valueType.uppercase() == "SPISOK"
 
+    val fieldUiReadonly = when (id.lowercase()) {
+        "data", "date" -> true
+        else -> readOnly
+    }
 
 
     return FieldUi(
@@ -279,7 +287,7 @@ fun FieldModel.toUi(): FieldUi {
         keyboardType = if (isDropDownField) KeyboardType.Unspecified else keyboardType,
         isRequired = isRequired,
         isError = false,
-        readOnly = readOnly,
+        readOnly = fieldUiReadonly,
         supportingText = supportingText,
         hint = hint,
         isValueVisible = keyboardType != KeyboardType.Password,

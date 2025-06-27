@@ -3,9 +3,11 @@ package com.vodovoz.app.data.maps.repository
 import com.vodovoz.app.data.maps.YandexMapAPI
 import com.vodovoz.app.data.maps.YandexMapSDK
 import com.vodovoz.app.data.maps.mappers.mapToDomain
+import com.vodovoz.app.data.maps.mappers.toData
 import com.vodovoz.app.data.maps.mappers.toDomain
 import com.vodovoz.app.data.vodovoz_service.mappers.executeRequest
 import com.vodovoz.app.domain.general.model.location.MapAddressModel
+import com.vodovoz.app.domain.general.model.location.MapPointModel
 import com.vodovoz.app.domain.general.respository.MapServiceRepository
 import com.vodovoz.app.util.extensions.catchResult
 import com.yandex.mapkit.search.Address
@@ -74,6 +76,11 @@ class MapServiceRepositoryImpl @Inject constructor(
                 )
             )
         }.catchResult()
+
+    override fun getRoute(start: MapPointModel, end: MapPointModel): Flow<Result<List<MapPointModel>>> = flow {
+        val points = mapSDK.getRoute(start.toData(), end.toData())
+        emit(Result.success(points.mapToDomain()))
+    }.catchResult()
 
 
 }

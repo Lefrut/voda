@@ -11,15 +11,30 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.fragment.findNavController
+import com.vodovoz.app.common.tab.TabManager
 import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.effects.LifecycleEffect
 import com.vodovoz.app.feature.delivery_date.model.DeliveryDateEvent
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class DeliveryDateFragment : Fragment() {
 
     private val viewModel by viewModels<DeliveryDateViewModel>()
+
+    @Inject
+    lateinit var tabManager: TabManager
+
+    override fun onStart() {
+        super.onStart()
+        tabManager.changeTabVisibility(false)
+    }
+
+    override fun onStop() {
+        super.onStop()
+        tabManager.changeTabVisibility(true)
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,

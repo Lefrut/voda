@@ -14,13 +14,17 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.fragment.findNavController
 import com.vodovoz.app.common.account.AccountManager
+import com.vodovoz.app.common.tab.TabManager
 import com.vodovoz.app.core.navigation.navigateToAddresses
 import com.vodovoz.app.core.navigation.navigateToDeliveryDate
+import com.vodovoz.app.core.navigation.navigateToOrderCallYou
+import com.vodovoz.app.core.navigation.navigateToOrderRecipient
 import com.vodovoz.app.core.navigation.navigateToPaymentMethod
 import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.effects.LifecycleEffect
 import com.vodovoz.app.feature.addresses.model.AddressScreenTypeUi
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.onSubscription
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -30,6 +34,9 @@ class OrderingFragment : Fragment() {
 
     @Inject
     lateinit var accountManager: AccountManager
+
+    @Inject
+    lateinit var tabManager: TabManager
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -66,7 +73,11 @@ class OrderingFragment : Fragment() {
 
 
     private suspend fun observeEvents() {
-        viewModel.observeEvent().collect { event ->
+        viewModel.observeEvent().onSubscription {
+            findNavController().currentBackStackEntry?.savedStateHandle?.get<Long>("addressId")?.let { addressId ->
+                viewModel.setAddressId(addressId)
+            }
+        }.collect { event ->
             when (event) {
                 OrderingFlowViewModel.OrderingEvents.GoBack -> {
                     findNavController().popBackStack()
@@ -80,12 +91,16 @@ class OrderingFragment : Fragment() {
                     findNavController().navigateToDeliveryDate(event.addressId)
                 }
 
-                is OrderingFlowViewModel.OrderingEvents.GoToPaymentMethod ->{
+                is OrderingFlowViewModel.OrderingEvents.GoToPaymentMethod -> {
                     findNavController().navigateToPaymentMethod(event.addressId, event.date)
                 }
 
-                else -> {
+                is OrderingFlowViewModel.OrderingEvents.GoToOrderRecipient -> {
+                    findNavController().navigateToOrderRecipient(event.addressId)
+                }
 
+                is OrderingFlowViewModel.OrderingEvents.GoToCallYou -> {
+                    findNavController().navigateToOrderCallYou(event.addressId)
                 }
             }
         }

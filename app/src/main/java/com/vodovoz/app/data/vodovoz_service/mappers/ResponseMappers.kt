@@ -4,6 +4,7 @@ import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import com.vodovoz.app.core.network.converters.LocalDateTimeJsonAdapter
 import com.vodovoz.app.core.network.retrofit.messageWithCode
+import com.vodovoz.app.core.network.retrofit.stringBody
 import com.vodovoz.app.domain.general.model.RequestException
 import com.vodovoz.app.util.extensions.catchResult
 import com.vodovoz.app.util.extensions.debugLog
@@ -57,12 +58,11 @@ inline fun <reified T, R> executeRequest(
 
         val adapter = moshiWithJsonAdapter.adapter<T>(type).lenient()
 
-        val stringBody = (response.body() as? String) ?: ""
-        //todo - remove after fix backend
-        val jsonStartIndex = stringBody.indexOf("{\"")
+        val stringBody = (response.stringBody() as? String) ?: ""
 
         val bodyResult = kotlin.runCatching {
-            adapter.fromJson(stringBody.substring(jsonStartIndex)) }
+            adapter.fromJson(stringBody)
+        }
         val body = bodyResult.getOrNull()
         val responseCode = response.code()
 

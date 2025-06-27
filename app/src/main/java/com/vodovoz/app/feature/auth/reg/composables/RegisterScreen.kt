@@ -50,15 +50,15 @@ fun RegisterScreen(
                 .windowInsetsPadding(WindowInsets.navigationBars),
         ) {
             when (viewState.uiState) {
-                RegFlowViewModel.UiState.Error -> {
+                RegFlowViewModel.RegUiState.Error -> {
                     NetworkErrorPlaceholder { viewModel.fetchRegisterDetails() }
                 }
 
-                RegFlowViewModel.UiState.Loading -> {
+                RegFlowViewModel.RegUiState.Loading -> {
                     LoadingPlaceholder()
                 }
 
-                RegFlowViewModel.UiState.Success -> {
+                RegFlowViewModel.RegUiState.Success -> {
                     RegisterBody(
                         fields = viewState.fields,
                         showAgreements = viewState.showAgreement,

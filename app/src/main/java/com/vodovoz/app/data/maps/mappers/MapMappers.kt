@@ -3,7 +3,6 @@ package com.vodovoz.app.data.maps.mappers
 import com.vodovoz.app.data.maps.model.YandexGeoResponseDTO
 import com.vodovoz.app.domain.general.model.location.MapAddressModel
 import com.vodovoz.app.domain.general.model.location.MapPointModel
-import com.vodovoz.app.util.extensions.debugLog
 import com.yandex.mapkit.geometry.Point
 import com.yandex.mapkit.search.SuggestItem
 
@@ -35,8 +34,18 @@ fun List<SuggestItem>.mapToDomain(): List<String> {
 
 fun SuggestItem.toDomain(): String? {
     if (uri?.contains("geo") == false) return null
-    return displayText.toString().ifBlank { return null }}
+    return displayText.toString().ifBlank { return null }
+}
+
+@JvmName("mapToMapPointModelList")
+fun List<Point>.mapToDomain(): List<MapPointModel> {
+    return mapNotNull { it.toDomain() }
+}
 
 fun Point.toDomain(): MapPointModel {
     return MapPointModel(latitude, longitude)
+}
+
+fun MapPointModel.toData(): Point {
+    return Point(lat, lon)
 }

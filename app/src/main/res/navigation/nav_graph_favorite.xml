@@ -6,6 +6,19 @@
     app:startDestination="@id/favoriteFragment">
 
     <fragment
+        android:id="@+id/orderCallYouFragment"
+        android:name="com.vodovoz.app.feature.order_call_you.OrderCallYouFragment"
+        android:label="OrderCallYouFragment"
+        />
+
+    <fragment
+        android:id="@+id/orderRecipientFragment"
+        android:name="com.vodovoz.app.feature.order_recipient.OrderRecipientFragment"
+        android:label="OrderRecipientFragment"
+        />
+
+
+    <fragment
         android:id="@+id/paymentMethodFragment"
         android:name="com.vodovoz.app.feature.payment_method.PaymentMethodFragment"
         android:label="PaymentMethodFragment"

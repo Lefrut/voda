@@ -77,7 +77,7 @@ class AddressesFlowViewModel @Inject constructor(
     }
 
     fun navigateToOrdering() = viewModelScope.launch {
-
+        eventListener.emit(AddressesEvents.GoBackToOrdering(dataState.selectedAddress.id))
     }
 
     fun editAddress(address: AddressUi) = viewModelScope.launch {
@@ -125,6 +125,7 @@ class AddressesFlowViewModel @Inject constructor(
         data object GoBack : AddressesEvents()
         data object GoToMap : AddressesEvents()
         data class GoToEditAddress(val addressId: Long, val addressName: String) : AddressesEvents()
+        data class GoBackToOrdering(val addressId: Long) : AddressesEvents()
     }
 
     @Immutable

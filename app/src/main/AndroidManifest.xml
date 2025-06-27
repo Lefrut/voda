@@ -22,30 +22,33 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
-    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>
+    <uses-permission
+        android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
-    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
-    <uses-permission android:name="android.permission.USE_BIOMETRIC"/>
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.USE_BIOMETRIC" />
 
 
     <application
+        android:name="com.vodovoz.app.ui.base.VodovozApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppSplash"
-        android:name="com.vodovoz.app.ui.base.VodovozApplication"
         android:usesCleartextTraffic="true">
 
         <activity
             android:name="com.vodovoz.app.ui.base.MainActivity"
+            android:configChanges="orientation|screenSize|keyboardHidden"
             android:exported="true"
+            android:launchMode="singleTask"
             android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustResize"
-            android:configChanges="orientation|screenSize|keyboardHidden">
+            android:windowSoftInputMode="adjustResize">
 
 
             <intent-filter>
@@ -55,31 +58,30 @@
 
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
+
                 <category android:name="android.intent.category.BROWSABLE" />
                 <category android:name="android.intent.category.DEFAULT" />
 
                 <!--TODO - change schemes-->
                 <data
-                    android:scheme="https"
                     android:host="vodovoz.ru"
-                    android:pathPrefix="/mobile_app/" />
+                    android:pathPrefix="/mobile_app/"
+                    android:scheme="https" />
 
                 <data
-                    android:scheme="https"
                     android:host="vodovoz.ru"
-                    android:pathPrefix="/gl/" />
+                    android:pathPrefix="/gl/"
+                    android:scheme="https" />
 
                 <data
-                    android:scheme="https"
                     android:host="vodovoz.ru"
                     android:pathPrefix="/landings/kalkulyator_vody/"
-                    />
+                    android:scheme="https" />
 
                 <data
-                    android:scheme="https"
                     android:host="vodovoz.ru"
                     android:pathPrefix="/catalog/"
-                    />
+                    android:scheme="https" />
 
 
             </intent-filter>
@@ -103,18 +105,18 @@
             </intent-filter>
         </service>
 
-        <meta-data android:name="com.google.firebase.messaging.default_notification_icon"
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
             android:resource="@mipmap/notification_icon" />
-        <meta-data android:name="com.google.firebase.messaging.default_notification_color"
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_color"
             android:resource="@color/bluePrimary" />
 
         <provider
             android:name="androidx.startup.InitializationProvider"
             android:authorities="com.vodovoz.app.androidx-startup"
             tools:node="remove"
-            tools:replace="android:authorities"
-            android:exported="false"
-            />
+            tools:replace="android:authorities" />
 
     </application>
 

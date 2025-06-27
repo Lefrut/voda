@@ -26,28 +26,31 @@ import com.vodovoz.app.data.vodovoz_service.model.order_history.ORDERS_HISTORY_I
 import com.vodovoz.app.data.vodovoz_service.model.order_history.ORDERS_HISTORY_KNOPKA_DTO
 import com.vodovoz.app.data.vodovoz_service.model.order_history.ORDERS_HISTORY_PRODUCT_DTO
 import com.vodovoz.app.data.vodovoz_service.model.order_history.OrdersHistoryDetailsDTO
+import com.vodovoz.app.data.vodovoz_service.model.ordering.CallYouItemDTO
 import com.vodovoz.app.data.vodovoz_service.model.ordering.ORDER_OPLATA_DTO
 import com.vodovoz.app.data.vodovoz_service.model.ordering.ORDER_OPLATA_ITEM_DTO
 import com.vodovoz.app.data.vodovoz_service.model.ordering.ORDER_POLYSHATEL_DTO
 import com.vodovoz.app.data.vodovoz_service.model.ordering.ORDER_POLYSHATEL_ITEM_DTO
 import com.vodovoz.app.data.vodovoz_service.model.ordering.ORDER_PREDYP_DTO
 import com.vodovoz.app.data.vodovoz_service.model.ordering.ORDER_PREDYP_ITEM_DTO
+import com.vodovoz.app.data.vodovoz_service.model.ordering.OrderCallYouDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.ordering.OrderingDetailsDTO
+import com.vodovoz.app.data.vodovoz_service.model.ordering.RecipientDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.payment_method.PaymentMethodDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.payment_method.PaymentMethodItemDTO
 import com.vodovoz.app.data.vodovoz_service.model.payment_method.PaymentMethodSectionDTO
-import com.vodovoz.app.domain.general.model.order.CancelOrderDetailsModel
-import com.vodovoz.app.domain.general.model.promotion.ColorfulButtonModel
 import com.vodovoz.app.domain.general.model.PaymentInfoModel
-import com.vodovoz.app.domain.general.model.product.SectionModel
 import com.vodovoz.app.domain.general.model.VodovozPlaceholderModel
 import com.vodovoz.app.domain.general.model.cart.BottomCartModel
 import com.vodovoz.app.domain.general.model.certificate.BuyCertificateModel
 import com.vodovoz.app.domain.general.model.order.AboutOrderItemModel
 import com.vodovoz.app.domain.general.model.order.AboutOrderPopupWindowModel
+import com.vodovoz.app.domain.general.model.order.CallYouItemModel
+import com.vodovoz.app.domain.general.model.order.CancelOrderDetailsModel
 import com.vodovoz.app.domain.general.model.order.DeliveryDateDetailsModel
 import com.vodovoz.app.domain.general.model.order.DeliveryDateOptionModel
 import com.vodovoz.app.domain.general.model.order.DeliveryTimeIntervalModel
+import com.vodovoz.app.domain.general.model.order.OrderCallYouDetailsModel
 import com.vodovoz.app.domain.general.model.order.OrderDetailsButtonModel
 import com.vodovoz.app.domain.general.model.order.OrderDetailsModel
 import com.vodovoz.app.domain.general.model.order.OrderDetailsSummaryModel
@@ -66,12 +69,50 @@ import com.vodovoz.app.domain.general.model.order.OrdersHistoryItemModel
 import com.vodovoz.app.domain.general.model.order.OrdersHistoryProductModel
 import com.vodovoz.app.domain.general.model.order.PaymentMethodDetailsModel
 import com.vodovoz.app.domain.general.model.order.PaymentMethodItemModel
+import com.vodovoz.app.domain.general.model.order.RecipientDetailsModel
+import com.vodovoz.app.domain.general.model.product.SectionModel
+import com.vodovoz.app.domain.general.model.promotion.ColorfulButtonModel
+import kotlin.math.roundToInt
 
+fun OrderCallYouDetailsDTO.toDomain(): OrderCallYouDetailsModel {
+
+    val callYouItems = (DANNYE?.mapNotNull { it.toDomain() } ?: emptyList()).ifEmpty {
+        throw IllegalArgumentException("OrderCallYouDetails items can't be empty or null")
+    }
+
+    return OrderCallYouDetailsModel(
+        title = TITLE ?: "",
+        items = callYouItems,
+        currentItem = callYouItems.first(),
+        button = KNOPKA?.toDomain()
+            ?: throw IllegalArgumentException("OrderCallYouDetails button can't be empty or null")
+    )
+}
+
+fun CallYouItemDTO.toDomain(): CallYouItemModel? {
+    return CallYouItemModel(
+        name = NAME ?: return null,
+        description = OPISANIE ?: "",
+        value = VALUE ?: return null,
+        code = CODE ?: return null
+    )
+}
+
+fun RecipientDetailsDTO.toDomain(): RecipientDetailsModel {
+    return RecipientDetailsModel(
+        title = TITLE ?: "",
+        fields = POLYA?.mapToDomain()
+            ?: throw IllegalArgumentException("RecipientDetails fields can't be null"),
+        button = KNOPKA?.toDomain()
+            ?: throw IllegalArgumentException("RecipientDetails button can't be null")
+    )
+}
 
 fun PaymentMethodDetailsDTO.toDomain(): PaymentMethodDetailsModel {
     return PaymentMethodDetailsModel(
         title = TITLE ?: "",
-        items = DANNYE?.mapToDomain() ?: throw IllegalArgumentException("Payment method items can't be null"),
+        items = DANNYE?.mapToDomain()
+            ?: throw IllegalArgumentException("Payment method items can't be null"),
         button = KNOPKA?.toDomain()
             ?: throw IllegalArgumentException("Payment method button can't be null")
     )
@@ -129,8 +170,8 @@ fun List<DATE_INTERVALS_DTO>.mapToDomain(): List<SectionModel<DeliveryTimeInterv
 fun DATE_INTERVALS_DTO.toDomain(): SectionModel<DeliveryTimeIntervalModel>? {
     return SectionModel(
         title = NAME ?: return null,
-        items = INTERVAL?.mapToDomain() ?: return null,
-        button = null
+        items = INTERVAL?.mapToDomain() ?: emptyList(),
+        placeholder = ERROR?.toDomain()
     )
 }
 
@@ -248,7 +289,7 @@ fun ORDER_PREDYP_ITEM_DTO.toDomain(): OrderNotifyItemModel? {
 
 fun BottomCartDTO.toDomain(): BottomCartModel {
     return BottomCartModel(
-        total = ALLSUMA ?: 0,
+        total = ALLSUMA?.roundToInt() ?: 0,
         count = TOVAROV ?: 0
     )
 }

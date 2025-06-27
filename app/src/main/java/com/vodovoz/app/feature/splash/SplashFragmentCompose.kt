@@ -36,10 +36,8 @@ import com.vodovoz.app.util.extensions.debugLog
 import com.vodovoz.app.util.extensions.disableFullScreen
 import com.vodovoz.app.util.extensions.enableFullScreen
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
 import org.json.JSONObject
 import javax.inject.Inject
@@ -103,9 +101,7 @@ class SplashFragment : Fragment() {
 
                                 SplashFileState.Success -> {
                                     splashViewModel.changeToAnimation(
-                                        SplashFileConfig.getSplashFile(
-                                            context
-                                        )
+                                        SplashFileConfig.getSplashFile(context)
                                     )
                                 }
 
@@ -145,9 +141,8 @@ class SplashFragment : Fragment() {
         }
     }
 
-    @OptIn(FlowPreview::class)
-    private suspend fun listenAppState() =
-        activityViewModel.appState.debounce(1L).collect { appState ->
+    private suspend fun listenAppState(): Unit =
+        activityViewModel.appState.collect { appState ->
 
             val navController = findNavController()
             val androidSplash = activityViewModel.androidSplash.value
@@ -194,7 +189,12 @@ class SplashFragment : Fragment() {
     private fun NavController.navigateToScreen(@IdRes screenId: Int) = navigate(
         screenId,
         null,
-        navOptions { launchSingleTop = true }
+        navOptions {
+            currentDestination?.id?.let { id ->
+                popUpTo(id) { inclusive = true }
+            }
+            launchSingleTop = true
+        }
     )
 
     private fun fetchDataForScreens() = lifecycleScope.launch {

@@ -25,6 +25,7 @@ import com.vodovoz.app.design_system.composables.bottomLine
 import com.vodovoz.app.design_system.composables.button.VodovozRadioButton
 import com.vodovoz.app.design_system.composables.chip.VodovozChip
 import com.vodovoz.app.design_system.composables.placeholders.LoadingPlaceholder
+import com.vodovoz.app.design_system.composables.placeholders.VodovozPlaceholder
 import com.vodovoz.app.design_system.composables.tab_row.VodovozScrollableTabRow
 import com.vodovoz.app.design_system.composables.tab_row.VodovozTab
 import com.vodovoz.app.design_system.composables.tab_row.VodovozTabRow
@@ -49,15 +50,18 @@ fun DeliveryDateBody(
     onTimeIntervalSelect: (DeliveryTimeIntervalUi) -> Unit,
     onCalendarShow: () -> Unit,
 ) {
+
+    val selectedTabOption = options.firstOrNull { it.value == selectedOption.value }
+
     Column(modifier = modifier.fillMaxSize()) {
         VodovozScrollableTabRow(
             modifier = Modifier.padding(vertical = 16.dp),
-            selectedTabIndex = options.indexOfOrNull(selectedOption) ?: options.size,
+            selectedTabIndex = options.indexOfOrNull(selectedTabOption ?: selectedOption) ?: 0,
             edgePadding = 16.dp,
             spacing = 12.dp
         ) {
             options.forEach { option ->
-                val selected = selectedOption == option
+                val selected = selectedOption.value == option.value
                 VodovozChip(
                     text = option.name,
                     selected = selected,
@@ -70,22 +74,22 @@ fun DeliveryDateBody(
                 )
             }
 
-            val selected = !options.contains(selectedOption)
+            val selectedChooseDate = selectedTabOption == null
 
             VodovozChip(
                 text = stringResource(id = R.string.choose_date),
-                selected = selected,
+                selected = selectedChooseDate,
                 contentPadding = PaddingValues(horizontal = 12.dp, vertical = 5.dp),
                 onSelect = { onCalendarShow() },
                 shape = RoundedCornerShape(20.dp),
                 borderStroke = null,
-                containerColor = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface,
-                contentColor = if (selected) MaterialTheme.colorScheme.background else MaterialTheme.colorScheme.onBackground
+                containerColor = if (selectedChooseDate) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface,
+                contentColor = if (selectedChooseDate) MaterialTheme.colorScheme.background else MaterialTheme.colorScheme.onBackground
             )
 
         }
 
-        if(timeSections.isNotEmpty()){
+        if (timeSections.isNotEmpty()) {
             VodovozTabRow(
                 modifier = Modifier.padding(16.dp),
                 selectedTabPosition = timeSections.indexOfOrNull(selectedTimeSection) ?: 0
@@ -111,18 +115,25 @@ fun DeliveryDateBody(
                     bottom = 24.dp
                 )
         ) {
-            if (listIsLoading) {
-                LoadingPlaceholder(
-                    modifier = Modifier.fillMaxSize(),
-                )
-            } else {
-                selectedTimeSection.items.forEachIndexed { _, deliveryTimeInterval ->
-                    DeliveryTimeIntervalItem(
-                        modifier = Modifier.bottomLine(MaterialTheme.colorScheme.surfaceVariant),
-                        deliveryTimeInterval = deliveryTimeInterval,
-                        selected = deliveryTimeInterval == selectedTimeInterval,
-                        onClick = onTimeIntervalSelect
+            val intervals = selectedTimeSection.items
+            when {
+                listIsLoading -> {
+                    LoadingPlaceholder(
+                        modifier = Modifier.fillMaxSize(),
                     )
+                }
+                intervals.isNotEmpty() -> {
+                    intervals.forEachIndexed { _, deliveryTimeInterval ->
+                        DeliveryTimeIntervalItem(
+                            modifier = Modifier.bottomLine(MaterialTheme.colorScheme.surfaceVariant),
+                            deliveryTimeInterval = deliveryTimeInterval,
+                            selected = deliveryTimeInterval == selectedTimeInterval,
+                            onClick = onTimeIntervalSelect
+                        )
+                    }
+                }
+                selectedTimeSection.placeholder != null -> {
+                    VodovozPlaceholder(data = selectedTimeSection.placeholder)
                 }
             }
         }

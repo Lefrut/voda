@@ -55,11 +55,12 @@ import com.vodovoz.app.domain.general.model.certificate.BuyCertificateDetailsMod
 import com.vodovoz.app.domain.general.model.certificate.BuyCertificateModel
 import com.vodovoz.app.domain.general.model.certificate.CertificateActivationDetailsModel
 import com.vodovoz.app.domain.general.model.format
-import com.vodovoz.app.domain.general.model.location.AddressDetailsModel
+import com.vodovoz.app.domain.general.model.location.AddAddressDetailsModel
 import com.vodovoz.app.domain.general.model.location.AddressModel
 import com.vodovoz.app.domain.general.model.location.MapAddressModel
 import com.vodovoz.app.domain.general.model.order.CancelOrderDetailsModel
 import com.vodovoz.app.domain.general.model.order.DeliveryDateDetailsModel
+import com.vodovoz.app.domain.general.model.order.OrderCallYouDetailsModel
 import com.vodovoz.app.domain.general.model.order.OrderDetailsModel
 import com.vodovoz.app.domain.general.model.order.OrderQuestionDetailsModel
 import com.vodovoz.app.domain.general.model.order.OrderingDetailsModel
@@ -67,6 +68,7 @@ import com.vodovoz.app.domain.general.model.order.OrdersHistoryDetailsModel
 import com.vodovoz.app.domain.general.model.order.OrdersHistoryItemModel
 import com.vodovoz.app.domain.general.model.order.PaymentMethodDetailsModel
 import com.vodovoz.app.domain.general.model.order.PreOrderSectionModel
+import com.vodovoz.app.domain.general.model.order.RecipientDetailsModel
 import com.vodovoz.app.domain.general.model.order.WhereOrderDetailsModel
 import com.vodovoz.app.domain.general.model.product.AllBottlesDetailsModel
 import com.vodovoz.app.domain.general.model.product.CommentModel
@@ -153,33 +155,53 @@ class VodovozServiceRepositoryImpl @Inject constructor(
         )
     }
 
-    override fun updateAddress(address: AddressDetailsModel): Flow<Result<Long>> {
+    override fun getAddAddressDetails(addressId: Long?): Flow<Result<AddAddressDetailsModel>> {
         return executeRequest(
             request = {
-                vodovozService.updateAddress(
-                    userId = accountManager.fetchAccountId(),
-                    addressId = address.id,
-                    address = address.name,
-                    type = VodovozAddressType.Personal.value,
-                    geo = "${address.lat},${address.lon}",
-                    city = address.city,
-                    street = address.street,
-                    house = address.house,
-                    intercom = address.intercom,
-                    entrance = address.entrance,
-                    flat = address.flat,
-                    floor = address.floor,
-                    needPass = address.needPass.value
+                vodovozService.getAddAddressDetails(
+                    accountManager.fetchAccountId(),
+                    addressId
                 )
             },
             mapper = {
-                it.data!!
+                it.data!!.toDomain()
+            }
+        )
+    }
+
+    override fun updateAddress(
+        addressId: Long,
+        address: MapAddressModel,
+        params: Map<String, String>,
+    ): Flow<Result<String>> {
+        return executeRequest(
+            request = {
+                val point = address.point
+                vodovozService.updateAddress(
+                    userId = accountManager.fetchAccountId(),
+                    addressId = addressId,
+                    geo = "${point.lat},${point.lon}",
+                    city = address.city,
+                    street = address.street,
+                    params = params
+                )
+            },
+            mapper = {
+                it.message ?: ""
+            },
+            onFail = { response ->
+
+                val message = moshi.fromJson<VodovozResponseDTO<String?>>(
+                    response.stringBody()
+                ).message ?: ""
+
+                throw RequestException(message)
             }
         )
     }
 
     override fun getPaymentMethodDetails(
-        addressId: Int,
+        addressId: Long,
         date: LocalDate,
     ): Flow<Result<PaymentMethodDetailsModel>> {
         return executeRequest(
@@ -197,7 +219,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
     }
 
     override fun getDeliveryDateDetails(
-        addressId: Int,
+        addressId: Long,
         date: LocalDate?,
     ): Flow<Result<DeliveryDateDetailsModel>> {
         return executeRequest(
@@ -207,6 +229,51 @@ class VodovozServiceRepositoryImpl @Inject constructor(
                     addressId = addressId,
                     date = date?.format(VodovozDateFormatters.DMY)
                 )
+            },
+            mapper = {
+                it.data!!.toDomain()
+            }
+        )
+    }
+
+    override fun getOrderRecipientDetails(
+        addressId: Long,
+    ): Flow<Result<RecipientDetailsModel>> {
+        return executeRequest(
+            request = {
+                vodovozService.getRecipientDetails(
+                    addressId = addressId,
+                    userId = accountManager.fetchAccountId()
+                )
+            },
+            mapper = {
+                it.data!!.toDomain()
+            }
+        )
+    }
+
+    override fun sendOrderRecipient(
+        addressId: Long,
+        fields: List<FieldModel>,
+    ): Flow<Result<String>> {
+        return executeRequest(
+            request = {
+                vodovozService.sendOrderRecipient(
+                    addressId = addressId,
+                    userId = accountManager.fetchAccountId(),
+                    params = fields.toQueries()
+                )
+            },
+            mapper = {
+                it.data ?: ""
+            }
+        )
+    }
+
+    override fun getOrderCallYouDetails(addressId: Long): Flow<Result<OrderCallYouDetailsModel>> {
+        return executeRequest(
+            request = {
+                vodovozService.getOrderCallYouDetails(addressId, accountManager.fetchAccountId())
             },
             mapper = {
                 it.data!!.toDomain()
@@ -429,10 +496,18 @@ class VodovozServiceRepositoryImpl @Inject constructor(
         )
     }
 
-    override fun requestPhoneCode(url: String, phone: String): Flow<Result<RequestCodeModel>> {
+    override fun requestPhoneCode(
+        url: String,
+        phone: String,
+        newsletter: Boolean?,
+    ): Flow<Result<RequestCodeModel>> {
         return executeRequest(
             request = {
-                vodovozService.requestPhoneCode(url, phone)
+                vodovozService.requestPhoneCode(
+                    url = url,
+                    phone = phone,
+                    newsletter = null  //todo - newsletter?.let { VodovozBoolean.from(newsletter).value })
+                )
             },
             mapper = {
                 val mapResult = it.data!!.toDomain()
@@ -1155,6 +1230,24 @@ class VodovozServiceRepositoryImpl @Inject constructor(
         )
     }
 
+    override fun logout(): Flow<Result<Unit>> {
+        return executeRequest(
+            request = {
+                vodovozService.logout(accountManager.fetchAccountId())
+            },
+            mapper = {}
+        )
+    }
+
+    override fun deleteAccount(): Flow<Result<Unit>> {
+        return executeRequest(
+            request = {
+                vodovozService.deleteAccount(accountManager.fetchAccountId())
+            },
+            mapper = {}
+        )
+    }
+
     override fun relogin(): Flow<Result<Boolean>> {
         return executeRequest(
             request = {
@@ -1649,6 +1742,26 @@ class VodovozServiceRepositoryImpl @Inject constructor(
                 ?: throw IllegalArgumentException("ProductAnalogsDTO can't be null")
         }
     )
+
+    override fun sendComment(
+        productId: Long,
+        rating: Int,
+        message: String,
+    ): Flow<Result<VodovozPlaceholderModel>> {
+        return executeRequest(
+            request = {
+                vodovozService.sendComment(
+                    accountManager.fetchAccountId(),
+                    productId,
+                    rating,
+                    message
+                )
+            },
+            mapper = {
+                it.data!!.toDomain()
+            }
+        )
+    }
 
     override fun getProductCommentsInfo(productId: Long): Flow<Result<ProductCommentsInfoModel>> {
         return executeRequest(

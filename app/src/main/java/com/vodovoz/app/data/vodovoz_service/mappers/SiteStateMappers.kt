@@ -19,7 +19,7 @@ fun SiteStateResponseDTO.toDomain(): VodovozSiteState {
         jivoChat = CHATJIVO?.toJivoChatModel() ?: JivoChatModel(isActive = false, url = ""),
         tracking = GENERATION?.toTrackingConfig() ?: TrackingConfig(trackingIsEnabled = false, time = 0),
         agreement = SOGLASHENIE?.toAgreementModel() ?: throw IllegalArgumentException("Agreement can't be null"),
-        showComments = COMMENTFILES ?: false,
+        takePhotos = COMMENTFILES ?: false,
         callPhoneNumber = CALL ?: ""
     )
 }

@@ -46,7 +46,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
@@ -302,7 +301,10 @@ class HomeFlowViewModel @Inject constructor(
         if (dataState.uiState is HomeUiState.Loading) return@launch
 
         uiStateListener.updateData { s ->
-            s.copy(showRefreshIndicator = true)
+            s.copy(
+                showRefreshIndicator = true,
+                sectionUnratedProducts = UnratedProductsSectionUi.Empty
+            )
         }
 
         fetchHomeDetails().join()
@@ -366,7 +368,7 @@ class HomeFlowViewModel @Inject constructor(
         }
     }
 
-    fun changeUnratedProductRating(
+    fun navigateToWriteComment(
         product: UnratedProductUi,
         rating: Float,
     ) = viewModelScope.launch {
@@ -382,15 +384,11 @@ class HomeFlowViewModel @Inject constructor(
                     rating.roundToInt()
                 )
             )
-            delay(300L)
             uiStateListener.updateData { s ->
-                val sectionUnratedProducts = s.sectionUnratedProducts.copy(
-                    products = s.sectionUnratedProducts.products - product
-                )
+                val sectionUnratedProducts = s.sectionUnratedProducts
                 val haveProducts = sectionUnratedProducts.products.isNotEmpty()
 
                 s.copy(
-                    sectionUnratedProducts = sectionUnratedProducts,
                     showedUnratedProducts = if (haveProducts) s.showedUnratedProducts else true
                 )
             }
@@ -518,6 +516,21 @@ class HomeFlowViewModel @Inject constructor(
         vodovozServiceRepository.removeUnratedProduct(productId = product.id).singleResult()
     }
 
+    fun navigateToViewedProducts() = viewModelScope.launch {
+        eventListener.emit(HomeEvents.GoToViewedProductList)
+    }
+
+    fun removeUnratedProduct(productId: Long) = viewModelScope.launch {
+        uiStateListener.updateData { s ->
+            val products = s.sectionUnratedProducts.products
+            s.copy(
+                sectionUnratedProducts = s.sectionUnratedProducts.copy(
+                    products = products - products.filter { it.id == productId }.toSet()
+                )
+            )
+        }
+    }
+
     @Stable
     sealed class HomeEvents : Event {
         data class GoToPreOrder(val id: Long, val name: String, val detailPicture: String) :
@@ -531,6 +544,7 @@ class HomeFlowViewModel @Inject constructor(
         data object GoToOrdersHistory : HomeEvents()
         data object GoToQrCode : HomeEvents()
         data object CloseApp : HomeEvents()
+        data object GoToViewedProductList : HomeEvents()
 
         data class WriteComment(
             val productId: Long,

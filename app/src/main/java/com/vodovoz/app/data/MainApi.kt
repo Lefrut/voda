@@ -24,9 +24,6 @@ interface MainApi {
         @Query("action") action: String? = null,
     ): ResponseBody
 
-    @GET("newmobile/user.php?action=logout")
-    suspend fun logout(@Query("userid") userId: Long? = null): Response<ResponseBody>
-
     /**
      * Addresses
      */

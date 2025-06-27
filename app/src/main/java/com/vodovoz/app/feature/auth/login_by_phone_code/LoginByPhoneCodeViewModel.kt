@@ -29,9 +29,6 @@ import kotlin.time.Duration.Companion.seconds
 class LoginByPhoneCodeViewModel @Inject constructor(
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val siteStateManager: SiteStateManager,
-    private val accountManager: AccountManager,
-    private val likeManager: LikeManager,
-    private val firebaseTokenManager: FirebaseTokenManager,
     private val loginManager: LoginManager,
     savedStateHandle: SavedStateHandle,
 ) : MviViewModel<LoginByPhoneCodeState, LoginByPhoneCodeEvent>(
@@ -49,9 +46,13 @@ class LoginByPhoneCodeViewModel @Inject constructor(
     }
 
     fun changeCode(code: String) = viewModelScope.launch {
+        val newCode = code.filter { c -> c.isDigit() }.take(4)
         _state.update { s ->
-            s.copy(code = code.filter { c -> c.isDigit() }.take(4))
+            s.copy(code = newCode)
         }
+
+        if(newCode.length == 4){ sendCode() }
+
     }
 
     fun sendCode() = viewModelScope.launch {
@@ -64,9 +65,7 @@ class LoginByPhoneCodeViewModel @Inject constructor(
             s.copy(requestCodeLoading = true)
         }
 
-        val smsUrl = siteStateManager.siteStateFlow.value?.smsUrl?.takeIf { s ->
-            s.isNotBlank()
-        } ?: run { siteStateManager.requestSiteState()?.smsUrl ?: "" }
+        val smsUrl = siteStateManager.siteStateFlow.value?.smsUrl ?: ""
 
         val requestPhoneCodeResult = vodovozServiceRepository
             .requestPhoneCode(smsUrl, stateSnapshot.phone)

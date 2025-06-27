@@ -151,6 +151,9 @@ fun HomeScreen(
                         onShowAllClick = { action ->
                             viewModel.handleButtonAction(action)
                         },
+                        onAllViewedProductsClick = {
+                            viewModel.navigateToViewedProducts()
+                        },
                         onAboutAdvertisingClick = { aboutAdvertisingUi ->
                             viewModel.showAdvertisingBottomSheet(aboutAdvertisingUi)
                         },
@@ -213,7 +216,7 @@ fun HomeScreen(
             },
             sectionUnratedProducts = viewState.sectionUnratedProducts,
             onProductRatingChanged = { product, rating ->
-                viewModel.changeUnratedProductRating(product, rating)
+                viewModel.navigateToWriteComment(product, rating)
             },
             onDispose = {
                 viewModel.closeUnratedProductsBottomSheet()

@@ -22,11 +22,13 @@ import com.vodovoz.app.domain.general.model.cart.CartDetailsModel
 import com.vodovoz.app.domain.general.model.certificate.BuyCertificateDetailsModel
 import com.vodovoz.app.domain.general.model.certificate.BuyCertificateModel
 import com.vodovoz.app.domain.general.model.certificate.CertificateActivationDetailsModel
+import com.vodovoz.app.domain.general.model.location.AddAddressDetailsModel
 import com.vodovoz.app.domain.general.model.location.AddressDetailsModel
 import com.vodovoz.app.domain.general.model.location.AddressModel
 import com.vodovoz.app.domain.general.model.location.MapAddressModel
 import com.vodovoz.app.domain.general.model.order.CancelOrderDetailsModel
 import com.vodovoz.app.domain.general.model.order.DeliveryDateDetailsModel
+import com.vodovoz.app.domain.general.model.order.OrderCallYouDetailsModel
 import com.vodovoz.app.domain.general.model.order.OrderDetailsModel
 import com.vodovoz.app.domain.general.model.order.OrderQuestionDetailsModel
 import com.vodovoz.app.domain.general.model.order.OrderingDetailsModel
@@ -34,6 +36,7 @@ import com.vodovoz.app.domain.general.model.order.OrdersHistoryDetailsModel
 import com.vodovoz.app.domain.general.model.order.OrdersHistoryItemModel
 import com.vodovoz.app.domain.general.model.order.PaymentMethodDetailsModel
 import com.vodovoz.app.domain.general.model.order.PreOrderSectionModel
+import com.vodovoz.app.domain.general.model.order.RecipientDetailsModel
 import com.vodovoz.app.domain.general.model.order.WhereOrderDetailsModel
 import com.vodovoz.app.domain.general.model.product.AllBottlesDetailsModel
 import com.vodovoz.app.domain.general.model.product.CommentModel
@@ -64,6 +67,7 @@ import com.vodovoz.app.domain.general.model.user.RequestCodeModel
 import com.vodovoz.app.domain.general.model.user.UserAuthInfoModel
 import com.vodovoz.app.domain.general.model.user.UserDataModel
 import kotlinx.coroutines.flow.Flow
+import org.jetbrains.annotations.Range
 import java.io.File
 import java.time.LocalDate
 
@@ -73,17 +77,32 @@ interface VodovozServiceRepository {
 
     fun addAddress(address: MapAddressModel): Flow<Result<Long>>
 
-    fun updateAddress(address: AddressDetailsModel): Flow<Result<Long>>
+    fun getAddAddressDetails(addressId: Long?): Flow<Result<AddAddressDetailsModel>>
+
+    fun updateAddress(addressId: Long, address: MapAddressModel, params: Map<String, String>): Flow<Result<String>>
 
     fun getPaymentMethodDetails(
-        addressId: Int,
+        addressId: Long,
         date: LocalDate,
     ): Flow<Result<PaymentMethodDetailsModel>>
 
     fun getDeliveryDateDetails(
-        addressId: Int,
+        addressId: Long,
         date: LocalDate? = null,
     ): Flow<Result<DeliveryDateDetailsModel>>
+
+    fun getOrderRecipientDetails(
+        addressId: Long
+    ): Flow<Result<RecipientDetailsModel>>
+
+    fun sendOrderRecipient(
+        addressId: Long,
+        fields: List<FieldModel>
+    ): Flow<Result<String>>
+
+    fun getOrderCallYouDetails(
+        addressId: Long
+    ): Flow<Result<OrderCallYouDetailsModel>>
 
     fun getOrderingDetails(): Flow<Result<OrderingDetailsModel>>
 
@@ -122,6 +141,7 @@ interface VodovozServiceRepository {
     fun requestPhoneCode(
         url: String,
         phone: String,
+        newsletter: Boolean? = null
     ): Flow<Result<RequestCodeModel>>
 
     fun loginByPhone(
@@ -250,6 +270,10 @@ interface VodovozServiceRepository {
 
     fun getRegisterDetails(): Flow<Result<AuthDetailsModel>>
 
+    fun logout(): Flow<Result<Unit>>
+
+    fun deleteAccount(): Flow<Result<Unit>>
+
     fun relogin(): Flow<Result<Boolean>>
 
     fun register(fields: List<FieldModel>): Flow<Result<UserAuthInfoModel>>
@@ -352,6 +376,12 @@ interface VodovozServiceRepository {
         productId: Long,
         sort: SortModel,
     ): Flow<Result<ProductsSectionModel>>
+
+    fun sendComment(
+        productId: Long,
+        rating: Int,
+        message: String
+    ): Flow<Result<VodovozPlaceholderModel>>
 
     fun getProductCommentsInfo(
         productId: Long,

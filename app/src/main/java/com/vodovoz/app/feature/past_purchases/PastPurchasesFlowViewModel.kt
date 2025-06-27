@@ -44,7 +44,6 @@ import javax.inject.Inject
 class PastPurchasesFlowViewModel @Inject constructor(
     private val cartManager: CartManager,
     private val likeManager: LikeManager,
-    private val accountManager: AccountManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
 ) : PagingContractViewModel<PastPurchasesFlowViewModel.PastPurchasesState, PastPurchasesFlowViewModel.PastPurchasesEvents>(
     PastPurchasesState()
@@ -127,8 +126,6 @@ class PastPurchasesFlowViewModel @Inject constructor(
         eventListener.emit(PastPurchasesEvents.GoBack)
     }
 
-
-    fun isLoginAlready() = accountManager.isAlreadyLogin()
 
     fun navigateToSearch() = viewModelScope.launch {
         eventListener.emit(PastPurchasesEvents.GoToSearch)
@@ -300,6 +297,7 @@ class PastPurchasesFlowViewModel @Inject constructor(
         val uiState: PastPurchasesUiState = PastPurchasesUiState.Loading,
     ) : State
 
+    @Stable
     sealed interface PastPurchasesUiState {
         data object Loading : PastPurchasesUiState
         data object Success : PastPurchasesUiState

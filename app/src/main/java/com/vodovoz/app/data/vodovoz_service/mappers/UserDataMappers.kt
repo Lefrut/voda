@@ -33,7 +33,7 @@ fun List<POLE_DTO>.mapToDomain(): List<FieldModel> {
 
 fun POLE_DTO.toDomain(): FieldModel? {
     return FieldModel(
-        id = CODE ?: ID ?: return null,
+        id = CODE ?: ID ?: PROP_CODE ?: return null,
         label = NAME ?: TEXT ?: "",
         value = VALUE ?: "",
         valueType = POLE ?: "text",

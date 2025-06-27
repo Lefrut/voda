@@ -69,8 +69,8 @@ class MainFragment : Fragment(R.layout.fragment_main) {
 
     private val viewModel: MainViewModel by viewModels()
 
-    private val binding: FragmentMainBinding by viewBinding {
-        FragmentMainBinding.bind(it.view ?: View(requireContext()))
+    private val binding: FragmentMainBinding by viewBinding { fragment ->
+        FragmentMainBinding.bind(fragment.view ?: View(requireContext()))
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -147,7 +147,8 @@ class MainFragment : Fragment(R.layout.fragment_main) {
                 .collect { has ->
                     val insets = ViewCompat.getRootWindowInsets(binding.root)
                     val bottomPadding =
-                        insets?.getInsetsIgnoringVisibility(WindowInsetsCompat.Type.navigationBars())?.bottom ?: 0
+                        insets?.getInsetsIgnoringVisibility(WindowInsetsCompat.Type.navigationBars())?.bottom
+                            ?: 0
                     binding.root.updatePadding(bottom = if (has) bottomPadding else 0)
                 }
         }
@@ -219,7 +220,7 @@ class MainFragment : Fragment(R.layout.fragment_main) {
 
         val activity = requireActivity()
 
-        binding.nvNavigation.setupWithNavController(
+        val navControllerLiveData = binding.nvNavigation.setupWithNavController(
             navGraphIds = navGraphIds,
             fragmentManager = childFragmentManager,
             containerId = R.id.fgvContainer,
@@ -229,7 +230,8 @@ class MainFragment : Fragment(R.layout.fragment_main) {
             recyclerViewToTop = { menuId ->
                 tabManager.reselect(menuId)
             }
-        ).observe(viewLifecycleOwner) { navController ->
+        )
+        navControllerLiveData.observe(viewLifecycleOwner) { navController ->
             Navigation.setViewNavController(requireView(), navController)
         }
     }

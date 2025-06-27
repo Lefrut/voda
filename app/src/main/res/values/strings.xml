@@ -391,7 +391,7 @@
 
     <string name="vpn_warning">Отключите VPN, если работа приложения замедляется</string>
 
-    <string name="logout_error">Не удалось выйти из аккаунта, попробойте снова.</string>
+    <string name="logout_error">Не удалось выйти из аккаунта, попробойте снова!</string>
     <string name="setting_params">Настроить параметры</string>
 
     <string name="notification_dialog_title">Уведомления</string>
@@ -430,5 +430,9 @@
     <string name="redact_address">Редактирование адреса</string>
     <string name="speak">Говорите…</string>
     <string name="share">%1$s %2$s</string>
+    <string name="send_cooment_error">Не удалось отправить отзыв, попробуйте снова!</string>
+    <string name="delete_account_error">Не удалось удалить аккаунт, попробойте снова!</string>
+    <string name="logout_after_delete_error">Не удалось выйти из аккаунта после удаления, попробойте снова!</string>
+    <string name="new_address">Новый адрес</string>
 
 </resources>
