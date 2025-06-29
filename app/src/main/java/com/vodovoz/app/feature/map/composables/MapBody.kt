@@ -1,5 +1,6 @@
 package com.vodovoz.app.feature.map.composables
 
+import android.annotation.SuppressLint
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -69,6 +70,7 @@ private val Dp.Companion.Saver: Saver<Dp, Float>
         )
     }
 
+@SuppressLint("UnusedBoxWithConstraintsScope")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MapBody(
@@ -92,8 +94,8 @@ fun MapBody(
 
     BoxWithConstraints(modifier = modifier.fillMaxSize()) {
         val mapHeight = rememberSaveable(saver = Dp.Saver) { maxHeight }
-        val focusMapWidth = remember { maxWidth }
-        val focusMapHeight = remember { mapHeight - 220.dp }
+        val focusMapWidth = rememberSaveable(saver = Dp.Saver) { maxWidth }
+        val focusMapHeight = rememberSaveable(saver = Dp.Saver) { mapHeight - 220.dp }
 
         YandexMapView(
             modifier = Modifier.size(focusMapWidth, mapHeight),

@@ -344,7 +344,7 @@ class HomeFragment : Fragment() {
 
                         "about" -> {
                             findNavController().navigateToWebView(
-                                ApiConfig.ABOUT_SHOP_URL,
+                                VodovozWebConfig.ABOUT_SHOP_URL,
                                 getString(R.string.about_store)
                             )
                         }
@@ -490,7 +490,7 @@ class HomeFragment : Fragment() {
 
                     "dostavka" -> {
                         findNavController().navigateToWebView(
-                            ApiConfig.ABOUT_DELIVERY_URL,
+                            VodovozWebConfig.ABOUT_DELIVERY_URL,
                             requireContext().getString(R.string.about_delivery)
                         )
 
