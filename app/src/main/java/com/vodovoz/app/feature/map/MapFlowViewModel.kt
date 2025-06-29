@@ -180,8 +180,8 @@ class MapFlowViewModel @Inject constructor(
     }
 
     private val amountControllerTimer = object : CountDownTimer(
-        ApiConfig.AMOUNT_CONTROLLER_TIMER,
-        ApiConfig.AMOUNT_CONTROLLER_TIMER
+        1500L,
+        1500L
     ) {
         override fun onTick(millisUntilFinished: Long) {}
         override fun onFinish() {

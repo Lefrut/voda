@@ -3,7 +3,10 @@ package com.vodovoz.app.feature.addresses.add
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import com.vodovoz.app.common.model.VodovozAddressType
+import com.vodovoz.app.R
+import com.vodovoz.app.common.model.VodovozBoolean
+import com.vodovoz.app.common.model.boolean
+import com.vodovoz.app.common.model.from
 import com.vodovoz.app.common.resources.ResourcesProvider
 import com.vodovoz.app.design_system.model.toUi
 import com.vodovoz.app.design_system.model.widgets.FieldUi
@@ -51,19 +54,25 @@ class AddAddressViewModel @Inject constructor(
 
 
     companion object {
-        private const val TYPE_WIDGET_ID = "tip"
+        private const val PRIVATE_HOUSE_ID = "chasdom"
+        private const val DELIVERY_OFFICE_ID = "dostavkaofis"
     }
 
     init {
-        savedStateHandle.get<MapAddressUi>("mapAddress").also { mapAddress ->
-            _state.update { s ->
-                s.copy(mapAddress = mapAddress)
+        viewModelScope.launch {
+            savedStateHandle.get<MapAddressUi>("mapAddress")?.let {
+                _state.update { s -> s.copy(mapAddress = it) }
             }
         }
+        fetchAddressDetails()
     }
 
     fun navigateBack() = viewModelScope.launch {
-        _events.emit(AddAddressEvent.GoBack)
+        if (addressId == null) {
+            _events.emit(AddAddressEvent.GoBackToMap)
+        } else {
+            _events.emit(AddAddressEvent.GoBackToAddresses)
+        }
     }
 
     fun showRemoveAddressDialog() {
@@ -85,38 +94,61 @@ class AddAddressViewModel @Inject constructor(
         _state.update { s ->
             s.copy(showRemoveAddressDialog = false)
         }
-        _events.emit(AddAddressEvent.GoBack)
+        navigateBack()
     }
 
-    fun updateAddress() = viewModelScope.launch {
-        if (addressId == null) return@launch
-
-        _state.update { s ->
-            s.copy(button = s.button.copy(loading = true))
-        }
-
-        val params = (stateSnapshot.linearSwitches.associate { w ->
-            w.id to w.value()
+    private fun getWidgetIdsAndValues(): Map<String, String> {
+        return (stateSnapshot.linearSwitches.associate { w ->
+            w.id to VodovozBoolean.from(w.value()).boolean.toString()
         } + stateSnapshot.linearFields.associate { w ->
             w.id to w.value()
         } + stateSnapshot.gridFields.associate { w ->
             w.id to w.value()
-        } + with(stateSnapshot.addressField) { id to value() }).toMutableMap()
+        } + with(stateSnapshot.addressField) { id to value() })
+    }
 
-        if (params[TYPE_WIDGET_ID].isNullOrEmpty()) {
-            params[TYPE_WIDGET_ID] = VodovozAddressType.Personal.value.toString()
+    fun addAddress() = viewModelScope.launch {
+
+        val params = getWidgetIdsAndValues()
+
+        val mapAddress = stateSnapshot.mapAddress ?: return@launch
+
+        _state.update { s ->
+            s.copy(
+                button = s.button.copy(
+                    loading = true,
+                    enabled = false
+                )
+            )
         }
 
-        val mapAddress = stateSnapshot.mapAddress ?: run {
-            _state.update { s ->
-                s.copy(
-                    button = s.button.copy(
-                        loading = false,
-                        enabled = false
-                    )
+        val addAddressResult =
+            vodovozServiceRepository.addAddress(mapAddress.toDomain(), params).singleResult()
+
+
+
+        addAddressResult.onSuccess {
+            _events.emit(AddAddressEvent.GoBackToAddresses)
+        }.onFailure { throwable ->
+            _events.emit(
+                AddAddressEvent.ShowSnackbar(
+                    throwable.message ?: resourcesProvider.getString(R.string.add_address_error)
                 )
-            }
-            return@launch
+            )
+        }
+
+        _state.update { s -> s.copy(button = s.button.copy(loading = false)) }
+    }
+
+
+    fun updateAddress() = viewModelScope.launch {
+        if (addressId == null) return@launch
+        val params = getWidgetIdsAndValues()
+
+        val mapAddress = stateSnapshot.mapAddress ?: return@launch
+
+        _state.update { s ->
+            s.copy(button = s.button.copy(loading = true))
         }
 
         val updateAddressResult = vodovozServiceRepository.updateAddress(
@@ -126,9 +158,13 @@ class AddAddressViewModel @Inject constructor(
         ).singleResult()
 
         updateAddressResult.onSuccess {
-            _events.emit(AddAddressEvent.GoBack)
+            _events.emit(AddAddressEvent.GoBackToAddresses)
         }.onFailure { throwable ->
-            _events.emit(AddAddressEvent.ShowSnackbar(throwable.message ?: ""))
+            _events.emit(
+                AddAddressEvent.ShowSnackbar(
+                    throwable.message ?: resourcesProvider.getString(R.string.update_address_error)
+                )
+            )
         }
 
         _state.update { s ->
@@ -143,10 +179,6 @@ class AddAddressViewModel @Inject constructor(
     }
 
     private val addressTypesSwitchUpdater = object : WidgetUpdater {
-
-        private val PRIVATE_HOUSE_ID = "chasdom"
-        private val DELIVERY_OFFICE_ID = "dostavkaofis"
-
 
         override fun canHandle(widget: WidgetUi, updatedWidget: WidgetUi): Boolean {
             return widget is SwitchUi && updatedWidget is SwitchUi
@@ -219,7 +251,7 @@ class AddAddressViewModel @Inject constructor(
 
         val mapAddressDeferred = async {
             mapServiceRepository.searchAddressInMoscow(
-                addressName ?: stateSnapshot.mapAddress?.name ?: return@async null
+                stateSnapshot.mapAddress?.name ?: addressName ?: return@async null
             ).singleResult().getOrNull()?.toUi()
         }
 
@@ -239,9 +271,20 @@ class AddAddressViewModel @Inject constructor(
                     uiState = AddAddressUiState.Form,
                     linearFields = addAddressDetails.linearFields.mapToUi(),
                     gridFields = addAddressDetails.gridFields.mapToUi(),
-                    addressField = addressField.copy(value = currentMapAddress?.name ?: addressField.value),
+                    addressField = addressField.copy(
+                        value = currentMapAddress?.let {
+                            resourcesProvider.getString(
+                                R.string.full_address,
+                                it.city,
+                                it.street,
+                                it.house
+                            )
+                        } ?: addressField.value
+                    ),
                     button = addAddressDetails.button.toUi().copy(enabled = false),
-                    linearSwitches = addAddressDetails.linearSwitches.mapToUi()
+                    linearSwitches = addAddressDetails.linearSwitches.mapToUi().filter { switch ->
+                        addressId == null || (switch.id != PRIVATE_HOUSE_ID && switch.id != DELIVERY_OFFICE_ID)
+                    }
                 )
             }
         }.onFailure {
@@ -254,9 +297,11 @@ class AddAddressViewModel @Inject constructor(
     }
 
     fun checkWidgetOnAddress(widget: WidgetUi) = viewModelScope.launch {
-        _events.emit(
-            AddAddressEvent.GoToMap(widget.value())
-        )
+        if (addressId == null) {
+            _events.emit(AddAddressEvent.GoBackToMap)
+        } else {
+            _events.emit(AddAddressEvent.GoToMap(widget.value()))
+        }
     }
 
     fun changeMapAddress(mapAddress: MapAddressUi) = viewModelScope.launch {
@@ -264,14 +309,17 @@ class AddAddressViewModel @Inject constructor(
             s.copy(
                 mapAddress = mapAddress,
                 addressField = s.addressField.copy(
-                    value = mapAddress.name
+                    value = resourcesProvider.getString(
+                        R.string.full_address,
+                        mapAddress.city,
+                        mapAddress.street,
+                        mapAddress.house
+                    )
+
                 )
             )
         }
     }
 
-    fun addAddress() {
-
-    }
 
 }

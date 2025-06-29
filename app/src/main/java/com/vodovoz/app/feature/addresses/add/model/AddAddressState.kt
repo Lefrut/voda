@@ -18,5 +18,5 @@ data class AddAddressState(
     val showRemoveAddressDialog: Boolean = false,
     val button: ColorfulButtonUi = ColorfulButtonUi.Empty,
     val uiState: AddAddressUiState = AddAddressUiState.Loading,
-    val addressId: Long? = null
+    val addressId: Long? = null,
 )

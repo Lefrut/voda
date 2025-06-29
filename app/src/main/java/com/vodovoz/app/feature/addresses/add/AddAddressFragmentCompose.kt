@@ -57,11 +57,6 @@ class AddAddressFragment : Fragment() {
         tabManager.changeTabVisibility(true)
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        viewModel.fetchAddressDetails()
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -100,13 +95,11 @@ class AddAddressFragment : Fragment() {
     ) {
         viewModel.events.onSubscription {
             findNavController().currentBackStackEntry?.savedStateHandle?.remove<MapAddressUi>("mapAddress")
-                ?.let { mapAddress ->
-                    viewModel.changeMapAddress(mapAddress)
-                }
+                ?.let { mapAddress -> viewModel.changeMapAddress(mapAddress) }
         }.collect { event ->
             when (event) {
-                AddAddressEvent.GoBack -> {
-                    findNavController().popBackStack()
+                AddAddressEvent.GoBackToMap -> {
+                    findNavController().popBackStack(R.id.mapFragment, false, true)
                 }
 
                 is AddAddressEvent.GoToMap -> {
@@ -117,6 +110,14 @@ class AddAddressFragment : Fragment() {
                     mainScope.launch {
                         snackbarHostState.showSnackbar(event.message)
                     }
+                }
+
+                AddAddressEvent.GoBackToAddresses -> {
+                    findNavController().popBackStack(
+                        destinationId = R.id.savedAddressesDialogFragment,
+                        inclusive = false,
+                        saveState = false
+                    )
                 }
             }
         }

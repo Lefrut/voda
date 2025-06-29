@@ -49,7 +49,7 @@ class AddressesFragment : Fragment() {
                 }
 
                 LaunchedEffect(Unit) {
-                    viewModel.fetchAddresses()
+                    viewModel.refresh()
                 }
 
                 LifecycleEffect {

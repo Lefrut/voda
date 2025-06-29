@@ -2,9 +2,16 @@ package com.vodovoz.app.feature.addresses
 
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.Indicator
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -18,12 +25,14 @@ import com.vodovoz.app.design_system.composables.top_bar.VodovozTopBar
 import com.vodovoz.app.feature.addresses.composables.AddressBody
 import com.vodovoz.app.feature.addresses.model.AddressScreenTypeUi
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddressesScreen(
     viewModel: AddressesFlowViewModel,
     viewState: AddressesFlowViewModel.AddressesState,
 ) {
     val uiState = viewState.uiState
+    val pullRefreshState = rememberPullToRefreshState()
 
     Scaffold(
         topBar = {
@@ -93,25 +102,41 @@ fun AddressesScreen(
             }
 
             AddressesFlowViewModel.AddressesUiState.Success -> {
-                AddressBody(
-                    modifier = Modifier.padding(top = paddingValues.calculateTopPadding()),
-                    contentPadding = PaddingValues(
-                        bottom = paddingValues.calculateBottomPadding() + 24.dp
-                    ),
-                    screenTypeUi = viewState.screenType,
-                    addressSections = viewState.addressSections,
-                    selectedAddress = viewState.selectedAddress,
-                    onEditAddressClick = { address ->
-                        viewModel.editAddress(address)
+                PullToRefreshBox(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues),
+                    state = pullRefreshState,
+                    isRefreshing = viewState.showRefreshIndicator,
+                    indicator = {
+                        Indicator(
+                            modifier = Modifier.align(Alignment.TopCenter),
+                            isRefreshing = viewState.showRefreshIndicator,
+                            state = pullRefreshState,
+                            containerColor = MaterialTheme.colorScheme.background,
+                            color = MaterialTheme.colorScheme.primary
+                        )
                     },
-                    onAddressSelect = { address ->
-                        viewModel.selectAddress(address)
-                    },
-                    onRemoveAddressSwipe = { address ->
-                        viewModel.showRemoveAddressDialog(address)
+                    onRefresh = {
+                        viewModel.refresh()
                     }
-                )
-
+                ) {
+                    AddressBody(
+                        contentPadding = PaddingValues(bottom = paddingValues.calculateBottomPadding() + 24.dp),
+                        screenTypeUi = viewState.screenType,
+                        addressSections = viewState.addressSections,
+                        selectedAddress = viewState.selectedAddress,
+                        onEditAddressClick = { address ->
+                            viewModel.editAddress(address)
+                        },
+                        onAddressSelect = { address ->
+                            viewModel.selectAddress(address)
+                        },
+                        onRemoveAddressSwipe = { address ->
+                            viewModel.showRemoveAddressDialog(address)
+                        }
+                    )
+                }
             }
         }
     }

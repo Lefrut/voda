@@ -135,18 +135,16 @@ class VodovozServiceRepositoryImpl @Inject constructor(
         )
     }
 
-    override fun addAddress(address: MapAddressModel): Flow<Result<Long>> {
+    override fun addAddress(address: MapAddressModel, params: Map<String, String>): Flow<Result<Long>> {
         return executeRequest(
             request = {
                 val point = address.point
                 vodovozService.addAddress(
                     userId = accountManager.fetchAccountId(),
-                    address = address.name,
-                    type = VodovozAddressType.Personal.value,
                     geo = "${point.lat},${point.lon}",
                     city = address.city,
                     street = address.street,
-                    house = address.house,
+                    queries = params
                 )
             },
             mapper = {
