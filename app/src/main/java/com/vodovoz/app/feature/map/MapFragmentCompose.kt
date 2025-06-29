@@ -173,12 +173,6 @@ class MapFragment : Fragment() {
     override fun onStart() {
         super.onStart()
         mapKit.onStart()
-
-        lifecycleScope.launch {
-            delay(300L)
-            WindowCompat.setDecorFitsSystemWindows(requireActivity().window, false)
-            tabManager.changeTabWindowInsets(true)
-        }
     }
 
 
@@ -201,7 +195,7 @@ class MapFragment : Fragment() {
         keyboardController: SoftwareKeyboardController?,
     ): Unit =
         viewModel.observeEvent().onSubscription {
-            delay(150L)
+            delay(750L)
             viewModel.moveToAvailableGeo()
         }.collect { event ->
             when (event) {
@@ -210,7 +204,7 @@ class MapFragment : Fragment() {
                     map.animMove(
                         map.cameraPosition.copy(
                             target = addressPoint,
-                            zoom = 16f,
+                            zoom = 16.5f,
                         )
                     )
                 }
@@ -223,7 +217,7 @@ class MapFragment : Fragment() {
                     val cameraPosition = location?.let {
                         CameraPosition(
                             Point(location.latitude, location.longitude),
-                            16f,
+                            16.5f,
                             0f,
                             0f
                         )
@@ -298,11 +292,7 @@ class MapFragment : Fragment() {
                     findNavController().navigateToAddAddress(
                         mapAddress =  event.mapAddress,
                         navOptions = navOptions {
-                            launchSingleTop = true
                             restoreState = true
-                            popUpTo(R.id.mapFragment) {
-                                saveState = true
-                            }
                             slideAnim()
                         }
                     )
@@ -311,8 +301,7 @@ class MapFragment : Fragment() {
                 is MapFlowViewModel.MapFlowEvents.BackToAddAddress -> {
                     val navController = findNavController()
                     navController.previousBackStackEntry?.savedStateHandle?.set(
-                        "mapAddress",
-                        event.mapAddress
+                        "mapAddress", event.mapAddress
                     )
                     navController.popBackStack()
                 }

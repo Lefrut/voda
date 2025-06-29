@@ -4,6 +4,7 @@ import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import com.vodovoz.app.BuildConfig
 import com.vodovoz.app.core.network.ApiConfig
+import com.vodovoz.app.core.network.VodovozWebConfig
 import com.vodovoz.app.core.network.interceptor.BaseUrlInterceptor
 import com.vodovoz.app.core.network.interceptor.ChangeUrlInterceptor
 import com.vodovoz.app.core.network.interceptor.VodovozInterceptor
@@ -86,7 +87,7 @@ abstract class NetworkModule {
         @Named("main")
         fun providesMainRetrofit(okHttpClient: OkHttpClient): Retrofit {
             return Retrofit.Builder()
-                .baseUrl(ApiConfig.VODOVOZ_URL)
+                .baseUrl(VodovozWebConfig.VODOVOZ_URL)
                 .addConverterFactory(MoshiConverterFactory.create())
                 .client(okHttpClient)
                 .build()

@@ -67,7 +67,8 @@ fun BaseQuantityButton(
     ) {
         Row(
             modifier = Modifier
-                .fillMaxSize(),
+                .fillMaxSize()
+                .clickable{},
             verticalAlignment = Alignment.CenterVertically
         ) {
 
@@ -84,9 +85,7 @@ fun BaseQuantityButton(
             )
 
             Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .pointerInput(Unit) { detectTapGestures { } },
+                modifier = Modifier.weight(1f),
                 contentAlignment = Alignment.Center
             ) {
                 content()
