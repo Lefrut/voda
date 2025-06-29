@@ -217,6 +217,7 @@
     <string name="hours">часа</string>
     <string name="minutes">минуты</string>
     <string name="time_to_drink_water">Пора пить воду 🥤</string>
+    <string name="full_address">%1$s, %2$s %3$s</string>
     <string name="cm">СМ</string>
     <string name="recover_password">Восстановление пароля</string>
 
@@ -269,6 +270,8 @@
 
     <string name="remove_address_title">Удалить адрес</string>
     <string name="remove_address_description">Вы действительно хотите удалить адрес?</string>
+    <string name="add_address_error">Не удалось создать адрес, попробуйте снова!</string>
+    <string name="update_address_error">Не удалось изменить адрес, попробуйте снова!</string>
     <string name="contact_us">Связаться с нами</string>
     <string name="about_store">О магазине</string>
     <string name="update">Обновить</string>

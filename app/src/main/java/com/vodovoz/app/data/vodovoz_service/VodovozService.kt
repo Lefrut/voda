@@ -240,18 +240,11 @@ interface VodovozService {
     @GET("oformlenie/address.php?action=add&iblock_id=102")
     suspend fun addAddress(
         @Query("userid") userId: Long?,
-        @Query("polnadres") address: String,
-        @Query("tip") type: Int,
         @Query("ktochka") geo: String? = null,
         @Query("city") city: String? = null,
         @Query("street") street: String? = null,
-        @Query("house") house: String? = null,
-        @Query("domofon") intercom: String? = null,
-        @Query("entrance") entrance: String? = null,
-        @Query("flat") flat: String? = null,
-        @Query("floor") floor: String? = null,
         @Query("leghtkm") fromMoscowToAddressKm: String? = null,
-        @Query("propusk") needPass: String? = null,
+        @QueryMap queries: Map<String, String>
     ): Response<VodovozResponseDTO<Long>>
 
     @GET("oformlenie/address.php?action=update&iblock_id=102")

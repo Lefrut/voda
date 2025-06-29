@@ -52,7 +52,6 @@ fun MapScreen(
 
     Column(
         modifier = Modifier
-            .lifecycleWindowInsets(WindowInsets.statusBars)
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background),
     ) {

@@ -34,7 +34,7 @@ fun AddAddressScreen(
             .background(MaterialTheme.colorScheme.background)
     ) {
         VodovozTopBar(
-            title = if(!editMode) stringResource(R.string.new_address) else stringResource(R.string.redact_address),
+            title = if (!editMode) stringResource(R.string.new_address) else stringResource(R.string.redact_address),
             actionIconId = if (editMode) R.drawable.ic_trash else null,
             actionIconTint = MaterialTheme.colorScheme.surfaceTint,
             onActionClick = {
@@ -45,9 +45,11 @@ fun AddAddressScreen(
             }
         )
 
-        Box(modifier = Modifier
-            .animateContentSize()
-            .weight(1f)) {
+        Box(
+            modifier = Modifier
+                .animateContentSize()
+                .weight(1f)
+        ) {
             when (viewState.uiState) {
                 AddAddressUiState.Error -> {
                     NetworkErrorPlaceholder {
@@ -69,9 +71,9 @@ fun AddAddressScreen(
                             viewModel.checkWidgetOnAddress(widget)
                         },
                         onSaveClick = {
-                            if(editMode){
+                            if (editMode) {
                                 viewModel.updateAddress()
-                            }else{
+                            } else {
                                 viewModel.addAddress()
                             }
                         }

@@ -13,14 +13,6 @@ object ApiConfig {
 
     const val MAPKIT_URL = "$MAPKIT_PROTOCOL$MAPKIT_IP"
 
-    var ABOUT_SHOP_URL = VODOVOZ_URL + "newmobile/informatsiya/omagazine.php"
-    var ABOUT_PAY_URL = VODOVOZ_URL + "newmobile/informatsiya/oplata.php"
-    var ABOUT_DELIVERY_URL = VODOVOZ_URL + "newmobile/informatsiya/dosytavka.php"
-    const val PERSONAL_DATA_URL =
-        "https://vodovoz.ru/delivery_files/informaciya/personalnie-dannie.php"
-
-    const val AMOUNT_CONTROLLER_TIMER = 1500L
-
     const val RUTUBE_URL = "https://rutube.ru/video/"
     const val YOUTUBE_URL = "https://www.youtube.com/watch?v=/"
 
@@ -30,6 +22,7 @@ object ApiConfig {
 object VodovozWebConfig {
 
     private const val VODOVOZ_PROTOCOL = "https://"
+    //todo - change to prod. url
     private const val VODOVOZ_DOMAIN = "vodovoz.net/"
 
     const val VODOVOZ_URL = "$VODOVOZ_PROTOCOL$VODOVOZ_DOMAIN"

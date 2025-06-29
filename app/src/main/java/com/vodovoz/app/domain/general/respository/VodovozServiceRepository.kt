@@ -75,7 +75,7 @@ interface VodovozServiceRepository {
 
     fun removeAddress(addressId: Int): Flow<Result<String>>
 
-    fun addAddress(address: MapAddressModel): Flow<Result<Long>>
+    fun addAddress(address: MapAddressModel, params: Map<String, String>): Flow<Result<Long>>
 
     fun getAddAddressDetails(addressId: Long?): Flow<Result<AddAddressDetailsModel>>
 
