@@ -59,6 +59,12 @@ class OrderRecipientFragment : Fragment() {
                                 OrderRecipientEvent.GoBack -> {
                                     findNavController().popBackStack()
                                 }
+
+                                OrderRecipientEvent.GoBackToOrdering -> {
+                                    val navController = findNavController()
+                                    navController.previousBackStackEntry?.savedStateHandle?.set("updateRecipient", true)
+                                    navController.popBackStack()
+                                }
                             }
                         }
                     }

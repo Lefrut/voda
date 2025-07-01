@@ -1,6 +1,7 @@
 package com.vodovoz.app.common.speech_recognizer
 
 import android.app.Activity
+import android.app.Dialog
 import android.content.Intent
 import android.os.Bundle
 import android.speech.RecognizerIntent
@@ -37,6 +38,11 @@ class SpeechDialogFragment : DialogFragment() {
             else -> dismiss()
         }
 
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setStyle(STYLE_NO_FRAME, android.R.style.Theme_Translucent_NoTitleBar)
     }
 
     override fun onCreateView(

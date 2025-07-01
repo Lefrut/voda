@@ -2,7 +2,6 @@ package com.vodovoz.app.feature.cart.ordering.model
 
 import androidx.compose.runtime.Immutable
 import com.vodovoz.app.domain.general.model.order.OrderNotifyItemModel
-import com.vodovoz.app.domain.general.model.order.OrderPaymentItemModel
 
 
 @Immutable

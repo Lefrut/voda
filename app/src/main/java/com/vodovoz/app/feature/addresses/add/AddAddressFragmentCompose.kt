@@ -99,7 +99,11 @@ class AddAddressFragment : Fragment() {
         }.collect { event ->
             when (event) {
                 AddAddressEvent.GoBackToMap -> {
-                    findNavController().popBackStack(R.id.mapFragment, false, true)
+                    findNavController().popBackStack(
+                        destinationId = R.id.mapFragment,
+                        inclusive = false,
+                        saveState = true
+                    )
                 }
 
                 is AddAddressEvent.GoToMap -> {

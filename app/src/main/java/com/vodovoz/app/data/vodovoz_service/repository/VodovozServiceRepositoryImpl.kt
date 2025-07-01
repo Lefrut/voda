@@ -7,7 +7,6 @@ import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
 import com.vodovoz.app.common.account.AccountManager
 import com.vodovoz.app.common.cookie.CookieManager
-import com.vodovoz.app.common.model.VodovozAddressType
 import com.vodovoz.app.common.model.VodovozSiteState
 import com.vodovoz.app.core.network.retrofit.messageWithCode
 import com.vodovoz.app.core.network.retrofit.stringBody
@@ -69,6 +68,7 @@ import com.vodovoz.app.domain.general.model.order.OrdersHistoryItemModel
 import com.vodovoz.app.domain.general.model.order.PaymentMethodDetailsModel
 import com.vodovoz.app.domain.general.model.order.PreOrderSectionModel
 import com.vodovoz.app.domain.general.model.order.RecipientDetailsModel
+import com.vodovoz.app.domain.general.model.order.RecipientModel
 import com.vodovoz.app.domain.general.model.order.WhereOrderDetailsModel
 import com.vodovoz.app.domain.general.model.product.AllBottlesDetailsModel
 import com.vodovoz.app.domain.general.model.product.CommentModel
@@ -240,6 +240,20 @@ class VodovozServiceRepositoryImpl @Inject constructor(
         return executeRequest(
             request = {
                 vodovozService.getRecipientDetails(
+                    addressId = addressId,
+                    userId = accountManager.fetchAccountId()
+                )
+            },
+            mapper = {
+                it.data!!.toDomain()
+            }
+        )
+    }
+
+    override fun getRecipient(addressId: Long): Flow<Result<RecipientModel>> {
+        return executeRequest(
+            request = {
+                vodovozService.getRecipient(
                     addressId = addressId,
                     userId = accountManager.fetchAccountId()
                 )

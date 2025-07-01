@@ -38,7 +38,7 @@ fun OrderCallYouScreen(
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 26.dp),
                     buttons = listOf(viewState.button),
                     onButtonClick = { button ->
-                        viewModel.activateButton(button)
+                        viewModel.chooseOrderingCallYou(button)
                     }
                 )
             }

@@ -35,6 +35,7 @@ import com.vodovoz.app.data.vodovoz_service.model.ordering.ORDER_PREDYP_DTO
 import com.vodovoz.app.data.vodovoz_service.model.ordering.ORDER_PREDYP_ITEM_DTO
 import com.vodovoz.app.data.vodovoz_service.model.ordering.OrderCallYouDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.ordering.OrderingDetailsDTO
+import com.vodovoz.app.data.vodovoz_service.model.ordering.RecipientDTO
 import com.vodovoz.app.data.vodovoz_service.model.ordering.RecipientDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.payment_method.PaymentMethodDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.payment_method.PaymentMethodItemDTO
@@ -56,7 +57,7 @@ import com.vodovoz.app.domain.general.model.order.OrderDetailsModel
 import com.vodovoz.app.domain.general.model.order.OrderDetailsSummaryModel
 import com.vodovoz.app.domain.general.model.order.OrderFilterModel
 import com.vodovoz.app.domain.general.model.order.OrderNotifyItemModel
-import com.vodovoz.app.domain.general.model.order.OrderPaymentItemModel
+import com.vodovoz.app.domain.general.model.order.OrderingMenuItemModel
 import com.vodovoz.app.domain.general.model.order.OrderProductModel
 import com.vodovoz.app.domain.general.model.order.OrderProductPresentModel
 import com.vodovoz.app.domain.general.model.order.OrderQuestionDetailsModel
@@ -70,6 +71,7 @@ import com.vodovoz.app.domain.general.model.order.OrdersHistoryProductModel
 import com.vodovoz.app.domain.general.model.order.PaymentMethodDetailsModel
 import com.vodovoz.app.domain.general.model.order.PaymentMethodItemModel
 import com.vodovoz.app.domain.general.model.order.RecipientDetailsModel
+import com.vodovoz.app.domain.general.model.order.RecipientModel
 import com.vodovoz.app.domain.general.model.product.SectionModel
 import com.vodovoz.app.domain.general.model.promotion.ColorfulButtonModel
 import kotlin.math.roundToInt
@@ -86,6 +88,13 @@ fun OrderCallYouDetailsDTO.toDomain(): OrderCallYouDetailsModel {
         currentItem = callYouItems.first(),
         button = KNOPKA?.toDomain()
             ?: throw IllegalArgumentException("OrderCallYouDetails button can't be empty or null")
+    )
+}
+
+fun RecipientDTO.toDomain(): RecipientModel{
+    return RecipientModel(
+        phone = PHONE ?: "",
+        fio = FIO ?: ""
     )
 }
 
@@ -220,7 +229,7 @@ fun OrderingDetailsDTO.toDomain(): OrderingDetailsModel {
 }
 
 
-fun ORDER_OPLATA_DTO.toDomain(): SectionModel<OrderPaymentItemModel> {
+fun ORDER_OPLATA_DTO.toDomain(): SectionModel<OrderingMenuItemModel> {
     return SectionModel(
         title = ZAGOLOVOK ?: "",
         items = DANNYE?.mapToDomain() ?: emptyList(),
@@ -229,13 +238,13 @@ fun ORDER_OPLATA_DTO.toDomain(): SectionModel<OrderPaymentItemModel> {
 }
 
 @JvmName("OrderPaymentItemModelList")
-fun List<ORDER_OPLATA_ITEM_DTO>.mapToDomain(): List<OrderPaymentItemModel> {
+fun List<ORDER_OPLATA_ITEM_DTO>.mapToDomain(): List<OrderingMenuItemModel> {
     return mapNotNull { it -> it.toDomain() }
 }
 
 
-fun ORDER_OPLATA_ITEM_DTO.toDomain(): OrderPaymentItemModel {
-    return OrderPaymentItemModel(
+fun ORDER_OPLATA_ITEM_DTO.toDomain(): OrderingMenuItemModel {
+    return OrderingMenuItemModel(
         image = KARTINKA?.toVodovozUrl() ?: "",
         name = NAME ?: "",
         description = OPISANIE ?: "",
@@ -244,7 +253,7 @@ fun ORDER_OPLATA_ITEM_DTO.toDomain(): OrderPaymentItemModel {
 }
 
 
-fun ORDER_POLYSHATEL_DTO.toDomain(): SectionModel<OrderRecipientItemModel> {
+fun ORDER_POLYSHATEL_DTO.toDomain(): SectionModel<OrderingMenuItemModel> {
     return SectionModel(
         title = ZAGOLOVOK ?: "",
         items = DANNYE?.mapToDomain() ?: emptyList(),
@@ -253,12 +262,12 @@ fun ORDER_POLYSHATEL_DTO.toDomain(): SectionModel<OrderRecipientItemModel> {
 }
 
 @JvmName("mapToOrderRecipientItemModelList")
-fun List<ORDER_POLYSHATEL_ITEM_DTO>.mapToDomain(): List<OrderRecipientItemModel> {
+fun List<ORDER_POLYSHATEL_ITEM_DTO>.mapToDomain(): List<OrderingMenuItemModel> {
     return mapNotNull { it.toDomain() }
 }
 
-fun ORDER_POLYSHATEL_ITEM_DTO.toDomain(): OrderRecipientItemModel? {
-    return OrderRecipientItemModel(
+fun ORDER_POLYSHATEL_ITEM_DTO.toDomain(): OrderingMenuItemModel? {
+    return OrderingMenuItemModel(
         image = KARTINKA?.toVodovozUrl() ?: "",
         name = NAME ?: "",
         description = OPISANIE ?: "",

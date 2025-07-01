@@ -66,8 +66,16 @@ class PaymentMethodViewModel @Inject constructor(
         }
     }
 
-    fun choosePaymentMethod() {
-        //todo - need realization
+    fun choosePaymentMethod() = viewModelScope.launch {
+        val paymentSections = stateSnapshot.paymentSections
+        val paymentBalance = paymentSections
+            .flatMap { it.items }
+            .firstOrNull { it -> it.isSwitch }
+
+        val paymentMethod = paymentSections
+            .flatMap { it.items }
+            .firstOrNull { !it.isSwitch && it.value } ?: return@launch
+        _events.emit(PaymentMethodEvent.GoBackToOrdering(paymentMethod, paymentBalance))
     }
 
     fun changePaymentMethodItem(paymentMethod: PaymentMethodItemUi) = viewModelScope.launch {
@@ -75,7 +83,7 @@ class PaymentMethodViewModel @Inject constructor(
             val sections = s.paymentSections.map { section ->
                 section.copy(
                     title = section.title,
-                    items = section.items.map {
+                    items = section.items.map { it ->
                         when {
                             it.id == paymentMethod.id && it.isSwitch -> it.copy(value = !it.value)
                             it.id == paymentMethod.id && !it.isSwitch -> it.copy(value = true)

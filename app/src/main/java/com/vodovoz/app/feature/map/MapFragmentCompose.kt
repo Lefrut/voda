@@ -19,6 +19,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.SheetValue.PartiallyExpanded
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -32,11 +33,9 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.navOptions
 import com.google.android.gms.location.LocationServices
-import com.vodovoz.app.R
 import com.vodovoz.app.common.tab.TabManager
 import com.vodovoz.app.core.android.getLocationOrNull
 import com.vodovoz.app.core.android.handleLocationAvailability
@@ -125,8 +124,7 @@ class MapFragment : Fragment() {
                     }
                 }
 
-                val anchoredDraggableState =
-                    rememberSaveable(saver = AnchoredDraggableState.Saver()) {
+                val anchoredDraggableState = remember {
                         AnchoredDraggableState(initialValue = PartiallyExpanded)
                     }
 
@@ -290,8 +288,9 @@ class MapFragment : Fragment() {
 
                 is MapFlowViewModel.MapFlowEvents.GoToAddAddress -> {
                     findNavController().navigateToAddAddress(
-                        mapAddress =  event.mapAddress,
+                        mapAddress = event.mapAddress,
                         navOptions = navOptions {
+                            launchSingleTop = true
                             restoreState = true
                             slideAnim()
                         }

@@ -432,7 +432,9 @@ private fun VodovozDay(
             .padding(vertical = 2.dp)
             .clip(CircleShape)
             .background(
-                color = if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent
+                color = if (isSelected && day.position == DayPosition.MonthDate) {
+                    MaterialTheme.colorScheme.primary
+                } else { Color.Transparent }
             )
 
             .clickable(

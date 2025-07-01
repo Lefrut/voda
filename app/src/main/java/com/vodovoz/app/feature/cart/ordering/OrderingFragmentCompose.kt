@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
@@ -23,6 +24,12 @@ import com.vodovoz.app.core.navigation.navigateToPaymentMethod
 import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.effects.LifecycleEffect
 import com.vodovoz.app.feature.addresses.model.AddressScreenTypeUi
+import com.vodovoz.app.feature.addresses.model.AddressUi
+import com.vodovoz.app.feature.delivery_date.model.DeliveryDateOptionUi
+import com.vodovoz.app.feature.delivery_date.model.DeliveryTimeIntervalUi
+import com.vodovoz.app.feature.order_call_you.model.CallYouItemUi
+import com.vodovoz.app.feature.payment_method.model.PaymentMethodItemNav
+import com.vodovoz.app.feature.payment_method.model.toUi
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.onSubscription
 import javax.inject.Inject
@@ -59,7 +66,7 @@ class OrderingFragment : Fragment() {
                     )
 
                     LifecycleEffect {
-                        observeEvents()
+                        observeEvents(scrollState)
                     }
                 }
             }
@@ -72,11 +79,35 @@ class OrderingFragment : Fragment() {
     }
 
 
-    private suspend fun observeEvents() {
+    private suspend fun observeEvents(scrollState: ScrollState) {
         viewModel.observeEvent().onSubscription {
-            findNavController().currentBackStackEntry?.savedStateHandle?.get<Long>("addressId")?.let { addressId ->
-                viewModel.setAddressId(addressId)
+
+            val backEntrySavedStateHandle =
+                findNavController().currentBackStackEntry?.savedStateHandle
+
+            backEntrySavedStateHandle?.remove<AddressUi>("address")
+                ?.let { address -> viewModel.setAddress(address) }
+
+            val timeInterval = backEntrySavedStateHandle?.remove<DeliveryTimeIntervalUi>("timeInterval")
+            val date = backEntrySavedStateHandle?.remove<DeliveryDateOptionUi>("dateOption")
+
+            if(timeInterval != null && date != null){
+                viewModel.setDeliveryDateTime(timeInterval, date)
             }
+
+            backEntrySavedStateHandle?.remove<CallYouItemUi>("callYou")
+                ?.let { callYouItem -> viewModel.setCallYou(callYouItem) }
+
+            backEntrySavedStateHandle?.remove<PaymentMethodItemNav>("paymentBalance")?.toUi()
+                ?.let { paymentBalance -> viewModel.setPaymentBalance(paymentBalance) }
+
+            backEntrySavedStateHandle?.remove<PaymentMethodItemNav>("paymentMethod")?.toUi()
+                ?.let { paymentMethod -> viewModel.setPaymentMethod(paymentMethod) }
+
+            backEntrySavedStateHandle?.remove<Boolean>("updateRecipient")?.let {
+                viewModel.refreshRecipient()
+            }
+
         }.collect { event ->
             when (event) {
                 OrderingFlowViewModel.OrderingEvents.GoBack -> {
@@ -88,7 +119,7 @@ class OrderingFragment : Fragment() {
                 }
 
                 is OrderingFlowViewModel.OrderingEvents.GoToDeliveryDate -> {
-                    findNavController().navigateToDeliveryDate(event.addressId)
+                    findNavController().navigateToDeliveryDate(addressId = event.addressId)
                 }
 
                 is OrderingFlowViewModel.OrderingEvents.GoToPaymentMethod -> {
@@ -101,6 +132,10 @@ class OrderingFragment : Fragment() {
 
                 is OrderingFlowViewModel.OrderingEvents.GoToCallYou -> {
                     findNavController().navigateToOrderCallYou(event.addressId)
+                }
+
+                OrderingFlowViewModel.OrderingEvents.ScrollToTop -> {
+                    scrollState.animateScrollTo(0)
                 }
             }
         }

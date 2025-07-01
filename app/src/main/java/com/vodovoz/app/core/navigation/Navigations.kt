@@ -47,6 +47,7 @@ fun NavController.navigateToAddAddress(
     addressName: String? = null,
     navOptions: NavOptions? = null,
 ) {
+
     navigate(
         R.id.addAddressFragment,
         bundleOf(
@@ -58,6 +59,13 @@ fun NavController.navigateToAddAddress(
             slideAnim()
         }
     )
+
+    val backStack = try {
+        getBackStackEntry(R.id.addAddressFragment)
+    } catch (_: Throwable) { null }
+
+    if (backStack != null) { backStack.savedStateHandle["mapAddress"] = mapAddress }
+
 }
 
 fun NavController.navigateToMap(addressName: String?) {
@@ -220,11 +228,11 @@ fun NavController.navigateToAddresses(addressScreenType: AddressScreenTypeUi) {
     )
 }
 
-fun NavController.navigateToDeliveryDate(addressId: Long) {
+fun NavController.navigateToDeliveryDate(addressId: Long, navOptions: NavOptions? = null) {
     navigate(
         R.id.deliveryDateFragment,
         bundleOf("addressId" to addressId),
-        navOptions {
+        navOptions ?: navOptions {
             slideAnim()
         }
     )

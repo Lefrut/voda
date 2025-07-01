@@ -1,6 +1,6 @@
 package com.vodovoz.app.domain.general.model.order
 
-data class OrderPaymentItemModel(
+data class OrderingMenuItemModel(
     val image: String,
     val name: String,
     val description: String,

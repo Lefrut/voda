@@ -64,8 +64,8 @@ class OrderCallYouViewModel @Inject constructor(
         }
     }
 
-    fun activateButton(button: ColorfulButtonUi) = viewModelScope.launch {
-
+    fun chooseOrderingCallYou(button: ColorfulButtonUi) = viewModelScope.launch {
+        _events.emit(OrderCallYouEvent.GoBackToOrdering(stateSnapshot.currentItem))
     }
 
     fun selectCallYouItem(item: CallYouItemUi) = viewModelScope.launch {

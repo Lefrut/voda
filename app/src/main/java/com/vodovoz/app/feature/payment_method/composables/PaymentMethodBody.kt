@@ -104,7 +104,8 @@ private fun PaymentMethodItemRow(
     Column(
         Modifier
             .background(MaterialTheme.colorScheme.background)
-            .animateContentSize()) {
+            .animateContentSize()
+    ) {
         Row(
             modifier = modifier
                 .clickable { onItemClick(item) }

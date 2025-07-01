@@ -40,6 +40,16 @@ class MapServiceRepositoryImpl @Inject constructor(
             emit(Result.success(mapSDK.getSuggestsInMoscow(query).mapToDomain()))
         }.catchResult()
 
+
+    private fun findFirstNonEmptyName(
+        components: List<Address.Component>,
+        kinds: List<Address.Component.Kind>,
+    ): String? {
+        return components.firstOrNull { component ->
+            component.name.isNotBlank() && component.kinds.any { it in kinds }
+        }?.name
+    }
+
     override fun searchAddressInMoscow(address: String): Flow<Result<MapAddressModel>> =
         flow {
             val yandexSearchResponse = mapSDK.searchAddressInMoscow(address)
@@ -53,31 +63,50 @@ class MapServiceRepositoryImpl @Inject constructor(
 
             val point = geoObject?.geometry?.getOrNull(0)?.point
 
-            val city = yandexAddressComponents.firstOrNull { component ->
-                component.kinds.contains(Address.Component.Kind.LOCALITY)
-            }?.name
-            val street = yandexAddressComponents.firstOrNull { component ->
-                component.kinds.contains(Address.Component.Kind.STREET)
-            }?.name
-            val house = yandexAddressComponents.firstOrNull { component ->
-                component.kinds.contains(Address.Component.Kind.HOUSE)
-            }?.name
+            val city = findFirstNonEmptyName(
+                components = yandexAddressComponents,
+                kinds = listOf(
+                    Address.Component.Kind.LOCALITY,
+                    Address.Component.Kind.DISTRICT,
+                    Address.Component.Kind.AREA,
+                    Address.Component.Kind.PROVINCE
+                )
+            ) ?: ""
 
+            val street = findFirstNonEmptyName(
+                components = yandexAddressComponents,
+                kinds = listOf(
+                    Address.Component.Kind.STREET,
+                    Address.Component.Kind.ROUTE
+                )
+            ) ?: ""
+            val house = findFirstNonEmptyName(
+                components = yandexAddressComponents,
+                kinds = listOf(
+                    Address.Component.Kind.HOUSE,
+                    Address.Component.Kind.ENTRANCE
+                )
+            ) ?: ""
 
             emit(
                 Result.success(
                     MapAddressModel(
-                        point = point?.toDomain() ?: throw IllegalArgumentException("Search point can't be null"),
-                        name = toponymObjectMetadata?.address?.formattedAddress ?: geoObject.name ?: address,
-                        city = city ?: "",
-                        street = street ?: "",
-                        house = house ?: ""
+                        point = point?.toDomain()
+                            ?: throw IllegalArgumentException("Search point can't be null"),
+                        name = toponymObjectMetadata?.address?.formattedAddress ?: geoObject.name
+                        ?: address,
+                        city = city,
+                        street = street,
+                        house = house
                     )
                 )
             )
         }.catchResult()
 
-    override fun getRoute(start: MapPointModel, end: MapPointModel): Flow<Result<List<MapPointModel>>> = flow {
+    override fun getRoute(
+        start: MapPointModel,
+        end: MapPointModel,
+    ): Flow<Result<List<MapPointModel>>> = flow {
         val points = mapSDK.getRoute(start.toData(), end.toData())
         emit(Result.success(points.mapToDomain()))
     }.catchResult()

@@ -37,6 +37,7 @@ import com.vodovoz.app.domain.general.model.order.OrdersHistoryItemModel
 import com.vodovoz.app.domain.general.model.order.PaymentMethodDetailsModel
 import com.vodovoz.app.domain.general.model.order.PreOrderSectionModel
 import com.vodovoz.app.domain.general.model.order.RecipientDetailsModel
+import com.vodovoz.app.domain.general.model.order.RecipientModel
 import com.vodovoz.app.domain.general.model.order.WhereOrderDetailsModel
 import com.vodovoz.app.domain.general.model.product.AllBottlesDetailsModel
 import com.vodovoz.app.domain.general.model.product.CommentModel
@@ -94,6 +95,10 @@ interface VodovozServiceRepository {
     fun getOrderRecipientDetails(
         addressId: Long
     ): Flow<Result<RecipientDetailsModel>>
+
+    fun getRecipient(
+        addressId: Long
+    ): Flow<Result<RecipientModel>>
 
     fun sendOrderRecipient(
         addressId: Long,
