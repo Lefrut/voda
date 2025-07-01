@@ -26,6 +26,7 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.zIndex
 import com.vodovoz.app.R
 import com.vodovoz.app.design_system.composables.dialogs.VodovozDialog
 import com.vodovoz.app.design_system.composables.placeholders.NetworkErrorPlaceholder
@@ -54,7 +55,9 @@ fun HomeScreen(
                 available: Offset,
                 source: NestedScrollSource,
             ): Offset {
-                if (consumed.y < 0 && !showedUnratedProducts) { viewModel.showUnratedProducts() }
+                if (consumed.y < 0 && !showedUnratedProducts) {
+                    viewModel.showUnratedProducts()
+                }
                 return super.onPostScroll(consumed, available, source)
             }
         }
@@ -211,9 +214,11 @@ fun HomeScreen(
     if (showUnratedProductBottomSheet) {
         //todo - need fix clicks on close
         UnratedProductsBottomSheet(
-            modifier = Modifier.graphicsLayer {
-                alpha = animatedUnratedAlpha.value
-            },
+            modifier = Modifier
+                .zIndex(Float.MAX_VALUE)
+                .graphicsLayer {
+                    alpha = animatedUnratedAlpha.value
+                },
             sectionUnratedProducts = viewState.sectionUnratedProducts,
             onProductRatingChanged = { product, rating ->
                 viewModel.navigateToWriteComment(product, rating)

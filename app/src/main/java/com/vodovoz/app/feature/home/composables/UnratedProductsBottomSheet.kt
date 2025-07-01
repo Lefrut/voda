@@ -17,6 +17,7 @@ import androidx.compose.foundation.gestures.AnchoredDraggableState
 import androidx.compose.foundation.gestures.DraggableAnchors
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.anchoredDraggable
+import androidx.compose.foundation.gestures.animateTo
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -50,7 +51,6 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -69,6 +69,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
@@ -77,6 +78,7 @@ import coil3.request.ImageRequest
 import coil3.request.crossfade
 import com.gowtham.ratingbar.RatingBar
 import com.vodovoz.app.R
+import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.composables.bottom_sheet.VodovozDragHandle
 import com.vodovoz.app.feature.home.model.UnratedProductUi
 import com.vodovoz.app.feature.home.model.UnratedProductsSectionUi
@@ -134,26 +136,25 @@ fun UnratedProductsBottomSheet(
             SheetValue.PartiallyExpanded -> {}
         }
 
-        LaunchedEffect(state, layoutHeight) {
-            snapshotFlow { state.currentValue }.collect { currentValue ->
-                when (currentValue) {
-                    SheetValue.Hidden -> {
-                        onDispose()
-                    }
-
-                    SheetValue.Expanded -> {
-                        state.updateAnchors(
-                            DraggableAnchors {
-                                SheetValue.Hidden at (layoutHeight - expandedPaddingTopPx).coerceAtLeast(
-                                    0f
-                                )
-                                SheetValue.Expanded at expandedPaddingTopPx
-                            }
-                        )
-                    }
-
-                    SheetValue.PartiallyExpanded -> {}
+        LaunchedEffect(state.currentValue, layoutHeight) {
+            when (state.currentValue) {
+                SheetValue.Hidden -> {
+                    onDispose()
                 }
+
+                SheetValue.Expanded -> {
+                    state.updateAnchors(
+                        DraggableAnchors {
+                            SheetValue.Hidden at (layoutHeight - expandedPaddingTopPx).coerceAtLeast(
+                                0f
+                            )
+                            SheetValue.Expanded at expandedPaddingTopPx
+                        }
+                    )
+                    state.animateTo(SheetValue.Expanded)
+                }
+
+                SheetValue.PartiallyExpanded -> {}
             }
         }
 
@@ -166,9 +167,11 @@ fun UnratedProductsBottomSheet(
                 .fillMaxWidth()
                 .height(columnHeight)
                 .offset {
-                    val sheetOffsetY = kotlin
-                        .runCatching { state.requireOffset() }
-                        .getOrNull() ?: 0f
+                    val sheetOffsetY = try {
+                        state.requireOffset()
+                    } catch (_: RuntimeException) {
+                        expandedPaddingTopPx
+                    }
                     IntOffset(x = 0, y = sheetOffsetY.toInt())
                 }
                 .dropShadow(
@@ -215,13 +218,7 @@ fun UnratedProductsBottomSheet(
                         SizeTransform(clip = false)
                     )
                 },
-                contentKey = { sheetValue ->
-                    when (sheetValue) {
-                        SheetValue.Hidden -> SheetValue.Expanded.name
-                        SheetValue.Expanded -> SheetValue.Expanded.name
-                        SheetValue.PartiallyExpanded -> SheetValue.PartiallyExpanded.name
-                    }
-                }
+                contentKey = { sheetValue -> sheetValue.name }
             ) { targetState ->
                 when (targetState) {
                     SheetValue.Expanded, SheetValue.Hidden -> {
@@ -288,9 +285,9 @@ fun UpdatedProductsExpanded(
     onNoRateProductClick: (UnratedProductUi) -> Unit,
     onClose: () -> Unit,
 ) {
-    val pagerState = rememberPagerState { products.size }
+    val pagerState = rememberPagerState(products.size) { products.size }
 
-    Column(modifier = modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
+    Column(modifier = modifier.fillMaxSize().background(MaterialTheme.colorScheme.background), horizontalAlignment = Alignment.CenterHorizontally) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -331,56 +328,62 @@ fun UpdatedProductsExpanded(
             },
             verticalAlignment = Alignment.CenterVertically
         ) lambda@{ page ->
-            val product = products.getOrNull(page) ?: return@lambda
-            Column(
-                modifier = Modifier.fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                AsyncImage(
-                    modifier = Modifier.size(300.dp),
-                    model = ImageRequest.Builder(LocalContext.current)
-                        .data(product.detailPicture)
-                        .crossfade(true).build(),
-                    contentDescription = null,
-                    contentScale = ContentScale.Inside,
-                )
-                Text(
-                    modifier = Modifier.padding(16.dp),
-                    text = product.name,
-                    color = MaterialTheme.colorScheme.onBackground,
-                    style = MaterialTheme.typography.headlineSmall,
-                    textAlign = TextAlign.Center
-                )
+            val product = products.getOrNull(page)
+            if (product != null) {
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    AsyncImage(
+                        modifier = Modifier.size(300.dp),
+                        model = ImageRequest.Builder(LocalContext.current)
+                            .data(product.detailPicture)
+                            .crossfade(true).build(),
+                        contentDescription = null,
+                        contentScale = ContentScale.Inside,
+                    )
+                    Text(
+                        modifier = Modifier.padding(16.dp),
+                        text = product.name,
+                        color = MaterialTheme.colorScheme.onBackground,
+                        style = MaterialTheme.typography.headlineSmall,
+                        textAlign = TextAlign.Center,
+                        minLines = 3,
+                        maxLines = 3
+                    )
 
 
-                var rating by rememberSaveable {
-                    mutableFloatStateOf(0f)
-                }
-
-                RatingBar(
-                    value = rating,
-                    modifier = Modifier.padding(top = 32.dp),
-                    painterEmpty = painterResource(id = R.drawable.ic_star_inactive),
-                    painterFilled = painterResource(id = R.drawable.ic_star_active),
-                    size = 48.dp,
-                    spaceBetween = 8.dp,
-                    onValueChange = { newRating ->
-                        rating = newRating
-                    },
-                    onRatingChanged = { newRating ->
-                        onProductRatingChanged(product, newRating)
+                    var rating by rememberSaveable {
+                        mutableFloatStateOf(0f)
                     }
-                )
+
+                    RatingBar(
+                        value = rating,
+                        modifier = Modifier.padding(top = 32.dp),
+                        painterEmpty = painterResource(id = R.drawable.ic_star_inactive),
+                        painterFilled = painterResource(id = R.drawable.ic_star_active),
+                        size = 48.dp,
+                        spaceBetween = 8.dp,
+                        onValueChange = { newRating ->
+                            rating = newRating
+                        },
+                        onRatingChanged = { newRating ->
+                            onProductRatingChanged(product, newRating)
+                        }
+                    )
+                }
             }
         }
 
-        PagerWormIndicator(
-            modifier = Modifier.padding(top = 56.dp, bottom = 12.dp),
-            pagerState = pagerState,
-            activeDotColor = MaterialTheme.colorScheme.primary,
-            dotColor = MaterialTheme.colorScheme.surfaceVariant,
-            dotCount = 5,
-        )
+        if (pagerState.pageCount > 1) {
+            PagerWormIndicator(
+                modifier = Modifier.padding(vertical = 12.dp),
+                pagerState = pagerState,
+                activeDotColor = MaterialTheme.colorScheme.primary,
+                dotColor = MaterialTheme.colorScheme.surfaceVariant,
+                dotCount = 5,
+            )
+        }
 
         Box(
             modifier = Modifier
@@ -446,5 +449,55 @@ fun UnratedProductsPartially(
                 }
             }
         }
+    }
+}
+
+@Preview(apiLevel = 34)
+@Composable
+private fun UnratedProductsExpandedPreview() {
+    VodovozTheme {
+
+        val sodas = listOf(
+            UnratedProductUi(
+                name = "Coca-Cola",
+                id = 1L,
+                detailPicture = "https://example.com/images/pepsi.png"
+            ),
+            UnratedProductUi(
+                name = "Pepsi",
+                id = 2L,
+                detailPicture = "https://example.com/images/pepsi.png"
+            ),
+            UnratedProductUi(
+                name = "Sprite",
+                id = 3L,
+                detailPicture = "https://example.com/images/sprite.png"
+            ),
+            UnratedProductUi(
+                name = "Fanta",
+                id = 4L,
+                detailPicture = "https://example.com/images/fanta.png"
+            ),
+            UnratedProductUi(
+                name = "Dr Pepper",
+                id = 5L,
+                detailPicture = "https://example.com/images/dr_pepper.png"
+            )
+        )
+
+
+        UpdatedProductsExpanded(
+            title = "Это нижний лист",
+            onClose = {
+
+            },
+            onNoRateProductClick = {
+
+            },
+            onProductRatingChanged = { _, _ ->
+
+            },
+            products = sodas
+        )
     }
 }
