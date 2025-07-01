@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.compose.BackHandler
+import androidx.annotation.Keep
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyListState
@@ -323,6 +324,7 @@ class HomeFragment : Fragment() {
     }
 
 
+    @Keep
     private fun observeDeepLinkFromSiteState() = lifecycleScope.launch {
         repeatOnLifecycle(Lifecycle.State.CREATED) {
             delay(2000L)
@@ -394,6 +396,7 @@ class HomeFragment : Fragment() {
     }
 
 
+    @Keep
     private fun observePushFromSiteState() = lifecycleScope.launch {
         repeatOnLifecycle(Lifecycle.State.CREATED) {
             delay(2000L)
