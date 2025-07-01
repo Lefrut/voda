@@ -36,7 +36,7 @@ class SiteStateManager @Inject constructor(
         currentAttempt++
 
         //todo - need extra fixes
-        val st = if (currentAttempt >= 3) {
+        val st = if (currentAttempt >= 10) {
             VodovozSiteState.Blocked.copy(isActive = true)
         } else {
             VodovozSiteState.Blocked.copy(
