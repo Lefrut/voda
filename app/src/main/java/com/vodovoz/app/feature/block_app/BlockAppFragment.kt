@@ -2,10 +2,10 @@ package com.vodovoz.app.feature.block_app
 
 import android.os.Bundle
 import android.view.View
+import androidx.annotation.Keep
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -14,7 +14,6 @@ import androidx.navigation.navOptions
 import by.kirich1409.viewbindingdelegate.viewBinding
 import coil3.load
 import com.vodovoz.app.R
-import com.vodovoz.app.data.vodovoz_service.di.toVodovozUrl
 import com.vodovoz.app.databinding.FragmentBlockAppBinding
 import com.vodovoz.app.feature.sitestate.SiteStateManager
 import com.vodovoz.app.ui.base.MainActivityViewModel
@@ -25,6 +24,7 @@ import com.vodovoz.app.util.extensions.startJivo
 import com.vodovoz.app.util.extensions.startTelegram
 import com.vodovoz.app.util.extensions.startViber
 import com.vodovoz.app.util.extensions.startWhatsUpWithUri
+import com.vodovoz.app.util.formatters.VodovozDateFormatters
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -34,7 +34,6 @@ import java.time.Duration
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 import java.util.Locale
 import javax.inject.Inject
 
@@ -132,12 +131,13 @@ class BlockAppFragment : Fragment(R.layout.fragment_block_app) {
 
     private var countdownJob: Job? = null
 
+    @Keep
     private fun startCountDown(localDateTime: String) {
         countdownJob?.cancel()
 
         countdownJob = viewLifecycleOwner.lifecycleScope.launch {
             val locale = Locale.getDefault()
-            val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss", locale)
+            val formatter = VodovozDateFormatters.DMY_HMS
             val futureDateTime = try {
                 LocalDateTime.parse(localDateTime, formatter)
             } catch (e: Exception) {
