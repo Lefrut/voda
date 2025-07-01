@@ -80,7 +80,7 @@ class AddressesFragment : Fragment() {
 
                 is AddressesFlowViewModel.AddressesEvents.GoBackToOrdering -> {
                     val navController = findNavController()
-                    navController.previousBackStackEntry?.savedStateHandle?.set("addressId", event.addressId)
+                    navController.previousBackStackEntry?.savedStateHandle?.set("address", event.address)
                     navController.popBackStack()
                 }
             }

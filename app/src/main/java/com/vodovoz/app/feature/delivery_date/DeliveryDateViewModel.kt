@@ -3,6 +3,8 @@ package com.vodovoz.app.feature.delivery_date
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import com.vodovoz.app.R
+import com.vodovoz.app.common.resources.ResourcesProvider
 import com.vodovoz.app.design_system.model.SectionUi
 import com.vodovoz.app.design_system.model.toUi
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
@@ -37,8 +39,10 @@ class DeliveryDateViewModel @Inject constructor(
 
     fun fetchDeliveryDateDetails() = viewModelScope.launch {
         val selectedLocalDate = try {
-            LocalDate.parse(stateSnapshot.selectedOption.value, VodovozDateFormatters.DMY)
-        } catch (_: Throwable) { LocalDate.now() }
+            LocalDate.parse(stateSnapshot.selectedDateOption.value, VodovozDateFormatters.DMY)
+        } catch (_: Throwable) {
+            LocalDate.now()
+        }
 
         val deliveryDateDetailsResult = vodovozServiceRepository.getDeliveryDateDetails(
             addressId = addressId,
@@ -59,7 +63,7 @@ class DeliveryDateViewModel @Inject constructor(
                     options = options,
                     timeSections = timeSections,
                     selectedTimeSection = firstSection,
-                    selectedOption = s.selectedOption.takeIf { it != DeliveryDateOptionUi.Empty }
+                    selectedDateOption = s.selectedDateOption.takeIf { it != DeliveryDateOptionUi.Empty }
                         ?: options.firstOrNull() ?: DeliveryDateOptionUi.Empty,
                     selectedTimeInterval = firstSection.items.firstOrNull()
                         ?: DeliveryTimeIntervalUi.Empty,
@@ -80,7 +84,7 @@ class DeliveryDateViewModel @Inject constructor(
     fun selectDateOption(dateOption: DeliveryDateOptionUi) {
         _state.update { s ->
             s.copy(
-                selectedOption = dateOption,
+                selectedDateOption = dateOption,
                 uiState = DeliveryDateUiState.BodyLoading
             )
         }
@@ -103,8 +107,13 @@ class DeliveryDateViewModel @Inject constructor(
         }
     }
 
-    fun chooseDeliveryDate() {
-        //todo - need finish
+    fun chooseDeliveryDate() = viewModelScope.launch {
+        _events.emit(
+            DeliveryDateEvent.GoBackToOrdering(
+                timeInterval = stateSnapshot.selectedTimeInterval,
+                dateOption = stateSnapshot.selectedDateOption
+            )
+        )
     }
 
     fun showCalendarDialog() {
@@ -117,29 +126,31 @@ class DeliveryDateViewModel @Inject constructor(
         _state.update { s ->
             s.copy(showCalendarDialog = false)
         }
-        if(stateSnapshot.uiState == DeliveryDateUiState.Loading){ navigateBack() }
+        if (stateSnapshot.uiState == DeliveryDateUiState.Loading) {
+            navigateBack()
+        }
     }
 
     fun selectCalendarDate(date: LocalDate) {
         val formattedDate = date.format(VodovozDateFormatters.DMY)
 
-        if (formattedDate == stateSnapshot.selectedOption.value) return
+        if (formattedDate == stateSnapshot.selectedDateOption.value) return
 
         _state.update { s ->
             s.copy(
-                selectedOption = s.options.find { it.value == formattedDate }
-                    ?: s.selectedOption.copy(
+                selectedDateOption = s.options.find { it.value == formattedDate }
+                    ?: s.selectedDateOption.copy(
                         name = UUID.randomUUID().toString(),
                         value = formattedDate
                     ),
-                uiState = if(stateSnapshot.uiState != DeliveryDateUiState.Loading) DeliveryDateUiState.BodyLoading else s.uiState,
+                uiState = if (stateSnapshot.uiState != DeliveryDateUiState.Loading) DeliveryDateUiState.BodyLoading else s.uiState,
                 showCalendarDialog = false
             )
         }
 
         val uiState = stateSnapshot.uiState
 
-        if(uiState == DeliveryDateUiState.Loading || uiState == DeliveryDateUiState.BodyLoading){
+        if (uiState == DeliveryDateUiState.Loading || uiState == DeliveryDateUiState.BodyLoading) {
             fetchDeliveryDateDetails()
         }
     }

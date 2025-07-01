@@ -51,6 +51,7 @@ import com.vodovoz.app.data.vodovoz_service.model.order_details.WhereMyOrderDeta
 import com.vodovoz.app.data.vodovoz_service.model.order_history.OrdersHistoryDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.ordering.OrderCallYouDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.ordering.OrderingDetailsDTO
+import com.vodovoz.app.data.vodovoz_service.model.ordering.RecipientDTO
 import com.vodovoz.app.data.vodovoz_service.model.ordering.RecipientDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.payment_method.PaymentMethodDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.product_details.ProductDetailsDTO
@@ -144,6 +145,12 @@ interface VodovozService {
         @Query("adresid") addressId: Long,
         @Query("userid") userId: Long?,
     ): Response<VodovozResponseDTO<RecipientDetailsDTO>>
+
+    @GET("oformlenie/profil.php?action=glav&proverka=Y")
+    suspend fun getRecipient(
+        @Query("adresid") addressId: Long,
+        @Query("userid") userId: Long?,
+    ): Response<VodovozResponseDTO<RecipientDTO>>
 
     @GET("oformlenie/profil.php?action=update")
     suspend fun sendOrderRecipient(

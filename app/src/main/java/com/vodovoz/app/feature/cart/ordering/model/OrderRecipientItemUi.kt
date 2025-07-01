@@ -8,7 +8,8 @@ data class OrderRecipientItemUi(
     val image: String,
     val name: String,
     val description: String,
-    val id: String
+    val id: String,
+    val error: Boolean = false
 )
 
 fun OrderRecipientItemModel.toUi(): OrderRecipientItemUi{

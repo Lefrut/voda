@@ -12,6 +12,8 @@
 
     <string name="have_not_account_text">Нет аккаунта?</string>
     <string name="create_account_btn_text">Создайте</string>
+
+    <string name="data_not_filled_error">Не заполнены данные</string>
     
     //BottomNavMenu
     <string name="home">Главный</string>
@@ -285,5 +287,6 @@
     <string name="delete_account_error">Не удалось удалить аккаунт, попробойте снова!</string>
     <string name="logout_after_delete_error">Не удалось выйти из аккаунта после удаления, попробойте снова!</string>
     <string name="new_address">Новый адрес</string>
+    <string name="date_time_inteval">%1$s, %2$s</string>
 
 </resources>

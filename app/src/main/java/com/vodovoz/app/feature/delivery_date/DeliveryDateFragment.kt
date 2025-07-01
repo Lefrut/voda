@@ -59,6 +59,15 @@ class DeliveryDateFragment : Fragment() {
                                 DeliveryDateEvent.GoBack -> {
                                     findNavController().popBackStack()
                                 }
+
+                                is DeliveryDateEvent.GoBackToOrdering -> {
+                                    val navController = findNavController()
+                                    navController.previousBackStackEntry?.savedStateHandle?.apply {
+                                        set("timeInterval", event.timeInterval)
+                                        set("dateOption", event.dateOption)
+                                    }
+                                    navController.popBackStack()
+                                }
                             }
                         }
                     }

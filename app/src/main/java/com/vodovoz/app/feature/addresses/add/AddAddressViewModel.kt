@@ -9,8 +9,10 @@ import com.vodovoz.app.common.model.boolean
 import com.vodovoz.app.common.model.from
 import com.vodovoz.app.common.resources.ResourcesProvider
 import com.vodovoz.app.design_system.model.toUi
+import com.vodovoz.app.design_system.model.widgets.EmptyTextValidator
 import com.vodovoz.app.design_system.model.widgets.FieldUi
 import com.vodovoz.app.design_system.model.widgets.FieldWidgetUpdater
+import com.vodovoz.app.design_system.model.widgets.NoRequiredValidator
 import com.vodovoz.app.design_system.model.widgets.RadioGroupUpdater
 import com.vodovoz.app.design_system.model.widgets.SingleCheckboxGroupUpdater
 import com.vodovoz.app.design_system.model.widgets.SwitchUi
@@ -18,6 +20,7 @@ import com.vodovoz.app.design_system.model.widgets.SwitchWidgetUpdater
 import com.vodovoz.app.design_system.model.widgets.WidgetUi
 import com.vodovoz.app.design_system.model.widgets.WidgetUpdater
 import com.vodovoz.app.design_system.model.widgets.WidgetUpdaterHandler
+import com.vodovoz.app.design_system.model.widgets.checkFields
 import com.vodovoz.app.design_system.model.widgets.mapToUi
 import com.vodovoz.app.design_system.model.widgets.toUi
 import com.vodovoz.app.domain.general.respository.MapServiceRepository
@@ -32,6 +35,7 @@ import com.vodovoz.app.ui.mvi.MviViewModel
 import com.vodovoz.app.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -56,13 +60,14 @@ class AddAddressViewModel @Inject constructor(
     companion object {
         private const val PRIVATE_HOUSE_ID = "chasdom"
         private const val DELIVERY_OFFICE_ID = "dostavkaofis"
+        private const val FLOOR_ID = "floor"
+        private const val FLAT_ID = "flat"
+
     }
 
     init {
-        viewModelScope.launch {
-            savedStateHandle.get<MapAddressUi>("mapAddress")?.let {
-                _state.update { s -> s.copy(mapAddress = it) }
-            }
+        savedStateHandle.get<MapAddressUi>("mapAddress")?.let { mapAddress ->
+            _state.update { s -> s.copy(mapAddress = mapAddress) }
         }
         fetchAddressDetails()
     }
@@ -104,14 +109,29 @@ class AddAddressViewModel @Inject constructor(
             w.id to w.value()
         } + stateSnapshot.gridFields.associate { w ->
             w.id to w.value()
-        } + with(stateSnapshot.addressField) { id to value() })
+        } + with(stateSnapshot.addressField) { id to (stateSnapshot.mapAddress?.name ?: value()) })
     }
 
     fun addAddress() = viewModelScope.launch {
 
-        val params = getWidgetIdsAndValues()
-
         val mapAddress = stateSnapshot.mapAddress ?: return@launch
+
+        stateSnapshot.gridFields.checkFields(
+            putErrors = true,
+            validators = listOf(
+                NoRequiredValidator,
+                EmptyTextValidator,
+            ),
+        ) { fields, isValid ->
+            if (!isValid) {
+                _state.update { s ->
+                    s.copy(gridFields = fields, button = s.button.copy(enabled = false))
+                }
+                return@launch
+            }
+        }
+
+        val params = getWidgetIdsAndValues()
 
         _state.update { s ->
             s.copy(
@@ -143,6 +163,22 @@ class AddAddressViewModel @Inject constructor(
 
     fun updateAddress() = viewModelScope.launch {
         if (addressId == null) return@launch
+
+        stateSnapshot.gridFields.checkFields(
+            putErrors = true,
+            validators = listOf(
+                NoRequiredValidator,
+                EmptyTextValidator,
+            ),
+        ) { fields, isValid ->
+            if (!isValid) {
+                _state.update { s ->
+                    s.copy(gridFields = fields, button = s.button.copy(enabled = false))
+                }
+                return@launch
+            }
+        }
+
         val params = getWidgetIdsAndValues()
 
         val mapAddress = stateSnapshot.mapAddress ?: return@launch
@@ -213,7 +249,12 @@ class AddAddressViewModel @Inject constructor(
     private val widgetUpdaterHandler = WidgetUpdaterHandler(
         updaters = listOf(
             addressTypesSwitchUpdater,
-            FieldWidgetUpdater(),
+            FieldWidgetUpdater(
+                listOf(
+                    NoRequiredValidator,
+                    EmptyTextValidator,
+                )
+            ),
             SwitchWidgetUpdater(),
             RadioGroupUpdater(),
             SingleCheckboxGroupUpdater()
@@ -242,6 +283,22 @@ class AddAddressViewModel @Inject constructor(
                 button = s.button.copy(enabled = true)
             )
         }
+
+        val privateHouseSwitch = stateSnapshot.linearSwitches.find { it.id == PRIVATE_HOUSE_ID }
+        _state.update { s ->
+            s.copy(
+                gridFields = s.gridFields.map { gridField ->
+                    if (gridField.id == FLOOR_ID || gridField.id == FLAT_ID) {
+                        gridField.copy(
+                            isRequired = privateHouseSwitch?.value != true,
+                            isError = gridField.isError && privateHouseSwitch?.value == false
+                        )
+                    } else {
+                        gridField
+                    }
+                }
+            )
+        }
     }
 
     fun fetchAddressDetails() = viewModelScope.launch {
@@ -250,8 +307,8 @@ class AddAddressViewModel @Inject constructor(
         }
 
         val mapAddressDeferred = async {
-            mapServiceRepository.searchAddressInMoscow(
-                stateSnapshot.mapAddress?.name ?: addressName ?: return@async null
+            stateSnapshot.mapAddress ?: mapServiceRepository.searchAddressInMoscow(
+                addressName ?: return@async null
             ).singleResult().getOrNull()?.toUi()
         }
 
@@ -260,6 +317,8 @@ class AddAddressViewModel @Inject constructor(
             vodovozServiceRepository.getAddAddressDetails(addressId).singleResult()
 
         addAddressDetailsResult.onSuccess { addAddressDetails ->
+
+            delay(300L)
 
             _state.update { s ->
 
@@ -272,12 +331,12 @@ class AddAddressViewModel @Inject constructor(
                     linearFields = addAddressDetails.linearFields.mapToUi(),
                     gridFields = addAddressDetails.gridFields.mapToUi(),
                     addressField = addressField.copy(
-                        value = currentMapAddress?.let {
+                        value = currentMapAddress?.let { mapAddress ->
                             resourcesProvider.getString(
                                 R.string.full_address,
-                                it.city,
-                                it.street,
-                                it.house
+                                mapAddress.city,
+                                mapAddress.street,
+                                mapAddress.house
                             )
                         } ?: addressField.value
                     ),

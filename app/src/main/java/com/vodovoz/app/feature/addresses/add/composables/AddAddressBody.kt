@@ -52,7 +52,7 @@ fun AddAddressBody(
                     modifier = Modifier.detectTap {
                         onWidgetClick(addressWidget)
                     },
-                    widget = addressWidget,
+                    widget = if (addressWidget is FieldUi) addressWidget.copy(readOnly = true) else addressWidget,
                     onWidgetChange = { _, _ -> }
                 )
             }
@@ -81,13 +81,15 @@ fun AddAddressBody(
                 }
             }
 
-            Column {
-                linearSwitches.forEach { widget ->
-                    key(widget.id) {
-                        VodovozWidget(
-                            widget = widget,
-                            onWidgetChange = onWidgetChange
-                        )
+            if(linearSwitches.isNotEmpty()){
+                Column {
+                    linearSwitches.forEach { widget ->
+                        key(widget.id) {
+                            VodovozWidget(
+                                widget = widget,
+                                onWidgetChange = onWidgetChange
+                            )
+                        }
                     }
                 }
             }

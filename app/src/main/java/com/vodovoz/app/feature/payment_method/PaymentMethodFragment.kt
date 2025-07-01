@@ -15,6 +15,7 @@ import com.vodovoz.app.common.tab.TabManager
 import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.effects.LifecycleEffect
 import com.vodovoz.app.feature.payment_method.model.PaymentMethodEvent
+import com.vodovoz.app.feature.payment_method.model.toNav
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -55,6 +56,15 @@ class PaymentMethodFragment : Fragment() {
                             when (event) {
                                 PaymentMethodEvent.GoBack -> {
                                     findNavController().popBackStack()
+                                }
+
+                                is PaymentMethodEvent.GoBackToOrdering -> {
+                                    val navController = findNavController()
+                                    navController.previousBackStackEntry?.savedStateHandle?.apply {
+                                        set("paymentBalance", event.paymentBalance?.toNav())
+                                        set("paymentMethod", event.paymentMethod?.toNav())
+                                    }
+                                    navController.popBackStack()
                                 }
                             }
                         }

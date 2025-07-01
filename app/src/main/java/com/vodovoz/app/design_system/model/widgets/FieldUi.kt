@@ -137,7 +137,7 @@ val KeyboardTypeValidator = FieldValidator { field ->
 val NameValidator = FieldValidator { field ->
     val value = field.value
     when {
-        field.id == "name" || field.id == "lastname" || field.id == "dr49" -> {
+        field.id == "name" || field.id == "lastname" || field.id == "dr49" || field.id == "fio"-> {
             FieldValidationResult.from(value.length in 3..30 && value.isNotBlank())
         }
 
@@ -185,7 +185,7 @@ fun FieldUi.getErrorText(getStringResource: (Int) -> String): String {
             getStringResource(R.string.supporting_text_email)
         }
 
-        id == "name" || id == "dr123" || id == "dr49" -> {
+        id == "name" || id == "dr123" || id == "dr49" || id == "fio" -> {
             getStringResource(R.string.supporting_text_name)
         }
 

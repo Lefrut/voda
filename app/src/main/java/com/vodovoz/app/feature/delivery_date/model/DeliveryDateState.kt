@@ -9,7 +9,7 @@ data class DeliveryDateState(
     val title: String = "",
     val button: ColorfulButtonUi = ColorfulButtonUi.Empty,
     val options: List<DeliveryDateOptionUi> = emptyList(),
-    val selectedOption: DeliveryDateOptionUi = DeliveryDateOptionUi.Empty,
+    val selectedDateOption: DeliveryDateOptionUi = DeliveryDateOptionUi.Empty,
     val timeSections: List<SectionUi<DeliveryTimeIntervalUi>> = emptyList(),
     val selectedTimeSection: SectionUi<DeliveryTimeIntervalUi> = SectionUi.empty(),
     val selectedTimeInterval: DeliveryTimeIntervalUi = DeliveryTimeIntervalUi.Empty,

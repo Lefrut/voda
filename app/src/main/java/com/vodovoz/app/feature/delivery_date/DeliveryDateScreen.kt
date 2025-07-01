@@ -78,7 +78,7 @@ fun DeliveryDateScreen(
                         listIsLoading = uiState is DeliveryDateUiState.BodyLoading,
                         listPaddingValues = PaddingValues(bottom = paddingValues.calculateBottomPadding()),
                         options = viewState.options,
-                        selectedOption = viewState.selectedOption,
+                        selectedOption = viewState.selectedDateOption,
                         timeSections = viewState.timeSections,
                         selectedTimeSection = viewState.selectedTimeSection,
                         selectedTimeInterval = viewState.selectedTimeInterval,
@@ -108,7 +108,7 @@ fun DeliveryDateScreen(
         val initialCalendarDay = remember {
 
             val initialDate = try {
-                LocalDate.parse(viewState.selectedOption.value, VodovozDateFormatters.DMY)
+                LocalDate.parse(viewState.selectedDateOption.value, VodovozDateFormatters.DMY)
             } catch (_: Throwable){
                 LocalDate.now()
             }

@@ -10,15 +10,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import coil3.compose.rememberAsyncImagePainter
 import com.vodovoz.app.design_system.composables.button.VodovozOutlineButton
-import com.vodovoz.app.feature.cart.ordering.model.OrderPaymentItemUi
+import com.vodovoz.app.feature.cart.ordering.model.OrderingMenuItemUi
 
 @Suppress("NonSkippableComposable")
 @Composable
 fun OrderingPaymentColumn(
     modifier: Modifier = Modifier,
     title: String,
-    items: List<OrderPaymentItemUi>,
-    onPaymentButtonClick: (OrderPaymentItemUi) -> Unit,
+    items: List<OrderingMenuItemUi>,
+    onPaymentButtonClick: (OrderingMenuItemUi) -> Unit,
 ) {
     Column(modifier = modifier.padding(horizontal = 16.dp)) {
         if (title.isNotEmpty()) {
@@ -36,6 +36,7 @@ fun OrderingPaymentColumn(
                     imagePainter = rememberAsyncImagePainter(model = orderPaymentItem.image),
                     name = orderPaymentItem.name,
                     description = orderPaymentItem.description,
+                    error = orderPaymentItem.error,
                     onClick = { onPaymentButtonClick(orderPaymentItem) }
                 )
             }

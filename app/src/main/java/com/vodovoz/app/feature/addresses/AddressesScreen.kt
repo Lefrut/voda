@@ -22,7 +22,7 @@ import com.vodovoz.app.design_system.composables.placeholders.LoadingPlaceholder
 import com.vodovoz.app.design_system.composables.placeholders.NetworkErrorPlaceholder
 import com.vodovoz.app.design_system.composables.placeholders.VodovozPlaceholder
 import com.vodovoz.app.design_system.composables.top_bar.VodovozTopBar
-import com.vodovoz.app.feature.addresses.composables.AddressBody
+import com.vodovoz.app.feature.addresses.composables.AddressesBody
 import com.vodovoz.app.feature.addresses.model.AddressScreenTypeUi
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -56,11 +56,7 @@ fun AddressesScreen(
         bottomBar = {
             if (uiState is AddressesFlowViewModel.AddressesUiState.Success) {
                 VodovozButton(
-                    modifier = Modifier.padding(
-                        bottom = 24.dp,
-                        start = 16.dp,
-                        end = 16.dp
-                    ),
+                    modifier = Modifier.padding(bottom = 24.dp, start = 16.dp, end = 16.dp),
                     text = when (viewState.screenType) {
                         AddressScreenTypeUi.Add -> stringResource(R.string.add_address)
                         AddressScreenTypeUi.Choose -> stringResource(R.string.choose)
@@ -121,7 +117,7 @@ fun AddressesScreen(
                         viewModel.refresh()
                     }
                 ) {
-                    AddressBody(
+                    AddressesBody(
                         contentPadding = PaddingValues(bottom = paddingValues.calculateBottomPadding() + 24.dp),
                         screenTypeUi = viewState.screenType,
                         addressSections = viewState.addressSections,

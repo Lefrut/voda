@@ -22,15 +22,15 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.vodovoz.app.R
 import com.vodovoz.app.design_system.composables.bottomLine
-import com.vodovoz.app.feature.cart.ordering.model.OrderRecipientItemUi
+import com.vodovoz.app.feature.cart.ordering.model.OrderingMenuItemUi
 
 @Suppress("NonSkippableComposable")
 @Composable
 fun OrderingRecipientColumn(
     modifier: Modifier = Modifier,
     title: String,
-    items: List<OrderRecipientItemUi>,
-    onItemClick: (OrderRecipientItemUi) -> Unit,
+    items: List<OrderingMenuItemUi>,
+    onItemClick: (OrderingMenuItemUi) -> Unit,
 ) {
     Column(modifier = modifier) {
         if (title.isNotEmpty()) {
@@ -63,8 +63,8 @@ fun OrderingRecipientColumn(
 @Composable
 fun OrderRecipientItemButton(
     modifier: Modifier = Modifier,
-    item: OrderRecipientItemUi,
-    onClick: (OrderRecipientItemUi) -> Unit,
+    item: OrderingMenuItemUi,
+    onClick: (OrderingMenuItemUi) -> Unit,
 ) {
     Row(
         modifier = modifier
@@ -89,11 +89,13 @@ fun OrderRecipientItemButton(
                 color = MaterialTheme.colorScheme.onBackground,
                 style = MaterialTheme.typography.bodyMedium
             )
-            Text(
-                text = item.description,
-                color = MaterialTheme.colorScheme.surfaceTint,
-                style = MaterialTheme.typography.labelSmall
-            )
+            if (item.description.isNotEmpty()) {
+                Text(
+                    text = item.description,
+                    color = if (item.error) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.surfaceTint,
+                    style = MaterialTheme.typography.labelSmall
+                )
+            }
         }
 
         Icon(

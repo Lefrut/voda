@@ -37,7 +37,7 @@ import com.vodovoz.app.feature.addresses.model.AddressUi
 
 @Suppress("NonSkippableComposable")
 @Composable
-fun AddressBody(
+fun AddressesBody(
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues,
     addressSections: List<SectionUi<AddressUi>>,
@@ -137,7 +137,7 @@ private fun AddressItemCard(
                 .weight(1f),
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-            if (address.description.isNotEmpty()) {
+            if (address.description.isNotEmpty() && screenTypeUi != AddressScreenTypeUi.Choose) {
                 Text(
                     text = address.description,
                     style = MaterialTheme.typography.bodyMedium.copy(
@@ -149,7 +149,9 @@ private fun AddressItemCard(
             }
 
             Text(
-                text = address.address,
+                text = address.address.replaceFirstChar { char ->
+                    char.uppercaseChar()
+                },
                 style = MaterialTheme.typography.bodyMedium.copy(letterSpacing = 0.sp),
                 color = MaterialTheme.colorScheme.onBackground
             )

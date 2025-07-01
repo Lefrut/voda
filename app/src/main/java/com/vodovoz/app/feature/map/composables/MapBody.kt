@@ -93,9 +93,9 @@ fun MapBody(
     val density = LocalDensity.current
 
     BoxWithConstraints(modifier = modifier.fillMaxSize()) {
-        val mapHeight = rememberSaveable(saver = Dp.Saver) { maxHeight }
-        val focusMapWidth = rememberSaveable(saver = Dp.Saver) { maxWidth }
-        val focusMapHeight = rememberSaveable(saver = Dp.Saver) { mapHeight - 220.dp }
+        val mapHeight = remember { maxHeight }
+        val focusMapWidth = remember() { maxWidth }
+        val focusMapHeight = remember() { mapHeight - 220.dp }
 
         YandexMapView(
             modifier = Modifier.size(focusMapWidth, mapHeight),

@@ -16,9 +16,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -34,6 +34,7 @@ fun VodovozOutlineButton(
     imagePainter: AsyncImagePainter?,
     name: String,
     description: String = "",
+    error: Boolean = false,
     onClick: () -> Unit,
 ) {
     VodovozOutlinedCard(
@@ -43,7 +44,7 @@ fun VodovozOutlineButton(
         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
         onClick = onClick
     ) {
-        
+
 
         Row(verticalAlignment = Alignment.CenterVertically) {
             imagePainter?.let {
@@ -69,8 +70,10 @@ fun VodovozOutlineButton(
                 if (description.isNotEmpty()) {
                     Text(
                         text = description,
-                        color = MaterialTheme.colorScheme.surfaceTint,
-                        style = MaterialTheme.typography.labelSmall
+                        color = if (error) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.surfaceTint,
+                        style = MaterialTheme.typography.labelSmall,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
             }

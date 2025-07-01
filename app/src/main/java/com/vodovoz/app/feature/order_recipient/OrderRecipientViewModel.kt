@@ -3,9 +3,13 @@ package com.vodovoz.app.feature.order_recipient
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import com.vodovoz.app.common.resources.ResourcesProvider
 import com.vodovoz.app.design_system.model.ColorfulButtonUi
 import com.vodovoz.app.design_system.model.toUi
 import com.vodovoz.app.design_system.model.widgets.FieldUi
+import com.vodovoz.app.design_system.model.widgets.PhoneNumberValidator
+import com.vodovoz.app.design_system.model.widgets.checkFields
+import com.vodovoz.app.design_system.model.widgets.getErrorText
 import com.vodovoz.app.design_system.model.widgets.mapToDomain
 import com.vodovoz.app.design_system.model.widgets.mapToUi
 import com.vodovoz.app.design_system.model.widgets.updateField
@@ -25,6 +29,7 @@ import javax.inject.Inject
 class OrderRecipientViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val vodovozServiceRepository: VodovozServiceRepository,
+    private val resourcesProvider: ResourcesProvider,
 ) : MviViewModel<OrderRecipientState, OrderRecipientEvent>(OrderRecipientState()) {
 
     private val addressId = savedStateHandle.get<Long>("addressId") ?: -1
@@ -65,14 +70,45 @@ class OrderRecipientViewModel @Inject constructor(
     }
 
     fun changeField(field: FieldUi, updatedField: FieldUi) {
-        _state.update { s ->
-            s.copy(
-                fields = s.fields.updateField(field, updatedField),
-            )
+        stateSnapshot.fields.checkFields(
+            putErrors = false,
+            validators = listOf(PhoneNumberValidator)
+        ) { updatedFields, isValid ->
+            _state.update { s ->
+                s.copy(
+                    fields = updatedFields.updateField(
+                        field = field,
+                        newField = updatedField
+                    ),
+                    button = s.button.copy(enabled = isValid)
+                )
+            }
         }
+
     }
 
     fun activateButton(button: ColorfulButtonUi) = viewModelScope.launch {
+        stateSnapshot.fields.checkFields(
+            putErrors = true,
+            getSupportingText = { field ->
+                field.getErrorText { resId ->
+                    resourcesProvider.getString(resId)
+                }
+            }
+        ) { fields, isValid ->
+
+            _state.update { s ->
+                s.copy(
+                    button = s.button.copy(enabled = false),
+                    fields = fields
+                )
+            }
+
+            if (!isValid) {
+                return@launch
+            }
+        }
+
         _state.update { s ->
             s.copy(button = s.button.copy(loading = true))
         }
@@ -80,9 +116,10 @@ class OrderRecipientViewModel @Inject constructor(
         vodovozServiceRepository.sendOrderRecipient(
             addressId = addressId,
             fields = stateSnapshot.fields.mapToDomain()
-        ).singleResult().onSuccess {
-            _events.emit(OrderRecipientEvent.GoBack)
-        }
+        ).singleResult()
+
+        _events.emit(OrderRecipientEvent.GoBackToOrdering)
+
 
         _state.update { s ->
             s.copy(button = s.button.copy(loading = false))

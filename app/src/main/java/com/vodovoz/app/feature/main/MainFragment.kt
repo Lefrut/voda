@@ -2,15 +2,13 @@ package com.vodovoz.app.feature.main
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.app.Activity.RESULT_OK
 import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.view.animation.AccelerateInterpolator
+import android.view.animation.LinearInterpolator
 import androidx.activity.result.ActivityResult
-import androidx.activity.result.ActivityResultCallback
-import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
@@ -101,14 +99,14 @@ class MainFragment : Fragment(R.layout.fragment_main) {
         }
     }
 
-    private val updateResultLauncher = registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result: ActivityResult ->
-        if (result.resultCode != RESULT_OK) {
-            accountManager.reportError("Update flow failed! Result code: ${result.resultCode}")
+    private val updateResultLauncher =
+        registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result: ActivityResult ->
+            if (result.resultCode != RESULT_OK) {
+                accountManager.reportError("Update flow failed! Result code: ${result.resultCode}")
+            } else {
+                accountManager.reportEvent("Success update!")
+            }
         }
-        else{
-            accountManager.reportEvent("Success update!")
-        }
-    }
 
     private fun checkForUpdate() {
         appUpdateController.checkForUpdate(updateResultLauncher)
@@ -130,10 +128,19 @@ class MainFragment : Fragment(R.layout.fragment_main) {
     private fun observeTabVisibility() = lifecycleScope.launch {
         repeatOnLifecycle(Lifecycle.State.STARTED) {
             tabManager.observeTabVisibility().collect { isVisible ->
-                binding.nvNavigation.visibility = if (isVisible) View.VISIBLE else View.GONE
+                val navView = binding.nvNavigation
+                if (isVisible) {
+                    navView.apply {
+                        animate().cancel()
+                        alpha = 0f
+                        visibility = View.VISIBLE
+                        animate().alpha(1f).setInterpolator(LinearInterpolator()).setDuration(400).start()
+                    }
+                } else {
+                    navView.apply { visibility = View.GONE }
+                }
             }
         }
-
     }
 
     private fun observeTabWindowInsets() = lifecycleScope.launch {

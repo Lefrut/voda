@@ -16,7 +16,7 @@ import com.vodovoz.app.design_system.model.SectionUi
 import com.vodovoz.app.design_system.model.widgets.FieldUi
 import com.vodovoz.app.design_system.model.order.OrderSummaryItemUi
 import com.vodovoz.app.feature.cart.ordering.model.OrderNotifyItemUi
-import com.vodovoz.app.feature.cart.ordering.model.OrderPaymentItemUi
+import com.vodovoz.app.feature.cart.ordering.model.OrderingMenuItemUi
 import com.vodovoz.app.feature.cart.ordering.model.OrderRecipientItemUi
 
 @Suppress("NonSkippableComposable")
@@ -25,16 +25,16 @@ fun OrderingBody(
     modifier: Modifier = Modifier,
     scrollState: ScrollState,
     comment: FieldUi?,
-    paymentSection: SectionUi<OrderPaymentItemUi>,
+    paymentSection: SectionUi<OrderingMenuItemUi>,
     notifySection: SectionUi<OrderNotifyItemUi>,
     selectedNotifyItem: OrderNotifyItemUi,
-    recipientSection: SectionUi<OrderRecipientItemUi>,
+    recipientSection: SectionUi<OrderingMenuItemUi>,
     totals: List<OrderSummaryItemUi>,
     button: ColorfulButtonUi,
-    onRecipientItemClick: (OrderRecipientItemUi) -> Unit,
+    onRecipientItemClick: (OrderingMenuItemUi) -> Unit,
     onCommentChange: (FieldUi, FieldUi) -> Unit,
     onNotifyItemSelect: (OrderNotifyItemUi) -> Unit,
-    onPaymentButtonClick: (OrderPaymentItemUi) -> Unit,
+    onPaymentButtonClick: (OrderingMenuItemUi) -> Unit,
     onButtonClick: () -> Unit,
 ) {
     Column(

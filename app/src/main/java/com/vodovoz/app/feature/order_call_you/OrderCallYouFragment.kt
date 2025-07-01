@@ -57,6 +57,12 @@ class OrderCallYouFragment : Fragment() {
                                 OrderCallYouEvent.GoBack -> {
                                     findNavController().popBackStack()
                                 }
+
+                                is OrderCallYouEvent.GoBackToOrdering -> {
+                                    val navController = findNavController()
+                                    navController.previousBackStackEntry?.savedStateHandle?.set("callYou", event.currentItem)
+                                    navController.popBackStack()
+                                }
                             }
                         }
                     }
