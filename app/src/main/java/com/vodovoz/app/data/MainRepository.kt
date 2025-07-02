@@ -6,9 +6,11 @@ import com.vodovoz.app.data.parser.response.map.UpdateAddressResponseJsonParser.
 import com.vodovoz.app.data.parser.response.ordering.RegOrderResponseJsonParser.parseRegOrderResponse
 import javax.inject.Inject
 
-class MainRepository @Inject constructor(
-    private val api: MainApi,
+class MainRepository(
+    private val api: MainApi = mainApi,
 ) {
+
+    @Inject constructor() : this(mainApi)
     /**
      * map
      */
@@ -21,38 +23,6 @@ class MainRepository @Inject constructor(
     /**
      * Addresses
      */
-
-    //Добавить адрес в сохраненные
-    suspend fun addAddress(
-        locality: String?,
-        street: String?,
-        house: String?,
-        entrance: String?,
-        floor: String?,
-        office: String?,
-        intercom: String?,
-        type: Int?,
-        userId: Long?,
-        lat: String,
-        longitude: String,
-        length: String,
-        fullAddress: String,
-    ) = api.fetchAddressResponse(
-        locality = locality,
-        street = street,
-        house = house,
-        entrance = entrance,
-        floor = floor,
-        office = office,
-        intercom = intercom,
-        type = type,
-        userid = userId,
-        blockId = 102,
-        action = "add",
-        fullAddress = fullAddress,
-        length = length,
-        longAndLat = "$lat,$longitude"
-    ).parseAddAddressResponse()
 
     //Обновить адрес
     suspend fun updateAddress(

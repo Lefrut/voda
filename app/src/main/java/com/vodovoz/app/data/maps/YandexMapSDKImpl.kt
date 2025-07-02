@@ -104,7 +104,6 @@ class YandexMapSDKImpl @Inject constructor() : YandexMapSDK {
         }
     }
 
-    private var drivingSession: DrivingSession? = null
 
     override suspend fun getRoute(start: Point, end: Point): List<Point> {
         return suspendCancellableCoroutine { cont ->
@@ -113,7 +112,7 @@ class YandexMapSDKImpl @Inject constructor() : YandexMapSDK {
                 RequestPoint(end, RequestPointType.WAYPOINT, null)
             )
 
-            drivingSession = drivingRouter.requestRoutes(
+            drivingRouter.requestRoutes(
                 requestPoints,
                 DrivingOptions(),
                 VehicleOptions(),

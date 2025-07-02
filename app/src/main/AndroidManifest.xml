@@ -62,7 +62,6 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <category android:name="android.intent.category.DEFAULT" />
 
-                <!--TODO - change schemes-->
                 <data
                     android:host="vodovoz.ru"
                     android:pathPrefix="/mobile_app/"

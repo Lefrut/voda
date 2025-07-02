@@ -110,6 +110,20 @@ val PhoneNumberValidator = FieldValidator { field ->
     }
 }
 
+val INNValidator = FieldValidator { field ->
+    return@FieldValidator when (field.id) {
+        "inn" -> FieldValidationResult.from(field.value.filter { char -> char.isDigit() }.length in 10..12)
+        else -> FieldValidationResult.NOT_APPLICABLE
+    }
+}
+
+val EmailValidator = FieldValidator { field ->
+    return@FieldValidator when (field.keyboardType) {
+        KeyboardType.Email -> FieldValidationResult.from(ValidationUtils.EMAIL_REGEX.matches(field.value))
+        else -> FieldValidationResult.NOT_APPLICABLE
+    }
+}
+
 val KeyboardTypeValidator = FieldValidator { field ->
     val value = field.value
 
@@ -137,7 +151,7 @@ val KeyboardTypeValidator = FieldValidator { field ->
 val NameValidator = FieldValidator { field ->
     val value = field.value
     when {
-        field.id == "name" || field.id == "lastname" || field.id == "dr49" || field.id == "fio"-> {
+        field.id == "name" || field.id == "lastname" || field.id == "dr49" || field.id == "fio" -> {
             FieldValidationResult.from(value.length in 3..30 && value.isNotBlank())
         }
 
@@ -201,6 +215,10 @@ fun FieldUi.getErrorText(getStringResource: (Int) -> String): String {
             getStringResource(R.string.supporting_text_message)
         }
 
+        id == "inn" -> {
+            getStringResource(R.string.error_invalid_inn)
+        }
+
         else -> ""
     }
 }
@@ -259,7 +277,7 @@ fun FieldModel.toUi(): FieldUi {
         "tel", "dr124", "phone", "dr50", "dr171" -> KeyboardType.Phone
         "pass", "parol" -> KeyboardType.Password
         "data", "date" -> KeyboardType.Unspecified
-        "oplata" -> KeyboardType.Number
+        "oplata", "inn" -> KeyboardType.Number
         else -> when (valueType.lowercase()) {
             "text" -> KeyboardType.Text
             "phone" -> KeyboardType.Phone

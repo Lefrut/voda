@@ -57,6 +57,7 @@ import com.vodovoz.app.domain.general.model.format
 import com.vodovoz.app.domain.general.model.location.AddAddressDetailsModel
 import com.vodovoz.app.domain.general.model.location.AddressModel
 import com.vodovoz.app.domain.general.model.location.MapAddressModel
+import com.vodovoz.app.domain.general.model.location.MapAreaModel
 import com.vodovoz.app.domain.general.model.order.CancelOrderDetailsModel
 import com.vodovoz.app.domain.general.model.order.DeliveryDateDetailsModel
 import com.vodovoz.app.domain.general.model.order.OrderCallYouDetailsModel
@@ -135,7 +136,10 @@ class VodovozServiceRepositoryImpl @Inject constructor(
         )
     }
 
-    override fun addAddress(address: MapAddressModel, params: Map<String, String>): Flow<Result<Long>> {
+    override fun addAddress(
+        address: MapAddressModel,
+        params: Map<String, String>,
+    ): Flow<Result<Long>> {
         return executeRequest(
             request = {
                 val point = address.point
@@ -144,6 +148,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
                     geo = "${point.lat},${point.lon}",
                     city = address.city,
                     street = address.street,
+                    fromMoscowToAddressKm = address.fromMoscowToPoint,
                     queries = params
                 )
             },
@@ -181,6 +186,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
                     geo = "${point.lat},${point.lon}",
                     city = address.city,
                     street = address.street,
+                    fromMoscowToAddressKm = address.fromMoscowToPoint,
                     params = params
                 )
             },
@@ -300,6 +306,42 @@ class VodovozServiceRepositoryImpl @Inject constructor(
             },
             mapper = {
                 it.data!!.toDomain()
+            }
+        )
+    }
+
+    override fun doOrder(
+        addressId: Long,
+        deliveryDate: String,
+        deliveryTimeInterval: String,
+        phone: String,
+        paymentMethodId: Long,
+        deliveryPrice: String,
+        callYouId: Long,
+        coupon: String?,
+        balance: String?,
+        deviceInfo: String?,
+        notifyDriverId: String?,
+        message: String?,
+    ): Flow<Result<String>> {
+        return executeRequest(
+            request = {
+                vodovozService.doOrder(
+                    addressId = addressId,
+                    userId = accountManager.fetchAccountId(),
+                    deliveryDate = deliveryDate,
+                    deliveryTimeInterval = deliveryTimeInterval,
+                    phone = phone,
+                    paymentMethodId = paymentMethodId,
+                    deliveryPrice = deliveryPrice,
+                    callYouId = callYouId,
+                    coupon = coupon,
+                    balance = balance,
+                    deviceInfo = deviceInfo
+                )
+            },
+            mapper = {
+                it.data ?: ""
             }
         )
     }
@@ -741,6 +783,15 @@ class VodovozServiceRepositoryImpl @Inject constructor(
                     moshi.fromJson<VodovozResponseDTO<VodovozPlaceholderDTO>>(body).data!!
                 throw EmptyResultException(placeholder = placeholder.toDomain())
             }
+        )
+    }
+
+    override fun getMapAreas(): Flow<Result<List<MapAreaModel>>> {
+        return executeRequest(
+            request = {
+                vodovozService.getMapAreas()
+            },
+            mapper = { it.data!!.mapToDomain() }
         )
     }
 

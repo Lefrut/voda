@@ -7,25 +7,40 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.viewinterop.AndroidView
 import com.vodovoz.app.design_system.model.MapPointUi
 import com.vodovoz.app.design_system.model.toMapPoint
+import com.vodovoz.app.design_system.model.toPoint
+import com.vodovoz.app.feature.map.model.MapAreaUi
 import com.vodovoz.app.ui.yandex_map.YandexMapUi
 import com.yandex.mapkit.ScreenPoint
 import com.yandex.mapkit.ScreenRect
+import com.yandex.mapkit.geometry.LinearRing
+import com.yandex.mapkit.geometry.Polygon
 
+@Suppress("NonSkippableComposable")
 @Composable
 fun YandexMapView(
     modifier: Modifier = Modifier,
     yandexMap: YandexMapUi,
+    areas: List<MapAreaUi>,
     focusMapHeightPx: Float,
     focusMapWidthPx: Float,
     onInputStart: () -> Unit,
     onInputEnd: () -> Unit,
-    onCenterChanged: (MapPointUi?) -> Unit
+    onCenterChanged: (MapPointUi?) -> Unit,
 ) {
+    LaunchedEffect(focusMapHeightPx, focusMapWidthPx) {
+        val mapView = yandexMap.mapView
+        mapView.focusRect = ScreenRect(
+            ScreenPoint(0f, 0f),
+            ScreenPoint(focusMapWidthPx, focusMapHeightPx)
+        )
+    }
+
     Box(
         modifier = modifier
             .pointerInput(Unit) {
@@ -68,16 +83,34 @@ fun YandexMapView(
     ) {
         AndroidView(
             modifier = Modifier.fillMaxWidth(),
-            factory = { yandexMap.mapView }
+            factory = {
+                yandexMap.mapView
+            },
+            update = { mapView ->
+                mapView.map.mapObjects.clear()
+
+                val polygonMapObjects = areas.map { area ->
+                    val points = area.points.map { point -> point.toPoint() }
+
+                    val polygon = Polygon(LinearRing(points), listOf())
+
+                    mapView.map.mapObjects.addPolygon(polygon).apply {
+                        fillColor = area.color.copy(0.15f).toArgb()
+                        strokeColor = area.color.copy(0.45f).toArgb()
+                        strokeWidth = 2f
+                        isVisible = false
+                    }
+                }
+
+                mapView.map.addCameraListener { _, cameraPosition, _, _ ->
+                    val showPolygons = cameraPosition.zoom < 12f
+
+                    polygonMapObjects.forEach { mapObject ->
+                        mapObject.isVisible = showPolygons
+                    }
+
+                }
+            }
         )
     }
-
-    LaunchedEffect(focusMapHeightPx, focusMapWidthPx) {
-        val mapView = yandexMap.mapView
-        mapView.focusRect = ScreenRect(
-            ScreenPoint(0f, 0f),
-            ScreenPoint(focusMapWidthPx, focusMapHeightPx)
-        )
-    }
-
 }

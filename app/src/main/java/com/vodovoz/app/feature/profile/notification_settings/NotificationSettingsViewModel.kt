@@ -103,7 +103,6 @@ class NotificationSettingsViewModel @Inject constructor(
     }
 
     fun saveNotificationSettings() {
-        //todo - need review when backend's fixed
         viewModelScope.launch {
 
             uiStateListener.updateData { s ->

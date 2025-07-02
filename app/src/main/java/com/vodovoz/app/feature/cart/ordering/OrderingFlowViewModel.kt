@@ -9,6 +9,8 @@ import com.vodovoz.app.common.content.Event
 import com.vodovoz.app.common.content.PagingContractViewModel
 import com.vodovoz.app.common.content.State
 import com.vodovoz.app.common.content.updateData
+import com.vodovoz.app.common.model.VodovozBoolean
+import com.vodovoz.app.common.model.from
 import com.vodovoz.app.common.resources.ResourcesProvider
 import com.vodovoz.app.design_system.model.ColorfulButtonUi
 import com.vodovoz.app.design_system.model.SectionUi
@@ -46,7 +48,7 @@ class OrderingFlowViewModel @Inject constructor(
     OrderingState(
     )
 ) {
-    private val coupon = savedStateHandle.get<String>("coupon") ?: ""
+    private val coupon = savedStateHandle.get<String>("coupon")
 
     companion object {
         private const val ADDRESS_MENU_ID = "adress"
@@ -254,9 +256,44 @@ class OrderingFlowViewModel @Inject constructor(
         }
     }
 
-    fun doOrder() = viewModelScope.launch {
+    fun doOrder(deviceInfo: String) = viewModelScope.launch {
         val ordering = dataState.ordering
 
+        if (
+            ordering.addressId != null && ordering.date != null
+            && ordering.timeInterval != null && ordering.recipientPhone != null
+            && ordering.paymentId != null && ordering.callYouId != null
+        ) {
+            uiStateListener.updateData { s ->
+                s.copy(button = s.button.copy(loading = true))
+            }
+
+            vodovozServiceRepository.doOrder(
+                addressId = ordering.addressId,
+                deliveryDate = ordering.date,
+                deliveryTimeInterval = ordering.timeInterval,
+                phone = ordering.recipientPhone,
+                paymentMethodId = ordering.paymentId.toLongOrNull() ?: 0,
+                //todo
+                deliveryPrice = "",
+                callYouId = ordering.callYouId.toLongOrNull() ?: 0,
+                coupon = coupon,
+                balance = VodovozBoolean.from(ordering.paymentBalance).value,
+                deviceInfo = deviceInfo,
+                notifyDriverId = dataState.selectedNotifyItem.value
+            ).singleResult()
+
+            uiStateListener.updateData { s ->
+                s.copy(button = s.button.copy(loading = false))
+            }
+
+        } else {
+            validateOrderingDetails()
+        }
+    }
+
+    private fun validateOrderingDetails() = viewModelScope.launch {
+        val ordering = dataState.ordering
         val recipientErrors = buildList {
             if (ordering.addressId == null) add(ADDRESS_MENU_ID)
             if (ordering.recipientName == null || ordering.recipientPhone == null) add(
@@ -297,10 +334,6 @@ class OrderingFlowViewModel @Inject constructor(
 
         if (recipientErrors.isNotEmpty()) {
             eventListener.emit(OrderingEvents.ScrollToTop)
-            return@launch
-        }
-
-        if (paymentErrors.isNotEmpty()) {
             return@launch
         }
     }

@@ -50,7 +50,7 @@ fun CartScreen(viewModel: CartFlowViewModel, viewState: CartFlowViewModel.CartSt
         Column(modifier = Modifier.fillMaxSize()) {
             CartTopBar(
                 title = viewState.title,
-                onShareClick = { /*todo - do if going to support cart share*/ }
+                onShareClick = { }
             )
             CartBody(
                 cartItems = viewState.cartItems,

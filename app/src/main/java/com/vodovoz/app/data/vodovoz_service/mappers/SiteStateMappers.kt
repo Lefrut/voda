@@ -11,7 +11,7 @@ import com.vodovoz.app.common.model.TrackingConfig
 
 fun SiteStateResponseDTO.toDomain(): VodovozSiteState {
     return VodovozSiteState(
-        //TODO - mb replace to "Y"
+        //TODO - replace to "Y"
         isActive = ACTIVE == "N",
         testUrl = TESTSAITSSILKA ?: "",
         smsUrl = SMSRASSILKA ?: "",

@@ -6,4 +6,5 @@ data class MapAddressModel(
     val city: String,
     val street: String,
     val house: String,
+    val fromMoscowToPoint: String = ""
 )
