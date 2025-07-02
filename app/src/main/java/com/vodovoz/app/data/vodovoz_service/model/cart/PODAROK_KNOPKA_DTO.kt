@@ -13,5 +13,7 @@ data class PODAROK_KNOPKA_DTO(
     @Json(name = "BACKGROUND")
     val BACKGROUND: String?,
     @Json(name = "ID")
-    val ID: String?
+    val ID: String?,
+    @Json(name = "OKNOPODAROK")
+    val OKNOPODAROK: OKNO_PODAROK_DTO?
 )

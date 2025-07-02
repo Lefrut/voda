@@ -132,9 +132,10 @@ class MainFragment : Fragment(R.layout.fragment_main) {
                 if (isVisible) {
                     navView.apply {
                         animate().cancel()
-                        alpha = 0f
+                        alpha = if (visibility == View.VISIBLE) 1f else 0f
                         visibility = View.VISIBLE
-                        animate().alpha(1f).setInterpolator(LinearInterpolator()).setDuration(400).start()
+                        animate().alpha(1f).setInterpolator(LinearInterpolator()).setDuration(400)
+                            .start()
                     }
                 } else {
                     navView.apply { visibility = View.GONE }

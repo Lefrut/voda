@@ -113,7 +113,7 @@ class WaterAppFragment : Fragment() {
                         statusBarColor = Color.Transparent,
                         navigationBarColor = Color.Transparent,
                         navigationBarContrastEnforced = false,
-                        handleDecorFitsSystemWindows = true
+                        handleDecorFitsSystemWindows = true,
                     )
 
                     val context = LocalContext.current

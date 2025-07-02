@@ -62,9 +62,13 @@ fun NavController.navigateToAddAddress(
 
     val backStack = try {
         getBackStackEntry(R.id.addAddressFragment)
-    } catch (_: Throwable) { null }
+    } catch (_: Throwable) {
+        null
+    }
 
-    if (backStack != null) { backStack.savedStateHandle["mapAddress"] = mapAddress }
+    if (backStack != null) {
+        backStack.savedStateHandle["mapAddress"] = mapAddress
+    }
 
 }
 
