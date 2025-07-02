@@ -8,9 +8,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.AnchoredDraggableState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.statusBars
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SheetValue
@@ -19,7 +17,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.vodovoz.app.R
 import com.vodovoz.app.design_system.composables.dialogs.VodovozDialog
-import com.vodovoz.app.design_system.modifiers.lifecycleWindowInsets
 import com.vodovoz.app.feature.map.composables.MapBody
 import com.vodovoz.app.feature.map.composables.MapSearchList
 import com.vodovoz.app.feature.map.composables.MapTopBar
@@ -73,12 +70,14 @@ fun MapScreen(
         Box {
             MapBody(
                 anchoredDraggableState = anchoredDraggableState,
-                addressName = viewState.currentAddress?.name ?: "",
+                addressName = viewState.currentMapAddress?.name ?: "",
                 addressIsLoading = viewState.addressIsLoading,
                 addressIsError = viewState.addressIsError,
                 screenType = viewState.screenType,
                 yandexMap = yandexMap,
+                areas = viewState.areas,
                 buttonIsLoading = viewState.buttonIsLoading,
+
                 onInputStart = {
                     viewModel.hideAddressBottomSheet()
                 },

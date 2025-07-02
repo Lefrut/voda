@@ -30,24 +30,7 @@ class SiteStateManager @Inject constructor(
     private val pushListener = MutableStateFlow<PushData?>(null)
     fun observePush() = pushListener.asStateFlow()
 
-    private var currentAttempt = 0
-
     suspend fun requestSiteState(): VodovozSiteState? {
-        currentAttempt++
-
-        //todo - need extra fixes
-        val st = if (currentAttempt >= 10) {
-            VodovozSiteState.Blocked.copy(isActive = true)
-        } else {
-            VodovozSiteState.Blocked.copy(
-                isActive = false,
-                data = SiteStateData(
-                    time = "24.06.2025 12:59:00",
-                    logo = "https://play-lh.googleusercontent.com/rvhTjMa8J-EkZYAseFP299-P4b4_WxPQCgs_6KnPAe6lbugJXjl-Z153SaBHKQzh-P0=w240-h480-rw",
-                    title = "Блок"
-                )
-            )
-        }
 
 
         val siteStateResult = vodovozServiceRepository.getSiteState().singleResult() //Result.success(st)

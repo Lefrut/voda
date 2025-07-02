@@ -212,7 +212,6 @@ fun HomeScreen(
     }
 
     if (showUnratedProductBottomSheet) {
-        //todo - need fix clicks on close
         UnratedProductsBottomSheet(
             modifier = Modifier
                 .zIndex(Float.MAX_VALUE)

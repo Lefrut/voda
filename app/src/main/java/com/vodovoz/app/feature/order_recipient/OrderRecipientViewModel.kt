@@ -6,7 +6,11 @@ import androidx.lifecycle.viewModelScope
 import com.vodovoz.app.common.resources.ResourcesProvider
 import com.vodovoz.app.design_system.model.ColorfulButtonUi
 import com.vodovoz.app.design_system.model.toUi
+import com.vodovoz.app.design_system.model.widgets.EmailValidator
 import com.vodovoz.app.design_system.model.widgets.FieldUi
+import com.vodovoz.app.design_system.model.widgets.INNValidator
+import com.vodovoz.app.design_system.model.widgets.NameValidator
+import com.vodovoz.app.design_system.model.widgets.NoRequiredValidator
 import com.vodovoz.app.design_system.model.widgets.PhoneNumberValidator
 import com.vodovoz.app.design_system.model.widgets.checkFields
 import com.vodovoz.app.design_system.model.widgets.getErrorText
@@ -90,10 +94,15 @@ class OrderRecipientViewModel @Inject constructor(
     fun activateButton(button: ColorfulButtonUi) = viewModelScope.launch {
         stateSnapshot.fields.checkFields(
             putErrors = true,
+            validators = listOf(
+                NoRequiredValidator,
+                INNValidator,
+                PhoneNumberValidator,
+                EmailValidator,
+                NameValidator
+            ),
             getSupportingText = { field ->
-                field.getErrorText { resId ->
-                    resourcesProvider.getString(resId)
-                }
+                field.getErrorText { resId -> resourcesProvider.getString(resId) }
             }
         ) { fields, isValid ->
 

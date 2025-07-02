@@ -27,11 +27,6 @@ data class KORZINA_PRODUCT_PODROBNO_DTO(
     val ZAPRET_FISHKAM: Int?,
     @Json(name = "CML2_ARTICLE")
     val CML2_ARTICLE: String?,
-    //todo - maybe uncomment
-//    @Json(name = "HIT")
-//    val HITS: List<String>?,
-//    @Json(name = "HIT")
-//    val HIT: Boolean?,
     @Json(name = "FAVORITE")
     val FAVORITE: Boolean?,
     @Json(name = "NALICHIE_MORE")

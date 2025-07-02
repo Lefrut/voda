@@ -210,21 +210,6 @@ private fun VodovozTextField(
                     modifier = Modifier.weight(1f).horizontalScroll(rememberScrollState()),
                     contentAlignment = Alignment.TopStart
                 ) {
-                    //todo - mb do animation
-//                    this@Row.AnimatedVisibility(
-//                        visible = value.text.isEmpty(),
-//                        exit = ExitTransition.None
-//                    ) {
-//                        Text(
-//                            text = hint,
-//                            color = MaterialTheme.colorScheme.surfaceTint,
-//                            style = MaterialTheme.typography.bodyMedium,
-//                            modifier = Modifier.horizontalScroll(rememberScrollState()),
-//                            maxLines = maxLines,
-//                            overflow = TextOverflow.Ellipsis
-//                        )
-//
-//                    }
                     if (value.text.isEmpty()) {
                         Text(
                             text = hint,

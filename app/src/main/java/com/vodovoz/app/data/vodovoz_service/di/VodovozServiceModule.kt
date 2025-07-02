@@ -1,5 +1,6 @@
 package com.vodovoz.app.data.vodovoz_service.di
 
+import com.squareup.moshi.Moshi
 import com.vodovoz.app.core.network.VodovozWebConfig
 import com.vodovoz.app.core.network.interceptor.BaseUrlInterceptor
 import com.vodovoz.app.core.network.interceptor.CookieHandlerInterceptor
@@ -19,6 +20,7 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -38,32 +40,35 @@ abstract class VodovozServiceModule {
     @Binds
     @Singleton
     abstract fun bindForAdultsDataStore(
-        forAdultsDataStore: ForAdultsDataStoreImpl
+        forAdultsDataStore: ForAdultsDataStoreImpl,
     ): ForAdultsDataStore
 
     @Binds
     @Singleton
     abstract fun bindStoriesDataStore(
-        storiesDataStore: StoriesDataStoreImpl
+        storiesDataStore: StoriesDataStoreImpl,
     ): StoriesDataStore
 
     @Binds
     @Singleton
     abstract fun bindUserPreferencesRepository(
-        impl: UserPreferencesRepositoryImpl
+        impl: UserPreferencesRepositoryImpl,
     ): UserPreferencesRepository
-
 
 
     companion object {
         @Provides
         @Singleton
         @Named("vodovoz")
-        fun providesVodovozRetrofit(@Named("vodovoz") okHttpClient: OkHttpClient): Retrofit {
+        fun providesVodovozRetrofit(
+            @Named("vodovoz") okHttpClient: OkHttpClient,
+            moshi: Moshi,
+        ): Retrofit {
+
             return Retrofit.Builder()
                 .baseUrl(VodovozWebConfig.VODOVOZ_URL + VodovozWebConfig.VODOVOZ_PATH)
                 .addCallAdapterFactory(NoOpCallAdapterFactory.create())
-                .addConverterFactory(NoOpConverterFactory.create())
+                .addConverterFactory(NoOpConverterFactory.create(moshi))
                 .client(okHttpClient)
                 .build()
         }
@@ -73,26 +78,6 @@ abstract class VodovozServiceModule {
         fun providesVodovozService(@Named("vodovoz") retrofit: Retrofit): VodovozService {
             return retrofit.create(VodovozService::class.java)
         }
-
-        @Provides
-        @Singleton
-        @Named("vodovoz")
-        fun providesOkHttpClient(
-            cookieHandlerInterceptor: CookieHandlerInterceptor,
-            baseUrlInterceptor: BaseUrlInterceptor,
-        ): OkHttpClient {
-            val httpLoggingInterceptor = HttpLoggingInterceptor()
-
-            return OkHttpClient.Builder()
-                .addInterceptor(cookieHandlerInterceptor)
-                .addInterceptor(baseUrlInterceptor)
-                .addInterceptor(httpLoggingInterceptor)
-                .connectTimeout(20, TimeUnit.SECONDS)
-                .readTimeout(20, TimeUnit.SECONDS)
-                .writeTimeout(20, TimeUnit.SECONDS)
-                .build()
-        }
-
     }
 
 }

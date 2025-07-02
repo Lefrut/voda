@@ -35,6 +35,7 @@ import com.vodovoz.app.data.vodovoz_service.model.VodovozResponseDTO
 import com.vodovoz.app.data.vodovoz_service.model.WaitFeedbackProductsDTO
 import com.vodovoz.app.data.vodovoz_service.model.address.AddAddressDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.address.AddressesDTO
+import com.vodovoz.app.data.vodovoz_service.model.address.MapAreaDTO
 import com.vodovoz.app.data.vodovoz_service.model.auth.AuthDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.auth.LoginByPhoneDTO
 import com.vodovoz.app.data.vodovoz_service.model.auth.RequestCodeDTO
@@ -133,6 +134,22 @@ interface VodovozService {
     /**
      * Order requests
      * */
+    @GET("oformlenie/confirm.php?action=glav&versiya=${BuildConfig.VERSION_NAME}")
+    suspend fun doOrder(
+        @Query("adresid") addressId: Long,
+        @Query("userid") userId: Long?,
+        @Query("date") deliveryDate: String,
+        @Query("indos") deliveryTimeInterval: String,
+        @Query("dopphone") phone: String,
+        @Query("payment") paymentMethodId: Long,
+        @Query("summdelivery") deliveryPrice: String,
+        @Query("nettovar") callYouId: Long,
+        @Query("kupon") coupon: String?,
+        @Query("schet") balance: String?,
+        @Query("device") deviceInfo: String?,
+        @Query("driver") notifyDriverId: String? = null,
+        @Query("comment") message: String? = null,
+    ): Response<VodovozResponseDTO<String>>
 
     @GET("oformlenie/zvonok.php?action=vampozvonit")
     suspend fun getOrderCallYouDetails(
@@ -247,11 +264,11 @@ interface VodovozService {
     @GET("oformlenie/address.php?action=add&iblock_id=102")
     suspend fun addAddress(
         @Query("userid") userId: Long?,
-        @Query("ktochka") geo: String? = null,
+        @Query("ktochka") geo: String,
         @Query("city") city: String? = null,
         @Query("street") street: String? = null,
-        @Query("leghtkm") fromMoscowToAddressKm: String? = null,
-        @QueryMap queries: Map<String, String>
+        @Query("leghtkm") fromMoscowToAddressKm: String,
+        @QueryMap queries: Map<String, String>,
     ): Response<VodovozResponseDTO<Long>>
 
     @GET("oformlenie/address.php?action=update&iblock_id=102")
@@ -261,7 +278,7 @@ interface VodovozService {
         @Query("ktochka") geo: String,
         @Query("city") city: String? = null,
         @Query("street") street: String? = null,
-        @Query("leghtkm") fromMoscowToAddressKm: String? = null,
+        @Query("leghtkm") fromMoscowToAddressKm: String,
         @QueryMap params: Map<String, String>,
     ): Response<VodovozResponseDTO<String?>>
 
@@ -272,12 +289,15 @@ interface VodovozService {
     ): Response<VodovozResponseDTO<String>>
 
 
-     @GET("oformlenie/address.php?action=edit")
-     suspend fun getAddAddressDetails(
-         @Query("userid") userId: Long?,
-         @Query("addressid") addressId: Long?
-     ): Response<VodovozResponseDTO<AddAddressDetailsDTO>>
+    @GET("oformlenie/address.php?action=edit")
+    suspend fun getAddAddressDetails(
+        @Query("userid") userId: Long?,
+        @Query("addressid") addressId: Long?,
+    ): Response<VodovozResponseDTO<AddAddressDetailsDTO>>
 
+
+    @GET("profile/karta/index.php?action=tochkakarta")
+    suspend fun getMapAreas(): Response<VodovozResponseDTO<List<MapAreaDTO>>>
 
     /**
      * Brand requests
@@ -327,7 +347,7 @@ interface VodovozService {
 
     @GET("config/userclose.php?action=zakrituser")
     suspend fun deleteAccount(
-        @Query("userid") userId: Long?
+        @Query("userid") userId: Long?,
     ): Response<VodovozResponseDTO<String?>>
 
     @GET("profile/index.php?action=edit")

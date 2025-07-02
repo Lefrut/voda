@@ -4,11 +4,33 @@ import com.vodovoz.app.data.vodovoz_service.model.address.ADDRESSES_SECTION_DTO
 import com.vodovoz.app.data.vodovoz_service.model.address.ADDRESS_ITEM_DTO
 import com.vodovoz.app.data.vodovoz_service.model.address.AddAddressDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.address.AddressesDTO
+import com.vodovoz.app.data.vodovoz_service.model.address.MapAreaDTO
 import com.vodovoz.app.data.vodovoz_service.model.address.SWITCH_DTO
 import com.vodovoz.app.domain.general.model.SwitchModel
 import com.vodovoz.app.domain.general.model.location.AddAddressDetailsModel
 import com.vodovoz.app.domain.general.model.location.AddressModel
+import com.vodovoz.app.domain.general.model.location.MapAreaModel
+import com.vodovoz.app.domain.general.model.location.MapPointModel
 import com.vodovoz.app.domain.general.model.product.SectionModel
+
+fun MapAreaDTO.toDomain(): MapAreaModel?{
+    return MapAreaModel(
+        id = ID ?: return null,
+        name = TEXT ?: "",
+        isMoscowRingRow = MKAD ?: false,
+        color = COLOR ?: "",
+        points = TOCHKA?.mapNotNull { coordinates ->
+            MapPointModel(
+                coordinates.getOrNull(0) ?: return@mapNotNull null,
+                coordinates.getOrNull(1) ?: return@mapNotNull null
+            )
+        } ?: return null,
+    )
+}
+
+fun List<MapAreaDTO>.mapToDomain(): List<MapAreaModel>{
+    return mapNotNull { it.toDomain() }.ifEmpty { throw IllegalArgumentException("MapAreas can't be empty") }
+}
 
 fun AddressesDTO.toDomain(): List<SectionModel<AddressModel>> {
     return listOf(FIZLICO?.toDomain(), YRLICO?.toDomain()).mapNotNull { section -> section }

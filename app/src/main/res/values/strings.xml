@@ -2,6 +2,10 @@
 
     <string name="app_name">Vodovoz</string>
 
+    <string name="order_device_info">%1$s Android: %2$s Версия: %3$s</string>
+    <string name="device_type_tablet">Планшет</string>
+    <string name="device_type_phone">Телефон</string>
+
     <string name="enter_code_title">Ввести код</string>
     <string name="enter_code_description">Введите код из SMS, отправленный на номер %s</string>
     <string name="resend_sms_hint">Повторно получить SMS с кодом можно через:</string>
@@ -288,5 +292,6 @@
     <string name="logout_after_delete_error">Не удалось выйти из аккаунта после удаления, попробойте снова!</string>
     <string name="new_address">Новый адрес</string>
     <string name="date_time_inteval">%1$s, %2$s</string>
+    <string name="error_invalid_inn">Неверный ИНН. Укажите 10 или 12 цифр.</string>
 
 </resources>

@@ -1,17 +1,63 @@
 package com.vodovoz.app.data
 
-import com.vodovoz.app.BuildConfig
-import com.vodovoz.app.feature.search.qrcode.model.QrCodeModel
-import okhttp3.MultipartBody
 import okhttp3.ResponseBody
-import retrofit2.Response
 import retrofit2.http.GET
-import retrofit2.http.Multipart
-import retrofit2.http.POST
-import retrofit2.http.Part
 import retrofit2.http.Query
-import retrofit2.http.QueryMap
-import retrofit2.http.Url
+
+val mainApi = object : MainApi {
+    override suspend fun fetchMapResponse(action: String?): ResponseBody { TODO("Not yet implemented") }
+
+    override suspend fun fetchAddressResponse(
+        locality: String?,
+        intercom: String?,
+        entrance: String?,
+        office: String?,
+        floor: String?,
+        house: String?,
+        street: String?,
+        userid: Long?,
+        blockId: Int?,
+        action: String?,
+        type: Int?,
+        addressId: Long?,
+        length: String?,
+        fullAddress: String?,
+        longAndLat: String?,
+    ): ResponseBody { TODO("Not yet implemented") }
+
+    override suspend fun fetchRegOrderResponse(
+        orderType: Int?,
+        device: String?,
+        addressId: Long?,
+        date: String?,
+        paymentId: Long?,
+        needOperatorCall: String?,
+        needShippingAlert: String?,
+        shippingAlertPhone: String?,
+        comment: String?,
+        totalPrice: Int?,
+        shippingId: Long?,
+        shippingPrice: Int?,
+        name: String?,
+        phone: String?,
+        email: String?,
+        inn: String?,
+        companyName: String?,
+        userId: Long?,
+        deposit: Int?,
+        fastShippingPrice: Int?,
+        extraShippingPrice: Int?,
+        commonShippingPrice: Int?,
+        coupon: String?,
+        shippingIntervalId: Long?,
+        overMoney: Int?,
+        parking: Int?,
+        appVersion: String?,
+        checkDeliveryValue: Int?,
+        useScore: String,
+    ): ResponseBody { TODO("Not yet implemented") }
+
+}
 
 interface MainApi {
 

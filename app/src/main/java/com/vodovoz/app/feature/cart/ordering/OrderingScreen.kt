@@ -12,10 +12,12 @@ import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import com.vodovoz.app.design_system.composables.placeholders.LoadingPlaceholder
 import com.vodovoz.app.design_system.composables.placeholders.NetworkErrorPlaceholder
 import com.vodovoz.app.design_system.composables.top_bar.VodovozTopBar
 import com.vodovoz.app.feature.cart.ordering.composables.OrderingBody
+import com.vodovoz.app.util.extensions.deviceInfo
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -25,6 +27,7 @@ fun OrderingScreen(
     scrollState: ScrollState,
 ) {
     val pullRefreshState = rememberPullToRefreshState()
+    val context = LocalContext.current
 
     Column(
         modifier = Modifier
@@ -89,7 +92,7 @@ fun OrderingScreen(
                             viewModel.navigateByPaymentItem(orderPaymentItem)
                         },
                         onButtonClick = {
-                            viewModel.doOrder()
+                            viewModel.doOrder(context.deviceInfo())
                         }
                     )
 

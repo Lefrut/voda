@@ -16,9 +16,10 @@ data class MapAddressUi(
     val street: String,
     val house: String,
     val point: MapPointUi,
+    val fromMoscowToPoint: Float
 ): Parcelable {
     companion object {
-        val Empty = MapAddressUi("", "", "", "", MapPointUi.Empty)
+        val Empty = MapAddressUi("", "", "", "", MapPointUi.Empty, 0f)
     }
 }
 
@@ -28,7 +29,8 @@ fun MapAddressModel.toUi(): MapAddressUi {
         name = name,
         city = city,
         street = street,
-        house = house
+        house = house,
+        fromMoscowToPoint = 0f
     )
 }
 
@@ -38,7 +40,8 @@ fun MapAddressUi.toDomain(): MapAddressModel {
         name = name,
         city = city,
         street = street,
-        house = house
+        house = house,
+        fromMoscowToPoint = fromMoscowToPoint.toString()
     )
 }
 

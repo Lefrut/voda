@@ -5,6 +5,7 @@ import androidx.annotation.Keep
 import com.squareup.moshi.Json
 import com.vodovoz.app.data.vodovoz_service.model.EXTENDED_PRICE_DTO
 import com.vodovoz.app.data.vodovoz_service.model.NALICHIE_MORE_DTO
+import com.vodovoz.app.data.vodovoz_service.model.TOVAR_18_DTO
 
 @Keep
 data class ORDER_DETAILS_TOVAR_DTO(
@@ -30,7 +31,7 @@ data class ORDER_DETAILS_TOVAR_DTO(
     val URL: Boolean?,
     //todo - put tovar18 class
     @Json(name = "TOVAR18")
-    val TOVAR18: Any?,
+    val TOVAR18: TOVAR_18_DTO?,
     @Json(name = "FAVORITE")
     val FAVORITE: Boolean?,
     @Json(name = "PROPERTY_RATING_VALUE")

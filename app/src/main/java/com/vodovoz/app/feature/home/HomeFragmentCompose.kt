@@ -55,7 +55,6 @@ import com.vodovoz.app.core.navigation.navigateToViewedProductList
 import com.vodovoz.app.core.navigation.navigateToWaterApp
 import com.vodovoz.app.core.navigation.navigateToWebView
 import com.vodovoz.app.core.navigation.navigateToWriteComment
-import com.vodovoz.app.core.network.ApiConfig
 import com.vodovoz.app.core.network.VodovozWebConfig
 import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.composables.snackbar.VodovozSnackbarHost
@@ -384,8 +383,9 @@ class HomeFragment : Fragment() {
                         }
 
                         else -> {
-                            val productId =
-                                path.filter { it.isDigit() }.toLongOrNull() ?: return@collect
+                            val productId = path.filter { char ->
+                                char.isDigit()
+                            }.toLongOrNull() ?: return@collect
                             findNavController().navigateToProductDetails(productId)
                         }
 

@@ -20,6 +20,9 @@ interface MapServiceRepository {
         address: String
     ): Flow<Result<MapAddressModel>>
 
-    fun getRoute(start: MapPointModel, end: MapPointModel): Flow<Result<List<MapPointModel>>>
+    fun getRoute(
+        start: MapPointModel,
+        end: MapPointModel
+    ): Flow<Result<List<MapPointModel>>>
 
 }

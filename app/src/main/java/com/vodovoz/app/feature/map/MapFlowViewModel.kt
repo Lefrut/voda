@@ -1,57 +1,45 @@
 package com.vodovoz.app.feature.map
 
-import android.os.CountDownTimer
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import com.vodovoz.app.common.account.AccountManager
 import com.vodovoz.app.common.content.Event
 import com.vodovoz.app.common.content.PagingContractViewModel
 import com.vodovoz.app.common.content.State
-import com.vodovoz.app.common.content.toErrorState
 import com.vodovoz.app.common.content.updateData
-import com.vodovoz.app.core.network.ApiConfig
-import com.vodovoz.app.data.MainRepository
-import com.vodovoz.app.data.model.common.ResponseEntity
 import com.vodovoz.app.design_system.model.MapPointUi
+import com.vodovoz.app.design_system.model.contains
+import com.vodovoz.app.design_system.model.distanceKm
+import com.vodovoz.app.design_system.model.mapToUi
+import com.vodovoz.app.design_system.model.toDomain
 import com.vodovoz.app.domain.general.respository.MapServiceRepository
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
-import com.vodovoz.app.feature.map.manager.DeliveryZonesManager
 import com.vodovoz.app.feature.map.model.MapAddressUi
-import com.vodovoz.app.feature.map.model.toDomain
+import com.vodovoz.app.feature.map.model.MapAreaUi
+import com.vodovoz.app.feature.map.model.findNearestPointTo
+import com.vodovoz.app.feature.map.model.mapToUi
 import com.vodovoz.app.feature.map.model.toUi
-import com.vodovoz.app.ui.model.AddressUI
-import com.vodovoz.app.ui.model.custom.DeliveryZonesBundleUI
 import com.vodovoz.app.util.extensions.debounceWithMax
-import com.vodovoz.app.util.extensions.debugLog
 import com.vodovoz.app.util.extensions.singleResult
-import com.yandex.mapkit.geometry.Point
-import com.yandex.mapkit.geometry.Polyline
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.retryWhen
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import kotlin.math.roundToInt
 
 @HiltViewModel
 @Stable
 class MapFlowViewModel @Inject constructor(
     savedState: SavedStateHandle,
-    private val repository: MainRepository,
-    private val deliveryZonesManager: DeliveryZonesManager,
-    private val accountManager: AccountManager,
     private val mapServiceRepository: MapServiceRepository,
+    private val vodovozServiceRepository: VodovozServiceRepository,
 ) : PagingContractViewModel<MapFlowViewModel.MapFlowState, MapFlowViewModel.MapFlowEvents>(
     MapFlowState()
 ) {
@@ -62,23 +50,36 @@ class MapFlowViewModel @Inject constructor(
 
     private val searchQueryFlow = MutableStateFlow(dataState.query)
 
+    companion object {
+        const val CORE_AREA_ID = 91851
+    }
+
     init {
-        viewModelScope.launch {
-            deliveryZonesManager
-                .observeDeliveryZonesState()
-                .collect { deliveryState ->
-                    if (deliveryState == null) {
-                        deliveryZonesManager.fetchDeliveryZonesBundle()
-                    } else {
-                        uiStateListener.value = state.copy(
-                            data = state.data.copy(
-                                deliveryZonesBundleUI = deliveryState.deliveryZonesBundleUI
-                            )
-                        )
-                    }
-                }
-        }
         handleSearchQueries()
+        fetchMapAreas()
+    }
+
+    private fun fetchMapAreas() = viewModelScope.launch {
+        val maxErrors = 5
+
+        vodovozServiceRepository.getMapAreas()
+            .onEach { result ->
+                result.onFailure { fail -> throw fail }
+            }
+            .retryWhen { _, attempt ->
+                if (attempt < maxErrors) true.also { delay(1000L) }
+                else false
+            }
+            .catch { fail -> emit(Result.failure(fail)) }
+            .collect { mapAreasResult ->
+                mapAreasResult.onSuccess { mapAreas ->
+
+                    uiStateListener.updateData { s ->
+                        s.copy(areas = mapAreas.mapToUi())
+                    }
+
+                }
+            }
     }
 
     fun navigateBack() = viewModelScope.launch {
@@ -108,15 +109,6 @@ class MapFlowViewModel @Inject constructor(
         eventListener.emit(MapFlowEvents.CheckGeo)
     }
 
-    fun updateZones(bool: Boolean) {
-        uiStateListener.value = state.copy(
-            data = state.data.copy(
-                updateZones = bool
-            )
-        )
-    }
-
-
     private fun handleSearchQueries() =
         searchQueryFlow.filter { query -> query.isNotBlank() }.debounceWithMax(250L, 6)
             .onEach { query ->
@@ -141,360 +133,26 @@ class MapFlowViewModel @Inject constructor(
         }
     }
 
-
-    fun fetchSeveralMinimalLineDistancesToMainPolygonPoints(
-        startPoint: Point,
-        pendingUpdateAddressUI: AddressUI? = null,
-    ) {
-        viewModelScope.launch {
-            val listOnPoints =
-                deliveryZonesManager.fetchSeveralMinimalLineDistancesToMainPolygonPoints(startPoint)
-            uiStateListener.value = state.copy(
-                data = state.data.copy(
-                    pendingUpdateAddressUI = pendingUpdateAddressUI,
-                    listOnPoints = listOnPoints
-                )
-            )
-        }
-    }
-
-    private fun savePointData(
-        latitude: String,
-        longitude: String,
-        length: String,
-        distance: Double,
-    ) {
-        val mappedAddress = state.data.addressUI?.copy(
-            latitude = latitude,
-            longitude = longitude,
-            length = length
-        )
-        uiStateListener.value = state.copy(
-
-            data = state.data.copy(
-                savedPointData = SavedPointData(latitude, longitude, length),
-                distance = distance,
-                addressUI = mappedAddress
-            )
-        )
-    }
-
-    private val amountControllerTimer = object : CountDownTimer(
-        1500L,
-        1500L
-    ) {
-        override fun onTick(millisUntilFinished: Long) {}
-        override fun onFinish() {
-            addPolyline()
-        }
-    }
-
-    fun savePolyline(distance: Double, polyline: Polyline?, startPoint: Point, endPoint: Point) {
-
-        uiStateListener.value = state.copy(
-            data = state.data.copy(
-                listOfSavedPolylinesData = state.data.listOfSavedPolylinesData + listOf(
-                    SavedPolylineData(distance, polyline, startPoint, endPoint)
-                )
-            )
-        )
-
-        amountControllerTimer.cancel()
-        amountControllerTimer.start()
-
-        viewModelScope.launch {
-            if (deliveryZonesManager.containsInCenterPolygon(endPoint)) {
-                amountControllerTimer.cancel()
-                savePointData(
-                    latitude = endPoint.latitude.toString(),
-                    longitude = endPoint.longitude.toString(),
-                    length = "0",
-                    distance = 0.0
-                )
-                tryToUpdate(
-                    lat = endPoint.longitude.toString(),
-                    long = endPoint.longitude.toString(),
-                    length = "0",
-                    polyline = null
-                )
-            } else {
-
-                if (state.data.listOnPoints.size == state.data.listOfSavedPolylinesData.size) {
-                    amountControllerTimer.cancel()
-                    addPolyline()
-                }
-
-            }
-        }
-
-    }
-
-    private fun tryToUpdate(lat: String, long: String, length: String, polyline: Polyline?) {
-        viewModelScope.launch {
-            val pendingUpdateAddressUi = state.data.pendingUpdateAddressUI
-            if (pendingUpdateAddressUi == null) {
-
-            } else {
-                val userId = accountManager.fetchAccountId() ?: return@launch
-                updateAddress(
-                    locality = pendingUpdateAddressUi.locality,
-                    street = pendingUpdateAddressUi.street,
-                    house = pendingUpdateAddressUi.house,
-                    entrance = pendingUpdateAddressUi.entrance,
-                    floor = pendingUpdateAddressUi.floor,
-                    office = pendingUpdateAddressUi.flat,
-                    intercom = pendingUpdateAddressUi.intercom,
-                    type = pendingUpdateAddressUi.type,
-                    userId = userId,
-                    addressId = pendingUpdateAddressUi.id,
-                    lat = lat,
-                    longitude = long,
-                    length = length,
-                    fullAddress = pendingUpdateAddressUi.fullAddress
-                )
-            }
-        }
-
-    }
-
-    internal fun addPolyline() {
-        viewModelScope.launch {
-            val minDistancePolyline =
-                state.data.listOfSavedPolylinesData.filter { it.polyline != null }
-                    .minByOrNull { it.distance }
-            minDistancePolyline?.let {
-                if (it.polyline == null) {
-
-                    return@launch
-                }
-                val newDistance = (it.distance / 1000).roundToInt().toString()
-
-                savePointData(
-                    latitude = it.startPoint.latitude.toString(),
-                    longitude = it.startPoint.longitude.toString(),
-                    length = newDistance,
-                    distance = it.distance
-                )
-
-                tryToUpdate(
-                    polyline = it.polyline,
-                    lat = it.startPoint.latitude.toString(),
-                    long = it.startPoint.longitude.toString(),
-                    length = newDistance
-                )
-            }
-        }
-    }
-
-    fun action(
-        entrance: String?,
-        floor: String?,
-        office: String?,
-        intercom: String?,
-        type: Int?,
-    ) {
-        val userId = accountManager.fetchAccountId() ?: return
-        val addressId = state.data.addressUI?.id
-
-        val locality = state.data.addressUI?.locality
-        val street = state.data.addressUI?.street
-        val house = state.data.addressUI?.house
-        val lat = state.data.addressUI?.latitude
-        val longitude = state.data.addressUI?.longitude
-        val length = state.data.addressUI?.length
-        val fullAddress = state.data.addressUI?.fullAddress?.substringAfter("Россия, ")
-
-        if (house.isNullOrEmpty() || lat.isNullOrEmpty() || longitude.isNullOrEmpty() || length.isNullOrEmpty() || fullAddress.isNullOrEmpty()) {
-            viewModelScope.launch {
-
-            }
-            return
-        }
-
-        if (addressId == null || addressId == 0L) {
-            addAddress(
-                locality,
-                street,
-                house,
-                entrance,
-                floor,
-                office,
-                intercom,
-                type,
-                userId,
-                lat,
-                longitude,
-                length,
-                fullAddress
-            )
-        } else {
-            updateAddress(
-                locality,
-                street,
-                house,
-                entrance,
-                floor,
-                office,
-                intercom,
-                type,
-                userId,
-                addressId,
-                lat,
-                longitude,
-                length,
-                fullAddress
-            )
-        }
-    }
-
-    private fun addAddress(
-        locality: String?,
-        street: String?,
-        house: String?,
-        entrance: String?,
-        floor: String?,
-        office: String?,
-        intercom: String?,
-        type: Int?,
-        userId: Long,
-        lat: String,
-        longitude: String,
-        length: String,
-        fullAddress: String,
-    ) {
-        uiStateListener.value = state.copy(loadingPage = true)
-
-        viewModelScope.launch {
-            flow {
-                emit(
-                    repository.addAddress(
-                        locality = locality,
-                        street = street,
-                        house = house,
-                        entrance = entrance,
-                        floor = floor,
-                        office = office,
-                        intercom = intercom,
-                        type = type,
-                        userId = userId,
-                        lat = lat,
-                        longitude = longitude,
-                        length = length,
-                        fullAddress = fullAddress
-                    )
-                )
-            }
-                .onEach { response ->
-                    uiStateListener.value = state.copy(
-                        loadingPage = false,
-                        error = null
-                    )
-                    when (response) {
-                        is ResponseEntity.Success -> {
-
-                        }
-
-                        is ResponseEntity.Error -> {
-
-                        }
-
-                        is ResponseEntity.Hide -> {
-
-                        }
-                    }
-                }
-                .flowOn(Dispatchers.Default)
-                .catch {
-                    debugLog { "add address error ${it.localizedMessage}" }
-                    uiStateListener.value =
-                        state.copy(error = it.toErrorState(), loadingPage = false)
-                }
-                .collect()
-        }
-    }
-
-    private fun updateAddress(
-        locality: String?,
-        street: String?,
-        house: String?,
-        entrance: String?,
-        floor: String?,
-        office: String?,
-        intercom: String?,
-        type: Int?,
-        userId: Long,
-        addressId: Long,
-        lat: String,
-        longitude: String,
-        length: String,
-        fullAddress: String,
-    ) {
-        uiStateListener.value = state.copy(loadingPage = true)
-
-        viewModelScope.launch {
-            flow {
-                emit(
-                    repository.updateAddress(
-                        locality = locality,
-                        street = street,
-                        house = house,
-                        entrance = entrance,
-                        floor = floor,
-                        office = office,
-                        intercom = intercom,
-                        type = type,
-                        userId = userId,
-                        addressId = addressId,
-                        lat = lat,
-                        longitude = longitude,
-                        length = length,
-                        fullAddress = fullAddress
-                    )
-                )
-            }
-                .onEach { response ->
-                    uiStateListener.value = state.copy(
-                        loadingPage = false,
-                        error = null
-                    )
-                    when (response) {
-                        is ResponseEntity.Success -> {
-                            val pendingUpdateAddressUi = state.data.pendingUpdateAddressUI
-                            if (pendingUpdateAddressUi == null) {
-                            } else {
-                                uiStateListener.value = state.copy(
-                                    data = state.data.copy(
-                                        pendingUpdateAddressUI = null
-                                    )
-                                )
-                            }
-                        }
-
-                        is ResponseEntity.Error -> {
-
-                        }
-
-                        is ResponseEntity.Hide -> {
-
-                        }
-                    }
-                }
-                .flowOn(Dispatchers.Default)
-                .catch {
-                    debugLog { "update address error ${it.localizedMessage}" }
-                    uiStateListener.value =
-                        state.copy(error = it.toErrorState(), loadingPage = false)
-                }
-                .collect()
-        }
-    }
-
     fun searchAddressByQuery() {
         searchAddress(dataState.query)
     }
 
+
+    private suspend fun calculateDistanceFromMoscowToAddress(addressPoint: MapPointUi): Float? {
+        val coreMapArea =
+            dataState.areas.find { area -> area.id == CORE_AREA_ID && area.isMoscowRingRow }
+                ?: return null
+
+        if(coreMapArea.contains(addressPoint)){ return 0f }
+
+        val nearestPoint = coreMapArea.findNearestPointTo(addressPoint) ?: return null
+        val route = nearestPoint.getRoute(addressPoint) ?: return null
+        val fromMoscowToPoint = route.distanceKm()
+        return fromMoscowToPoint
+    }
+
     fun searchAddress(addressName: String) = viewModelScope.launch {
-        if (addressName == dataState.currentAddress?.name || addressName.any { c -> c.isDigit() } || dataState.query == addressName) {
+        if (addressName == dataState.currentMapAddress?.name || addressName.any { c -> c.isDigit() } || dataState.query == addressName) {
 
             uiStateListener.updateData { s ->
                 s.copy(addressIsLoading = true)
@@ -504,8 +162,12 @@ class MapFlowViewModel @Inject constructor(
                 addressName
             ).singleResult().getOrNull()?.toUi()
 
-            currentAddress?.let {
-                changeAddress(currentAddress)
+            currentAddress?.let { mapAddress ->
+
+                val fromMoscowToPoint =
+                    calculateDistanceFromMoscowToAddress(mapAddress.point) ?: return@launch
+
+                changeAddress(currentAddress.copy(fromMoscowToPoint = fromMoscowToPoint))
                 eventListener.emit(MapFlowEvents.HideKeyboard)
                 eventListener.emit(MapFlowEvents.MoveToAddress(currentAddress.point))
             }
@@ -515,8 +177,9 @@ class MapFlowViewModel @Inject constructor(
         }
     }
 
+
     fun moveToAvailableGeo() = viewModelScope.launch {
-        val addressPoint = dataState.currentAddress?.point
+        val addressPoint = dataState.currentMapAddress?.point
         if (addressPoint != null) {
             eventListener.emit(MapFlowEvents.MoveToAddress(addressPoint))
         } else if (addressName != null) {
@@ -553,30 +216,42 @@ class MapFlowViewModel @Inject constructor(
     private var searchAddressJob: Job? = null
 
     fun searchAddress(point: MapPointUi?) = viewModelScope.launch {
-        if (point == null || point == dataState.currentAddress?.point) return@launch
+        if (point == null || point == dataState.currentMapAddress?.point) return@launch
 
         searchAddressJob?.cancel()
 
-        searchAddressJob = launch {
+        searchAddressJob = launch job@{
             uiStateListener.updateData { s ->
                 s.copy(addressIsLoading = true)
             }
 
-            delay(300L)
+            delay(350L)
 
             val addressByGeoResult =
                 mapServiceRepository.getAddressByGeo(point.lat, point.lon).singleResult()
 
-            addressByGeoResult.onSuccess { address ->
-                changeAddress(address.toUi())
+
+
+            addressByGeoResult.onSuccess { mapAddressModel ->
+                val mapAddress = mapAddressModel.toUi()
+
+                val fromMoscowToPoint =
+                    calculateDistanceFromMoscowToAddress(mapAddress.point) ?: return@job
+
+                changeAddress(mapAddress.copy(fromMoscowToPoint = fromMoscowToPoint))
             }
         }
+    }
+
+    private suspend fun MapPointUi.getRoute(end: MapPointUi): List<MapPointUi>? {
+        return mapServiceRepository.getRoute(toDomain(), end.toDomain()).singleResult().getOrNull()
+            ?.mapToUi()
     }
 
     private fun changeAddress(address: MapAddressUi) {
         uiStateListener.updateData { s ->
             s.copy(
-                currentAddress = address,
+                currentMapAddress = address,
                 mode = MapUiMode.OnlyMap,
                 addressIsLoading = false,
                 addressIsError = with(address) { house.isBlank() }
@@ -605,7 +280,7 @@ class MapFlowViewModel @Inject constructor(
             s.copy(buttonIsLoading = true)
         }
 
-        val mapAddress = dataState.currentAddress
+        val mapAddress = dataState.currentMapAddress
         val screenType = dataState.screenType
 
         when {
@@ -625,35 +300,12 @@ class MapFlowViewModel @Inject constructor(
 
     }
 
-    data class SavedPolylineData(
-        val distance: Double,
-        val polyline: Polyline?,
-        val startPoint: Point,
-        val endPoint: Point,
-    )
-
-    data class SavedPointData(
-        val latitude: String,
-        val longitude: String,
-        val length: String,
-    )
-
     @Immutable
     data class MapFlowState(
-
-        val deliveryZonesBundleUI: DeliveryZonesBundleUI? = null,
-        val addressUI: AddressUI? = null,
-        val updateZones: Boolean = false,
-        val savedPointData: SavedPointData? = null,
-        val polyline: Polyline? = null,
-        val distance: Double? = null,
-        val listOnPoints: List<Point> = emptyList(),
-        val listOfSavedPolylinesData: List<SavedPolylineData> = emptyList(),
-        val pendingUpdateAddressUI: AddressUI? = null,
-
+        val areas: List<MapAreaUi> = emptyList(),
         val query: String = "",
         val showSettingsDialog: Boolean = false,
-        val currentAddress: MapAddressUi? = null,
+        val currentMapAddress: MapAddressUi? = null,
         val addressIsLoading: Boolean = true,
         val addressIsError: Boolean = false,
         val buttonIsLoading: Boolean = false,

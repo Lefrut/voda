@@ -67,7 +67,8 @@ class LoginFragment : Fragment() {
 //
 //                override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
 //                    super.onAuthenticationSucceeded(result)
-//                    //todo - put auth method
+//todo - put auth method
+//
 //                }
 //
 //                override fun onAuthenticationFailed() {

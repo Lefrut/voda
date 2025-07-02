@@ -23,9 +23,9 @@ import com.vodovoz.app.domain.general.model.certificate.BuyCertificateDetailsMod
 import com.vodovoz.app.domain.general.model.certificate.BuyCertificateModel
 import com.vodovoz.app.domain.general.model.certificate.CertificateActivationDetailsModel
 import com.vodovoz.app.domain.general.model.location.AddAddressDetailsModel
-import com.vodovoz.app.domain.general.model.location.AddressDetailsModel
 import com.vodovoz.app.domain.general.model.location.AddressModel
 import com.vodovoz.app.domain.general.model.location.MapAddressModel
+import com.vodovoz.app.domain.general.model.location.MapAreaModel
 import com.vodovoz.app.domain.general.model.order.CancelOrderDetailsModel
 import com.vodovoz.app.domain.general.model.order.DeliveryDateDetailsModel
 import com.vodovoz.app.domain.general.model.order.OrderCallYouDetailsModel
@@ -68,7 +68,6 @@ import com.vodovoz.app.domain.general.model.user.RequestCodeModel
 import com.vodovoz.app.domain.general.model.user.UserAuthInfoModel
 import com.vodovoz.app.domain.general.model.user.UserDataModel
 import kotlinx.coroutines.flow.Flow
-import org.jetbrains.annotations.Range
 import java.io.File
 import java.time.LocalDate
 
@@ -80,7 +79,11 @@ interface VodovozServiceRepository {
 
     fun getAddAddressDetails(addressId: Long?): Flow<Result<AddAddressDetailsModel>>
 
-    fun updateAddress(addressId: Long, address: MapAddressModel, params: Map<String, String>): Flow<Result<String>>
+    fun updateAddress(
+        addressId: Long,
+        address: MapAddressModel,
+        params: Map<String, String>,
+    ): Flow<Result<String>>
 
     fun getPaymentMethodDetails(
         addressId: Long,
@@ -93,23 +96,38 @@ interface VodovozServiceRepository {
     ): Flow<Result<DeliveryDateDetailsModel>>
 
     fun getOrderRecipientDetails(
-        addressId: Long
+        addressId: Long,
     ): Flow<Result<RecipientDetailsModel>>
 
     fun getRecipient(
-        addressId: Long
+        addressId: Long,
     ): Flow<Result<RecipientModel>>
 
     fun sendOrderRecipient(
         addressId: Long,
-        fields: List<FieldModel>
+        fields: List<FieldModel>,
     ): Flow<Result<String>>
 
     fun getOrderCallYouDetails(
-        addressId: Long
+        addressId: Long,
     ): Flow<Result<OrderCallYouDetailsModel>>
 
     fun getOrderingDetails(): Flow<Result<OrderingDetailsModel>>
+
+    fun doOrder(
+        addressId: Long,
+        deliveryDate: String,
+        deliveryTimeInterval: String,
+        phone: String,
+        paymentMethodId: Long,
+        deliveryPrice: String,
+        callYouId: Long,
+        coupon: String?,
+        balance: String?,
+        deviceInfo: String?,
+        notifyDriverId: String? = null,
+        message: String? = null,
+    ): Flow<Result<String>>
 
     fun orderService(
         serviceType: String,
@@ -146,7 +164,7 @@ interface VodovozServiceRepository {
     fun requestPhoneCode(
         url: String,
         phone: String,
-        newsletter: Boolean? = null
+        newsletter: Boolean? = null,
     ): Flow<Result<RequestCodeModel>>
 
     fun loginByPhone(
@@ -189,6 +207,8 @@ interface VodovozServiceRepository {
     ): Flow<Result<WhereOrderDetailsModel>>
 
     fun getAddresses(): Flow<Result<List<SectionModel<AddressModel>>>>
+
+    fun getMapAreas(): Flow<Result<List<MapAreaModel>>>
 
 
     fun getPastPurchasesDetails(
@@ -385,7 +405,7 @@ interface VodovozServiceRepository {
     fun sendComment(
         productId: Long,
         rating: Int,
-        message: String
+        message: String,
     ): Flow<Result<VodovozPlaceholderModel>>
 
     fun getProductCommentsInfo(

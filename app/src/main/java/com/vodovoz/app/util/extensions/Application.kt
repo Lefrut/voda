@@ -35,6 +35,9 @@ import androidx.core.view.WindowInsetsControllerCompat
 import androidx.core.widget.NestedScrollView
 import androidx.fragment.app.Fragment
 import com.google.android.material.snackbar.Snackbar
+import com.vodovoz.app.BuildConfig
+import com.vodovoz.app.R
+import com.vodovoz.app.common.resources.ResourcesProvider
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
@@ -129,13 +132,6 @@ fun Snackbar.action(action: String, color: Int? = null, listener: (View) -> Unit
     color?.let { setActionTextColor(color) }
 }
 
-
-fun NestedScrollView.scrollViewToTop() {
-    this.post {
-        this.fling(0)
-        this.smoothScrollTo(0, 0)
-    }
-}
 
 fun longArgs(key: String): ReadOnlyProperty<Fragment, Long> {
     return ReadOnlyProperty { thisRef, _ ->

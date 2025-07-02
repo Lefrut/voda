@@ -31,7 +31,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-//todo - review item click listeners
 @HiltViewModel
 @Stable
 class ProductAnalogsViewModel @Inject constructor(

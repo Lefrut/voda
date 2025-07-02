@@ -58,6 +58,7 @@ import com.vodovoz.app.design_system.composables.decoration.SkeletonBox
 import com.vodovoz.app.design_system.model.MapPointUi
 import com.vodovoz.app.feature.home.composables.dropShadow
 import com.vodovoz.app.feature.map.MapFlowViewModel
+import com.vodovoz.app.feature.map.model.MapAreaUi
 import com.vodovoz.app.ui.yandex_map.YandexMapUi
 import kotlin.math.roundToInt
 
@@ -70,6 +71,7 @@ private val Dp.Companion.Saver: Saver<Dp, Float>
         )
     }
 
+@Suppress("NonSkippableComposable")
 @SuppressLint("UnusedBoxWithConstraintsScope")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -82,6 +84,7 @@ fun MapBody(
     yandexMap: YandexMapUi,
     anchoredDraggableState: AnchoredDraggableState<SheetValue>,
     screenType: MapFlowViewModel.MapScreenTypeUi,
+    areas: List<MapAreaUi>,
     onInputStart: () -> Unit,
     onInputEnd: () -> Unit,
     onZoomPlusClick: () -> Unit,
@@ -100,6 +103,7 @@ fun MapBody(
         YandexMapView(
             modifier = Modifier.size(focusMapWidth, mapHeight),
             yandexMap = yandexMap,
+            areas = areas,
             focusMapWidthPx = with(density) { focusMapWidth.toPx() },
             focusMapHeightPx = with(density) { focusMapHeight.toPx() },
             onInputStart = onInputStart,
