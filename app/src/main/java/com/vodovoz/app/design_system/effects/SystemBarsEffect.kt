@@ -2,12 +2,14 @@ package com.vodovoz.app.design_system.effects
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.view.WindowCompat
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.vodovoz.app.util.extensions.window
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 
 @Composable
@@ -16,10 +18,12 @@ fun SystemBarsEffect(
     navigationBarColor: Color,
     navigationBarContrastEnforced: Boolean = true,
     darkIcons: Boolean = false,
-    handleDecorFitsSystemWindows: Boolean = true
+    handleDecorFitsSystemWindows: Boolean = true,
+    delayTimeMillis: Long = 0L
 ) {
     val context = LocalContext.current
     val window = context.window() ?: return
+    val coroutineScope = rememberCoroutineScope()
 
 
     val systemUiController = rememberSystemUiController()
@@ -29,7 +33,11 @@ fun SystemBarsEffect(
 
     DisposableEffect(window, statusBarColor, navigationBarColor, darkIcons) {
         if(handleDecorFitsSystemWindows){
-            WindowCompat.setDecorFitsSystemWindows(window, false)
+            coroutineScope.launch {
+                delay(delayTimeMillis)
+                WindowCompat.setDecorFitsSystemWindows(window, false)
+            }
+
         }
 
         systemUiController.setStatusBarColor(

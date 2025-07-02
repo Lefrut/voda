@@ -86,7 +86,7 @@ fun PODAROK_DTO.toDomain(): CartPresentModel {
         image = KARTINKA?.toVodovozUrl() ?: "",
         leftToGift = MAXSYMMA ?: OPIS?.filter { it.isDigit() }?.toIntOrNull() ?: 0,
         button = KNOPKA?.toDomain(),
-        popupWindow = OKNOPODAROK?.toDomain()
+        popupWindow = KNOPKA?.OKNOPODAROK?.toDomain()
     )
 }
 

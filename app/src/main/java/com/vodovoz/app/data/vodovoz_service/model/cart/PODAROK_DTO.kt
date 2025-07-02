@@ -17,7 +17,5 @@ data class PODAROK_DTO(
     @Json(name = "KARTINKA")
     val KARTINKA: String?,
     @Json(name = "KNOPKA")
-    val KNOPKA: PODAROK_KNOPKA_DTO?,
-    @Json(name = "OKNOPODAROK")
-    val OKNOPODAROK: OKNO_PODAROK_DTO?
+    val KNOPKA: PODAROK_KNOPKA_DTO?
 )
