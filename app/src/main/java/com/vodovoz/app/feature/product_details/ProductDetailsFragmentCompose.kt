@@ -48,13 +48,6 @@ class ProductDetailsFragment : Fragment() {
     @Inject
     lateinit var tabManager: TabManager
 
-    private val args: ProductDetailsFragmentArgs by navArgs()
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        viewModel.setupProductDetails(args.productId)
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,

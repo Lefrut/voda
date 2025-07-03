@@ -11,6 +11,7 @@ import com.vodovoz.app.design_system.model.ColorfulButtonUi
 import com.vodovoz.app.design_system.model.ParentCategoryUi
 import com.vodovoz.app.design_system.model.PriceUi
 import com.vodovoz.app.design_system.model.ProductMediaUi
+import com.vodovoz.app.design_system.model.StoryUi
 import com.vodovoz.app.design_system.model.filters.FilterUi
 import com.vodovoz.app.design_system.model.filters.FiltersUi
 import com.vodovoz.app.feature.addresses.model.AddressScreenTypeUi
@@ -224,7 +225,7 @@ fun NavController.navigateToGifts(
 
 fun NavController.navigateToAddresses(addressScreenType: AddressScreenTypeUi) {
     navigate(
-        R.id.savedAddressesDialogFragment,
+        R.id.addressesFragment,
         bundleOf("screenType" to addressScreenType),
         navOptions {
             slideAnim()
@@ -287,7 +288,7 @@ fun NavController.navigateToRecoverPassword() {
 
 fun NavController.navigateToButtonProductList(buttonId: Int) {
     navigate(
-        R.id.paginatedProductsCatalogWithoutFiltersFragment,
+        R.id.productCatalogFragment,
         bundleOf(
             "dataSource" to ProductCatalogFragment.DataSource.ButtonProducts(
                 buttonId
@@ -341,6 +342,10 @@ fun NavController.navigateToOrdersHistory() {
     })
 }
 
+fun NavController.navigateToOrdering(coupon: String) {
+    navigate(R.id.orderingFragment, bundleOf("coupon" to coupon), navOptions { expandAnim() })
+}
+
 fun NavController.navigateToOrderDetails(orderId: Long) {
     navigate(R.id.orderDetailsFragment, bundleOf("orderId" to orderId))
 }
@@ -362,8 +367,11 @@ fun NavController.navigateToDetailMedia(media: ProductMediaUi, mediaList: List<P
 
 }
 
-fun NavController.navigateToStories(storyId: Long) {
-    val bundle = bundleOf("startHistoryId" to storyId)
+fun NavController.navigateToStories(storyId: Long, stories: List<StoryUi>) {
+    val bundle = bundleOf(
+        "storyId" to storyId,
+        "stories" to stories
+    )
     navigate(
         R.id.fullScreenHistorySliderFragment,
         bundle,
@@ -515,7 +523,7 @@ fun NavController.navigateToSubCategories(category: ParentCategoryUi) {
 
 fun NavController.navigateToBrandProductList(brandId: Long) {
     navigate(
-        R.id.paginatedProductsCatalogWithoutFiltersFragment,
+        R.id.productCatalogFragment,
         bundleOf(
             "dataSource" to ProductCatalogFragment.DataSource.Brand(
                 brandId
@@ -526,7 +534,7 @@ fun NavController.navigateToBrandProductList(brandId: Long) {
 
 fun NavController.navigateToSearchProductList(query: String) {
     navigate(
-        R.id.paginatedProductsCatalogWithoutFiltersFragment,
+        R.id.productCatalogFragment,
         bundleOf(
             "dataSource" to ProductCatalogFragment.DataSource.Search(
                 query
@@ -537,7 +545,7 @@ fun NavController.navigateToSearchProductList(query: String) {
 
 fun NavController.navigateToViewedProductList() {
     navigate(
-        R.id.paginatedProductsCatalogWithoutFiltersFragment,
+        R.id.productCatalogFragment,
         bundleOf(
             "dataSource" to ProductCatalogFragment.DataSource.ViewedProducts
         )
@@ -547,7 +555,7 @@ fun NavController.navigateToViewedProductList() {
 
 fun NavController.navigateToCategoryProductList(categoryId: Long) {
     navigate(
-        R.id.paginatedProductsCatalogWithoutFiltersFragment,
+        R.id.productCatalogFragment,
         bundleOf(
             "dataSource" to ProductCatalogFragment.DataSource.Category(
                 categoryId
@@ -558,7 +566,7 @@ fun NavController.navigateToCategoryProductList(categoryId: Long) {
 
 fun NavController.navigateToBannerProductList(bannerId: Long, blockId: Long) {
     navigate(
-        R.id.paginatedProductsCatalogWithoutFiltersFragment,
+        R.id.productCatalogFragment,
         bundleOf(
             "dataSource" to ProductCatalogFragment.DataSource.Products(
                 bannerId, blockId
@@ -597,14 +605,14 @@ fun NavController.navigateToSearch(query: String = "") {
 
 fun NavController.navigateToHurryBuyUpProducts() {
     navigate(
-        R.id.paginatedProductsCatalogWithoutFiltersFragment,
+        R.id.productCatalogFragment,
         bundleOf("dataSource" to ProductCatalogFragment.DataSource.HurryBuyUpProducts)
     )
 }
 
 fun NavController.navigateToNewProducts() {
     navigate(
-        R.id.paginatedProductsCatalogWithoutFiltersFragment,
+        R.id.productCatalogFragment,
         bundleOf("dataSource" to ProductCatalogFragment.DataSource.NewProducts)
     )
 }

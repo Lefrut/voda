@@ -12,25 +12,28 @@ import com.vodovoz.app.ui.graphics.fromHexOrUnspecified
 import kotlinx.parcelize.Parcelize
 
 @Immutable
+@Parcelize
 data class StoryUi(
     val id: Long,
     val image: String,
     val pages: List<StoryPage>,
     val viewed: Boolean,
-)
+): Parcelable
 
 @Immutable
+@Parcelize
 data class StoryPage(
     val image: String,
     val actionWithButton: ActionWithButtonUi,
     val durationMillis: Int,
-)
+): Parcelable
 
 @Stable
+@Parcelize
 data class ActionWithButtonUi(
     val action: VodovozAction,
     val colorfulButton: ColorfulButtonUi,
-) {
+): Parcelable {
     companion object {
         val Empty = ActionWithButtonUi(VodovozAction.Unknown("", ""), ColorfulButtonUi.Empty)
     }

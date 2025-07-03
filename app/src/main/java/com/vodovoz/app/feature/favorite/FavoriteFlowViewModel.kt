@@ -339,7 +339,7 @@ class FavoriteFlowViewModel @Inject constructor(
         val productsLoadStates: CombinedLoadStates = emptyCombinedLoadStates,
     ) : State
 
-    @Immutable
+    @Stable
     sealed interface FavoriteUiState {
 
         data object Loading : FavoriteUiState

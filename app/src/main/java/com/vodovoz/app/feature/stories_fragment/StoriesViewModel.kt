@@ -10,13 +10,11 @@ import com.vodovoz.app.common.content.State
 import com.vodovoz.app.common.content.updateData
 import com.vodovoz.app.common.model.VodovozAction
 import com.vodovoz.app.design_system.model.StoryUi
-import com.vodovoz.app.design_system.model.mapToUi
 import com.vodovoz.app.domain.general.respository.UserPreferencesRepository
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
+import com.vodovoz.app.util.extensions.indexOfOrNull
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -24,13 +22,13 @@ import javax.inject.Inject
 @Stable
 class StoriesViewModel @Inject constructor(
     savedState: SavedStateHandle,
-    private val vodovozServiceRepository: VodovozServiceRepository,
     private val userPreferencesRepository: UserPreferencesRepository,
 ) : PagingContractViewModel<StoriesViewModel.HistoriesSliderState, StoriesViewModel.StoriesEvents>(
     HistoriesSliderState()
 ) {
 
-    private val startStoryId = savedState.get<Long>("startHistoryId") ?: 0L
+    private val startStoryId = savedState.get<Long>("storyId") ?: 0L
+    private val stories: List<StoryUi>? = savedState.get<List<StoryUi>>("stories")
 
     init {
         fetchStories()
@@ -43,35 +41,27 @@ class StoriesViewModel @Inject constructor(
 
         userPreferencesRepository.addViewedStoryId(startStoryId)
 
-        vodovozServiceRepository.getStories().onEach { storiesResult ->
-            val stories = storiesResult.getOrNull()
-            if (stories != null) {
 
-                val storyIndex =
-                    stories.indexOf(
-                        stories.firstOrNull { it.id == startStoryId } ?: run {
-                            navigateBack()
-                            return@onEach
-                        }
-                    )
+        if (stories != null) {
+            val storyIndex = stories.indexOfOrNull(stories.firstOrNull { it -> it.id == startStoryId }) ?: 0
 
-                delay(150)
+            delay(150L)
 
-                uiStateListener.updateData { s ->
-                    s.copy(
-                        stories = stories.mapToUi(),
-                        currentStoryIndex = storyIndex,
-                        currentPageIndex = 0,
-                        uiState = StoriesUiState.Success,
-                        timePassed = 0
-                    )
-                }
-                startStory()
-            } else {
-                navigateBack()
+            uiStateListener.updateData { s ->
+                s.copy(
+                    stories = stories,
+                    currentStoryIndex = storyIndex,
+                    currentPageIndex = 0,
+                    uiState = StoriesUiState.Success,
+                    timePassed = 0
+                )
             }
+            startStory()
+        } else {
+            delay(500L)
+            navigateBack()
+        }
 
-        }.collect()
     }
 
     private fun startStory() = viewModelScope.launch {
@@ -198,7 +188,7 @@ class StoriesViewModel @Inject constructor(
         data class ActivateAction(val action: VodovozAction) : StoriesEvents()
     }
 
-    @Immutable
+    @Stable
     sealed class StoriesUiState {
         data object Loading : StoriesUiState()
         data object Success : StoriesUiState()

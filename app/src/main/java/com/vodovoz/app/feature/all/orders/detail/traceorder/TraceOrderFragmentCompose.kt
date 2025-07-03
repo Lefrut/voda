@@ -93,11 +93,6 @@ class TraceOrderFragment : Fragment() {
         VodovozUserLocationListener(requireContext())
     }
 
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
-
     override fun onStart() {
         super.onStart()
         mapKit.onStart()

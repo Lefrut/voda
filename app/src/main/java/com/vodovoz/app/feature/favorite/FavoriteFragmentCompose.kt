@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
@@ -45,7 +46,7 @@ class FavoriteFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        viewModel.fetchFavoriteProducts()
+        viewModel.checkFavoritesChanges()
     }
 
     override fun onDestroyView() {
@@ -64,11 +65,12 @@ class FavoriteFragment : Fragment() {
             ?: viewModel.checkFavoritesChanges()
 
         return ComposeView(requireContext()).apply {
-            setViewCompositionStrategy(ViewCompositionStrategy.Default)
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+
             setContent {
                 VodovozTheme {
                     val pagingState by viewModel.observeUiState().collectAsStateWithLifecycle()
-                    val viewState = pagingState.data
+                    val viewState by rememberUpdatedState(pagingState.data)
                     val lazyGridState = rememberLazyGridState()
 
                     when (viewState.uiState) {

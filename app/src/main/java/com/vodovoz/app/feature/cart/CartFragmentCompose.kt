@@ -30,6 +30,7 @@ import com.vodovoz.app.common.account.AccountManager
 import com.vodovoz.app.common.tab.TabManager
 import com.vodovoz.app.core.navigation.navigateToAllBottles
 import com.vodovoz.app.core.navigation.navigateToGifts
+import com.vodovoz.app.core.navigation.navigateToOrdering
 import com.vodovoz.app.core.navigation.navigateToProductDetails
 import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.composables.placeholders.LoadingPlaceholder
@@ -143,16 +144,7 @@ class CartFragment : Fragment() {
                         if (findNavController().currentBackStackEntry?.destination?.id == R.id.orderingFragment) {
                             findNavController().popBackStack()
                         }
-                        findNavController().navigate(
-                            CartFragmentDirections.actionToOrderingFragment(
-                                0,
-                                0,
-                                0,
-                                0,
-                                event.cart,
-                                event.coupon
-                            )
-                        )
+                        findNavController().navigateToOrdering(event.coupon)
                     }
 
                     is CartFlowViewModel.CartEvents.GoToGifts -> {

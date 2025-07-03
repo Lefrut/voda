@@ -17,11 +17,11 @@ import com.vodovoz.app.core.navigation.navigateToProductDetails
 import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.composables.bottom_sheet.SortOptionsBottomSheet
 import com.vodovoz.app.design_system.effects.LifecycleEffect
-import com.vodovoz.app.feature.product_analogs.model.ProductsCollectionEvent
+import com.vodovoz.app.feature.product_analogs.model.ProductAnalogsEvent
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class ProductsCollectionFragment : Fragment() {
+class ProductAnalogsFragment : Fragment() {
 
     private val viewModel: ProductAnalogsViewModel by viewModels()
 
@@ -37,7 +37,8 @@ class ProductsCollectionFragment : Fragment() {
         savedInstanceState: Bundle?,
     ): View {
         return ComposeView(requireContext()).apply {
-            setViewCompositionStrategy(ViewCompositionStrategy.Default)
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+
             setContent {
                 val viewState by viewModel.state.collectAsStateWithLifecycle()
 
@@ -72,15 +73,15 @@ class ProductsCollectionFragment : Fragment() {
                 LifecycleEffect {
                     viewModel.events.collect { event ->
                         when (event) {
-                            ProductsCollectionEvent.GoBack -> {
+                            ProductAnalogsEvent.GoBack -> {
                                 findNavController().popBackStack()
                             }
 
-                            is ProductsCollectionEvent.GoToProductAnalogs -> {
+                            is ProductAnalogsEvent.GoToProductAnalogs -> {
                                 findNavController().navigateToProductDetails(event.productId)
                             }
 
-                            is ProductsCollectionEvent.GoToProductDetails -> {
+                            is ProductAnalogsEvent.GoToProductDetails -> {
                                 findNavController().navigateToProductAnalogs(event.productId)
                             }
                         }

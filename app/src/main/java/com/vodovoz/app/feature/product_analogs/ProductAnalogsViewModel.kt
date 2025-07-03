@@ -13,7 +13,7 @@ import com.vodovoz.app.domain.general.model.product.toUi
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.feature.product_comments.model.SortUi
 import com.vodovoz.app.feature.product_comments.model.toDomain
-import com.vodovoz.app.feature.product_analogs.model.ProductsCollectionEvent
+import com.vodovoz.app.feature.product_analogs.model.ProductAnalogsEvent
 import com.vodovoz.app.feature.product_analogs.model.ProductAnalogsState
 import com.vodovoz.app.feature.product_analogs.model.ProductAnalogsUiState
 import com.vodovoz.app.ui.mvi.MviViewModel
@@ -38,7 +38,7 @@ class ProductAnalogsViewModel @Inject constructor(
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val cartManager: CartManager,
     private val favoritesManager: LikeManager,
-) : MviViewModel<ProductAnalogsState, ProductsCollectionEvent>(
+) : MviViewModel<ProductAnalogsState, ProductAnalogsEvent>(
     ProductAnalogsState()
 ) {
     private val productId = savedStateHandle.get<Long>("productId") ?: -1
@@ -142,7 +142,7 @@ class ProductAnalogsViewModel @Inject constructor(
     }
 
     fun navigateBack() = viewModelScope.launch {
-        _events.emit(ProductsCollectionEvent.GoBack)
+        _events.emit(ProductAnalogsEvent.GoBack)
     }
 
     fun switchLayout() = viewModelScope.launch {
@@ -152,7 +152,7 @@ class ProductAnalogsViewModel @Inject constructor(
     }
 
     fun navigateToProductDetails(product: ProductUi) = viewModelScope.launch {
-        _events.emit(ProductsCollectionEvent.GoToProductDetails(product.id))
+        _events.emit(ProductAnalogsEvent.GoToProductDetails(product.id))
     }
 
     fun changeProductFavorite(product: ProductUi) = viewModelScope.launch {
@@ -160,7 +160,7 @@ class ProductAnalogsViewModel @Inject constructor(
     }
 
     fun navigateToProductAnalogs(product: ProductUi) = viewModelScope.launch {
-        _events.emit(ProductsCollectionEvent.GoToProductAnalogs(product.id))
+        _events.emit(ProductAnalogsEvent.GoToProductAnalogs(product.id))
     }
 
     fun incrementProductToCart(product: ProductUi) = viewModelScope.launch {

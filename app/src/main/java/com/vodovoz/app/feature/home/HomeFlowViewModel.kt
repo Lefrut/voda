@@ -46,6 +46,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
@@ -67,7 +68,7 @@ class HomeFlowViewModel @Inject constructor(
 ) : PagingContractViewModel<HomeFlowViewModel.HomeState, HomeFlowViewModel.HomeEvents>(HomeState()) {
 
     suspend fun listenStories() = uiStateListener.map { it.data.stories }
-        .combine(userPreferencesRepository.viewedStoryIds) { p1, p2 ->
+        .combine(userPreferencesRepository.viewedStoryIds) { _, p2 ->
             p2
         }.collectLatest { storyIds ->
             uiStateListener.updateData { s ->
@@ -339,7 +340,12 @@ class HomeFlowViewModel @Inject constructor(
     }
 
     fun navigateToStories(startStory: StoryUi) = viewModelScope.launch {
-        eventListener.emit(HomeEvents.GoToStories(storyId = startStory.id))
+        eventListener.emit(
+            HomeEvents.GoToStories(
+                storyId = startStory.id,
+                stories = dataState.stories
+            )
+        )
     }
 
     fun navigateToPromotionDetails(promotion: PromotionUi) = viewModelScope.launch {
@@ -428,6 +434,7 @@ class HomeFlowViewModel @Inject constructor(
 
     fun activateSpecialPromotionAction(action: VodovozAction) = viewModelScope.launch {
         uiStateListener.updateData { s -> s.copy(showSpecialPromotionBS = false) }
+        delay(100L)
         eventListener.emit(HomeEvents.ActivateVodovozAction(action))
     }
 
@@ -553,7 +560,7 @@ class HomeFlowViewModel @Inject constructor(
             val rating: Int,
         ) : HomeEvents()
 
-        data class GoToStories(val storyId: Long) : HomeEvents()
+        data class GoToStories(val storyId: Long, val stories: List<StoryUi>) : HomeEvents()
         data class GoToProductDetails(val productId: Long) : HomeEvents()
         data class GoToPromotionDetails(val promotionId: Long) : HomeEvents()
         data class ActivateButtonAction(val action: ButtonAction) : HomeEvents()

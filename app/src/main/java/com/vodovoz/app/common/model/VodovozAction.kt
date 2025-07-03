@@ -1,9 +1,12 @@
 package com.vodovoz.app.common.model
 
+import android.os.Parcelable
 import androidx.compose.runtime.Immutable
+import kotlinx.parcelize.Parcelize
 
 
-sealed interface VodovozAction {
+@Parcelize
+sealed interface VodovozAction: Parcelable {
     data class Product(val id: Long) : VodovozAction
     data class Products(val blockId: Long, val bannerId: Long) : VodovozAction
     data class Category(val id: Long) : VodovozAction
@@ -13,7 +16,7 @@ sealed interface VodovozAction {
     data class Url(val url: String) : VodovozAction
     data class UrlWithCookie(val url: String) : VodovozAction
 
-    data class Unknown(val action: String, val id: Any?) : VodovozAction
+    data class Unknown(val action: String, val id: String?) : VodovozAction
 
 }
 
