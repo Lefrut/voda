@@ -118,7 +118,7 @@ class AddAddressFragment : Fragment() {
 
                 AddAddressEvent.GoBackToAddresses -> {
                     findNavController().popBackStack(
-                        destinationId = R.id.savedAddressesDialogFragment,
+                        destinationId = R.id.addressesFragment,
                         inclusive = false,
                         saveState = false
                     )

@@ -80,7 +80,7 @@
 
     <fragment
         android:id="@+id/productsCollectionFragment"
-        android:name="com.vodovoz.app.feature.product_analogs.ProductsCollectionFragment"
+        android:name="com.vodovoz.app.feature.product_analogs.ProductAnalogsFragment"
         android:label="fragment_product_collection">
 
         <argument
@@ -116,7 +116,7 @@
             app:exitAnim="@anim/to_top" />
         <action
             android:id="@+id/action_to_paginatedProductsCatalogWithoutFiltersFragment"
-            app:destination="@id/paginatedProductsCatalogWithoutFiltersFragment" />
+            app:destination="@id/productCatalogFragment" />
         <action
             android:id="@+id/action_to_productDetailFragment"
             app:destination="@id/productDetailFragment" />
@@ -174,7 +174,7 @@
 
         <action
             android:id="@+id/action_to_paginatedProductsCatalogWithoutFiltersFragment"
-            app:destination="@id/paginatedProductsCatalogWithoutFiltersFragment" />
+            app:destination="@id/productCatalogFragment" />
 
         <action
             android:id="@+id/action_to_webViewFragment"
@@ -230,7 +230,7 @@
             app:destination="@id/promotionDetailFragment" />
         <action
             android:id="@+id/action_to_paginatedProductsCatalogWithoutFiltersFragment"
-            app:destination="@id/paginatedProductsCatalogWithoutFiltersFragment" />
+            app:destination="@id/productCatalogFragment" />
         <action
             android:id="@+id/action_to_fullScreenDetailPicturesSliderFragment"
             app:destination="@id/detailMedia" />
@@ -283,7 +283,7 @@
     </fragment>
 
     <fragment
-        android:id="@+id/paginatedProductsCatalogWithoutFiltersFragment"
+        android:id="@+id/productCatalogFragment"
         android:name="com.vodovoz.app.feature.product_catalog.ProductCatalogFragment"
         android:label="PaginatedProductsCatalogWithoutFiltersFragment">
         <argument
@@ -308,7 +308,7 @@
             app:nullable="true" />
         <action
             android:id="@+id/action_to_paginatedProductsCatalogWithoutFiltersFragment"
-            app:destination="@id/paginatedProductsCatalogWithoutFiltersFragment" />
+            app:destination="@id/productCatalogFragment" />
     </fragment>
 
     <fragment
@@ -353,7 +353,7 @@
             app:destination="@id/loginFragment" />
         <action
             android:id="@+id/action_to_savedAddressesDialogFragment"
-            app:destination="@id/savedAddressesDialogFragment" />
+            app:destination="@id/addressesFragment" />
         <action
             android:id="@+id/action_to_allOrdersFragment"
             app:destination="@id/allOrdersFragment" />
@@ -394,37 +394,7 @@
     <fragment
         android:id="@+id/fullScreenHistorySliderFragment"
         android:name="com.vodovoz.app.feature.stories_fragment.StoriesFragment"
-        android:label="FullScreenHistorySliderFragment">
-        <argument
-            android:name="startHistoryId"
-            app:argType="long" />
-        <action
-            android:id="@+id/action_to_promotionDetailFragment"
-            app:destination="@id/promotionDetailFragment" />
-        <action
-            android:id="@+id/action_to_paginatedProductsCatalogWithoutFiltersFragment"
-            app:destination="@id/paginatedProductsCatalogWithoutFiltersFragment" />
-        <action
-            android:id="@+id/action_to_allBrandsFragment"
-            app:destination="@id/allBrandsFragment" />
-        <action
-            android:id="@+id/action_to_productDetailFragment"
-            app:destination="@id/productDetailFragment" />
-        <action
-            android:id="@+id/action_to_allPromotionsFragment"
-            app:destination="@id/allPromotionsFragment" />
-
-        <action
-            android:id="@+id/action_to_waterAppFragment"
-            app:destination="@+id/waterAppFragment" />
-
-        <action
-            android:id="@+id/action_to_webViewFragment"
-            app:destination="@id/webViewFragment" />
-        <action
-            android:id="@+id/action_to_buyCertificateFragment"
-            app:destination="@+id/buyCertificateFragment" />
-    </fragment>
+        android:label="FullScreenHistorySliderFragment"/>
     <fragment
         android:id="@+id/concreteFilterFragment"
         android:name="com.vodovoz.app.feature.filter_values.FilterValuesFlowFragment"
@@ -495,7 +465,7 @@
             app:nullable="true" />
     </fragment>
     <fragment
-        android:id="@+id/savedAddressesDialogFragment"
+        android:id="@+id/addressesFragment"
         android:name="com.vodovoz.app.feature.addresses.AddressesFragment"
         android:label="SavedAddressesDialogFragment">
         <action
@@ -641,7 +611,7 @@
 
         <action
             android:id="@+id/action_to_savedAddressesDialogFragment"
-            app:destination="@id/savedAddressesDialogFragment" />
+            app:destination="@id/addressesFragment" />
 
         <argument
             android:name="total"

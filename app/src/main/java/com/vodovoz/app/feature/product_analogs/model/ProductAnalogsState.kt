@@ -1,6 +1,7 @@
 package com.vodovoz.app.feature.product_analogs.model
 
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.Stable
 import com.vodovoz.app.domain.general.model.product.ProductsSectionUi
 import com.vodovoz.app.feature.product_comments.model.SortUi
 
@@ -13,6 +14,7 @@ data class ProductAnalogsState(
     val uiState: ProductAnalogsUiState = ProductAnalogsUiState.Loading
 )
 
+@Stable
 sealed interface ProductAnalogsUiState{
 
     data object Loading: ProductAnalogsUiState

@@ -209,7 +209,7 @@ class HomeFragment : Fragment() {
                 }
 
                 is HomeFlowViewModel.HomeEvents.GoToStories -> {
-                    findNavController().navigateToStories(event.storyId)
+                    findNavController().navigateToStories(event.storyId, event.stories)
                 }
 
                 is HomeFlowViewModel.HomeEvents.GoToProductDetails -> {

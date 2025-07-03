@@ -2,6 +2,7 @@ package com.vodovoz.app.feature.product_details
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.vodovoz.app.common.about_product.AboutProductManager
@@ -53,15 +54,26 @@ import kotlin.math.roundToInt
 class ProductDetailsFlowViewModel @Inject constructor(
     private val cartManager: CartManager,
     private val likeManager: LikeManager,
-    private val accountManager: AccountManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val aboutProductManager: AboutProductManager,
     private val userPreferencesRepository: UserPreferencesRepository,
+    savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
     private val uiStateListener = MutableStateFlow(ProductDetailsState())
     private val state
         get() = uiStateListener.value
+
+
+
+    init {
+        savedStateHandle.get<Long>("productId")?.let {
+            uiStateListener.update { s ->
+                s.copy(productDetails = s.productDetails.copy(id = it))
+            }
+        }
+        fetchProductDetails()
+    }
 
 
     private val eventListener = MutableSharedFlow<ProductDetailsEvents>(replay = 0)
@@ -203,8 +215,6 @@ class ProductDetailsFlowViewModel @Inject constructor(
                     }
                 }
             }.launchIn(viewModelScope)
-
-    fun isLoginAlready() = accountManager.isAlreadyLogin()
 
     fun incrementCart() = viewModelScope.launch {
         val productDetails = state.productDetails
