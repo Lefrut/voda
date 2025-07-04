@@ -65,7 +65,10 @@ fun OKNO_PROMOKOD_DTO.toDomain(): CartPromoPopupWindowModel {
         title = TITLE ?: "",
         fieldHint = TEXT_V_POLE ?: "",
         buttonName = KNOPKA?.TITLE ?: "",
-        errorText = VALUE?.OSHIBKA
+        errorText = VALUE?.OSHIBKA,
+        borderColor = VALUE?.BORDER ?: "",
+        color = VALUE?.COLOR ?: "",
+        value = VALUE?.VALUE ?: ""
     )
 }
 

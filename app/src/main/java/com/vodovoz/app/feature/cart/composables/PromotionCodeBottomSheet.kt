@@ -96,8 +96,7 @@ fun PromotionCodeBottomSheet(
                         )
                     }
                 } else null,
-                isError = info.errorText != null,
-                supportingText = info.errorText
+                supportingText = info.errorText,
             )
 
             VodovozButton(

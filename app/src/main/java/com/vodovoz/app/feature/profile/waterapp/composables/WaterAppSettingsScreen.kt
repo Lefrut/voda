@@ -11,14 +11,16 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -83,6 +85,7 @@ fun WaterAppSettingsScreen(
         )
         Column(
             modifier = Modifier
+                .verticalScroll(rememberScrollState())
                 .padding(top = 16.dp)
                 .fillMaxSize(),
         ) {
@@ -117,7 +120,7 @@ fun WaterAppSettingsScreen(
 
 
             AnimatedVisibility(haveNotifications) {
-                Column {
+                Column(modifier = Modifier) {
                     Text(
                         modifier = Modifier.padding(top = 32.dp, start = 16.dp, end = 16.dp),
                         text = stringResource(R.string.reminder_interval),
@@ -134,20 +137,24 @@ fun WaterAppSettingsScreen(
                         )
                     ) {
                         val maxItemsInEachRow = 4
-                        val cardWidth = (maxWidth - 8.dp * 3) / maxItemsInEachRow
+                        val cardWidth =
+                            (maxWidth - 8.dp * (maxItemsInEachRow - 1)) / maxItemsInEachRow
 
                         FlowRow(
                             modifier = Modifier.fillMaxWidth(),
                             maxItemsInEachRow = maxItemsInEachRow,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            horizontalArrangement = Arrangement.spacedBy(
+                                8.dp,
+                                Alignment.CenterHorizontally
+                            ),
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             intervals.forEach { interval ->
                                 key(interval.minutes) {
                                     ReminderCard(
                                         modifier = Modifier
-                                            .width(cardWidth)
-                                            .aspectRatio(1.15f),
+                                            .width(cardWidth - 1.dp)
+                                            .height(cardWidth * 0.85f),
                                         reminderIntervalUi = interval,
                                         onReminderIntervalClick = onReminderIntervalClick
                                     )

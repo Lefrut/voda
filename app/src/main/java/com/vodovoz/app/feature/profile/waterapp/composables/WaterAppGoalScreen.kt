@@ -1,5 +1,6 @@
 package com.vodovoz.app.feature.profile.waterapp.composables
 
+import android.view.WindowInsets
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -15,9 +16,12 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -67,7 +71,7 @@ fun WaterAppGoalScreen(
         modifier = modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
-            .systemBarsPadding()
+            .windowInsetsPadding(androidx.compose.foundation.layout.WindowInsets.statusBars)
     ) {
         Box(
             Modifier
@@ -119,7 +123,7 @@ fun WaterAppGoalScreen(
         }
 
         Column(
-            modifier = modifier.matchParentSize(),
+            modifier = modifier.matchParentSize().windowInsetsPadding(androidx.compose.foundation.layout.WindowInsets.navigationBars),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Icon(

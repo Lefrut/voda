@@ -11,10 +11,10 @@ import com.vodovoz.app.common.content.State
 import com.vodovoz.app.common.content.updateData
 import com.vodovoz.app.common.like.LikeManager
 import com.vodovoz.app.design_system.model.VodovozPlaceholderUi
-import com.vodovoz.app.design_system.model.toUi
-import com.vodovoz.app.domain.general.model.EmptyResultException
 import com.vodovoz.app.design_system.model.order.OrderSummaryItemUi
 import com.vodovoz.app.design_system.model.order.mapToUi
+import com.vodovoz.app.design_system.model.toUi
+import com.vodovoz.app.domain.general.model.EmptyResultException
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.feature.cart.model.CartButtonUi
 import com.vodovoz.app.feature.cart.model.CartItemUi
@@ -256,7 +256,15 @@ class CartFlowViewModel @Inject constructor(
         }
 
         uiStateListener.updateData { s ->
-            s.copy(showPromotionCodeBottomSheet = false, promoCode = correctCoupon)
+            s.copy(
+                showPromotionCodeBottomSheet = false,
+                promoCode = correctCoupon,
+                promotionalCodeButton = s.promotionalCodeButton?.copy(
+                    popupWindow = s.promotionalCodeButton.popupWindow.copy(
+                        errorText = null,
+                    )
+                )
+            )
         }
     }
 
@@ -288,7 +296,11 @@ class CartFlowViewModel @Inject constructor(
     }
 
     fun navigateToOrder() = viewModelScope.launch {
-        eventListener.emit(CartEvents.GoToOrder("", ""))
+        if (accountManager.fetchAccountId() != null) {
+            eventListener.emit(CartEvents.GoToOrder(""))
+        } else {
+            eventListener.emit(CartEvents.GoToProfile)
+        }
     }
 
     @Immutable
@@ -324,7 +336,6 @@ class CartFlowViewModel @Inject constructor(
     sealed class CartEvents : Event {
 
         data class GoToOrder(
-            val cart: String,
             val coupon: String,
         ) : CartEvents()
 
