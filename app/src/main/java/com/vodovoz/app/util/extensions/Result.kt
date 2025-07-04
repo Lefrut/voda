@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.singleOrNull
 
 fun <T> Flow<Result<T>>.catchResult(): Flow<Result<T>> = catch { throwable ->
+    debugLog { throwable.message + throwable.stackTraceToString() }
     emit(Result.failure(throwable))
 }
 

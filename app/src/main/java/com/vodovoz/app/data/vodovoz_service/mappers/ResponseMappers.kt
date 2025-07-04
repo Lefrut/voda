@@ -1,5 +1,6 @@
 package com.vodovoz.app.data.vodovoz_service.mappers
 
+import androidx.annotation.Keep
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import com.vodovoz.app.core.network.converters.LocalDateTimeJsonAdapter
@@ -41,11 +42,12 @@ val moshiWithJsonAdapter: Moshi =
         .build()
 
 
+@Keep
 inline fun <reified T, R> executeRequest(
     crossinline request: suspend () -> Response<T>,
     crossinline mapper: (T) -> R,
-    noinline onFail: ((Response<T>) -> Result<R>) = { response ->
-        val exception = RequestException(response.messageWithCode() ?: "")
+    crossinline onFail: ((Response<ResponseBody>) -> Result<R>) = { response ->
+        val exception = RequestException(response.messageWithCode())
         Result.failure(exception)
     },
     crossinline onResponse: (Response<T>) -> Unit = {},
@@ -56,45 +58,34 @@ inline fun <reified T, R> executeRequest(
 
         onResponse(response)
 
-        val adapter = moshiWithJsonAdapter.adapter<T>(type).lenient()
-
-        val stringBody = (response.stringBody() as? String) ?: ""
+        val stringBody = response.stringBody()
 
         val bodyResult = kotlin.runCatching {
+            val adapter = moshiWithJsonAdapter.adapter<T>(type)
             adapter.fromJson(stringBody)
         }
         val body = bodyResult.getOrNull()
         val responseCode = response.code()
+        val errorCode = responseCode.takeIf { code -> code !in 200..299 } ?: 520
 
         bodyResult.onSuccess {
             if (body != null && responseCode == 200) {
-                val result = kotlin.runCatching {
-                    mapper(body)
-                }
-                if (result.isFailure) {
-                    emit(onFail(Response.error(1100, stringBody.jsonToResponseBody())))
-                } else {
-                    debugLog { result.onFailure { t -> t.message + t.suppressed + t.stackTraceToString() } }
+                val result = kotlin.runCatching { mapper(body) }
 
+                if (result.isFailure) {
+                    emit(onFail(Response.error(errorCode, stringBody.jsonToResponseBody())))
+                } else {
                     emit(result)
                 }
             } else {
-                emit(onFail(Response.error(responseCode.takeIf { it != 200 } ?: 1100,
-                    stringBody.jsonToResponseBody())))
+                emit(onFail(Response.error(errorCode, stringBody.jsonToResponseBody())))
             }
         }.onFailure {
-            debugLog {
-                bodyResult.onFailure { t ->
-                    t.message + t.suppressed + t.stackTraceToString()
-                }
-            }
-
-            emit(onFail(Response.error(responseCode.takeIf { it != 200 } ?: 1100, stringBody.jsonToResponseBody())))
+            val onFailResult = onFail(Response.error(errorCode, stringBody.jsonToResponseBody()))
+            emit(onFailResult)
         }
     }.catchResult().take(1).onEach { result ->
-        result.onFailure { t ->
-            debugLog { t.stackTraceToString() }
-        }
+        result.onFailure { t -> debugLog { t.stackTraceToString() } }
     }.flowOn(Dispatchers.IO)
 }
 

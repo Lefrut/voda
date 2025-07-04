@@ -5,6 +5,7 @@ import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
 @Keep
+@JsonClass(generateAdapter = true)
 data class VodovozResponseDTO<T>(
     @Json(name = "status")
     val status: String?,

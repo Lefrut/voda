@@ -9,14 +9,15 @@ import com.vodovoz.app.data.vodovoz_service.model.VodovozResponseDTO
 import com.vodovoz.app.domain.general.model.RequestException
 import com.vodovoz.app.util.extensions.debugLog
 import kotlinx.coroutines.flow.singleOrNull
+import okhttp3.ResponseBody
 import retrofit2.Response
 import kotlin.reflect.KClass
 
-class VodovozPagingSource<T : Any, R : Any> constructor(
+class VodovozPagingSource<T : Any, R : Any> (
     private val clazz: KClass<T>,
     private val request: suspend (page: Int, limit: Int) -> Response<VodovozResponseDTO<T>>,
     private val mapper: (VodovozResponseDTO<T>) -> List<R>,
-    private val onFail: (Response<VodovozResponseDTO<T>>) -> Result<List<R>> = { response ->
+    private val onFail: (Response<ResponseBody>) -> Result<List<R>> = { response ->
         val exception = RequestException(response.messageWithCode())
         Result.failure(exception)
     }

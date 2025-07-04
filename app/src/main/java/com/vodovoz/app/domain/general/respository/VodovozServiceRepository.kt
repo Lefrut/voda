@@ -127,7 +127,7 @@ interface VodovozServiceRepository {
         deviceInfo: String?,
         notifyDriverId: String? = null,
         message: String? = null,
-    ): Flow<Result<String>>
+    ): Flow<Result<VodovozPlaceholderModel>>
 
     fun orderService(
         serviceType: String,

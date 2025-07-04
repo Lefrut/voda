@@ -149,7 +149,7 @@ interface VodovozService {
         @Query("device") deviceInfo: String?,
         @Query("driver") notifyDriverId: String? = null,
         @Query("comment") message: String? = null,
-    ): Response<VodovozResponseDTO<String>>
+    ): Response<VodovozResponseDTO<VodovozPlaceholderDTO>>
 
     @GET("oformlenie/zvonok.php?action=vampozvonit")
     suspend fun getOrderCallYouDetails(
