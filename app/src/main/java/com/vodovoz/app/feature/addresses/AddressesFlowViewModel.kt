@@ -32,6 +32,9 @@ class AddressesFlowViewModel @Inject constructor(
     )
 ) {
 
+    private val selectedAddressId = savedState.get<Long>("addressId")
+
+
     fun fetchAddresses() = viewModelScope.launch {
         val addressesResult = vodovozServiceRepository.getAddresses().singleResult()
 
@@ -43,11 +46,14 @@ class AddressesFlowViewModel @Inject constructor(
                 }
             }
 
+            val selectedAddress = addressSections.find { section ->
+                section.items.find { addressUi -> addressUi.id == selectedAddressId } != null
+            }?.items?.firstOrNull() ?: addressSections.firstOrNull()?.items?.firstOrNull() ?: AddressUi.Empty
+
             uiStateListener.updateData { s ->
                 s.copy(
                     addressSections = addressSections,
-                    selectedAddress = addressSections.firstOrNull()?.items?.firstOrNull()
-                        ?: AddressUi.Empty,
+                    selectedAddress = selectedAddress,
                     uiState = AddressesUiState.Success
                 )
             }

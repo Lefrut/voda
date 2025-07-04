@@ -88,10 +88,11 @@ class OrderingFragment : Fragment() {
             backEntrySavedStateHandle?.remove<AddressUi>("address")
                 ?.let { address -> viewModel.setAddress(address) }
 
-            val timeInterval = backEntrySavedStateHandle?.remove<DeliveryTimeIntervalUi>("timeInterval")
+            val timeInterval =
+                backEntrySavedStateHandle?.remove<DeliveryTimeIntervalUi>("timeInterval")
             val date = backEntrySavedStateHandle?.remove<DeliveryDateOptionUi>("dateOption")
 
-            if(timeInterval != null && date != null){
+            if (timeInterval != null && date != null) {
                 viewModel.setDeliveryDateTime(timeInterval, date)
             }
 
@@ -114,16 +115,23 @@ class OrderingFragment : Fragment() {
                     findNavController().popBackStack()
                 }
 
-                OrderingFlowViewModel.OrderingEvents.GoToAddresses -> {
-                    findNavController().navigateToAddresses(AddressScreenTypeUi.Choose)
+                is OrderingFlowViewModel.OrderingEvents.GoToAddresses -> {
+                    findNavController().navigateToAddresses(
+                        AddressScreenTypeUi.Choose,
+                        event.addressId
+                    )
                 }
 
                 is OrderingFlowViewModel.OrderingEvents.GoToDeliveryDate -> {
-                    findNavController().navigateToDeliveryDate(addressId = event.addressId)
+                    findNavController().navigateToDeliveryDate(
+                        addressId = event.addressId,
+                        date = event.date,
+                        timeInterval = event.timeInterval
+                    )
                 }
 
                 is OrderingFlowViewModel.OrderingEvents.GoToPaymentMethod -> {
-                    findNavController().navigateToPaymentMethod(event.addressId, event.date)
+                    findNavController().navigateToPaymentMethod(event.addressId, event.date, event.paymentMethodId, event.balance)
                 }
 
                 is OrderingFlowViewModel.OrderingEvents.GoToOrderRecipient -> {
@@ -131,7 +139,7 @@ class OrderingFragment : Fragment() {
                 }
 
                 is OrderingFlowViewModel.OrderingEvents.GoToCallYou -> {
-                    findNavController().navigateToOrderCallYou(event.addressId)
+                    findNavController().navigateToOrderCallYou(event.addressId, event.callYouId)
                 }
 
                 OrderingFlowViewModel.OrderingEvents.ScrollToTop -> {

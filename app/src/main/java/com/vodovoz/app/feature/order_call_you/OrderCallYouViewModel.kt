@@ -28,6 +28,8 @@ class OrderCallYouViewModel @Inject constructor(
 
     private val addressId: Long = savedStateHandle.get<Long>("addressId") ?: -1
 
+    private val callYouId: String? = savedStateHandle.get<String>("callYouId")
+
     init {
         fetchOrderCallYouDetails()
     }
@@ -45,12 +47,17 @@ class OrderCallYouViewModel @Inject constructor(
             vodovozServiceRepository.getOrderCallYouDetails(addressId).singleResult()
 
         callYouDetailsResult.onSuccess { callYouDetails ->
+
+            val items = callYouDetails.items.mapToUi()
+
             _state.update { s ->
                 s.copy(
                     uiState = OrderCallYouUiState.CallYou,
                     title = callYouDetails.title,
-                    currentItem = callYouDetails.currentItem.toUi(),
-                    items = callYouDetails.items.mapToUi(),
+                    currentItem = items.firstOrNull {
+                        it.value == callYouId
+                    } ?: callYouDetails.currentItem.toUi(),
+                    items = items,
                     button = callYouDetails.button.toUi()
                 )
             }
