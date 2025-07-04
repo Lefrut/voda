@@ -248,7 +248,9 @@ fun VodovozTextField(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     readOnly: Boolean = false,
-    textStyle: TextStyle = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onBackground),
+    textStyle: TextStyle = MaterialTheme.typography.bodyMedium.copy(
+        color = MaterialTheme.colorScheme.onBackground
+    ),
     hint: String = "",
     label: String? = null,
     supportingText: String? = null,

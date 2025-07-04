@@ -18,11 +18,17 @@ data class OKNO_PROMOKOD_DTO(
 @Keep
 data class KNOPKA_OKNO_PROMOKOD_DTO(
     @Json(name = "TITLE")
-    val TITLE: String?
+    val TITLE: String?,
 )
 
 @Keep
 data class OKNO_PROMOKOD_VALUE(
     @Json(name = "OSHIBKA")
-    val OSHIBKA: String?
+    val OSHIBKA: String?,
+    @Json(name = "BORDER")
+    val BORDER: String?,
+    @Json(name = "TITLE")
+    val COLOR: String?,
+    @Json(name = "VALUE")
+    val VALUE: String?,
 )

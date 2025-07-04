@@ -159,13 +159,13 @@ class MapFragment : Fragment() {
         userLocationLayer.isHeadingEnabled = true
         userLocationLayer.setObjectListener(userLocationListener)
 
-
-        ViewCompat.setOnApplyWindowInsetsListener(view) { _, insets ->
-            val imeVisible = insets.isVisible(WindowInsetsCompat.Type.ime())
-            tabManager.changeTabVisibility(!imeVisible)
-            tabManager.changeTabWindowInsets(!imeVisible)
-            return@setOnApplyWindowInsetsListener insets
-        }
+//
+//        ViewCompat.setOnApplyWindowInsetsListener(view) { _, insets ->
+//            val imeVisible = insets.isVisible(WindowInsetsCompat.Type.ime())
+//            tabManager.changeTabVisibility(!imeVisible)
+//            tabManager.changeTabWindowInsets(!imeVisible)
+//            return@setOnApplyWindowInsetsListener insets
+//        }
     }
 
     override fun onStart() {
@@ -174,11 +174,11 @@ class MapFragment : Fragment() {
     }
 
 
-    override fun onPause() {
-        super.onPause()
-        WindowCompat.setDecorFitsSystemWindows(requireActivity().window, true)
-        tabManager.changeTabWindowInsets(false)
-    }
+//    override fun onPause() {
+//        super.onPause()
+//        WindowCompat.setDecorFitsSystemWindows(requireActivity().window, true)
+//        tabManager.changeTabWindowInsets(false)
+//    }
 
     override fun onStop() {
         mapKit.onStop()
