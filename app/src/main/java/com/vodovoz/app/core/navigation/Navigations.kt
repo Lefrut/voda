@@ -223,32 +223,15 @@ fun NavController.navigateToGifts(
     )
 }
 
-fun NavController.navigateToAddresses(addressScreenType: AddressScreenTypeUi) {
+fun NavController.navigateToAddresses(
+    addressScreenType: AddressScreenTypeUi,
+    addressId: Long? = null,
+) {
     navigate(
         R.id.addressesFragment,
-        bundleOf("screenType" to addressScreenType),
-        navOptions {
-            slideAnim()
-        }
-    )
-}
-
-fun NavController.navigateToDeliveryDate(addressId: Long, navOptions: NavOptions? = null) {
-    navigate(
-        R.id.deliveryDateFragment,
-        bundleOf("addressId" to addressId),
-        navOptions ?: navOptions {
-            slideAnim()
-        }
-    )
-}
-
-fun NavController.navigateToPaymentMethod(addressId: Long, date: LocalDate) {
-    navigate(
-        R.id.paymentMethodFragment,
         bundleOf(
-            "addressId" to addressId,
-            "date" to date.toEpochDay()
+            "screenType" to addressScreenType,
+            "addressId" to addressId
         ),
         navOptions {
             slideAnim()
@@ -256,10 +239,52 @@ fun NavController.navigateToPaymentMethod(addressId: Long, date: LocalDate) {
     )
 }
 
-fun NavController.navigateToOrderCallYou(addressId: Long) {
+fun NavController.navigateToDeliveryDate(
+    addressId: Long,
+    date: String? = null,
+    timeInterval: String? = null,
+    navOptions: NavOptions? = null,
+) {
+    navigate(
+        R.id.deliveryDateFragment,
+        bundleOf(
+            "addressId" to addressId,
+            "date" to date,
+            "timeInterval" to timeInterval
+        ),
+        navOptions ?: navOptions {
+            slideAnim()
+        }
+    )
+}
+
+fun NavController.navigateToPaymentMethod(
+    addressId: Long,
+    date: LocalDate,
+    paymentMethodId: String? = null,
+    balance: Boolean? = null
+    ) {
+    navigate(
+        R.id.paymentMethodFragment,
+        bundleOf(
+            "addressId" to addressId,
+            "date" to date.toEpochDay(),
+            "paymentMethodId" to paymentMethodId,
+            "balance" to balance
+        ),
+        navOptions {
+            slideAnim()
+        }
+    )
+}
+
+fun NavController.navigateToOrderCallYou(addressId: Long, callYouId: String? = null) {
     navigate(
         R.id.orderCallYouFragment,
-        bundleOf("addressId" to addressId),
+        bundleOf(
+            "addressId" to addressId,
+            "callYouId" to callYouId
+        ),
         navOptions {
             slideAnim()
         }

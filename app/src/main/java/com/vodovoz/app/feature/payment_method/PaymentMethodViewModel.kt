@@ -33,6 +33,8 @@ class PaymentMethodViewModel @Inject constructor(
     private val orderDate = savedStateHandle.get<Long>("date")?.let { days ->
         LocalDate.ofEpochDay(days)
     } ?: navigateBack().let { LocalDate.now() }
+    private val paymentMethodId = savedStateHandle.get<String>("paymentMethodId")
+    private val balance = savedStateHandle.get<Boolean>("balance")
 
     fun navigateBack() = viewModelScope.launch {
         _events.emit(PaymentMethodEvent.GoBack)
@@ -48,16 +50,49 @@ class PaymentMethodViewModel @Inject constructor(
         ).singleResult()
 
         paymentDetailsResult.onSuccess { paymentDetails ->
+
+            val paymentSections = paymentDetails.items.map { section ->
+                section.toUi { items -> items.mapToUi() }
+            }
+
             _state.update { s ->
                 s.copy(
                     title = paymentDetails.title,
                     button = paymentDetails.button.toUi(),
-                    paymentSections = paymentDetails.items.map { section ->
-                        section.toUi { items -> items.mapToUi() }
-                    },
+                    paymentSections = paymentSections,
                     uiState = PaymentMethodUiState.Success
                 )
+
+
             }
+
+            val paymentMethodItemUi = paymentSections.flatMap {
+                it.items
+            }.firstOrNull { it.id == paymentMethodId }
+
+            if (paymentMethodItemUi != null) {
+                changePaymentMethodItem(paymentMethodItemUi).join()
+            }
+            if (balance != null) {
+                _state.update { s ->
+                    s.copy(
+                        paymentSections = s.paymentSections.map { section ->
+                            section.copy(
+                                title = section.title,
+                                items = section.items.map { paymentItem ->
+                                    if(paymentItem.id == "schet"){
+                                        paymentItem.copy(value = balance)
+                                    }else {
+                                        paymentItem
+                                    }
+                                }
+                            )
+                        }
+
+                    )
+                }
+            }
+
 
         }.onFailure {
             _state.update { s ->

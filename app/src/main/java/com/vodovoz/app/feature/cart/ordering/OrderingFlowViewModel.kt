@@ -138,10 +138,14 @@ class OrderingFlowViewModel @Inject constructor(
     }
 
     fun navigateByRecipientItem(orderRecipientItem: OrderingMenuItemUi) = viewModelScope.launch {
-        val addressId = dataState.ordering.addressId
+        val ordering = dataState.ordering
+        val addressId = ordering.addressId
+        val timeInterval = ordering.timeInterval
+        val date = ordering.date
+
         when (orderRecipientItem.id) {
             ADDRESS_MENU_ID -> {
-                eventListener.emit(OrderingEvents.GoToAddresses)
+                eventListener.emit(OrderingEvents.GoToAddresses(addressId))
             }
 
             RECIPIENT_MENU_ID -> {
@@ -170,7 +174,13 @@ class OrderingFlowViewModel @Inject constructor(
                         )
                     }
                 } else {
-                    eventListener.emit(OrderingEvents.GoToDeliveryDate(addressId))
+                    eventListener.emit(
+                        OrderingEvents.GoToDeliveryDate(
+                            addressId,
+                            date,
+                            timeInterval
+                        )
+                    )
                 }
 
             }
@@ -195,9 +205,13 @@ class OrderingFlowViewModel @Inject constructor(
     }
 
     fun navigateByPaymentItem(orderPaymentItem: OrderingMenuItemUi) = viewModelScope.launch {
-        val addressId = dataState.ordering.addressId
-        val timeInterval = dataState.ordering.timeInterval
-        val date = dataState.ordering.date
+        val ordering = dataState.ordering
+        val addressId = ordering.addressId
+        val timeInterval = ordering.timeInterval
+        val date = ordering.date
+        val callYouId = ordering.callYouId
+        val paymentMethodId = ordering.paymentId
+        val balance = ordering.paymentBalance
 
         when (orderPaymentItem.id) {
             PAYMENT_MENU_ID -> {
@@ -229,7 +243,9 @@ class OrderingFlowViewModel @Inject constructor(
                     eventListener.emit(
                         OrderingEvents.GoToPaymentMethod(
                             addressId = addressId,
-                            date = localDate
+                            date = localDate,
+                            paymentMethodId = paymentMethodId,
+                            balance = balance
                         )
                     )
                 }
@@ -248,7 +264,7 @@ class OrderingFlowViewModel @Inject constructor(
                     }
                     eventListener.emit(OrderingEvents.ScrollToTop)
                 } else {
-                    eventListener.emit(OrderingEvents.GoToCallYou(addressId))
+                    eventListener.emit(OrderingEvents.GoToCallYou(addressId, callYouId))
                 }
 
 
@@ -567,13 +583,24 @@ class OrderingFlowViewModel @Inject constructor(
 
     sealed class OrderingEvents : Event {
         data object GoBack : OrderingEvents()
-        data object GoToAddresses : OrderingEvents()
+        data class GoToAddresses(val addressId: Long?) : OrderingEvents()
         data object ScrollToTop : OrderingEvents()
 
-        data class GoToDeliveryDate(val addressId: Long) : OrderingEvents()
-        data class GoToPaymentMethod(val addressId: Long, val date: LocalDate) : OrderingEvents()
+        data class GoToDeliveryDate(
+            val addressId: Long,
+            val date: String?,
+            val timeInterval: String?,
+        ) : OrderingEvents()
+
+        data class GoToPaymentMethod(
+            val addressId: Long,
+            val date: LocalDate,
+            val paymentMethodId: String?,
+            val balance: Boolean?,
+        ) : OrderingEvents()
+
         data class GoToOrderRecipient(val addressId: Long) : OrderingEvents()
-        data class GoToCallYou(val addressId: Long) : OrderingEvents()
+        data class GoToCallYou(val addressId: Long, val callYouId: String?) : OrderingEvents()
     }
 
     @Stable

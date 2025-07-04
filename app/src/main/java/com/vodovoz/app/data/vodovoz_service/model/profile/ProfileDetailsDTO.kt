@@ -11,7 +11,7 @@ import com.vodovoz.app.data.vodovoz_service.model.TOVARY_DTO
 @Keep
 data class ProfileDetailsDTO(
     @Json(name = "PROFIL")
-    val PROFIL: PROFIL_DTO,
+    val PROFIL: PROFIL_DTO?,
     @Json(name = "BLOCK")
     val BLOCK: List<PROFILE_BLOCK_DTO>?,
     @Json(name = "DENIGI")

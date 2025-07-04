@@ -122,16 +122,18 @@ fun DeliveryDateBody(
                         modifier = Modifier.fillMaxSize(),
                     )
                 }
+
                 intervals.isNotEmpty() -> {
                     intervals.forEachIndexed { _, deliveryTimeInterval ->
                         DeliveryTimeIntervalItem(
                             modifier = Modifier.bottomLine(MaterialTheme.colorScheme.surfaceVariant),
                             deliveryTimeInterval = deliveryTimeInterval,
-                            selected = deliveryTimeInterval == selectedTimeInterval,
+                            selected = deliveryTimeInterval.value == selectedTimeInterval.value,
                             onClick = onTimeIntervalSelect
                         )
                     }
                 }
+
                 selectedTimeSection.placeholder != null -> {
                     VodovozPlaceholder(data = selectedTimeSection.placeholder)
                 }

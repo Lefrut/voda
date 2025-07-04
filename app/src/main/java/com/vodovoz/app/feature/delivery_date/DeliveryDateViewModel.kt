@@ -3,8 +3,6 @@ package com.vodovoz.app.feature.delivery_date
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import com.vodovoz.app.R
-import com.vodovoz.app.common.resources.ResourcesProvider
 import com.vodovoz.app.design_system.model.SectionUi
 import com.vodovoz.app.design_system.model.toUi
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
@@ -33,6 +31,23 @@ class DeliveryDateViewModel @Inject constructor(
 
     private val addressId = savedStateHandle.get<Long>("addressId") ?: -1
 
+    private val deliveryDate = savedStateHandle.get<String>("date")
+
+    private val timeInterval = savedStateHandle.get<String>("timeInterval")
+
+    init {
+        if (deliveryDate != null && timeInterval != null) {
+            _state.update { s ->
+                s.copy(
+                    showCalendarDialog = false,
+                    selectedDateOption = DeliveryDateOptionUi.Empty.copy(value = deliveryDate),
+                    selectedTimeInterval = DeliveryTimeIntervalUi.Empty.copy(value = timeInterval),
+                )
+            }
+            fetchDeliveryDateDetails()
+        }
+    }
+
     fun navigateBack() = viewModelScope.launch {
         _events.emit(DeliveryDateEvent.GoBack)
     }
@@ -56,17 +71,34 @@ class DeliveryDateViewModel @Inject constructor(
             }
             val firstSection = timeSections.firstOrNull() ?: SectionUi.empty()
 
+
+
             _state.update { s ->
+
+                val selectedTimeInterval =
+                    s.selectedTimeInterval.takeIf { it != DeliveryTimeIntervalUi.Empty }
+                        ?: firstSection.items.firstOrNull() ?: DeliveryTimeIntervalUi.Empty
+
+                val timeSectionBySelectedTimeInterval = timeSections.find { section ->
+                    section.items.find { it.value == selectedTimeInterval.value } != null
+                }
+
+                val selectedTimeSection = timeSectionBySelectedTimeInterval
+                    ?: timeSections.firstOrNull()
+                    ?: s.selectedTimeSection
+
                 s.copy(
                     title = deliveryDateDetails.title,
                     button = deliveryDateDetails.button.toUi(),
                     options = options,
                     timeSections = timeSections,
-                    selectedTimeSection = firstSection,
-                    selectedDateOption = s.selectedDateOption.takeIf { it != DeliveryDateOptionUi.Empty }
-                        ?: options.firstOrNull() ?: DeliveryDateOptionUi.Empty,
-                    selectedTimeInterval = firstSection.items.firstOrNull()
-                        ?: DeliveryTimeIntervalUi.Empty,
+                    selectedTimeSection = selectedTimeSection,
+                    selectedDateOption = s.selectedDateOption.takeIf {
+                        it != DeliveryDateOptionUi.Empty
+                    } ?: options.firstOrNull() ?: DeliveryDateOptionUi.Empty,
+                    selectedTimeInterval = if (timeSectionBySelectedTimeInterval == null) {
+                        selectedTimeSection.items.firstOrNull() ?: DeliveryTimeIntervalUi.Empty
+                    } else selectedTimeInterval,
                     uiState = DeliveryDateUiState.Success
                 )
             }
@@ -74,9 +106,7 @@ class DeliveryDateViewModel @Inject constructor(
 
         }.onFailure {
             _state.update { s ->
-                s.copy(
-                    uiState = DeliveryDateUiState.Error
-                )
+                s.copy(uiState = DeliveryDateUiState.Error)
             }
         }
     }
@@ -108,10 +138,12 @@ class DeliveryDateViewModel @Inject constructor(
     }
 
     fun chooseDeliveryDate() = viewModelScope.launch {
+        val dateOption = stateSnapshot.selectedDateOption
+        val timeInterval = stateSnapshot.selectedTimeInterval
         _events.emit(
             DeliveryDateEvent.GoBackToOrdering(
-                timeInterval = stateSnapshot.selectedTimeInterval,
-                dateOption = stateSnapshot.selectedDateOption
+                timeInterval = timeInterval,
+                dateOption = dateOption
             )
         )
     }

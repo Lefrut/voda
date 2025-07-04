@@ -38,7 +38,7 @@ fun DeliveryDateScreen(
         modifier = Modifier.systemBarsPadding(),
         topBar = {
             VodovozTopBar(
-                title = viewState.title.ifEmpty { stringResource(R.string.delivery_time_and_date) },
+                title = viewState.title,
                 onBack = { viewModel.navigateBack() }
             )
         },
