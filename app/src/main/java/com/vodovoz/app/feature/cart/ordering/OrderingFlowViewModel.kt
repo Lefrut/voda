@@ -14,6 +14,7 @@ import com.vodovoz.app.common.model.from
 import com.vodovoz.app.common.resources.ResourcesProvider
 import com.vodovoz.app.design_system.model.ColorfulButtonUi
 import com.vodovoz.app.design_system.model.SectionUi
+import com.vodovoz.app.design_system.model.VodovozPlaceholderUi
 import com.vodovoz.app.design_system.model.order.OrderSummaryItemUi
 import com.vodovoz.app.design_system.model.order.mapToUi
 import com.vodovoz.app.design_system.model.toUi
@@ -45,8 +46,7 @@ class OrderingFlowViewModel @Inject constructor(
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val resourcesProvider: ResourcesProvider,
 ) : PagingContractViewModel<OrderingFlowViewModel.OrderingState, OrderingFlowViewModel.OrderingEvents>(
-    OrderingState(
-    )
+    OrderingState()
 ) {
     private val coupon = savedStateHandle.get<String>("coupon")
 
@@ -88,7 +88,7 @@ class OrderingFlowViewModel @Inject constructor(
                     selectedNotifyItem = s.selectedNotifyItem.takeIf { it ->
                         it != OrderNotifyItemUi.Empty
                     } ?: notifySection.items.firstOrNull() ?: s.selectedNotifyItem,
-                    uiState = OrderingUiState.Success
+                    uiState = OrderingUiState.Order
                 )
             }
         }.onFailure {
@@ -281,7 +281,11 @@ class OrderingFlowViewModel @Inject constructor(
                 balance = VodovozBoolean.from(ordering.paymentBalance).value,
                 deviceInfo = deviceInfo,
                 notifyDriverId = dataState.selectedNotifyItem.value
-            ).singleResult()
+            ).singleResult().onSuccess { placeholder ->
+                uiStateListener.updateData { s ->
+                    s.copy(uiState = OrderingUiState.Success(placeholder.toUi()))
+                }
+            }
 
             uiStateListener.updateData { s ->
                 s.copy(button = s.button.copy(loading = false))
@@ -574,8 +578,9 @@ class OrderingFlowViewModel @Inject constructor(
 
     @Stable
     sealed interface OrderingUiState {
-        data object Success : OrderingUiState
+        data object Order : OrderingUiState
         data object Loading : OrderingUiState
         data object Error : OrderingUiState
+        data class Success(val placeholder: VodovozPlaceholderUi) : OrderingUiState
     }
 }

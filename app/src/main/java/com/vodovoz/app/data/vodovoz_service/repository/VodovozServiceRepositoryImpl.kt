@@ -10,6 +10,7 @@ import com.vodovoz.app.common.cookie.CookieManager
 import com.vodovoz.app.common.model.VodovozSiteState
 import com.vodovoz.app.core.network.retrofit.messageWithCode
 import com.vodovoz.app.core.network.retrofit.stringBody
+import com.vodovoz.app.core.network.retrofit.stringErrorBody
 import com.vodovoz.app.core.network.serialization.fromJson
 import com.vodovoz.app.data.vodovoz_service.VodovozService
 import com.vodovoz.app.data.vodovoz_service.mappers.executeRequest
@@ -112,6 +113,7 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import java.io.File
+import java.net.URLEncoder
 import java.time.LocalDate
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -196,7 +198,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
             onFail = { response ->
 
                 val message = moshi.fromJson<VodovozResponseDTO<String?>>(
-                    response.stringBody()
+                    response.stringErrorBody()
                 ).message ?: ""
 
                 throw RequestException(message)
@@ -323,7 +325,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
         deviceInfo: String?,
         notifyDriverId: String?,
         message: String?,
-    ): Flow<Result<String>> {
+    ): Flow<Result<VodovozPlaceholderModel>> {
         return executeRequest(
             request = {
                 vodovozService.doOrder(
@@ -337,11 +339,11 @@ class VodovozServiceRepositoryImpl @Inject constructor(
                     callYouId = callYouId,
                     coupon = coupon,
                     balance = balance,
-                    deviceInfo = deviceInfo
+                    deviceInfo = URLEncoder.encode(deviceInfo, "UTF-8")
                 )
             },
             mapper = {
-                it.data ?: ""
+                it.data!!.toDomain()
             }
         )
     }
@@ -412,7 +414,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
             onFail = { response ->
                 val placeholder =
                     moshi.fromJson<VodovozResponseDTO<VodovozPlaceholderDTO>>(
-                        response.stringBody()
+                        response.stringErrorBody()
                     ).data!!.toDomain()
 
                 throw EmptyResultException(placeholder = placeholder)
@@ -469,7 +471,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
             onFail = { response ->
                 val placeholder =
                     moshi.fromJson<VodovozResponseDTO<VodovozPlaceholderDTO>>(
-                        response.stringBody()
+                        response.stringErrorBody()
                     ).data!!.toDomain()
 
                 throw EmptyResultException(placeholder = placeholder)
@@ -543,7 +545,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
             },
             onFail = { it ->
                 val errorMessage =
-                    moshi.fromJson<VodovozResponseDTO<String>>(it.stringBody()).message ?: ""
+                    moshi.fromJson<VodovozResponseDTO<String>>(it.stringErrorBody()).message ?: ""
 
                 throw RequestException(errorMessage)
             }
@@ -586,7 +588,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
                 it.data!!.toDomain()
             },
             onFail = { it ->
-                val json = it.stringBody()
+                val json = it.stringErrorBody()
                 val errorMessage = moshi.fromJson<VodovozResponseDTO<String>>(json).message ?: ""
                 throw RequestException(errorMessage)
             }
@@ -654,7 +656,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
             },
             onFail = { response ->
                 val message =
-                    moshi.fromJson<VodovozResponseDTO<String>>(response.stringBody()).data ?: ""
+                    moshi.fromJson<VodovozResponseDTO<String>>(response.stringErrorBody()).data ?: ""
 
                 throw RequestException(message = message)
             }
@@ -732,7 +734,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
             },
             onFail = { response ->
                 val placeholder =
-                    moshi.fromJson<VodovozResponseDTO<VodovozPlaceholderDTO>>(response.stringBody()).data!!.toDomain()
+                    moshi.fromJson<VodovozResponseDTO<VodovozPlaceholderDTO>>(response.stringErrorBody()).data!!.toDomain()
                 throw UserNotLoginException(placeholder = placeholder)
             }
         )
@@ -778,7 +780,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
                 }
             },
             onFail = { response ->
-                val body = response.stringBody()
+                val body = response.stringErrorBody()
                 val placeholder =
                     moshi.fromJson<VodovozResponseDTO<VodovozPlaceholderDTO>>(body).data!!
                 throw EmptyResultException(placeholder = placeholder.toDomain())
@@ -814,7 +816,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
             onFail = { response ->
                 val placeholder =
                     moshi.fromJson<VodovozResponseDTO<VodovozPlaceholderDTO>>(
-                        response.stringBody()
+                        response.stringErrorBody()
                     ).data!!.toDomain()
                 throw EmptyResultException(placeholder = placeholder)
             }
@@ -847,7 +849,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
                     onFail = { response ->
                         val placeholder =
                             moshi.fromJson<VodovozResponseDTO<VodovozPlaceholderDTO>>(
-                                response.stringBody()
+                                response.stringErrorBody()
                             ).data!!.toDomain()
                         throw EmptyResultException(placeholder = placeholder)
                     }
@@ -871,7 +873,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
             },
             onFail = { response ->
                 val placeholder =
-                    moshi.fromJson<VodovozResponseDTO<VodovozPlaceholderDTO>>(response.stringBody()).data!!.toDomain()
+                    moshi.fromJson<VodovozResponseDTO<VodovozPlaceholderDTO>>(response.stringErrorBody()).data!!.toDomain()
                 throw EmptyResultException(placeholder = placeholder)
             }
         )
@@ -901,7 +903,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
                     onFail = { response ->
                         val placeholder =
                             moshi.fromJson<VodovozResponseDTO<VodovozPlaceholderDTO>>(
-                                response.stringBody()
+                                response.stringErrorBody()
                             ).data!!.toDomain()
                         throw EmptyResultException(placeholder = placeholder)
                     }
@@ -930,7 +932,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
             },
             onFail = { response ->
                 val placeholder = moshi.fromJson<VodovozResponseDTO<VodovozPlaceholderDTO>>(
-                    response.stringBody()
+                    response.stringErrorBody()
                 ).data!!.toDomain()
 
                 throw EmptyResultException(placeholder = placeholder)
@@ -963,7 +965,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
                     },
                     onFail = { response ->
                         val placeholder = moshi.fromJson<VodovozResponseDTO<VodovozPlaceholderDTO>>(
-                            response.stringBody()
+                            response.stringErrorBody()
                         ).data!!.toDomain()
 
                         throw EmptyResultException(placeholder = placeholder)
@@ -1013,7 +1015,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
             },
             onFail = { response ->
                 val placeholder = moshi.fromJson<VodovozResponseDTO<VodovozPlaceholderDTO>>(
-                    response.stringBody()
+                    response.stringErrorBody()
                 ).data!!.toDomain()
 
                 throw EmptyResultException(placeholder = placeholder)
@@ -1048,7 +1050,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
                     },
                     onFail = { response ->
                         val placeholder = moshi.fromJson<VodovozResponseDTO<VodovozPlaceholderDTO>>(
-                            response.stringBody()
+                            response.stringErrorBody()
                         ).data!!.toDomain()
 
                         throw EmptyResultException(placeholder = placeholder)
@@ -1089,11 +1091,11 @@ class VodovozServiceRepositoryImpl @Inject constructor(
             onFail = { response ->
                 throw try {
                     val message =
-                        moshi.fromJson<VodovozErrorResponseDTO>(response.stringBody()).message
+                        moshi.fromJson<VodovozErrorResponseDTO>(response.stringErrorBody()).message
                     ValidationException(message = message ?: "")
                 } catch (_: Throwable) {
                     val placeholder =
-                        moshi.fromJson<VodovozResponseDTO<VodovozPlaceholderDTO>>(response.stringBody()).data
+                        moshi.fromJson<VodovozResponseDTO<VodovozPlaceholderDTO>>(response.stringErrorBody()).data
                     UserNotLoginException(placeholder = placeholder?.toDomain())
                 }
             }
@@ -1123,7 +1125,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
                 it.message ?: ""
             },
             onFail = {
-                val info = it.stringBody() ?: ""
+                val info = it.stringErrorBody() ?: ""
                 throw Exception(info)
             }
         )
@@ -1153,7 +1155,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
             },
             onFail = { response ->
                 val errorData = moshi.fromJson<VodovozResponseDTO<VodovozPlaceholderDTO>>(
-                    response.stringBody()
+                    response.stringErrorBody()
                 ).data
 
                 Result.failure(UserNotLoginException(placeholder = errorData!!.toDomain()))
@@ -1172,7 +1174,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
             },
             onFail = { response ->
                 val errorData = moshi.fromJson<VodovozResponseDTO<VodovozPlaceholderDTO>>(
-                    response.stringBody()
+                    response.stringErrorBody()
                 ).data
 
                 Result.failure(UserNotLoginException(placeholder = errorData!!.toDomain()))
@@ -1274,7 +1276,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
             },
             onFail = { response ->
                 val errorDTO = moshi.fromJson<VodovozResponseDTO<String>>(
-                    response.stringBody(),
+                    response.stringErrorBody(),
                     Types.newParameterizedType(VodovozResponseDTO::class.java, String::class.java)
                 )
                 throw RequestException(errorDTO.message ?: "")
@@ -1356,7 +1358,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
                 registerDTO.data!!.toDomain()
             },
             onFail = { response ->
-                val jsonBody = response.stringBody()
+                val jsonBody = response.stringErrorBody()
 
                 throw when (response.code()) {
                     404 -> {
@@ -1383,7 +1385,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
                 response.data!!.toDomain()
             },
             onFail = { response ->
-                val jsonBody = response.stringBody()
+                val jsonBody = response.stringErrorBody()
                 val errorResponse = moshi.fromJson<VodovozResponseDTO<String>>(jsonBody)
 
                 Result.failure(ValidationException(errorResponse.message ?: ""))
@@ -1436,7 +1438,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
             onFail = { response ->
                 val placeholder =
                     moshi.fromJson<VodovozResponseDTO<VodovozPlaceholderDTO>>(
-                        response.stringBody()
+                        response.stringErrorBody()
                     ).data
 
                 throw EmptyResultException(placeholder = placeholder!!.toDomain())
@@ -1505,7 +1507,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
                     },
                     onFail = { response ->
                         val placeholder =
-                            moshi.fromJson<VodovozResponseDTO<VodovozPlaceholderDTO>>(response.stringBody()).data
+                            moshi.fromJson<VodovozResponseDTO<VodovozPlaceholderDTO>>(response.stringErrorBody()).data
                         throw EmptyResultException(placeholder = placeholder?.toDomain())
                     }
                 )
@@ -1523,7 +1525,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
             },
             onFail = { response ->
                 val placeholder =
-                    moshi.fromJson<VodovozResponseDTO<VodovozPlaceholderDTO>>(response.stringBody()).data
+                    moshi.fromJson<VodovozResponseDTO<VodovozPlaceholderDTO>>(response.stringErrorBody()).data
                 throw EmptyResultException(placeholder = placeholder?.toDomain())
             }
         )
@@ -1539,7 +1541,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
             },
             onFail = { response ->
                 val placeholder =
-                    moshi.fromJson<VodovozResponseDTO<VodovozPlaceholderDTO>>(response.stringBody()).data
+                    moshi.fromJson<VodovozResponseDTO<VodovozPlaceholderDTO>>(response.stringErrorBody()).data
                 throw EmptyResultException(placeholder = placeholder?.toDomain())
             }
         )
@@ -1566,7 +1568,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
             },
             onFail = { response ->
                 val value =
-                    moshi.fromJson<VodovozResponseDTO<VodovozPlaceholderDTO>>(response.stringBody())
+                    moshi.fromJson<VodovozResponseDTO<VodovozPlaceholderDTO>>(response.stringErrorBody())
                 throw EmptyResultException(placeholder = value.data!!.toDomain())
             }
         )
@@ -1611,7 +1613,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
             },
             mapper = { response -> response.message ?: "" },
             onFail = { response ->
-                val jsonBody = response.stringBody()
+                val jsonBody = response.stringErrorBody()
                 val responseBody = moshi.fromJson<VodovozErrorResponseDTO>(jsonBody)
                 Result.failure(ValidationException(responseBody.message ?: ""))
             }
@@ -1656,7 +1658,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
             },
             onFail = { response ->
                 val value =
-                    moshi.fromJson<VodovozResponseDTO<VodovozPlaceholderDTO>>(response.stringBody())
+                    moshi.fromJson<VodovozResponseDTO<VodovozPlaceholderDTO>>(response.stringErrorBody())
                 throw EmptyResultException(placeholder = value.data!!.toDomain())
             }
         )
@@ -1748,8 +1750,10 @@ class VodovozServiceRepositoryImpl @Inject constructor(
                 vodovozResponse.data!!.toDomain()
             },
             onFail = { response ->
-                val value =
-                    moshi.fromJson<VodovozResponseDTO<VodovozPlaceholderDTO>>(response.stringBody())
+
+                val value = moshi.fromJson<VodovozResponseDTO<VodovozPlaceholderDTO>>(
+                    response.stringErrorBody()
+                )
                 throw EmptyResultException(placeholder = value.data!!.toDomain())
             }
         )
@@ -2125,7 +2129,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
         },
         onFail = { response ->
             val placeholder =
-                moshi.fromJson<VodovozResponseDTO<VodovozPlaceholderDTO>>(response.stringBody()).data!!.toDomain()
+                moshi.fromJson<VodovozResponseDTO<VodovozPlaceholderDTO>>(response.stringErrorBody()).data!!.toDomain()
             throw EmptyResultException(placeholder = placeholder)
         }
     )
@@ -2154,7 +2158,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
                     },
                     onFail = { response ->
                         val placeholder =
-                            moshi.fromJson<VodovozResponseDTO<VodovozPlaceholderDTO>>(response.stringBody()).data!!.toDomain()
+                            moshi.fromJson<VodovozResponseDTO<VodovozPlaceholderDTO>>(response.stringErrorBody()).data!!.toDomain()
                         throw EmptyResultException(placeholder = placeholder)
                     }
                 )
@@ -2187,7 +2191,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
             },
             onFail = { response ->
                 val placeholder =
-                    moshi.fromJson<VodovozResponseDTO<VodovozPlaceholderDTO>>(response.stringBody()).data!!.toDomain()
+                    moshi.fromJson<VodovozResponseDTO<VodovozPlaceholderDTO>>(response.stringErrorBody()).data!!.toDomain()
                 throw EmptyResultException(placeholder = placeholder)
             }
         )
@@ -2217,7 +2221,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
                     },
                     onFail = { response ->
                         val placeholder =
-                            moshi.fromJson<VodovozResponseDTO<VodovozPlaceholderDTO>>(response.stringBody()).data!!.toDomain()
+                            moshi.fromJson<VodovozResponseDTO<VodovozPlaceholderDTO>>(response.stringErrorBody()).data!!.toDomain()
                         throw EmptyResultException(placeholder = placeholder)
                     }
                 )

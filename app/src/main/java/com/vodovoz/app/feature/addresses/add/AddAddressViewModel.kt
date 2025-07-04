@@ -318,7 +318,7 @@ class AddAddressViewModel @Inject constructor(
 
         addAddressDetailsResult.onSuccess { addAddressDetails ->
 
-            delay(300L)
+            delay(200L)
 
             _state.update { s ->
 
@@ -340,7 +340,7 @@ class AddAddressViewModel @Inject constructor(
                             )
                         } ?: addressField.value
                     ),
-                    button = addAddressDetails.button.toUi().copy(enabled = false),
+                    button = addAddressDetails.button.toUi(),
                     linearSwitches = addAddressDetails.linearSwitches.mapToUi().filter { switch ->
                         addressId == null || (switch.id != PRIVATE_HOUSE_ID && switch.id != DELIVERY_OFFICE_ID)
                     }
@@ -374,7 +374,6 @@ class AddAddressViewModel @Inject constructor(
                         mapAddress.street,
                         mapAddress.house
                     )
-
                 )
             )
         }

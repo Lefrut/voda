@@ -26,7 +26,7 @@ fun CartDetailsDTO.toDomain(): CartDetailsModel {
     return CartDetailsModel(
         title = TITLE ?: "",
         countText = COUNT ?: "",
-        items = KORZINA?.mapToDomain() ?: emptyList(),
+        items = KORZINA.mapToDomain(),
         present = PODAROK?.toDomain(),
         bottlesButton = KNOPKI?.BYTYLI?.toDomain(),
         promotionalCodeButton = KNOPKI?.PROMOKOD?.toDomain(),

@@ -96,7 +96,6 @@ class FavoriteFlowViewModel @Inject constructor(
         val favoritesMap = likeManager.observeLikes().firstOrNull() ?: return@launch
         val currentFavoritesMap = dataState.products.associate { it.id to it.isFavorite }
 
-
         //TODO - check new categories
         val newFavorites = favoritesMap.keys - currentFavoritesMap.keys
         if (newFavorites.isNotEmpty()) {

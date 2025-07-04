@@ -61,7 +61,8 @@ abstract class VodovozServiceModule {
         @Singleton
         @Named("vodovoz")
         fun providesVodovozRetrofit(
-            @Named("vodovoz") okHttpClient: OkHttpClient,
+            @Named("vodovoz")
+            okHttpClient: OkHttpClient,
             moshi: Moshi,
         ): Retrofit {
 

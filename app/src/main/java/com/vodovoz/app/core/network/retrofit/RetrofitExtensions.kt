@@ -9,6 +9,12 @@ fun <T> Response<T>.messageWithCode(): String {
 
 fun <T> Response<T>.stringBody(): String {
     return try {
-        ((body() as? String) ?: (errorBody() ?: raw().body)?.string()) ?: ""
+        (body() as? String) ?: ""
     } catch (_: Throwable) { "" }
 }
+
+
+fun <T> Response<T>.stringErrorBody(): String {
+    return errorBody()?.string() ?: ""
+}
+

@@ -3,6 +3,7 @@ package com.vodovoz.app.core.network.di
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import com.vodovoz.app.BuildConfig
+import com.vodovoz.app.core.network.converters.LocalDateTimeJsonAdapter
 import com.vodovoz.app.core.network.interceptor.BaseUrlInterceptor
 import com.vodovoz.app.core.network.interceptor.CookieHandlerInterceptor
 import dagger.Binds
@@ -14,6 +15,7 @@ import dagger.multibindings.IntoSet
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
+import java.time.LocalDateTime
 import java.util.concurrent.TimeUnit
 import javax.inject.Named
 import javax.inject.Qualifier
@@ -76,6 +78,7 @@ abstract class NetworkModule {
         @Provides
         @Singleton
         @IntoSet
+        @VodovozInterceptor
         fun provideLoggingInterceptor(): Interceptor {
             return HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY)
         }
@@ -84,6 +87,7 @@ abstract class NetworkModule {
         @Singleton
         fun provideMoshi(): Moshi {
             return Moshi.Builder()
+                .add(LocalDateTime::class.java, LocalDateTimeJsonAdapter().nullSafe())
                 .add(KotlinJsonAdapterFactory())
                 .build()
         }

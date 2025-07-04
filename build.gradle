@@ -21,8 +21,7 @@ plugins {
 }
 
 allprojects {
-    //Support @JvmDefault
-    tasks.withType(KotlinCompile).all {
+    tasks.withType(KotlinCompile).configureEach {
         kotlinOptions {
             freeCompilerArgs += ['-Xjvm-default=all-compatibility'] //enable or compatibility
             jvmTarget = "17"
