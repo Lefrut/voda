@@ -103,10 +103,8 @@ class QrCodeFragment : Fragment() {
                     .collect { qrCodeEvents ->
                         when (qrCodeEvents) {
                             is QrCodeViewModel.QrCodeEvents.Success -> {
-                                findNavController().navigate(
-                                    QrCodeFragmentDirections.actionToProductDetailFragment(
-                                        qrCodeEvents.id.toLong()
-                                    )
+                                findNavController().navigateToProductDetails(
+                                    qrCodeEvents.id.toLong()
                                 )
                             }
 
