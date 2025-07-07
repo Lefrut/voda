@@ -44,7 +44,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
-import coil3.request.ImageRequest
+
 import coil3.request.crossfade
 import com.vodovoz.app.R
 import com.vodovoz.app.design_system.composables.bottom_sheet.VodovozDragHandle
@@ -276,10 +276,7 @@ fun TraceOrderBottomSheet(
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             AsyncImage(
-                                model = ImageRequest.Builder(LocalContext.current)
-                                    .crossfade(true)
-                                    .data(button.image)
-                                    .build(),
+                                model = button.image,
                                 contentDescription = null,
                                 modifier = Modifier
                                     .padding(end = 4.dp)
@@ -311,10 +308,7 @@ private fun TraceOrderBottomSheetItem(modifier: Modifier = Modifier, image: Stri
         verticalAlignment = Alignment.CenterVertically
     ) {
         AsyncImage(
-            model = ImageRequest.Builder(LocalContext.current)
-                .crossfade(true)
-                .data(image)
-                .build(),
+            model = image,
             contentDescription = null,
             modifier = Modifier.size(24.dp),
             contentScale = ContentScale.FillBounds

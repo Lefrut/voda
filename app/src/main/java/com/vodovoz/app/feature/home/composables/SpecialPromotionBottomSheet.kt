@@ -21,7 +21,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import coil3.compose.rememberAsyncImagePainter
-import coil3.request.ImageRequest
+
 import coil3.request.crossfade
 import com.vodovoz.app.design_system.composables.bottom_sheet.VodovozDragHandle
 import com.vodovoz.app.design_system.composables.button.VodovozButton
@@ -52,8 +52,7 @@ fun SpecialPromotionBottomSheet(
                 style = MaterialTheme.typography.titleMedium
             )
             val painter = rememberAsyncImagePainter(
-                ImageRequest.Builder(LocalContext.current).data(specialPromotionUi.picture)
-                    .crossfade(true).build()
+                specialPromotionUi.picture
             )
 
             if (specialPromotionUi.picture.isNotEmpty()) {

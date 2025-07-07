@@ -5,6 +5,11 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
 import androidx.hilt.work.HiltWorkerFactory
 import androidx.work.Configuration
+import coil3.ImageLoader
+import coil3.PlatformContext
+import coil3.SingletonImageLoader
+import coil3.request.CachePolicy
+import coil3.request.crossfade
 import com.vodovoz.app.BuildConfig
 import com.vodovoz.app.common.notification.NotificationChannels
 import com.vodovoz.app.core.network.ApiConfig
@@ -18,7 +23,7 @@ import timber.log.Timber
 import javax.inject.Inject
 
 @HiltAndroidApp
-class VodovozApplication : Application(), Configuration.Provider {
+class VodovozApplication : Application(), Configuration.Provider, SingletonImageLoader.Factory  {
 
     @Inject
     lateinit var workerFactory: HiltWorkerFactory
@@ -53,6 +58,14 @@ class VodovozApplication : Application(), Configuration.Provider {
             YandexMetrica.activate(this, config)
             YandexMetrica.enableActivityAutoTracking(this)
         }
+    }
+
+    override fun newImageLoader(context: PlatformContext): ImageLoader {
+        return ImageLoader.Builder(context)
+            .memoryCachePolicy(CachePolicy.ENABLED)
+            .diskCachePolicy(CachePolicy.DISABLED)
+            .crossfade(true)
+            .build()
     }
 
 

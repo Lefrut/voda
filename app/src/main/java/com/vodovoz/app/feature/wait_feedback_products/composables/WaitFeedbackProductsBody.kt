@@ -27,7 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.paging.CombinedLoadStates
 import androidx.paging.LoadState
 import coil3.compose.AsyncImage
-import coil3.request.ImageRequest
+
 import coil3.request.crossfade
 import com.gowtham.ratingbar.RatingBar
 import com.gowtham.ratingbar.StepSize
@@ -106,10 +106,7 @@ fun WaitFeedbackProductUi(
         )
     ) {
         AsyncImage(
-            model = ImageRequest.Builder(LocalContext.current)
-                .data(waitFeedbackProduct.image)
-                .crossfade(true)
-                .build(),
+            model = waitFeedbackProduct.image,
             contentDescription = null,
             modifier = Modifier
                 .padding(end = 16.dp)

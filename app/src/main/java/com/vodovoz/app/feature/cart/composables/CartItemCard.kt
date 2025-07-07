@@ -27,7 +27,7 @@ import androidx.compose.ui.text.fromHtml
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
-import coil3.request.ImageRequest
+
 import coil3.request.crossfade
 import com.vodovoz.app.R
 import com.vodovoz.app.design_system.ExtendedTheme
@@ -64,7 +64,7 @@ fun CartItemCard(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             AsyncImage(
-                model = ImageRequest.Builder(context).data(cartItem.image).crossfade(true).build(),
+                model = cartItem.image,
                 contentDescription = null,
                 modifier = Modifier
                     .padding(bottom = 11.dp)

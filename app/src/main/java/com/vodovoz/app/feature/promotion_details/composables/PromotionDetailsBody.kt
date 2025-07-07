@@ -27,7 +27,7 @@ import androidx.compose.ui.text.fromHtml
 import androidx.compose.ui.unit.dp
 import androidx.paging.CombinedLoadStates
 import coil3.compose.AsyncImage
-import coil3.request.ImageRequest
+
 import coil3.request.crossfade
 import com.valentinilk.shimmer.ShimmerBounds
 import com.valentinilk.shimmer.rememberShimmer
@@ -68,9 +68,7 @@ fun PromotionDetailsBody(
         item(span = { GridItemSpan(2) }) {
             Column(modifier = Modifier.padding(horizontal = 16.dp)) {
                 AsyncImage(
-                    model = ImageRequest.Builder(LocalContext.current)
-                        .data(promotionDetails.picture).crossfade(true)
-                        .build(),
+                    model = promotionDetails.picture,
                     contentDescription = null,
                     modifier = Modifier
                         .fillMaxWidth()

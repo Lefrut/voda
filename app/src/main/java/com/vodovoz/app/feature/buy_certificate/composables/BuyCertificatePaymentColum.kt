@@ -17,7 +17,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
-import coil3.request.ImageRequest
+
 import coil3.request.crossfade
 import com.vodovoz.app.design_system.composables.button.VodovozRadioButton
 import com.vodovoz.app.design_system.model.PaymentTypeUi
@@ -81,10 +81,7 @@ fun PaymentTypeItemCard(
     ) {
 
         AsyncImage(
-            model = ImageRequest.Builder(context)
-                .crossfade(true)
-                .data(paymentTypeUi.image)
-                .build(),
+            model = paymentTypeUi.image,
             contentDescription = null,
             modifier = Modifier.size(40.dp),
             contentScale = ContentScale.FillBounds

@@ -29,7 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.os.bundleOf
 import coil3.compose.AsyncImage
-import coil3.request.ImageRequest
+
 import coil3.request.crossfade
 import com.vodovoz.app.core.network.ApiConfig
 import com.vodovoz.app.design_system.composables.button.VodovozButtonsColumn
@@ -80,10 +80,7 @@ fun ServiceDetailBody(
                 .padding(paddingValues)
         ) {
             AsyncImage(
-                model = ImageRequest.Builder(context).data(image)
-                    .crossfade(true)
-                    .memoryCacheKey(image)
-                    .build(),
+                model = image,
                 contentDescription = null,
                 modifier = Modifier
                     .fillMaxWidth()

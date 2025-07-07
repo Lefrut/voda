@@ -10,17 +10,14 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.rememberAsyncImagePainter
-import coil3.request.ImageRequest
+
 import com.vodovoz.app.design_system.composables.zoom.ZoomableContainer
 import com.vodovoz.app.design_system.composables.zoom.rememberZoomableState
 
 @Composable
 internal fun DetailMediaImage(modifier: Modifier = Modifier, image: String) {
-    val context = LocalContext.current
     val painter = rememberAsyncImagePainter(
-        model = ImageRequest.Builder(context)
-            .data(image)
-            .build(),
+        model = image,
         contentScale = ContentScale.Inside
     )
 

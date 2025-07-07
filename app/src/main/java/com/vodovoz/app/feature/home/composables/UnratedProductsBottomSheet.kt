@@ -74,7 +74,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
-import coil3.request.ImageRequest
 import coil3.request.crossfade
 import com.gowtham.ratingbar.RatingBar
 import com.vodovoz.app.R
@@ -336,9 +335,7 @@ fun UpdatedProductsExpanded(
                 ) {
                     AsyncImage(
                         modifier = Modifier.size(300.dp),
-                        model = ImageRequest.Builder(LocalContext.current)
-                            .data(product.detailPicture)
-                            .crossfade(true).build(),
+                        model = product.detailPicture,
                         contentDescription = null,
                         contentScale = ContentScale.Inside,
                     )
@@ -439,10 +436,7 @@ fun UnratedProductsPartially(
                     AsyncImage(
                         modifier = Modifier
                             .size(120.dp),
-                        model = ImageRequest.Builder(LocalContext.current)
-                            .data(product.detailPicture)
-                            .crossfade(true)
-                            .build(),
+                        model = product.detailPicture,
                         contentDescription = null,
                         contentScale = ContentScale.Crop,
                     )

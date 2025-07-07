@@ -21,7 +21,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
-import coil3.request.ImageRequest
+
 import coil3.request.crossfade
 import com.vodovoz.app.feature.buy_certificate.model.CertificateUi
 
@@ -89,9 +89,7 @@ private fun CertificateCard(
             .clickable { onClick(certificateUi) }
     ) {
         AsyncImage(
-            model = ImageRequest.Builder(context).data(certificateUi.image)
-                .crossfade(true)
-                .build(),
+            model = certificateUi.image,
             contentDescription = null,
             modifier = Modifier
                 .padding(4.dp)

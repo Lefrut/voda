@@ -21,7 +21,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
-import coil3.request.ImageRequest
+
 import coil3.request.crossfade
 import com.vodovoz.app.feature.profile.model.ProfileCardUi
 
@@ -72,11 +72,7 @@ private fun ProfileCard(
             .padding(start = 8.dp, end = 8.dp, top = 8.dp)
     ) {
         AsyncImage(
-            model = ImageRequest.Builder(LocalContext.current)
-                .crossfade(true)
-                .crossfade(100)
-                .data(card.imageUrl)
-                .build(),
+            model = card.imageUrl,
             contentDescription = null,
             modifier = Modifier.size(24.dp),
             contentScale = ContentScale.FillBounds

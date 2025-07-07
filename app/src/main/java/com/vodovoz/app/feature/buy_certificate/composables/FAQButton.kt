@@ -15,7 +15,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
-import coil3.request.ImageRequest
+
 import coil3.request.crossfade
 import com.vodovoz.app.R
 import com.vodovoz.app.feature.buy_certificate.model.FAQUi
@@ -27,8 +27,7 @@ fun FAQButton(modifier: Modifier = Modifier, faq: FAQUi, onFAQClick: (FAQUi) -> 
         verticalAlignment = Alignment.CenterVertically
     ) {
         AsyncImage(
-            model = ImageRequest.Builder(LocalContext.current)
-                .crossfade(true).data(faq.image).build(),
+            model = faq.image,
             contentDescription = null,
             contentScale = ContentScale.FillBounds,
             modifier = Modifier.size(24.dp)
