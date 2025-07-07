@@ -36,7 +36,6 @@ android {
 
     buildTypes {
         release {
-            //todo - debuggable false
             debuggable false
             minifyEnabled true
             shrinkResources true

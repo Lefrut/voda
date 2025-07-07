@@ -25,8 +25,8 @@ class FilterValuesViewModel @Inject constructor(
     ConcreteFilterState()
 ) {
 
-    private val filter = savedStateHandle.get<FilterUi>("filter")!!
-    private val categoryId = savedStateHandle.get<Long>("categoryId")!!.toInt()
+    private val filter = savedStateHandle.get<FilterUi>("filter") ?: FilterUi.Empty
+    private val categoryId = savedStateHandle.get<Long>("categoryId")?.toInt() ?: -1
 
     init {
         viewModelScope.launch {
