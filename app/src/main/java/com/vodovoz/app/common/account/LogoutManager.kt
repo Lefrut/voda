@@ -2,10 +2,7 @@ package com.vodovoz.app.common.account
 
 import com.vodovoz.app.common.cart.CartManager
 import com.vodovoz.app.common.cookie.CookieManager
-import com.vodovoz.app.common.like.LikeManager
-import com.vodovoz.app.common.tab.TabManager
 import com.vodovoz.app.common.token.FirebaseTokenManager
-import com.vodovoz.app.data.MainRepository
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.feature.profile.waterapp.WaterAppHelper
 import com.vodovoz.app.util.extensions.catchResult

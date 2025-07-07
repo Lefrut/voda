@@ -15,9 +15,11 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.navOptions
 import com.vodovoz.app.R
 import com.vodovoz.app.common.tab.TabManager
 import com.vodovoz.app.core.navigation.navigateToMap
+import com.vodovoz.app.core.navigation.slideAnim
 import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.effects.LifecycleEffect
 import com.vodovoz.app.feature.addresses.add.composables.AddAddressScreen
@@ -107,7 +109,13 @@ class AddAddressFragment : Fragment() {
                 }
 
                 is AddAddressEvent.GoToMap -> {
-                    findNavController().navigateToMap(event.addressName)
+                    findNavController().navigateToMap(
+                        event.addressName,
+                        navOptions {
+                            slideAnim()
+                            launchSingleTop = true
+                        }
+                    )
                 }
 
                 is AddAddressEvent.ShowSnackbar -> {

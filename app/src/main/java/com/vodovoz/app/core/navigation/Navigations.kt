@@ -46,6 +46,7 @@ fun NavController.navigateToAddAddress(
     mapAddress: MapAddressUi? = null,
     addressId: Long? = null,
     addressName: String? = null,
+    addressType: Int? = null,
     navOptions: NavOptions? = null,
 ) {
 
@@ -55,6 +56,7 @@ fun NavController.navigateToAddAddress(
             "mapAddress" to mapAddress,
             "addressId" to addressId,
             "addressName" to addressName,
+            "addressType" to addressType
         ),
         navOptions ?: navOptions {
             slideAnim()
@@ -73,11 +75,11 @@ fun NavController.navigateToAddAddress(
 
 }
 
-fun NavController.navigateToMap(addressName: String?) {
+fun NavController.navigateToMap(addressName: String?, navOptions: NavOptions? = null) {
     navigate(
         R.id.mapFragment,
         bundleOf("addressName" to addressName),
-        navOptions {
+        navOptions ?: navOptions {
             slideAnim()
         }
     )

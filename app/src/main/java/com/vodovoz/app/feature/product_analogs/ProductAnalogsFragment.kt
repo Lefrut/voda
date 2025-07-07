@@ -82,7 +82,7 @@ class ProductAnalogsFragment : Fragment() {
                             }
 
                             is ProductAnalogsEvent.GoToProductDetails -> {
-                                findNavController().navigateToProductAnalogs(event.productId)
+                                findNavController().navigateToProductDetails(event.productId)
                             }
                         }
                     }

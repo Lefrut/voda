@@ -46,7 +46,7 @@ fun AllBottlesBody(
 ) {
     LazyColumn(modifier = modifier.fillMaxSize(), contentPadding = paddingValues) {
 
-        item {
+        item(key = "BottlesTitle") {
             Text(
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                 text = description,
@@ -99,7 +99,7 @@ private fun BottleItem(
         Column(
             modifier = Modifier
                 .weight(1f)
-                .padding(16.dp)
+                .padding(start = 16.dp, bottom = 16.dp, top = 16.dp)
         ) {
             Text(
                 text = bottle.name,
@@ -149,14 +149,14 @@ private fun BottleItem(
                 CartCounterButton(
                     modifier = Modifier.padding(end = 16.dp, start = 8.dp),
                     cartQuantity = bottle.cartQuantity,
-                    catalogQuantity = 10000,
-                    haveTrash = false,
+                    catalogQuantity = Int.MAX_VALUE,
                     onPlusClick = {
                         onIncrementBottle(bottle)
                     },
                     onMinusClick = {
                         onDecrementBottle(bottle)
                     },
+                    haveTrash = false,
                     onTrashClick = {}
                 )
 

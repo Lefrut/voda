@@ -27,7 +27,7 @@ data class OKNO_PROMOKOD_VALUE(
     val OSHIBKA: String?,
     @Json(name = "BORDER")
     val BORDER: String?,
-    @Json(name = "TITLE")
+    @Json(name = "COLOR")
     val COLOR: String?,
     @Json(name = "VALUE")
     val VALUE: String?,

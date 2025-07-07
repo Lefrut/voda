@@ -41,10 +41,6 @@ class BuyCertificateFragment : Fragment() {
     override fun onStart() {
         super.onStart()
         tabManager.changeTabVisibility(false)
-
-        viewModel.viewModelScope.launch { delay(200L) }.invokeOnCompletion {
-            viewModel.fetchBuyCertificateDetails()
-        }
     }
 
     override fun onStop() {

@@ -323,7 +323,6 @@ fun OPLATA_DTO.toDomain(): PaymentInfoModel {
 
 
 fun OrderPlaceholderDTO.toVodovozPlaceholder(): VodovozPlaceholderModel {
-
     return VodovozPlaceholderModel(
         title = title ?: "",
         headerHtml = header ?: "",

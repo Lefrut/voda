@@ -43,6 +43,9 @@ class BuyCertificateViewModel @Inject constructor(
     BuyCertificateState()
 ) {
 
+    init {
+        fetchBuyCertificateDetails()
+    }
 
     fun fetchBuyCertificateDetails() = viewModelScope.launch {
         val buyCertificateDetailsResult =

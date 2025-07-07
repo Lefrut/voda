@@ -12,7 +12,6 @@ import com.vodovoz.app.design_system.composables.snackbar.VodovozSnackbarHost
 import com.vodovoz.app.design_system.composables.top_bar.VodovozTopBar
 import com.vodovoz.app.feature.buy_certificate.composables.BuyCertificateBody
 
-@Suppress("NonSkippableComposable")
 @Composable
 fun BuyCertificateScreen(
     viewModel: BuyCertificateViewModel,

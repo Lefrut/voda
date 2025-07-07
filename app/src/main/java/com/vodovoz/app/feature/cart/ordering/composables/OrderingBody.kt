@@ -13,11 +13,10 @@ import com.vodovoz.app.design_system.composables.decoration.OrderSummaryColumn
 import com.vodovoz.app.design_system.composables.decoration.VodovozHorizontalDivider
 import com.vodovoz.app.design_system.model.ColorfulButtonUi
 import com.vodovoz.app.design_system.model.SectionUi
-import com.vodovoz.app.design_system.model.widgets.FieldUi
 import com.vodovoz.app.design_system.model.order.OrderSummaryItemUi
+import com.vodovoz.app.design_system.model.widgets.FieldUi
 import com.vodovoz.app.feature.cart.ordering.model.OrderNotifyItemUi
 import com.vodovoz.app.feature.cart.ordering.model.OrderingMenuItemUi
-import com.vodovoz.app.feature.cart.ordering.model.OrderRecipientItemUi
 
 @Suppress("NonSkippableComposable")
 @Composable
@@ -93,7 +92,9 @@ fun OrderingBody(
         VodovozButton(
             modifier = Modifier.padding(vertical = 24.dp, horizontal = 16.dp),
             text = button.name,
-            onClick = onButtonClick
+            onClick = onButtonClick,
+            isLoading = button.loading,
+            enabled = button.enabled
         )
 
     }

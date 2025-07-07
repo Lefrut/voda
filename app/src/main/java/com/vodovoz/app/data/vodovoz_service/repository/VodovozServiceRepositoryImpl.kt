@@ -9,7 +9,6 @@ import com.vodovoz.app.common.account.AccountManager
 import com.vodovoz.app.common.cookie.CookieManager
 import com.vodovoz.app.common.model.VodovozSiteState
 import com.vodovoz.app.core.network.retrofit.messageWithCode
-import com.vodovoz.app.core.network.retrofit.stringBody
 import com.vodovoz.app.core.network.retrofit.stringErrorBody
 import com.vodovoz.app.core.network.serialization.fromJson
 import com.vodovoz.app.data.vodovoz_service.VodovozService
@@ -188,7 +187,6 @@ class VodovozServiceRepositoryImpl @Inject constructor(
                     geo = "${point.lat},${point.lon}",
                     city = address.city,
                     street = address.street,
-                    fromMoscowToAddressKm = address.fromMoscowToPoint,
                     params = params
                 )
             },
@@ -318,8 +316,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
         deliveryTimeInterval: String,
         phone: String,
         paymentMethodId: Long,
-        deliveryPrice: String,
-        callYouId: Long,
+        callYouId: Long?,
         coupon: String?,
         balance: String?,
         deviceInfo: String?,
@@ -328,6 +325,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
     ): Flow<Result<VodovozPlaceholderModel>> {
         return executeRequest(
             request = {
+
                 vodovozService.doOrder(
                     addressId = addressId,
                     userId = accountManager.fetchAccountId(),
@@ -335,7 +333,6 @@ class VodovozServiceRepositoryImpl @Inject constructor(
                     deliveryTimeInterval = deliveryTimeInterval,
                     phone = phone,
                     paymentMethodId = paymentMethodId,
-                    deliveryPrice = deliveryPrice,
                     callYouId = callYouId,
                     coupon = coupon,
                     balance = balance,

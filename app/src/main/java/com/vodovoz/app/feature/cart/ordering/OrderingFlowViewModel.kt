@@ -104,6 +104,11 @@ class OrderingFlowViewModel @Inject constructor(
         eventListener.emit(OrderingEvents.GoBack)
     }
 
+    fun navigateBackWithRefresh() = viewModelScope.launch {
+        eventListener.emit(OrderingEvents.RefreshCart)
+        eventListener.emit(OrderingEvents.GoBack)
+    }
+
     private fun changeOrderingSection(
         clearErrors: Boolean = true,
         section: SectionUi<OrderingMenuItemUi>,
@@ -278,7 +283,7 @@ class OrderingFlowViewModel @Inject constructor(
         if (
             ordering.addressId != null && ordering.date != null
             && ordering.timeInterval != null && ordering.recipientPhone != null
-            && ordering.paymentId != null && ordering.callYouId != null
+            && ordering.paymentId != null
         ) {
             uiStateListener.updateData { s ->
                 s.copy(button = s.button.copy(loading = true))
@@ -290,9 +295,7 @@ class OrderingFlowViewModel @Inject constructor(
                 deliveryTimeInterval = ordering.timeInterval,
                 phone = ordering.recipientPhone,
                 paymentMethodId = ordering.paymentId.toLongOrNull() ?: 0,
-                //todo
-                deliveryPrice = "",
-                callYouId = ordering.callYouId.toLongOrNull() ?: 0,
+                callYouId = ordering.callYouId?.toLongOrNull(),
                 coupon = coupon,
                 balance = VodovozBoolean.from(ordering.paymentBalance).value,
                 deviceInfo = deviceInfo,
@@ -324,7 +327,6 @@ class OrderingFlowViewModel @Inject constructor(
 
         val paymentErrors = buildList {
             if (ordering.paymentId == null) add(PAYMENT_MENU_ID)
-            if (ordering.callYouId == null) add(CALL_YOU_MENU_ID)
         }
 
         uiStateListener.updateData { s ->
@@ -585,6 +587,7 @@ class OrderingFlowViewModel @Inject constructor(
         data object GoBack : OrderingEvents()
         data class GoToAddresses(val addressId: Long?) : OrderingEvents()
         data object ScrollToTop : OrderingEvents()
+        data object RefreshCart : OrderingEvents()
 
         data class GoToDeliveryDate(
             val addressId: Long,

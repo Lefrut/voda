@@ -4,6 +4,7 @@ import androidx.compose.runtime.Stable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.vodovoz.app.R
+import com.vodovoz.app.common.model.VodovozAddressType
 import com.vodovoz.app.common.model.VodovozBoolean
 import com.vodovoz.app.common.model.boolean
 import com.vodovoz.app.common.model.from
@@ -53,6 +54,8 @@ class AddAddressViewModel @Inject constructor(
     private val addressId = savedStateHandle.get<Long>("addressId")?.also { id ->
         _state.update { s -> s.copy(addressId = id) }
     }
+
+    private val addressType = savedStateHandle.get<Int>("addressType")
 
     private val addressName = savedStateHandle.get<String>("addressName")
 
@@ -342,7 +345,7 @@ class AddAddressViewModel @Inject constructor(
                     ),
                     button = addAddressDetails.button.toUi(),
                     linearSwitches = addAddressDetails.linearSwitches.mapToUi().filter { switch ->
-                        addressId == null || (switch.id != PRIVATE_HOUSE_ID && switch.id != DELIVERY_OFFICE_ID)
+                        addressId == null || (switch.id == PRIVATE_HOUSE_ID && VodovozAddressType.Personal.value == addressType) || switch.id != DELIVERY_OFFICE_ID
                     }
                 )
             }

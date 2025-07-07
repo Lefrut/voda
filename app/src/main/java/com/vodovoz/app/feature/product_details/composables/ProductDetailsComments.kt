@@ -83,6 +83,7 @@ private fun CommentsPager(
     ) { page ->
         CommentCard(
             comment = comments[page],
+            minLines = 2,
             maxLines = 2
         )
     }

@@ -15,6 +15,7 @@ data class CartPromoPopupWindowUi(
     val borderColor: Color,
     val color: Color,
     val value: String,
+    val buttonIsLoading: Boolean = false
 ) {
     companion object {
         val Empty = CartPromoPopupWindowUi(

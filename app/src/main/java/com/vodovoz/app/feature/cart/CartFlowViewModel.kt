@@ -89,6 +89,8 @@ class CartFlowViewModel @Inject constructor(
 
         cartDetailsResult.onSuccess { cartDetails ->
             val cartItems = cartDetails.items.mapToUi()
+            val promoButton = cartDetails.promotionalCodeButton?.toUi()
+
             uiStateListener.updateData { s ->
                 s.copy(
                     title = cartDetails.title,
@@ -96,10 +98,11 @@ class CartFlowViewModel @Inject constructor(
                     cartItems = cartDetails.items.mapToUi(),
                     present = cartDetails.present?.toUi(),
                     bottlesButton = cartDetails.bottlesButton?.toUi(),
-                    promotionalCodeButton = cartDetails.promotionalCodeButton?.toUi(),
+                    promotionalCodeButton = promoButton,
                     presentButton = cartDetails.presentButton?.toUi(),
                     uiState = CartUiState.Cart,
-                    orderSummary = cartDetails.orderSummary.mapToUi()
+                    orderSummary = cartDetails.orderSummary.mapToUi(),
+                    promoCode = promoButton?.popupWindow?.value ?: s.promoCode
                 )
             }
 
@@ -248,6 +251,14 @@ class CartFlowViewModel @Inject constructor(
     }
 
     fun applyPromoCode() = viewModelScope.launch {
+        uiStateListener.updateData { s ->
+            val promoButton = s.promotionalCodeButton
+            s.copy(
+                promotionalCodeButton = promoButton?.copy(
+                    popupWindow = promoButton.popupWindow.copy(buttonIsLoading = true)
+                )
+            )
+        }
         fetchCartDetails().join()
 
         val correctCoupon = dataState.promotionalCodeButton?.coupon
@@ -261,7 +272,7 @@ class CartFlowViewModel @Inject constructor(
                 promoCode = correctCoupon,
                 promotionalCodeButton = s.promotionalCodeButton?.copy(
                     popupWindow = s.promotionalCodeButton.popupWindow.copy(
-                        errorText = null,
+                        buttonIsLoading = false
                     )
                 )
             )

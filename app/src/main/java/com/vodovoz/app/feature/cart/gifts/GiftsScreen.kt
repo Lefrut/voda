@@ -150,7 +150,7 @@ private fun GiftItem(
             )
         }
 
-        VodovozRadioButton(selected = selected, onClick = {})
+        VodovozRadioButton(selected = selected, onClick = { onClick(item) })
 
     }
 }

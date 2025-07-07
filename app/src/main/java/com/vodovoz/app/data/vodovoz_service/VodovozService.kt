@@ -142,8 +142,7 @@ interface VodovozService {
         @Query("indos") deliveryTimeInterval: String,
         @Query("dopphone") phone: String,
         @Query("payment") paymentMethodId: Long,
-        @Query("summdelivery") deliveryPrice: String,
-        @Query("nettovar") callYouId: Long,
+        @Query("nettovar") callYouId: Long?,
         @Query("kupon") coupon: String?,
         @Query("schet") balance: String?,
         @Query("device") deviceInfo: String?,
@@ -278,7 +277,7 @@ interface VodovozService {
         @Query("ktochka") geo: String,
         @Query("city") city: String? = null,
         @Query("street") street: String? = null,
-        @Query("leghtkm") fromMoscowToAddressKm: String,
+        @Query("leghtkm") fromMoscowToAddressKm: String? = null,
         @QueryMap params: Map<String, String>,
     ): Response<VodovozResponseDTO<String?>>
 

@@ -11,16 +11,3 @@ fun JSONObject.safeString(name: String): String =  when(has(name)) {
     }
     false -> ""
 }
-
-
-
-
-
-
-fun JSONObject.safeLong(name: String) = when(has(name)) {
-    true -> when(isNull(name)) {
-        true -> 0L
-        false -> getLong(name)
-    }
-    false -> 0L
-}
