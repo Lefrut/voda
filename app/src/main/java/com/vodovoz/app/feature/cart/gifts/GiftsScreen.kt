@@ -26,7 +26,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
-import coil3.request.ImageRequest
+
 import coil3.request.crossfade
 import com.vodovoz.app.R
 import com.vodovoz.app.design_system.composables.button.VodovozButton
@@ -125,7 +125,7 @@ private fun GiftItem(
         verticalAlignment = Alignment.CenterVertically
     ) {
         AsyncImage(
-            model = ImageRequest.Builder(context).data(item.image).crossfade(true).build(),
+            model = item.image,
             contentDescription = null,
             modifier = Modifier.size(50.dp),
             contentScale = ContentScale.FillBounds

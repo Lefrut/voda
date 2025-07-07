@@ -22,7 +22,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
-import coil3.request.ImageRequest
+import coil3.request.CachePolicy
+
 import coil3.request.crossfade
 import com.vodovoz.app.feature.profile.model.ProfileWalletItemUi
 
@@ -66,8 +67,7 @@ private fun WalletItemCard(
                 .align(Alignment.Bottom)
                 .padding(start = 6.dp, end = 15.dp)
                 .size(56.dp),
-            model = ImageRequest.Builder(LocalContext.current).data(walletItem.imageUrl)
-                .crossfade(true).build(),
+            model = walletItem.imageUrl,
             contentDescription = null,
             contentScale = ContentScale.Crop
         )

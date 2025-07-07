@@ -17,6 +17,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
+import coil3.compose.LocalAsyncImageModelEqualityDelegate
+import coil3.compose.LocalAsyncImagePreviewHandler
 import com.valentinilk.shimmer.LocalShimmerTheme
 import com.valentinilk.shimmer.defaultShimmerTheme
 
@@ -65,10 +67,12 @@ fun VodovozTheme(
         typography = vodovozTypography,
         shapes = vodovozShapes
     ) {
+
         CompositionLocalProvider(
             LocalExtendedColors provides extendedLightColors,
             LocalExtendedTypography provides extendedTypography,
-            LocalShimmerTheme provides VodovozShimmerTheme
+            LocalShimmerTheme provides VodovozShimmerTheme,
+
         ) {
             content()
         }

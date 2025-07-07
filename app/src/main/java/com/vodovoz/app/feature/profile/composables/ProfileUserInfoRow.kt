@@ -23,7 +23,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
-import coil3.request.ImageRequest
+
 import coil3.request.crossfade
 import com.vodovoz.app.R
 import com.vodovoz.app.feature.profile.model.UserInfoBlockUi
@@ -36,11 +36,7 @@ fun ProfileUserInfoRow(
 ) {
     Row(modifier = modifier.clickable { onClick() }.padding(horizontal = 16.dp)) {
         AsyncImage(
-            model = ImageRequest.Builder(LocalContext.current)
-                .crossfade(true)
-                .crossfade(100)
-                .data(userInfoBlock.imageUrl)
-                .build(),
+            model = userInfoBlock.imageUrl,
             contentDescription = null,
             placeholder = painterResource(id = R.drawable.pic_avatar),
             modifier = Modifier

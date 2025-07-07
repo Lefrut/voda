@@ -18,7 +18,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
-import coil3.request.ImageRequest
+
 import coil3.request.crossfade
 import com.vodovoz.app.feature.profile.model.ProfileMenuItemUi
 
@@ -39,10 +39,7 @@ fun ProfileMenuItem(
     ) {
 
         AsyncImage(
-            model = ImageRequest.Builder(LocalContext.current)
-                .crossfade(true)
-                .data(item.imageUrl)
-                .build(),
+            model = item.imageUrl,
             contentDescription = null,
             modifier = Modifier.size(24.dp),
             contentScale = ContentScale.FillBounds

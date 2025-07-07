@@ -36,7 +36,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import coil3.compose.AsyncImage
-import coil3.request.ImageRequest
+
 import coil3.request.crossfade
 import com.vodovoz.app.R
 import com.vodovoz.app.design_system.ExtendedTheme
@@ -169,7 +169,7 @@ fun CartPresentCard(
                 modifier = Modifier
                     .size(75.dp)
                     .zIndex(0f),
-                model = ImageRequest.Builder(context).data(present.image).crossfade(true).build(),
+                model = present.image,
                 contentDescription = null,
                 contentScale = ContentScale.Inside
             )

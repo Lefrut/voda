@@ -24,7 +24,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
-import coil3.request.ImageRequest
+
 import coil3.request.crossfade
 import com.vodovoz.app.R
 import com.vodovoz.app.design_system.composables.bottom_sheet.VodovozDragHandle
@@ -120,8 +120,7 @@ private fun SupportingBottomSheetBody(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 AsyncImage(
-                    model = ImageRequest.Builder(context).data(item.imageUrl).crossfade(true)
-                        .build(),
+                    model = item.imageUrl,
                     contentDescription = null,
                     modifier = Modifier
                         .padding(end = 16.dp)

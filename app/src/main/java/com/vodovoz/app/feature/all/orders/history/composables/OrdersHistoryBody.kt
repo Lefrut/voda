@@ -44,7 +44,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import coil3.compose.rememberAsyncImagePainter
-import coil3.request.ImageRequest
+
 import coil3.request.crossfade
 import com.vodovoz.app.R
 import com.vodovoz.app.design_system.ExtendedTheme
@@ -262,8 +262,7 @@ fun OrdersHistoryProductCard(
 ) {
     Box(modifier = modifier.size(76.dp)) {
         AsyncImage(
-            model = ImageRequest.Builder(LocalContext.current).data(ordersHistoryProduct.image)
-                .crossfade(true).build(),
+            model = ordersHistoryProduct.image,
             contentDescription = null,
             modifier = Modifier.matchParentSize(),
             contentScale = ContentScale.FillBounds

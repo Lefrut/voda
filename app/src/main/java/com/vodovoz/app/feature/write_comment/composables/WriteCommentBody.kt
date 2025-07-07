@@ -37,7 +37,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import coil3.compose.rememberAsyncImagePainter
-import coil3.request.ImageRequest
+
 import coil3.request.crossfade
 import com.vodovoz.app.R
 import com.vodovoz.app.design_system.composables.button.VodovozButton
@@ -75,8 +75,7 @@ fun WriteCommentBody(
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             AsyncImage(
-                model = ImageRequest.Builder(LocalContext.current).data(productImage)
-                    .crossfade(true).build(),
+                model = productImage,
                 contentDescription = null,
                 modifier = Modifier.size(76.dp),
                 contentScale = ContentScale.FillBounds

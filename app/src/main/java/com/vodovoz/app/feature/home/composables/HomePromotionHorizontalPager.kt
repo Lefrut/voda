@@ -24,7 +24,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.isUnspecified
 import coil3.compose.AsyncImage
-import coil3.request.ImageRequest
+
 import coil3.request.crossfade
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
@@ -53,12 +53,11 @@ fun AuthScrollImagePager(
         snapPosition = SnapPosition.Start,
 
         ) { page ->
-
         val currentImage = images[page]
 
         Box {
             AsyncImage(
-                model = ImageRequest.Builder(context).data(currentImage).crossfade(true).build(),
+                model = currentImage,
                 contentDescription = null,
                 modifier = Modifier
                     .height(150.dp)

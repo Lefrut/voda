@@ -19,7 +19,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
-import coil3.request.ImageRequest
+
 import coil3.request.crossfade
 import com.vodovoz.app.R
 
@@ -43,7 +43,7 @@ fun CartButton(
         verticalAlignment = Alignment.CenterVertically
     ) {
         AsyncImage(
-            model = ImageRequest.Builder(context).data(image).crossfade(true).build(),
+            model = image,
             contentDescription = null,
             modifier = Modifier.size(40.dp),
             contentScale = ContentScale.FillBounds,

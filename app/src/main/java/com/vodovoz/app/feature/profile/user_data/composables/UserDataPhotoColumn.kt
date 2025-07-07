@@ -19,7 +19,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
-import coil3.request.ImageRequest
+
 import coil3.request.crossfade
 import com.vodovoz.app.R
 
@@ -37,10 +37,7 @@ fun UserDataPhotoColumn(
     ) {
         Box {
             AsyncImage(
-                model = ImageRequest.Builder(LocalContext.current)
-                    .crossfade(true)
-                    .data(photo)
-                    .build(),
+                model = photo,
                 contentDescription = null,
                 modifier = Modifier
                     .size(80.dp)
