@@ -5,7 +5,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -132,10 +134,14 @@ fun CartBody(
             }
         }
 
+        item{
+            Spacer(modifier = Modifier.height(8.dp))
+        }
+
         item {
             bottlesButton?.apply {
                 CartButton(
-                    modifier = Modifier.padding(top = 24.dp, start = 16.dp, end = 16.dp),
+                    modifier = Modifier.padding(top = 16.dp, start = 16.dp, end = 16.dp),
                     image = image,
                     name = name,
                     onClick = onBottlesButtonClick
@@ -146,7 +152,7 @@ fun CartBody(
         item {
             promotionCodeButton?.apply {
                 CartButton(
-                    modifier = Modifier.padding(top = 24.dp, start = 16.dp, end = 16.dp),
+                    modifier = Modifier.padding(top = 16.dp, start = 16.dp, end = 16.dp),
                     image = image,
                     name = coupon.ifEmpty { title },
                     label = text.takeIf { txt -> txt.isNotEmpty() },
@@ -158,7 +164,7 @@ fun CartBody(
         item {
             presentButton?.apply {
                 CartButton(
-                    modifier = Modifier.padding(top = 24.dp, start = 16.dp, end = 16.dp),
+                    modifier = Modifier.padding(top = 16.dp, start = 16.dp, end = 16.dp),
                     image = image,
                     name = name,
                     onClick = onPresentButtonClick

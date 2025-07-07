@@ -4,6 +4,7 @@ import androidx.annotation.Keep
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import com.vodovoz.app.core.network.converters.LocalDateTimeJsonAdapter
+import com.vodovoz.app.core.network.converters.UnicodeJsonAdapter
 import com.vodovoz.app.core.network.retrofit.messageWithCode
 import com.vodovoz.app.core.network.retrofit.stringBody
 import com.vodovoz.app.domain.general.model.RequestException

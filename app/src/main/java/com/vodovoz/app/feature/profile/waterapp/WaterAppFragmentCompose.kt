@@ -104,8 +104,6 @@ class WaterAppFragment : Fragment() {
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
 
-
-
             setContent {
                 VodovozTheme {
 

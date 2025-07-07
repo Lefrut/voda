@@ -100,11 +100,7 @@ fun OrderingScreen(
 
                 }
 
-                is OrderingFlowViewModel.OrderingUiState.Success -> {
-                    VodovozLongPlaceholder(
-                        data = uiState.placeholder
-                    )
-                }
+                is OrderingFlowViewModel.OrderingUiState.Success -> {}
             }
         }
     }

@@ -5,7 +5,11 @@ import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.pointer.PointerEventPass
@@ -20,6 +24,7 @@ import com.yandex.mapkit.ScreenPoint
 import com.yandex.mapkit.ScreenRect
 import com.yandex.mapkit.geometry.LinearRing
 import com.yandex.mapkit.geometry.Polygon
+import com.yandex.mapkit.map.CameraListener
 
 @Suppress("NonSkippableComposable")
 @Composable
@@ -39,6 +44,40 @@ fun YandexMapView(
             ScreenPoint(0f, 0f),
             ScreenPoint(focusMapWidthPx, focusMapHeightPx)
         )
+    }
+
+
+    val polygonMapObjects by remember(areas) {
+        mutableStateOf(areas.map { area ->
+            val points = area.points.map { point -> point.toPoint() }
+
+            val polygon = Polygon(LinearRing(points), listOf())
+
+            yandexMap.mapView.map.mapObjects.addPolygon(polygon).apply {
+                fillColor = area.color.copy(0.15f).toArgb()
+                strokeColor = area.color.copy(0.45f).toArgb()
+                strokeWidth = 2f
+                isVisible = false
+            }
+        }
+        )
+    }
+
+    DisposableEffect(key1 = polygonMapObjects) {
+        val mapView = yandexMap.mapView
+        val map = mapView.map
+        val cameraListener = CameraListener { _, cameraPosition, _, _ ->
+            val showPolygons = cameraPosition.zoom < 12f
+            polygonMapObjects.forEach { mapObject ->
+                mapObject.isVisible = showPolygons
+            }
+        }
+        map.addCameraListener(cameraListener)
+
+        onDispose {
+            map.removeCameraListener(cameraListener)
+        }
+
     }
 
     Box(
@@ -85,31 +124,6 @@ fun YandexMapView(
             modifier = Modifier.fillMaxWidth(),
             factory = {
                 yandexMap.mapView
-            },
-            update = { mapView ->
-                mapView.map.mapObjects.clear()
-
-                val polygonMapObjects = areas.map { area ->
-                    val points = area.points.map { point -> point.toPoint() }
-
-                    val polygon = Polygon(LinearRing(points), listOf())
-
-                    mapView.map.mapObjects.addPolygon(polygon).apply {
-                        fillColor = area.color.copy(0.15f).toArgb()
-                        strokeColor = area.color.copy(0.45f).toArgb()
-                        strokeWidth = 2f
-                        isVisible = false
-                    }
-                }
-
-                mapView.map.addCameraListener { _, cameraPosition, _, _ ->
-                    val showPolygons = cameraPosition.zoom < 12f
-
-                    polygonMapObjects.forEach { mapObject ->
-                        mapObject.isVisible = showPolygons
-                    }
-
-                }
             }
         )
     }

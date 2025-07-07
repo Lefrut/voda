@@ -12,6 +12,17 @@
         />
 
     <fragment
+        android:id="@+id/cancelOrderFragment"
+        android:name="com.vodovoz.app.feature.cancel_order.CancelOrderFragment"
+        android:label="CancelOrderFragment"/>
+
+    <fragment
+        android:id="@+id/orderQuestionFragment"
+        android:name="com.vodovoz.app.feature.order_question.OrderQuestionFragment"
+        android:label="OrderQuestionFragment"/>
+
+
+    <fragment
         android:id="@+id/orderRecipientFragment"
         android:name="com.vodovoz.app.feature.order_recipient.OrderRecipientFragment"
         android:label="OrderRecipientFragment"

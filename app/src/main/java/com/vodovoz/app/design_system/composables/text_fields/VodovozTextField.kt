@@ -17,10 +17,10 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActionScope
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
@@ -30,6 +30,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextRange
@@ -153,6 +154,7 @@ private fun VodovozTextField(
     maxLines: Int = if (singleLine) 1 else Int.MAX_VALUE,
     minLines: Int = 1,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
+    colors: VodovozTextFieldColors = VodovozTextFieldDefaults.colors()
 ) {
     val isFocused by interactionSource.collectIsFocusedAsState()
 
@@ -180,7 +182,7 @@ private fun VodovozTextField(
             if (!label.isNullOrEmpty()) {
                 Text(
                     text = label,
-                    color = MaterialTheme.colorScheme.surfaceTint,
+                    color = if(isFocused) colors.focusedLabelColor else colors.labelColor,
                     style = MaterialTheme.typography.bodySmall,
                     modifier = Modifier.padding(bottom = 4.dp)
                 )
@@ -191,7 +193,7 @@ private fun VodovozTextField(
                     .heightIn(48.dp)
                     .border(
                         width = 1.dp,
-                        color = if (isError) MaterialTheme.colorScheme.error else if (isFocused) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
+                        color = if (isError) colors.errorColor else if (isFocused) colors.focusedBorderColor else colors.borderColor,
                         shape = MaterialTheme.shapes.medium
                     )
                     .padding(horizontal = 16.dp, vertical = 10.dp),
@@ -207,7 +209,9 @@ private fun VodovozTextField(
                     )
                 }
                 Box(
-                    modifier = Modifier.weight(1f).horizontalScroll(rememberScrollState()),
+                    modifier = Modifier
+                        .weight(1f)
+                        .horizontalScroll(rememberScrollState()),
                     contentAlignment = Alignment.TopStart
                 ) {
                     if (value.text.isEmpty()) {
@@ -230,8 +234,8 @@ private fun VodovozTextField(
                 Text(
                     text = supportingText,
                     color = if (!isError) {
-                        MaterialTheme.colorScheme.surfaceTint
-                    } else MaterialTheme.colorScheme.error,
+                        colors.supportingTextColor
+                    } else colors.errorColor,
                     style = MaterialTheme.typography.labelSmall,
                     modifier = Modifier.padding(top = 4.dp)
                 )
@@ -263,6 +267,7 @@ fun VodovozTextField(
     minLines: Int = 1,
     maxLines: Int = minLines,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
+    colors: VodovozTextFieldColors = VodovozTextFieldDefaults.colors(),
 ) {
     var textFieldValueState by rememberSaveable(stateSaver = TextFieldValue.Saver) {
         mutableStateOf(TextFieldValue(text = value))
@@ -333,8 +338,45 @@ fun VodovozTextField(
         trailingIcon = trailingIcon,
         visualTransformation = visualTransformation,
         maxLines = maxLines,
-        minLines = minLines
+        minLines = minLines,
+        colors = colors
+    )
+}
 
+
+@Immutable
+data class VodovozTextFieldColors(
+    val focusedLabelColor: Color,
+    val labelColor: Color,
+    val supportingTextColor: Color,
+    val textColor: Color,
+    val focusedTextColor: Color,
+    val borderColor: Color,
+    val focusedBorderColor: Color,
+    val errorColor: Color,
+)
+
+data object VodovozTextFieldDefaults {
+
+    @Composable
+    fun colors(
+        focusedLabelColor: Color = MaterialTheme.colorScheme.surfaceTint,
+        labelColor: Color = MaterialTheme.colorScheme.surfaceTint,
+        supportingTextColor: Color = MaterialTheme.colorScheme.surfaceTint,
+        textColor: Color = MaterialTheme.colorScheme.onBackground,
+        focusedTextColor: Color = MaterialTheme.colorScheme.onBackground,
+        borderColor: Color = MaterialTheme.colorScheme.surfaceVariant,
+        focusedBorderColor: Color = MaterialTheme.colorScheme.primary,
+        errorColor: Color = MaterialTheme.colorScheme.error
+    ) = VodovozTextFieldColors(
+        focusedLabelColor = focusedLabelColor,
+        labelColor = labelColor,
+        supportingTextColor = supportingTextColor,
+        textColor = textColor,
+        focusedTextColor = focusedTextColor,
+        borderColor = borderColor,
+        focusedBorderColor = focusedBorderColor,
+        errorColor = errorColor
     )
 
 }

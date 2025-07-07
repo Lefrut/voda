@@ -6,11 +6,13 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.fragment.findNavController
@@ -22,9 +24,11 @@ import com.vodovoz.app.core.navigation.navigateToOrderCallYou
 import com.vodovoz.app.core.navigation.navigateToOrderRecipient
 import com.vodovoz.app.core.navigation.navigateToPaymentMethod
 import com.vodovoz.app.design_system.VodovozTheme
+import com.vodovoz.app.design_system.composables.placeholders.VodovozLongPlaceholder
 import com.vodovoz.app.design_system.effects.LifecycleEffect
 import com.vodovoz.app.feature.addresses.model.AddressScreenTypeUi
 import com.vodovoz.app.feature.addresses.model.AddressUi
+import com.vodovoz.app.feature.cart.CartFlowViewModel
 import com.vodovoz.app.feature.delivery_date.model.DeliveryDateOptionUi
 import com.vodovoz.app.feature.delivery_date.model.DeliveryTimeIntervalUi
 import com.vodovoz.app.feature.order_call_you.model.CallYouItemUi
@@ -38,6 +42,7 @@ import javax.inject.Inject
 class OrderingFragment : Fragment() {
 
     private val viewModel: OrderingFlowViewModel by viewModels()
+    private val cartViewModel: CartFlowViewModel by activityViewModels()
 
     @Inject
     lateinit var accountManager: AccountManager
@@ -59,11 +64,38 @@ class OrderingFragment : Fragment() {
                     val viewState by rememberUpdatedState(newValue = pagingState.data)
                     val scrollState = rememberScrollState()
 
-                    OrderingScreen(
-                        viewModel = viewModel,
-                        viewState = viewState,
-                        scrollState = scrollState
-                    )
+                    when (val uiState = viewState.uiState) {
+                        OrderingFlowViewModel.OrderingUiState.Error,
+                        OrderingFlowViewModel.OrderingUiState.Loading,
+                        OrderingFlowViewModel.OrderingUiState.Order -> {
+                            OrderingScreen(
+                                viewModel = viewModel,
+                                viewState = viewState,
+                                scrollState = scrollState
+                            )
+
+                        }
+
+                        is OrderingFlowViewModel.OrderingUiState.Success -> {
+                            VodovozLongPlaceholder(
+                                data = uiState.placeholder,
+                                onCloseClick = {
+                                    viewModel.navigateBackWithRefresh()
+                                },
+                                onButtonClick = {
+                                    //todo - payment
+                                }
+                            )
+
+                            DisposableEffect(Unit) {
+                                tabManager.changeTabVisibility(false)
+                                onDispose {
+                                    tabManager.changeTabVisibility(true)
+                                }
+                            }
+                        }
+                    }
+
 
                     LifecycleEffect {
                         observeEvents(scrollState)
@@ -131,7 +163,12 @@ class OrderingFragment : Fragment() {
                 }
 
                 is OrderingFlowViewModel.OrderingEvents.GoToPaymentMethod -> {
-                    findNavController().navigateToPaymentMethod(event.addressId, event.date, event.paymentMethodId, event.balance)
+                    findNavController().navigateToPaymentMethod(
+                        event.addressId,
+                        event.date,
+                        event.paymentMethodId,
+                        event.balance
+                    )
                 }
 
                 is OrderingFlowViewModel.OrderingEvents.GoToOrderRecipient -> {
@@ -144,6 +181,10 @@ class OrderingFragment : Fragment() {
 
                 OrderingFlowViewModel.OrderingEvents.ScrollToTop -> {
                     scrollState.animateScrollTo(0)
+                }
+
+                OrderingFlowViewModel.OrderingEvents.RefreshCart -> {
+                    cartViewModel.refresh()
                 }
             }
         }

@@ -21,6 +21,7 @@ import com.vodovoz.app.feature.map.model.findNearestPointTo
 import com.vodovoz.app.feature.map.model.mapToUi
 import com.vodovoz.app.feature.map.model.toUi
 import com.vodovoz.app.util.extensions.debounceWithMax
+import com.vodovoz.app.util.extensions.debugLog
 import com.vodovoz.app.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
@@ -137,17 +138,29 @@ class MapFlowViewModel @Inject constructor(
         searchAddress(dataState.query)
     }
 
-
     private suspend fun calculateDistanceFromMoscowToAddress(addressPoint: MapPointUi): Float? {
-        val coreMapArea =
-            dataState.areas.find { area -> area.id == CORE_AREA_ID && area.isMoscowRingRow }
-                ?: return null
+        if(dataState.areas.isEmpty()){ delay(750L) }
 
-        if(coreMapArea.contains(addressPoint)){ return 0f }
+        val coreMapArea = dataState.areas.find { area ->
+            area.id == CORE_AREA_ID && area.isMoscowRingRow
+        } ?: run {
+            return null
+        }
 
-        val nearestPoint = coreMapArea.findNearestPointTo(addressPoint) ?: return null
-        val route = nearestPoint.getRoute(addressPoint) ?: return null
+        if (coreMapArea.contains(addressPoint)) {
+            return 0f
+        }
+
+        val nearestPoint = coreMapArea.findNearestPointTo(addressPoint) ?: run {
+            return null
+        }
+
+        val route = nearestPoint.getRoute(addressPoint) ?: run {
+            return null
+        }
+
         val fromMoscowToPoint = route.distanceKm()
+
         return fromMoscowToPoint
     }
 
@@ -165,7 +178,7 @@ class MapFlowViewModel @Inject constructor(
             currentAddress?.let { mapAddress ->
 
                 val fromMoscowToPoint =
-                    calculateDistanceFromMoscowToAddress(mapAddress.point) ?: return@launch
+                    calculateDistanceFromMoscowToAddress(mapAddress.point) ?: Float.MAX_VALUE
 
                 changeAddress(currentAddress.copy(fromMoscowToPoint = fromMoscowToPoint))
                 eventListener.emit(MapFlowEvents.HideKeyboard)
@@ -236,7 +249,7 @@ class MapFlowViewModel @Inject constructor(
                 val mapAddress = mapAddressModel.toUi()
 
                 val fromMoscowToPoint =
-                    calculateDistanceFromMoscowToAddress(mapAddress.point) ?: return@job
+                    calculateDistanceFromMoscowToAddress(mapAddress.point) ?: Float.MAX_VALUE
 
                 changeAddress(mapAddress.copy(fromMoscowToPoint = fromMoscowToPoint))
             }
@@ -298,6 +311,10 @@ class MapFlowViewModel @Inject constructor(
             s.copy(buttonIsLoading = false)
         }
 
+    }
+
+    fun moveToMoscow() = viewModelScope.launch {
+        eventListener.emit(MapFlowEvents.MoveToGeoOrMoscow)
     }
 
     @Immutable

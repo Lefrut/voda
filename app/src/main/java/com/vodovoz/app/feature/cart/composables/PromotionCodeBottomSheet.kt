@@ -27,6 +27,7 @@ import com.vodovoz.app.R
 import com.vodovoz.app.design_system.composables.bottom_sheet.VodovozDragHandle
 import com.vodovoz.app.design_system.composables.button.VodovozButton
 import com.vodovoz.app.design_system.composables.text_fields.VodovozTextField
+import com.vodovoz.app.design_system.composables.text_fields.VodovozTextFieldDefaults
 import com.vodovoz.app.feature.cart.model.CartPromoPopupWindowUi
 import kotlinx.coroutines.delay
 
@@ -97,11 +98,19 @@ fun PromotionCodeBottomSheet(
                     }
                 } else null,
                 supportingText = info.errorText,
+                isError = info.errorText != null,
+                colors = if (info.errorText != null) VodovozTextFieldDefaults.colors(
+                    errorColor = info.color,
+                    borderColor = info.borderColor,
+                    focusedBorderColor = info.borderColor
+                ) else VodovozTextFieldDefaults.colors()
             )
+
 
             VodovozButton(
                 modifier = Modifier.padding(top = 16.dp),
                 text = info.buttonName,
+                isLoading = info.buttonIsLoading,
                 onClick = onApplyPromoClick,
                 enabled = promoCode.isNotBlank(),
             )

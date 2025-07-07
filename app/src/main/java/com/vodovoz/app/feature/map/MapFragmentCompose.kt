@@ -22,14 +22,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.SoftwareKeyboardController
 import androidx.compose.ui.platform.ViewCompositionStrategy
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowCompat
-import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -125,8 +121,8 @@ class MapFragment : Fragment() {
                 }
 
                 val anchoredDraggableState = remember {
-                        AnchoredDraggableState(initialValue = PartiallyExpanded)
-                    }
+                    AnchoredDraggableState(initialValue = PartiallyExpanded)
+                }
 
 
                 VodovozTheme {
@@ -159,13 +155,6 @@ class MapFragment : Fragment() {
         userLocationLayer.isHeadingEnabled = true
         userLocationLayer.setObjectListener(userLocationListener)
 
-//
-//        ViewCompat.setOnApplyWindowInsetsListener(view) { _, insets ->
-//            val imeVisible = insets.isVisible(WindowInsetsCompat.Type.ime())
-//            tabManager.changeTabVisibility(!imeVisible)
-//            tabManager.changeTabWindowInsets(!imeVisible)
-//            return@setOnApplyWindowInsetsListener insets
-//        }
     }
 
     override fun onStart() {
@@ -173,12 +162,6 @@ class MapFragment : Fragment() {
         mapKit.onStart()
     }
 
-
-//    override fun onPause() {
-//        super.onPause()
-//        WindowCompat.setDecorFitsSystemWindows(requireActivity().window, true)
-//        tabManager.changeTabWindowInsets(false)
-//    }
 
     override fun onStop() {
         mapKit.onStop()

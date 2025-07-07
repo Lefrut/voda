@@ -85,6 +85,7 @@ private fun CertificateCard(
                 else BorderStroke(0.dp, Color.Transparent),
                 MaterialTheme.shapes.large
             )
+            .clip(MaterialTheme.shapes.large)
             .clickable { onClick(certificateUi) }
     ) {
         AsyncImage(

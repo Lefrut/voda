@@ -17,20 +17,24 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.fromHtml
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.text.HtmlCompat
+import androidx.core.text.toHtml
+import androidx.core.text.toSpanned
 import coil3.compose.rememberAsyncImagePainter
 import com.vodovoz.app.R
 import com.vodovoz.app.design_system.composables.button.VodovozButton
 import com.vodovoz.app.design_system.composables.button.VodovozButtonDefaults
 import com.vodovoz.app.design_system.model.VodovozPlaceholderUi
+import com.vodovoz.app.design_system.utils.toAnnotatedString
 
 @Composable
 fun VodovozLongPlaceholder(
@@ -69,18 +73,23 @@ fun VodovozLongPlaceholder(
                 modifier = Modifier.size(80.dp),
                 contentScale = ContentScale.FillBounds
             )
+
+
             Text(
                 modifier = Modifier.padding(top = 24.dp),
-                text = AnnotatedString.fromHtml(data.headerHtml),
+                text = HtmlCompat.fromHtml(data.headerHtml, HtmlCompat.FROM_HTML_MODE_LEGACY).toAnnotatedString(),
                 color = MaterialTheme.colorScheme.onBackground,
                 style = MaterialTheme.typography.headlineSmall.copy(textAlign = TextAlign.Center)
             )
 
             Text(
                 modifier = Modifier.padding(top = 24.dp),
-                text = AnnotatedString.fromHtml(data.descriptionHtml),
+                text = HtmlCompat.fromHtml(data.descriptionHtml, HtmlCompat.FROM_HTML_MODE_LEGACY).toAnnotatedString(),
                 color = MaterialTheme.colorScheme.surfaceTint,
-                style = MaterialTheme.typography.bodyMedium.copy(textAlign = TextAlign.Center, letterSpacing = 0.sp)
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    textAlign = TextAlign.Center,
+                    letterSpacing = 0.sp
+                )
             )
         }
 
@@ -99,8 +108,10 @@ fun VodovozLongPlaceholder(
             )
         } else {
             VodovozButton(
-                modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 24.dp),
-                text = stringResource(id = R.string.catalog_button_text),
+                modifier = Modifier
+                    .alpha(0f)
+                    .padding(start = 16.dp, end = 16.dp, bottom = 24.dp),
+                text = "",
                 onClick = onButtonClick,
                 colors = VodovozButtonDefaults.secondaryColors()
             )

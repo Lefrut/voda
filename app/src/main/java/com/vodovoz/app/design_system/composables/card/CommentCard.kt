@@ -55,7 +55,7 @@ fun CommentCard(
 
                 (1..5).forEach { starNumber ->
                     Icon(
-                        painter = painterResource(id = R.drawable.ic_star_active),
+                        painter = painterResource(id = R.drawable.ic_star_active_v2),
                         contentDescription = null,
                         tint = if (starNumber <= comment.rating) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.surfaceVariant,
                         modifier = Modifier.size(18.dp)
@@ -86,43 +86,6 @@ fun CommentCard(
                     color = MaterialTheme.colorScheme.surfaceTint,
                     style = MaterialTheme.typography.labelSmall
                 )
-
-                /**Likes and dislikes*/
-//                Icon(
-//                    painter = painterResource(id = R.drawable.ic_dislike),
-//                    contentDescription = null,
-//                    modifier = Modifier
-//                        .padding(start = 8.dp)
-//                        .size(18.dp),
-//                    tint = MaterialTheme.colorScheme.surfaceTint
-//                )
-//
-//
-//                Text(
-//                    modifier = Modifier.padding(start = 4.dp),
-//                    text = "0",
-//                    maxLines = 1,
-//                    color = MaterialTheme.colorScheme.surfaceTint,
-//                    style = MaterialTheme.typography.labelSmall
-//                )
-//
-//                Icon(
-//                    painter = painterResource(id = R.drawable.ic_like_up),
-//                    contentDescription = null,
-//                    modifier = Modifier
-//                        .padding(start = 16.dp)
-//                        .size(18.dp),
-//                    tint = MaterialTheme.colorScheme.surfaceTint
-//
-//                )
-//
-//                Text(
-//                    modifier = Modifier.padding(start = 4.dp),
-//                    text = "0",
-//                    maxLines = 1,
-//                    color = MaterialTheme.colorScheme.surfaceTint,
-//                    style = MaterialTheme.typography.labelSmall
-//                )
             }
         }
     }

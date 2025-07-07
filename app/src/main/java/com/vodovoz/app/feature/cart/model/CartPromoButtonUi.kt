@@ -29,8 +29,8 @@ data class CartPromoButtonUi(
     }
 }
 
-fun CartPromoButtonModel.toUi(): CartPromoButtonUi{
+fun CartPromoButtonModel.toUi(): CartPromoButtonUi {
     return CartPromoButtonUi(
-        title, text, coupon,Color.fromHexOrUnspecified(textColor), image, id, popupWindow.toUi()
+        title, text, coupon, Color.fromHexOrUnspecified(textColor), image, id, popupWindow.toUi()
     )
 }

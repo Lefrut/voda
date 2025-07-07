@@ -99,7 +99,7 @@ fun PaymentTypeItemCard(
             style = MaterialTheme.typography.bodyMedium
         )
 
-        VodovozRadioButton(selected = selected, onClick = { })
+        VodovozRadioButton(selected = selected, onClick = { onClick(paymentTypeUi) })
     }
 }
 

@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.view.WindowCompat
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
@@ -19,7 +20,7 @@ fun SystemBarsEffect(
     navigationBarContrastEnforced: Boolean = true,
     darkIcons: Boolean = false,
     handleDecorFitsSystemWindows: Boolean = true,
-    delayTimeMillis: Long = 0L
+    delayTimeMillis: Long = 0L,
 ) {
     val context = LocalContext.current
     val window = context.window() ?: return
@@ -29,10 +30,10 @@ fun SystemBarsEffect(
     val systemUiController = rememberSystemUiController()
 
     val prevStatusBarColor = window.statusBarColor
-    val prevNavBarColor    = window.navigationBarColor
+    val prevNavBarColor = window.navigationBarColor
 
     DisposableEffect(window, statusBarColor, navigationBarColor, darkIcons) {
-        if(handleDecorFitsSystemWindows){
+        if (handleDecorFitsSystemWindows) {
             coroutineScope.launch {
                 delay(delayTimeMillis)
                 WindowCompat.setDecorFitsSystemWindows(window, false)
@@ -50,17 +51,20 @@ fun SystemBarsEffect(
         )
 
         onDispose {
+            val prevStatusBarColorsCompose = Color(prevStatusBarColor)
             systemUiController.setStatusBarColor(
-                color = Color(prevStatusBarColor),
-                darkIcons = !darkIcons,
+                color = prevStatusBarColorsCompose,
+                darkIcons = prevStatusBarColorsCompose.luminance() > 0.5f,
             )
+
+            val prevNavigationBarColorCompose = Color(prevNavBarColor)
             systemUiController.setNavigationBarColor(
-                color = Color(prevNavBarColor),
-                darkIcons = !darkIcons,
+                color = prevNavigationBarColorCompose,
+                darkIcons = prevNavigationBarColorCompose.luminance() > 0.5f,
                 navigationBarContrastEnforced = navigationBarContrastEnforced
             )
 
-            if(handleDecorFitsSystemWindows){
+            if (handleDecorFitsSystemWindows) {
                 WindowCompat.setDecorFitsSystemWindows(window, true)
             }
         }
