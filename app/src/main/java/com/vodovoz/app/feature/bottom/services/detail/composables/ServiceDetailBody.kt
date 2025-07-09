@@ -38,7 +38,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.zIndex
 import androidx.core.os.bundleOf
 import coil3.compose.AsyncImage
-import com.vodovoz.app.core.network.ApiConfig
+import com.vodovoz.app.core.network.VodovozWebConfig
 import com.vodovoz.app.design_system.composables.button.VodovozButtonsColumn
 import com.vodovoz.app.design_system.composables.card.GridProductCard
 import com.vodovoz.app.design_system.composables.placeholders.LoadingPlaceholder
@@ -207,7 +207,7 @@ fun ServiceDetailsWebView(
                     onLoadingChange(true)
                     coroutineScope.launch {
                         webView.loadDataWithBaseURL(
-                            ApiConfig.VODOVOZ_URL,
+                            VodovozWebConfig.VODOVOZ_URL,
                             html.prepareServiceHtml(),
                             "text/html",
                             "utf-8",

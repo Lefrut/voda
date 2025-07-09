@@ -36,7 +36,7 @@ object ProfileChatsNavigator {
             }
 
             else -> {
-                //todo - navigate to writ message
+                //todo - navigate to write message
                 //navController.navi()
             }
         }

@@ -1,7 +1,7 @@
 package com.vodovoz.app.data.maps.di
 
 import com.squareup.moshi.Moshi
-import com.vodovoz.app.core.network.ApiConfig
+import com.vodovoz.app.core.network.WebConfig
 import com.vodovoz.app.core.network.retrofit.NoOpCallAdapterFactory
 import com.vodovoz.app.core.network.retrofit.NoOpConverterFactory
 import com.vodovoz.app.data.maps.YandexMapAPI
@@ -37,7 +37,7 @@ abstract class MapServiceModule {
         @Named("yandex_map")
         fun providesYandexMapRetrofit(moshi: Moshi): Retrofit {
             return Retrofit.Builder()
-                .baseUrl(ApiConfig.MAPKIT_URL)
+                .baseUrl(WebConfig.MAPKIT_URL)
                 .addCallAdapterFactory(NoOpCallAdapterFactory.create())
                 .addConverterFactory(NoOpConverterFactory.create(moshi))
                 .build()

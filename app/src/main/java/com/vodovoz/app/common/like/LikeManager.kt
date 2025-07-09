@@ -51,7 +51,8 @@ class LikeManager @Inject constructor(
         selectedCategoryId = categoryId
     }
 
-    //todo - use when products will be to have categories id
+
+    /*
     suspend fun changeFavorite(productId: Long, newValue: Boolean, categoryId: Int? = null) {
 
         val (likeVersion, userId) = mutex.withLock {
@@ -78,7 +79,7 @@ class LikeManager @Inject constructor(
                 }
             }
         }
-    }
+    }*/
 
 
     suspend fun changeFavorite(productId: Long, newValue: Boolean) {

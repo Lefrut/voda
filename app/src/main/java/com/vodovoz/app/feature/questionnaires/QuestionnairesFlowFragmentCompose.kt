@@ -25,7 +25,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.vodovoz.app.R
 import com.vodovoz.app.common.tab.TabManager
 import com.vodovoz.app.core.navigation.navigateToWebView
-import com.vodovoz.app.core.network.ApiConfig
+import com.vodovoz.app.core.network.VodovozWebConfig
 import com.vodovoz.app.core.network.interceptor.BaseUrlInterceptor
 import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.composables.dialogs.VodovozDialog
@@ -231,7 +231,7 @@ class QuestionnairesFlowFragment : Fragment() {
     }
 
     private fun loadHomeFragmentWithNewServerURL(serverUrl: String?) {
-        ApiConfig.VODOVOZ_URL = serverUrl ?: ""
+        VodovozWebConfig.VODOVOZ_URL = serverUrl ?: ""
 
         if (serverUrl == null) {
             baseUrlInterceptor.clear()
