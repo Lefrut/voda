@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.zIndex
 import com.vodovoz.app.design_system.composables.placeholders.LoadingPlaceholder
 import com.vodovoz.app.design_system.composables.placeholders.NetworkErrorPlaceholder
 import com.vodovoz.app.design_system.composables.top_bar.VodovozTopBar
@@ -23,7 +24,7 @@ fun ServiceDetailScreen(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
-        VodovozTopBar(onBack = { viewModel.navigateBack() }, title = viewState.title)
+        VodovozTopBar(modifier = Modifier.zIndex(1f),onBack = { viewModel.navigateBack() }, title = viewState.title)
         when (viewState.uiState) {
             ServiceDetailsUiState.Error -> {
                 NetworkErrorPlaceholder {
@@ -41,6 +42,7 @@ fun ServiceDetailScreen(
                     html = viewState.html,
                     productsSection = viewState.productsSection,
                     button = viewState.button,
+                    webViewIsLoading = viewState.webViewIsLoading,
                     onButtonClick = { button ->
                         viewModel.navigateToServiceOrder(button)
                     },
@@ -58,7 +60,9 @@ fun ServiceDetailScreen(
                     },
                     onIncrementProductToCart = { product ->
                         viewModel.incrementProductToCard(product)
-
+                    },
+                    onLoadingChange = { isLoading ->
+                        viewModel.changeLoading(isLoading)
                     }
                 )
             }

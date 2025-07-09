@@ -6,9 +6,9 @@ import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import androidx.core.view.WindowCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.navOptions
 import com.google.firebase.messaging.RemoteMessage
 import com.vodovoz.app.R
 import com.vodovoz.app.databinding.ActivityMainBinding
@@ -47,7 +47,13 @@ class MainActivity : AppCompatActivity() {
             .findFragmentById(binding.fcvMainContainer.id) as? NavHostFragment
         val navController = navHostFragment?.navController
         navController?.setGraph(R.navigation.nav_graph)
-        navController?.navigate(R.id.splashFragment)
+        navController?.navigate(
+            resId = R.id.splashFragment,
+            args = null,
+            navOptions = navOptions {
+                launchSingleTop = true
+            }
+        )
 
         processIntent(intent)
     }

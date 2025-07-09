@@ -5,7 +5,9 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -19,14 +21,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
-
-import coil3.request.crossfade
 import com.vodovoz.app.design_system.model.SectionUi
 import com.vodovoz.app.feature.home.model.PopularCategoryUi
 
@@ -50,14 +49,18 @@ fun HomePopularCategories(
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             items(sectionPopularCategories.items, key = { it.id }) { popularCategory ->
-                HomeSectionItem(category = popularCategory, onClick = onPopularCategoryClick)
+                HomeSectionItem(
+                    modifier = Modifier.fillMaxHeight(),
+                    category = popularCategory,
+                    onClick = onPopularCategoryClick
+                )
             }
         }
     }
 }
 
 @Composable
-fun HomeSectionItem(
+private fun HomeSectionItem(
     modifier: Modifier = Modifier,
     category: PopularCategoryUi,
     onClick: (PopularCategoryUi) -> Unit,
@@ -99,7 +102,8 @@ fun HomeSectionItem(
             maxLines = 2,
             style = labelSmall.copy(fontSize = fontSize, letterSpacing = 0.1.sp),
             overflow = TextOverflow.Ellipsis,
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
+            minLines = 2
         )
     }
 }

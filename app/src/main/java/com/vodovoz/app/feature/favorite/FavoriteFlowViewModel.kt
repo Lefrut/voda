@@ -33,7 +33,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -93,26 +92,22 @@ class FavoriteFlowViewModel @Inject constructor(
     }
 
     fun checkFavoritesChanges() = viewModelScope.launch {
-        val favoritesMap = likeManager.observeLikes().firstOrNull() ?: return@launch
-        val currentFavoritesMap = dataState.products.associate { it.id to it.isFavorite }
+        val oldLikes = dataState.lastSavedLikes
 
-        //TODO - check new categories
-        val newFavorites = favoritesMap.keys - currentFavoritesMap.keys
-        if (newFavorites.isNotEmpty()) {
-            selectCategory(dataState.currentCategory)
-            return@launch
-        }
+        val newLikes = likeManager.getLikes()
+        val newLikeCategories = likeManager.getLikesCategories()
+        val selectedCategory = likeManager.selectedCategoryId
 
+        val likesIds = (newLikes.keys + oldLikes.keys).toSet()
 
-        val commonProducts = favoritesMap.keys.intersect(currentFavoritesMap.keys)
+        likesIds.forEach { id ->
+            val newLikeCategory = newLikeCategories[id]
+            val newLike = newLikes[id]
+            val oldLike = oldLikes[id]
 
-        commonProducts.forEach { productId ->
-            val isFavoriteInCache = favoritesMap[productId] ?: false
-            val isFavoriteInCurrent = currentFavoritesMap[productId] ?: false
-
-            if (isFavoriteInCache != isFavoriteInCurrent) {
+            if ((newLike != oldLike || newLike == null) && (newLikeCategory == selectedCategory || selectedCategory == null || newLikeCategory == null)) {
                 fetchFavoriteProducts()
-                return@launch
+                return@forEach
             }
         }
     }
@@ -163,7 +158,7 @@ class FavoriteFlowViewModel @Inject constructor(
 
         val favoriteProductsResult =
             vodovozServiceRepository.getFavoriteProducts(
-                productsIds = likeManager.fetchLikeLocalStr() ?: ""
+                productsIds = likeManager.fetchLocalFavorites()
             ).singleResult()
                 .map { productsSectionModel -> productsSectionModel.toUi() }
 
@@ -179,7 +174,8 @@ class FavoriteFlowViewModel @Inject constructor(
                     currentSort = currentSort,
                     uiState = FavoriteUiState.Success,
                     products = emptyList(),
-                    showRefreshIndicator = false
+                    showRefreshIndicator = false,
+                    lastSavedLikes = likeManager.getLikes()
                 )
             }
 
@@ -190,7 +186,7 @@ class FavoriteFlowViewModel @Inject constructor(
             vodovozServiceRepository.getFavoriteProductsPaged(
                 categoryId = currentCategory.id,
                 sort = dataState.currentSort.toDomain(),
-                productsIds = likeManager.fetchLikeLocalStr() ?: ""
+                productsIds = likeManager.fetchLocalFavorites()
             ).map { pagingData ->
                 pagingData.map { productModel -> productModel.toUi() }
             }.collectLatest { pagingData ->
@@ -264,12 +260,12 @@ class FavoriteFlowViewModel @Inject constructor(
                 currentCategory = newCategory,
                 productsLoadStates = s.productsLoadStates.copy(
                     refresh = LoadState.Loading,
-                ),
-
                 )
+            )
         }
 
         eventListener.emit(FavoriteEvents.ScrollToTop)
+        likeManager.changeCategory(category.id.takeIf { it != CategoryUi.Empty.id })
         fetchFavoriteProducts()
     }
 
@@ -336,6 +332,7 @@ class FavoriteFlowViewModel @Inject constructor(
         val uiState: FavoriteUiState = FavoriteUiState.Loading,
         val products: List<ProductUi> = emptyList(),
         val productsLoadStates: CombinedLoadStates = emptyCombinedLoadStates,
+        val lastSavedLikes: Map<Long, Boolean> = emptyMap(),
     ) : State
 
     @Stable

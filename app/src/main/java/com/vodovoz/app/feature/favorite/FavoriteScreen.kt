@@ -18,7 +18,6 @@ import com.vodovoz.app.feature.favorite.composables.FavoriteBody
 import com.vodovoz.app.feature.favorite.composables.FavoriteTopBar
 
 @OptIn(ExperimentalMaterial3Api::class)
-@Suppress("NonSkippableComposable")
 @Composable
 fun FavoriteScreen(
     viewModel: FavoriteFlowViewModel,

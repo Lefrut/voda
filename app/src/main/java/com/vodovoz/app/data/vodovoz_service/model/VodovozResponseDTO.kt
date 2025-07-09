@@ -24,7 +24,6 @@ data class VodovozPlaceholderDTO(
     @Json(name = "KNOPKA") val button: VodovozButtonDTO?,
 )
 
-@JsonClass(generateAdapter = true)
 @Keep
 data class VodovozButtonDTO(
     @Json(name = "TEXT")
@@ -35,4 +34,8 @@ data class VodovozButtonDTO(
     val background: String?,
     @Json(name = "ID")
     val id: String?,
+    @Json(name = "BRAYZER")
+    val browser: String?,
+    @Json(name = "URL")
+    val url: String?
 )

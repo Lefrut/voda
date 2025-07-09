@@ -1,6 +1,7 @@
 package com.vodovoz.app.data.vodovoz_service.datastore
 
 import android.content.Context
+import androidx.datastore.preferences.SharedPreferencesMigration
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.longPreferencesKey
@@ -14,7 +15,15 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 private val Context.adultsPrefsDataStore by preferencesDataStore(
-    name = "ForAdultsPrefs"
+    name = "ForAdultsPrefs",
+    produceMigrations = { context ->
+        listOf(
+            SharedPreferencesMigration(
+                context = context,
+                sharedPreferencesName = "ForAdultsPrefs"
+            )
+        )
+    }
 )
 
 @Singleton

@@ -44,11 +44,6 @@ class FavoriteFragment : Fragment() {
     @Inject
     lateinit var tabManager: TabManager
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        viewModel.checkFavoritesChanges()
-    }
-
     override fun onDestroyView() {
         super.onDestroyView()
         viewModel.checkFavoritesChanges()
@@ -61,8 +56,7 @@ class FavoriteFragment : Fragment() {
     ): View {
         findNavController().currentBackStackEntry?.savedStateHandle?.remove<CategoryUi>(
             "category"
-        )?.let { category -> viewModel.selectCategory(category) }
-            ?: viewModel.checkFavoritesChanges()
+        )?.let { category -> viewModel.selectCategory(category) } ?: viewModel.checkFavoritesChanges()
 
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)

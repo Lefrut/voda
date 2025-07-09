@@ -10,5 +10,6 @@ data class ServiceDetailsState(
     val image: String = "",
     val html: String = "",
     val productsSection: ServiceProductsUi? = null,
-    val button: ColorfulButtonUi? = null
+    val button: ColorfulButtonUi? = null,
+    val webViewIsLoading: Boolean = true
 )

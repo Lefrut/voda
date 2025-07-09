@@ -16,6 +16,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.fragment.findNavController
+import com.vodovoz.app.R
 import com.vodovoz.app.common.account.AccountManager
 import com.vodovoz.app.common.tab.TabManager
 import com.vodovoz.app.core.navigation.navigateToAddresses
@@ -23,6 +24,7 @@ import com.vodovoz.app.core.navigation.navigateToDeliveryDate
 import com.vodovoz.app.core.navigation.navigateToOrderCallYou
 import com.vodovoz.app.core.navigation.navigateToOrderRecipient
 import com.vodovoz.app.core.navigation.navigateToPaymentMethod
+import com.vodovoz.app.core.navigation.navigateToWebView
 import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.composables.placeholders.VodovozLongPlaceholder
 import com.vodovoz.app.design_system.effects.LifecycleEffect
@@ -34,6 +36,7 @@ import com.vodovoz.app.feature.delivery_date.model.DeliveryTimeIntervalUi
 import com.vodovoz.app.feature.order_call_you.model.CallYouItemUi
 import com.vodovoz.app.feature.payment_method.model.PaymentMethodItemNav
 import com.vodovoz.app.feature.payment_method.model.toUi
+import com.vodovoz.app.util.extensions.openUrl
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.onSubscription
 import javax.inject.Inject
@@ -83,7 +86,7 @@ class OrderingFragment : Fragment() {
                                     viewModel.navigateBackWithRefresh()
                                 },
                                 onButtonClick = {
-                                    //todo - payment
+                                    viewModel.activatePayButton(uiState.placeholder.button)
                                 }
                             )
 
@@ -185,6 +188,18 @@ class OrderingFragment : Fragment() {
 
                 OrderingFlowViewModel.OrderingEvents.RefreshCart -> {
                     cartViewModel.refresh()
+                }
+
+                is OrderingFlowViewModel.OrderingEvents.GoToWebView -> {
+                    findNavController().navigateToWebView(
+                        title = context?.getString(
+                            R.string.space
+                        ) ?: "",
+                        url = event.url
+                    )
+                }
+                is OrderingFlowViewModel.OrderingEvents.OpenUrl -> {
+                    context?.openUrl(event.url)
                 }
             }
         }

@@ -1,7 +1,9 @@
 package com.vodovoz.app.feature.buy_certificate.model
 
+import androidx.compose.runtime.Immutable
 import com.vodovoz.app.domain.general.model.PaymentInfoModel
 
+@Immutable
 data class PaymentInfoUi(
     val id: Int,
     val name: String,

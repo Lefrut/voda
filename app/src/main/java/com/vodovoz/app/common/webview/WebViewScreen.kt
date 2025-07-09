@@ -7,32 +7,31 @@ import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.compose.ui.zIndex
 import com.vodovoz.app.common.webview.model.WebViewState
 import com.vodovoz.app.common.webview.model.WebViewUiState
+import com.vodovoz.app.design_system.composables.placeholders.LoadingPlaceholder
 import com.vodovoz.app.design_system.composables.placeholders.NetworkErrorPlaceholder
 import com.vodovoz.app.design_system.composables.top_bar.VodovozTopBar
+import kotlinx.coroutines.delay
 
 @Composable
 fun WebViewScreen(viewModel: WebViewViewModel, viewState: WebViewState) {
     Column(modifier = Modifier.fillMaxSize()) {
-        if(viewState.showTopBar){
+        if (viewState.showTopBar) {
             VodovozTopBar(
+                modifier = Modifier.zIndex(1f),
                 onBack = {
                     viewModel.navigateBack()
                 },
@@ -49,24 +48,18 @@ fun WebViewScreen(viewModel: WebViewViewModel, viewState: WebViewState) {
                     WebView(
                         url = viewState.url,
                         onLoadingFinished = { viewModel.setUiState(WebViewUiState.NotLoading) },
-                        onError = { viewModel.setUiState(WebViewUiState.Error) }
+                        onError = { viewModel.setUiState(WebViewUiState.Error) },
+                        onBackClick = { viewModel.navigateBack() }
                     )
+
+                    if (viewState.uiState is WebViewUiState.Loading) {
+                        LoadingPlaceholder()
+                    }
                 }
             }
         }
     }
 
-    if (viewState.uiState is WebViewUiState.Loading) {
-        CircularProgressIndicator(
-            modifier = Modifier
-                .fillMaxSize()
-                .wrapContentSize()
-                .size(40.dp),
-            color = MaterialTheme.colorScheme.primary,
-            trackColor = Color.Transparent,
-            strokeWidth = 4.dp
-        )
-    }
 }
 
 
@@ -77,6 +70,7 @@ private fun WebView(
     url: String,
     onLoadingFinished: () -> Unit,
     onError: () -> Unit,
+    onBackClick: () -> Unit,
 ) {
     val context = LocalContext.current
 
@@ -101,11 +95,12 @@ private fun WebView(
     }
 
     AndroidView(
-        factory = { webView },
+        factory = { webView.apply { } },
         modifier = modifier.fillMaxSize()
     )
 
     LaunchedEffect(url) {
+        delay(150)
         if (url.contains("#")) {
             webView.loadDataWithBaseURL(
                 url.substringBefore("#"),
@@ -119,7 +114,13 @@ private fun WebView(
         }
     }
 
-
+    BackHandler {
+        if (webView.canGoBack()) {
+            webView.goBack()
+        } else {
+            onBackClick()
+        }
+    }
 }
 
 private class WebClient(
@@ -147,7 +148,7 @@ private class ProgressWebChromeClient(
 
     override fun onProgressChanged(view: WebView, newProgress: Int) {
         super.onProgressChanged(view, newProgress)
-        if (newProgress >= 20 && !isCallbackCalled) {
+        if (newProgress >= 35 && !isCallbackCalled) {
             isCallbackCalled = true
             onPageVisible()
         }

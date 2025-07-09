@@ -23,10 +23,10 @@ class AccountManager @Inject constructor(
         return id
     }
 
-    private fun fetchUserId() = dataStoreRepository.getLong(USER_ID)
+    private fun fetchUserId() = dataStoreRepository.getInt(USER_ID)?.toLong()
 
     fun updateUserId(userId: Long) {
-        dataStoreRepository.putLong(USER_ID, userId)
+        dataStoreRepository.putInt(USER_ID, userId.toInt())
         accountIdListener.value = userId
     }
 
@@ -91,10 +91,10 @@ class AccountManager @Inject constructor(
     )
 
     companion object {
-        private const val USER_ID = "USER_ID"
-        private const val USER_TOKEN = "USER_TOKEN"
-        private const val EMAIL = "EMAIL"
-        private const val PASSWORD = "PASSWORD"
+        private const val USER_ID = "User_ID"
+        private const val USER_TOKEN = "User_token"
+        private const val EMAIL = "Email"
+        private const val PASSWORD = "Password"
         private const val USE_BIO = "USE_BIO"
     }
 

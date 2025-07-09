@@ -65,29 +65,4 @@ class WebViewFragment : Fragment() {
         }
     }
 
-
-//    @SuppressLint("SetJavaScriptEnabled")
-//    private fun initWebView() {
-//        binding.wvContent.settings.javaScriptEnabled = true
-//        if (args.url.contains("#")) {
-//            binding.wvContent.loadDataWithBaseURL(args.url.substringBefore("#"), "", "text/html", "utf-8", null)
-//        }
-//        binding.wvContent.webViewClient = object : WebViewClient() {
-//            override fun onPageFinished(view: WebView?, url: String?) {
-//                super.onPageFinished(view, url)
-//                if (url != null && !url.contains("#") && args.url.contains("#")) {
-//                    binding.wvContent.loadUrl(args.url)
-//                }
-//            }
-//        }
-//
-//        try {
-//            if (!args.url.contains("#")) {
-//                binding.wvContent.loadUrl(args.url)
-//            }
-//        } catch (e: Throwable) {
-//            showError(e.toErrorState())
-//        }
-//    }
-
 }

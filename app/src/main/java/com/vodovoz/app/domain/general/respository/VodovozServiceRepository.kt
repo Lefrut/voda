@@ -112,7 +112,11 @@ interface VodovozServiceRepository {
         addressId: Long,
     ): Flow<Result<OrderCallYouDetailsModel>>
 
-    fun getOrderingDetails(): Flow<Result<OrderingDetailsModel>>
+    fun getOrderingDetails(
+        addressId: Long? = null,
+        date: String? = null,
+        timeInterval: String? = null
+    ): Flow<Result<OrderingDetailsModel>>
 
     fun doOrder(
         addressId: Long,

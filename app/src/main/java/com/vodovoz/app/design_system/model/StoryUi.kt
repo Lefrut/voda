@@ -4,10 +4,10 @@ import android.os.Parcelable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.graphics.Color
+import com.vodovoz.app.common.model.VodovozAction
 import com.vodovoz.app.domain.general.model.promotion.ActionWithButtonModel
 import com.vodovoz.app.domain.general.model.promotion.ColorfulButtonModel
 import com.vodovoz.app.domain.general.model.promotion.StoryModel
-import com.vodovoz.app.common.model.VodovozAction
 import com.vodovoz.app.ui.graphics.fromHexOrUnspecified
 import kotlinx.parcelize.Parcelize
 
@@ -18,7 +18,7 @@ data class StoryUi(
     val image: String,
     val pages: List<StoryPage>,
     val viewed: Boolean,
-): Parcelable
+) : Parcelable
 
 @Immutable
 @Parcelize
@@ -26,14 +26,14 @@ data class StoryPage(
     val image: String,
     val actionWithButton: ActionWithButtonUi,
     val durationMillis: Int,
-): Parcelable
+) : Parcelable
 
 @Stable
 @Parcelize
 data class ActionWithButtonUi(
     val action: VodovozAction,
     val colorfulButton: ColorfulButtonUi,
-): Parcelable {
+) : Parcelable {
     companion object {
         val Empty = ActionWithButtonUi(VodovozAction.Unknown("", ""), ColorfulButtonUi.Empty)
     }
@@ -48,7 +48,9 @@ data class ColorfulButtonUi(
     val id: String = "",
     val enabled: Boolean = true,
     val loading: Boolean = false,
-): Parcelable {
+    val browser: Boolean? = null,
+    val url: String? = null,
+) : Parcelable {
 
 
     val backgroundColor: Color get() = Color(backgroundColorValue)
@@ -97,6 +99,8 @@ fun ColorfulButtonModel.toUi(): ColorfulButtonUi {
         backgroundColorValue = Color.fromHexOrUnspecified(backgroundColor).value,
         textColorValue = Color.fromHexOrUnspecified(textColor).value,
         id = id,
+        browser = browser,
+        url = url
     )
 }
 
