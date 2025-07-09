@@ -56,7 +56,9 @@ fun DeliveryDateBody(
     Column(modifier = modifier.fillMaxSize()) {
         VodovozScrollableTabRow(
             modifier = Modifier.padding(vertical = 16.dp),
-            selectedTabIndex = options.indexOfOrNull(selectedTabOption ?: selectedOption) ?: 0,
+            selectedTabIndex = selectedTabOption?.let {
+                options.indexOfOrNull(selectedTabOption)
+            } ?: (options.lastIndex + 1),
             edgePadding = 16.dp,
             spacing = 12.dp
         ) {
@@ -92,7 +94,7 @@ fun DeliveryDateBody(
         if (timeSections.isNotEmpty()) {
             VodovozTabRow(
                 modifier = Modifier.padding(16.dp),
-                selectedTabPosition = timeSections.indexOfOrNull(selectedTimeSection) ?: 0
+                selectedTabPosition = timeSections.indexOfOrNull(selectedTimeSection) ?: (timeSections.size / 3)
             ) {
                 timeSections.forEachIndexed { index, timeSection ->
                     key(timeSection.title) {

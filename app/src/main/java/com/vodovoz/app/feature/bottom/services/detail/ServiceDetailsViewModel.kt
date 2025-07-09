@@ -156,4 +156,11 @@ class ServiceDetailsViewModel @Inject constructor(
         _events.emit(ServiceDetailsEvent.GoToServiceOrder(button.id))
     }
 
+    fun changeLoading(loading: Boolean) = viewModelScope.launch {
+        if(!loading){ delay(200) }
+        _state.update { s ->
+            s.copy(webViewIsLoading = loading)
+        }
+    }
+
 }

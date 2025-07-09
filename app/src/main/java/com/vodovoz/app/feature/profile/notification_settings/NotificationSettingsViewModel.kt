@@ -169,6 +169,7 @@ class NotificationSettingsViewModel @Inject constructor(
         data object GoBack : NotSettingsEvents()
     }
 
+    @Stable
     sealed interface NotSettingsUiState {
         data object Loading : NotSettingsUiState
         data object Success : NotSettingsUiState

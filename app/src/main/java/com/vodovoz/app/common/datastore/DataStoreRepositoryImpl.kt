@@ -8,6 +8,8 @@ import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.Types
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
@@ -21,11 +23,11 @@ private val Context.dataStore by preferencesDataStore(
         listOf(
             SharedPreferencesMigration(
                 context = context,
-                sharedPreferencesName = "shared_prefs"
+                sharedPreferencesName = "User"
             ),
             SharedPreferencesMigration(
                 context = context,
-                sharedPreferencesName = "COOKIE_SETTINGS"
+                sharedPreferencesName = "Favorites"
             )
         )
     }

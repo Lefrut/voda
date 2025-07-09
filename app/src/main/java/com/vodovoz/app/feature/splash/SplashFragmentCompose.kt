@@ -199,11 +199,14 @@ class SplashFragment : Fragment() {
 
     private fun fetchDataForScreens() = lifecycleScope.launch {
         splashViewModel.sendFirebaseToken()
-        favoriteViewModel.fetchFavoriteProducts()
+        val syncFavoritesJob = splashViewModel.syncFavorites()
         homeViewModel.fetchHomeDetails()
         catalogViewModel.fetchCatalogDetails()
         cartFlowViewModel.fetchCartDetails()
         profileViewModel.fetchProfileDetails()
+        syncFavoritesJob.join()
+        favoriteViewModel.fetchFavoriteProducts()
+
         delay(400)
     }
 

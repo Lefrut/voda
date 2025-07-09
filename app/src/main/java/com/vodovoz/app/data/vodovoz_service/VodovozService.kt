@@ -199,6 +199,9 @@ interface VodovozService {
     @GET("oformlenie/oformlenie.php?action=glav")
     suspend fun getOrderingDetails(
         @Query("userid") userId: Long?,
+        @Query("adresid") addressId: Long?,
+        @Query("date") date: String?,
+        @Query("indos") timeInterval: String?
     ): Response<VodovozResponseDTO<OrderingDetailsDTO>>
 
     @GET("profile/historyorder/voditel.php")

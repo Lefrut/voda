@@ -299,10 +299,19 @@ class VodovozServiceRepositoryImpl @Inject constructor(
         )
     }
 
-    override fun getOrderingDetails(): Flow<Result<OrderingDetailsModel>> {
+    override fun getOrderingDetails(
+        addressId: Long?,
+        date: String?,
+        timeInterval: String?,
+    ): Flow<Result<OrderingDetailsModel>> {
         return executeRequest(
             request = {
-                vodovozService.getOrderingDetails(accountManager.fetchAccountId())
+                vodovozService.getOrderingDetails(
+                    userId = accountManager.fetchAccountId(),
+                    addressId = addressId,
+                    date = date,
+                    timeInterval = timeInterval
+                )
             },
             mapper = {
                 it.data!!.toDomain()
@@ -325,7 +334,6 @@ class VodovozServiceRepositoryImpl @Inject constructor(
     ): Flow<Result<VodovozPlaceholderModel>> {
         return executeRequest(
             request = {
-
                 vodovozService.doOrder(
                     addressId = addressId,
                     userId = accountManager.fetchAccountId(),
@@ -653,7 +661,8 @@ class VodovozServiceRepositoryImpl @Inject constructor(
             },
             onFail = { response ->
                 val message =
-                    moshi.fromJson<VodovozResponseDTO<String>>(response.stringErrorBody()).data ?: ""
+                    moshi.fromJson<VodovozResponseDTO<String>>(response.stringErrorBody()).data
+                        ?: ""
 
                 throw RequestException(message = message)
             }
@@ -1320,8 +1329,11 @@ class VodovozServiceRepositoryImpl @Inject constructor(
                 }
                 vodovozService.relogin(id, token)
             },
-            mapper = {
-                it.data!!
+            mapper = { response ->
+                if (response.data == false || response.data == null) {
+                    throw UserBlockedException(message = response.message ?: "")
+                }
+                response.data
             },
             onResponse = onResponse@{ response ->
                 if (response.code() != 200) return@onResponse
@@ -1333,8 +1345,8 @@ class VodovozServiceRepositoryImpl @Inject constructor(
             onFail = { response ->
                 val code = response.code()
 
-                when (code) {
-                    402, 404 -> {
+                when {
+                    code == 402 || code == 404-> {
                         throw UserBlockedException(message = response.messageWithCode())
                     }
 

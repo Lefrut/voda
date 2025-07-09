@@ -56,11 +56,13 @@ class BuyCertificateViewModel @Inject constructor(
 
                 val tabs = buyCertificateDetails.tabs.mapToUi()
                 val paymentTypes = buyCertificateDetails.paymentTypes.mapToUi()
+                val certificates = buyCertificateDetails.certificates.mapToUi()
 
                 s.copy(
                     uiState = if (s.uiState is BuyCertificateUiState.Success) s.uiState else BuyCertificateUiState.Body,
                     title = buyCertificateDetails.title,
-                    certificates = buyCertificateDetails.certificates.mapToUi(),
+                    certificates = certificates,
+                    currentCertificate = certificates.lastOrNull() ?: s.currentCertificate,
                     certificatesTitle = buyCertificateDetails.certificatesTitle,
                     tabs = tabs,
                     button = buyCertificateDetails.button.toUi(),

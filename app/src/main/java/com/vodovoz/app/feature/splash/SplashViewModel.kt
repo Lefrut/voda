@@ -24,15 +24,11 @@ class SplashViewModel @Inject constructor(
     private val logoutManager: LogoutManager
 ) : MviViewModel<SplashState, SplashEvent>(SplashState()) {
 
-    init {
-        syncFavorites()
-    }
-
     fun sendFirebaseToken() = viewModelScope.launch {
         firebaseTokenManager.sendFirebaseToken()
     }
 
-    private fun syncFavorites() = viewModelScope.launch {
+    fun syncFavorites() = viewModelScope.launch {
         likeManager.syncFavoritesFromLocal()
     }
 

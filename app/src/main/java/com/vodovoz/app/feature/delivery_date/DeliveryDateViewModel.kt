@@ -44,8 +44,8 @@ class DeliveryDateViewModel @Inject constructor(
                     selectedTimeInterval = DeliveryTimeIntervalUi.Empty.copy(value = timeInterval),
                 )
             }
-            fetchDeliveryDateDetails()
         }
+        fetchDeliveryDateDetails()
     }
 
     fun navigateBack() = viewModelScope.launch {
@@ -166,7 +166,12 @@ class DeliveryDateViewModel @Inject constructor(
     fun selectCalendarDate(date: LocalDate) {
         val formattedDate = date.format(VodovozDateFormatters.DMY)
 
-        if (formattedDate == stateSnapshot.selectedDateOption.value) return
+        if (formattedDate == stateSnapshot.selectedDateOption.value) {
+            _state.update { s ->
+                s.copy(showCalendarDialog = false)
+            }
+            return
+        }
 
         _state.update { s ->
             s.copy(

@@ -48,8 +48,8 @@ class CookieManager @Inject constructor(
 
     companion object {
         //Cookie Settings
-        private const val COOKIE_SESSION_ID = "cookie_SESSION_id"
-        private const val COOKIE_LAST_ENTIRE = "COOKIE_LAST_ENTIRE"
+        private const val COOKIE_SESSION_ID = "cookies"
+        private const val COOKIE_LAST_ENTIRE = "last_entire"
         private const val COOKIES_LIFE_TIME_IN_MIN = 120
         private const val COOKIES_LIFE_TIME_IN_MILLIS = COOKIES_LIFE_TIME_IN_MIN * 60 * 1000
     }

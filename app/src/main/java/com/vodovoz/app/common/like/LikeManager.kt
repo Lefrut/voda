@@ -1,5 +1,7 @@
 package com.vodovoz.app.common.like
 
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.Types
 import com.vodovoz.app.common.account.AccountManager
 import com.vodovoz.app.common.datastore.DataStoreRepository
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
@@ -20,9 +22,8 @@ class LikeManager @Inject constructor(
 ) {
 
     companion object {
-        private const val FAV_IDS = "fav ids"
+        private const val FAV_IDS = "Favorites"
     }
-
 
     private val mutex = Mutex()
 
@@ -32,31 +33,34 @@ class LikeManager @Inject constructor(
 
     private val likes = ConcurrentHashMap<Long, Boolean>()
     private val likesVersions = ConcurrentHashMap<Long, Int>()
-    private var selectedCategoryId: Long? = null
+    private val likesCategories = ConcurrentHashMap<Long, Int?>()
+    var selectedCategoryId: Int? = null
+        private set
+
+    fun getLikes(): Map<Long, Boolean> {
+        return likes.toMap()
+    }
+
+    fun getLikesCategories(): Map<Long, Int?> {
+        return likesCategories
+    }
 
     fun observeLikes() = likesStateListener.asSharedFlow()
 
-    //todo - review this method
-    suspend fun changeCategory(categoryId: Long? = null, newFavorites: Map<Long, Boolean>) = mutex.withLock {
+    suspend fun changeCategory(categoryId: Int? = null) = mutex.withLock {
         selectedCategoryId = categoryId
-        likes.clear()
-        likes.putAll(newFavorites)
     }
 
-    //todo - finish this method
-    suspend fun changeFavorite(productId: Long, newValue: Boolean, categoryId: Long? = null) {
+    //todo - use when products will be to have categories id
+    suspend fun changeFavorite(productId: Long, newValue: Boolean, categoryId: Int? = null) {
 
         val (likeVersion, userId) = mutex.withLock {
-            //todo - need finish
-            if(selectedCategoryId == null && categoryId != selectedCategoryId){
-                //implement realization
-            }
-            if(selectedCategoryId != null) {
-                updateFavoritesLocal(productId, newValue)
-            }
+
             val updatedVersion = updateFavoritesOptimistically(productId, newValue)
+
             if (updatedVersion < getLikeVersion(productId)) return
 
+            likesCategories[productId] = categoryId
             val userId = accountManager.fetchAccountId()
             updatedVersion to userId
         }
@@ -80,7 +84,7 @@ class LikeManager @Inject constructor(
     suspend fun changeFavorite(productId: Long, newValue: Boolean) {
 
         val (likeVersion, userId) = mutex.withLock {
-            if(selectedCategoryId != null) {
+            if (selectedCategoryId != null) {
                 updateFavoritesLocal(productId, newValue)
             }
             val updatedVersion = updateFavoritesOptimistically(productId, newValue)
@@ -113,7 +117,8 @@ class LikeManager @Inject constructor(
         if (newIsFavorite) {
             vodovozServiceRepository.addProductToFavorites(productId).singleResult().getOrThrow()
         } else {
-            vodovozServiceRepository.removeProductFromFavorites(productId).singleResult().getOrThrow()
+            vodovozServiceRepository.removeProductFromFavorites(productId).singleResult()
+                .getOrThrow()
         }
     }
 
@@ -134,16 +139,21 @@ class LikeManager @Inject constructor(
         } else if (!newIsFavorite) {
             removeInFavoriteStr(localLikesListString, productId)
         } else {
-            (parseFavoriteStr(localLikesListString) + listOf(productId))
+            val ids = parseFavorites(localLikesListString)
+            (listOf(productId) + ids)
         }
-        dataStoreRepository.putString(FAV_IDS, buildFavoriteStr(localLikesList))
+        dataStoreRepository.putString(FAV_IDS, formatFavorites(localLikesList))
     }
 
-    fun fetchLikeLocalStr(): String? {
-        return dataStoreRepository.getString(FAV_IDS)?.dropLast(1)
+    fun fetchLocalFavorites(): String {
+        return formatFavorites(
+            parseFavorites(
+                dataStoreRepository.getString(FAV_IDS)?.dropLastWhile { char -> char == ',' } ?: ""
+            )
+        )
     }
 
-    private fun buildFavoriteStr(favoriteList: List<Long>): String {
+    private fun formatFavorites(favoriteList: List<Long>): String {
         val favoriteStr = StringBuilder()
         favoriteList.forEach { productId ->
             favoriteStr.append(productId).append(",")
@@ -151,14 +161,24 @@ class LikeManager @Inject constructor(
         return favoriteStr.toString()
     }
 
-    private fun parseFavoriteStr(favoriteStr: String): List<Long> {
-        val favoriteList = mutableListOf<Long>()
-        favoriteStr.split(",").forEach { id ->
-            if (id.isNotEmpty()) {
-                favoriteList.add(id.toLong())
+    private fun parseFavorites(favoriteStr: String): List<Long> {
+        if (favoriteStr.isBlank()) return emptyList()
+
+        val favorites = try {
+            val favoriteList = mutableListOf<Long>()
+            favoriteStr.split(",").forEach { id ->
+                if (id.isNotEmpty()) {
+                    favoriteList.add(id.toLong())
+                }
             }
+            favoriteList.toSet().toList()
+        } catch (_: Exception) {
+            val ids = extractIdsFromJson(favoriteStr)
+            rewriteFavoritesLocal(ids.associateWith { true })
+            ids
         }
-        return favoriteList.toSet().toList()
+
+        return favorites
     }
 
     private fun removeInFavoriteStr(favoriteStr: String, productId: Long): List<Long> {
@@ -171,16 +191,36 @@ class LikeManager @Inject constructor(
         return favoriteList.toSet().toList()
     }
 
+    private fun extractIdsFromJson(json: String): List<Long> {
+        val moshi = Moshi.Builder().build()
+        val innerType =
+            Types.newParameterizedType(Map::class.java, String::class.java, String::class.java)
+        val type = Types.newParameterizedType(Map::class.java, String::class.java, innerType)
+        val adapter = moshi.adapter<Map<String, Map<String, String>>>(type)
+        return runCatching {
+            adapter.fromJson(json)?.values?.mapNotNull { it["ID"]?.toLongOrNull() } ?: emptyList()
+        }.getOrDefault(emptyList())
+    }
+
     suspend fun syncFavoritesFromLocal() {
-        val localLikesListString = dataStoreRepository.getString(FAV_IDS)
-        val localLikesList = if (localLikesListString.isNullOrEmpty()) {
-            listOf()
-        } else {
-            parseFavoriteStr(localLikesListString)
-        }
+        val localLikesListString = dataStoreRepository.getString(FAV_IDS) ?: ""
+
+        val localLikesList = parseFavorites(localLikesListString)
+
         localLikesList.forEach { productId ->
             updateFavoritesOptimistically(productId, true)
         }
+    }
+
+    private fun rewriteFavoritesLocal(favorites: Map<Long, Boolean>) {
+        dataStoreRepository.putString(
+            FAV_IDS,
+            formatFavorites(
+                favorites.filter { favorite ->
+                    favorite.value
+                }.keys.toList()
+            )
+        )
     }
 
     suspend fun updateLikesAfterLogin(userId: Long) {

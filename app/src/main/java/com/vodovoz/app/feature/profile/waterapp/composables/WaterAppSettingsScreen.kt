@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -24,6 +25,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
@@ -72,21 +74,31 @@ fun WaterAppSettingsScreen(
         onCloseClick()
     }
 
-
-    Column(
+    Scaffold(
         modifier = modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-            .systemBarsPadding()
-    ) {
-        ClosingTopBar(
-            title = stringResource(id = R.string.settings),
-            onCloseClick = onCloseClick
-        )
+            .systemBarsPadding(),
+        topBar = {
+            ClosingTopBar(
+                title = stringResource(id = R.string.settings),
+                onCloseClick = onCloseClick
+            )
+        },
+        bottomBar = {
+            VodovozButton(
+                modifier = Modifier.padding(vertical = 24.dp, horizontal = 16.dp),
+                text = stringResource(id = R.string.save),
+                onClick = onSettingsSaveClick
+            )
+        },
+        contentWindowInsets = WindowInsets(0, 0, 0, 0)
+    ) { paddingValues ->
         Column(
             modifier = Modifier
+                .fillMaxSize()
+                .padding(top = paddingValues.calculateTopPadding())
                 .verticalScroll(rememberScrollState())
-                .padding(top = 16.dp)
+                .padding(bottom = paddingValues.calculateBottomPadding(), top = 16.dp)
                 .fillMaxSize(),
         ) {
             Text(
@@ -153,7 +165,7 @@ fun WaterAppSettingsScreen(
                                 key(interval.minutes) {
                                     ReminderCard(
                                         modifier = Modifier
-                                            .width(cardWidth - 1.dp)
+                                            .width(cardWidth - 0.5.dp)
                                             .height(cardWidth * 0.85f),
                                         reminderIntervalUi = interval,
                                         onReminderIntervalClick = onReminderIntervalClick
@@ -197,15 +209,8 @@ fun WaterAppSettingsScreen(
                     }
                 }
             }
-
-            Spacer(modifier = Modifier.weight(1f))
-
-            VodovozButton(
-                modifier = Modifier.padding(vertical = 24.dp, horizontal = 16.dp),
-                text = stringResource(id = R.string.save),
-                onClick = onSettingsSaveClick
-            )
         }
+
     }
 }
 

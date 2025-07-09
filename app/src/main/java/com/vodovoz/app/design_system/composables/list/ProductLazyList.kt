@@ -107,9 +107,7 @@ fun LazyGridScope.linearProducts(
             ) { product ->
                 val currentIndex = products.indexOfOrNull(product) ?: return@items
 
-                LaunchedEffect(Unit) {
-                    onProductSee(currentIndex)
-                }
+                SideEffect { onProductSee(currentIndex) }
 
                 Column(modifier = Modifier.padding(horizontal = 16.dp)) {
                     LinearProductCard(
@@ -187,9 +185,7 @@ fun LazyGridScope.gridProducts(
                 span = { GridItemSpan(1) },
                 key = { i -> products[i].id }
             ) { index ->
-                LaunchedEffect(index) {
-                    onProductSee(index)
-                }
+                SideEffect { onProductSee(index) }
 
                 GridHorizontalPadding(isStartPadding = index % 2 == 0) {
                     GridProductCard(

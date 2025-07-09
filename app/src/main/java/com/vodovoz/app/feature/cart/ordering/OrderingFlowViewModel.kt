@@ -56,7 +56,6 @@ class OrderingFlowViewModel @Inject constructor(
         private const val DELIVERY_TIME_MENU_ID = "time"
         private const val PAYMENT_MENU_ID = "oplata"
         private const val CALL_YOU_MENU_ID = "vampozvonit"
-
     }
 
     init {
@@ -271,8 +270,6 @@ class OrderingFlowViewModel @Inject constructor(
                 } else {
                     eventListener.emit(OrderingEvents.GoToCallYou(addressId, callYouId))
                 }
-
-
             }
         }
     }
@@ -438,6 +435,7 @@ class OrderingFlowViewModel @Inject constructor(
                 val recipientSection = s.recipientSection
 
                 s.copy(
+                    totals = orderingDetails.totals.mapToUi(),
                     paymentSection = orderingDetails.paymentSection.toUi {
                         it.mapToUi()
                     },
@@ -490,7 +488,13 @@ class OrderingFlowViewModel @Inject constructor(
                 )
             }
 
-            vodovozServiceRepository.getOrderingDetails().singleResult()
+            val ordering = dataState.ordering
+
+            vodovozServiceRepository.getOrderingDetails(
+                addressId = ordering.addressId,
+                date = ordering.date,
+                timeInterval = ordering.timeInterval
+            ).singleResult()
                 .onSuccess { orderingDetails ->
                     uiStateListener.updateData { s ->
                         s.copy(
@@ -501,7 +505,8 @@ class OrderingFlowViewModel @Inject constructor(
                                             .find { it.id == PAYMENT_MENU_ID } ?: menuItem
                                     } else menuItem
                                 }
-                            )
+                            ),
+                            totals = orderingDetails.totals.mapToUi()
                         )
                     }
                 }
@@ -568,6 +573,19 @@ class OrderingFlowViewModel @Inject constructor(
         }
     }
 
+    fun activatePayButton(button: ColorfulButtonUi?) = viewModelScope.launch {
+        if(button?.url == null) {
+            navigateBackWithRefresh()
+            return@launch
+        }
+
+        if(button.browser == true){
+            eventListener.emit(OrderingEvents.GoToWebView(button.url))
+        }else{
+            eventListener.emit(OrderingEvents.OpenUrl(button.url))
+        }
+    }
+
     @Immutable
     data class OrderingState(
         val title: String = "",
@@ -604,6 +622,8 @@ class OrderingFlowViewModel @Inject constructor(
 
         data class GoToOrderRecipient(val addressId: Long) : OrderingEvents()
         data class GoToCallYou(val addressId: Long, val callYouId: String?) : OrderingEvents()
+        data class OpenUrl(val url: String) : OrderingEvents()
+        data class GoToWebView(val url: String) : OrderingEvents()
     }
 
     @Stable
