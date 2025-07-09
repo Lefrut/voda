@@ -23,7 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
 import com.gapps.library.api.VideoService
-import com.vodovoz.app.core.network.ApiConfig
+import com.vodovoz.app.core.network.WebConfig
 import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
 import java.util.concurrent.TimeUnit
@@ -109,7 +109,7 @@ fun DetailMediaVideo(
             },
             update = {
                 videoService.loadVideoPreview(
-                    url = (if (isRutube) ApiConfig.RUTUBE_URL else ApiConfig.YOUTUBE_URL) + videoCode,
+                    url = (if (isRutube) WebConfig.RUTUBE_URL else WebConfig.YOUTUBE_URL) + videoCode,
                     onSuccess = { model ->
 
                         val linkToPlay = model.linkToPlay ?: return@loadVideoPreview

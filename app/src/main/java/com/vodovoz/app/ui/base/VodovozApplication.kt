@@ -10,11 +10,12 @@ import coil3.PlatformContext
 import coil3.SingletonImageLoader
 import coil3.request.CachePolicy
 import coil3.request.crossfade
+import coil3.svg.SvgDecoder
 import com.vodovoz.app.BuildConfig
 import com.vodovoz.app.common.notification.NotificationChannels
-import com.vodovoz.app.core.network.ApiConfig
 import com.vodovoz.app.common.constants.AppKeys
 import com.vodovoz.app.common.constants.AppKeys.YANDEX_METRICA_KEY
+import com.vodovoz.app.core.network.VodovozWebConfig
 import com.yandex.mapkit.MapKitFactory
 import com.yandex.metrica.YandexMetrica
 import com.yandex.metrica.YandexMetricaConfig
@@ -52,7 +53,7 @@ class VodovozApplication : Application(), Configuration.Provider, SingletonImage
                     .withNativeCrashReporting(false)
                     .withLocationTracking(false)
                     .withAppVersion(BuildConfig.VERSION_NAME)
-                    .withUserProfileID(ApiConfig.VODOVOZ_URL)
+                    .withUserProfileID(VodovozWebConfig.VODOVOZ_URL)
                     .withLogs()
                     .build()
             YandexMetrica.activate(this, config)
@@ -62,6 +63,9 @@ class VodovozApplication : Application(), Configuration.Provider, SingletonImage
 
     override fun newImageLoader(context: PlatformContext): ImageLoader {
         return ImageLoader.Builder(context)
+            .components {
+                add(SvgDecoder.Factory())
+            }
             .memoryCachePolicy(CachePolicy.ENABLED)
             .diskCachePolicy(CachePolicy.DISABLED)
             .crossfade(true)

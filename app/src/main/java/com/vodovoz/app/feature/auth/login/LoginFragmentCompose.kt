@@ -54,7 +54,6 @@ class LoginFragment : Fragment() {
 
 
 
-    //todo - next time
 //    private val executor: Executor by lazy { ContextCompat.getMainExecutor(requireContext()) }
 //    private val biometricManager by lazy { BiometricManager.from(requireContext()) }
 //    private val biometricPrompt: BiometricPrompt by lazy {
@@ -67,7 +66,6 @@ class LoginFragment : Fragment() {
 //
 //                override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
 //                    super.onAuthenticationSucceeded(result)
-//todo - put auth method
 //
 //                }
 //
@@ -153,7 +151,6 @@ class LoginFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        //todo - next time
         //checkShowFingerPrint()
     }
 
@@ -203,7 +200,6 @@ class LoginFragment : Fragment() {
 
 
 
-    //todo - next time
 //    private fun checkShowFingerPrint() {
 //        val userSettings = accountManager.fetchUserSettings()
 //        val isSettingsCorrect =
