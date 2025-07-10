@@ -52,7 +52,9 @@ class BlockAppFragment : Fragment(R.layout.fragment_block_app) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         observeSiteState()
-        addOnBackPressedCallback { }
+        addOnBackPressedCallback {
+
+        }
     }
 
     private fun observeSiteState() = viewLifecycleOwner.lifecycleScope.launch {

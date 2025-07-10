@@ -72,21 +72,8 @@ class FavoriteFlowViewModel @Inject constructor(
 
     private fun listenPagingLoadStates() = viewModelScope.launch {
         pagingProductsListener.collectLoadState { combinedLoadStates ->
-            val currentRefreshState = dataState.productsLoadStates.refresh
-            val refreshState = when {
-                combinedLoadStates.refresh is LoadState.Loading && dataState.products.isNotEmpty() -> {
-                    currentRefreshState
-                }
-
-                else -> combinedLoadStates.refresh
-            }
-
             uiStateListener.updateData { s ->
-                s.copy(
-                    productsLoadStates = combinedLoadStates.copy(
-                        refresh = refreshState
-                    )
-                )
+                s.copy(productsLoadStates = combinedLoadStates)
             }
         }
     }
@@ -99,6 +86,10 @@ class FavoriteFlowViewModel @Inject constructor(
         val selectedCategory = likeManager.selectedCategoryId
 
         val likesIds = (newLikes.keys + oldLikes.keys).toSet()
+
+        uiStateListener.updateData { s ->
+            s.copy(lastSavedLikes = newLikes)
+        }
 
         likesIds.forEach { id ->
             val newLikeCategory = newLikeCategories[id]
@@ -175,7 +166,6 @@ class FavoriteFlowViewModel @Inject constructor(
                     uiState = FavoriteUiState.Success,
                     products = emptyList(),
                     showRefreshIndicator = false,
-                    lastSavedLikes = likeManager.getLikes()
                 )
             }
 

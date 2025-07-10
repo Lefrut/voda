@@ -6,7 +6,8 @@ import androidx.compose.runtime.Stable
 import androidx.compose.ui.graphics.Color
 import androidx.work.Constraints
 import androidx.work.ExistingPeriodicWorkPolicy
-import androidx.work.PeriodicWorkRequest
+import androidx.work.OutOfQuotaPolicy
+import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.squareup.moshi.Moshi
 import com.vodovoz.app.common.account.AccountManager
@@ -280,11 +281,12 @@ class WaterAppHelper @Inject constructor(
         if (data.switch) {
             val minutes = data.time.toLong()
 
-            val work = PeriodicWorkRequest.Builder(
-                WaterAppWorker::class.java,
+
+            val work = PeriodicWorkRequestBuilder<WaterAppWorker>(
                 minutes,
                 TimeUnit.MINUTES
             )
+                .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
                 .setConstraints(Constraints.NONE)
                 .setInitialDelay(minutes, TimeUnit.MINUTES)
                 .addTag(waterTag)

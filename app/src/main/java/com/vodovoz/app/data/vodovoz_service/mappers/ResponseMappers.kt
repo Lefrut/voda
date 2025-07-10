@@ -61,7 +61,7 @@ inline fun <reified T, R> executeRequest(
         val stringBody = response.stringBody()
 
         val bodyResult = kotlin.runCatching {
-            val adapter = moshiWithJsonAdapter.adapter<T>(type)
+            val adapter = moshiWithJsonAdapter.adapter<T>(type).lenient()
             adapter.fromJson(stringBody)
         }
         val body = bodyResult.getOrNull()
