@@ -8,6 +8,9 @@ import com.vodovoz.app.common.model.AgreementModel
 import com.vodovoz.app.common.model.JivoChatModel
 import com.vodovoz.app.common.model.VodovozSiteState
 import com.vodovoz.app.common.model.TrackingConfig
+import com.vodovoz.app.common.model.VodovozBoolean
+import com.vodovoz.app.common.model.boolean
+import com.vodovoz.app.common.model.from
 
 fun SiteStateResponseDTO.toDomain(): VodovozSiteState {
     return VodovozSiteState(
@@ -15,7 +18,7 @@ fun SiteStateResponseDTO.toDomain(): VodovozSiteState {
         isActive = ACTIVE == "N",
         testUrl = TESTSAITSSILKA ?: "",
         smsUrl = SMSRASSILKA ?: "",
-        isSmsEnabled = REGISTRACION_SMS == "Y",
+        isSmsEnabled = VodovozBoolean.from(REGISTRACION_SMS).boolean,
         jivoChat = CHATJIVO?.toJivoChatModel() ?: JivoChatModel(isActive = false, url = ""),
         tracking = GENERATION?.toTrackingConfig() ?: TrackingConfig(trackingIsEnabled = false, time = 0),
         agreement = SOGLASHENIE?.toAgreementModel() ?: throw IllegalArgumentException("Agreement can't be null"),
@@ -27,14 +30,14 @@ fun SiteStateResponseDTO.toDomain(): VodovozSiteState {
 
 fun CHATJIVO_DTO.toJivoChatModel(): JivoChatModel {
     return JivoChatModel(
-        isActive = ACTIVE == "Y" && SSILKA != null,
+        isActive = VodovozBoolean.from(ACTIVE).boolean && SSILKA != null,
         url = SSILKA ?: ""
     )
 }
 
 fun GENERATION_DTO.toTrackingConfig(): TrackingConfig {
     return TrackingConfig(
-        trackingIsEnabled = TRAKING == "Y",
+        trackingIsEnabled = VodovozBoolean.from(TRAKING).boolean,
         time = TIME?.toInt() ?: 30
     )
 }

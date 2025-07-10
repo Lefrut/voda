@@ -28,6 +28,7 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
+import androidx.core.text.HtmlCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -137,12 +138,7 @@ fun longArgs(key: String): ReadOnlyProperty<Fragment, Long> {
 
 
 fun String.fromHtml(): Spanned {
-    val result: Spanned = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-        Html.fromHtml(this, Html.FROM_HTML_MODE_LEGACY)
-    } else {
-        @Suppress("DEPRECATION")
-        Html.fromHtml(this)
-    }
+    val result: Spanned = HtmlCompat.fromHtml(this, HtmlCompat.FROM_HTML_MODE_LEGACY)
     return result
 }
 

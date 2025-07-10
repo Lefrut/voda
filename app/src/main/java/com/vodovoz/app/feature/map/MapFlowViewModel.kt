@@ -313,10 +313,6 @@ class MapFlowViewModel @Inject constructor(
 
     }
 
-    fun moveToMoscow() = viewModelScope.launch {
-        eventListener.emit(MapFlowEvents.MoveToGeoOrMoscow)
-    }
-
     @Immutable
     data class MapFlowState(
         val areas: List<MapAreaUi> = emptyList(),

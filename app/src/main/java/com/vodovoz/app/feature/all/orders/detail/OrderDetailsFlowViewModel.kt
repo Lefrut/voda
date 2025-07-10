@@ -132,7 +132,6 @@ class OrderDetailsFlowViewModel @Inject constructor(
             }
 
             is OrderDetailsButtonUi.WhereOrderButton -> {
-                orderDetailsButton.id
                 eventListener.emit(
                     OrderDetailsEvent.GoToTraceOrder(
                         orderDetailsButton.driverId,
