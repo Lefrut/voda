@@ -59,6 +59,7 @@ class CertificateActivationFragment : Fragment() {
                     when (val uiState = viewState.uiState) {
 
                         is CertificateActivationUiState.CertificateActivated -> {
+                            //todo - need to receive VodovozPlaceholderUi
                             CertificateActivatedPlaceholder(
                                 message = uiState.message,
                                 onCloseClick = {

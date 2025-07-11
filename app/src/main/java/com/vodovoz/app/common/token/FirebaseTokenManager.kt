@@ -2,6 +2,7 @@ package com.vodovoz.app.common.token
 
 import com.google.firebase.messaging.FirebaseMessaging
 import com.vodovoz.app.common.account.AccountManager
+import com.vodovoz.app.common.notification.NotificationConfig
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.util.extensions.debugLog
 import com.vodovoz.app.util.extensions.singleResult
@@ -13,7 +14,7 @@ import kotlin.coroutines.suspendCoroutine
 @Singleton
 class FirebaseTokenManager @Inject constructor(
     private val accountManager: AccountManager,
-    private val vodovozServiceRepository: VodovozServiceRepository
+    private val vodovozServiceRepository: VodovozServiceRepository,
 ) {
 
     suspend fun sendFirebaseToken() {
@@ -38,6 +39,9 @@ class FirebaseTokenManager @Inject constructor(
         return suspendCoroutine { continuation ->
             FirebaseMessaging.getInstance().token
                 .addOnSuccessListener { token ->
+                    FirebaseMessaging.getInstance().subscribeToTopic(
+                        NotificationConfig.TOPIC_GLOBAL
+                    )
                     continuation.resume(token)
                 }
                 .addOnFailureListener {
