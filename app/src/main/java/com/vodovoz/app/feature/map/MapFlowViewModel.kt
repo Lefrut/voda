@@ -139,7 +139,7 @@ class MapFlowViewModel @Inject constructor(
     }
 
     private suspend fun calculateDistanceFromMoscowToAddress(addressPoint: MapPointUi): Float? {
-        if(dataState.areas.isEmpty()){ delay(750L) }
+        if(dataState.areas.isEmpty()){ delay(850L) }
 
         val coreMapArea = dataState.areas.find { area ->
             area.id == CORE_AREA_ID && area.isMoscowRingRow
