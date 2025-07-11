@@ -46,9 +46,10 @@ class AddressesFlowViewModel @Inject constructor(
                 }
             }
 
-            val selectedAddress = addressSections.find { section ->
-                section.items.find { addressUi -> addressUi.id == selectedAddressId } != null
-            }?.items?.firstOrNull() ?: addressSections.firstOrNull()?.items?.firstOrNull() ?: AddressUi.Empty
+            val selectedAddress = addressSections.flatMap { it.items }.find {
+                it.id == selectedAddressId
+            } ?: addressSections.firstOrNull()?.items?.firstOrNull() ?: AddressUi.Empty
+
 
             uiStateListener.updateData { s ->
                 s.copy(

@@ -2,18 +2,19 @@ package com.vodovoz.app.common.notification
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.PendingIntent
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import androidx.core.os.bundleOf
-import androidx.navigation.NavDeepLinkBuilder
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.vodovoz.app.R
 import com.vodovoz.app.core.android.getBitmap
-import com.vodovoz.app.util.extensions.debugLog
+import com.vodovoz.app.data.parser.common.safeString
+import com.vodovoz.app.ui.base.MainActivity
 import com.vodovoz.app.util.extensions.fromHtml
 import org.json.JSONObject
 
@@ -24,9 +25,10 @@ class FirebaseNotificationManager : FirebaseMessagingService() {
         super.onMessageReceived(message)
 
         val messageNotification = message.notification ?: return
+        val params = message.data.toMap()
 
-        val jsonData = if (message.data.isNotEmpty()) {
-            JSONObject(message.data.toString())
+        val jsonData = if (params.isNotEmpty()) {
+            JSONObject(params)
         } else {
             JSONObject()
         }
@@ -39,15 +41,26 @@ class FirebaseNotificationManager : FirebaseMessagingService() {
 
     }
 
+    private fun createNotificationPendingIntent(data: JSONObject): PendingIntent {
+        val intent = Intent(applicationContext, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            data.keys().forEach { key -> putExtra(key, data.safeString(key)) }
+        }
+
+        return PendingIntent.getActivity(
+            applicationContext,
+            0,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+    }
+
     private fun showLargeIconNotification(not: RemoteMessage.Notification, data: JSONObject) {
-        val pendingIntent = NavDeepLinkBuilder(applicationContext)
-            .setGraph(R.navigation.nav_graph)
-            .setArguments(bundleOf("push" to data.toString()))
-            .setDestination(R.id.splashFragment)
-            .createPendingIntent()
+
+
+        val pendingIntent = createNotificationPendingIntent(data)
 
         val bitmap = getBitmap(not.imageUrl.toString())
-        debugLog { "large icon bitmap $bitmap" }
         val bigPictureStyle = NotificationCompat.BigPictureStyle().also {
             it.setBigContentTitle(not.title)
             it.setSummaryText(not.body?.fromHtml())
@@ -80,11 +93,7 @@ class FirebaseNotificationManager : FirebaseMessagingService() {
     }
 
     private fun showSmallIconNotification(not: RemoteMessage.Notification, data: JSONObject) {
-        val pendingIntent = NavDeepLinkBuilder(applicationContext)
-            .setGraph(R.navigation.nav_graph)
-            .setArguments(bundleOf("push" to data.toString()))
-            .setDestination(R.id.splashFragment)
-            .createPendingIntent()
+        val pendingIntent = createNotificationPendingIntent(data)
 
         val inboxStyle = NotificationCompat.InboxStyle().also {
             it.addLine(not.body)

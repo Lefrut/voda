@@ -10,6 +10,7 @@ import com.vodovoz.app.common.content.PagingContractViewModel
 import com.vodovoz.app.common.content.State
 import com.vodovoz.app.common.content.updateData
 import com.vodovoz.app.common.like.LikeManager
+import com.vodovoz.app.common.tab.TabManager
 import com.vodovoz.app.design_system.model.VodovozPlaceholderUi
 import com.vodovoz.app.design_system.model.order.OrderSummaryItemUi
 import com.vodovoz.app.design_system.model.order.mapToUi
@@ -42,6 +43,7 @@ class CartFlowViewModel @Inject constructor(
     private val likeManager: LikeManager,
     private val accountManager: AccountManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
+    private val tabManager: TabManager
 ) : PagingContractViewModel<CartFlowViewModel.CartState, CartFlowViewModel.CartEvents>(CartState()) {
 
     init {
@@ -52,6 +54,7 @@ class CartFlowViewModel @Inject constructor(
     private suspend fun listenCartUpdates() {
         cartManager.observeUpdateCartList().filter { update -> update }.collect {
             refresh()
+            tabManager.updateBottomNavCartState()
             cartManager.updateCartListState(false)
         }
     }

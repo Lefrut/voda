@@ -6,7 +6,6 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.vodovoz.app.common.about_product.AboutProductManager
-import com.vodovoz.app.common.account.AccountManager
 import com.vodovoz.app.common.cart.CartManager
 import com.vodovoz.app.common.content.Event
 import com.vodovoz.app.common.content.State
@@ -242,10 +241,10 @@ class ProductDetailsFlowViewModel @Inject constructor(
         }
     }
 
-    fun changeFloatingButton(show: Boolean) = viewModelScope.launch {
+    fun changeFloatingButton(isVisible: Boolean) = viewModelScope.launch {
         uiStateListener.update { s ->
             s.copy(
-                hideFloatingButton = show
+                hideFloatingButton = isVisible
             )
         }
     }
@@ -495,8 +494,7 @@ class ProductDetailsFlowViewModel @Inject constructor(
             val prices: List<PriceUi>,
             val analogButton: ColorfulButtonUi?,
             val isAvailable: Boolean,
-        ) :
-            ProductDetailsEvents()
+        ) : ProductDetailsEvents()
 
         data object GoBack : ProductDetailsEvents()
         data class Share(val text: String) : ProductDetailsEvents()

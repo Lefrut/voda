@@ -9,6 +9,7 @@ import com.vodovoz.app.common.account.AccountManager
 import com.vodovoz.app.common.cookie.CookieManager
 import com.vodovoz.app.common.model.VodovozSiteState
 import com.vodovoz.app.core.network.retrofit.messageWithCode
+import com.vodovoz.app.core.network.retrofit.stringBody
 import com.vodovoz.app.core.network.retrofit.stringErrorBody
 import com.vodovoz.app.core.network.serialization.fromJson
 import com.vodovoz.app.data.vodovoz_service.VodovozService
@@ -1088,12 +1089,14 @@ class VodovozServiceRepositoryImpl @Inject constructor(
         )
     }
 
-    override fun updatePassword(password: String): Flow<Result<Unit>> {
+    override fun updatePassword(password: String): Flow<Result<VodovozPlaceholderModel>> {
         return executeRequest(
             request = {
                 vodovozService.updatePassword(accountManager.fetchAccountId() ?: -1, password)
             },
-            mapper = {},
+            mapper = {
+                it.data!!.toDomain()
+            },
             onFail = { response ->
                 throw try {
                     val message =
@@ -1367,13 +1370,14 @@ class VodovozServiceRepositoryImpl @Inject constructor(
                 registerDTO.data!!.toDomain()
             },
             onFail = { response ->
-                val jsonBody = response.stringErrorBody()
+                val jsonBody = response.stringErrorBody().ifEmpty { response.stringBody() }
 
                 throw when (response.code()) {
                     404 -> {
-                        val message = moshi.fromJson<VodovozResponseDTO<String>>(
+                        val message = moshi.fromJson<VodovozErrorResponseDTO>(
                             json = jsonBody
-                        ).data ?: ""
+                        ).message ?: ""
+
                         ValidationException(message = message)
                     }
 

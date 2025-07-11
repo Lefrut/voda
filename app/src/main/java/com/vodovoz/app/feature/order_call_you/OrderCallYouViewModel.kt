@@ -11,7 +11,6 @@ import com.vodovoz.app.feature.order_call_you.model.OrderCallYouEvent
 import com.vodovoz.app.feature.order_call_you.model.OrderCallYouState
 import com.vodovoz.app.feature.order_call_you.model.OrderCallYouUiState
 import com.vodovoz.app.feature.order_call_you.model.mapToUi
-import com.vodovoz.app.feature.order_call_you.model.toUi
 import com.vodovoz.app.ui.mvi.MviViewModel
 import com.vodovoz.app.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -49,16 +48,19 @@ class OrderCallYouViewModel @Inject constructor(
         callYouDetailsResult.onSuccess { callYouDetails ->
 
             val items = callYouDetails.items.mapToUi()
+            val currentItem = items.firstOrNull {
+                it.value == callYouId
+            }
 
             _state.update { s ->
                 s.copy(
                     uiState = OrderCallYouUiState.CallYou,
                     title = callYouDetails.title,
-                    currentItem = items.firstOrNull {
-                        it.value == callYouId
-                    } ?: callYouDetails.currentItem.toUi(),
+                    currentItem = currentItem ?: CallYouItemUi.Empty,
                     items = items,
-                    button = callYouDetails.button.toUi()
+                    button = callYouDetails.button.toUi().copy(
+                        enabled = currentItem != null
+                    )
                 )
             }
         }.onFailure {
@@ -77,7 +79,7 @@ class OrderCallYouViewModel @Inject constructor(
 
     fun selectCallYouItem(item: CallYouItemUi) = viewModelScope.launch {
         _state.update { s ->
-            s.copy(currentItem = item)
+            s.copy(currentItem = item, button = s.button.copy(enabled = true))
         }
     }
 }

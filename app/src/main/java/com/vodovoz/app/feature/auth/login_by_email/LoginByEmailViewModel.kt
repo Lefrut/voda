@@ -10,7 +10,11 @@ import com.vodovoz.app.common.resources.ResourcesProvider
 import com.vodovoz.app.design_system.model.ColorfulButtonUi
 import com.vodovoz.app.design_system.model.toUi
 import com.vodovoz.app.design_system.model.updateButton
+import com.vodovoz.app.design_system.model.widgets.EmailValidator
 import com.vodovoz.app.design_system.model.widgets.FieldUi
+import com.vodovoz.app.design_system.model.widgets.MessageValidator
+import com.vodovoz.app.design_system.model.widgets.NameValidator
+import com.vodovoz.app.design_system.model.widgets.NoRequiredValidator
 import com.vodovoz.app.design_system.model.widgets.checkFields
 import com.vodovoz.app.design_system.model.widgets.mapToDomain
 import com.vodovoz.app.design_system.model.widgets.mapToUi
@@ -169,7 +173,16 @@ class LoginByEmailViewModel @Inject constructor(
             s.copy(
                 fields = updatedFields,
                 buttons = s.buttons.updateButton(LOGIN_BY_EMAIL_BUTTON) { button ->
-                    button.copy(enabled = updatedFields.checkFields() && s.agreementChecked)
+                    button.copy(
+                        enabled = updatedFields.checkFields(
+                            validators = listOf(
+                                NoRequiredValidator,
+                                EmailValidator,
+                                NameValidator,
+                                MessageValidator
+                            )
+                        ) && s.agreementChecked
+                    )
                 }
             )
         }

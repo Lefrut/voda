@@ -75,7 +75,7 @@ fun LoginByPhoneCodeBody(
         Spacer(modifier = Modifier.weight(1f))
 
         Column(
-            modifier = Modifier.padding(bottom = 24.dp),
+            modifier = Modifier,
             verticalArrangement = Arrangement.spacedBy(8.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {

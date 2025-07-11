@@ -6,6 +6,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.waitForUpOrCancellation
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.derivedStateOf
@@ -27,11 +28,14 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
-fun Modifier.isElementVisible(onVisibilityChanged: (Boolean) -> Unit) = composed {
+@Composable
+fun Modifier.isElementVisible(onVisibilityChanged: (Boolean) -> Unit): Modifier {
     val isVisible by remember { derivedStateOf { mutableStateOf(false) } }
-    LaunchedEffect(isVisible.value) { onVisibilityChanged.invoke(isVisible.value) }
+    LaunchedEffect(isVisible.value) {
+        onVisibilityChanged.invoke(isVisible.value)
+    }
 
-    onGloballyPositioned { layoutCoordinates ->
+    return onGloballyPositioned { layoutCoordinates ->
         isVisible.value = layoutCoordinates.parentLayoutCoordinates?.let {
             val parentBounds = it.boundsInWindow()
             val childBounds = layoutCoordinates.boundsInWindow()

@@ -65,40 +65,45 @@ class DeliveryDateViewModel @Inject constructor(
         ).singleResult()
 
         deliveryDateDetailsResult.onSuccess { deliveryDateDetails ->
-            val options = deliveryDateDetails.options.mapToUi()
+            val dateOptions = deliveryDateDetails.options.mapToUi()
             val timeSections = deliveryDateDetails.timeSections.map { timeSection ->
                 timeSection.toUi { deliveryTime -> deliveryTime.mapToUi() }
             }
-            val firstSection = timeSections.firstOrNull() ?: SectionUi.empty()
-
-
 
             _state.update { s ->
 
-                val selectedTimeInterval =
-                    s.selectedTimeInterval.takeIf { it != DeliveryTimeIntervalUi.Empty }
-                        ?: firstSection.items.firstOrNull() ?: DeliveryTimeIntervalUi.Empty
+
 
                 val timeSectionBySelectedTimeInterval = timeSections.find { section ->
-                    section.items.find { it.value == selectedTimeInterval.value } != null
+                    section.items.find { it.value == s.selectedTimeInterval.value } != null
                 }
+
 
                 val selectedTimeSection = timeSectionBySelectedTimeInterval
                     ?: timeSections.firstOrNull()
-                    ?: s.selectedTimeSection
+                    ?: SectionUi.empty()
+
+
+                val baseSelectedTimeInterval =
+                    if (s.selectedTimeInterval == DeliveryTimeIntervalUi.Empty) {
+                        DeliveryTimeIntervalUi.Empty
+                    } else selectedTimeSection.items.firstOrNull() ?: DeliveryTimeIntervalUi.Empty
+
 
                 s.copy(
                     title = deliveryDateDetails.title,
-                    button = deliveryDateDetails.button.toUi(),
-                    options = options,
+                    button = deliveryDateDetails.button.toUi().copy(
+                        enabled = baseSelectedTimeInterval != DeliveryTimeIntervalUi.Empty
+                    ),
+                    options = dateOptions,
                     timeSections = timeSections,
                     selectedTimeSection = selectedTimeSection,
                     selectedDateOption = s.selectedDateOption.takeIf {
                         it != DeliveryDateOptionUi.Empty
-                    } ?: options.firstOrNull() ?: DeliveryDateOptionUi.Empty,
+                    } ?: dateOptions.firstOrNull() ?: DeliveryDateOptionUi.Empty,
                     selectedTimeInterval = if (timeSectionBySelectedTimeInterval == null) {
-                        selectedTimeSection.items.firstOrNull() ?: DeliveryTimeIntervalUi.Empty
-                    } else selectedTimeInterval,
+                        baseSelectedTimeInterval
+                    } else s.selectedTimeInterval,
                     uiState = DeliveryDateUiState.Success
                 )
             }
@@ -122,18 +127,25 @@ class DeliveryDateViewModel @Inject constructor(
     }
 
     fun selectTimeSection(timeSection: SectionUi<DeliveryTimeIntervalUi>) {
+
+
         _state.update { s ->
             s.copy(
                 selectedTimeSection = timeSection,
-                selectedTimeInterval = timeSection.items.firstOrNull()
-                    ?: DeliveryTimeIntervalUi.Empty
+                selectedTimeInterval = DeliveryTimeIntervalUi.Empty,
+                button = s.button.copy(enabled = false)
             )
         }
     }
 
     fun selectDeliveryTimeInterval(deliveryTimeInterval: DeliveryTimeIntervalUi) {
         _state.update { s ->
-            s.copy(selectedTimeInterval = deliveryTimeInterval)
+            s.copy(
+                selectedTimeInterval = deliveryTimeInterval,
+                button = s.button.copy(
+                    enabled = deliveryTimeInterval != DeliveryTimeIntervalUi.Empty
+                )
+            )
         }
     }
 

@@ -121,7 +121,6 @@ class CartManager @Inject constructor(
             return@withLock
         }
         updateCart(newCart)
-        tabManager.updateBottomNavCartState()
     }
 
     private suspend fun updateCartOnline(
@@ -192,7 +191,6 @@ class CartManager @Inject constructor(
             firstCart = null
             _blockedProductsState.update { s -> s + addInCart.keys + cartChanges.keys }
 
-
             for ((key, value) in addInCart) {
                 updateCartItem(key, (cart[key] ?: 0) + value)
             }
@@ -212,13 +210,11 @@ class CartManager @Inject constructor(
                 }
             }
 
-
             _blockedProductsState.update { s -> s - addInCart.keys - cartChanges.keys }
 
             if (currentCartVersion >= cartVersion) {
                 updateCartListState(true)
             }
-
         }
     }
 

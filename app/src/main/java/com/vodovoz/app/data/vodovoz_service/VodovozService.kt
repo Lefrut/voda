@@ -374,7 +374,7 @@ interface VodovozService {
     suspend fun updatePassword(
         @Query("userid") userId: Long,
         @Query("password") password: String,
-    ): Response<VodovozResponseDTO<String>>
+    ): Response<VodovozResponseDTO<VodovozPlaceholderDTO>>
 
     /**
      * Notification settings requests
