@@ -10,16 +10,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.fragment.findNavController
 import com.vodovoz.app.common.tab.TabManager
 import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.composables.placeholders.LoadingPlaceholder
+import com.vodovoz.app.design_system.composables.placeholders.VodovozLongPlaceholder
 import com.vodovoz.app.design_system.effects.LifecycleEffect
-import com.vodovoz.app.feature.profile.ProfileFlowViewModel
-import com.vodovoz.app.feature.profile.change_password.composables.PasswordChangedPlaceholder
 import com.vodovoz.app.feature.profile.change_password.model.ChangePasswordEvent
 import com.vodovoz.app.feature.profile.change_password.model.ChangePasswordUiState
 import dagger.hilt.android.AndroidEntryPoint
@@ -56,11 +54,9 @@ class ChangePasswordFragment : Fragment() {
             setContent {
                 VodovozTheme {
                     val viewState by viewModel.state.collectAsStateWithLifecycle()
-                    val snackbarHostState = remember {
-                        SnackbarHostState()
-                    }
+                    val snackbarHostState = remember { SnackbarHostState() }
 
-                    when (viewState.uiState) {
+                    when (val uiState = viewState.uiState) {
                         ChangePasswordUiState.ChangePassword -> {
                             ChangePasswordScreen(
                                 viewModel = viewModel,
@@ -73,10 +69,15 @@ class ChangePasswordFragment : Fragment() {
                             LoadingPlaceholder()
                         }
 
-                        ChangePasswordUiState.PasswordChanged -> {
-                            PasswordChangedPlaceholder(
-                                onCloseClick = { viewModel.navigateBack() },
-                                onFineClick = { viewModel.navigateBack() }
+                        is ChangePasswordUiState.Placeholder -> {
+                            VodovozLongPlaceholder(
+                                data = uiState.placeholder,
+                                onCloseClick = {
+                                    viewModel.navigateBack()
+                                },
+                                onButtonClick = {
+                                    viewModel.navigateBack()
+                                }
                             )
                         }
                     }

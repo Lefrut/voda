@@ -186,7 +186,7 @@ class RegFlowViewModel @Inject constructor(
             s.copy(
                 agreementChecked = checked,
                 buttons = s.buttons.updateButton(REGISTER_BUTTON) { btn ->
-                    btn.copy(enabled = s.fields.checkFields() && (s.agreementChecked || !s.showAgreement))
+                    btn.copy(enabled = s.fields.checkFields() && (checked || !s.showAgreement))
                 }
             )
         }

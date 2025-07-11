@@ -135,7 +135,7 @@
 
     <string name="change">Изменить</string>
 
-    <string name="error_password_unknown">Не удалось изменить пароль. Попробуйте еще раз позже.</string>
+    <string name="error_password_unknown">Не удалось изменить пароль!</string>
     <string name="success_password_change">Пароль успешно\n изменен!</string>
     <string name="error_login">Не удалось войти. Неизвестная ошибка, попробуйте еще раз.</string>
 

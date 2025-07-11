@@ -66,7 +66,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun processIntent(intent: Intent) {
-        debugLog { "proccessIntent: ${intent.data}" }
         handleIntent(intent)
         handlePushIntent(intent)
     }
@@ -74,16 +73,17 @@ class MainActivity : AppCompatActivity() {
     private fun handlePushIntent(intent: Intent) {
         val data = intent.extras ?: return
         val remoteMessage = RemoteMessage(data)
+        val params = remoteMessage.data.toMap()
 
-        val jsonData = if (remoteMessage.data.isNotEmpty()) {
-            JSONObject(remoteMessage.data.toString())
-        } else {
-            null
+        val jsonData = if (params.isNotEmpty()) {
+            JSONObject(params)
         }
+        else null
 
         lifecycleScope.launch {
             if (jsonData != null) siteStateManager.savePushData(jsonData)
         }
+
     }
 
     private fun handleIntent(intent: Intent) = lifecycleScope.launch {

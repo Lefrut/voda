@@ -54,6 +54,7 @@ fun ProductDetailsScreen(
         bottomBar = {
             ProductBottomFloatingButton(
                 modifier = Modifier.graphicsLayer {
+                    viewState.hideFloatingButton
                     translationY = lerp(0f, size.height, floatingButtonProgress)
                 },
                 isLoading = viewState.buttonIsLoading,
@@ -100,8 +101,8 @@ fun ProductDetailsScreen(
                     showDetailText = viewState.showDetailText,
                     buttons = viewState.buttons,
                     totalPrice = viewState.totalPrice,
-                    onFloatingButtonChange = { show ->
-                        viewModel.changeFloatingButton(show)
+                    onFloatingButtonChange = { isVisible ->
+                        viewModel.changeFloatingButton(isVisible)
                     },
                     onAllPropertiesShow = {
                         viewModel.showAllProperties()

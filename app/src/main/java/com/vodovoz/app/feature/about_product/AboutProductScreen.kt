@@ -40,7 +40,6 @@ fun AboutProductScreen(
 ) {
 
     Scaffold(
-        modifier = Modifier.windowInsetsPadding(WindowInsets.systemBars),
         topBar = {
             VodovozTopBar(
                 onBack = { viewModel.navigateBack() },

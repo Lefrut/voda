@@ -22,12 +22,11 @@ import com.vodovoz.app.design_system.composables.button.VodovozButton
 import com.vodovoz.app.design_system.composables.text_fields.VodovozTextFieldsColumn
 import com.vodovoz.app.design_system.model.widgets.FieldUi
 
+@Suppress("NonSkippableComposable")
 @Composable
 fun ChangePasswordBody(
     modifier: Modifier = Modifier,
     fields: List<FieldUi>,
-    buttonLoading: Boolean,
-    buttonEnabled: Boolean,
     onFieldChange: (FieldUi, FieldUi) -> Unit,
     onUpdatePasswordClick: () -> Unit,
 ) {
@@ -53,19 +52,6 @@ fun ChangePasswordBody(
                 onUpdatePasswordClick()
             }
         )
-
-        Spacer(modifier = Modifier.weight(1f))
-
-        VodovozButton(
-            modifier = Modifier.padding(bottom = 24.dp, start = 16.dp, end = 16.dp),
-            text = stringResource(R.string.change),
-            enabled = buttonEnabled,
-            isLoading = buttonLoading,
-            onClick = {
-                onUpdatePasswordClick()
-            },
-        )
-
     }
 
 }

@@ -1,5 +1,6 @@
 package com.vodovoz.app.feature.product_details.composables
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -96,45 +97,43 @@ fun ProductDetailsButtonsBlock(
 
         val analogButton = buttons.analogButton
 
-        when {
-            cartQuantity > 0 && isAvailable -> {
-                ProductQuantityButton(
-                    modifier = Modifier.isElementVisible(onFloatingButtonChange),
-                    isLoading = quantityButtonIsLoading,
-                    onPlus = onProductPlus,
-                    onMinus = onProductMinus,
-                    quantity = cartQuantity,
-                    totalPrice = totalPrice
-                )
-            }
+        Box(Modifier.isElementVisible(onFloatingButtonChange)) {
+            when {
+                cartQuantity > 0 && isAvailable -> {
+                    ProductQuantityButton(
+                        isLoading = quantityButtonIsLoading,
+                        onPlus = onProductPlus,
+                        onMinus = onProductMinus,
+                        quantity = cartQuantity,
+                        totalPrice = totalPrice
+                    )
+                }
 
-            isAvailable -> {
-                VodovozButton(
-                    text = stringResource(R.string.to_cart),
-                    onClick = onProductPlus,
-                    modifier = Modifier.isElementVisible(onFloatingButtonChange),
-                )
-            }
+                isAvailable -> {
+                    VodovozButton(
+                        text = stringResource(R.string.to_cart),
+                        onClick = onProductPlus,
+                    )
+                }
 
-            analogButton != null -> {
-                VodovozButton(
-                    text = analogButton.name,
-                    onClick = onAnalogButtonClick,
-                    colors = ButtonDefaults.filledTonalButtonColors(
-                        contentColor = analogButton.textColor,
-                        containerColor = analogButton.backgroundColor
-                    ),
-                    modifier = Modifier.isElementVisible(onFloatingButtonChange)
-                )
-            }
+                analogButton != null -> {
+                    VodovozButton(
+                        text = analogButton.name,
+                        onClick = onAnalogButtonClick,
+                        colors = ButtonDefaults.filledTonalButtonColors(
+                            contentColor = analogButton.textColor,
+                            containerColor = analogButton.backgroundColor
+                        ),
+                    )
+                }
 
-            else -> {
-                VodovozButton(
-                    text = stringResource(id = R.string.analogs),
-                    onClick = onAnalogButtonClick,
-                    colors = VodovozButtonDefaults.secondaryColors(),
-                    modifier = Modifier.isElementVisible(onFloatingButtonChange)
-                )
+                else -> {
+                    VodovozButton(
+                        text = stringResource(id = R.string.analogs),
+                        onClick = onAnalogButtonClick,
+                        colors = VodovozButtonDefaults.secondaryColors(),
+                    )
+                }
             }
         }
 

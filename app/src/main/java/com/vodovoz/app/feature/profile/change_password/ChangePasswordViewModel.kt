@@ -3,15 +3,15 @@ package com.vodovoz.app.feature.profile.change_password
 import androidx.lifecycle.viewModelScope
 import com.vodovoz.app.R
 import com.vodovoz.app.common.resources.ResourcesProvider
-import com.vodovoz.app.domain.general.model.UserNotLoginException
-import com.vodovoz.app.domain.general.model.ValidationException
-import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
+import com.vodovoz.app.design_system.model.toUi
 import com.vodovoz.app.design_system.model.widgets.FieldUi
+import com.vodovoz.app.design_system.model.widgets.NoRequiredValidator
 import com.vodovoz.app.design_system.model.widgets.checkFields
 import com.vodovoz.app.design_system.model.widgets.mapToDomain
 import com.vodovoz.app.design_system.model.widgets.toUi
-import com.vodovoz.app.feature.preorder.model.toUi
 import com.vodovoz.app.design_system.model.widgets.updateFieldAndResetError
+import com.vodovoz.app.domain.general.model.ValidationException
+import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.feature.profile.change_password.model.ChangePasswordEvent
 import com.vodovoz.app.feature.profile.change_password.model.ChangePasswordState
 import com.vodovoz.app.feature.profile.change_password.model.ChangePasswordUiState
@@ -66,7 +66,7 @@ class ChangePasswordViewModel @Inject constructor(
             val updatedFields = s.fields.updateFieldAndResetError(field, updatedField)
             s.copy(
                 fields = updatedFields,
-                buttonEnabled = updatedFields.checkFields()
+                buttonEnabled = updatedFields.checkFields(validators = listOf(NoRequiredValidator))
             )
         }
     }
@@ -74,9 +74,7 @@ class ChangePasswordViewModel @Inject constructor(
     fun updatePassword() = viewModelScope.launch {
 
         val fields = stateSnapshot.fields.mapToDomain()
-        val passwordField = fields.firstOrNull()
-
-        if (passwordField == null || !stateSnapshot.buttonEnabled) return@launch
+        val passwordField = fields.firstOrNull() ?: return@launch
 
         _state.update { s ->
             s.copy(buttonLoading = true)
@@ -86,25 +84,25 @@ class ChangePasswordViewModel @Inject constructor(
             vodovozServiceRepository.updatePassword(passwordField.value).singleResult()
         updatePasswordResult.onSuccess {
             _state.update { s ->
-                s.copy(uiState = ChangePasswordUiState.PasswordChanged)
+                s.copy(uiState = ChangePasswordUiState.Placeholder(it.toUi()))
             }
         }.onFailure { t ->
-            when (t) {
+
+            val message = when (t) {
                 is ValidationException -> {
-                    _events.emit(
-                        ChangePasswordEvent.ShowSnackbar(
-                            t.message
-                                ?: resourcesProvider.getString(R.string.error_password_unknown)
-                        )
-                    )
+                    t.message?.ifBlank {
+                        resourcesProvider.getString(R.string.error_password_unknown)
+                    } ?: resourcesProvider.getString(R.string.error_password_unknown)
                 }
 
                 else -> {
-                    _events.emit(
-                        ChangePasswordEvent.ShowSnackbar(resourcesProvider.getString(R.string.error_password_unknown))
-                    )
+                    resourcesProvider.getString(R.string.error_password_unknown)
                 }
             }
+
+            _events.emit(
+                ChangePasswordEvent.ShowSnackbar(message)
+            )
         }
         _state.update { s -> s.copy(buttonLoading = false, buttonEnabled = false) }
     }

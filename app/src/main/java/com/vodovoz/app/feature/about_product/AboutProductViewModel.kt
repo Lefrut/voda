@@ -48,11 +48,11 @@ class AboutProductViewModel @Inject constructor(
 
 
     init {
-        setupNavArguments()
+        initByArguments()
         fetchAboutProductInfo()
     }
 
-    private fun setupNavArguments() = viewModelScope.launch {
+    private fun initByArguments() = viewModelScope.launch {
         val price = productPrices.firstOrNull()
         price?.let {
             _state.update { s ->

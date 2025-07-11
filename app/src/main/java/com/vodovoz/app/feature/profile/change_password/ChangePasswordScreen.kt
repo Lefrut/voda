@@ -10,6 +10,10 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
+import com.vodovoz.app.R
+import com.vodovoz.app.design_system.composables.button.VodovozButton
 import com.vodovoz.app.design_system.composables.snackbar.VodovozSnackbarHost
 import com.vodovoz.app.design_system.composables.top_bar.VodovozTopBar
 import com.vodovoz.app.feature.profile.change_password.composables.ChangePasswordBody
@@ -25,7 +29,6 @@ fun ChangePasswordScreen(
     Scaffold(
         topBar = {
             VodovozTopBar(
-                modifier = Modifier.windowInsetsPadding(WindowInsets.statusBars),
                 onBack = { viewModel.navigateBack() },
                 title = viewState.title
             )
@@ -33,7 +36,17 @@ fun ChangePasswordScreen(
         snackbarHost = {
             VodovozSnackbarHost(
                 hostState = snackbarHostState,
-                modifier = Modifier.windowInsetsPadding(WindowInsets.navigationBars)
+            )
+        },
+        bottomBar = {
+            VodovozButton(
+                modifier = Modifier.padding(bottom = 24.dp, start = 16.dp, end = 16.dp),
+                text = stringResource(R.string.change),
+                isLoading = viewState.buttonLoading,
+                enabled = viewState.buttonEnabled,
+                onClick = {
+                    viewModel.updatePassword()
+                },
             )
         },
         contentWindowInsets = WindowInsets(0, 0, 0, 0)
@@ -43,8 +56,6 @@ fun ChangePasswordScreen(
                 .padding(paddingValues)
                 .consumeWindowInsets(paddingValues),
             fields = viewState.fields,
-            buttonEnabled = viewState.buttonEnabled,
-            buttonLoading = viewState.buttonLoading,
             onFieldChange = { field, updatedField ->
                 viewModel.changeField(field, updatedField)
             },

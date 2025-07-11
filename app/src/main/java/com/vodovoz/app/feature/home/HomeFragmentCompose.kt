@@ -406,7 +406,10 @@ class HomeFragment : Fragment() {
                 when (pushData.path) {
                     "AKCII" -> {
                         val promotionId = pushData.id
-                        if (promotionId.isNullOrEmpty()) return@collect
+                        if (promotionId.isNullOrEmpty()) {
+                            findNavController().navigateToPromotions()
+                            return@collect
+                        }
 
                         val eventParameters = "\"ID_AKCII\": \"$promotionId\""
                         accountManager.reportEvent("Зашел в акцию (push)", eventParameters)
@@ -475,7 +478,6 @@ class HomeFragment : Fragment() {
 
                     "BRANDY" -> {
                         findNavController().navigateToAllBrands()
-                        siteStateManager.clearPushListener()
                     }
 
                     "about" -> {

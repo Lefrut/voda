@@ -59,7 +59,7 @@ fun PastPurchasesBody(
         contentPadding = PaddingValues(vertical = 16.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        item(span = { GridItemSpan(maxLineSpan) }) {
+        item(span = { GridItemSpan(maxLineSpan) }, key = "ProductListCategoriesRow") {
             if (categories.isNotEmpty()) {
                 ProductListCategoriesRow(
                     modifier = Modifier.padding(bottom = 16.dp),
@@ -74,7 +74,7 @@ fun PastPurchasesBody(
 
         }
 
-        stickyHeader {
+        stickyHeader(key = "ProductListOptionsRow") {
             ProductListOptionsRow(
                 modifier = Modifier
                     .padding(bottom = 8.dp)

@@ -58,7 +58,7 @@ class PaymentMethodViewModel @Inject constructor(
             _state.update { s ->
                 s.copy(
                     title = paymentDetails.title,
-                    button = paymentDetails.button.toUi(),
+                    button = paymentDetails.button.toUi().copy(enabled = false),
                     paymentSections = paymentSections,
                     uiState = PaymentMethodUiState.Success
                 )
@@ -80,9 +80,9 @@ class PaymentMethodViewModel @Inject constructor(
                             section.copy(
                                 title = section.title,
                                 items = section.items.map { paymentItem ->
-                                    if(paymentItem.id == "schet"){
+                                    if (paymentItem.id == "schet") {
                                         paymentItem.copy(value = balance)
-                                    }else {
+                                    } else {
                                         paymentItem
                                     }
                                 }
@@ -130,8 +130,12 @@ class PaymentMethodViewModel @Inject constructor(
                 )
             }
 
+
             s.copy(
-                paymentSections = sections
+                paymentSections = sections,
+                button = s.button.copy(
+                    enabled = sections.flatMap { it.items }.any { !it.isSwitch && it.value }
+                )
             )
         }
     }
