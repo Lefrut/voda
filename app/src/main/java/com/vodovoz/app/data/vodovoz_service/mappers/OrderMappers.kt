@@ -61,7 +61,6 @@ import com.vodovoz.app.domain.general.model.order.OrderingMenuItemModel
 import com.vodovoz.app.domain.general.model.order.OrderProductModel
 import com.vodovoz.app.domain.general.model.order.OrderProductPresentModel
 import com.vodovoz.app.domain.general.model.order.OrderQuestionDetailsModel
-import com.vodovoz.app.domain.general.model.order.OrderRecipientItemModel
 import com.vodovoz.app.domain.general.model.order.OrderStatusModel
 import com.vodovoz.app.domain.general.model.order.OrderingDetailsModel
 import com.vodovoz.app.domain.general.model.order.OrdersHistoryButtonModel
@@ -408,7 +407,7 @@ fun ORDER_DETAILS_TOVAR_DTO.toDomain(): OrderProductModel? {
         articleNumberText = CML2_ARTICLE ?: "",
         depositText = PROPERTY_ZALOG_VALUE,
         price = EXTENDED_PRICE?.minByOrNull { (it?.PRICE ?: Int.MAX_VALUE) }?.toDomain(),
-        isShowcaseProduct = URL == true,
+        showcase = URL == true,
         image = DETAIL_PICTURE?.toVodovozUrl() ?: "",
         labels = NALICHIE_MORE?.mapToDomain() ?: emptyList(),
         present = PODAROK?.toDomain(),

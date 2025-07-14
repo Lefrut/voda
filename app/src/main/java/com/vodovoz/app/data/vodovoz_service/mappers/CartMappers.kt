@@ -1,5 +1,8 @@
 package com.vodovoz.app.data.vodovoz_service.mappers
 
+import com.vodovoz.app.common.model.VodovozBoolean
+import com.vodovoz.app.common.model.boolean
+import com.vodovoz.app.common.model.from
 import com.vodovoz.app.data.vodovoz_service.di.toVodovozUrl
 import com.vodovoz.app.data.vodovoz_service.model.cart.CART_KNOPKA_DTO
 import com.vodovoz.app.data.vodovoz_service.model.cart.CartDetailsDTO
@@ -129,20 +132,20 @@ fun KORZINA_PRODUCT_DTO.toDomain(): CartItemModel? {
         priceText = PRICE_FORMATED ?: "",
         productName = PODROBNO.NAME ?: "",
         isFavorite = PODROBNO.FAVORITE ?: false,
-        isHit = false, //PODROBNO.HIT ?:
         depositText = PODROBNO.PROPERTY_ZALOG_VALUE ?: "",
         articleText = PODROBNO.CML2_ARTICLE ?: "",
         quantity = QUANTITY?.toDoubleOrNull()?.toInt() ?: 0,
         basePrice = BASE_PRICE ?: 0f,
         currentPrice = PRICE ?: 0f,
-        canBuy = CAN_BUY == "Y",
+        canBuy = VodovozBoolean.from(CAN_BUY).boolean,
         discountPrice = DISCOUNT_PRICE ?: 0f,
         discountPercentsText = DISCOUNT_PRICE_PERCENT ?: "",
         image = PODROBNO.DETAIL_PICTURE?.toVodovozUrl() ?: "",
         leftItems = PODROBNO.CATALOG_QUANTITY ?: 0,
         label = PODROBNO.NALICHIE_MORE?.toDomain(),
         hasDiscount = DISCOUNTS_APPLY ?: false,
-        restrictionsCode = PODROBNO.ZAPRET_FISHKAM ?: 0
+        restrictionsCode = PODROBNO.ZAPRET_FISHKAM ?: 0,
+        showcase = PODROBNO.URL == true
     )
 }
 

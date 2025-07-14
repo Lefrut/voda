@@ -29,7 +29,6 @@ data class ORDER_DETAILS_TOVAR_DTO(
     val EXTENDED_PRICE: List<EXTENDED_PRICE_DTO?>?,
     @Json(name = "URL")
     val URL: Boolean?,
-    //todo - put tovar18 class
     @Json(name = "TOVAR18")
     val TOVAR18: TOVAR_18_DTO?,
     @Json(name = "FAVORITE")

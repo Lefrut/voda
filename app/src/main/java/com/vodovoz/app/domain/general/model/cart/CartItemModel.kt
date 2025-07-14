@@ -7,7 +7,6 @@ data class CartItemModel(
     val productId: Long,
     val productName: String,
     val isFavorite: Boolean,
-    val isHit: Boolean,
     val canBuy: Boolean,
     val discountPercentsText: String,
     val discountPrice: Float,
@@ -21,5 +20,6 @@ data class CartItemModel(
     val leftItems: Int,
     val label: LabelModel?,
     val hasDiscount: Boolean,
-    val restrictionsCode: Int
+    val restrictionsCode: Int,
+    val showcase: Boolean
 )

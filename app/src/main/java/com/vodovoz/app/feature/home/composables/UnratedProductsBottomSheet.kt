@@ -169,7 +169,7 @@ fun UnratedProductsBottomSheet(
                     val sheetOffsetY = try {
                         state.requireOffset()
                     } catch (_: RuntimeException) {
-                        expandedPaddingTopPx
+                        layoutHeight / 1.2f
                     }
                     IntOffset(x = 0, y = sheetOffsetY.toInt())
                 }

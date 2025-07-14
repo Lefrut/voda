@@ -11,7 +11,6 @@ data class CartItemUi(
     val productId: Long,
     val productName: String,
     val isFavorite: Boolean,
-    val isHit: Boolean,
     val canBuy: Boolean,
     val discountPercentsText: String,
     val discountPrice: Float,
@@ -25,7 +24,8 @@ data class CartItemUi(
     val leftItems: Int,
     val label: LabelUi?,
     val hasDiscount: Boolean,
-    val restriction: ProductRestrictionUi
+    val restriction: ProductRestrictionUi,
+    val showcase: Boolean
 )
 
 
@@ -54,7 +54,6 @@ fun CartItemModel.toUi(): CartItemUi {
         productId = productId,
         productName = productName,
         isFavorite = isFavorite,
-        isHit = isHit,
         canBuy = canBuy,
         discountPercentsText = discountPercentsText,
         discountPrice = discountPrice,
@@ -68,6 +67,7 @@ fun CartItemModel.toUi(): CartItemUi {
         leftItems = leftItems,
         label = label?.toUi(),
         hasDiscount = hasDiscount,
-        restriction = ProductRestrictionUi.fromCode(restrictionsCode)
+        restriction = ProductRestrictionUi.fromCode(restrictionsCode),
+        showcase = showcase
     )
 }
