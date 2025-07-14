@@ -45,7 +45,7 @@ fun OrderProductCard(
             .fillMaxWidth()
             .clickable(
                 onClick = {
-                    if (product.isShowcaseProduct && product.catalogQuantity > 1) {
+                    if (product.showcase) {
                         onClick(product)
                     }
                 },
@@ -83,7 +83,7 @@ fun OrderProductCard(
                     style = MaterialTheme.typography.bodySmall
                 )
 
-                if (restrictions != ProductRestrictionUi.NO_FAVORITES && restrictions != ProductRestrictionUi.FULL_RESTRICTION && restrictions != ProductRestrictionUi.NO_FAVORITES_QUANTITY) {
+                if (restrictions != ProductRestrictionUi.NO_FAVORITES && restrictions != ProductRestrictionUi.FULL_RESTRICTION && restrictions != ProductRestrictionUi.NO_FAVORITES_QUANTITY && product.showcase) {
                     Icon(
                         painter = painterResource(id = if (product.isFavorite) R.drawable.ic_favorite_filled else R.drawable.ic_favorite_outline),
                         contentDescription = null,

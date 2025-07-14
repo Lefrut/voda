@@ -3,6 +3,7 @@ package com.vodovoz.app.common.cart
 import com.vodovoz.app.common.tab.TabManager
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.util.extensions.singleResult
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -18,13 +19,13 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withTimeout
+import java.time.LocalDate
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class CartManager @Inject constructor(
-    private val tabManager: TabManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
 ) {
 
@@ -113,7 +114,6 @@ class CartManager @Inject constructor(
             _blockedProductsState.update { emptySet() }
             updateCartListState(true)
         }
-        tabManager.clearBottomNavCartState()
     }
 
     suspend fun syncCart(newCart: Map<Long, Int>) = cartMutex.withLock {
@@ -217,6 +217,7 @@ class CartManager @Inject constructor(
             }
         }
     }
+
 
 
     fun formatCart(cart: Map<Long, Int>): String {

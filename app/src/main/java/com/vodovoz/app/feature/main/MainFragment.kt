@@ -134,7 +134,7 @@ class MainFragment : Fragment(R.layout.fragment_main) {
                         animate().cancel()
                         alpha = if (visibility == View.VISIBLE) 1f else 0f
                         visibility = View.VISIBLE
-                        animate().alpha(1f).setInterpolator(LinearInterpolator()).setDuration(400)
+                        animate().alpha(1f).setInterpolator(LinearInterpolator()).setDuration(300)
                             .start()
                     }
                 } else {

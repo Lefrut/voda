@@ -10,7 +10,7 @@ data class OrderProductModel(
     val articleNumberText: String,
     val depositText: String?,
     val price: PriceModel?,
-    val isShowcaseProduct: Boolean,
+    val showcase: Boolean,
     val image: String,
     val labels: List<LabelModel>,
     val pricePerUnit: Int?,

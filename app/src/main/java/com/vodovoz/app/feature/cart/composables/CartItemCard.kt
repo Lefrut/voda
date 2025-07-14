@@ -46,7 +46,6 @@ fun CartItemCard(
     onDecrement: (CartItemUi) -> Unit,
     onRemove: (CartItemUi) -> Unit,
 ) {
-    val context = LocalContext.current
 
     val isPresent = cartItem.label?.name?.contains("подарок", true) == true
     val isAvailable = cartItem.canBuy && cartItem.leftItems > 0
@@ -54,7 +53,7 @@ fun CartItemCard(
 
     Row(
         modifier = modifier.clickable(
-            onClick = { onClick(cartItem) },
+            onClick = { if(cartItem.showcase) { onClick(cartItem) } },
             indication = null,
             interactionSource = null
         )
@@ -92,7 +91,7 @@ fun CartItemCard(
                     style = MaterialTheme.typography.bodySmall
                 )
 
-                if (restriction != ProductRestrictionUi.NO_FAVORITES && restriction != ProductRestrictionUi.FULL_RESTRICTION && restriction != ProductRestrictionUi.NO_FAVORITES_QUANTITY) {
+                if (restriction != ProductRestrictionUi.NO_FAVORITES && restriction != ProductRestrictionUi.FULL_RESTRICTION && restriction != ProductRestrictionUi.NO_FAVORITES_QUANTITY && cartItem.showcase) {
                     Icon(
                         painter = painterResource(id = if (cartItem.isFavorite) R.drawable.ic_favorite_filled else R.drawable.ic_favorite_outline),
                         contentDescription = null,

@@ -18,7 +18,6 @@ android {
         applicationId "com.m.vodovoz"
         minSdk 21
         targetSdk 34
-        //todo - update version
         versionCode 200
         versionName "2.0.0"
 
@@ -79,8 +78,7 @@ android {
 
 dependencies {
 
-
-    //Test
+//    Test
 //    androidTestImplementation 'androidx.test.ext:junit:1.2.0'
 //    androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.0'
     testImplementation 'junit:junit:4.13.2'
@@ -172,7 +170,6 @@ dependencies {
 
 
 
-    //todo - comment in release
     //debugImplementation("com.squareup.leakcanary:leakcanary-android:2.14")
     implementation 'androidx.core:core-splashscreen:1.0.1'
 

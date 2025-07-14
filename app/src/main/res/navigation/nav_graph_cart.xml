@@ -152,6 +152,11 @@
         android:label="AllCommentsByProductDialogFragment"/>
 
     <fragment
+        android:id="@+id/aboutProductFragment"
+        android:name="com.vodovoz.app.feature.about_product.AboutProductFragment"
+        android:label="AboutProductFragment" />
+
+    <fragment
         android:id="@+id/aboutServicesFragment"
         android:name="com.vodovoz.app.feature.bottom.services.AboutServicesFragment"
         android:label="AboutServicesDialogFragment"/>

@@ -30,5 +30,7 @@ data class KORZINA_PRODUCT_PODROBNO_DTO(
     @Json(name = "FAVORITE")
     val FAVORITE: Boolean?,
     @Json(name = "NALICHIE_MORE")
-    val NALICHIE_MORE: NALICHIE_MORE_DTO?
+    val NALICHIE_MORE: NALICHIE_MORE_DTO?,
+    @Json(name = "URL")
+    val URL: Boolean?,
 )

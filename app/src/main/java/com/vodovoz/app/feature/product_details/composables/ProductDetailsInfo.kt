@@ -125,49 +125,51 @@ fun ProductDetailsInfo(
             }
         }
 
-        Text(
-            modifier = Modifier
-                .padding(top = 16.dp)
-                .fillMaxWidth(),
-            text = contentBlockCharacteristics.title,
-            color = MaterialTheme.colorScheme.onBackground,
-            style = MaterialTheme.typography.headlineSmall
-        )
-
-        Column(
-            modifier = Modifier
-                .padding(top = 16.dp)
-                .fillMaxWidth()
-                .animateContentSize(),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            val minCharacteristic = 4
-            val commonCharacteristics = (contentBlockCharacteristics.content.firstOrNull()
-                ?: CharacteristicsBlockUi.Empty).characteristics
-
-
-            val showedCharacteristics = commonCharacteristics.take(
-                if (showAllProperties) commonCharacteristics.size else minCharacteristic
+        if(contentBlockCharacteristics.content.isNotEmpty()){
+            Text(
+                modifier = Modifier
+                    .padding(top = 16.dp)
+                    .fillMaxWidth(),
+                text = contentBlockCharacteristics.title,
+                color = MaterialTheme.colorScheme.onBackground,
+                style = MaterialTheme.typography.headlineSmall
             )
 
-            showedCharacteristics.forEach { characteristic ->
-                CharacteristicItem(
-                    modifier = Modifier.fillMaxWidth(),
-                    characteristic = characteristic
-                )
-            }
+            Column(
+                modifier = Modifier
+                    .padding(top = 16.dp)
+                    .fillMaxWidth()
+                    .animateContentSize(),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                val minCharacteristic = 4
+                val commonCharacteristics = (contentBlockCharacteristics.content.firstOrNull()
+                    ?: CharacteristicsBlockUi.Empty).characteristics
 
-            if (!showAllProperties && minCharacteristic < commonCharacteristics.size) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_arrow_down),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .align(Alignment.End)
-                        .size(24.dp)
-                        .clip(MaterialTheme.shapes.small)
-                        .clickable { onAllPropertiesShow() },
-                    tint = MaterialTheme.colorScheme.surfaceTint
+
+                val showedCharacteristics = commonCharacteristics.take(
+                    if (showAllProperties) commonCharacteristics.size else minCharacteristic
                 )
+
+                showedCharacteristics.forEach { characteristic ->
+                    CharacteristicItem(
+                        modifier = Modifier.fillMaxWidth(),
+                        characteristic = characteristic
+                    )
+                }
+
+                if (!showAllProperties && minCharacteristic < commonCharacteristics.size) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_arrow_down),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .align(Alignment.End)
+                            .size(24.dp)
+                            .clip(MaterialTheme.shapes.small)
+                            .clickable { onAllPropertiesShow() },
+                        tint = MaterialTheme.colorScheme.surfaceTint
+                    )
+                }
             }
         }
     }
