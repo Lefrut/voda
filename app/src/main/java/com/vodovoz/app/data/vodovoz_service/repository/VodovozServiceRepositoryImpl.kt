@@ -8,7 +8,10 @@ import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
 import com.vodovoz.app.common.account.AccountManager
 import com.vodovoz.app.common.cookie.CookieManager
+import com.vodovoz.app.common.model.VodovozBoolean
 import com.vodovoz.app.common.model.VodovozSiteState
+import com.vodovoz.app.common.model.boolean
+import com.vodovoz.app.common.model.from
 import com.vodovoz.app.core.network.retrofit.messageWithCode
 import com.vodovoz.app.core.network.retrofit.stringBody
 import com.vodovoz.app.core.network.retrofit.stringErrorBody
@@ -95,6 +98,7 @@ import com.vodovoz.app.domain.general.model.service.ServiceOrderDetailsModel
 import com.vodovoz.app.domain.general.model.toQueries
 import com.vodovoz.app.domain.general.model.toSliderQueries
 import com.vodovoz.app.domain.general.model.user.AuthDetailsModel
+import com.vodovoz.app.domain.general.model.user.BonusesPopupWindowModel
 import com.vodovoz.app.domain.general.model.user.ChangePasswordDetailsModel
 import com.vodovoz.app.domain.general.model.user.NotificationSettingsDetailsModel
 import com.vodovoz.app.domain.general.model.user.ProfileDetailsModel
@@ -1185,6 +1189,29 @@ class VodovozServiceRepositoryImpl @Inject constructor(
 
                 Result.failure(UserNotLoginException(placeholder = errorData!!.toDomain()))
             }
+        )
+    }
+
+    override fun getBonusesPopupWindow(): Flow<Result<BonusesPopupWindowModel>> {
+        return executeRequest(
+            request = {
+                vodovozService.getBonusesPopupWindow(accountManager.fetchAccountId())
+            },
+            mapper = {
+                it.data!!.toDomain()
+            }
+        )
+    }
+
+    override fun updateBonusesSubscribe(subscribe: Boolean): Flow<Result<Unit>> {
+        return executeRequest(
+            request = {
+                vodovozService.updateBonusesSubscribe(
+                    accountManager.fetchAccountId(),
+                    VodovozBoolean.from(subscribe).value
+                )
+            },
+            mapper = {}
         )
     }
 

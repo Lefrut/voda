@@ -15,6 +15,7 @@ import com.vodovoz.app.design_system.model.mapToUi
 import com.vodovoz.app.design_system.model.toUi
 import com.vodovoz.app.domain.general.model.UserNotLoginException
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
+import com.vodovoz.app.feature.profile.model.BonusesPopupWindowUi
 import com.vodovoz.app.feature.profile.model.ProfileCardUi
 import com.vodovoz.app.feature.profile.model.ProfileChatItemUi
 import com.vodovoz.app.feature.profile.model.ProfileChatsPopupWindowUi
@@ -27,6 +28,7 @@ import com.vodovoz.app.feature.profile.model.toUi
 import com.vodovoz.app.feature.sitestate.SiteStateManager
 import com.vodovoz.app.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -50,7 +52,11 @@ class ProfileFlowViewModel @Inject constructor(
         uiStateListener.updateData { s ->
             s.copy(uiState = if (dataState.uiState != ProfileUiState.Profile) ProfileUiState.Loading else s.uiState)
         }
+
+        val bonusesPopupWindowDeferred =
+            async { vodovozServiceRepository.getBonusesPopupWindow().singleResult() }
         val profileDetailsResult = vodovozServiceRepository.getProfileDetails().singleResult()
+        val bonusesPopupWindow = bonusesPopupWindowDeferred.await().getOrNull()?.toUi()
 
         profileDetailsResult.onSuccess { profileDetails ->
             uiStateListener.updateData { s ->
@@ -61,7 +67,8 @@ class ProfileFlowViewModel @Inject constructor(
                     cards = profileDetails.cards.mapToUi(),
                     smallMenu = profileDetails.smallMenu.mapToUi(),
                     normalMenu = profileDetails.normalMenu.mapToUi(),
-                    walletItems = profileDetails.walletItems.mapToUi()
+                    walletItems = profileDetails.walletItems.mapToUi(),
+                    currentBonusesBSData = bonusesPopupWindow
                 )
             }
         }.onFailure { t ->
@@ -164,7 +171,9 @@ class ProfileFlowViewModel @Inject constructor(
             }
 
             "bonus" -> {
-                showTextBottomSheet(walletItem.popupWindow ?: return@launch)
+                uiStateListener.updateData { s ->
+                    s.copy(showBonusesBS = true)
+                }
             }
 
             else -> {}
@@ -202,6 +211,35 @@ class ProfileFlowViewModel @Inject constructor(
         }
     }
 
+    fun hideBonusesBottomSheet() = viewModelScope.launch {
+        uiStateListener.updateData { s ->
+            s.copy(showBonusesBS = false)
+        }
+    }
+
+    fun copyText(text: String) = viewModelScope.launch {
+        eventListener.emit(ProfileEvents.Copy(text))
+    }
+
+    fun navigateToBonusesConditions(bonusesPopupWindow: BonusesPopupWindowUi) =
+        viewModelScope.launch {
+            val url = bonusesPopupWindow.url
+            if (bonusesPopupWindow.browser) {
+                eventListener.emit(ProfileEvents.OpenUrl(url))
+            } else {
+                eventListener.emit(ProfileEvents.GoToWebView(url, bonusesPopupWindow.button.name))
+            }
+        }
+
+    fun changeBonusesSubscribe(subscribe: Boolean) = viewModelScope.launch {
+        uiStateListener.updateData { s ->
+            s.copy(
+                currentBonusesBSData = s.currentBonusesBSData?.copy(warmAboutExpiration = subscribe)
+            )
+        }
+        vodovozServiceRepository.updateBonusesSubscribe(subscribe).singleResult()
+    }
+
 
     @Immutable
     data class ProfileState(
@@ -214,11 +252,13 @@ class ProfileFlowViewModel @Inject constructor(
         val normalMenu: List<ProfileMenuItemUi> = emptyList(),
         val showAdvertisingBS: Boolean = false,
         val showSupportingBS: Boolean = false,
+        val showBonusesBS: Boolean = false,
         val showTextBS: Boolean = false,
         val showRefreshIndicator: Boolean = false,
 
         val currentTextBSData: ProfilePopupWindowUi? = null,
         val currentSupportingBSData: ProfileChatsPopupWindowUi = ProfileChatsPopupWindowUi.Empty,
+        val currentBonusesBSData: BonusesPopupWindowUi? = null,
         val currentAdvertising: AboutAdvertisingUi = AboutAdvertisingUi.Empty,
     ) : State
 
@@ -244,6 +284,8 @@ class ProfileFlowViewModel @Inject constructor(
         data class ActivateVodovozAction(val action: VodovozAction) : ProfileEvents()
         data class Copy(val value: String) : ProfileEvents()
         data class GoByChatItemId(val chatId: String, val data: String) : ProfileEvents()
+        data class OpenUrl(val url: String) : ProfileEvents()
+        data class GoToWebView(val url: String, val title: String) : ProfileEvents()
     }
 
 }

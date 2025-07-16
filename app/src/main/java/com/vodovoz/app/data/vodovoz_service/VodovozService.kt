@@ -56,6 +56,7 @@ import com.vodovoz.app.data.vodovoz_service.model.ordering.RecipientDTO
 import com.vodovoz.app.data.vodovoz_service.model.ordering.RecipientDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.payment_method.PaymentMethodDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.product_details.ProductDetailsDTO
+import com.vodovoz.app.data.vodovoz_service.model.profile.BonusesPopupWindowDTO
 import com.vodovoz.app.data.vodovoz_service.model.profile.ProfileDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.services.AllServicesDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.services.ServiceDetailsDTO
@@ -332,6 +333,18 @@ interface VodovozService {
     /**
      * Profile requests
      * */
+
+    @GET("profile/bonus.php?action=glav")
+    suspend fun getBonusesPopupWindow(
+        @Query("userid") userId: Long?
+    ): Response<VodovozResponseDTO<BonusesPopupWindowDTO>>
+
+    @GET("profile/bonus.php?action=glav")
+    suspend fun updateBonusesSubscribe(
+        @Query("userid") userId: Long?,
+        @Query("lgb_subscribe") subscribe: String
+    ): Response<VodovozResponseDTO<String>>
+
     @GET("profile/index.php?action=glav")
     suspend fun getProfileDetails(
         @Query("userid") userId: Long,
