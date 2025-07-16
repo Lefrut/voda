@@ -36,7 +36,6 @@ import com.vodovoz.app.feature.cart.composables.CartPresentCard
 import com.vodovoz.app.feature.cart.gifts.model.GiftsState
 import com.vodovoz.app.feature.cart.model.CartPresentItemUi
 
-@Suppress("NonSkippableComposable")
 @Composable
 fun GiftsScreen(viewModel: GiftsViewModel, viewState: GiftsState) {
     Column(
@@ -56,13 +55,12 @@ fun GiftsScreen(viewModel: GiftsViewModel, viewState: GiftsState) {
                 .verticalScroll(rememberScrollState())
                 .padding(bottom = 24.dp, top = 8.dp)
         ) {
-            val present = viewState.present
+            val present = viewState.present?.popupWindow?.present
             if (present != null && present.button == null) {
                 CartPresentCard(
                     modifier = Modifier
                         .padding(bottom = 24.dp, start = 16.dp, end = 16.dp)
                         .animateContentSize(),
-                    currentCartPrice = present.maxPresentPrice,
                     present = present,
                     onChoosePresentClick = {}
                 )

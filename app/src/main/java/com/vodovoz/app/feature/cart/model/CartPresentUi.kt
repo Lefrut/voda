@@ -14,17 +14,25 @@ data class CartPresentUi(
     val title: String,
     val description: String,
     val image: String,
+    val currentPresentPrice: Int,
     val maxPresentPrice: Int,
     val button: ColorfulButtonUi?,
     val popupWindow: CartPresentPopupWindowUi?,
-): Parcelable {
+) : Parcelable {
     companion object {
-        val Empty = CartPresentUi(-1, "", "", "", 0, null, null)
+        val Empty = CartPresentUi(-1, "", "", "", 0, 0, null, null)
     }
 }
 
-fun CartPresentModel.toUi(): CartPresentUi{
+fun CartPresentModel.toUi(): CartPresentUi {
     return CartPresentUi(
-        id, title, description, image, leftToGift, button?.toUi(), popupWindow?.toUi()
+        id = id,
+        title = title,
+        description = description,
+        image = image,
+        currentPresentPrice = currentGift,
+        maxPresentPrice = leftToGift,
+        button = button?.toUi(),
+        popupWindow = popupWindow?.toUi()
     )
 }

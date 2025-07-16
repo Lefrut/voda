@@ -19,25 +19,27 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.fromHtml
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.coerceAtMost
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import coil3.compose.AsyncImage
-
-import coil3.request.crossfade
 import com.vodovoz.app.R
 import com.vodovoz.app.design_system.ExtendedTheme
 import com.vodovoz.app.design_system.composables.button.VodovozButtonSmall
@@ -46,39 +48,45 @@ import com.vodovoz.app.feature.cart.model.CartPresentUi
 @Composable
 fun CartPresentCard(
     modifier: Modifier = Modifier,
-    currentCartPrice: Int,
     present: CartPresentUi,
     onChoosePresentClick: () -> Unit,
 ) {
-    val context = LocalContext.current
     val density = LocalDensity.current
+
+    var contentHeight by remember {
+        mutableStateOf(0.dp)
+    }
 
     BoxWithConstraints(modifier = modifier) {
         val maxWidth = maxWidth
-        val minHeight = with(density) { constraints.minHeight.toDp() }
         val horizontalPadding = 16.dp
         val verticalPadding = 10.dp
-        val button = present.button
 
+        val button = present.button
 
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(MaterialTheme.shapes.large)
                 .background(MaterialTheme.colorScheme.primaryContainer)
-                .padding(
-                    horizontal = horizontalPadding,
-                    vertical = 10.dp
-                )
-
         ) {
             Column(
                 modifier = Modifier
                     .weight(1f)
                     .zIndex(1f)
+                    .onSizeChanged { intSize ->
+                        contentHeight = with(density) {
+                            intSize.height.toDp()
+                        }
+                    }
+                    .padding(
+                        top = verticalPadding,
+                        start = horizontalPadding,
+                        bottom = verticalPadding
+                    )
             ) {
                 Text(
-                    modifier = Modifier.padding(end = 30.dp),
+                    modifier = Modifier.padding(end = 20.dp),
                     text = present.title,
                     color = MaterialTheme.colorScheme.onBackground,
                     style = MaterialTheme.typography.bodyMedium.copy(
@@ -126,7 +134,7 @@ fun CartPresentCard(
                     }
                 } else {
                     val animatedProgress by animateFloatAsState(
-                        targetValue = currentCartPrice.toFloat() / present.maxPresentPrice,
+                        targetValue = present.currentPresentPrice.toFloat() / present.maxPresentPrice,
                         label = "animated present progress",
                         animationSpec = tween(160)
                     )
@@ -148,7 +156,6 @@ fun CartPresentCard(
                             trackColor = MaterialTheme.colorScheme.background,
                             progress = { animatedProgress },
                             drawStopIndicator = {}
-
                         )
 
 
@@ -165,13 +172,29 @@ fun CartPresentCard(
                 }
             }
 
+            val imageTopPaddingDp = 10.dp
+
             AsyncImage(
                 modifier = Modifier
-                    .size(75.dp)
+                    .align(
+                        if (button == null) Alignment.Top
+                        else Alignment.Bottom
+                    )
+                    .then(
+                        if (button == null) Modifier.padding(end = 25.dp, top = 10.dp)
+                        else Modifier.padding(end = 10.dp, top = imageTopPaddingDp)
+                    )
+                    .then(
+                        if (button == null) Modifier.size(80.dp, 65.dp)
+                        else Modifier
+                            .width(82.dp)
+                            .height((contentHeight - imageTopPaddingDp).coerceAtMost(110.dp))
+
+                    )
                     .zIndex(0f),
                 model = present.image,
                 contentDescription = null,
-                contentScale = ContentScale.Inside
+                contentScale = ContentScale.FillBounds
             )
         }
     }

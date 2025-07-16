@@ -4,5 +4,6 @@ import com.vodovoz.app.domain.general.model.promotion.ColorfulButtonModel
 
 data class CartPresentPopupWindowModel(
     val items: List<CartPresentItemModel>,
-    val button: ColorfulButtonModel
+    val button: ColorfulButtonModel,
+    val present: CartPresentModel?
 )

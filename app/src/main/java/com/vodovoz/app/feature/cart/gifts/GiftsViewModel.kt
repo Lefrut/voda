@@ -1,5 +1,6 @@
 package com.vodovoz.app.feature.cart.gifts
 
+import androidx.compose.runtime.Stable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.vodovoz.app.feature.cart.gifts.model.GiftsEvent
@@ -15,6 +16,7 @@ import javax.inject.Inject
 
 
 @HiltViewModel
+@Stable
 class GiftsViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
 ) : MviViewModel<GiftsState, GiftsEvent>(GiftsState()) {

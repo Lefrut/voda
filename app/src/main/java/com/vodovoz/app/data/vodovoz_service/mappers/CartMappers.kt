@@ -26,15 +26,22 @@ import com.vodovoz.app.domain.general.model.cart.CartPromoPopupWindowModel
 import com.vodovoz.app.domain.general.model.cart.OrderSummaryItemModel
 
 fun CartDetailsDTO.toDomain(): CartDetailsModel {
+
+    val orderSummary = ITOG?.mapToDomain() ?: throw IllegalArgumentException("OrderSummary can't be null")
+
     return CartDetailsModel(
         title = TITLE ?: "",
         countText = COUNT ?: "",
         items = KORZINA.mapToDomain(),
-        present = PODAROK?.toDomain(),
+        present = PODAROK?.toDomain(
+            orderPrice = orderSummary.firstOrNull()?.value?.filter {
+                it.isDigit()
+            }?.toIntOrNull() ?: 0
+        ),
         bottlesButton = KNOPKI?.BYTYLI?.toDomain(),
         promotionalCodeButton = KNOPKI?.PROMOKOD?.toDomain(),
         presentButton = KNOPKI?.PODARKI?.toDomain(),
-        orderSummary = ITOG?.mapToDomain() ?: throw IllegalArgumentException("OrderSummary can't be null")
+        orderSummary = orderSummary
     )
 }
 
@@ -84,7 +91,7 @@ fun CART_KNOPKA_DTO.toDomain(): CartButtonModel {
     )
 }
 
-fun PODAROK_DTO.toDomain(): CartPresentModel {
+fun PODAROK_DTO.toDomain(orderPrice: Int): CartPresentModel {
     return CartPresentModel(
         id = ID ?: -1,
         title = TITLE ?: "",
@@ -92,14 +99,16 @@ fun PODAROK_DTO.toDomain(): CartPresentModel {
         image = KARTINKA?.toVodovozUrl() ?: "",
         leftToGift = MAXSYMMA ?: OPIS?.filter { it.isDigit() }?.toIntOrNull() ?: 0,
         button = KNOPKA?.toDomain(),
-        popupWindow = KNOPKA?.OKNOPODAROK?.toDomain()
+        popupWindow = KNOPKA?.OKNOPODAROK?.toDomain(orderPrice),
+        currentGift = orderPrice
     )
 }
 
-fun OKNO_PODAROK_DTO.toDomain(): CartPresentPopupWindowModel {
+fun OKNO_PODAROK_DTO.toDomain(orderPrice: Int): CartPresentPopupWindowModel {
     return CartPresentPopupWindowModel(
         items = PODAROK?.mapToDomain() ?: emptyList(),
-        button = KNOPKA?.toDomain() ?: ColorfulButtonModel.Empty
+        button = KNOPKA?.toDomain() ?: ColorfulButtonModel.Empty,
+        present = PODAROK_BANNER?.toDomain(orderPrice)
     )
 }
 
