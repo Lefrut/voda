@@ -33,8 +33,8 @@ fun VodovozButtonsColumn(
                 colors = ButtonDefaults.filledTonalButtonColors(
                     containerColor = containerColor,
                     contentColor = contentColor,
-                    disabledContentColor = contentColor.copy(0.4f),
-                    disabledContainerColor = containerColor.copy(0.4f)
+                    disabledContentColor = contentColor.copy(0.45f),
+                    disabledContainerColor = containerColor.copy(0.45f)
                 ),
                 enabled = button.enabled,
                 isLoading = button.loading,

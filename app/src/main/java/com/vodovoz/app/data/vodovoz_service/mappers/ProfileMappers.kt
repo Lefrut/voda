@@ -1,9 +1,14 @@
 package com.vodovoz.app.data.vodovoz_service.mappers
 
+import com.vodovoz.app.common.model.VodovozBoolean
+import com.vodovoz.app.common.model.boolean
+import com.vodovoz.app.common.model.from
 import com.vodovoz.app.core.network.VodovozWebConfig
 import com.vodovoz.app.data.vodovoz_service.di.toVodovozUrl
+import com.vodovoz.app.data.vodovoz_service.model.profile.BonusesPopupWindowDTO
 import com.vodovoz.app.data.vodovoz_service.model.profile.CHAT_MENU_DTO
 import com.vodovoz.app.data.vodovoz_service.model.profile.DENIGI_DTO
+import com.vodovoz.app.data.vodovoz_service.model.profile.KNOPKA_BONUSES_DTO
 import com.vodovoz.app.data.vodovoz_service.model.profile.PROFILE_BLOCK_DTO
 import com.vodovoz.app.data.vodovoz_service.model.profile.PROFILE_MENO_OKNO_DTO
 import com.vodovoz.app.data.vodovoz_service.model.profile.PROFILE_MINI_MENU_DTO
@@ -12,6 +17,9 @@ import com.vodovoz.app.data.vodovoz_service.model.profile.PROFILE_TEXT_OKNO_DTO
 import com.vodovoz.app.data.vodovoz_service.model.profile.PROFIL_DTO
 import com.vodovoz.app.data.vodovoz_service.model.profile.ProfileDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.profile.TEXT_KNOPKA_DTO
+import com.vodovoz.app.domain.general.model.product.SectionModel
+import com.vodovoz.app.domain.general.model.promotion.ColorfulButtonModel
+import com.vodovoz.app.domain.general.model.user.BonusesPopupWindowModel
 import com.vodovoz.app.domain.general.model.user.ProfileCardModel
 import com.vodovoz.app.domain.general.model.user.ProfileChatItemModel
 import com.vodovoz.app.domain.general.model.user.ProfileChatsPopupWindowModel
@@ -19,7 +27,6 @@ import com.vodovoz.app.domain.general.model.user.ProfileDetailsModel
 import com.vodovoz.app.domain.general.model.user.ProfileMenuItemModel
 import com.vodovoz.app.domain.general.model.user.ProfilePopupWindowModel
 import com.vodovoz.app.domain.general.model.user.ProfileWalletItemModel
-import com.vodovoz.app.domain.general.model.product.SectionModel
 import com.vodovoz.app.domain.general.model.user.TextButtonModel
 import com.vodovoz.app.domain.general.model.user.UserInfoBlockModel
 
@@ -129,3 +136,24 @@ fun CHAT_MENU_DTO.toDomain(): ProfileChatItemModel {
 }
 
 
+fun BonusesPopupWindowDTO.toDomain(): BonusesPopupWindowModel {
+    val buttonId = KNOPKA?.ID
+    return BonusesPopupWindowModel(
+        title = TITLE ?: "",
+        coupon = COUPON ?: "",
+        description = OPISANIE ?: "",
+        warmAboutExpiration = SGORANIE?.KLYCH == "1",
+        messageAboutExpiration = SGORANIE?.TITLE ?: "",
+        button = KNOPKA?.toDomain() ?: ColorfulButtonModel.Empty,
+        url = buttonId?.SSILKA?.toVodovozUrl() ?: "",
+        browser = !VodovozBoolean.from(buttonId?.IFRAME).boolean
+    )
+}
+
+fun KNOPKA_BONUSES_DTO.toDomain(): ColorfulButtonModel {
+    return ColorfulButtonModel(
+        name = TITLE ?: "",
+        backgroundColor = BACKGROUND ?: "",
+        textColor = TEXTCOLOR ?: ""
+    )
+}

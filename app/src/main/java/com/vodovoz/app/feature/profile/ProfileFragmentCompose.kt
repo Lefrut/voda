@@ -34,12 +34,14 @@ import com.vodovoz.app.core.navigation.navigateToWaitFeedbackProducts
 import com.vodovoz.app.core.navigation.navigateToWaterApp
 import com.vodovoz.app.core.navigation.activate
 import com.vodovoz.app.core.navigation.navigateToLoginByEmail
+import com.vodovoz.app.core.navigation.navigateToWebView
 import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.composables.placeholders.LoadingPlaceholder
 import com.vodovoz.app.design_system.composables.placeholders.NetworkErrorPlaceholder
 import com.vodovoz.app.design_system.composables.placeholders.VodovozPlaceholder
 import com.vodovoz.app.feature.profile.navigation.ProfileChatsNavigator
 import com.vodovoz.app.util.extensions.copyText
+import com.vodovoz.app.util.extensions.openUrl
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -178,6 +180,13 @@ class ProfileFragment : Fragment() {
 
                         ProfileFlowViewModel.ProfileEvents.GoToWaitFeedbackProducts -> {
                             findNavController().navigateToWaitFeedbackProducts()
+                        }
+
+                        is ProfileFlowViewModel.ProfileEvents.GoToWebView -> {
+                            findNavController().navigateToWebView(events.url, events.title)
+                        }
+                        is ProfileFlowViewModel.ProfileEvents.OpenUrl -> {
+                            requireContext().openUrl(events.url)
                         }
                     }
                 }

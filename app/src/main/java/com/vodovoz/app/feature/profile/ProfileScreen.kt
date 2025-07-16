@@ -2,15 +2,9 @@ package com.vodovoz.app.feature.profile
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.layout.systemBars
-import androidx.compose.foundation.layout.systemBarsPadding
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CornerSize
@@ -30,6 +24,7 @@ import com.vodovoz.app.design_system.composables.bottom_sheet.InfoBottomSheet
 import com.vodovoz.app.design_system.composables.decoration.AdvertisingChip
 import com.vodovoz.app.feature.all.promotions.composables.AdvertisingInfoBottomSheet
 import com.vodovoz.app.feature.home.composables.AuthScrollImagePager
+import com.vodovoz.app.feature.profile.composables.BonusesBottomSheet
 import com.vodovoz.app.feature.profile.composables.ProfileCardsRow
 import com.vodovoz.app.feature.profile.composables.ProfileMenuColumn
 import com.vodovoz.app.feature.profile.composables.ProfileUserInfoRow
@@ -179,6 +174,25 @@ fun ProfileScreen(
             },
             onApply = {
                 viewModel.closeTextBottomSheet()
+            }
+        )
+    }
+
+    val bonusesBSData = viewState.currentBonusesBSData
+    if(bonusesBSData != null && viewState.showBonusesBS){
+        BonusesBottomSheet(
+            data = bonusesBSData,
+            onDismissRequest = {
+                viewModel.hideBonusesBottomSheet()
+            },
+            onCopyClick = { s ->
+                viewModel.copyText(s)
+            },
+            onSubscribeChange = { subscribe ->
+                viewModel.changeBonusesSubscribe(subscribe)
+            },
+            onConditionButtonClick = { bonusesPopupWindow ->
+                viewModel.navigateToBonusesConditions(bonusesPopupWindow)
             }
         )
     }

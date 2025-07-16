@@ -59,6 +59,7 @@ import com.vodovoz.app.domain.general.model.service.AllServicesDetailsModel
 import com.vodovoz.app.domain.general.model.service.ServiceDetailsModel
 import com.vodovoz.app.domain.general.model.service.ServiceOrderDetailsModel
 import com.vodovoz.app.domain.general.model.user.AuthDetailsModel
+import com.vodovoz.app.domain.general.model.user.BonusesPopupWindowModel
 import com.vodovoz.app.domain.general.model.user.ChangePasswordDetailsModel
 import com.vodovoz.app.domain.general.model.user.NotificationSettingsDetailsModel
 import com.vodovoz.app.domain.general.model.user.ProfileDetailsModel
@@ -115,7 +116,7 @@ interface VodovozServiceRepository {
     fun getOrderingDetails(
         addressId: Long? = null,
         date: String? = null,
-        timeInterval: String? = null
+        timeInterval: String? = null,
     ): Flow<Result<OrderingDetailsModel>>
 
     fun doOrder(
@@ -283,6 +284,10 @@ interface VodovozServiceRepository {
     fun getUserData(): Flow<Result<UserDataModel>>
 
     fun getProfileDetails(): Flow<Result<ProfileDetailsModel>>
+
+    fun getBonusesPopupWindow(): Flow<Result<BonusesPopupWindowModel>>
+
+    fun updateBonusesSubscribe(subscribe: Boolean): Flow<Result<Unit>>
 
     fun getFilters(categoryId: Int): Flow<Result<FiltersModel>>
 
