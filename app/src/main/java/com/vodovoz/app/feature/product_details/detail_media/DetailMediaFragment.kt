@@ -6,7 +6,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.snapshotFlow
@@ -19,7 +18,6 @@ import androidx.navigation.fragment.findNavController
 import com.vodovoz.app.common.tab.TabManager
 import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.effects.LifecycleEffect
-import com.vodovoz.app.design_system.effects.SystemBarsEffect
 import com.vodovoz.app.feature.product_details.detail_media.model.DetailMediaEvent
 import com.vodovoz.app.util.extensions.disableFullScreen
 import com.vodovoz.app.util.extensions.enableFullScreen
@@ -78,6 +76,10 @@ class DetailMediaFragment : Fragment() {
                             snapshotFlow { pagerState.currentPage }.distinctUntilChanged()
                                 .collectLatest { currentPage ->
                                     viewModel.setMediaByIndex(currentPage)
+                                    findNavController().previousBackStackEntry?.savedStateHandle?.set(
+                                        "mediaIndex",
+                                        currentPage
+                                    )
                                 }
                         }
                     }

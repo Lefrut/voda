@@ -97,8 +97,8 @@ fun MapBody(
 
     BoxWithConstraints(modifier = modifier.fillMaxSize()) {
         val mapHeight = remember { maxHeight }
-        val focusMapWidth = remember() { maxWidth }
-        val focusMapHeight = remember() { mapHeight - 220.dp }
+        val focusMapWidth = remember { maxWidth }
+        val focusMapHeight = remember { mapHeight - 220.dp }
 
         YandexMapView(
             modifier = Modifier.size(focusMapWidth, mapHeight),

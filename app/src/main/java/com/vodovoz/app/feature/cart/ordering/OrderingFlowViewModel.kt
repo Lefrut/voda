@@ -579,6 +579,8 @@ class OrderingFlowViewModel @Inject constructor(
             return@launch
         }
 
+        eventListener.emit(OrderingEvents.RefreshCart)
+
         if(button.browser == true){
             eventListener.emit(OrderingEvents.GoToWebView(button.url))
         }else{

@@ -290,12 +290,6 @@ fun FieldModel.toUi(): FieldUi {
     }
     val isDropDownField = valueType.uppercase() == "SPISOK"
 
-    val fieldUiReadonly = when (id.lowercase()) {
-        "data", "date" -> true
-        else -> readOnly
-    }
-
-
     return FieldUi(
         id = id,
         label = label,
@@ -305,7 +299,7 @@ fun FieldModel.toUi(): FieldUi {
         keyboardType = if (isDropDownField) KeyboardType.Unspecified else keyboardType,
         isRequired = isRequired,
         isError = false,
-        readOnly = fieldUiReadonly,
+        readOnly = readOnly,
         supportingText = supportingText,
         hint = hint,
         isValueVisible = keyboardType != KeyboardType.Password,

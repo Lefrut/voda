@@ -58,7 +58,9 @@ fun VodovozDropDownTextField(
         modifier = Modifier.fillMaxWidth(),
         expanded = showDropDown,
         onExpandedChange = {
-            showDropDown = !showDropDown
+            if(!field.readOnly){
+                showDropDown = !showDropDown
+            }
         }
     ) {
         VodovozTextField(
@@ -76,16 +78,18 @@ fun VodovozDropDownTextField(
             supportingText = field.supportingText,
             visualTransformation = VisualTransformation.None,
             trailingIcon = {
-                Icon(
-                    imageVector = ImageVector.vectorResource(R.drawable.ic_arrow_down),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .clip(CircleShape)
-                        .clickable { }
-                        .size(24.dp)
-                        .graphicsLayer { rotationZ = animatedArrowRotation },
-                    tint = MaterialTheme.colorScheme.primary
-                )
+                if(!field.readOnly){
+                    Icon(
+                        imageVector = ImageVector.vectorResource(R.drawable.ic_arrow_down),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .clip(CircleShape)
+                            .clickable { }
+                            .size(24.dp)
+                            .graphicsLayer { rotationZ = animatedArrowRotation },
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
             },
             prefix = null
         )

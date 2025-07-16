@@ -441,6 +441,7 @@ interface VodovozService {
         @Query("filtervalue") filtersAndValues: String? = null,
         @Query("price_to") priceTo: Float? = null,
         @Query("price_from") priceFrom: Float? = null,
+        @QueryMap queries: Map<String, String?> = emptyMap()
     ): Response<VodovozResponseDTO<ProductsSectionDTO>>
 
     /**

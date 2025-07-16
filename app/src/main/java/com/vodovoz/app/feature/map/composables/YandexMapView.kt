@@ -44,6 +44,7 @@ fun YandexMapView(
             ScreenPoint(0f, 0f),
             ScreenPoint(focusMapWidthPx, focusMapHeightPx)
         )
+        mapView.focusPoint = ScreenPoint(focusMapWidthPx / 2, focusMapHeightPx / 2)
     }
 
 

@@ -102,21 +102,27 @@ class UserDataFlowViewModel @Inject constructor(
     }
 
     fun updateUserData() = viewModelScope.launch {
+        uiStateListener.updateData { s ->
+            s.copy(buttonLoading = true)
+        }
+
         val updateUserDataResult =
             vodovozServiceRepository.updateUserData(dataState.fields.mapToDomain()).singleResult()
         updateUserDataResult.onSuccess { message ->
             eventListener.emit(UserDataEvents.UpdateProfile)
             eventListener.emit(UserDataEvents.ShowSnackbar(message))
-            uiStateListener.updateData { s ->
-                s.copy(buttonEnabled = false)
-            }
+
         }.onFailure {
             eventListener.emit(
                 UserDataEvents.ShowSnackbar(resourcesProvider.getString(R.string.update_user_data_error))
             )
-            uiStateListener.updateData { s ->
-                s.copy(buttonEnabled = false)
-            }
+        }
+
+        uiStateListener.updateData { s ->
+            s.copy(
+                buttonEnabled = false,
+                buttonLoading = false
+            )
         }
     }
 
@@ -269,6 +275,7 @@ class UserDataFlowViewModel @Inject constructor(
         val photoDescription: String = "",
         val uiState: UserDataUiState = UserDataUiState.Loading,
         val buttonEnabled: Boolean = false,
+        val buttonLoading: Boolean = false,
         val showLogoutDialog: Boolean = false,
         val showDeleteAccountDialog: Boolean = false,
         val showDatePicker: Boolean = false,

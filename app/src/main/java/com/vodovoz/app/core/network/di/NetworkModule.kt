@@ -44,9 +44,8 @@ abstract class NetworkModule {
     @IntoSet
     @VodovozInterceptor
     abstract fun bindCookieHandlerInterceptor(
-        interceptor : CookieHandlerInterceptor
+        interceptor: CookieHandlerInterceptor,
     ): Interceptor
-
 
 
     companion object {
@@ -60,7 +59,7 @@ abstract class NetworkModule {
         ): OkHttpClient {
             val okHttpClient = OkHttpClient.Builder()
             for (interceptor in interceptors) {
-                if(!BuildConfig.DEBUG && interceptor is HttpLoggingInterceptor){
+                if (!BuildConfig.DEBUG && interceptor is HttpLoggingInterceptor) {
                     continue
                 }
                 okHttpClient.addInterceptor(interceptor)

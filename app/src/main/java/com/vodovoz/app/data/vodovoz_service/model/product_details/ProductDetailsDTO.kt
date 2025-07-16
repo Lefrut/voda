@@ -14,8 +14,8 @@ data class ProductDetailsDTO(
     val DETAILTEXT: List<DETAILTEXT_DTO>?,
     @Json(name = "KNOPKI")
     val KNOPKI: PRODUCT_DETAILS_KNOPKI_DTO?,
-    @Json(name = "PODILITSYA")
-    val PODILITSYA: PODILITSYA_DTO?,
+    @Json(name = "SHARE")
+    val SHARE: PODILITSYA_DTO?,
     @Json(name = "TOVAR")
     val TOVAR: TOVAR_DETAIL_DTO?
 )

@@ -103,7 +103,7 @@ private fun TOVAR_DETAIL_DTO.toDomain(
             ?: emptyList()) + detailPicture).distinct().reversed(),
         sectionTags = TAGS?.toDomain() ?: SectionModel.empty(),
         isFavorite = FAVORITE ?: false,
-        isAvailable = (KOLLTOVAR ?: -1) > 0,
+        isAvailable = (KOLLTOVAR ?: 0) > 0,
         productQuantity = KOLLTOVAR ?: 0,
         labels = NALICHIE?.mapToDomain() ?: emptyList(),
         rating = PROPERTY_RATING_VALUE?.toFloat() ?: 0f,
@@ -297,7 +297,7 @@ fun ProductDetailsDTO.toDomain(): ProductDetailsScreenModel {
 
     return ProductDetailsScreenModel(
         details = TOVAR?.toDomain(
-            shareUrlText = PODILITSYA?.detail_page_url ?: "",
+            shareUrlText = SHARE?.detail_page_url_ios?.run { "$NAME $URL" } ?: "",
             commentsCount = commentsCount
         ) ?: throw NoSuchElementException("Product details not found."),
         buttons = ProductDetailsButtonsModel(

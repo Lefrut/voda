@@ -18,6 +18,7 @@ import com.vodovoz.app.core.navigation.navigateToAddAddress
 import com.vodovoz.app.core.navigation.navigateToMap
 import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.effects.LifecycleEffect
+import com.vodovoz.app.feature.addresses.model.AddressScreenTypeUi
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -28,6 +29,17 @@ class AddressesFragment : Fragment() {
     lateinit var tabManager: TabManager
 
     internal val viewModel: AddressesFlowViewModel by viewModels()
+
+    override fun onStart() {
+        super.onStart()
+        val screenType = viewModel.observeUiState().value.data.screenType
+        when(screenType){
+            AddressScreenTypeUi.Add -> {}
+            AddressScreenTypeUi.Choose -> {
+                tabManager.changeTabVisibility(false)
+            }
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,

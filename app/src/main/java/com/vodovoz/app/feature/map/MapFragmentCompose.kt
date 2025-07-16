@@ -22,6 +22,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.SoftwareKeyboardController
@@ -70,6 +71,8 @@ class MapFragment : Fragment() {
 
     @Inject
     lateinit var tabManager: TabManager
+
+
 
     private val fusedLocationClient by lazy {
         LocationServices.getFusedLocationProviderClient(requireContext())
@@ -120,7 +123,7 @@ class MapFragment : Fragment() {
                     }
                 }
 
-                val anchoredDraggableState = remember {
+                val anchoredDraggableState = rememberSaveable(saver = AnchoredDraggableState.Saver()) {
                     AnchoredDraggableState(initialValue = PartiallyExpanded)
                 }
 

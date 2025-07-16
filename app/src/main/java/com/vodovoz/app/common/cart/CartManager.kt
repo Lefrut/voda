@@ -1,5 +1,6 @@
 package com.vodovoz.app.common.cart
 
+import com.vodovoz.app.common.di.IoDispatcher
 import com.vodovoz.app.common.tab.TabManager
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.util.extensions.singleResult
@@ -27,10 +28,12 @@ import javax.inject.Singleton
 @Singleton
 class CartManager @Inject constructor(
     private val vodovozServiceRepository: VodovozServiceRepository,
+    @IoDispatcher
+    private val dispatcher: CoroutineDispatcher
 ) {
 
     private val cartMutex = Mutex()
-    private val coroutineScope = CoroutineScope(Dispatchers.IO)
+    private val coroutineScope = CoroutineScope(dispatcher)
 
     private val updateCartListListener = MutableStateFlow(false)
     fun observeUpdateCartList() = updateCartListListener.asStateFlow()

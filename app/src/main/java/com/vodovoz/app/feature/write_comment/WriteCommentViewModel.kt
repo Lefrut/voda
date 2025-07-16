@@ -40,7 +40,7 @@ class WriteCommentViewModel @Inject constructor(
     private val vodovozServiceRepository: VodovozServiceRepository,
 ) : MviViewModel<WriteCommentState, WriteCommentEvent>(WriteCommentState()) {
 
-    private val productId: Long = savedStateHandle["product_id"] ?: navigateBack().run { -1L }
+    private val productId: Long = savedStateHandle["product_id"] ?: -1
     private val productName: String = savedStateHandle["product_name"] ?: ""
     private val productImage: String = savedStateHandle["product_image"] ?: ""
     private val rating: Int = savedStateHandle["rating"] ?: 0
@@ -107,7 +107,7 @@ class WriteCommentViewModel @Inject constructor(
             }
         }
 
-        if (!isValid) return@launch
+        if (!isValid || rating == 0) return@launch
 
         _state.update { s ->
             s.copy(buttonIsLoading = true)

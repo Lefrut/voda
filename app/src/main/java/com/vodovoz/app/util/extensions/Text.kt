@@ -56,4 +56,20 @@ fun String.prepareServiceHtml(): String {
 }
 
 
+fun String.decodeUnicodeEscapes(): String {
+    val replacements = mapOf(
+        "\\u2028" to "\n",
+        "\\u2029" to "\n",
+        "\\u200B" to "",
+    )
+
+    val regex = Regex("""\\u([0-9a-fA-F]{4})""")
+    return regex.replace(this) { matchResult ->
+        replacements.forEach { (unicode, new) ->
+            if(unicode == matchResult.value) return@replace new
+        }
+        return@replace matchResult.value
+    }
+}
+
 

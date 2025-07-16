@@ -1,6 +1,7 @@
 package com.vodovoz.app.data.vodovoz_service.mappers
 
 import android.text.Html
+import androidx.core.text.HtmlCompat
 import com.vodovoz.app.data.vodovoz_service.di.toVodovozUrl
 import com.vodovoz.app.data.vodovoz_service.model.AKCIYA_DTO
 import com.vodovoz.app.data.vodovoz_service.model.HIT_DTO
@@ -85,6 +86,6 @@ fun OREKLAME_DTO.toDomain(): AboutAdvertisingModel? {
         name = this.NAME ?: "",
         title = this.ZAGOLOVOK ?: return null,
         aboutCompanyTitle = this.NAMEVNUTRI ?: return null,
-        aboutCompany = Html.fromHtml(dannye).toString()
+        aboutCompany = HtmlCompat.fromHtml(dannye, HtmlCompat.FROM_HTML_MODE_LEGACY).toString()
     )
 }

@@ -5,6 +5,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.foundation.pager.PagerState
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
@@ -14,7 +16,6 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.fragment.findNavController
-import androidx.navigation.fragment.navArgs
 import coil3.compose.rememberAsyncImagePainter
 import com.vodovoz.app.R
 import com.vodovoz.app.common.tab.TabManager
@@ -37,6 +38,7 @@ import com.vodovoz.app.design_system.effects.LifecycleEffect
 import com.vodovoz.app.util.extensions.copyText
 import com.vodovoz.app.util.extensions.shareText
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.onSubscription
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -60,10 +62,20 @@ class ProductDetailsFragment : Fragment() {
             setContent {
                 VodovozTheme {
                     val viewState by viewModel.observeUiState().collectAsStateWithLifecycle()
+                    val uiState = viewState.uiState
 
-                    when (val uiState = viewState.uiState) {
+                    val mediaPagerState = when (uiState) {
+                        ProductDetailsFlowViewModel.ProductDetailsUiState.Success -> {
+                            rememberPagerState { viewState.productDetails.mediaList.size }
+                        }
+
+                        else -> {
+                            rememberPagerState { 0 }
+                        }
+                    }
 
 
+                    when (uiState) {
                         ProductDetailsFlowViewModel.ProductDetailsUiState.ProductNotFound -> {
                             EmptyResultPlaceholder(
                                 title = stringResource(R.string.product_not_found),
@@ -83,6 +95,7 @@ class ProductDetailsFragment : Fragment() {
                             ProductDetailsScreen(
                                 viewState = viewState,
                                 viewModel = viewModel,
+                                mediaPagerState = mediaPagerState
                             )
                         }
 
@@ -100,7 +113,10 @@ class ProductDetailsFragment : Fragment() {
                     }
 
 
-                    LifecycleEffect { observeEvents() }
+                    LifecycleEffect {
+                        observeEvents(mediaPagerState)
+                    }
+
                     LifecycleEffect { viewModel.listenFavorites() }
                     LifecycleEffect { viewModel.listenCart() }
                     LifecycleEffect { viewModel.listenLoadingsProduct() }
@@ -110,87 +126,100 @@ class ProductDetailsFragment : Fragment() {
         }
     }
 
-    private suspend fun observeEvents(): Unit = viewModel.observeEvent().collect { event ->
-        when (event) {
-            is ProductDetailsFlowViewModel.ProductDetailsEvents.GoToPreOrder -> {
-                findNavController().navigateToPreOrder(event.id)
-            }
+    private suspend fun observeEvents(mediaPagerState: PagerState): Unit =
+        viewModel.observeEvent().onSubscription {
+            val mediaIndex = findNavController().currentBackStackEntry
+                ?.savedStateHandle
+                ?.get<Int>("mediaIndex")
 
-            is ProductDetailsFlowViewModel.ProductDetailsEvents.GoToProfile -> {
-                tabManager.setAuthRedirect(findNavController().graph.id)
-                tabManager.selectTab(R.id.graph_profile)
+            mediaIndex?.let { page ->
+                viewModel.setMediaPage(page)
             }
+        }.collect { event ->
+            when (event) {
+                is ProductDetailsFlowViewModel.ProductDetailsEvents.GoToPreOrder -> {
+                    findNavController().navigateToPreOrder(event.id)
+                }
 
-            is ProductDetailsFlowViewModel.ProductDetailsEvents.GoToCart -> {
-                tabManager.setAuthRedirect(findNavController().graph.id)
-                tabManager.selectTab(R.id.graph_cart)
-            }
+                is ProductDetailsFlowViewModel.ProductDetailsEvents.GoToProfile -> {
+                    tabManager.setAuthRedirect(findNavController().graph.id)
+                    tabManager.selectTab(R.id.graph_profile)
+                }
 
-            is ProductDetailsFlowViewModel.ProductDetailsEvents.GoToAboutProduct -> {
-                findNavController().navigateToAboutProduct(
-                    productId = event.productId,
-                    prices = event.prices,
-                    analogButton = event.analogButton,
-                    isAvailable = event.isAvailable
-                )
-            }
+                is ProductDetailsFlowViewModel.ProductDetailsEvents.GoToCart -> {
+                    tabManager.setAuthRedirect(findNavController().graph.id)
+                    tabManager.selectTab(R.id.graph_cart)
+                }
 
-            is ProductDetailsFlowViewModel.ProductDetailsEvents.GoToProductComments -> {
-                findNavController().navigateToProductComments(
-                    productId = event.productId,
-                    productName = event.productName,
-                    productImage = event.productImage
-                )
-            }
+                is ProductDetailsFlowViewModel.ProductDetailsEvents.GoToAboutProduct -> {
+                    findNavController().navigateToAboutProduct(
+                        productId = event.productId,
+                        prices = event.prices,
+                        analogButton = event.analogButton,
+                        isAvailable = event.isAvailable
+                    )
+                }
 
-            is ProductDetailsFlowViewModel.ProductDetailsEvents.GoToProductAnalogs -> {
-                findNavController().navigateToProductAnalogs(event.productId)
-            }
+                is ProductDetailsFlowViewModel.ProductDetailsEvents.GoToProductComments -> {
+                    findNavController().navigateToProductComments(
+                        productId = event.productId,
+                        productName = event.productName,
+                        productImage = event.productImage
+                    )
+                }
 
-            ProductDetailsFlowViewModel.ProductDetailsEvents.GoBack -> {
-                findNavController().popBackStack()
-            }
+                is ProductDetailsFlowViewModel.ProductDetailsEvents.GoToProductAnalogs -> {
+                    findNavController().navigateToProductAnalogs(event.productId)
+                }
 
-            is ProductDetailsFlowViewModel.ProductDetailsEvents.GoToSearch -> {
-                findNavController().navigateToSearch(event.query)
-            }
+                ProductDetailsFlowViewModel.ProductDetailsEvents.GoBack -> {
+                    findNavController().popBackStack()
+                }
 
-            is ProductDetailsFlowViewModel.ProductDetailsEvents.GoToProductDetails -> {
-                findNavController().navigateToProductDetails(event.productId)
-            }
+                is ProductDetailsFlowViewModel.ProductDetailsEvents.GoToSearch -> {
+                    findNavController().navigateToSearch(event.query)
+                }
 
-            is ProductDetailsFlowViewModel.ProductDetailsEvents.GoToCategoryProductList -> {
-                findNavController().navigateToCategoryProductList(event.categoryId)
-            }
+                is ProductDetailsFlowViewModel.ProductDetailsEvents.GoToProductDetails -> {
+                    findNavController().navigateToProductDetails(event.productId)
+                }
 
-            is ProductDetailsFlowViewModel.ProductDetailsEvents.Share -> {
-                kotlin.runCatching { requireContext().shareText(event.text) }
-            }
+                is ProductDetailsFlowViewModel.ProductDetailsEvents.GoToCategoryProductList -> {
+                    findNavController().navigateToCategoryProductList(event.categoryId)
+                }
 
-            is ProductDetailsFlowViewModel.ProductDetailsEvents.GoToSearchProductList -> {
-                findNavController().navigateToSearchProductList(event.query)
-            }
+                is ProductDetailsFlowViewModel.ProductDetailsEvents.Share -> {
+                    kotlin.runCatching { requireContext().shareText(event.text) }
+                }
 
-            is ProductDetailsFlowViewModel.ProductDetailsEvents.Copy -> {
-                requireContext().copyText(event.text)
-            }
+                is ProductDetailsFlowViewModel.ProductDetailsEvents.GoToSearchProductList -> {
+                    findNavController().navigateToSearchProductList(event.query)
+                }
 
-            is ProductDetailsFlowViewModel.ProductDetailsEvents.GoToBrandProducts -> {
-                findNavController().navigateToBrandProductList(event.brandId)
-            }
+                is ProductDetailsFlowViewModel.ProductDetailsEvents.Copy -> {
+                    requireContext().copyText(event.text)
+                }
 
-            is ProductDetailsFlowViewModel.ProductDetailsEvents.GoToWriteComment -> {
-                findNavController().navigateToWriteComment(
-                    event.id,
-                    event.name,
-                    event.detailPicture,
-                    event.rating
-                )
-            }
+                is ProductDetailsFlowViewModel.ProductDetailsEvents.GoToBrandProducts -> {
+                    findNavController().navigateToBrandProductList(event.brandId)
+                }
 
-            is ProductDetailsFlowViewModel.ProductDetailsEvents.GoToDetailMedia -> {
-                findNavController().navigateToDetailMedia(event.media, event.mediaList)
+                is ProductDetailsFlowViewModel.ProductDetailsEvents.GoToWriteComment -> {
+                    findNavController().navigateToWriteComment(
+                        event.id,
+                        event.name,
+                        event.detailPicture,
+                        event.rating
+                    )
+                }
+
+                is ProductDetailsFlowViewModel.ProductDetailsEvents.GoToDetailMedia -> {
+                    findNavController().navigateToDetailMedia(event.media, event.mediaList)
+                }
+
+                is ProductDetailsFlowViewModel.ProductDetailsEvents.ScrollToMediaPage -> {
+                    mediaPagerState.scrollToPage(event.page)
+                }
             }
         }
-    }
 }

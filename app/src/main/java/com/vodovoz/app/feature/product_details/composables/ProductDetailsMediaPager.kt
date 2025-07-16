@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PageSize
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
@@ -32,10 +33,9 @@ import mx.platacard.pagerindicator.PagerWormIndicator
 fun ProductDetailsMediaPager(
     modifier: Modifier = Modifier,
     productMediaList: List<ProductMediaUi>,
+    pagerState: PagerState = rememberPagerState { productMediaList.size },
     onMediaClick: (ProductMediaUi) -> Unit,
 ) {
-
-    val pagerState = rememberPagerState { productMediaList.size }
 
     Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
 

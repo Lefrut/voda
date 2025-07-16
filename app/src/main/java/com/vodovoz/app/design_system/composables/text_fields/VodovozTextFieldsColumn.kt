@@ -38,7 +38,9 @@ fun VodovozTextFieldsColumn(
                         awaitEachGesture {
                             awaitFirstDown(pass = PointerEventPass.Initial)
                             val up = waitForUpOrCancellation(pass = PointerEventPass.Initial)
-                            if(up != null ) onFieldClick(field)
+                            if(up != null && !field.readOnly) {
+                                onFieldClick(field)
+                            }
                         }
                     },
                     field = field,

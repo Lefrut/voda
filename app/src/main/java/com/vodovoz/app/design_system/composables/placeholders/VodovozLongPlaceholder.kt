@@ -21,20 +21,17 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.fromHtml
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.text.HtmlCompat
-import androidx.core.text.toHtml
-import androidx.core.text.toSpanned
 import coil3.compose.rememberAsyncImagePainter
 import com.vodovoz.app.R
 import com.vodovoz.app.design_system.composables.button.VodovozButton
 import com.vodovoz.app.design_system.composables.button.VodovozButtonDefaults
 import com.vodovoz.app.design_system.model.VodovozPlaceholderUi
-import com.vodovoz.app.design_system.utils.toAnnotatedString
 
 @Composable
 fun VodovozLongPlaceholder(
@@ -77,14 +74,14 @@ fun VodovozLongPlaceholder(
 
             Text(
                 modifier = Modifier.padding(top = 24.dp),
-                text = HtmlCompat.fromHtml(data.headerHtml, HtmlCompat.FROM_HTML_MODE_LEGACY).toAnnotatedString(),
+                text = AnnotatedString.fromHtml(data.headerHtml),
                 color = MaterialTheme.colorScheme.onBackground,
                 style = MaterialTheme.typography.headlineSmall.copy(textAlign = TextAlign.Center)
             )
 
             Text(
                 modifier = Modifier.padding(top = 24.dp),
-                text = HtmlCompat.fromHtml(data.descriptionHtml, HtmlCompat.FROM_HTML_MODE_LEGACY).toAnnotatedString(),
+                text = AnnotatedString.fromHtml(data.descriptionHtml.replace("\n", stringResource(id = R.string.html_br))),
                 color = MaterialTheme.colorScheme.surfaceTint,
                 style = MaterialTheme.typography.bodyMedium.copy(
                     textAlign = TextAlign.Center,

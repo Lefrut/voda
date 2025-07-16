@@ -52,6 +52,7 @@ fun UserDataScreen(
             photo = viewState.photo,
             photoDescription = viewState.photoDescription,
             buttonEnabled = viewState.buttonEnabled,
+            buttonLoading = viewState.buttonLoading,
             onSaveDataClick = {
                 viewModel.updateUserData()
             },

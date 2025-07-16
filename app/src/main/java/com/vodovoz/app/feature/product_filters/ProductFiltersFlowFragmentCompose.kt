@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.RangeSliderState
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -22,6 +23,8 @@ import com.vodovoz.app.design_system.composables.placeholders.LoadingPlaceholder
 import com.vodovoz.app.design_system.composables.placeholders.NetworkErrorPlaceholder
 import com.vodovoz.app.design_system.effects.LifecycleEffect
 import com.vodovoz.app.design_system.model.filters.FilterUi
+import com.vodovoz.app.design_system.model.filters.FiltersPriceUi
+import com.vodovoz.app.util.extensions.calculateActiveRange
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -44,6 +47,33 @@ class ProductFiltersFlowFragment : Fragment() {
     }
 
     @OptIn(ExperimentalMaterial3Api::class)
+    @Composable
+    private fun rememberFiltersRangeSliderState(
+        uiState: ProductFiltersFlowViewModel.ProductFiltersUiState,
+        filtersPrice: FiltersPriceUi,
+    ): RangeSliderState {
+        return remember(
+            uiState,
+            filtersPrice.min,
+            filtersPrice.max
+        ) {
+            val range = calculateActiveRange(
+                min = filtersPrice.min,
+                max = filtersPrice.max,
+                currentMin = filtersPrice.currentMin,
+                currentMax = filtersPrice.currentMax
+            )
+
+            RangeSliderState(
+                activeRangeStart = range.start,
+                activeRangeEnd = range.endInclusive,
+                valueRange = 0f..1f
+            )
+        }
+
+    }
+
+    @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -55,35 +85,18 @@ class ProductFiltersFlowFragment : Fragment() {
             }
 
         return ComposeView(requireContext()).apply {
-            setViewCompositionStrategy(ViewCompositionStrategy.Default)
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+
             setContent {
                 VodovozTheme {
                     val pagingState by viewModel.observeUiState().collectAsStateWithLifecycle()
                     val viewState by rememberUpdatedState(newValue = pagingState.data)
 
                     val filterPrice = viewState.filters.price
-                    val sliderState = remember(
-                        viewState.uiState,
-                        filterPrice.max,
-                        filterPrice.min
-                    ) {
-                        val range =
-                            (filterPrice.max.toFloat() - filterPrice.min).takeIf { it != 0f }
-                                ?: return@remember RangeSliderState(
-                                    activeRangeStart = 0f,
-                                    activeRangeEnd = 1f,
-                                    valueRange = 0f..1f
-                                )
 
-                        val start = (filterPrice.currentMin - filterPrice.min) / range
-                        val end =
-                            ((filterPrice.currentMax - filterPrice.min) / range).coerceAtLeast(start)
-                        RangeSliderState(
-                            activeRangeStart = start,
-                            activeRangeEnd = end,
-                            valueRange = 0f..1f
-                        )
-                    }
+                    val sliderState = rememberFiltersRangeSliderState(
+                        viewState.uiState, filterPrice,
+                    )
 
                     when (viewState.uiState) {
                         ProductFiltersFlowViewModel.ProductFiltersUiState.Error -> {
