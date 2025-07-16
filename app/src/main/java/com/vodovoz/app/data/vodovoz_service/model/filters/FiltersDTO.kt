@@ -21,11 +21,11 @@ data class FiltersDTO(
 data class FilterBoundsDTO(
     @Expose
     @Json(name = "MIN")
-    val MIN: Int? = null,
+    val MIN: String? = null,
 
     @Expose
     @Json(name = "MAX")
-    val MAX: Int? = null
+    val MAX: String? = null
 )
 
 @Keep

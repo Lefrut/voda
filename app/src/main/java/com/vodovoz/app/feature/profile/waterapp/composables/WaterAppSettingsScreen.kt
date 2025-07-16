@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -54,7 +53,7 @@ import com.vodovoz.app.design_system.robotoFontFamily
 import com.vodovoz.app.feature.profile.waterapp.WaterAppHelper
 import com.vodovoz.app.feature.profile.waterapp.model.ReminderIntervalUi
 import com.vodovoz.app.feature.profile.waterapp.model.WaterAppUiState
-import com.vodovoz.app.util.toExactIntOrNull
+import com.vodovoz.app.util.toIntRoundOrNull
 
 @NonRestartableComposable
 @Composable
@@ -288,7 +287,7 @@ private fun ReminderCard(
 ) {
     val showHours = WaterAppHelper.shouldDisplayIntervalAsHours(reminderIntervalUi.minutes)
     val valueString = WaterAppHelper.formatReminderMinutes(reminderIntervalUi.minutes)
-    val valueInt = valueString.toExactIntOrNull()
+    val valueInt = valueString.toIntRoundOrNull()
 
     val contentColor = if (!reminderIntervalUi.selected) {
         MaterialTheme.colorScheme.primary
