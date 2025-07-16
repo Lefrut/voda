@@ -61,9 +61,6 @@ fun CartBody(
                     modifier = Modifier
                         .padding(bottom = 24.dp, start = 16.dp, end = 16.dp)
                         .animateContentSize(),
-                    currentCartPrice = cartOrderSummary.getOrNull(1)?.value?.filter { c ->
-                        c.isDigit()
-                    }?.toIntOrNull() ?: 0,
                     present = cartPresent,
                     onChoosePresentClick = onPresentButtonClick
                 )

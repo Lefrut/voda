@@ -7,6 +7,7 @@ data class CartPresentModel(
     val title: String,
     val description: String,
     val image: String,
+    val currentGift: Int,
     val leftToGift: Int,
     val button: ColorfulButtonModel?,
     val popupWindow: CartPresentPopupWindowModel?
