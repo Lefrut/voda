@@ -5,6 +5,7 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -26,6 +27,7 @@ import com.vodovoz.app.feature.product_details.composables.ProductDetailsTopBar
 fun ProductDetailsScreen(
     viewState: ProductDetailsFlowViewModel.ProductDetailsState,
     viewModel: ProductDetailsFlowViewModel,
+    mediaPagerState: PagerState
 ) {
     val productDetails = viewState.productDetails
 
@@ -91,6 +93,7 @@ fun ProductDetailsScreen(
                         .padding(top = paddingValues.calculateTopPadding())
                         .verticalScroll(rememberScrollState())
                         .padding(bottom = paddingValues.calculateBottomPadding()),
+                    mediaPagerState = mediaPagerState,
                     productDetails = productDetails,
                     comments = viewState.comments,
                     quantityButtonIsLoading = viewState.buttonIsLoading,

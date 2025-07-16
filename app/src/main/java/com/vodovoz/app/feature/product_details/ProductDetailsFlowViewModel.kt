@@ -199,15 +199,6 @@ class ProductDetailsFlowViewModel @Inject constructor(
                         )
                     }
 
-                    val productDetails = state.productDetails
-
-                    aboutProductManager.updateInfo(
-                        tabs = state.tabs,
-                        characteristicBlockList = productDetails.characteristics,
-                        documents = productDetails.documents,
-                        fullDescription = productDetails.detailInfo
-                    )
-
                 }.onFailure {
                     uiStateListener.update { s ->
                         s.copy(uiState = ProductDetailsUiState.ProductNotFound)
@@ -304,8 +295,15 @@ class ProductDetailsFlowViewModel @Inject constructor(
     }
 
     fun navigateToAboutProduct() = viewModelScope.launch {
-
         val viewState = uiStateListener.value
+        val productDetails = state.productDetails
+
+        aboutProductManager.updateInfo(
+            tabs = state.tabs,
+            characteristicBlockList = productDetails.characteristics,
+            documents = productDetails.documents,
+            fullDescription = productDetails.detailInfo
+        )
 
         eventListener.emit(
             ProductDetailsEvents.GoToAboutProduct(
@@ -482,6 +480,10 @@ class ProductDetailsFlowViewModel @Inject constructor(
         userPreferencesRepository.setCanViewAdultProducts(true)
     }
 
+    fun setMediaPage(page: Int) = viewModelScope.launch {
+        eventListener.emit(ProductDetailsEvents.ScrollToMediaPage(page))
+    }
+
 
     sealed class ProductDetailsEvents : Event {
         data class GoToPreOrder(val id: Long) : ProductDetailsEvents()
@@ -522,6 +524,8 @@ class ProductDetailsFlowViewModel @Inject constructor(
             val name: String,
             val rating: Int,
         ) : ProductDetailsEvents()
+
+        class ScrollToMediaPage(val page: Int) : ProductDetailsEvents()
     }
 
 

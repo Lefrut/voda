@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -17,19 +18,18 @@ import com.vodovoz.app.design_system.model.ProductDetailsUi
 import com.vodovoz.app.design_system.model.ProductMediaUi
 import com.vodovoz.app.design_system.model.ProductUi
 import com.vodovoz.app.design_system.model.SectionUi
-import com.vodovoz.app.util.formatPrice
 
 @Suppress("NonSkippableComposable")
 @Composable
 fun ProductDetailsBody(
     modifier: Modifier = Modifier,
+    mediaPagerState: PagerState,
     productDetails: ProductDetailsUi,
     comments: List<CommentUi>,
     sectionAccessory: SectionUi<ProductUi>,
     sectionSimilarProducts: SectionUi<ProductUi>,
     buttons: ProductDetailsButtonsUi,
     totalPrice: Int,
-
     productCartQuantity: Int,
     showDetailText: Boolean,
     showAllProperties: Boolean,
@@ -41,16 +41,13 @@ fun ProductDetailsBody(
     onDecrementProduct: () -> Unit,
     onIncrementProduct: () -> Unit,
     onAboutProductClick: () -> Unit,
-
     onShowAllCommentsClick: () -> Unit,
-
     onMultiButtonClick: () -> Unit,
     onPresentButtonClick: () -> Unit,
     onPreOrderButtonClick: () -> Unit,
     onAnalogButtonClick: () -> Unit,
     onPresentBlockButtonClick: () -> Unit,
     onQueryClick: (String) -> Unit,
-
     onBrandClick: (BrandCategoryItemUi) -> Unit,
     onCategoryClick: (BrandCategoryItemUi) -> Unit,
     onProductClick: (ProductUi) -> Unit,
@@ -59,13 +56,14 @@ fun ProductDetailsBody(
     onProductAnalogsClick: (ProductUi) -> Unit,
     onIncrementProductToCart: (ProductUi) -> Unit,
     onDecrementProductToCart: (ProductUi) -> Unit,
-    onWriteCommentClick: () -> Unit
+    onWriteCommentClick: () -> Unit,
 ) {
     Column(
         modifier = modifier.fillMaxSize()
     ) {
         ProductDetailsMediaPager(
             productMediaList = productDetails.mediaList,
+            pagerState = mediaPagerState,
             onMediaClick = { media ->
                 onProductMediaClick(media)
             },
@@ -87,7 +85,7 @@ fun ProductDetailsBody(
 
         ProductDetailsRatingBar(
             modifier = Modifier.padding(top = 16.dp),
-            rating = productDetails.rating.formatPrice(),
+            rating = productDetails.rating.toString(),
             numberOfReviews = productDetails.commentsCount,
             articleNumber = productDetails.articleNumber,
             onReviewsClick = onShowAllCommentsClick,

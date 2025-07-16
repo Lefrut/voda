@@ -18,7 +18,8 @@ fun SiteStateResponseDTO.toDomain(): VodovozSiteState {
         isActive = ACTIVE == "N",
         testUrl = TESTSAITSSILKA ?: "",
         smsUrl = SMSRASSILKA ?: "",
-        isSmsEnabled = VodovozBoolean.from(REGISTRACION_SMS).boolean,
+        //todo - VodovozBoolean.from(REGISTRACION_SMS).boolean
+        isSmsEnabled = false,
         jivoChat = CHATJIVO?.toJivoChatModel() ?: JivoChatModel(isActive = false, url = ""),
         tracking = GENERATION?.toTrackingConfig() ?: TrackingConfig(trackingIsEnabled = false, time = 0),
         agreement = SOGLASHENIE?.toAgreementModel() ?: throw IllegalArgumentException("Agreement can't be null"),

@@ -264,8 +264,8 @@ fun NavController.navigateToPaymentMethod(
     addressId: Long,
     date: LocalDate,
     paymentMethodId: String? = null,
-    balance: Boolean? = null
-    ) {
+    balance: Boolean? = null,
+) {
     navigate(
         R.id.paymentMethodFragment,
         bundleOf(
@@ -656,8 +656,12 @@ fun NavController.navigateToBuyCertificate() {
     navigate(R.id.buyCertificateFragment)
 }
 
-fun NavController.navigateToWebView(url: String, title: String = "") {
-    navigate(R.id.webViewFragment, bundleOf("url" to url, "title" to title))
+fun NavController.navigateToWebView(
+    url: String,
+    title: String = "",
+    navOptions: NavOptions? = null,
+) {
+    navigate(R.id.webViewFragment, bundleOf("url" to url, "title" to title), navOptions)
 
 }
 

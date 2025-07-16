@@ -16,6 +16,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.navOptions
 import com.vodovoz.app.R
 import com.vodovoz.app.common.account.AccountManager
 import com.vodovoz.app.common.tab.TabManager
@@ -52,6 +53,17 @@ class OrderingFragment : Fragment() {
 
     @Inject
     lateinit var tabManager: TabManager
+
+    override fun onStart() {
+        super.onStart()
+        tabManager.changeTabVisibility(false)
+    }
+
+    override fun onStop() {
+        super.onStop()
+        tabManager.changeTabVisibility(true)
+    }
+
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -187,6 +199,7 @@ class OrderingFragment : Fragment() {
                 }
 
                 OrderingFlowViewModel.OrderingEvents.RefreshCart -> {
+                    tabManager.clearBottomNavCartState()
                     cartViewModel.refresh()
                 }
 
@@ -195,11 +208,17 @@ class OrderingFragment : Fragment() {
                         title = context?.getString(
                             R.string.space
                         ) ?: "",
-                        url = event.url
+                        url = event.url,
+                        navOptions = navOptions {
+                            popUpTo(R.id.cartFragment){
+                                inclusive = false
+                            }
+                        }
                     )
                 }
                 is OrderingFlowViewModel.OrderingEvents.OpenUrl -> {
                     context?.openUrl(event.url)
+                    findNavController().popBackStack()
                 }
             }
         }

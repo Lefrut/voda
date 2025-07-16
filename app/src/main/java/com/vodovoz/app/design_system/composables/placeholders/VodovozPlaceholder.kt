@@ -22,7 +22,6 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.rememberAsyncImagePainter
 import com.vodovoz.app.R
 import com.vodovoz.app.design_system.composables.button.VodovozButton
-import com.vodovoz.app.design_system.composables.button.VodovozButtonDefaults
 import com.vodovoz.app.design_system.model.VodovozPlaceholderUi
 
 @Composable
@@ -58,7 +57,8 @@ fun VodovozPlaceholder(
 
             Text(
                 modifier = Modifier.padding(top = 24.dp),
-                text = AnnotatedString.fromHtml(data.descriptionHtml),
+                text = AnnotatedString.fromHtml(data.descriptionHtml.replace("\n",
+                    stringResource(R.string.html_br))),
                 color = MaterialTheme.colorScheme.surfaceTint,
                 style = MaterialTheme.typography.bodyMedium.copy(textAlign = TextAlign.Center)
             )

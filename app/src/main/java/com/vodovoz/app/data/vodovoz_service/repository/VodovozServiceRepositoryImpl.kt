@@ -1,5 +1,6 @@
 package com.vodovoz.app.data.vodovoz_service.repository
 
+import androidx.core.text.HtmlCompat
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
@@ -92,6 +93,7 @@ import com.vodovoz.app.domain.general.model.service.AllServicesDetailsModel
 import com.vodovoz.app.domain.general.model.service.ServiceDetailsModel
 import com.vodovoz.app.domain.general.model.service.ServiceOrderDetailsModel
 import com.vodovoz.app.domain.general.model.toQueries
+import com.vodovoz.app.domain.general.model.toSliderQueries
 import com.vodovoz.app.domain.general.model.user.AuthDetailsModel
 import com.vodovoz.app.domain.general.model.user.ChangePasswordDetailsModel
 import com.vodovoz.app.domain.general.model.user.NotificationSettingsDetailsModel
@@ -102,13 +104,8 @@ import com.vodovoz.app.domain.general.model.user.RequestCodeModel
 import com.vodovoz.app.domain.general.model.user.UserAuthInfoModel
 import com.vodovoz.app.domain.general.model.user.UserDataModel
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
-import com.vodovoz.app.util.extensions.singleResult
 import com.vodovoz.app.util.formatters.VodovozDateFormatters
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
@@ -1199,32 +1196,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
             mapper = {
                 it.data!!.toDomain()
             }
-        ).map { result ->
-            //todo - delete after back fix
-            result.mapCatching { filtersModel ->
-                val updatedFilters = coroutineScope {
-                    filtersModel.filters.map { filter ->
-                        async {
-                            if (filter.values.isEmpty()) {
-                                val values = getFilterValues(categoryId, filter.id)
-                                    .singleResult()
-                                    .getOrNull() ?: emptyList()
-                                filter.copy(
-                                    values = values.take(6),
-                                    totalValues = values.size
-                                )
-                            } else {
-                                filter
-                            }
-                        }
-                    }.awaitAll()
-                }
-
-                filtersModel.copy(
-                    filters = updatedFilters
-                )
-            }
-        }
+        )
     }
 
     override fun getFilterValues(
@@ -1236,7 +1208,14 @@ class VodovozServiceRepositoryImpl @Inject constructor(
                 vodovozService.getFilterValues(categoryId, filterId)
             },
             mapper = {
-                it.data!!.map { filterValue -> FilterValueModel(filterValue, filterValue) }
+                it.data!!.map { filterValue ->
+                    FilterValueModel(
+                        filterValue,
+                        HtmlCompat.fromHtml(
+                            filterValue, HtmlCompat.FROM_HTML_MODE_LEGACY
+                        ).toString()
+                    )
+                }
             }
         )
     }
@@ -1349,7 +1328,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
                 val code = response.code()
 
                 when {
-                    code == 402 || code == 404-> {
+                    code == 402 || code == 404 -> {
                         throw UserBlockedException(message = response.messageWithCode())
                     }
 
@@ -1434,6 +1413,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
     ): Flow<Result<ProductsSectionModel>> {
         val filtersQuery = filters.filters.joinToString(",") { it.name }
         val filtersAndValuesQuery = filters.filters.format()
+        val boundsMap = filters.filters.toSliderQueries()
 
         return executeRequest(
             request = {
@@ -1442,7 +1422,8 @@ class VodovozServiceRepositoryImpl @Inject constructor(
                     filters = filtersQuery.takeIf { s -> s.isNotBlank() },
                     filtersAndValues = filtersAndValuesQuery.takeIf { s -> s.isNotBlank() },
                     priceTo = filters.priceRange.last.toFloat(),
-                    priceFrom = filters.priceRange.first.toFloat()
+                    priceFrom = filters.priceRange.first.toFloat(),
+                    queries = boundsMap
                 )
             },
             mapper = { response ->
@@ -1467,6 +1448,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
 
         val filtersQuery = filters.filters.joinToString(",") { it.name }
         val filtersAndValuesQuery = filters.filters.format()
+        val boundsMap = filters.filters.toSliderQueries()
 
         return Pager(
             config = PagingConfig(pageSize = 5, initialLoadSize = 5),
@@ -1482,7 +1464,8 @@ class VodovozServiceRepositoryImpl @Inject constructor(
                             filters = filtersQuery.takeIf { s -> s.isNotBlank() },
                             filtersAndValues = filtersAndValuesQuery.takeIf { s -> s.isNotBlank() },
                             priceTo = filters.priceRange.last.toFloat(),
-                            priceFrom = filters.priceRange.first.toFloat()
+                            priceFrom = filters.priceRange.first.toFloat(),
+                            queries = boundsMap
                         )
                     },
                     mapper = { response ->

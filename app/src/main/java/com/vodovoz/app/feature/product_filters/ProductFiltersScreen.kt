@@ -19,7 +19,6 @@ import com.vodovoz.app.feature.product_filters.composables.ProductFiltersBody
 import com.vodovoz.app.feature.product_filters.composables.ProductFiltersTopBar
 
 @OptIn(ExperimentalMaterial3Api::class)
-@Suppress("NonSkippableComposable")
 @Composable
 fun ProductFiltersScreen(
     viewModel: ProductFiltersFlowViewModel,
@@ -55,7 +54,7 @@ fun ProductFiltersScreen(
             sliderState = sliderState,
             filters = filters.filters,
             filterPrice = filters.price,
-            onPriceChange = { range ->
+            onPriceRangeChange = { range ->
                 viewModel.changeFiltersPrice(range)
             },
             onFilterValueSelect = { filter, filterValue ->
@@ -64,11 +63,20 @@ fun ProductFiltersScreen(
             onShowAllFilterValuesClick = { filterUi ->
                 viewModel.navigateToFilterValues(filterUi)
             },
-            onFromChange = {
+            onPriceFromChange = {
                 viewModel.changePriceFromField(it)
             },
-            onToChange = {
+            onPriceToChange = {
                 viewModel.changePriceToField(it)
+            },
+            onFilterRangeChange = { filter, range ->
+                viewModel.changeFilterRange(filter, range)
+            },
+            onFilterFromChange = { filter, value ->
+                viewModel.changeFilterFrom(filter, value)
+            },
+            onFilterToChange = { filter, value ->
+                viewModel.changeFilterTo(filter, value)
             }
         )
     }

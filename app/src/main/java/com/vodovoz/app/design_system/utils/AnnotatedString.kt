@@ -2,44 +2,58 @@ package com.vodovoz.app.design_system.utils
 
 import android.content.res.Resources
 import android.graphics.Typeface
-import android.text.Editable
-import android.text.Html
+import android.text.Layout
 import android.text.Spanned
 import android.text.style.AbsoluteSizeSpan
+import android.text.style.AlignmentSpan
 import android.text.style.BackgroundColorSpan
 import android.text.style.ClickableSpan
 import android.text.style.ForegroundColorSpan
 import android.text.style.RelativeSizeSpan
 import android.text.style.StrikethroughSpan
 import android.text.style.StyleSpan
+import android.text.style.SubscriptSpan
+import android.text.style.SuperscriptSpan
 import android.text.style.TypefaceSpan
 import android.text.style.URLSpan
 import android.text.style.UnderlineSpan
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.LinkInteractionListener
+import androidx.compose.ui.text.ParagraphStyle
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.fromHtml
+import androidx.compose.ui.text.style.BaselineShift
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
-import org.xml.sax.XMLReader
 
 fun Spanned.toAnnotatedString(
     linkStyles: TextLinkStyles? = null,
-    linkInteractionListener: LinkInteractionListener? = null
+    linkInteractionListener: LinkInteractionListener? = null,
 ): AnnotatedString {
-    val builder = AnnotatedString.Builder(this.toString())
+    val builder = AnnotatedString.Builder(toString())
 
     getSpans(0, length, Any::class.java).forEach { span ->
         val start = getSpanStart(span)
         val end = getSpanEnd(span)
 
         when (span) {
+            is AlignmentSpan -> {
+                builder.addStyle(span.toParagraphStyle(), start, end)
+            }
+
+            is SubscriptSpan -> {
+                builder.addStyle(SpanStyle(baselineShift = BaselineShift.Subscript), start, end)
+            }
+
+            is SuperscriptSpan -> {
+                builder.addStyle(SpanStyle(baselineShift = BaselineShift.Superscript), start, end)
+            }
 
             is RelativeSizeSpan -> {
                 builder.addStyle(SpanStyle(fontSize = span.sizeChange.em), start, end)
@@ -47,10 +61,22 @@ fun Spanned.toAnnotatedString(
 
             is StyleSpan -> {
                 when (span.style) {
-                    Typeface.BOLD -> builder.addStyle(SpanStyle(fontWeight = FontWeight.Bold), start, end)
-                    Typeface.ITALIC -> builder.addStyle(SpanStyle(fontStyle = FontStyle.Italic), start, end)
+                    Typeface.BOLD -> builder.addStyle(
+                        SpanStyle(fontWeight = FontWeight.Bold),
+                        start,
+                        end
+                    )
+
+                    Typeface.ITALIC -> builder.addStyle(
+                        SpanStyle(fontStyle = FontStyle.Italic),
+                        start,
+                        end
+                    )
+
                     Typeface.BOLD_ITALIC -> builder.addStyle(
-                        SpanStyle(fontWeight = FontWeight.Bold, fontStyle = FontStyle.Italic), start, end
+                        SpanStyle(fontWeight = FontWeight.Bold, fontStyle = FontStyle.Italic),
+                        start,
+                        end
                     )
                 }
             }
@@ -72,13 +98,12 @@ fun Spanned.toAnnotatedString(
             )
 
             is TypefaceSpan -> {
-                if (span.family == "monospace") {
-                    builder.addStyle(SpanStyle(fontFamily = FontFamily.Monospace), start, end)
-                }
+                builder.addStyle(span.toSpanStyle(), start, end)
             }
 
             is AbsoluteSizeSpan -> {
-                val sizeInSp = if (span.dip) span.size.toFloat() else (span.size.toFloat() / Resources.getSystem().displayMetrics.scaledDensity)
+                val sizeInSp =
+                    if (span.dip) span.size.toFloat() else (span.size.toFloat() / Resources.getSystem().displayMetrics.scaledDensity)
                 builder.addStyle(SpanStyle(fontSize = sizeInSp.sp), start, end)
             }
 
@@ -90,13 +115,23 @@ fun Spanned.toAnnotatedString(
                     builder.addStyle(urlStyle, start, end)
                 }
                 linkInteractionListener?.let {
-                    builder.addStringAnnotation(tag = "INTERACT", annotation = url, start = start, end = end)
+                    builder.addStringAnnotation(
+                        tag = "INTERACT",
+                        annotation = url,
+                        start = start,
+                        end = end
+                    )
                 }
             }
 
             is ClickableSpan -> {
                 val id = span.hashCode().toString()
-                builder.addStringAnnotation(tag = "CLICKABLE", annotation = id, start = start, end = end)
+                builder.addStringAnnotation(
+                    tag = "CLICKABLE",
+                    annotation = id,
+                    start = start,
+                    end = end
+                )
                 linkInteractionListener?.let {
                     builder.addStyle(linkStyles?.style ?: SpanStyle(color = Color.Blue), start, end)
                 }
@@ -105,4 +140,27 @@ fun Spanned.toAnnotatedString(
     }
 
     return builder.toAnnotatedString()
+}
+
+private fun TypefaceSpan.toSpanStyle(): SpanStyle {
+    val fontFamily =
+        when (family) {
+            FontFamily.Cursive.name -> FontFamily.Cursive
+            FontFamily.Monospace.name -> FontFamily.Monospace
+            FontFamily.SansSerif.name -> FontFamily.SansSerif
+            FontFamily.Serif.name -> FontFamily.Serif
+            else -> FontFamily.Monospace
+        }
+    return SpanStyle(fontFamily = fontFamily)
+}
+
+private fun AlignmentSpan.toParagraphStyle(): ParagraphStyle {
+    val alignment =
+        when (this.alignment) {
+            Layout.Alignment.ALIGN_NORMAL -> TextAlign.Start
+            Layout.Alignment.ALIGN_CENTER -> TextAlign.Center
+            Layout.Alignment.ALIGN_OPPOSITE -> TextAlign.End
+            else -> TextAlign.Unspecified
+        }
+    return ParagraphStyle(textAlign = alignment)
 }

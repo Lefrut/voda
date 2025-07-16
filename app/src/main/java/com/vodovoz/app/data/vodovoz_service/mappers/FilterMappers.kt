@@ -1,5 +1,6 @@
 package com.vodovoz.app.data.vodovoz_service.mappers
 
+import com.vodovoz.app.data.vodovoz_service.model.filters.FilterBoundsDTO
 import com.vodovoz.app.data.vodovoz_service.model.filters.FilterDTO
 import com.vodovoz.app.data.vodovoz_service.model.filters.FilterValueDTO
 import com.vodovoz.app.data.vodovoz_service.model.filters.FilterValuesDTO
@@ -11,12 +12,8 @@ import kotlin.math.max
 import kotlin.math.min
 
 fun FiltersDTO.toDomain(): FiltersModel {
-    val min = CENAFILTER?.MIN ?: 0
-    val max = max(
-        min, CENAFILTER?.MAX ?: throw IllegalArgumentException("Max of filter price can't be null")
-    )
     return FiltersModel(
-        priceRange = min(min, max)..max,
+        priceRange = CENAFILTER?.toDomain() ?: throw IllegalArgumentException("Max of filter price can't be null"),
         filters = DANNIE?.mapToDomain() ?: throw IllegalArgumentException("Filters can't be null")
     )
 }
@@ -26,12 +23,24 @@ fun List<FilterDTO>.mapToDomain(): List<FilterModel> {
 }
 
 fun FilterDTO.toDomain(): FilterModel? {
+    val bounds = ZHACFILTER?.toDomain()
     return FilterModel(
         id = CODE ?: return null,
         name = NAME ?: return null,
         totalValues = ZNACHEIE?.COUNT ?: 0,
-        values = ZNACHEIE?.toDomain() ?: emptyList()
+        values = ZNACHEIE?.toDomain() ?: emptyList(),
+        bounds = bounds,
+        currentBounds = bounds
+
     )
+}
+
+fun FilterBoundsDTO.toDomain(): IntRange?{
+    val min = MIN ?: return null
+    val max = max(
+        min, MAX ?: return null
+    )
+    return min(min, max)..max
 }
 
 @JvmName("mapToListFilterValueModel")

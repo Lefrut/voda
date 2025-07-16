@@ -34,11 +34,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.fromHtml
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -48,6 +46,8 @@ import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.model.CharacteristicUi
 import com.vodovoz.app.design_system.model.CharacteristicsBlockUi
 import com.vodovoz.app.design_system.model.ContentBlockUi
+import com.vodovoz.app.design_system.utils.toAnnotatedString
+import com.vodovoz.app.util.extensions.fromHtml
 import kotlinx.coroutines.launch
 
 @Composable
@@ -91,9 +91,8 @@ fun ProductDetailsInfo(
             targetValue = if (showDetailText) 180f else 0f, label = "arrow down animation"
         )
 
+        val annotatedDetailsInfo = detailInfo.content.fromHtml().toAnnotatedString()
 
-        val annotatedDetailsInfo =
-            AnnotatedString.fromHtml(detailInfo.content.takeWhile { if (!showDetailText) it != '\n' else true })
         if (annotatedDetailsInfo.isNotEmpty()) {
             Row(
                 modifier = Modifier
@@ -125,7 +124,7 @@ fun ProductDetailsInfo(
             }
         }
 
-        if(contentBlockCharacteristics.content.isNotEmpty()){
+        if (contentBlockCharacteristics.content.isNotEmpty()) {
             Text(
                 modifier = Modifier
                     .padding(top = 16.dp)

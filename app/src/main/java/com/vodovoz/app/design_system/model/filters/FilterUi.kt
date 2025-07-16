@@ -3,8 +3,10 @@ package com.vodovoz.app.design_system.model.filters
 import android.os.Parcelable
 import androidx.compose.runtime.Immutable
 import com.vodovoz.app.domain.general.model.FilterModel
+import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 
+@Suppress("INAPPLICABLE_IGNORED_ON_PARCEL_CONSTRUCTOR_PROPERTY")
 @Immutable
 @Parcelize
 data class FilterUi(
@@ -12,6 +14,10 @@ data class FilterUi(
     val name: String,
     val totalValues: Int,
     val values: List<FilterValueUi>,
+    @IgnoredOnParcel
+    val bounds: IntRange? = null,
+    @IgnoredOnParcel
+    val currentBounds: IntRange? = null
 ): Parcelable {
     companion object {
         val Empty = FilterUi("", "", 0, emptyList())
@@ -23,7 +29,9 @@ fun FilterModel.toUi(): FilterUi {
         id = id,
         name = name,
         totalValues = totalValues,
-        values = values.mapToUi()
+        values = values.mapToUi(),
+        bounds = bounds,
+        currentBounds = currentBounds
     )
 }
 
@@ -36,7 +44,9 @@ fun FilterUi.toDomain(): FilterModel {
         id = id,
         name = name,
         totalValues = totalValues,
-        values = values.mapToDomain()
+        values = values.mapToDomain(),
+        bounds = bounds,
+        currentBounds = currentBounds
     )
 }
 

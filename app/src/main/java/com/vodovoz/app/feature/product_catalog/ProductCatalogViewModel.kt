@@ -282,7 +282,7 @@ class ProductCatalogViewModel @Inject constructor(
         val dataStateFilters = dataState.currentFilters
 
         val filteredFilters = dataStateFilters.filters.filter { filterUi ->
-            filterUi.values.any { filterValueUi -> filterValueUi.selected }
+            filterUi.values.any { filterValueUi -> filterValueUi.selected } || (filterUi.bounds != null && filterUi.currentBounds != null)
         }.map { filterUi ->
             filterUi.copy(values = filterUi.values.filter { value -> value.selected })
         }

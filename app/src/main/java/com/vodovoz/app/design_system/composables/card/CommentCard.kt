@@ -63,10 +63,9 @@ fun CommentCard(
                 }
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
-
             if (comment.text.isNotEmpty()) {
                 Text(
+                    modifier = Modifier.padding(top = 12.dp),
                     text = AnnotatedString.fromHtml(comment.text),
                     color = MaterialTheme.colorScheme.onBackground,
                     style = MaterialTheme.typography.bodySmall,

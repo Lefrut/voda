@@ -63,8 +63,8 @@ class ProductCommentsFragment : Fragment() {
                                 is ProductCommentsFlowViewModel.ProductCommentsEvents.GoToWriteComment -> {
                                     findNavController().navigateToWriteComment(
                                         productId = event.productId,
-                                        productImage = event.productName,
-                                        productName = event.productImage,
+                                        productImage = event.productImage,
+                                        productName = event.productName,
                                         rating = 0
                                     )
                                 }

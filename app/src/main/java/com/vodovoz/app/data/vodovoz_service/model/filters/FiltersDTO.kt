@@ -10,7 +10,7 @@ import com.squareup.moshi.JsonClass
 data class FiltersDTO(
     @Expose
     @Json(name = "CENAFILTER")
-    val CENAFILTER: FiltersPriceDTO? = null,
+    val CENAFILTER: FilterBoundsDTO? = null,
 
     @Expose
     @Json(name = "DANNIE")
@@ -18,7 +18,7 @@ data class FiltersDTO(
 )
 
 @Keep
-data class FiltersPriceDTO(
+data class FilterBoundsDTO(
     @Expose
     @Json(name = "MIN")
     val MIN: Int? = null,
@@ -39,8 +39,15 @@ data class FilterDTO(
     val CODE: String? = null,
 
     @Expose
+    @Json(name = "TYPE")
+    val TYPE: String? = null,
+
+    @Expose
     @Json(name = "ZNACHEIE")
-    val ZNACHEIE: FilterValuesDTO?
+    val ZNACHEIE: FilterValuesDTO?,
+
+    @Json(name = "ZHACFILTER")
+    val ZHACFILTER: FilterBoundsDTO?
 )
 
 @Keep

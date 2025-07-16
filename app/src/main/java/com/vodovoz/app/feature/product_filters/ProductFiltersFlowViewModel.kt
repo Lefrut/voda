@@ -1,6 +1,7 @@
 package com.vodovoz.app.feature.product_filters
 
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.Stable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.vodovoz.app.common.content.Event
@@ -43,7 +44,7 @@ class ProductFiltersFlowViewModel @Inject constructor(
     private fun listenFiltersSelectionState() = viewModelScope.launch {
         uiStateListener.map { it.data.filters }.collectLatest { filters ->
             val anyFilterHasSelected = filters.filters.any { filter ->
-                filter.values.any { it.selected }
+                filter.values.any { it.selected } || filter.bounds != filter.currentBounds
             }
             val filtersPrice = filters.price
 
@@ -63,7 +64,10 @@ class ProductFiltersFlowViewModel @Inject constructor(
             s.copy(
                 filters = filters.copy(
                     filters = filters.filters.map { filter ->
-                        filter.copy(values = filter.values.map { it.copy(selected = false) })
+                        filter.copy(
+                            values = filter.values.map { it.copy(selected = false) },
+                            currentBounds = filter.bounds
+                        )
                     },
                     price = filters.price.copy(
                         currentMax = price.max,
@@ -103,7 +107,7 @@ class ProductFiltersFlowViewModel @Inject constructor(
             s.copy(
                 filters = s.filters.copy(
                     price = price.copy(
-                        currentMin = min.toIntOrNull() ?: price.currentMin
+                        currentMin = min.toIntOrNull() ?: Int.MIN_VALUE
                     )
                 )
             )
@@ -116,7 +120,7 @@ class ProductFiltersFlowViewModel @Inject constructor(
             s.copy(
                 filters = s.filters.copy(
                     price = price.copy(
-                        currentMax = max.toIntOrNull() ?: price.currentMax
+                        currentMax = max.toIntOrNull() ?: Int.MIN_VALUE
                     )
                 )
             )
@@ -292,6 +296,71 @@ class ProductFiltersFlowViewModel @Inject constructor(
         }
     }
 
+    fun changeFilterRange(filter: FilterUi, range: ClosedFloatingPointRange<Float>) =
+        viewModelScope.launch {
+            uiStateListener.updateData { s ->
+
+                val target = s.filters.filters.find { it.id == filter.id } ?: return@updateData s
+                val bounds = target.bounds ?: return@updateData s
+
+                val delta = bounds.last - bounds.first
+
+                val newMin = bounds.first + (delta * range.start).roundToInt()
+                val newMax = bounds.first + (delta * range.endInclusive).roundToInt()
+
+                val updated = target.copy(currentBounds = newMin..newMax)
+
+                s.copy(
+                    filters = s.filters.copy(
+                        filters = s.filters.filters.map {
+                            if (it.id == filter.id) updated else it
+                        }
+                    )
+                )
+            }
+        }
+
+    fun changeFilterFrom(filter: FilterUi, value: String) {
+        uiStateListener.updateData { s ->
+
+            val target = s.filters.filters.find { it.id == filter.id } ?: return@updateData s
+            val bounds = target.bounds ?: return@updateData s
+            val current = target.currentBounds ?: bounds
+
+            val newMin = value.toIntOrNull() ?: Int.MIN_VALUE
+            val updated = target.copy(currentBounds = newMin..current.last)
+
+            s.copy(
+                filters = s.filters.copy(
+                    filters = s.filters.filters.map {
+                        if (it.id == filter.id) updated else it
+                    }
+                )
+            )
+        }
+    }
+
+    fun changeFilterTo(filter: FilterUi, value: String) {
+        uiStateListener.updateData { s ->
+
+            val target = s.filters.filters.find { it.id == filter.id } ?: return@updateData s
+            val bounds = target.bounds ?: return@updateData s
+            val current = target.currentBounds ?: bounds
+
+            val newMax = value.toIntOrNull() ?: Int.MIN_VALUE
+            val updated = target.copy(currentBounds = current.first..newMax)
+
+            s.copy(
+                filters = s.filters.copy(
+                    filters = s.filters.filters.map {
+                        if (it.id == filter.id) updated else it
+                    }
+                )
+            )
+        }
+
+    }
+
 
     @Immutable
     data class ProductFiltersState(
@@ -301,7 +370,7 @@ class ProductFiltersFlowViewModel @Inject constructor(
         val showClearButton: Boolean = false,
     ) : State
 
-    @Immutable
+    @Stable
     sealed interface ProductFiltersUiState {
         data object Loading : ProductFiltersUiState
         data object Success : ProductFiltersUiState

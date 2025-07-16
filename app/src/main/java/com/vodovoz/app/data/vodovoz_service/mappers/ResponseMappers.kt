@@ -10,6 +10,7 @@ import com.vodovoz.app.core.network.retrofit.stringErrorBody
 import com.vodovoz.app.domain.general.model.RequestException
 import com.vodovoz.app.util.extensions.catchResult
 import com.vodovoz.app.util.extensions.debugLog
+import com.vodovoz.app.util.extensions.decodeUnicodeEscapes
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -59,7 +60,7 @@ inline fun <reified T, R> executeRequest(
 
         onResponse(response)
 
-        val stringBody = response.stringBody().ifEmpty { response.stringErrorBody() }
+        val stringBody = response.stringBody().ifEmpty { response.stringErrorBody() }.decodeUnicodeEscapes()
 
         val bodyResult = kotlin.runCatching {
             val adapter = moshiWithJsonAdapter.adapter<T>(type).lenient()
@@ -89,4 +90,6 @@ inline fun <reified T, R> executeRequest(
         result.onFailure { t -> debugLog { t.stackTraceToString() } }
     }.flowOn(Dispatchers.IO)
 }
+
+
 

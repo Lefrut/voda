@@ -31,6 +31,7 @@ fun UserDataBody(
     photoDescription: String,
     fields: List<FieldUi>,
     buttonEnabled: Boolean,
+    buttonLoading: Boolean,
     onFieldChange: (FieldUi, FieldUi) -> Unit,
     onFieldClick: (FieldUi) -> Unit,
     onSaveDataClick: () -> Unit,
@@ -68,7 +69,8 @@ fun UserDataBody(
             modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 24.dp),
             text = stringResource(id = R.string.save),
             onClick = onSaveDataClick,
-            enabled = buttonEnabled
+            enabled = buttonEnabled,
+            isLoading = buttonLoading
         )
 
         Text(

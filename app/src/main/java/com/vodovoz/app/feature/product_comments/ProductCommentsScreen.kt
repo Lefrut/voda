@@ -2,7 +2,7 @@ package com.vodovoz.app.feature.product_comments
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -51,7 +51,8 @@ fun ProductCommentsScreen(
 ) {
 
     val aboutComments = viewState.productCommentsInfo
-
+    val lazyPagingComments = viewState.pagedComments.collectAsLazyPagingItems()
+    val loadState = lazyPagingComments.loadState
 
     Column(
         modifier = Modifier
@@ -60,44 +61,45 @@ fun ProductCommentsScreen(
             .consumeWindowInsets(WindowInsets.systemBars)
     ) {
         VodovozTopBar(
+            title = stringResource(id = R.string.comments),
             onBack = {
                 viewModel.navigateBack()
-            },
-            title = stringResource(id = R.string.comments)
-        )
-
-        val sorting = aboutComments.sorting
-        if (sorting.isNotEmpty()) {
-            VodovozScrollableTabRow(
-                modifier = Modifier.padding(top = 8.dp),
-                selectedTabIndex = sorting.indexOfOrNull(viewState.currentSort) ?: 0,
-                spacing = 8.dp,
-                edgePadding = 16.dp
-            ) {
-                sorting.forEach { sort ->
-                    VodovozChip(
-                        text = sort.name,
-                        selected = sort == viewState.currentSort,
-                        onSelect = { viewModel.selectSort(sort) }
-                    )
-                }
             }
-        }
-
-        val lazyPagingComments = viewState.pagedComments.collectAsLazyPagingItems()
-        val loadState = lazyPagingComments.loadState
+        )
 
         LazyColumn(
             modifier = Modifier.weight(1f),
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+            contentPadding = PaddingValues(top = 8.dp, bottom = 16.dp),
             state = lazyListState
         ) {
+
+            val sorting = aboutComments.sorting
+            if (sorting.isNotEmpty()) {
+                item {
+                    VodovozScrollableTabRow(
+                        selectedTabIndex = sorting.indexOfOrNull(viewState.currentSort) ?: 0,
+                        spacing = 8.dp,
+                        edgePadding = 16.dp
+                    ) {
+                        sorting.forEach { sort ->
+                            VodovozChip(
+                                text = sort.name,
+                                selected = sort == viewState.currentSort,
+                                onSelect = { viewModel.selectSort(sort) }
+                            )
+                        }
+                    }
+                }
+            }
 
             item {
                 CommentsInfoCard(
                     aboutComments = aboutComments,
-                    modifier = Modifier
+                    modifier = Modifier.padding(
+                        start = 16.dp,
+                        top = 16.dp,
+                        end = 16.dp
+                    )
                 )
             }
 
@@ -112,7 +114,11 @@ fun ProductCommentsScreen(
                 ) { i ->
                     val comment = lazyPagingComments[i]
                     if (comment != null) {
-                        CommentCard(comment = comment, minLines = 1)
+                        CommentCard(
+                            modifier = Modifier.padding(top = 16.dp),
+                            comment = comment,
+                            minLines = 1
+                        )
                     }
                 }
             }
@@ -120,6 +126,7 @@ fun ProductCommentsScreen(
                 item {
                     CircularProgressIndicator(
                         modifier = Modifier
+                            .padding(top = 16.dp)
                             .fillMaxWidth()
                             .wrapContentSize(align = Alignment.Center)
                             .size(30.dp),
