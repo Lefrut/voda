@@ -32,7 +32,7 @@ import com.vodovoz.app.feature.order_call_you.model.CallYouItemUi
 import com.vodovoz.app.feature.payment_method.model.PaymentMethodItemUi
 import com.vodovoz.app.util.extensions.singleResult
 import com.vodovoz.app.util.formatters.VodovozDateFormatters
-import com.vodovoz.app.util.toExactIntOrNull
+import com.vodovoz.app.util.toIntRoundOrNull
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -552,7 +552,7 @@ class OrderingFlowViewModel @Inject constructor(
                     paymentId = paymentMethod.id,
                     paymentChange = paymentMethod.field?.value?.filter { char ->
                         char.isDigit()
-                    }?.toExactIntOrNull()?.toString()
+                    }?.toIntRoundOrNull()?.toString()
                 ),
                 paymentSection = changeOrderingSection(
                     clearErrors = false,
