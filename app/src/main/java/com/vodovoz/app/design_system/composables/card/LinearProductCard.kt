@@ -44,6 +44,7 @@ import com.vodovoz.app.design_system.model.ColorfulButtonUi
 import com.vodovoz.app.design_system.model.ForAdultsUi
 import com.vodovoz.app.design_system.model.LabelUi
 import com.vodovoz.app.design_system.model.ProductUi
+import com.vodovoz.app.util.extensions.formatRating
 import com.vodovoz.app.util.formatPrice
 import java.util.Locale
 import kotlin.math.roundToInt
@@ -151,19 +152,12 @@ fun LinearProductCard(
                             .size(18.dp),
                     )
 
-                    val ratingText = remember(product.rating) {
-                        String.format(
-                            Locale.getDefault(),
-                            "%.1f",
-                            product.rating
-                        )
-                    }
 
                     Text(
                         modifier = Modifier
                             .align(Alignment.CenterVertically)
                             .padding(start = 2.dp),
-                        text = if (product.rating > 0) ratingText else 0.toString(),
+                        text = formatRating(product.rating),
                         color = if (product.rating <= 0.0f) MaterialTheme.colorScheme.surfaceTint else MaterialTheme.colorScheme.onBackground,
                         style = ExtendedTheme.typography.labelMediumVariant,
                         maxLines = 1

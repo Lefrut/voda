@@ -1,7 +1,7 @@
 package com.vodovoz.app.common.cookie
 
 import com.vodovoz.app.common.account.AccountManager
-import com.vodovoz.app.common.datastore.DataStoreRepository
+import com.vodovoz.app.common.datastore.DataStorePrefs
 import com.vodovoz.app.util.extensions.debugLog
 import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
@@ -9,33 +9,33 @@ import javax.inject.Singleton
 
 @Singleton
 class CookieManager @Inject constructor(
-    private val dataStoreRepository: DataStoreRepository,
+    private val dataStorePrefs: DataStorePrefs,
     private val accountManager: AccountManager,
 ) {
 
-    fun fetchCookieSessionId() = runBlocking { dataStoreRepository.getString(COOKIE_SESSION_ID) }
+    fun fetchCookieSessionId() = runBlocking { dataStorePrefs.getString(COOKIE_SESSION_ID) }
     fun updateCookieSessionId(cookieSessionId: String?) {
         cookieSessionId?.let {
-            dataStoreRepository.putString(COOKIE_SESSION_ID, cookieSessionId)
+            dataStorePrefs.putString(COOKIE_SESSION_ID, cookieSessionId)
             debugLog { "Cookie updated: $cookieSessionId" }
             setLastEntire()
         }
     }
 
     fun isAvailableCookieSessionId(): Boolean {
-        return dataStoreRepository.contains(COOKIE_SESSION_ID)
+        return dataStorePrefs.contains(COOKIE_SESSION_ID)
     }
 
 
     fun removeCookieSessionId() {
-        dataStoreRepository.remove(COOKIE_SESSION_ID)
+        dataStorePrefs.remove(COOKIE_SESSION_ID)
     }
 
     fun isOldCookie(): Boolean {
 
         if (!accountManager.isAlreadyLogin()) {
             val currentEntire = System.currentTimeMillis()
-            val lastEntire = dataStoreRepository.getLong(COOKIE_LAST_ENTIRE) ?: 0
+            val lastEntire = dataStorePrefs.getLong(COOKIE_LAST_ENTIRE) ?: 0
             val diff = currentEntire - lastEntire
             return diff > COOKIES_LIFE_TIME_IN_MILLIS
         }
@@ -43,7 +43,7 @@ class CookieManager @Inject constructor(
     }
 
     private fun setLastEntire() {
-        dataStoreRepository.putLong(COOKIE_LAST_ENTIRE, System.currentTimeMillis())
+        dataStorePrefs.putLong(COOKIE_LAST_ENTIRE, System.currentTimeMillis())
     }
 
     companion object {

@@ -57,12 +57,12 @@ import com.vodovoz.app.domain.general.model.order.OrderDetailsModel
 import com.vodovoz.app.domain.general.model.order.OrderDetailsSummaryModel
 import com.vodovoz.app.domain.general.model.order.OrderFilterModel
 import com.vodovoz.app.domain.general.model.order.OrderNotifyItemModel
-import com.vodovoz.app.domain.general.model.order.OrderingMenuItemModel
 import com.vodovoz.app.domain.general.model.order.OrderProductModel
 import com.vodovoz.app.domain.general.model.order.OrderProductPresentModel
 import com.vodovoz.app.domain.general.model.order.OrderQuestionDetailsModel
 import com.vodovoz.app.domain.general.model.order.OrderStatusModel
 import com.vodovoz.app.domain.general.model.order.OrderingDetailsModel
+import com.vodovoz.app.domain.general.model.order.OrderingMenuItemModel
 import com.vodovoz.app.domain.general.model.order.OrdersHistoryButtonModel
 import com.vodovoz.app.domain.general.model.order.OrdersHistoryDetailsModel
 import com.vodovoz.app.domain.general.model.order.OrdersHistoryItemModel
@@ -90,7 +90,7 @@ fun OrderCallYouDetailsDTO.toDomain(): OrderCallYouDetailsModel {
     )
 }
 
-fun RecipientDTO.toDomain(): RecipientModel{
+fun RecipientDTO.toDomain(): RecipientModel {
     return RecipientModel(
         phone = PHONE ?: "",
         fio = FIO ?: ""
@@ -363,9 +363,9 @@ fun OrderQuestionDetailsDTO.toDomain(): OrderQuestionDetailsModel {
 
 fun KNOPKA_ORDER_DTO.toDomain(): ColorfulButtonModel {
     return ColorfulButtonModel(
-        name = NAME ?: TEXT ?: "",
+        name = NAME ?: TEXT ?: TITLE ?: "",
         backgroundColor = BACKGROUND ?: "",
-        textColor = COLOR ?: "",
+        textColor = COLOR ?: TEXTCOLOR ?: "",
         id = ID ?: ""
     )
 }

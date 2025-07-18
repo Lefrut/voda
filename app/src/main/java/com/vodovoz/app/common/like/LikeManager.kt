@@ -3,7 +3,7 @@ package com.vodovoz.app.common.like
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
 import com.vodovoz.app.common.account.AccountManager
-import com.vodovoz.app.common.datastore.DataStoreRepository
+import com.vodovoz.app.common.datastore.DataStorePrefs
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.util.extensions.singleResult
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -16,7 +16,7 @@ import javax.inject.Singleton
 
 @Singleton
 class LikeManager @Inject constructor(
-    private val dataStoreRepository: DataStoreRepository,
+    private val dataStorePrefs: DataStorePrefs,
     private val accountManager: AccountManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
 ) {
@@ -134,7 +134,7 @@ class LikeManager @Inject constructor(
     }
 
     private fun updateFavoritesLocal(productId: Long, newIsFavorite: Boolean) {
-        val localLikesListString = dataStoreRepository.getString(FAV_IDS)
+        val localLikesListString = dataStorePrefs.getString(FAV_IDS)
         val localLikesList = if (localLikesListString.isNullOrEmpty()) {
             listOf(productId)
         } else if (!newIsFavorite) {
@@ -143,13 +143,13 @@ class LikeManager @Inject constructor(
             val ids = parseFavorites(localLikesListString)
             (listOf(productId) + ids)
         }
-        dataStoreRepository.putString(FAV_IDS, formatFavorites(localLikesList))
+        dataStorePrefs.putString(FAV_IDS, formatFavorites(localLikesList))
     }
 
     fun fetchLocalFavorites(): String {
         return formatFavorites(
             parseFavorites(
-                dataStoreRepository.getString(FAV_IDS)?.dropLastWhile { char -> char == ',' } ?: ""
+                dataStorePrefs.getString(FAV_IDS)?.dropLastWhile { char -> char == ',' } ?: ""
             )
         )
     }
@@ -204,7 +204,7 @@ class LikeManager @Inject constructor(
     }
 
     suspend fun syncFavoritesFromLocal() {
-        val localLikesListString = dataStoreRepository.getString(FAV_IDS) ?: ""
+        val localLikesListString = dataStorePrefs.getString(FAV_IDS) ?: ""
 
         val localLikesList = parseFavorites(localLikesListString)
 
@@ -214,7 +214,7 @@ class LikeManager @Inject constructor(
     }
 
     private fun rewriteFavoritesLocal(favorites: Map<Long, Boolean>) {
-        dataStoreRepository.putString(
+        dataStorePrefs.putString(
             FAV_IDS,
             formatFavorites(
                 favorites.filter { favorite ->
@@ -226,11 +226,11 @@ class LikeManager @Inject constructor(
 
     suspend fun updateLikesAfterLogin(userId: Long) {
 
-        val localLikesListString = dataStoreRepository.getString(FAV_IDS)?.dropLast(1) ?: ""
+        val localLikesListString = dataStorePrefs.getString(FAV_IDS)?.dropLast(1) ?: ""
 
         runCatching {
             vodovozServiceRepository.addFavoriteProducts(localLikesListString).singleResult()
-            dataStoreRepository.remove(FAV_IDS)
+            dataStorePrefs.remove(FAV_IDS)
         }
     }
 

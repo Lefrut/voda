@@ -2,7 +2,7 @@ package com.vodovoz.app.common.datastore
 
 import kotlinx.coroutines.flow.Flow
 
-interface DataStoreRepository {
+interface DataStorePrefs {
 
     fun getStringFlow(key: String): Flow<String?>
 
@@ -13,6 +13,8 @@ interface DataStoreRepository {
     fun putBoolean(key: String, value: Boolean)
 
     fun getBoolean(key: String) : Boolean?
+
+    fun getBooleanFlow(key: String): Flow<Boolean?>
 
     fun putInt(key: String, value: Int)
 

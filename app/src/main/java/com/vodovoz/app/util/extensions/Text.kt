@@ -4,6 +4,7 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
+import java.text.DecimalFormat
 
 
 fun Context.copyText(text: String) {
@@ -70,6 +71,14 @@ fun String.decodeUnicodeEscapes(): String {
         }
         return@replace matchResult.value
     }
+}
+
+fun formatRating(rating: Float): String {
+    val df = DecimalFormat("#.#")
+    df.decimalFormatSymbols = df.decimalFormatSymbols.apply {
+        decimalSeparator = '.'
+    }
+    return df.format(rating)
 }
 
 

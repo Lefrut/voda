@@ -80,8 +80,10 @@ private fun WebView(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT
             )
-            settings.javaScriptEnabled = true
-            settings.domStorageEnabled = true
+            settings.apply {
+                domStorageEnabled = true
+                javaScriptEnabled = true
+            }
         }
     }
 
@@ -95,7 +97,7 @@ private fun WebView(
     }
 
     AndroidView(
-        factory = { webView.apply { } },
+        factory = { webView },
         modifier = modifier.fillMaxSize()
     )
 

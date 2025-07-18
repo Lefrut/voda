@@ -10,7 +10,7 @@ import androidx.work.PeriodicWorkRequest
 import androidx.work.WorkManager
 import com.squareup.moshi.Moshi
 import com.vodovoz.app.common.account.AccountManager
-import com.vodovoz.app.common.datastore.DataStoreRepository
+import com.vodovoz.app.common.datastore.DataStorePrefs
 import com.vodovoz.app.feature.profile.waterapp.worker.WaterAppWorker
 import com.vodovoz.app.util.extensions.debugLog
 import com.vodovoz.app.util.extensions.fetchCurrentDayInTimeMillis
@@ -27,7 +27,7 @@ import javax.inject.Singleton
 @Stable
 @Singleton
 class WaterAppHelper @Inject constructor(
-    private val dataStoreRepository: DataStoreRepository,
+    private val dataStorePrefs: DataStorePrefs,
     private val applicationContext: Application,
     private val accountManager: AccountManager,
     moshi: Moshi,
@@ -112,7 +112,7 @@ class WaterAppHelper @Inject constructor(
     fun saveUserData() {
         val data = waterAppUserDataListener.value
         val json = userDataJsonAdapter.toJson(data)
-        dataStoreRepository.putString(WATER_APP_USER_DATA, json)
+        dataStorePrefs.putString(WATER_APP_USER_DATA, json)
     }
 
     fun setGender(gender: String) {
@@ -198,7 +198,7 @@ class WaterAppHelper @Inject constructor(
     fun saveWaterAppRateData() {
         val data = waterAppRateDataListener.value
         val json = rateJsonAdapter.toJson(data)
-        dataStoreRepository.putString(WATER_APP_RATE, json)
+        dataStorePrefs.putString(WATER_APP_RATE, json)
 
         debugLog { "save water rate" }
     }
@@ -228,7 +228,7 @@ class WaterAppHelper @Inject constructor(
     }
 
     fun fetchWaterAppUserData() {
-        val json = dataStoreRepository.getString(WATER_APP_USER_DATA)
+        val json = dataStorePrefs.getString(WATER_APP_USER_DATA)
         val data = json?.takeIf { it.isNotEmpty() }?.let { userDataJsonAdapter.fromJson(it) }
         waterAppUserDataListener.value = data ?: WaterAppUserData()
     }
@@ -236,7 +236,7 @@ class WaterAppHelper @Inject constructor(
 
     fun fetchWaterAppRateData() {
         val currentDate = fetchCurrentDayInTimeMillis()
-        val json = dataStoreRepository.getString(WATER_APP_RATE)
+        val json = dataStorePrefs.getString(WATER_APP_RATE)
 
         val data = json?.takeIf { it.isNotEmpty() }?.let { rateJsonAdapter.fromJson(it) }
 
@@ -257,7 +257,7 @@ class WaterAppHelper @Inject constructor(
 
 
     fun fetchWaterAppNotificationData() {
-        val json = dataStoreRepository.getString(WATER_APP_NOTIFICATION_DATA)
+        val json = dataStorePrefs.getString(WATER_APP_NOTIFICATION_DATA)
 
         val data = if (!json.isNullOrEmpty()) {
             notificationJsonAdapter.fromJson(json)
@@ -295,13 +295,13 @@ class WaterAppHelper @Inject constructor(
 
         val notificationJson = notificationJsonAdapter.toJson(data)
 
-        dataStoreRepository.putString(WATER_APP_NOTIFICATION_DATA, notificationJson)
+        dataStorePrefs.putString(WATER_APP_NOTIFICATION_DATA, notificationJson)
     }
 
     fun clearData() {
-        dataStoreRepository.remove(WATER_APP_NOTIFICATION_DATA)
-        dataStoreRepository.remove(WATER_APP_USER_DATA)
-        dataStoreRepository.remove(WATER_APP_RATE)
+        dataStorePrefs.remove(WATER_APP_NOTIFICATION_DATA)
+        dataStorePrefs.remove(WATER_APP_USER_DATA)
+        dataStorePrefs.remove(WATER_APP_RATE)
 
         fetchWaterAppUserData()
         fetchWaterAppNotificationData()

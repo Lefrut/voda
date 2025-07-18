@@ -33,19 +33,7 @@ import com.vodovoz.app.util.extensions.isTablet
 @AndroidEntryPoint
 class AboutAppFragment : Fragment() {
 
-    @Inject
-    lateinit var tabManager: TabManager
     private val viewModel: AboutAppViewModel by viewModels()
-
-    override fun onStart() {
-        super.onStart()
-        tabManager.changeTabVisibility(false)
-    }
-
-    override fun onStop() {
-        super.onStop()
-        tabManager.changeTabVisibility(true)
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater,

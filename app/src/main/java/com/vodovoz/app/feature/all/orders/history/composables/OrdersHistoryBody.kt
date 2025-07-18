@@ -28,13 +28,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
@@ -44,8 +44,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import coil3.compose.rememberAsyncImagePainter
-
-import coil3.request.crossfade
 import com.vodovoz.app.R
 import com.vodovoz.app.design_system.ExtendedTheme
 import com.vodovoz.app.design_system.composables.chip.OrderStatusChip
@@ -183,9 +181,12 @@ fun OrdersHistoryItemCard(
                 MaterialTheme.shapes.large
             )
             .clickable { onClick(orderHistoryItem) }
-            .padding(horizontal = 18.5.dp, vertical = 28.dp)
+            .padding(vertical = 28.dp)
     ) {
-        Row(modifier = Modifier, horizontalArrangement = Arrangement.SpaceBetween) {
+        Row(
+            modifier = Modifier.padding(horizontal = 18.5.dp),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
             Row(Modifier.weight(1f)) {
                 Text(
                     text = AnnotatedString.fromHtml(orderHistoryItem.description),
@@ -210,7 +211,7 @@ fun OrdersHistoryItemCard(
 
         if (orderHistoryItem.address.isNotEmpty()) {
             Text(
-                modifier = Modifier.padding(top = 8.dp),
+                modifier = Modifier.padding(top = 8.dp, start = 18.5.dp, end = 18.5.dp),
                 text = orderHistoryItem.address,
                 color = MaterialTheme.colorScheme.onBackground,
                 style = MaterialTheme.typography.bodyMedium.copy(letterSpacing = 0.sp)
@@ -222,18 +223,21 @@ fun OrdersHistoryItemCard(
                 modifier = Modifier
                     .padding(top = 16.dp)
                     .fillMaxWidth()
-                    .horizontalScroll(rememberScrollState()),
+                    .horizontalScroll(rememberScrollState())
+                    .padding(start = 18.5.dp, end = 18.5.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 orderHistoryItem.products.forEach { product ->
-                    OrdersHistoryProductCard(
-                        ordersHistoryProduct = product
-                    )
+                    key(product.id) {
+                        OrdersHistoryProductCard(
+                            ordersHistoryProduct = product
+                        )
+                    }
                 }
             }
         }
         Row(
-            modifier = Modifier.padding(top = 16.dp),
+            modifier = Modifier.padding(top = 16.dp, start = 18.5.dp, end = 18.5.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(

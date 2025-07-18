@@ -19,11 +19,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.vodovoz.app.R
 import com.vodovoz.app.design_system.VodovozTheme
+import com.vodovoz.app.util.extensions.formatRating
+import java.util.Locale
 
 @Composable
 fun ProductDetailsRatingBar(
     modifier: Modifier = Modifier,
-    rating: String,
+    rating: Float,
     numberOfReviews: Int,
     articleNumber: String,
     onCopyClick: () -> Unit,
@@ -37,15 +39,15 @@ fun ProductDetailsRatingBar(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            text = rating,
-            color = if (numberOfReviews == 0) MaterialTheme.colorScheme.surfaceTint else MaterialTheme.colorScheme.onBackground,
+            text = formatRating(rating),
+            color = if (rating <= 0f) MaterialTheme.colorScheme.surfaceTint else MaterialTheme.colorScheme.onBackground,
             style = MaterialTheme.typography.titleSmall
         )
 
         Icon(
             painter = painterResource(id = R.drawable.ic_star_active),
             contentDescription = null,
-            tint = if (numberOfReviews == 0) MaterialTheme.colorScheme.surfaceVariant else MaterialTheme.colorScheme.tertiary,
+            tint = if (rating <= 0f) MaterialTheme.colorScheme.surfaceVariant else MaterialTheme.colorScheme.tertiary,
             modifier = Modifier
                 .padding(start = 4.dp)
                 .size(16.dp),
@@ -105,7 +107,7 @@ fun ProductDetailsRatingBar(
 private fun ProductDetailsRatingBarPreview() {
     VodovozTheme {
         ProductDetailsRatingBar(
-            rating = "4.3",
+            rating = 4.3f,
             numberOfReviews = 0,
             articleNumber = "123456789",
             onReviewsClick = {},

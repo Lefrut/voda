@@ -27,8 +27,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -57,7 +58,7 @@ fun CategoriesBottomSheet(
         containerColor = MaterialTheme.colorScheme.background,
         modifier = Modifier
             .systemBarsPadding()
-            .padding(start = 8.dp, end = 8.dp, top = 16.dp),
+            .padding(top = 16.dp),
         shape = MaterialTheme.shapes.large.copy(
             bottomStart = CornerSize(0.dp),
             bottomEnd = CornerSize(0.dp)
@@ -80,17 +81,17 @@ fun CategoriesBottomSheet(
                 Text(
                     modifier = Modifier
                         .weight(1f)
-                        .padding(end = 16.dp),
+                        .padding(horizontal = 16.dp),
                     text = stringResource(id = R.string.categories),
                     color = MaterialTheme.colorScheme.onBackground,
                     style = MaterialTheme.typography.titleMedium,
                     textAlign = TextAlign.Center
                 )
                 Icon(
-                    painter = painterResource(id = R.drawable.ic_arrow_down),
+                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_close),
                     contentDescription = null,
                     modifier = Modifier
-                        .size(32.dp)
+                        .size(24.dp)
                         .clip(CircleShape)
                         .clickable { onDismissRequest() },
                     tint = MaterialTheme.colorScheme.onBackground

@@ -21,21 +21,7 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class WebViewFragment : Fragment() {
 
-
-    @Inject
-    lateinit var tabManager: TabManager
-
     private val viewModel by viewModels<WebViewViewModel>()
-
-    override fun onStart() {
-        super.onStart()
-        tabManager.changeTabVisibility(false)
-    }
-
-    override fun onStop() {
-        super.onStop()
-        tabManager.changeTabVisibility(true)
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater,

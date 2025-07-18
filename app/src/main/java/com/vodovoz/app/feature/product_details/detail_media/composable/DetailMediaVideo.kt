@@ -71,7 +71,6 @@ fun DetailMediaVideo(
                         ViewGroup.LayoutParams.WRAP_CONTENT
                     )
 
-
                     webViewClient = object : WebViewClient() {
                         override fun shouldOverrideUrlLoading(
                             view: WebView?,
@@ -79,10 +78,7 @@ fun DetailMediaVideo(
                         ): Boolean = true
                     }
 
-
-
                     webChromeClient = object : WebChromeClient() {
-
                         override fun onShowCustomView(view: View?, callback: CustomViewCallback?) {
                             customView = view
                             onLandscape()
@@ -94,12 +90,11 @@ fun DetailMediaVideo(
                         }
                     }
 
-
                     settings.apply {
                         javaScriptEnabled = true
                         domStorageEnabled = true
                         allowFileAccess = true
-                        mediaPlaybackRequiresUserGesture = true
+                        mediaPlaybackRequiresUserGesture = false
                         cacheMode = WebSettings.LOAD_DEFAULT
                     }
 
@@ -115,9 +110,9 @@ fun DetailMediaVideo(
                         val linkToPlay = model.linkToPlay ?: return@loadVideoPreview
 
                         webView.updateVideoWebView(
-                            false,
-                            model.height,
-                            model.width
+                            landscapeOrientation = false,
+                            videoHeight = model.height,
+                            videoWidth = model.width
                         )
 
                         if (webView.url == linkToPlay) return@loadVideoPreview

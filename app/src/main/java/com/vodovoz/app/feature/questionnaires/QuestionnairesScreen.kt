@@ -21,7 +21,6 @@ import com.vodovoz.app.design_system.composables.top_bar.VodovozTopBar
 import com.vodovoz.app.feature.questionnaires.components.QuestionnairesBody
 import java.time.LocalDate
 
-@Suppress("NonSkippableComposable")
 @Composable
 fun QuestionnairesScreen(
     viewModel: QuestionnairesFlowViewModel,

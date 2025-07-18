@@ -23,8 +23,12 @@ data class KNOPKA_ORDER_DTO(
     val BACKGROUND: String?,
     @Json(name = "NAME")
     val NAME: String?,
+    @Json(name = "TITLE")
+    val TITLE: String?,
     @Json(name = "COLOR")
     val COLOR: String?,
+    @Json(name = "TEXTCOLOR")
+    val TEXTCOLOR: String?,
     @Json(name = "ID")
     val ID: String?,
     @Json(name = "TEXT")

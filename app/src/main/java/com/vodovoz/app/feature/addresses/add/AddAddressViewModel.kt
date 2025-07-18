@@ -266,42 +266,34 @@ class AddAddressViewModel @Inject constructor(
     )
 
     fun changeWidget(widget: WidgetUi, updatedWidget: WidgetUi) {
+        val updatedLinearFields = widgetUpdaterHandler.updateWidget(
+            widgets = stateSnapshot.linearFields,
+            widget = widget,
+            updatedWidget = updatedWidget
+        ).filterIsInstance<FieldUi>()
+
+        val updatedSwitches = widgetUpdaterHandler.updateWidget(
+            widgets = stateSnapshot.linearSwitches,
+            widget = widget,
+            updatedWidget = updatedWidget
+        ).filterIsInstance<SwitchUi>()
+
+        val updatedGridFields = widgetUpdaterHandler.updateWidget(
+            widgets = stateSnapshot.gridFields,
+            widget = widget,
+            updatedWidget = updatedWidget
+        ).filterIsInstance<FieldUi>()
+
         _state.update { s ->
             s.copy(
-                linearFields = widgetUpdaterHandler.updateWidget(
-                    widgets = stateSnapshot.linearFields,
-                    widget = widget,
-                    updatedWidget = updatedWidget
-                ).filterIsInstance<FieldUi>(),
-                linearSwitches = widgetUpdaterHandler.updateWidget(
-                    widgets = stateSnapshot.linearSwitches,
-                    widget = widget,
-                    updatedWidget = updatedWidget
-                ).filterIsInstance<SwitchUi>(),
-                gridFields = widgetUpdaterHandler.updateWidget(
-                    widgets = stateSnapshot.gridFields,
-                    widget = widget,
-                    updatedWidget = updatedWidget
-                ).filterIsInstance<FieldUi>(),
+                linearFields = updatedLinearFields,
+                linearSwitches = updatedSwitches,
+                gridFields = updatedGridFields.updateByPrivateHouseRules(updatedSwitches),
                 button = s.button.copy(enabled = true)
             )
         }
 
-        val privateHouseSwitch = stateSnapshot.linearSwitches.find { it.id == PRIVATE_HOUSE_ID }
-        _state.update { s ->
-            s.copy(
-                gridFields = s.gridFields.map { gridField ->
-                    if (gridField.id == FLOOR_ID || gridField.id == FLAT_ID) {
-                        gridField.copy(
-                            isRequired = privateHouseSwitch?.value != true,
-                            isError = gridField.isError && privateHouseSwitch?.value == false
-                        )
-                    } else {
-                        gridField
-                    }
-                }
-            )
-        }
+
     }
 
     fun fetchAddressDetails() = viewModelScope.launch {
@@ -327,12 +319,14 @@ class AddAddressViewModel @Inject constructor(
 
                 val currentMapAddress = mapAddressDeferred.await()
                 val addressField = addAddressDetails.addressField.toUi()
-
+                val linearSwitches = addAddressDetails.linearSwitches.mapToUi().filter { switch ->
+                    addressId == null || (switch.id == PRIVATE_HOUSE_ID && VodovozAddressType.Personal.value == addressType) || switch.id != DELIVERY_OFFICE_ID
+                }
                 s.copy(
                     mapAddress = currentMapAddress,
                     uiState = AddAddressUiState.Form,
                     linearFields = addAddressDetails.linearFields.mapToUi(),
-                    gridFields = addAddressDetails.gridFields.mapToUi(),
+                    gridFields = addAddressDetails.gridFields.mapToUi().updateByPrivateHouseRules(linearSwitches),
                     addressField = addressField.copy(
                         value = currentMapAddress?.let { mapAddress ->
                             resourcesProvider.getString(
@@ -344,11 +338,11 @@ class AddAddressViewModel @Inject constructor(
                         } ?: addressField.value
                     ),
                     button = addAddressDetails.button.toUi(),
-                    linearSwitches = addAddressDetails.linearSwitches.mapToUi().filter { switch ->
-                        addressId == null || (switch.id == PRIVATE_HOUSE_ID && VodovozAddressType.Personal.value == addressType) || switch.id != DELIVERY_OFFICE_ID
-                    }
+                    linearSwitches = linearSwitches
                 )
             }
+
+
         }.onFailure {
             _state.update { s ->
                 s.copy(uiState = AddAddressUiState.Error)
@@ -356,6 +350,22 @@ class AddAddressViewModel @Inject constructor(
         }
 
 
+    }
+
+    private fun List<FieldUi>.updateByPrivateHouseRules(
+        switches: List<SwitchUi>
+    ): List<FieldUi> {
+        val privateHouseSwitch = switches.find { it.id == PRIVATE_HOUSE_ID } ?: return this
+        return map {gridField ->
+            if (gridField.id == FLOOR_ID || gridField.id == FLAT_ID) {
+                gridField.copy(
+                    isRequired = !privateHouseSwitch.value,
+                    isError = gridField.isError && !privateHouseSwitch.value
+                )
+            } else {
+                gridField
+            }
+        }
     }
 
     fun checkWidgetOnAddress(widget: WidgetUi) = viewModelScope.launch {

@@ -24,7 +24,11 @@ fun ServiceDetailScreen(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
-        VodovozTopBar(modifier = Modifier.zIndex(1f),onBack = { viewModel.navigateBack() }, title = viewState.title)
+        VodovozTopBar(
+            modifier = Modifier.zIndex(1f),
+            onBack = { viewModel.navigateBack() },
+            title = viewState.title
+        )
         when (viewState.uiState) {
             ServiceDetailsUiState.Error -> {
                 NetworkErrorPlaceholder {
@@ -63,6 +67,9 @@ fun ServiceDetailScreen(
                     },
                     onLoadingChange = { isLoading ->
                         viewModel.changeLoading(isLoading)
+                    },
+                    onBackClick = {
+                        viewModel.navigateBack()
                     }
                 )
             }

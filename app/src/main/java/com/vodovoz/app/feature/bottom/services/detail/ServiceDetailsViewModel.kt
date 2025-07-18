@@ -35,9 +35,7 @@ class ServiceDetailsViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
 ) : MviViewModel<ServiceDetailsState, ServiceDetailsEvent>(ServiceDetailsState()) {
 
-    private val serviceId: Int = savedStateHandle.get<Int>("serviceId") ?: navigateBack().run {
-        -1
-    }
+    private val serviceId: Int = savedStateHandle.get<Int>("serviceId") ?: navigateBack().run { -1 }
 
     init {
         viewModelScope.launch { delay(250) }.invokeOnCompletion {

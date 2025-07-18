@@ -85,7 +85,7 @@ fun ProductDetailsBody(
 
         ProductDetailsRatingBar(
             modifier = Modifier.padding(top = 16.dp),
-            rating = productDetails.rating.toString(),
+            rating = productDetails.rating,
             numberOfReviews = productDetails.commentsCount,
             articleNumber = productDetails.articleNumber,
             onReviewsClick = onShowAllCommentsClick,

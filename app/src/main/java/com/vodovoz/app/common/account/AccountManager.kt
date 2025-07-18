@@ -2,8 +2,7 @@ package com.vodovoz.app.common.account
 
 import androidx.annotation.Keep
 import com.vodovoz.app.BuildConfig
-import com.vodovoz.app.common.datastore.DataStoreRepository
-import com.yandex.metrica.YandexMetrica
+import com.vodovoz.app.common.datastore.DataStorePrefs
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
@@ -11,7 +10,7 @@ import javax.inject.Singleton
 
 @Singleton
 class AccountManager @Inject constructor(
-    private val dataStoreRepository: DataStoreRepository,
+    private val dataStorePrefs: DataStorePrefs,
 ) {
 
     private val accountIdListener = MutableStateFlow<Long?>(null)
@@ -23,48 +22,48 @@ class AccountManager @Inject constructor(
         return id
     }
 
-    private fun fetchUserId() = dataStoreRepository.getInt(USER_ID)?.toLong()
+    private fun fetchUserId() = dataStorePrefs.getInt(USER_ID)?.toLong()
 
     fun updateUserId(userId: Long) {
-        dataStoreRepository.putInt(USER_ID, userId.toInt())
+        dataStorePrefs.putInt(USER_ID, userId.toInt())
         accountIdListener.value = userId
     }
 
     fun removeUserId() {
-        dataStoreRepository.remove(USER_ID)
+        dataStorePrefs.remove(USER_ID)
         accountIdListener.value = null
     }
 
     fun fetchUserToken() =
-        dataStoreRepository.getString(USER_TOKEN)
+        dataStorePrefs.getString(USER_TOKEN)
 
     fun updateUserToken(userToken: String) {
-        dataStoreRepository.putString(USER_TOKEN, userToken)
+        dataStorePrefs.putString(USER_TOKEN, userToken)
     }
 
     fun removeUserToken() {
-        dataStoreRepository.remove(USER_TOKEN)
+        dataStorePrefs.remove(USER_TOKEN)
     }
 
     fun fetchUserSettings(): UserSettings {
-        val email = dataStoreRepository.getString(EMAIL) ?: ""
-        val password = dataStoreRepository.getString(PASSWORD) ?: ""
+        val email = dataStorePrefs.getString(EMAIL) ?: ""
+        val password = dataStorePrefs.getString(PASSWORD) ?: ""
         return UserSettings(email, password)
     }
 
     fun updateLastLoginSetting(settings: UserSettings) {
-        with(dataStoreRepository) {
+        with(dataStorePrefs) {
             putString(EMAIL, settings.email)
             putString(PASSWORD, settings.password)
         }
     }
 
     fun saveUseBio(use: Boolean) {
-        dataStoreRepository.putBoolean(USE_BIO, use)
+        dataStorePrefs.putBoolean(USE_BIO, use)
     }
 
     fun fetchUseBio(): Boolean {
-        return dataStoreRepository.getBoolean(USE_BIO) ?: false
+        return dataStorePrefs.getBoolean(USE_BIO) ?: false
     }
 
     fun isAlreadyLogin() = fetchUserId() != null
