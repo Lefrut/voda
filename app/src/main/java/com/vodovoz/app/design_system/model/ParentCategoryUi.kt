@@ -24,6 +24,33 @@ data class ParentCategoryUi(
 
 }
 
+fun List<ParentCategoryUi>.findParentOfOnlyLeaf(): ParentCategoryUi? {
+    fun traverse(
+        node: ParentCategoryUi,
+        parent: ParentCategoryUi?,
+        acc: MutableList<Pair<ParentCategoryUi, ParentCategoryUi>>
+    ) {
+        if (node.childCategories.isEmpty()) {
+            if (parent != null) acc += node to parent
+        } else {
+            node.childCategories.forEach { child ->
+                traverse(child, node, acc)
+            }
+        }
+    }
+
+    val leafParentPairs = mutableListOf<Pair<ParentCategoryUi, ParentCategoryUi>>()
+    for (root in this) {
+        traverse(root, null, leafParentPairs)
+    }
+
+    return if (leafParentPairs.size == 1) {
+        leafParentPairs.first().second
+    } else {
+        null
+    }
+}
+
 fun ParentCategoryUi.allCategories(): List<ParentCategoryUi> {
     return listOf(this) + childCategories.flatMap { category ->
         category.allCategories()

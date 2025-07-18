@@ -1,29 +1,40 @@
 package com.vodovoz.app.feature.block_app
 
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
+import androidx.activity.compose.BackHandler
 import androidx.annotation.Keep
-import androidx.core.view.isVisible
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.navOptions
-import by.kirich1409.viewbindingdelegate.viewBinding
-import coil3.load
 import com.vodovoz.app.R
-import com.vodovoz.app.databinding.FragmentBlockAppBinding
+import com.vodovoz.app.design_system.VodovozTheme
+import com.vodovoz.app.design_system.effects.LifecycleEffect
+import com.vodovoz.app.feature.block_app.composables.BlockAppBody
+import com.vodovoz.app.feature.block_app.model.BlockAppEvent
 import com.vodovoz.app.feature.sitestate.SiteStateManager
 import com.vodovoz.app.ui.base.MainActivityViewModel
-import com.vodovoz.app.util.extensions.addOnBackPressedCallback
 import com.vodovoz.app.util.extensions.dialPhoneNumber
-import com.vodovoz.app.util.extensions.fromHtml
-import com.vodovoz.app.util.extensions.startJivo
-import com.vodovoz.app.util.extensions.startTelegram
-import com.vodovoz.app.util.extensions.startViber
-import com.vodovoz.app.util.extensions.startWhatsUpWithUri
+import com.vodovoz.app.util.extensions.openUrl
 import com.vodovoz.app.util.formatters.VodovozDateFormatters
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Job
@@ -38,13 +49,10 @@ import java.util.Locale
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class BlockAppFragment : Fragment(R.layout.fragment_block_app) {
+class BlockAppFragment : Fragment() {
 
     private val mainActivityViewModel: MainActivityViewModel by activityViewModels()
-
-    private val binding: FragmentBlockAppBinding by viewBinding {
-        FragmentBlockAppBinding.bind(requireView())
-    }
+    private val blockAppViewModel: BlockAppViewModel by viewModels()
 
     @Inject
     lateinit var siteStateManager: SiteStateManager
@@ -52,16 +60,79 @@ class BlockAppFragment : Fragment(R.layout.fragment_block_app) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         observeSiteState()
-        addOnBackPressedCallback {
+    }
 
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?,
+    ): View {
+        return ComposeView(requireContext()).apply {
+            setContent {
+                VodovozTheme {
+                    val blockAppState by blockAppViewModel.state.collectAsStateWithLifecycle()
+
+                    Column(modifier = Modifier.background(MaterialTheme.colorScheme.background)) {
+                        Text(
+                            modifier = Modifier.padding(16.dp),
+                            text = blockAppState.title,
+                            color = MaterialTheme.colorScheme.onBackground,
+                            style = MaterialTheme.typography.headlineSmall,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        BlockAppBody(
+                            image = blockAppState.image,
+                            description = blockAppState.description,
+                            contacts = blockAppState.contacts,
+                            showTime = blockAppState.showTime,
+                            timeHours = blockAppState.hours,
+                            timeMinutes = blockAppState.minutes,
+                            timeSeconds = blockAppState.seconds,
+                            timeDays = blockAppState.days,
+                            onContactClick = { contact ->
+                                blockAppViewModel.navigateByContact(contact)
+                            }
+                        )
+                    }
+
+                    LifecycleEffect {
+                        blockAppViewModel.listenSiteState()
+                    }
+
+                    val context = LocalContext.current
+
+                    LifecycleEffect {
+                        blockAppViewModel.events.collect { event ->
+                            when (event) {
+                                is BlockAppEvent.DialPhoneNumber -> {
+                                    context.dialPhoneNumber(event.phoneNumber)
+                                }
+
+                                BlockAppEvent.GoBack -> {
+                                    findNavController().popBackStack()
+                                }
+
+                                is BlockAppEvent.OpenUrl -> {
+                                    context.openUrl(event.url)
+                                }
+                            }
+                        }
+                    }
+
+                    BackHandler {}
+                }
+            }
         }
     }
 
     private fun observeSiteState() = viewLifecycleOwner.lifecycleScope.launch {
+        delay(1000L)
         repeatOnLifecycle(Lifecycle.State.STARTED) {
             siteStateManager.siteStateFlow.collect { siteState ->
 
-                if (siteState == null || siteState.isActive) {
+                //TODO - put siteState.isActive
+                if (siteState == null) {
                     countdownJob?.cancel()
                     mainActivityViewModel.checkAppState().join()
                     findNavController().navigate(
@@ -77,56 +148,6 @@ class BlockAppFragment : Fragment(R.layout.fragment_block_app) {
 
                 val time = siteState.data?.time ?: ""
                 startCountDown(time)
-
-                binding.imageBlockApp.load(siteState.data?.logo ?: "")
-
-                binding.txtBlockApp.text = if (siteState.data?.desc == null) {
-                    binding.txtBlockApp.isVisible = false
-                    ""
-                } else {
-                    binding.txtBlockApp.isVisible = true
-                    siteState.data.desc.fromHtml()
-                }
-
-                val siteData = siteState.data
-
-                siteData?.apply {
-                    binding.whatsUp.load(whatsUp?.image)
-                    binding.viber.load(viber?.image)
-                    binding.telegram.load(telegram?.image)
-                    binding.chat.load(chat?.image)
-                    binding.imageCall.load(phone?.image)
-                }
-
-                binding.whatsUp.setOnClickListener {
-                    val url = siteData?.whatsUp?.url ?: return@setOnClickListener
-                    requireActivity().startWhatsUpWithUri(url)
-                }
-
-                binding.viber.setOnClickListener {
-                    val url = siteData?.viber?.url ?: return@setOnClickListener
-                    requireActivity().startViber(url)
-                }
-
-                binding.telegram.setOnClickListener {
-                    val url = siteData?.telegram?.url ?: return@setOnClickListener
-                    requireActivity().startTelegram(url)
-                }
-
-                binding.telegram.setOnClickListener {
-                    val url = siteData?.telegram?.url ?: return@setOnClickListener
-                    requireActivity().startTelegram(url)
-                }
-
-                binding.chat.setOnClickListener {
-                    val url = siteData?.chat?.url ?: return@setOnClickListener
-                    requireActivity().startJivo(url)
-                }
-
-                binding.imageCall.setOnClickListener {
-                    val phone = siteData?.phone?.url ?: return@setOnClickListener
-                    requireContext().dialPhoneNumber(phone)
-                }
             }
         }
     }
@@ -138,7 +159,7 @@ class BlockAppFragment : Fragment(R.layout.fragment_block_app) {
         countdownJob?.cancel()
 
         countdownJob = viewLifecycleOwner.lifecycleScope.launch {
-            val locale = Locale.getDefault()
+            val locale = Locale.US
             val formatter = VodovozDateFormatters.DMY_HMS
             val futureDateTime = try {
                 LocalDateTime.parse(localDateTime, formatter)
@@ -154,7 +175,7 @@ class BlockAppFragment : Fragment(R.layout.fragment_block_app) {
                 val nowMillis = Instant.now().toEpochMilli()
 
                 if (nowMillis < futureMillis) {
-                    binding.linearTimeData.visibility = View.VISIBLE
+                    blockAppViewModel.showTime()
 
                     val now = LocalDateTime.now(ZoneId.of("Europe/Moscow"))
                     val duration = Duration.between(now, futureDateTime)
@@ -165,12 +186,14 @@ class BlockAppFragment : Fragment(R.layout.fragment_block_app) {
                     val minutes = (totalSeconds % 3600) / 60
                     val seconds = totalSeconds % 60
 
-                    binding.txtDays.text = String.format(locale, "%02d", days)
-                    binding.txtHours.text = String.format(locale, "%02d", hours)
-                    binding.txtMinute.text = String.format(locale, "%02d", minutes)
-                    binding.txtSecond.text = String.format(locale, "%02d", seconds)
+                    blockAppViewModel.setTime(
+                        String.format(locale, "%02d", days),
+                        String.format(locale, "%02d", hours),
+                        String.format(locale, "%02d", minutes),
+                        String.format(locale, "%02d", seconds)
+                    )
                 } else {
-                    binding.linearTimeData.visibility = View.GONE
+                    blockAppViewModel.hideTime()
                     val siteState = siteStateManager.requestSiteState()
                     val siteStateTime = siteState?.data?.time ?: ""
                     startCountDown(siteStateTime)

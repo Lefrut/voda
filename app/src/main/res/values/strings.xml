@@ -294,5 +294,9 @@
     <string name="date_time_inteval">%1$s, %2$s</string>
     <string name="error_invalid_inn">Неверный ИНН. Укажите 10 или 12 цифр.</string>
     <string name="html_br"><![CDATA[<br>]]></string>
+    <string name="block_days">ДНЕЙ</string>
+    <string name="block_hours">ЧАСОВ</string>
+    <string name="block_minutes">МИНУТ</string>
+    <string name="block_seconds">СЕКУНД</string>
 
 </resources>

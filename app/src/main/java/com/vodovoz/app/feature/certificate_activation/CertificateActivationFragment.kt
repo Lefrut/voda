@@ -31,19 +31,6 @@ class CertificateActivationFragment : Fragment() {
 
     internal val viewModel: CertificateActivationViewModel by viewModels()
 
-    @Inject
-    internal lateinit var tabManager: TabManager
-
-    override fun onStart() {
-        super.onStart()
-        tabManager.changeTabVisibility(false)
-    }
-
-    override fun onStop() {
-        super.onStop()
-        tabManager.changeTabVisibility(true)
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,

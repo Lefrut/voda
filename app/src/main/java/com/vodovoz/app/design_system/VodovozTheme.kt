@@ -61,7 +61,6 @@ fun VodovozTheme(
 ) {
     val colorScheme = if (isDarkTheme) lightColors else lightColors
 
-    WindowInsets.statusBars
     MaterialTheme(
         colorScheme = colorScheme,
         typography = vodovozTypography,
@@ -72,7 +71,6 @@ fun VodovozTheme(
             LocalExtendedColors provides extendedLightColors,
             LocalExtendedTypography provides extendedTypography,
             LocalShimmerTheme provides VodovozShimmerTheme,
-
         ) {
             content()
         }

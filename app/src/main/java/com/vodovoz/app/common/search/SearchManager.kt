@@ -1,13 +1,13 @@
 package com.vodovoz.app.common.search
 
-import com.vodovoz.app.common.datastore.DataStoreRepository
+import com.vodovoz.app.common.datastore.DataStorePrefs
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class SearchManager @Inject constructor(
-    private val dataStoreRepository: DataStoreRepository,
+    private val dataStorePrefs: DataStorePrefs,
 ) {
 
     companion object {
@@ -15,12 +15,12 @@ class SearchManager @Inject constructor(
     }
 
     fun fetchSearchHistoryFlow() =
-        dataStoreRepository.getStringFlow(SEARCH_HISTORY).map { queries ->
+        dataStorePrefs.getStringFlow(SEARCH_HISTORY).map { queries ->
             parseSearchHistoryStr(queries ?: "")
         }
 
     fun clearSearchHistory() {
-        dataStoreRepository.remove(SEARCH_HISTORY)
+        dataStorePrefs.remove(SEARCH_HISTORY)
     }
 
     fun addQueryToHistory(query: String) {
@@ -28,18 +28,18 @@ class SearchManager @Inject constructor(
             val queryList = fetchSearchHistory()
             val cont = queryList.find { it == query }
             if (cont == null) {
-                dataStoreRepository.putString(SEARCH_HISTORY, buildSearchHistoryStr(listOf(query) + queryList))
+                dataStorePrefs.putString(SEARCH_HISTORY, buildSearchHistoryStr(listOf(query) + queryList))
             }
         }
     }
 
     fun removeQueryFromHistory(query: String){
         val queryList = fetchSearchHistory().toMutableList().apply { remove(query) }
-        dataStoreRepository.putString(SEARCH_HISTORY, buildSearchHistoryStr(queryList))
+        dataStorePrefs.putString(SEARCH_HISTORY, buildSearchHistoryStr(queryList))
     }
 
     fun fetchSearchHistory() =
-        parseSearchHistoryStr(dataStoreRepository.getString(SEARCH_HISTORY) ?: "")
+        parseSearchHistoryStr(dataStorePrefs.getString(SEARCH_HISTORY) ?: "")
 
     private fun parseSearchHistoryStr(searchHistoryStr: String): List<String> {
         val queryList = searchHistoryStr.split(",").toMutableList()

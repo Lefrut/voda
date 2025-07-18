@@ -15,7 +15,7 @@ data class SiteStateResponseDTO(
     @Json(name = "COMMENTFILES")
     val COMMENTFILES: Boolean?,
     @Json(name = "DATA")
-    val DATA: Any?,
+    val DATA: SiteStateDataDTO?,
     @Json(name = "GENERATION")
     val GENERATION: GENERATION_DTO?,
     @Json(name = "REGISTRACION_SMS")

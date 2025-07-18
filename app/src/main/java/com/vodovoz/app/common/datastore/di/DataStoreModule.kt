@@ -1,8 +1,8 @@
 package com.vodovoz.app.common.datastore.di
 
 import android.app.Application
-import com.vodovoz.app.common.datastore.DataStoreRepository
-import com.vodovoz.app.common.datastore.DataStoreRepositoryImpl
+import com.vodovoz.app.common.datastore.DataStorePrefs
+import com.vodovoz.app.common.datastore.DataStorePrefsImpl
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -15,8 +15,8 @@ class DataStoreModule {
 
     @Provides
     @Singleton
-    fun providesDataStore(context: Application): DataStoreRepository {
-        return DataStoreRepositoryImpl(context)
+    fun providesDataStore(context: Application): DataStorePrefs {
+        return DataStorePrefsImpl(context)
     }
 
 }

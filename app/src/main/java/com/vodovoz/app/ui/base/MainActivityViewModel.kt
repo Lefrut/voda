@@ -39,7 +39,7 @@ class MainActivityViewModel @Inject constructor(
         if (siteState == null) {
             _appState.update { AppState.ErrorLoading }
             return@launch
-        } else if (!siteState.isActive) {
+        } else if (!siteState.isActive || siteState.data != null) {
             _appState.update { AppState.Blocked }
             return@launch
         }

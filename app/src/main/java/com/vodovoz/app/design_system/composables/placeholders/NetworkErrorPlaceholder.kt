@@ -1,5 +1,6 @@
 package com.vodovoz.app.design_system.composables.placeholders
 
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -17,11 +18,25 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.vodovoz.app.R
+import com.vodovoz.app.common.block_app_signal.ReloadAppSignalProvider
 import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.composables.button.VodovozButton
+import com.vodovoz.app.design_system.effects.LifecycleEffect
+import kotlinx.coroutines.channels.consumeEach
 
 @Composable
 fun NetworkErrorPlaceholder(modifier: Modifier = Modifier, onTryAgainClick: () -> Unit) {
+    val activity = LocalActivity.current
+    
+    LifecycleEffect {
+        val blockAppSignal =  (activity as? ReloadAppSignalProvider)?.reloadAppSignal ?: return@LifecycleEffect
+        blockAppSignal.getChannel(this).consumeEach { update ->
+            if(update) {
+                
+            }
+        }
+    }
+
     Column(
         modifier = modifier
             .fillMaxSize()

@@ -4,6 +4,7 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import io.mockk.mockkObject
+import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
@@ -43,7 +44,6 @@ class CartManagerTests {
 
     @Test
     fun `multiple async cart changes with 5 success 2 fails`() = runTest {
-
         val addOperations = listOf<Triple<Flow<Result<String>>, Long, Int>>(
             Triple(flowOf(Result.success("Success")), 1, 2),
             Triple(flowOf(Result.success("Success")), 2, 2),
@@ -59,11 +59,6 @@ class CartManagerTests {
         val updateOperations2 = listOf(
             Triple(flowOf(Result.success("Success")), 1L, 0)
         )
-
-
-        val observeCartJob = launch {
-            cartManager.observeCarts().collect { map -> println(map) }
-        }
 
         coEvery {
             vodovozServiceRepository.addProductToCart(any(), any())
@@ -98,8 +93,6 @@ class CartManagerTests {
         assert(cart.getOrDefault(1, 0) == 0)
         assert(cart[2] == 2)
         assert(cart[3] == 2)
-
-        observeCartJob.cancel()
     }
 
 
@@ -122,7 +115,6 @@ class CartManagerTests {
             val cart = cartManager.observeCarts().firstOrNull()
 
             assert(cartManager.blockedProductsState.value.isEmpty())
-            assert(cart != null)
             assert(cart?.toMap() == mapOf(productId to productCount))
             assert(cartManager.cartVersion != 0)
 
@@ -143,6 +135,38 @@ class CartManagerTests {
         cartManager.change(3, 1).join()
 
         assert(cartManager.observeUpdateCartList().value)
+    }
+
+    @Test
+    fun `add products in empty cart by add()`() = runTest {
+        coEvery {
+            vodovozServiceRepository.addProductToCart(any(), any())
+        } returns flow { Result.success("") }
+
+        launch {
+            cartManager.add(mapOf(1L to 10, 2L to 20))
+        }.join()
+        val cart = cartManager.observeCarts().firstOrNull() ?: emptyMap()
+
+        assertEquals(
+            cart,
+            mapOf(1 to 10, 2 to 20)
+        )
+        assert(cartManager.blockedProductsState.value.isEmpty())
+    }
+
+    @Test
+    fun `add products in empty cart with error by add()`() = runTest {
+        launch {
+            cartManager.add(mapOf(1L to 10, 2L to 20))
+        }.join()
+        val cart = cartManager.observeCarts().firstOrNull() ?: emptyMap()
+
+        assertEquals(
+            cart,
+            mapOf(1 to 10, 2 to 20)
+        )
+        assert(cartManager.blockedProductsState.value.isEmpty())
     }
 
 }

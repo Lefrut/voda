@@ -23,7 +23,9 @@ import com.vodovoz.app.design_system.composables.list.ProductListTitle
 import com.vodovoz.app.design_system.composables.list.gridProducts
 import com.vodovoz.app.design_system.composables.list.linearProducts
 import com.vodovoz.app.design_system.composables.placeholders.VodovozPlaceholder
+import com.vodovoz.app.design_system.model.ParentCategoryUi
 import com.vodovoz.app.design_system.model.ProductUi
+import com.vodovoz.app.design_system.model.allCategories
 import com.vodovoz.app.design_system.model.toUi
 import com.vodovoz.app.domain.general.model.EmptyResultException
 import com.vodovoz.app.feature.home.model.CategoryUi
@@ -36,10 +38,12 @@ fun ProductCatalogBody(
     lazyGridState: LazyGridState,
     title: String,
     categories: List<CategoryUi>,
+    categoriesTree: List<ParentCategoryUi>,
     productsQuantity: String,
     currentCategory: CategoryUi,
     currentSort: SortUi,
     isGridView: Boolean,
+    showShare: Boolean,
     showFilters: Boolean,
     showEmptyCategory: Boolean,
     products: List<ProductUi>,
@@ -71,6 +75,7 @@ fun ProductCatalogBody(
                 modifier = Modifier.padding(bottom = 16.dp),
                 productsQuantity = productsQuantity,
                 title = title,
+                showShare = showShare,
                 onShareClick = onShareClick
             )
         }
@@ -85,7 +90,9 @@ fun ProductCatalogBody(
                     onCategoryClick = { category ->
                         onCategoryClick(category)
                     },
-                    onCategoriesListClick = onCategoriesListClick
+                    onCategoriesListClick = if (categoriesTree.allCategories().size > 1) {
+                        onCategoriesListClick
+                    } else null
                 )
             }
 

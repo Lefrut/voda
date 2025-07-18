@@ -9,7 +9,7 @@ data class VodovozSiteState(
     val jivoChat: JivoChatModel,
     val tracking: TrackingConfig,
     val agreement: AgreementModel,
-    val data: SiteStateData? = null,
+    val data: VodovozSiteStateData?,
     val callPhoneNumber: String,
 ) {
     companion object {
@@ -22,7 +22,8 @@ data class VodovozSiteState(
             jivoChat = JivoChatModel(false, ""),
             tracking = TrackingConfig(false, 30),
             agreement = AgreementModel("", emptyList()),
-            callPhoneNumber = ""
+            callPhoneNumber = "",
+            data = null
         )
     }
 }
@@ -42,20 +43,18 @@ data class TrackingConfig(
     val time: Int,
 )
 
-data class SiteStateData(
-    val title: String?,
-    val logo: String?,
-    val desc: String? = null,
-    val email: String? = null,
-    val whatsUp: SiteStateContact? = null,
-    val viber: SiteStateContact? = null,
-    val telegram: SiteStateContact? = null,
-    val chat: SiteStateContact? = null,
-    val phone: SiteStateContact? = null,
-    val time: String? = null,
+data class VodovozSiteStateData(
+    val title: String,
+    val logo: String,
+    val description: String,
+    val email: String,
+    val time: String,
+    val phone: String,
+    val contacts: List<VodovozSiteStateContact>,
 )
 
-data class SiteStateContact(
+data class VodovozSiteStateContact(
     val url: String,
+    val urlType: String,
     val image: String,
 )

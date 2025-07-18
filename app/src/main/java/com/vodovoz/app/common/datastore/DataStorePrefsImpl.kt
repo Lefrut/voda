@@ -8,8 +8,6 @@ import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
-import com.squareup.moshi.Moshi
-import com.squareup.moshi.Types
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
@@ -33,10 +31,10 @@ private val Context.dataStore by preferencesDataStore(
     }
 )
 
-class DataStoreRepositoryImpl @Inject constructor(
+class DataStorePrefsImpl @Inject constructor(
     @ApplicationContext
     private val context: Context,
-) : DataStoreRepository {
+) : DataStorePrefs {
 
     override fun getStringFlow(key: String): Flow<String?> {
         val prefKey = stringPreferencesKey(key)
@@ -79,6 +77,11 @@ class DataStoreRepositoryImpl @Inject constructor(
             e.printStackTrace()
             null
         }
+    }
+
+    override fun getBooleanFlow(key: String): Flow<Boolean?> {
+        val prefKey = booleanPreferencesKey(key)
+        return context.dataStore.data.map { prefs -> prefs[prefKey] }
     }
 
     override fun putInt(key: String, value: Int) {

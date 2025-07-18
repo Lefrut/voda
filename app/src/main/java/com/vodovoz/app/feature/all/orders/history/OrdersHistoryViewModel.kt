@@ -6,7 +6,6 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.CombinedLoadStates
 import androidx.paging.LoadState
 import androidx.paging.map
-import com.vodovoz.app.common.account.AccountManager
 import com.vodovoz.app.common.cart.CartManager
 import com.vodovoz.app.common.content.Event
 import com.vodovoz.app.common.content.PagingContractViewModel
@@ -24,22 +23,15 @@ import com.vodovoz.app.ui.paging.PagingDataListener
 import com.vodovoz.app.ui.paging.copy
 import com.vodovoz.app.ui.paging.emptyCombinedLoadStates
 import com.vodovoz.app.util.extensions.debounceWithMax
-import com.vodovoz.app.util.extensions.debugLog
 import com.vodovoz.app.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.mapLatest
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -119,7 +111,8 @@ class OrdersHistoryViewModel @Inject constructor(
                 s.copy(
                     title = ordersHistoryDetails.title,
                     filters = ordersHistoryDetails.filters.mapToUi(),
-                    uiState = AllOrdersUiState.Body
+                    uiState = AllOrdersUiState.Body,
+                    showRefreshIndicator = false
                 )
             }
 
@@ -235,6 +228,18 @@ class OrdersHistoryViewModel @Inject constructor(
         }
     }
 
+    fun refresh() = viewModelScope.launch {
+        uiStateListener.updateData { s ->
+            s.copy(showRefreshIndicator = true)
+        }
+
+        fetchOrdersHistoryDetails().join()
+
+        uiStateListener.updateData { s ->
+            s.copy(showRefreshIndicator = false)
+        }
+    }
+
     @Immutable
     data class AllOrdersState(
         val title: String = "",
@@ -245,6 +250,7 @@ class OrdersHistoryViewModel @Inject constructor(
         val filters: List<OrderFilterUi> = emptyList(),
         val items: List<OrdersHistoryItemUi> = emptyList(),
         val loadStates: CombinedLoadStates = emptyCombinedLoadStates,
+        val showRefreshIndicator: Boolean = false,
     ) : State
 
     sealed class AllOrdersEvent : Event {

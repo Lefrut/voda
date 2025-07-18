@@ -1,13 +1,13 @@
 package com.vodovoz.app.common.tracking
 
-import com.vodovoz.app.common.datastore.DataStoreRepository
+import com.vodovoz.app.common.datastore.DataStorePrefs
 import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class TrackingManager @Inject constructor(
-    private val dataStoreRepository: DataStoreRepository,
+    private val dataStorePrefs: DataStorePrefs,
 ) {
 
     private var sessionId: String = ""
@@ -26,13 +26,13 @@ class TrackingManager @Inject constructor(
          * **/
         val timeInMillis: Long = sessionIdTime.toLong() * 60 * 1000
         val currentTime = System.currentTimeMillis()
-        val lastSessionIDTime: Long = dataStoreRepository.getLong("LastSessionIDTime") ?: 0L
+        val lastSessionIDTime: Long = dataStorePrefs.getLong("LastSessionIDTime") ?: 0L
         if (currentTime - lastSessionIDTime > timeInMillis) {
             sessionId = UUID.randomUUID().toString()
-            dataStoreRepository.putString("sessionId", sessionId)
-            dataStoreRepository.putLong("LastSessionIDTime", currentTime)
+            dataStorePrefs.putString("sessionId", sessionId)
+            dataStorePrefs.putLong("LastSessionIDTime", currentTime)
         } else {
-            sessionId = dataStoreRepository.getString("sessionId") ?: UUID.randomUUID().toString()
+            sessionId = dataStorePrefs.getString("sessionId") ?: UUID.randomUUID().toString()
         }
 
         /**
@@ -41,13 +41,13 @@ class TrackingManager @Inject constructor(
          * формат: 0:&lt;TIMESTAMP>:&lt;UUID>, где TIMESTAMP - время создания в формате base36
          * **/
         val yearInMillis = 365L * 24 * 60 * 60 * 1000
-        val lastUserGUIDTime = dataStoreRepository.getLong("LastUserGUIDTime") ?: 0L
+        val lastUserGUIDTime = dataStorePrefs.getLong("LastUserGUIDTime") ?: 0L
         if (currentTime - lastUserGUIDTime > yearInMillis) {
             userGUID = createGuidUUID(currentTime)
-            dataStoreRepository.putString("userGUID", userGUID)
-            dataStoreRepository.putLong("LastUserGUIDTime", currentTime)
+            dataStorePrefs.putString("userGUID", userGUID)
+            dataStorePrefs.putLong("LastUserGUIDTime", currentTime)
         } else {
-            userGUID = dataStoreRepository.getString(
+            userGUID = dataStorePrefs.getString(
                 "userGUID"
             ) ?: createGuidUUID(currentTime)
 

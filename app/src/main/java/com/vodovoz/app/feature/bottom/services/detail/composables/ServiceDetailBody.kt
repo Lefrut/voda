@@ -9,6 +9,7 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -33,6 +34,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.zIndex
@@ -64,6 +66,7 @@ fun ServiceDetailBody(
     onDecrementProductToCart: (ProductUi) -> Unit,
     onAnalogsClick: (ProductUi) -> Unit,
     onLoadingChange: (Boolean) -> Unit,
+    onBackClick: () -> Unit
 ) {
     Scaffold(
         modifier = modifier,
@@ -97,7 +100,8 @@ fun ServiceDetailBody(
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 8.dp),
                 html = html,
-                onLoadingChange = onLoadingChange
+                onLoadingChange = onLoadingChange,
+                onBackClick = onBackClick
             )
 
             productsSection?.let {
@@ -145,16 +149,21 @@ fun ServiceDetailsWebView(
     modifier: Modifier = Modifier,
     html: String,
     onLoadingChange: (Boolean) -> Unit,
+    onBackClick: () -> Unit
 ) {
     val coroutineScope = rememberCoroutineScope()
     val webViewBundle: Bundle = rememberSaveable { bundleOf() }
     var lastProgress by remember { mutableIntStateOf(100) }
     var errorOccurred by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    val webView = remember {
+        WebView(context)
+    }
 
     Box(modifier = modifier) {
         AndroidView(
-            factory = { context ->
-                WebView(context).apply {
+            factory = {
+                webView.apply {
                     layoutParams = ViewGroup.LayoutParams(
                         ViewGroup.LayoutParams.MATCH_PARENT,
                         ViewGroup.LayoutParams.WRAP_CONTENT
@@ -223,5 +232,13 @@ fun ServiceDetailsWebView(
                 webView.saveState(webViewBundle)
             }
         )
+    }
+
+    BackHandler {
+        if(webView.canGoBack()){
+            webView.goBack()
+        }else{
+            onBackClick()
+        }
     }
 }

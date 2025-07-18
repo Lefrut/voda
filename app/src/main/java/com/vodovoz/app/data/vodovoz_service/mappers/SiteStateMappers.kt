@@ -1,30 +1,60 @@
 package com.vodovoz.app.data.vodovoz_service.mappers
 
-import com.vodovoz.app.data.vodovoz_service.model.CHATJIVO_DTO
-import com.vodovoz.app.data.vodovoz_service.model.GENERATION_DTO
-import com.vodovoz.app.data.vodovoz_service.model.SOGLASHENIE_DTO
-import com.vodovoz.app.data.vodovoz_service.model.SiteStateResponseDTO
 import com.vodovoz.app.common.model.AgreementModel
 import com.vodovoz.app.common.model.JivoChatModel
-import com.vodovoz.app.common.model.VodovozSiteState
 import com.vodovoz.app.common.model.TrackingConfig
 import com.vodovoz.app.common.model.VodovozBoolean
+import com.vodovoz.app.common.model.VodovozSiteState
+import com.vodovoz.app.common.model.VodovozSiteStateContact
+import com.vodovoz.app.common.model.VodovozSiteStateData
 import com.vodovoz.app.common.model.boolean
 import com.vodovoz.app.common.model.from
+import com.vodovoz.app.data.vodovoz_service.model.CHATJIVO_DTO
+import com.vodovoz.app.data.vodovoz_service.model.GENERATION_DTO
+import com.vodovoz.app.data.vodovoz_service.model.SITE_STATE_TRANSITION_DTO
+import com.vodovoz.app.data.vodovoz_service.model.SOGLASHENIE_DTO
+import com.vodovoz.app.data.vodovoz_service.model.SiteStateDataDTO
+import com.vodovoz.app.data.vodovoz_service.model.SiteStateResponseDTO
 
 fun SiteStateResponseDTO.toDomain(): VodovozSiteState {
     return VodovozSiteState(
         //TODO - replace to "Y"
-        isActive = ACTIVE == "N",
+        isActive = ACTIVE == "Y",
         testUrl = TESTSAITSSILKA ?: "",
         smsUrl = SMSRASSILKA ?: "",
-        //todo - VodovozBoolean.from(REGISTRACION_SMS).boolean
-        isSmsEnabled = false,
+        isSmsEnabled = VodovozBoolean.from(REGISTRACION_SMS).boolean,
         jivoChat = CHATJIVO?.toJivoChatModel() ?: JivoChatModel(isActive = false, url = ""),
-        tracking = GENERATION?.toTrackingConfig() ?: TrackingConfig(trackingIsEnabled = false, time = 0),
-        agreement = SOGLASHENIE?.toAgreementModel() ?: throw IllegalArgumentException("Agreement can't be null"),
+        tracking = GENERATION?.toTrackingConfig() ?: TrackingConfig(
+            trackingIsEnabled = false,
+            time = 0
+        ),
+        agreement = SOGLASHENIE?.toAgreementModel() ?: AgreementModel("", emptyList()),
         takePhotos = COMMENTFILES ?: false,
-        callPhoneNumber = CALL ?: ""
+        callPhoneNumber = CALL ?: "",
+        data = DATA?.toDomain()
+    )
+}
+
+fun SiteStateDataDTO.toDomain(): VodovozSiteStateData {
+    return VodovozSiteStateData(
+        title = TITLE ?: "",
+        logo = LOGO ?: "",
+        description = OPISANIE ?: "",
+        email = EMAIL ?: "",
+        //todo - put time
+        time = "19.07.2025 16:00:00" ?: "",
+        phone = TELEFON ?: "",
+        contacts = KLYCH?.mapNotNull { contact ->
+            contact.toDomain()
+        } ?: emptyList()
+    )
+}
+
+fun SITE_STATE_TRANSITION_DTO.toDomain(): VodovozSiteStateContact? {
+    return VodovozSiteStateContact(
+        url = URL ?: "",
+        urlType = TYPE ?: "",
+        image = IMAGES ?: return null
     )
 }
 

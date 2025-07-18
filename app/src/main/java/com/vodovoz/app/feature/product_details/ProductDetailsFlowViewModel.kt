@@ -315,16 +315,6 @@ class ProductDetailsFlowViewModel @Inject constructor(
         )
     }
 
-    fun setupProductDetails(productId: Long) = viewModelScope.launch {
-        uiStateListener.update { s ->
-            s.copy(
-                productDetails = s.productDetails.copy(id = productId),
-                uiState = ProductDetailsUiState.Loading
-            )
-        }
-        fetchProductDetails()
-    }
-
     fun showAllComments() = viewModelScope.launch {
         val productDetails = state.productDetails
         eventListener.emit(

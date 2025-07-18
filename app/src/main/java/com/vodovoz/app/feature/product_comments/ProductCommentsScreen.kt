@@ -115,7 +115,7 @@ fun ProductCommentsScreen(
                     val comment = lazyPagingComments[i]
                     if (comment != null) {
                         CommentCard(
-                            modifier = Modifier.padding(top = 16.dp),
+                            modifier = Modifier.padding(top = 16.dp, start = 16.dp, end = 16.dp),
                             comment = comment,
                             minLines = 1
                         )

@@ -27,6 +27,7 @@ fun ProductListTitle(
     modifier: Modifier = Modifier,
     productsQuantity: String,
     title: String,
+    showShare: Boolean,
     onShareClick: () -> Unit,
 ) {
     Row(
@@ -59,16 +60,18 @@ fun ProductListTitle(
                 )
             }
         }
-        Icon(
-            painter = painterResource(id = R.drawable.ic_share),
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.onBackground,
-            modifier = Modifier
-                .padding(start = 10.dp)
-                .size(24.dp)
-                .clip(MaterialTheme.shapes.small)
-                .clickable { onShareClick() }
-        )
+        if(showShare){
+            Icon(
+                painter = painterResource(id = R.drawable.ic_share),
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onBackground,
+                modifier = Modifier
+                    .padding(start = 10.dp)
+                    .size(24.dp)
+                    .clip(MaterialTheme.shapes.small)
+                    .clickable { onShareClick() }
+            )
+        }
     }
 }
 
@@ -80,6 +83,7 @@ private fun ProductListTitlePreview() {
             modifier = Modifier.background(Color.White),
             productsQuantity = "23",
             title = "",
+            showShare = false,
             onShareClick = {}
         )
     }

@@ -1,12 +1,10 @@
 package com.vodovoz.app.common.cart
 
 import com.vodovoz.app.common.di.IoDispatcher
-import com.vodovoz.app.common.tab.TabManager
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.util.extensions.singleResult
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
@@ -20,7 +18,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withTimeout
-import java.time.LocalDate
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -29,7 +26,7 @@ import javax.inject.Singleton
 class CartManager @Inject constructor(
     private val vodovozServiceRepository: VodovozServiceRepository,
     @IoDispatcher
-    private val dispatcher: CoroutineDispatcher
+    private val dispatcher: CoroutineDispatcher,
 ) {
 
     private val cartMutex = Mutex()
@@ -48,6 +45,27 @@ class CartManager @Inject constructor(
     val blockedProductsState = _blockedProductsState.asStateFlow()
     var cartVersion = 0
         private set
+
+    private fun calculateCartChanges(): Map<Long, Int> {
+        val firstCartCopy = firstCart?.toMap() ?: return emptyMap()
+        val cartChanges = cart.filter { (key, value) ->
+            val oldValue = firstCartCopy[key]
+            value != oldValue
+        }
+
+        return cartChanges
+    }
+
+    private fun calculateCartWithoutChanges(
+        firstCart: Map<Long, Int>,
+        cartChanges: Map<Long, Int>,
+    ): Map<Long, Int> {
+        return cart.keys.associateWith { key ->
+            val newValue = cartChanges[key] ?: return@associateWith cart[key] ?: 0
+            val oldValue = firstCart[key] ?: 0
+            cart.getOrDefault(key, 0) - (newValue - oldValue)
+        }
+    }
 
 
     fun observeCarts() = cartSharedFlow.asSharedFlow()
@@ -70,16 +88,13 @@ class CartManager @Inject constructor(
 
             if (currentCartVersion < cartVersion) return@launch
 
-            val firstCartCopy = firstCart?.toMap() ?: return@launch
+
+            val cartChanges = calculateCartChanges()
+            val firstCartCopy = firstCart?.toMap()
+
+            if (cartChanges.isEmpty() || firstCartCopy == null) return@launch
+
             firstCart = null
-
-            val cartChanges = cart.filter { (key, value) ->
-                val oldValue = firstCartCopy[key]
-                value != oldValue
-            }
-
-            if (cartChanges.isEmpty()) return@launch
-
             _blockedProductsState.update { s -> s + cartChanges.keys }
 
             firstCartCopy to cartChanges
@@ -92,11 +107,9 @@ class CartManager @Inject constructor(
             }
         }.onFailure {
             cartMutex.withLock {
-                val cartWithoutChanges = cart.keys.associateWith { key ->
-                    val newValue = cartChanges[key] ?: return@associateWith cart[key] ?: 0
-                    val oldValue = currentFirstCart[key] ?: 0
-                    cart.getOrDefault(key, 0) - (newValue - oldValue)
-                }
+                val cartWithoutChanges = calculateCartWithoutChanges(
+                    currentFirstCart, cartChanges
+                )
                 updateCart(cartWithoutChanges)
             }
         }
@@ -178,35 +191,40 @@ class CartManager @Inject constructor(
         if (cartMutex.isLocked) return@launch
 
         cartMutex.withLock {
-
             val addInCart = parseCart(productIdsWithQuantity)
-
-
             if (blockedProductsState.value.any { id -> addInCart.contains(id) }) return@launch
 
             val currentCartVersion = ++cartVersion
 
-            val firstCartCopy = firstCart?.toMap() ?: cart
-            val cartChanges = cart.filter { (key, value) ->
-                val oldValue = firstCartCopy[key]
-                value != oldValue
-            }
+            val cartChanges = calculateCartChanges()
+            val firstCartCopy = firstCart?.toMap()
             firstCart = null
-            _blockedProductsState.update { s -> s + addInCart.keys + cartChanges.keys }
+
+            _blockedProductsState.update { s ->
+                s + addInCart.keys + cartChanges.keys
+            }
 
             for ((key, value) in addInCart) {
                 updateCartItem(key, (cart[key] ?: 0) + value)
             }
 
+            if (cartChanges.isNotEmpty() && firstCartCopy != null) {
+                runCatching {
+                    updateCartOnline(cartChanges, firstCartCopy)
+                }.onFailure {
+                    val cartWithoutChanges = calculateCartWithoutChanges(
+                        firstCartCopy, cartChanges
+                    )
+                    updateCart(cartWithoutChanges)
+                }
+            }
 
             runCatching {
-                if (cartChanges.isNotEmpty()) {
-                    updateCartOnline(cartChanges, firstCartCopy)
+                withTimeout(5000L){
+                    vodovozServiceRepository.addMultipleProductsToCart(
+                        productIdsWithQuantity
+                    ).singleResult().getOrThrow()
                 }
-
-                vodovozServiceRepository.addMultipleProductsToCart(
-                    productIdsWithQuantity
-                ).singleResult()
             }.onFailure {
                 for ((key, value) in addInCart) {
                     updateCartItem(key, ((cart[key] ?: 0) - value).coerceAtLeast(0))
@@ -214,13 +232,11 @@ class CartManager @Inject constructor(
             }
 
             _blockedProductsState.update { s -> s - addInCart.keys - cartChanges.keys }
-
             if (currentCartVersion >= cartVersion) {
                 updateCartListState(true)
             }
         }
     }
-
 
 
     fun formatCart(cart: Map<Long, Int>): String {

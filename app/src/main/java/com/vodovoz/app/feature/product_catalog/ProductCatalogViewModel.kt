@@ -24,6 +24,7 @@ import com.vodovoz.app.design_system.model.allCategories
 import com.vodovoz.app.design_system.model.filters.FiltersPriceUi
 import com.vodovoz.app.design_system.model.filters.FiltersUi
 import com.vodovoz.app.design_system.model.filters.toDomain
+import com.vodovoz.app.design_system.model.findParentOfOnlyLeaf
 import com.vodovoz.app.design_system.model.toCategory
 import com.vodovoz.app.design_system.model.toUi
 import com.vodovoz.app.design_system.model.withUpdatedCart
@@ -351,14 +352,18 @@ class ProductCatalogViewModel @Inject constructor(
 
             uiStateListener.updateData { state ->
 
-                val categories = productsSection.categories.ifEmpty {
-                    buildList {
-                        addAll(dataState.categoryTree.allCategories()
-                            .map { category -> category.toCategory() }
-                        )
-                        removeIf { it.id == state.currentCategory.id }
-                    }
+                val categoryTreeList: List<CategoryUi> = buildList {
+                    addAll(dataState.categoryTree.allCategories()
+                        .map { category -> category.toCategory() }
+                    )
+                    removeIf { categoryUi -> categoryUi.id == state.currentCategory.id }
                 }
+
+                val categories = if (dataSource is DataSource.Category) {
+                    categoryTreeList
+                } else {
+                    productsSection.categories.ifEmpty { categoryTreeList }
+                }.takeIf { it.size > 1 } ?: emptyList()
 
                 state.copy(
                     productsSection = productsSection.copy(categories = categories),
@@ -373,7 +378,8 @@ class ProductCatalogViewModel @Inject constructor(
                     currentBottomSheetCategory = state.currentCategory.toParentCategory(),
                     categoryTree = if (dataSource !is DataSource.Category) productsSection.categories.map { categoryUi ->
                         categoryUi.toParentCategory()
-                    } else state.categoryTree
+                    } else state.categoryTree,
+                    showShare = "${productsSection.share.url}${productsSection.share.text}".isNotBlank()
                 )
             }
 
@@ -505,18 +511,27 @@ class ProductCatalogViewModel @Inject constructor(
                 it.id == categoryId && it.countChildren == 0
             } != null
         ) return@launch
+
         if (dataSource !is DataSource.Category) return@launch
 
         val categoryTreeResult =
             vodovozServiceRepository.getCategoryTree(categoryId).singleResult()
 
+
         categoryTreeResult.onSuccess { categoryTree ->
+            val backendCategories = categoryTree.map { category ->
+                category.toUi()
+            }
+
+            val parentOfOnlyLeaf = backendCategories.findParentOfOnlyLeaf()
+            val childrenCategoriesOfParent = if (parentOfOnlyLeaf != null) {
+                vodovozServiceRepository.getCategoryTree(parentOfOnlyLeaf.id).singleResult()
+                    .getOrNull()?.map { it.toUi() } ?: backendCategories
+            } else backendCategories
+
             uiStateListener.updateData { s ->
 
-                val bottomSheetCategories = categoryTree.map { category ->
-                    category.toUi()
-                }
-                s.copy(categoryTree = bottomSheetCategories)
+                s.copy(categoryTree = childrenCategoriesOfParent)
             }
         }.onFailure {
             if (dataState.categoryTree.isEmpty()) {
@@ -665,14 +680,11 @@ class ProductCatalogViewModel @Inject constructor(
         @Stable
         val productsLoadStates: CombinedLoadStates = emptyCombinedLoadStates,
         val categoryTree: List<ParentCategoryUi> = emptyList(),
-
         val currentCategory: CategoryUi = CategoryUi.Empty,
         val currentBottomSheetCategory: ParentCategoryUi = ParentCategoryUi.Empty,
         val currentFilters: FiltersUi = FiltersUi.Empty,
         val currentSort: SortUi = SortUi.Empty,
-
         val uiState: ProductCatalogUiState = ProductCatalogUiState.Loading,
-
         val isGridView: Boolean = true,
         val showFilters: Boolean = false,
         val showCategoryList: Boolean = false,
@@ -680,6 +692,7 @@ class ProductCatalogViewModel @Inject constructor(
         val showSortBottomSheet: Boolean = false,
         val showRefreshIndicator: Boolean = false,
         val showEmptyCategory: Boolean = false,
+        val showShare: Boolean = false,
     ) : State
 
     @Stable

@@ -31,14 +31,11 @@ fun ProductCatalogScreen(
     val productsSection = viewState.productsSection
     val pullRefreshState = rememberPullToRefreshState()
 
-
-
     Column(
         modifier = Modifier.fillMaxSize()
     ) {
         val searchQuery =
-            (viewModel.dataSource as? ProductCatalogFragment.DataSource.Search)?.query
-                ?: ""
+            (viewModel.dataSource as? ProductCatalogFragment.DataSource.Search)?.query ?: ""
 
         VodovozSearchTopBar(
             value = searchQuery,
@@ -95,6 +92,8 @@ fun ProductCatalogScreen(
                         isGridView = viewState.isGridView,
                         showFilters = viewState.showFilters,
                         showEmptyCategory = viewState.showEmptyCategory,
+                        showShare = viewState.showShare,
+                        categoriesTree = viewState.categoryTree,
                         onProductSee = { index ->
                             viewModel.notifyPagingProducts(index)
                         },
@@ -131,7 +130,7 @@ fun ProductCatalogScreen(
                         },
                         onProductAnalogsClick = { product ->
                             viewModel.navigateToProductAnalogs(product)
-                        }
+                        },
                     )
 
                 }
