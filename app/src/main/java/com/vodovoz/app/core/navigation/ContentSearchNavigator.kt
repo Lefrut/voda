@@ -12,6 +12,7 @@ import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.qualifiers.ApplicationContext
 
+
 class ContentSearchNavigator @AssistedInject constructor(
     @ApplicationContext private val context: Context,
     @Assisted private val navController: NavController,

@@ -1609,7 +1609,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
             onFail = onFail@{ response ->
                 val code = response.code()
                 return@onFail when (code) {
-                    402 -> Result.success(VodovozSiteState.Blocked)
+                    402, 403 -> Result.success(VodovozSiteState.Blocked)
                     else -> Result.failure(RequestException(response.messageWithCode()))
                 }
             }

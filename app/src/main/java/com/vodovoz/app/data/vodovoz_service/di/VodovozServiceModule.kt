@@ -35,7 +35,9 @@ abstract class VodovozServiceModule {
 
     @Binds
     @Singleton
-    abstract fun bindVodovozServiceRepository(vodovozServiceRepository: VodovozServiceRepositoryImpl): VodovozServiceRepository
+    abstract fun bindVodovozServiceRepository(
+        vodovozServiceRepository: VodovozServiceRepositoryImpl
+    ): VodovozServiceRepository
 
     @Binds
     @Singleton
@@ -65,7 +67,6 @@ abstract class VodovozServiceModule {
             okHttpClient: OkHttpClient,
             moshi: Moshi,
         ): Retrofit {
-
             return Retrofit.Builder()
                 .baseUrl(VodovozWebConfig.VODOVOZ_URL + VodovozWebConfig.VODOVOZ_PATH)
                 .addCallAdapterFactory(NoOpCallAdapterFactory.create())

@@ -1,5 +1,6 @@
 package com.vodovoz.app.design_system.composables.placeholders
 
+import android.view.View
 import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -13,26 +14,51 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.findNavController
+import androidx.navigation.navOptions
 import com.vodovoz.app.R
-import com.vodovoz.app.common.block_app_signal.ReloadAppSignalProvider
+import com.vodovoz.app.common.block_app_signal.BlockAppSignal
+import com.vodovoz.app.common.block_app_signal.BlockAppSignalProvider
+import com.vodovoz.app.core.navigation.findRootNavController
+import com.vodovoz.app.core.navigation.slideAnim
 import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.composables.button.VodovozButton
 import com.vodovoz.app.design_system.effects.LifecycleEffect
-import kotlinx.coroutines.channels.consumeEach
 
 @Composable
 fun NetworkErrorPlaceholder(modifier: Modifier = Modifier, onTryAgainClick: () -> Unit) {
     val activity = LocalActivity.current
-    
+    val view = LocalView.current
+
     LifecycleEffect {
-        val blockAppSignal =  (activity as? ReloadAppSignalProvider)?.reloadAppSignal ?: return@LifecycleEffect
-        blockAppSignal.getChannel(this).consumeEach { update ->
-            if(update) {
-                
+        val blockAppSignal =
+            (activity as? BlockAppSignalProvider)?.appSignal ?: return@LifecycleEffect
+
+        blockAppSignal.getSignalFlow().collect { signalType ->
+            when (signalType) {
+                BlockAppSignal.Type.Reload -> {
+                    blockAppSignal.setSignal(BlockAppSignal.Type.None)
+                    onTryAgainClick()
+                }
+
+                BlockAppSignal.Type.Block -> {
+                    val rootNavController = view.findRootNavController()
+
+                    rootNavController?.navigate(
+                        R.id.blockAppFragment,
+                        null,
+                        navOptions { slideAnim() }
+                    )
+                }
+
+                BlockAppSignal.Type.None -> {
+
+                }
             }
         }
     }

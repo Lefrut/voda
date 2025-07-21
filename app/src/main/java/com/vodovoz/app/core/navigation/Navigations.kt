@@ -1,10 +1,15 @@
 package com.vodovoz.app.core.navigation
 
 import android.os.Bundle
+import android.view.View
+import android.view.ViewParent
 import androidx.core.os.bundleOf
+import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
 import androidx.navigation.NavOptionsBuilder
+import androidx.navigation.findNavController
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.navOptions
 import com.vodovoz.app.R
 import com.vodovoz.app.design_system.model.ColorfulButtonUi
@@ -24,6 +29,15 @@ import com.vodovoz.app.feature.map.model.MapAddressUi
 import com.vodovoz.app.feature.product_catalog.ProductCatalogFragment
 import java.time.LocalDate
 
+fun View.findRootNavController(): NavController? {
+    return generateSequence(this) { view ->
+        view.parent as? View?
+    }.mapNotNull { view ->
+        runCatching {
+            view.findNavController()
+        }.getOrNull()
+    }.lastOrNull()
+}
 
 fun NavOptionsBuilder.slideAnim() {
     anim {

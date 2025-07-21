@@ -19,7 +19,7 @@ import com.vodovoz.app.data.vodovoz_service.model.SiteStateResponseDTO
 fun SiteStateResponseDTO.toDomain(): VodovozSiteState {
     return VodovozSiteState(
         //TODO - replace to "Y"
-        isActive = ACTIVE == "Y",
+        isActive = !VodovozBoolean.from(ACTIVE).boolean,
         testUrl = TESTSAITSSILKA ?: "",
         smsUrl = SMSRASSILKA ?: "",
         isSmsEnabled = VodovozBoolean.from(REGISTRACION_SMS).boolean,
@@ -41,8 +41,7 @@ fun SiteStateDataDTO.toDomain(): VodovozSiteStateData {
         logo = LOGO ?: "",
         description = OPISANIE ?: "",
         email = EMAIL ?: "",
-        //todo - put time
-        time = "19.07.2025 16:00:00" ?: "",
+        time = TIME ?: "",
         phone = TELEFON ?: "",
         contacts = KLYCH?.mapNotNull { contact ->
             contact.toDomain()

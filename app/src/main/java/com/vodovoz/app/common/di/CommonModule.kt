@@ -1,5 +1,8 @@
 package com.vodovoz.app.common.di
 
+import com.vodovoz.app.common.block_app_signal.BlockAppSignal
+import com.vodovoz.app.common.block_app_signal.BlockAppSignalImpl
+import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -23,21 +26,29 @@ annotation class MainDispatcher
 
 @Module
 @InstallIn(SingletonComponent::class)
-object CommonModule {
+abstract class CommonModule {
 
-    @Provides
-    @IoDispatcher
     @Singleton
-    fun provideIoDispatcher() : CoroutineDispatcher = Dispatchers.IO
+    @Binds
+    abstract fun bindAppSignal(
+        impl: BlockAppSignalImpl
+    ): BlockAppSignal
 
-    @Provides
-    @DefaultDispatcher
-    @Singleton
-    fun provideDefaultDispatcher() : CoroutineDispatcher = Dispatchers.Default
+    companion object {
+        @Provides
+        @IoDispatcher
+        @Singleton
+        fun provideIoDispatcher() : CoroutineDispatcher = Dispatchers.IO
 
-    @Provides
-    @MainDispatcher
-    @Singleton
-    fun provideMainDispatcher() : CoroutineDispatcher = Dispatchers.Main
+        @Provides
+        @DefaultDispatcher
+        @Singleton
+        fun provideDefaultDispatcher() : CoroutineDispatcher = Dispatchers.Default
+
+        @Provides
+        @MainDispatcher
+        @Singleton
+        fun provideMainDispatcher() : CoroutineDispatcher = Dispatchers.Main
+    }
 
 }

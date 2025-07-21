@@ -3,6 +3,7 @@ package com.vodovoz.app.feature.sitestate
 import com.vodovoz.app.common.agreement.AgreementController
 import com.vodovoz.app.common.jivochat.JivoChatController
 import com.vodovoz.app.common.model.VodovozSiteState
+import com.vodovoz.app.common.model.VodovozSiteStateData
 import com.vodovoz.app.data.parser.common.safeString
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.util.extensions.debugLog
@@ -30,8 +31,6 @@ class SiteStateManager @Inject constructor(
     fun observePush() = pushListener.asStateFlow()
 
     suspend fun requestSiteState(): VodovozSiteState? {
-
-
         val siteStateResult = vodovozServiceRepository.getSiteState().singleResult()
 
         siteStateResult.onSuccess { siteState ->

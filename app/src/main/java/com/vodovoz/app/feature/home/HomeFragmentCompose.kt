@@ -102,6 +102,7 @@ class HomeFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         observeTabReselect()
         observePushFromSiteState()
         observeDeepLinkFromSiteState()
