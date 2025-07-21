@@ -128,17 +128,18 @@ class MainFragment : Fragment(R.layout.fragment_main) {
     private fun observeTabVisibility() = lifecycleScope.launch {
         repeatOnLifecycle(Lifecycle.State.STARTED) {
             tabManager.observeTabVisibility().collect { isVisible ->
-                val navView = binding.nvNavigation
+                val bottomNavigationView = binding.nvNavigation
                 if (isVisible) {
-                    navView.apply {
+                    bottomNavigationView.apply {
                         animate().cancel()
                         alpha = if (visibility == View.VISIBLE) 1f else 0f
                         visibility = View.VISIBLE
-                        animate().alpha(1f).setInterpolator(LinearInterpolator()).setDuration(300)
-                            .start()
+                        animate().alpha(1f).setInterpolator(
+                            LinearInterpolator()
+                        ).setDuration(300).start()
                     }
                 } else {
-                    navView.apply { visibility = View.GONE }
+                    bottomNavigationView.apply { visibility = View.GONE }
                 }
             }
         }
@@ -147,13 +148,16 @@ class MainFragment : Fragment(R.layout.fragment_main) {
     private fun observeTabWindowInsets() = lifecycleScope.launch {
         repeatOnLifecycle(Lifecycle.State.STARTED) {
             tabManager
-                .observeTabWindowInsets()
+                .observeBottomPadding()
                 .collect { has ->
                     val insets = ViewCompat.getRootWindowInsets(binding.root)
                     val bottomPadding =
                         insets?.getInsetsIgnoringVisibility(WindowInsetsCompat.Type.navigationBars())?.bottom
                             ?: 0
-                    binding.root.updatePadding(bottom = if (has) bottomPadding else 0)
+
+                    binding.root.updatePadding(
+                        bottom = if (has) bottomPadding else 0
+                    )
                 }
         }
     }
@@ -163,31 +167,29 @@ class MainFragment : Fragment(R.layout.fragment_main) {
     private fun observeCartState() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                tabManager
-                    .observeBottomNavCartState()
-                    .collect { state ->
-                        if (state == null || state.count == 0) {
-                            binding.circleAmount.isVisible = false
-                            binding.nvNavigation.menu.getItem(2).title = getString(R.string.cart)
-                        } else {
-                            binding.circleAmount.text = state.count.toString()
-                            binding.circleAmount.isVisible = true
-                            binding.circleAmount
-                                .animate()
-                                .scaleX(1.4f)
-                                .scaleY(1.4f)
-                                .setDuration(300)
-                                .setInterpolator(AccelerateInterpolator())
-                                .withEndAction {
-                                    binding.circleAmount.animate()
-                                        .scaleX(1f)
-                                        .scaleY(1f)
-                                }
-                                .start()
-                            binding.nvNavigation.menu.getItem(2).title =
-                                getString(R.string.price_text, state.total)
-                        }
+                tabManager.observeBottomNavCartState().collect { state ->
+                    if (state == null || state.count == 0) {
+                        binding.circleAmount.isVisible = false
+                        binding.nvNavigation.menu.getItem(2).title = getString(R.string.cart)
+                    } else {
+                        binding.circleAmount.text = state.count.toString()
+                        binding.circleAmount.isVisible = true
+                        binding.circleAmount
+                            .animate()
+                            .scaleX(1.4f)
+                            .scaleY(1.4f)
+                            .setDuration(300)
+                            .setInterpolator(AccelerateInterpolator())
+                            .withEndAction {
+                                binding.circleAmount.animate()
+                                    .scaleX(1f)
+                                    .scaleY(1f)
+                            }
+                            .start()
+                        binding.nvNavigation.menu.getItem(2).title =
+                            getString(R.string.price_text, state.total)
                     }
+                }
             }
         }
     }
@@ -197,8 +199,8 @@ class MainFragment : Fragment(R.layout.fragment_main) {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 tabManager
                     .observeTabState()
-                    .collect {
-                        binding.nvNavigation.selectedItemId = it
+                    .collect { tabId ->
+                        binding.nvNavigation.selectedItemId = tabId
                     }
             }
         }

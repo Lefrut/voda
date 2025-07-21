@@ -82,7 +82,7 @@ interface VodovozServiceRepository {
 
     fun updateAddress(
         addressId: Long,
-        address: MapAddressModel,
+        address: MapAddressModel?,
         params: Map<String, String>,
     ): Flow<Result<String>>
 

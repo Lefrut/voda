@@ -5,6 +5,7 @@ import android.net.Uri
 import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.ui.graphics.toArgb
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.NavHostFragment
@@ -14,9 +15,10 @@ import com.vodovoz.app.R
 import com.vodovoz.app.common.block_app_signal.BlockAppSignal
 import com.vodovoz.app.common.block_app_signal.BlockAppSignalProvider
 import com.vodovoz.app.databinding.ActivityMainBinding
+import com.vodovoz.app.design_system.black
 import com.vodovoz.app.feature.sitestate.SiteStateManager
 import com.vodovoz.app.util.extensions.debugLog
-import com.vodovoz.app.util.extensions.setSystemBarIconColors
+import com.vodovoz.app.util.extensions.setSystemBarColors
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import org.json.JSONObject
@@ -40,13 +42,22 @@ class MainActivity : AppCompatActivity(), BlockAppSignalProvider {
     private val viewModel: MainActivityViewModel by viewModels()
     private val splashFileViewModel: SplashFileViewModel by viewModels()
 
+    override fun onStart() {
+        super.onStart()
+
+        window.setSystemBarColors(
+            black.toArgb(),
+            black.toArgb()
+        )
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        installSplashScreen().setKeepOnScreenCondition { viewModel.androidSplash.value }
-        window.setSystemBarIconColors()
+        installSplashScreen().setKeepOnScreenCondition {
+            viewModel.androidSplash.value
+        }
         supportActionBar?.hide()
         splashFileViewModel.downloadSplashFile()
-
         viewModel.checkAppState()
 
         binding = ActivityMainBinding.inflate(layoutInflater).apply { setContentView(root) }

@@ -34,13 +34,13 @@ class ServiceOrderFragment : Fragment() {
         super.onStart()
         WindowCompat.setDecorFitsSystemWindows(requireActivity().window, false)
         tabManager.changeTabVisibility(false)
-        tabManager.changeTabWindowInsets(true)
+        tabManager.changeBottomPadding(true)
     }
 
     override fun onStop() {
         super.onStop()
         WindowCompat.setDecorFitsSystemWindows(requireActivity().window, true)
-        tabManager.changeTabWindowInsets(false)
+        tabManager.changeBottomPadding(false)
         tabManager.changeTabVisibility(true)
     }
 
@@ -98,7 +98,7 @@ class ServiceOrderFragment : Fragment() {
 
         ViewCompat.setOnApplyWindowInsetsListener(view) { _, insets ->
             val imeVisible = insets.isVisible(WindowInsetsCompat.Type.ime())
-            tabManager.changeTabWindowInsets(!imeVisible)
+            tabManager.changeBottomPadding(!imeVisible)
             return@setOnApplyWindowInsetsListener insets
         }
     }

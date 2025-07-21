@@ -301,13 +301,6 @@ class AddAddressViewModel @Inject constructor(
             s.copy(uiState = AddAddressUiState.Loading)
         }
 
-        val mapAddressDeferred = async {
-            stateSnapshot.mapAddress ?: mapServiceRepository.searchAddressInMoscow(
-                addressName ?: return@async null
-            ).singleResult().getOrNull()?.toUi()
-        }
-
-
         val addAddressDetailsResult =
             vodovozServiceRepository.getAddAddressDetails(addressId).singleResult()
 
@@ -317,25 +310,16 @@ class AddAddressViewModel @Inject constructor(
 
             _state.update { s ->
 
-                val currentMapAddress = mapAddressDeferred.await()
                 val addressField = addAddressDetails.addressField.toUi()
                 val linearSwitches = addAddressDetails.linearSwitches.mapToUi().filter { switch ->
                     addressId == null || (switch.id == PRIVATE_HOUSE_ID && VodovozAddressType.Personal.value == addressType) || switch.id != DELIVERY_OFFICE_ID
                 }
                 s.copy(
-                    mapAddress = currentMapAddress,
                     uiState = AddAddressUiState.Form,
                     linearFields = addAddressDetails.linearFields.mapToUi(),
                     gridFields = addAddressDetails.gridFields.mapToUi().updateByPrivateHouseRules(linearSwitches),
                     addressField = addressField.copy(
-                        value = currentMapAddress?.let { mapAddress ->
-                            resourcesProvider.getString(
-                                R.string.full_address,
-                                mapAddress.city,
-                                mapAddress.street,
-                                mapAddress.house
-                            )
-                        } ?: addressField.value
+                        value = stateSnapshot.mapAddress?.name ?: addressName ?: addressField.value
                     ),
                     button = addAddressDetails.button.toUi(),
                     linearSwitches = linearSwitches

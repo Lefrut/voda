@@ -9,6 +9,7 @@ import androidx.annotation.Keep
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.getValue
@@ -38,7 +39,6 @@ import com.vodovoz.app.util.formatters.VodovozDateFormatters
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import java.time.Duration
@@ -75,7 +75,11 @@ class BlockAppFragment : Fragment() {
                 VodovozTheme {
                     val blockAppState by blockAppViewModel.state.collectAsStateWithLifecycle()
 
-                    Column(modifier = Modifier.background(MaterialTheme.colorScheme.background)) {
+                    Column(
+                        modifier = Modifier
+                            .background(MaterialTheme.colorScheme.background)
+                            .systemBarsPadding()
+                    ) {
                         Text(
                             modifier = Modifier.padding(16.dp),
                             text = blockAppState.title,
@@ -173,7 +177,7 @@ class BlockAppFragment : Fragment() {
             val futureMillis = futureDateTime.atZone(zoneId).toInstant().toEpochMilli()
 
             launch {
-                while (isActive){
+                while (isActive) {
                     delay(2000L)
                     siteStateManager.requestSiteState()
                 }
