@@ -12,7 +12,6 @@ import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.WindowInsetsCompat.CONSUMED
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -63,14 +62,14 @@ class SearchFragment : Fragment() {
     override fun onStart() {
         super.onStart()
         WindowCompat.setDecorFitsSystemWindows(requireActivity().window, false)
-        tabManager.changeTabWindowInsets(true)
+        tabManager.changeBottomPadding(true)
     }
 
     override fun onStop() {
         super.onStop()
         tabManager.changeTabVisibility(true)
         WindowCompat.setDecorFitsSystemWindows(requireActivity().window, true)
-        tabManager.changeTabWindowInsets(false)
+        tabManager.changeBottomPadding(false)
     }
 
     override fun onCreateView(

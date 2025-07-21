@@ -25,6 +25,7 @@ import com.vodovoz.app.util.extensions.debugLog
 import com.vodovoz.app.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.channels.produce
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.catch
@@ -61,7 +62,7 @@ class MapFlowViewModel @Inject constructor(
     }
 
     private fun fetchMapAreas() = viewModelScope.launch {
-        val maxErrors = 5
+        val maxErrors = 10
 
         vodovozServiceRepository.getMapAreas()
             .onEach { result ->
@@ -164,33 +165,6 @@ class MapFlowViewModel @Inject constructor(
         return fromMoscowToPoint
     }
 
-    fun searchAddress(addressName: String) = viewModelScope.launch {
-        if (addressName == dataState.currentMapAddress?.name || addressName.any { c -> c.isDigit() } || dataState.query == addressName) {
-
-            uiStateListener.updateData { s ->
-                s.copy(addressIsLoading = true)
-            }
-
-            val currentAddress = mapServiceRepository.searchAddressInMoscow(
-                addressName
-            ).singleResult().getOrNull()?.toUi()
-
-            currentAddress?.let { mapAddress ->
-
-                val fromMoscowToPoint =
-                    calculateDistanceFromMoscowToAddress(mapAddress.point) ?: Float.MAX_VALUE
-
-                changeAddress(currentAddress.copy(fromMoscowToPoint = fromMoscowToPoint))
-                eventListener.emit(MapFlowEvents.HideKeyboard)
-                eventListener.emit(MapFlowEvents.MoveToAddress(currentAddress.point))
-            }
-
-        } else {
-            changeQuery(addressName)
-        }
-    }
-
-
     fun moveToAvailableGeo() = viewModelScope.launch {
         val addressPoint = dataState.currentMapAddress?.point
         if (addressPoint != null) {
@@ -228,6 +202,31 @@ class MapFlowViewModel @Inject constructor(
 
     private var searchAddressJob: Job? = null
 
+    fun searchAddress(addressName: String) = viewModelScope.launch {
+        if (addressName == dataState.currentMapAddress?.name || addressName.any { c -> c.isDigit() } || dataState.query == addressName) {
+
+            uiStateListener.updateData { s ->
+                s.copy(addressIsLoading = true)
+            }
+
+            val currentAddress = mapServiceRepository.searchAddressInMoscow(
+                addressName
+            ).singleResult().getOrNull()?.toUi()
+
+            currentAddress?.let { mapAddress ->
+
+                val fromMoscowToPoint = calculateDistanceFromMoscowToAddress(mapAddress.point) ?: return@launch
+                changeAddress(currentAddress.copy(fromMoscowToPoint = fromMoscowToPoint))
+                eventListener.emit(MapFlowEvents.HideKeyboard)
+                eventListener.emit(MapFlowEvents.MoveToAddress(currentAddress.point))
+            }
+
+        } else {
+            changeQuery(addressName)
+        }
+    }
+
+
     fun searchAddress(point: MapPointUi?) = viewModelScope.launch {
         if (point == null || point == dataState.currentMapAddress?.point) return@launch
 
@@ -249,7 +248,7 @@ class MapFlowViewModel @Inject constructor(
                 val mapAddress = mapAddressModel.toUi()
 
                 val fromMoscowToPoint =
-                    calculateDistanceFromMoscowToAddress(mapAddress.point) ?: Float.MAX_VALUE
+                    calculateDistanceFromMoscowToAddress(mapAddress.point) ?: return@job
 
                 changeAddress(mapAddress.copy(fromMoscowToPoint = fromMoscowToPoint))
             }

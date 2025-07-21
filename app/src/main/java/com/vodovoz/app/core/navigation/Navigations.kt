@@ -2,14 +2,11 @@ package com.vodovoz.app.core.navigation
 
 import android.os.Bundle
 import android.view.View
-import android.view.ViewParent
 import androidx.core.os.bundleOf
-import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
 import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.findNavController
-import androidx.navigation.fragment.findNavController
 import androidx.navigation.navOptions
 import com.vodovoz.app.R
 import com.vodovoz.app.design_system.model.ColorfulButtonUi
@@ -663,7 +660,15 @@ fun NavController.navigateToPromotions() {
 }
 
 fun NavController.navigateToWaterApp() {
-    navigate(R.id.waterAppFragment)
+    navigate(
+        R.id.waterAppFragment,
+        null,
+        navOptions {
+            anim {
+                enter = R.anim.water_slide_in
+            }
+        }
+    )
 }
 
 fun NavController.navigateToBuyCertificate() {

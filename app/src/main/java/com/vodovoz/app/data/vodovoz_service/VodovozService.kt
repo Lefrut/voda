@@ -278,7 +278,7 @@ interface VodovozService {
     suspend fun updateAddress(
         @Query("userid") userId: Long?,
         @Query("addressid") addressId: Long,
-        @Query("ktochka") geo: String,
+        @Query("ktochka") geo: String?,
         @Query("city") city: String? = null,
         @Query("street") street: String? = null,
         @Query("leghtkm") fromMoscowToAddressKm: String? = null,

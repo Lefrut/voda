@@ -1,13 +1,11 @@
 package com.vodovoz.app.feature.stories_fragment
 
-import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
@@ -16,6 +14,7 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.compose.LifecycleStartEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.fragment.findNavController
 import com.vodovoz.app.common.cookie.CookieManager
@@ -49,9 +48,12 @@ class StoriesFragment : Fragment() {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
 
             setContent {
-                DisposableEffect(Unit) {
+
+                LifecycleStartEffect(Unit) {
                     tabManager.changeTabVisibility(false)
-                    onDispose { tabManager.changeTabVisibility(true) }
+                    onStopOrDispose {
+                        tabManager.changeTabVisibility(true)
+                    }
                 }
 
                 VodovozTheme {
@@ -82,9 +84,6 @@ class StoriesFragment : Fragment() {
                             )
                         }
                     }
-
-
-
 
                     SystemBarsEffect(
                         statusBarColor = MaterialTheme.colorScheme.onBackground,

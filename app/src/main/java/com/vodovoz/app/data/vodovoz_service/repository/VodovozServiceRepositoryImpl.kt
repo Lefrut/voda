@@ -10,7 +10,6 @@ import com.vodovoz.app.common.account.AccountManager
 import com.vodovoz.app.common.cookie.CookieManager
 import com.vodovoz.app.common.model.VodovozBoolean
 import com.vodovoz.app.common.model.VodovozSiteState
-import com.vodovoz.app.common.model.boolean
 import com.vodovoz.app.common.model.from
 import com.vodovoz.app.core.network.retrofit.messageWithCode
 import com.vodovoz.app.core.network.retrofit.stringBody
@@ -177,18 +176,24 @@ class VodovozServiceRepositoryImpl @Inject constructor(
 
     override fun updateAddress(
         addressId: Long,
-        address: MapAddressModel,
+        address: MapAddressModel?,
         params: Map<String, String>,
     ): Flow<Result<String>> {
+
+
         return executeRequest(
             request = {
-                val point = address.point
+                val point = address?.point
+                val geo = point?.let {
+                    "${point.lat} ${point.lon}"
+                }
+
                 vodovozService.updateAddress(
                     userId = accountManager.fetchAccountId(),
                     addressId = addressId,
-                    geo = "${point.lat},${point.lon}",
-                    city = address.city,
-                    street = address.street,
+                    geo = geo,
+                    city = address?.city,
+                    street = address?.street,
                     params = params
                 )
             },
@@ -1557,7 +1562,10 @@ class VodovozServiceRepositoryImpl @Inject constructor(
     override fun getBarCodeProducts(barCode: String): Flow<Result<List<ProductModel>>> {
         return executeRequest(
             request = {
-                vodovozService.getSearchProducts(query = barCode, isCamera = VodovozBoolean.True.value)
+                vodovozService.getSearchProducts(
+                    query = barCode,
+                    isCamera = VodovozBoolean.True.value
+                )
             },
             mapper = {
                 it.data!!.TOVAR!!.mapToDomain()

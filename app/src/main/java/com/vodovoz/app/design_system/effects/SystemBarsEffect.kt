@@ -7,6 +7,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.view.WindowCompat
+import androidx.lifecycle.compose.LifecycleStartEffect
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.vodovoz.app.util.extensions.window
 import kotlinx.coroutines.delay
@@ -32,7 +33,8 @@ fun SystemBarsEffect(
     val prevStatusBarColor = window.statusBarColor
     val prevNavBarColor = window.navigationBarColor
 
-    DisposableEffect(window, statusBarColor, navigationBarColor, darkIcons) {
+    LifecycleStartEffect(statusBarColor, navigationBarColor, darkIcons) {
+
         if (handleDecorFitsSystemWindows) {
             coroutineScope.launch {
                 delay(delayTimeMillis)
@@ -50,7 +52,7 @@ fun SystemBarsEffect(
             darkIcons = darkIcons
         )
 
-        onDispose {
+        onStopOrDispose {
             val prevStatusBarColorsCompose = Color(prevStatusBarColor)
             systemUiController.setStatusBarColor(
                 color = prevStatusBarColorsCompose,
