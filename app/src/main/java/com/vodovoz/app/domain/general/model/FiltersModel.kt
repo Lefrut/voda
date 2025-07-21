@@ -22,7 +22,6 @@ data class FilterValueModel(
 fun List<FilterModel>.format(): String {
     return joinToString(";") { filter ->
         val currentBounds = filter.currentBounds
-        //todo - format for bounds
         val data = if (currentBounds?.first != null) {
             listOf(currentBounds.first, currentBounds.last).joinToString(",")
         } else filter.values.joinToString(",") { it.id }

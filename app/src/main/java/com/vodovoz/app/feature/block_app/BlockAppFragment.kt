@@ -25,8 +25,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
-import androidx.navigation.navOptions
-import com.vodovoz.app.R
+import com.vodovoz.app.common.block_app_signal.BlockAppSignal
 import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.effects.LifecycleEffect
 import com.vodovoz.app.feature.block_app.composables.BlockAppBody
@@ -39,6 +38,7 @@ import com.vodovoz.app.util.formatters.VodovozDateFormatters
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import java.time.Duration
@@ -56,6 +56,9 @@ class BlockAppFragment : Fragment() {
 
     @Inject
     lateinit var siteStateManager: SiteStateManager
+
+    @Inject
+    lateinit var blockAppSignal: BlockAppSignal
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -128,21 +131,20 @@ class BlockAppFragment : Fragment() {
 
     private fun observeSiteState() = viewLifecycleOwner.lifecycleScope.launch {
         delay(1000L)
+
         repeatOnLifecycle(Lifecycle.State.STARTED) {
             siteStateManager.siteStateFlow.collect { siteState ->
 
-                //TODO - put siteState.isActive
-                if (siteState == null) {
+                val lastSignal = blockAppSignal.lastSignalOrNull()
+
+                if (siteState == null || siteState.isActive) {
                     countdownJob?.cancel()
-                    mainActivityViewModel.checkAppState().join()
-                    findNavController().navigate(
-                        R.id.splashFragment,
-                        null,
-                        navOptions {
-                            popUpTo(R.id.blockAppFragment) { inclusive = true }
-                            launchSingleTop = true
-                        }
-                    )
+                    if (lastSignal == BlockAppSignal.Type.Block) {
+                        blockAppSignal.setSignal(BlockAppSignal.Type.Reload)
+                    } else {
+                        mainActivityViewModel.checkAppState().join()
+                    }
+                    findNavController().popBackStack()
                     return@collect
                 }
 
@@ -170,8 +172,15 @@ class BlockAppFragment : Fragment() {
             val zoneId = ZoneId.of("Europe/Moscow")
             val futureMillis = futureDateTime.atZone(zoneId).toInstant().toEpochMilli()
 
+            launch {
+                while (isActive){
+                    delay(2000L)
+                    siteStateManager.requestSiteState()
+                }
+            }
+
             while (isActive) {
-                delay(1000)
+                delay(999L)
                 val nowMillis = Instant.now().toEpochMilli()
 
                 if (nowMillis < futureMillis) {

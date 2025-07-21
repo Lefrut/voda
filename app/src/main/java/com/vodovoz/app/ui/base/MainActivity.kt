@@ -11,8 +11,8 @@ import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.navOptions
 import com.google.firebase.messaging.RemoteMessage
 import com.vodovoz.app.R
-import com.vodovoz.app.common.block_app_signal.ReloadAppSignal
-import com.vodovoz.app.common.block_app_signal.ReloadAppSignalProvider
+import com.vodovoz.app.common.block_app_signal.BlockAppSignal
+import com.vodovoz.app.common.block_app_signal.BlockAppSignalProvider
 import com.vodovoz.app.databinding.ActivityMainBinding
 import com.vodovoz.app.feature.sitestate.SiteStateManager
 import com.vodovoz.app.util.extensions.debugLog
@@ -24,14 +24,15 @@ import javax.inject.Inject
 
 
 @AndroidEntryPoint
-class MainActivity : AppCompatActivity(), ReloadAppSignalProvider {
+class MainActivity : AppCompatActivity(), BlockAppSignalProvider {
 
     private lateinit var binding: ActivityMainBinding
 
     @Inject
-    lateinit var reloadAppSignalInject: ReloadAppSignal
+    lateinit var reloadAppSignalInject: BlockAppSignal
 
-    override val reloadAppSignal get() = reloadAppSignalInject
+    @get:Inject
+    override val appSignal get() = reloadAppSignalInject
 
     @Inject
     lateinit var siteStateManager: SiteStateManager
