@@ -13,6 +13,8 @@ import com.vodovoz.app.common.like.LikeManager
 import com.vodovoz.app.design_system.model.ColorfulButtonUi
 import com.vodovoz.app.design_system.model.OrderProductUi
 import com.vodovoz.app.design_system.model.mapToUi
+import com.vodovoz.app.design_system.model.order.OrderSummaryItemUi
+import com.vodovoz.app.design_system.model.order.mapToUi
 import com.vodovoz.app.design_system.model.withUpdatedFavorites
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.feature.all.orders.detail.composables.AboutOrderPopupWindowUi
@@ -82,7 +84,7 @@ class OrderDetailsFlowViewModel @Inject constructor(
                     title = orderDetails.title,
                     subtitle = orderDetails.subtitle,
                     header = orderDetails.header,
-                    orderSummary = orderDetails.orderSummary.toUi(),
+                    orderSummary = orderDetails.orderSummary.mapToUi(),
                     statuses = orderDetails.statuses.mapToUi(),
                     currentStatuses = orderDetails.currentStatus.mapToUi(),
                     productsTitle = orderDetails.productsTitle,
@@ -199,7 +201,7 @@ class OrderDetailsFlowViewModel @Inject constructor(
         val header: String = "",
         val topButtons: List<OrderDetailsButtonUi> = emptyList(),
         val bottomButtons: List<ColorfulButtonUi> = emptyList(),
-        val orderSummary: OrderDetailsSummaryUi = OrderDetailsSummaryUi.Empty,
+        val orderSummary: List<OrderSummaryItemUi> = emptyList(),
         val currentStatuses: List<OrderStatusUi> = emptyList(),
         val statuses: List<OrderStatusUi> = emptyList(),
         val productsTitle: String = "",

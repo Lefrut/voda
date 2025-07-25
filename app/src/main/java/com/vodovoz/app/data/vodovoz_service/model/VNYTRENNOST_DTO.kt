@@ -6,6 +6,8 @@ import com.squareup.moshi.Json
 
 @Keep
 data class VNYTRENNOST_DTO(
+    @Json(name = "IMAGE")
+    val IMAGE: String?,
     @Json(name = "ACTION")
     val ACTION: String?,
     @Json(name = "ID")

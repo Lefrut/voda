@@ -17,4 +17,6 @@ data class AuthDetailsDTO(
     val SOGLASHENIE: String?,
     @Json(name = "KNOPKA")
     val KNOPKA: List<KNOPKA_AUTH_DTO>?,
+    @Json(name = "PODPISKA")
+    val PODPISKA: List<AUTH_CHECKBOX_DTO>?
 )

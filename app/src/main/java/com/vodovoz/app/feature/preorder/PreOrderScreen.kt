@@ -10,7 +10,6 @@ import androidx.compose.ui.Modifier
 import com.vodovoz.app.feature.preorder.composables.PreOrderBody
 import com.vodovoz.app.design_system.composables.top_bar.ClosingTopBar
 
-@Suppress("NonSkippableComposable")
 @Composable
 fun PreOrderScreen(
     viewModel: PreOrderFlowViewModel,

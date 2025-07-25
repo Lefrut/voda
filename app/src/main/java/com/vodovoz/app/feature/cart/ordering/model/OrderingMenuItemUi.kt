@@ -9,14 +9,21 @@ data class OrderingMenuItemUi(
     val name: String,
     val description: String,
     val id: String,
-    val error: Boolean = false
+    val error: Boolean = false,
+    val defaultValue: String?,
 )
 
-fun OrderingMenuItemModel.toUi(): OrderingMenuItemUi{
-    return OrderingMenuItemUi(image, name, description, id)
+fun OrderingMenuItemModel.toUi(): OrderingMenuItemUi {
+    return OrderingMenuItemUi(
+        image = image,
+        name = name,
+        description = description,
+        id = id,
+        defaultValue = defaultValue
+    )
 }
 
-fun List<OrderingMenuItemModel>.mapToUi(): List<OrderingMenuItemUi>{
+fun List<OrderingMenuItemModel>.mapToUi(): List<OrderingMenuItemUi> {
     return map { it.toUi() }
 }
 

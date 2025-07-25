@@ -6,6 +6,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.vodovoz.app.common.about_product.AboutProductManager
+import com.vodovoz.app.common.account.AccountManager
 import com.vodovoz.app.common.cart.CartManager
 import com.vodovoz.app.common.content.Event
 import com.vodovoz.app.common.content.State
@@ -56,13 +57,13 @@ class ProductDetailsFlowViewModel @Inject constructor(
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val aboutProductManager: AboutProductManager,
     private val userPreferencesRepository: UserPreferencesRepository,
-    savedStateHandle: SavedStateHandle
+    private val accountManager: AccountManager,
+    savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
     private val uiStateListener = MutableStateFlow(ProductDetailsState())
     private val state
         get() = uiStateListener.value
-
 
 
     init {
@@ -86,14 +87,13 @@ class ProductDetailsFlowViewModel @Inject constructor(
         blockedProducts
     }.collectLatest { blockedProducts ->
         uiStateListener.update { s ->
-            val sectionSimilarProducts = s.sectionSimilarProducts
-            val sectionAccessory = s.sectionAccessory
             val productDetails = s.productDetails
 
             s.copy(
                 buttonIsLoading = productDetails.id in blockedProducts,
-                sectionAccessory = sectionAccessory.withUpdatedLoading(blockedProducts),
-                sectionSimilarProducts = sectionSimilarProducts.withUpdatedLoading(blockedProducts),
+                moreProductSections = s.moreProductSections.map { section ->
+                    section.copy(items = section.items.withUpdatedLoading(blockedProducts))
+                },
             )
         }
     }
@@ -104,8 +104,6 @@ class ProductDetailsFlowViewModel @Inject constructor(
         cartMap
     }.collectLatest { cartMap ->
         uiStateListener.update { s ->
-            val sectionSimilarProducts = s.sectionSimilarProducts
-            val sectionAccessory = s.sectionAccessory
             val productDetails = s.productDetails
             val productCartQuantity = cartMap.getOrDefault(
                 productDetails.id,
@@ -116,8 +114,9 @@ class ProductDetailsFlowViewModel @Inject constructor(
                 productDetails = productDetails.copy(
                     cartQuantity = productCartQuantity
                 ),
-                sectionAccessory = sectionAccessory.withUpdatedCart(cartMap),
-                sectionSimilarProducts = sectionSimilarProducts.withUpdatedCart(cartMap),
+                moreProductSections = s.moreProductSections.map { section ->
+                    section.copy(items = section.items.withUpdatedCart(cartMap))
+                },
                 totalPrice = calculateProductPrice(
                     productCartQuantity,
                     productDetails.prices
@@ -133,9 +132,6 @@ class ProductDetailsFlowViewModel @Inject constructor(
         favorites
     }.collectLatest { favoritesMap ->
         uiStateListener.update { s ->
-
-            val sectionSimilarProducts = s.sectionSimilarProducts
-            val sectionAccessory = s.sectionAccessory
             val productDetails = s.productDetails
 
             s.copy(
@@ -145,13 +141,9 @@ class ProductDetailsFlowViewModel @Inject constructor(
                         productDetails.isFavorite
                     )
                 ),
-                sectionSimilarProducts = sectionSimilarProducts.copy(
-                    items = sectionSimilarProducts.items.withUpdatedFavorites(favoritesMap)
-                ),
-                sectionAccessory = sectionAccessory.copy(
-                    items = sectionAccessory.items.withUpdatedFavorites(favoritesMap)
-                )
-
+                moreProductSections = s.moreProductSections.map { section ->
+                    section.copy(items = section.items.withUpdatedFavorites(favoritesMap))
+                },
             )
         }
     }
@@ -181,14 +173,12 @@ class ProductDetailsFlowViewModel @Inject constructor(
                         s.copy(
                             comments = productDetailsScreenModel.comments.mapToUi(),
                             productDetails = productDetailsScreenModel.details.toUi(),
-                            sectionAccessory = moreProducts.sectionAccessory.toUi { list ->
-                                val uiList = list.map { productModel -> productModel.toUi() }
-                                uiList.take(list.size - (list.size % 2))
-
-                            },
-                            sectionSimilarProducts = moreProducts.sectionSimilar.toUi { list ->
-                                val uiList = list.map { productModel -> productModel.toUi() }
-                                uiList.take(list.size - (list.size % 2))
+                            moreProductSections = moreProducts.map { section ->
+                                section.toUi { products ->
+                                    with(products.mapToUi()) {
+                                        dropLast(products.size % 2)
+                                    }
+                                }
                             },
                             buttons = productDetailsScreenModel.buttons.toUi(),
                             tabs = productDetailsScreenModel.tabs.map { it.toUi() },
@@ -405,14 +395,20 @@ class ProductDetailsFlowViewModel @Inject constructor(
 
     fun navigateToWriteComment() = viewModelScope.launch {
         val productDetails = uiStateListener.value.productDetails
-        eventListener.emit(
-            ProductDetailsEvents.GoToWriteComment(
-                productDetails.id,
-                productDetails.detailPicture,
-                productDetails.name,
-                0
+
+        if (accountManager.fetchAccountId() == null) {
+            eventListener.emit(ProductDetailsEvents.GoToProfile)
+        } else {
+            eventListener.emit(
+                ProductDetailsEvents.GoToWriteComment(
+                    productDetails.id,
+                    productDetails.detailPicture,
+                    productDetails.name,
+                    0
+                )
             )
-        )
+
+        }
     }
 
     fun saveMultiProductChoice() = viewModelScope.launch {
@@ -530,8 +526,7 @@ class ProductDetailsFlowViewModel @Inject constructor(
         val comments: List<CommentUi> = emptyList(),
         val buttons: ProductDetailsButtonsUi = ProductDetailsButtonsUi.Empty,
         val tabs: List<ProductDetailsTabUi> = emptyList(),
-        val sectionSimilarProducts: SectionUi<ProductUi> = SectionUi.empty(),
-        val sectionAccessory: SectionUi<ProductUi> = SectionUi.empty(),
+        val moreProductSections: List<SectionUi<ProductUi>> = emptyList(),
         val uiState: ProductDetailsUiState = ProductDetailsUiState.Loading,
         val totalPrice: Int = 0,
         val showMultiBottomSheet: Boolean = false,

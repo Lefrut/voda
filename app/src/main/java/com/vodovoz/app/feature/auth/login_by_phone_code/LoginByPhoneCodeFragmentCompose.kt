@@ -45,13 +45,11 @@ class LoginByPhoneCodeFragment : Fragment() {
     override fun onStart() {
         super.onStart()
         tabManager.changeTabVisibility(false)
-        WindowCompat.setDecorFitsSystemWindows(requireActivity().window, false)
     }
 
     override fun onStop() {
         super.onStop()
         tabManager.changeTabVisibility(true)
-        WindowCompat.setDecorFitsSystemWindows(requireActivity().window, true)
     }
 
     override fun onCreateView(

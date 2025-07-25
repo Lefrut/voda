@@ -4,6 +4,7 @@ package com.vodovoz.app.data.vodovoz_service.model.order_details
 import androidx.annotation.Keep
 import com.squareup.moshi.Json
 import com.vodovoz.app.data.vodovoz_service.model.COLORFUL_KNOPKA_DTO
+import com.vodovoz.app.data.vodovoz_service.model.cart.ITOG_ITEM_DTO
 
 @Keep
 data class OrderDetailsDTO(
@@ -14,7 +15,7 @@ data class OrderDetailsDTO(
     @Json(name = "TOVARY")
     val TOVARY: ORDER_DETAILS_TOVARY_DTO?,
     @Json(name = "ITOG")
-    val ITOG: ORDER_DETAILS_ITOG_DTO?,
+    val ITOG: List<ITOG_ITEM_DTO>?,
     @Json(name = "KNOPKI_NIZ")
     val KNOPKI_NIZ: List<COLORFUL_KNOPKA_DTO>?
 )

@@ -6,6 +6,13 @@
     app:startDestination="@id/catalogFragment">
 
     <fragment
+        android:id="@+id/writeMessageFragment"
+        android:name="com.vodovoz.app.feature.write_message.WriteMessageFragment"
+        android:label="WriteMessageFragment"
+        />
+
+
+    <fragment
         android:id="@+id/orderCallYouFragment"
         android:name="com.vodovoz.app.feature.order_call_you.OrderCallYouFragment"
         android:label="OrderCallYouFragment"

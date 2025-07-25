@@ -82,9 +82,10 @@ val vodovozValidators
     get() = listOf(
         NoRequiredValidator,
         PhoneNumberValidator,
+        EmailValidator,
         MessageValidator,
         NameValidator,
-        KeyboardTypeValidator
+        EmptyTextValidator
     )
 
 val EmptyTextValidator = FieldValidator { field ->

@@ -8,13 +8,17 @@ import com.vodovoz.app.data.vodovoz_service.model.filters.FiltersDTO
 import com.vodovoz.app.domain.general.model.FilterModel
 import com.vodovoz.app.domain.general.model.FilterValueModel
 import com.vodovoz.app.domain.general.model.FiltersModel
-import com.vodovoz.app.util.toIntRoundOrNull
+import com.vodovoz.app.util.smartParseFloat
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.math.roundToInt
 
 fun FiltersDTO.toDomain(): FiltersModel {
+    val priceFilter = CENAFILTER?.toDomain()?.let {
+        it.start.roundToInt()..it.endInclusive.roundToInt()
+    }
     return FiltersModel(
-        priceRange = CENAFILTER?.toDomain()
+        priceRange = priceFilter
             ?: throw IllegalArgumentException("Max of filter price can't be null"),
         filters = DANNIE?.mapToDomain() ?: throw IllegalArgumentException("Filters can't be null")
     )
@@ -37,10 +41,11 @@ fun FilterDTO.toDomain(): FilterModel? {
     )
 }
 
-fun FilterBoundsDTO.toDomain(): IntRange? {
-    val min = MIN?.toIntRoundOrNull() ?: return null
+fun FilterBoundsDTO.toDomain(): ClosedRange<Float>? {
+
+    val min = MIN?.smartParseFloat() ?: return null
     val max = max(
-        min, MAX?.toIntRoundOrNull() ?: return null
+        min, MAX?.smartParseFloat() ?: return null
     )
     return min(min, max)..max
 }

@@ -161,7 +161,10 @@ class ProductCatalogViewModel @Inject constructor(
             is DataSource.ButtonProducts -> {
                 fetchProductsData(
                     fetchProductsSection = {
-                        vodovozServiceRepository.getAllSuperTop(dataSource.buttonId).singleResult()
+                        vodovozServiceRepository.getAllSuperTop(
+                            buttonId = dataSource.buttonId,
+                            categoryId = categoryId
+                        ).singleResult()
                     },
                     fetchPagedProductsFlow = {
                         vodovozServiceRepository.getAllSuperTopPaged(
@@ -176,7 +179,9 @@ class ProductCatalogViewModel @Inject constructor(
             DataSource.HurryBuyUpProducts -> {
                 fetchProductsData(
                     fetchProductsSection = {
-                        vodovozServiceRepository.getAllHurryUpBuyProducts().singleResult()
+                        vodovozServiceRepository.getAllHurryUpBuyProducts(
+                            categoryId = categoryId
+                        ).singleResult()
                     },
                     fetchPagedProductsFlow = {
                         vodovozServiceRepository.getAllHurryUpBuyProductsPaged(
@@ -190,7 +195,9 @@ class ProductCatalogViewModel @Inject constructor(
             DataSource.NewProducts -> {
                 fetchProductsData(
                     fetchProductsSection = {
-                        vodovozServiceRepository.getAllNewProducts().singleResult()
+                        vodovozServiceRepository.getAllNewProducts(
+                            categoryId = categoryId
+                        ).singleResult()
                     },
                     fetchPagedProductsFlow = {
                         vodovozServiceRepository.getAllNewProductsPaged(
@@ -204,7 +211,9 @@ class ProductCatalogViewModel @Inject constructor(
             DataSource.ViewedProducts -> {
                 fetchProductsData(
                     fetchProductsSection = {
-                        vodovozServiceRepository.getAllViewedProducts().singleResult()
+                        vodovozServiceRepository.getAllViewedProducts(
+                            categoryId
+                        ).singleResult()
                     },
                     fetchPagedProductsFlow = {
                         vodovozServiceRepository.getAllViewedProductsPaged(
@@ -238,7 +247,10 @@ class ProductCatalogViewModel @Inject constructor(
             is DataSource.Search -> {
                 fetchProductsData(
                     fetchProductsSection = {
-                        vodovozServiceRepository.getSearchProducts(dataSource.query).singleResult()
+                        vodovozServiceRepository.getSearchProducts(
+                            dataSource.query,
+                            categoryId
+                        ).singleResult()
                     },
                     fetchPagedProductsFlow = {
                         vodovozServiceRepository.getSearchProductsPaged(

@@ -22,4 +22,14 @@ data class FIELD_DTO(
     val ZAPRETREDAKTOR: String?,
     @Json(name = "TEXT_V_POLE")
     val TEXT_V_POLE: String?,
+    @Json(name = "NAME")
+    val NAME: String?,
+    @Json(name = "TEXTOPIS")
+    val TEXTOPIS: String?,
+    @Json(name = "OBYZATELEN")
+    val OBYZATELEN: String?,
+    @Json(name = "TYPE")
+    val TYPE: String?,
+    @Json(name = "ID")
+    val ID: String?,
 )

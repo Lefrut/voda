@@ -12,10 +12,11 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.fragment.findNavController
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.vodovoz.app.common.tab.TabManager
 import com.vodovoz.app.design_system.VodovozTheme
+import com.vodovoz.app.design_system.effects.AppearanceSystemBarsEffect
 import com.vodovoz.app.design_system.effects.LifecycleEffect
-import com.vodovoz.app.design_system.effects.SystemBarsEffect
 import com.vodovoz.app.design_system.model.DocumentUi
 import com.vodovoz.app.feature.document_viewer.model.DocumentViewerEvent
 import dagger.hilt.android.AndroidEntryPoint
@@ -60,9 +61,10 @@ class DocumentViewerFragment : Fragment() {
             setContent {
                 val viewState by viewModel.state.collectAsStateWithLifecycle()
 
-                SystemBarsEffect(
-                    statusBarColor = MaterialTheme.colorScheme.background,
-                    navigationBarColor = MaterialTheme.colorScheme.background
+
+                AppearanceSystemBarsEffect(
+                    lightStatusBar = true,
+                    lightNavigationBar = true
                 )
 
                 VodovozTheme {

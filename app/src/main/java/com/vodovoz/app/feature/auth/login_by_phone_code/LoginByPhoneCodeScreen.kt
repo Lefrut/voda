@@ -30,9 +30,7 @@ fun LoginByPhoneCodeScreen(viewState: LoginByPhoneCodeState, viewModel: LoginByP
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-            .windowInsetsPadding(WindowInsets.systemBars)
-            .consumeWindowInsets(WindowInsets.systemBars),
+            .background(MaterialTheme.colorScheme.background),
     ) {
         VodovozTopBar(
             onBack = { viewModel.navigateBack() },

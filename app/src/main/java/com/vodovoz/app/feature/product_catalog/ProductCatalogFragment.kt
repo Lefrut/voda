@@ -41,11 +41,7 @@ class ProductCatalogFragment : Fragment() {
 
     internal val viewModel: ProductCatalogViewModel by viewModels()
 
-    @Inject
-    lateinit var tabManager: TabManager
-
-    @Inject
-    lateinit var navigatorFactory: ContentSearchNavigator.Factory
+    @Inject lateinit var navigatorFactory: ContentSearchNavigator.Factory
 
     private lateinit var searchNavigator: ContentSearchNavigator
 
@@ -99,13 +95,6 @@ class ProductCatalogFragment : Fragment() {
                                     viewModel.setCanViewAdultProducts()
                                 }
                             )
-
-                            DisposableEffect(Unit) {
-                                tabManager.changeTabVisibility(false)
-                                onDispose {
-                                    tabManager.changeTabVisibility(true)
-                                }
-                            }
                         }
 
                         else -> {

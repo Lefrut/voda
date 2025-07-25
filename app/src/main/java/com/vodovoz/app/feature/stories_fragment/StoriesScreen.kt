@@ -1,14 +1,8 @@
 package com.vodovoz.app.feature.stories_fragment
 
 import android.annotation.SuppressLint
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.splineBasedDecay
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.AnchoredDraggableState
-import androidx.compose.foundation.gestures.DraggableAnchors
-import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.anchoredDraggable
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.foundation.layout.Box
@@ -27,8 +21,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -36,21 +29,19 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
 import coil3.compose.AsyncImage
+import coil3.imageLoader
+import coil3.memory.MemoryCache
+import coil3.request.ImageRequest
 import com.vodovoz.app.R
 import com.vodovoz.app.design_system.composables.button.VodovozButton
 import com.vodovoz.app.feature.stories_fragment.composables.StoriesIndicator
+import kotlinx.coroutines.delay
 import kotlin.math.absoluteValue
-
-enum class DragAnchor(val value: Float) {
-    Top(1f),
-    Center(0f),
-    Bottom(-1f),
-}
 
 
 @SuppressLint("RestrictedApi")
@@ -61,37 +52,30 @@ fun StoriesScreen(
     pagerState: PagerState,
 ) {
     val stories = viewState.stories
+    val context = LocalContext.current
 
+    LaunchedEffect(viewState.currentStoryIndex) {
+        delay(100L)
+        stories.getOrNull(pagerState.currentPage)?.pages?.forEach { storyPage ->
+            val key = MemoryCache.Key(storyPage.image)
 
-    val density = LocalDensity.current
+            val alreadyInMemory = context.imageLoader.memoryCache?.get(key) != null
+            if (alreadyInMemory) return@forEach
 
-    val anchoredDraggableState = remember {
-        AnchoredDraggableState(
-            initialValue = DragAnchor.Center,
-            positionalThreshold = { distance: Float -> distance * 0.5f },
-            velocityThreshold = { with(density) { 200.dp.toPx() } },
-            snapAnimationSpec = tween(300),
-            decayAnimationSpec = splineBasedDecay(density),
-            confirmValueChange = { true },
-        ).apply {
-            updateAnchors(
-                DraggableAnchors {
-                    DragAnchor.entries.forEach { anchor -> anchor at (anchor.value * 1500f) }
-                }
-            )
+            val request = ImageRequest.Builder(context)
+                .data(storyPage.image)
+                .memoryCacheKey(key)
+                .build()
+
+            context.imageLoader.execute(request)
         }
     }
-
-
-
-
-
 
     HorizontalPager(
         modifier = Modifier
             .fillMaxSize()
-            .windowInsetsPadding(WindowInsets.systemBars)
             .background(MaterialTheme.colorScheme.onBackground)
+            .windowInsetsPadding(WindowInsets.systemBars)
             .pointerInput(Unit) {
                 awaitPointerEventScope {
                     while (true) {
@@ -112,9 +96,14 @@ fun StoriesScreen(
                 }
             },
         state = pagerState,
-        beyondViewportPageCount = stories.size
+        beyondViewportPageCount = stories.size,
+        key = { page ->
+            val currentStory = stories.getOrNull(page)
+            currentStory?.id ?: -kotlin.random.Random.nextInt()
+        }
     ) { i ->
         val story = stories.getOrNull(i) ?: return@HorizontalPager
+
         val storyPage =
             story.pages.getOrNull(viewState.currentPageIndex) ?: story.pages.firstOrNull()
             ?: return@HorizontalPager
@@ -148,13 +137,13 @@ fun StoriesScreen(
 
                 }
                 .clip(MaterialTheme.shapes.large)
-                .anchoredDraggable(anchoredDraggableState, Orientation.Vertical)
         ) {
             AsyncImage(
                 modifier = Modifier.fillMaxSize(),
-                model = storyPage.image,
+                model = if (viewState.currentStoryIndex != i) story.pages.firstOrNull()?.image
+                    ?: "" else storyPage.image,
                 contentDescription = null,
-                contentScale = ContentScale.FillBounds,
+                contentScale = ContentScale.Crop,
                 alignment = Alignment.Center
             )
 
@@ -170,9 +159,10 @@ fun StoriesScreen(
                         .padding(horizontal = 12.dp)
                         .padding(top = 8.dp),
                     countPages = story.pages.size,
-                    pageIndex = viewState.currentPageIndex,
+                    pageIndex = if (viewState.currentStoryIndex != i) 0 else viewState.currentPageIndex,
                     progress = {
-                        timePassed.value / storyDuration.value
+                        if (viewState.currentStoryIndex != i) 0f
+                        else timePassed.value / storyDuration.value
                     }
                 )
                 CloseButton(

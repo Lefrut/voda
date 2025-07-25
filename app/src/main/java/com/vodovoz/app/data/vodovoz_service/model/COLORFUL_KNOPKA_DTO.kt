@@ -12,6 +12,12 @@ data class COLORFUL_KNOPKA_DTO(
     val COLOR_TEXT: String?,
     @Json(name = "NAME")
     val NAME: String?,
+    @Json(name = "TEXT")
+    val TEXT: String?,
     @Json(name = "ID")
-    val ID: String?
+    val ID: String?,
+    @Json(name = "COLOR")
+    val COLOR: String?,
+    @Json(name = "BACKGROUND")
+    val BACKGROUND: String?,
 )

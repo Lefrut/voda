@@ -34,7 +34,6 @@ fun DocumentViewerScreen(
         modifier = Modifier
             .fillMaxSize()
             .windowInsetsPadding(WindowInsets.systemBars)
-            .consumeWindowInsets(WindowInsets.systemBars)
     ) {
         VodovozTopBar(onBack = { viewModel.navigateBack() }, title = document.description)
 

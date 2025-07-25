@@ -186,7 +186,6 @@ fun Activity.enableFullScreen() {
 }
 
 fun Activity.disableFullScreen() {
-    WindowCompat.setDecorFitsSystemWindows(window, true)
     val insetsController = WindowCompat.getInsetsController(window, window.decorView)
 
     insetsController.show(WindowInsetsCompat.Type.statusBars())
@@ -201,7 +200,7 @@ fun Context.openUrl(url: String) {
     }
 }
 
-fun Context.window(): Window? =
+tailrec fun Context.window(): Window? =
     when (this) {
         is Activity -> window
         is ContextWrapper -> baseContext.window()

@@ -4,5 +4,6 @@ data class CallYouItemModel(
     val name: String,
     val description: String,
     val value: String,
-    val code: String
+    val code: String,
+    val enabled: Boolean
 )

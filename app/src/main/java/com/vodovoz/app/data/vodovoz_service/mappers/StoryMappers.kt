@@ -18,8 +18,8 @@ fun StoriesDTO.toDomain(): List<StoryModel> {
 fun STORY_DTO.toDomain(): StoryModel? {
     return StoryModel(
         id = ID ?: return null,
-        image = RAZDEL?.IMAGE?.toVodovozUrl() ?: "",
-        actionWithButtonList = VNYTRENNOST?.mapNotNull { it?.toDomain() } ?: return null,
+        previewImage = RAZDEL?.IMAGE?.toVodovozUrl() ?: "",
+        pages = VNYTRENNOST?.mapNotNull { it?.toDomain() } ?: return null,
         viewed = false
     )
 }
@@ -27,19 +27,20 @@ fun STORY_DTO.toDomain(): StoryModel? {
 fun VNYTRENNOST_DTO.toDomain(): ActionWithButtonModel? {
     return ActionWithButtonModel(
         action = ACTION_DTO(ACTION, ID).toAction(73) ?: return null,
-        colorfulButton = KNOPKA?.toDomain() ?: return null
+        colorfulButton = KNOPKA?.toDomain() ?: return null,
+        image = IMAGE?.toVodovozUrl() ?: ""
     )
 }
 
-fun List<COLORFUL_KNOPKA_DTO>.mapToDomain(): List<ColorfulButtonModel>{
+fun List<COLORFUL_KNOPKA_DTO>.mapToDomain(): List<ColorfulButtonModel> {
     return map { it.toDomain() }
 }
 
 fun COLORFUL_KNOPKA_DTO.toDomain(): ColorfulButtonModel {
     return ColorfulButtonModel(
-        name = NAME ?: "",
-        backgroundColor = COLOR_BACKGROUND ?: "",
-        textColor = COLOR_TEXT ?: "",
+        name = NAME ?: TEXT ?: "",
+        backgroundColor = COLOR_BACKGROUND ?: BACKGROUND ?: "",
+        textColor = COLOR_TEXT ?: COLOR ?: "",
         id = ID ?: ""
     )
 }

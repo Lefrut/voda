@@ -19,6 +19,7 @@ import com.vodovoz.app.common.tab.TabManager
 import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.composables.placeholders.VodovozLongPlaceholder
 import com.vodovoz.app.design_system.effects.LifecycleEffect
+import com.vodovoz.app.ui.insets.InsetsVisibilityState
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -30,17 +31,18 @@ class ServiceOrderFragment : Fragment() {
     @Inject
     lateinit var tabManager: TabManager
 
+    @Inject
+    lateinit var insetsState: InsetsVisibilityState
+
     override fun onStart() {
         super.onStart()
-        WindowCompat.setDecorFitsSystemWindows(requireActivity().window, false)
         tabManager.changeTabVisibility(false)
-        tabManager.changeBottomPadding(true)
+        insetsState.insertSystemBarInsets(false)
     }
 
     override fun onStop() {
         super.onStop()
-        WindowCompat.setDecorFitsSystemWindows(requireActivity().window, true)
-        tabManager.changeBottomPadding(false)
+        insetsState.insertSystemBarInsets(true)
         tabManager.changeTabVisibility(true)
     }
 
@@ -98,7 +100,7 @@ class ServiceOrderFragment : Fragment() {
 
         ViewCompat.setOnApplyWindowInsetsListener(view) { _, insets ->
             val imeVisible = insets.isVisible(WindowInsetsCompat.Type.ime())
-            tabManager.changeBottomPadding(!imeVisible)
+            insetsState.insertNavigationBarInsets(!imeVisible)
             return@setOnApplyWindowInsetsListener insets
         }
     }

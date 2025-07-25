@@ -1,7 +1,9 @@
 package com.vodovoz.app.data.vodovoz_service.mappers
 
 import com.vodovoz.app.common.model.VodovozBoolean
+import com.vodovoz.app.common.model.boolean
 import com.vodovoz.app.common.model.equalsTo
+import com.vodovoz.app.common.model.from
 import com.vodovoz.app.data.vodovoz_service.di.toVodovozUrl
 import com.vodovoz.app.data.vodovoz_service.model.CancelOrderDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.KNOPKA_ORDER_DTO
@@ -15,7 +17,6 @@ import com.vodovoz.app.data.vodovoz_service.model.delivery_date.DELIVERY_DATE_DT
 import com.vodovoz.app.data.vodovoz_service.model.delivery_date.DeliveryDateDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.order_details.ABOUT_ORDER_ITEM_DTO
 import com.vodovoz.app.data.vodovoz_service.model.order_details.ABOUT_ORDER_OKNO_DTO
-import com.vodovoz.app.data.vodovoz_service.model.order_details.ORDER_DETAILS_ITOG_DTO
 import com.vodovoz.app.data.vodovoz_service.model.order_details.ORDER_DETAILS_KNOPKA_DTO
 import com.vodovoz.app.data.vodovoz_service.model.order_details.ORDER_DETAILS_TOVAR_DTO
 import com.vodovoz.app.data.vodovoz_service.model.order_details.ORDER_PRODUCT_PODAROK_DTO
@@ -102,7 +103,8 @@ fun CallYouItemDTO.toDomain(): CallYouItemModel? {
         name = NAME ?: return null,
         description = OPISANIE ?: "",
         value = VALUE ?: return null,
-        code = CODE ?: return null
+        code = CODE ?: return null,
+        enabled = !VodovozBoolean.from(ZABLOCKPOLE).boolean
     )
 }
 
@@ -222,8 +224,7 @@ fun OrderingDetailsDTO.toDomain(): OrderingDetailsModel {
         paymentSection = OPLATA?.toDomain()
             ?: throw IllegalArgumentException("Ordering payment can't be null"),
         totals = ITOG?.mapToDomain() ?: emptyList(),
-        button = KNOPKA?.toDomain()
-            ?: throw IllegalArgumentException("Ordering button can't be null")
+        button = KNOPKA?.toDomain() ?: throw IllegalArgumentException("Ordering button can't be null")
     )
 }
 
@@ -247,7 +248,8 @@ fun ORDER_OPLATA_ITEM_DTO.toDomain(): OrderingMenuItemModel {
         image = KARTINKA?.toVodovozUrl() ?: "",
         name = NAME ?: "",
         description = OPISANIE ?: "",
-        id = ID ?: ""
+        id = ID ?: "",
+        defaultValue = null
     )
 }
 
@@ -270,7 +272,8 @@ fun ORDER_POLYSHATEL_ITEM_DTO.toDomain(): OrderingMenuItemModel? {
         image = KARTINKA?.toVodovozUrl() ?: "",
         name = NAME ?: "",
         description = OPISANIE ?: "",
-        id = ID ?: return null
+        id = ID ?: return null,
+        defaultValue = DEFAULTVALUE
     )
 }
 
@@ -346,8 +349,7 @@ fun OrderDetailsDTO.toDomain(): OrderDetailsModel {
         products = TOVARY?.TOVAR?.mapToDomain() ?: emptyList(),
         productsTitle = TOVARY?.TITLE ?: "",
         bottomButtons = KNOPKI_NIZ?.mapToDomain() ?: emptyList(),
-        orderSummary = ITOG?.toDomain()
-            ?: throw IllegalArgumentException("Order details summary can't be null")
+        orderSummary = ITOG?.mapToDomain() ?: throw IllegalArgumentException("Order details summary can't be null")
     )
 }
 
@@ -384,15 +386,6 @@ fun CancelOrderDetailsDTO.toDomain(): CancelOrderDetailsModel {
     )
 }
 
-fun ORDER_DETAILS_ITOG_DTO.toDomain(): OrderDetailsSummaryModel {
-    return OrderDetailsSummaryModel(
-        finalPriceText = finalPrice ?: "",
-        productsPriceText = productsPrice ?: "",
-        depositText = deposit ?: "",
-        deliveryText = delivery ?: "",
-        parkingText = parking ?: "",
-    )
-}
 
 @JvmName("mapToOrderProductModelList")
 fun List<ORDER_DETAILS_TOVAR_DTO>.mapToDomain(): List<OrderProductModel> {

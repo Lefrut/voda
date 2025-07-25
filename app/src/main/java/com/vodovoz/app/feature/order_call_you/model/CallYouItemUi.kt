@@ -12,16 +12,17 @@ data class CallYouItemUi(
     val name: String,
     val description: String,
     val value: String,
+    val enabled: Boolean
 ): Parcelable {
     companion object {
-        val Empty = CallYouItemUi("", "", "", "")
+        val Empty = CallYouItemUi("", "", "", "", false)
     }
 }
 
 
 fun CallYouItemModel.toUi(): CallYouItemUi {
     return CallYouItemUi(
-        code, name, description, value
+        code, name, description, value, enabled
     )
 }
 

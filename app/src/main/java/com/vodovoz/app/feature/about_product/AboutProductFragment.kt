@@ -10,6 +10,7 @@ import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.compose.LifecycleStartEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.fragment.findNavController
 import com.vodovoz.app.R
@@ -29,16 +30,6 @@ class AboutProductFragment : Fragment() {
     @Inject
     lateinit var tabManager: TabManager
 
-    override fun onStop() {
-        super.onStop()
-        tabManager.changeTabVisibility(true)
-    }
-
-    override fun onStart() {
-        super.onStart()
-        tabManager.changeTabVisibility(false)
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -51,6 +42,13 @@ class AboutProductFragment : Fragment() {
                 val viewState by viewModel.state.collectAsStateWithLifecycle()
 
                 VodovozTheme {
+
+                    LifecycleStartEffect(Unit) {
+                        tabManager.changeTabVisibility(false)
+                        onStopOrDispose {
+                            tabManager.changeTabVisibility(true)
+                        }
+                    }
 
                     AboutProductScreen(
                         viewModel = viewModel,

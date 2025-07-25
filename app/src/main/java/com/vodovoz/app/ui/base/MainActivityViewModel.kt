@@ -37,7 +37,6 @@ class MainActivityViewModel @Inject constructor(
         val siteState = siteStateDeferred.await()
 
         if (siteState == null) {
-
             _appState.update { AppState.ErrorLoading }
             return@launch
         } else if (!siteState.isActive || siteState.data != null) {

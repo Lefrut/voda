@@ -16,6 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.unit.dp
 import com.vodovoz.app.feature.order_call_you.model.CallYouItemUi
 
@@ -63,7 +64,12 @@ private fun CallYouItemRadioButton(
 ) {
     Row(
         modifier = modifier
-            .clickable { onItemSelect(item) }
+            .alpha(if (item.enabled) 1f else 0.4f)
+            .clickable {
+                if (item.enabled) {
+                    onItemSelect(item)
+                }
+            }
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {

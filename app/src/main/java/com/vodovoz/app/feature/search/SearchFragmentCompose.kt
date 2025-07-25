@@ -10,7 +10,6 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.core.view.ViewCompat
-import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -30,6 +29,7 @@ import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.composables.placeholders.NetworkErrorPlaceholder
 import com.vodovoz.app.design_system.effects.LifecycleEffect
 import com.vodovoz.app.core.navigation.ContentSearchNavigator
+import com.vodovoz.app.ui.insets.InsetsVisibilityState
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -48,6 +48,9 @@ class SearchFragment : Fragment() {
     lateinit var tabManager: TabManager
 
     @Inject
+    lateinit var insetsVisibilityState: InsetsVisibilityState
+
+    @Inject
     lateinit var navigatorFactory: ContentSearchNavigator.Factory
 
     private lateinit var searchNavigator: ContentSearchNavigator
@@ -61,15 +64,13 @@ class SearchFragment : Fragment() {
 
     override fun onStart() {
         super.onStart()
-        WindowCompat.setDecorFitsSystemWindows(requireActivity().window, false)
-        tabManager.changeBottomPadding(true)
+        insetsVisibilityState.insertSystemBarInsets(true)
     }
 
     override fun onStop() {
         super.onStop()
         tabManager.changeTabVisibility(true)
-        WindowCompat.setDecorFitsSystemWindows(requireActivity().window, true)
-        tabManager.changeBottomPadding(false)
+        insetsVisibilityState.insertSystemBarInsets(true)
     }
 
     override fun onCreateView(

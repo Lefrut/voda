@@ -47,7 +47,6 @@ import com.vodovoz.app.domain.general.model.product.OldNewPriceModel
 import com.vodovoz.app.domain.general.model.PresentInfoModel
 import com.vodovoz.app.domain.general.model.product.ProductDetailsButtonsModel
 import com.vodovoz.app.domain.general.model.product.ProductDetailsModel
-import com.vodovoz.app.domain.general.model.product.ProductDetailsMoreProducts
 import com.vodovoz.app.domain.general.model.product.ProductDetailsScreenModel
 import com.vodovoz.app.domain.general.model.product.ProductDetailsTabModel
 import com.vodovoz.app.domain.general.model.product.ProductVideoModel
@@ -291,8 +290,7 @@ fun ProductDetailsDTO.toDomain(): ProductDetailsScreenModel {
 
     val moreButtons = TOVAR?.DOPKNOPKI
     val moreProducts = BLOCTOVAR
-    val similar = moreProducts?.POHOSHIE
-    val accessory = moreProducts?.AKSESSYAR
+
     val commentsCount = COMMENTS?.COMMEN_COUNT ?: COMMENTS?.COMMENTS?.size ?: 0
 
     return ProductDetailsScreenModel(
@@ -307,19 +305,7 @@ fun ProductDetailsDTO.toDomain(): ProductDetailsScreenModel {
             analogButton = KNOPKI?.ANALOG?.toDomain(),
             preOrderButton = KNOPKI?.ZAKAZAT?.toDomain()
         ),
-        moreProducts = ProductDetailsMoreProducts(
-            sectionSimilar = SectionModel(
-                title = similar?.NAME ?: "",
-                items = similar?.REKOMEND?.mapNotNull { tovarDataDto -> tovarDataDto?.toDomain() }
-                    ?: emptyList(),
-                button = null
-            ),
-            sectionAccessory = SectionModel(
-                title = accessory?.NAME ?: "",
-                items = accessory?.REKOMEND?.mapNotNull { it?.toDomain() } ?: emptyList(),
-                button = null
-            )
-        ),
+        moreProducts = BLOCTOVAR?.map { it -> it.toDomain() } ?: emptyList(),
         comments = COMMENTS?.COMMENTS?.mapNotNull { commentDto -> commentDto?.toDomain() }
             ?: emptyList(),
         tabs = DETAILTEXT?.mapNotNull { it.toDomain() } ?: emptyList()

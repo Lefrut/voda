@@ -34,6 +34,7 @@ import com.vodovoz.app.design_system.model.filters.FilterUi
 import com.vodovoz.app.design_system.model.filters.FilterValueUi
 import com.vodovoz.app.design_system.model.filters.FiltersPriceUi
 import com.vodovoz.app.util.extensions.calculateActiveRange
+import com.vodovoz.app.util.extensions.debugLog
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
@@ -49,8 +50,8 @@ fun ProductFiltersBody(
     onPriceRangeChange: (ClosedFloatingPointRange<Float>) -> Unit,
     onFilterRangeChange: (FilterUi, ClosedFloatingPointRange<Float>) -> Unit,
     onFilterValueSelect: (FilterUi, FilterValueUi) -> Unit,
-    onFilterFromChange: (FilterUi, String) -> Unit,
-    onFilterToChange: (FilterUi, String) -> Unit,
+    onFilterFromChange: (FilterUi, Float) -> Unit,
+    onFilterToChange: (FilterUi, Float) -> Unit,
     onShowAllFilterValuesClick: (FilterUi) -> Unit,
     onPriceFromChange: (String) -> Unit,
     onPriceToChange: (String) -> Unit,
@@ -70,10 +71,10 @@ fun ProductFiltersBody(
 
         ProductFilterSlider(
             sliderState = sliderState,
-            currentMax = filterPrice.currentMax,
-            currentMin = filterPrice.currentMin,
-            onFromChange = onPriceFromChange,
-            onToChange = onPriceToChange,
+            currentMaxText = filterPrice.currentMax.toString(),
+            currentMinText = filterPrice.currentMin.toString(),
+            onFromChange = { onPriceFromChange(it.toString()) },
+            onToChange = { onPriceToChange(it.toString()) },
             onSliderRangeChange = onPriceRangeChange
         )
 
@@ -105,8 +106,8 @@ fun FilterItem(
     filter: FilterUi,
     onFilterValueSelect: (FilterUi, FilterValueUi) -> Unit,
     onFilterSliderChange: (FilterUi, ClosedFloatingPointRange<Float>) -> Unit,
-    onFilterFromChange: (FilterUi, String) -> Unit,
-    onFilterToChange: (FilterUi, String) -> Unit,
+    onFilterFromChange: (FilterUi, Float) -> Unit,
+    onFilterToChange: (FilterUi, Float) -> Unit,
     onShowAllClick: (FilterUi) -> Unit,
 ) {
     Column(modifier = modifier) {
@@ -141,14 +142,14 @@ fun FilterItem(
                 val currentSliderBounds = filter.currentBounds ?: sliderBounds
 
                 val sliderState = remember(
-                    sliderBounds.first,
-                    sliderBounds.last
+                    sliderBounds.start,
+                    sliderBounds.endInclusive
                 ) {
                     val range = calculateActiveRange(
-                        max = sliderBounds.last,
-                        min = sliderBounds.first,
-                        currentMax = currentSliderBounds.last,
-                        currentMin = currentSliderBounds.first
+                        max = sliderBounds.endInclusive,
+                        min = sliderBounds.start,
+                        currentMax = currentSliderBounds.endInclusive,
+                        currentMin = currentSliderBounds.start
                     )
                     RangeSliderState(
                         activeRangeStart = range.start,
@@ -159,8 +160,8 @@ fun FilterItem(
 
                 ProductFilterSlider(
                     sliderState = sliderState,
-                    currentMin = currentSliderBounds.first,
-                    currentMax = currentSliderBounds.last,
+                    currentMinText = currentSliderBounds.start.toString(),
+                    currentMaxText = currentSliderBounds.endInclusive.toString(),
                     onFromChange = { from ->
                         onFilterFromChange(filter, from)
                     },
@@ -172,19 +173,22 @@ fun FilterItem(
                     }
                 )
 
-                val activeRangeStart = rememberUpdatedState(newValue = currentSliderBounds.first)
-                val activeRangeEnd = rememberUpdatedState(newValue = currentSliderBounds.last)
+                val activeRangeStart = rememberUpdatedState(newValue = currentSliderBounds.start)
+                val activeRangeEnd = rememberUpdatedState(newValue = currentSliderBounds.endInclusive)
 
                 LaunchedEffect(Unit) {
                     snapshotFlow { activeRangeStart.value }
                         .debounce(1200)
                         .collectLatest { first ->
+
                             val start = calculateActiveRange(
-                                max = sliderBounds.last,
-                                min = sliderBounds.first,
-                                currentMax = currentSliderBounds.last,
+                                max = sliderBounds.endInclusive,
+                                min = sliderBounds.start,
+                                currentMax = currentSliderBounds.endInclusive,
                                 currentMin = first
                             ).start
+
+                            debugLog { "calculate start for $first - $start" }
 
                             sliderState.activeRangeStart = start
                         }
@@ -195,10 +199,10 @@ fun FilterItem(
                         .debounce(1200)
                         .collectLatest { last ->
                             val end = calculateActiveRange(
-                                max = sliderBounds.last,
-                                min = sliderBounds.first,
+                                max = sliderBounds.endInclusive,
+                                min = sliderBounds.start,
                                 currentMax = last,
-                                currentMin = currentSliderBounds.first
+                                currentMin = currentSliderBounds.start
                             ).endInclusive
 
                             sliderState.activeRangeEnd = end

@@ -1,6 +1,5 @@
 package com.vodovoz.app.feature.profile.user_data
 
-import com.vodovoz.app.design_system.composables.date_picker.VodovozCalendarDialog
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.padding
@@ -14,6 +13,7 @@ import androidx.compose.ui.res.stringResource
 import com.kizitonwose.calendar.core.CalendarDay
 import com.kizitonwose.calendar.core.DayPosition
 import com.vodovoz.app.R
+import com.vodovoz.app.design_system.composables.date_picker.VodovozCalendarDialog
 import com.vodovoz.app.design_system.composables.dialogs.VodovozDialog
 import com.vodovoz.app.design_system.composables.snackbar.VodovozSnackbarHost
 import com.vodovoz.app.design_system.composables.top_bar.VodovozTopBar
@@ -43,6 +43,7 @@ fun UserDataScreen(
         },
         contentWindowInsets = WindowInsets(0, 0, 0, 0)
     ) { paddingValues ->
+
         UserDataBody(
             modifier = Modifier
                 .padding(paddingValues)
@@ -50,6 +51,8 @@ fun UserDataScreen(
             fields = viewState.fields,
             photoTitle = viewState.photoTitle,
             photo = viewState.photo,
+            deleteTextPrefix = viewState.deleteTextPrefix,
+            deleteText = viewState.deleteText,
             photoDescription = viewState.photoDescription,
             buttonEnabled = viewState.buttonEnabled,
             buttonLoading = viewState.buttonLoading,
@@ -129,3 +132,4 @@ fun UserDataScreen(
         )
     }
 }
+

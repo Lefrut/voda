@@ -18,7 +18,6 @@ import com.vodovoz.app.data.vodovoz_service.model.SiteStateResponseDTO
 
 fun SiteStateResponseDTO.toDomain(): VodovozSiteState {
     return VodovozSiteState(
-        //TODO - replace to "Y"
         isActive = !VodovozBoolean.from(ACTIVE).boolean,
         testUrl = TESTSAITSSILKA ?: "",
         smsUrl = SMSRASSILKA ?: "",

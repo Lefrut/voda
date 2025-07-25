@@ -15,9 +15,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.vodovoz.app.design_system.composables.button.VodovozButtonsColumn
 import com.vodovoz.app.design_system.composables.chip.OrderStatusChip
+import com.vodovoz.app.design_system.composables.decoration.OrderSummaryColumn
 import com.vodovoz.app.design_system.composables.decoration.VodovozHorizontalDivider
 import com.vodovoz.app.design_system.model.ColorfulButtonUi
 import com.vodovoz.app.design_system.model.OrderProductUi
+import com.vodovoz.app.design_system.model.order.OrderSummaryItemUi
 import com.vodovoz.app.feature.all.orders.detail.model.OrderDetailsButtonUi
 import com.vodovoz.app.feature.all.orders.detail.model.OrderDetailsSummaryUi
 import com.vodovoz.app.feature.all.orders.detail.model.OrderStatusUi
@@ -33,7 +35,7 @@ fun OrderDetailsBody(
     productsTitle: String,
     products: List<OrderProductUi>,
     bottomButtons: List<ColorfulButtonUi>,
-    orderSummary: OrderDetailsSummaryUi,
+    orderSummary: List<OrderSummaryItemUi>,
     onTopButtonClick: (OrderDetailsButtonUi) -> Unit,
     onBottomButtonClick: (ColorfulButtonUi) -> Unit,
     onProductClick: (OrderProductUi) -> Unit,
@@ -105,9 +107,9 @@ fun OrderDetailsBody(
 
         VodovozHorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 
-        OrderDetailsSummaryColumn(
-            modifier = Modifier.padding(horizontal = 16.dp),
-            orderSummary = orderSummary
+        OrderSummaryColumn(
+            modifier = Modifier.padding(top = 24.dp, start = 16.dp, end = 16.dp),
+            items = orderSummary
         )
 
         VodovozButtonsColumn(

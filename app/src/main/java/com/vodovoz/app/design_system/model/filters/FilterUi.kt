@@ -15,9 +15,9 @@ data class FilterUi(
     val totalValues: Int,
     val values: List<FilterValueUi>,
     @IgnoredOnParcel
-    val bounds: IntRange? = null,
+    val bounds: ClosedRange<Float>? = null,
     @IgnoredOnParcel
-    val currentBounds: IntRange? = null
+    val currentBounds: ClosedRange<Float>? = null
 ): Parcelable {
     companion object {
         val Empty = FilterUi("", "", 0, emptyList())

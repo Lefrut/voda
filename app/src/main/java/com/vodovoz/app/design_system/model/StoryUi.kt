@@ -33,9 +33,10 @@ data class StoryPage(
 data class ActionWithButtonUi(
     val action: VodovozAction,
     val colorfulButton: ColorfulButtonUi,
+    val image: String,
 ) : Parcelable {
     companion object {
-        val Empty = ActionWithButtonUi(VodovozAction.Unknown("", ""), ColorfulButtonUi.Empty)
+        val Empty = ActionWithButtonUi(VodovozAction.Unknown("", ""), ColorfulButtonUi.Empty, "")
     }
 }
 
@@ -78,9 +79,9 @@ fun List<StoryModel>.mapToUi(): List<StoryUi> {
 fun StoryModel.toUi(): StoryUi {
     return StoryUi(
         id = id,
-        image = image,
-        pages = actionWithButtonList.map { action ->
-            StoryPage(image, action.toUi(), 5_000)
+        image = previewImage,
+        pages = pages.map { action ->
+            StoryPage(action.image, action.toUi(), 5_000)
         },
         viewed = viewed
     )
@@ -89,7 +90,8 @@ fun StoryModel.toUi(): StoryUi {
 fun ActionWithButtonModel.toUi(): ActionWithButtonUi {
     return ActionWithButtonUi(
         action = action,
-        colorfulButton = colorfulButton.toUi()
+        colorfulButton = colorfulButton.toUi(),
+        image = image
     )
 }
 

@@ -12,9 +12,9 @@ import coil3.request.CachePolicy
 import coil3.request.crossfade
 import coil3.svg.SvgDecoder
 import com.vodovoz.app.BuildConfig
-import com.vodovoz.app.common.notification.NotificationChannels
 import com.vodovoz.app.common.constants.AppKeys
 import com.vodovoz.app.common.constants.AppKeys.YANDEX_METRICA_KEY
+import com.vodovoz.app.common.notification.NotificationChannels
 import com.vodovoz.app.core.network.VodovozWebConfig
 import com.yandex.mapkit.MapKitFactory
 import com.yandex.metrica.YandexMetrica
@@ -24,7 +24,7 @@ import timber.log.Timber
 import javax.inject.Inject
 
 @HiltAndroidApp
-class VodovozApplication : Application(), Configuration.Provider, SingletonImageLoader.Factory  {
+class VodovozApplication : Application(), Configuration.Provider, SingletonImageLoader.Factory {
 
     @Inject
     lateinit var workerFactory: HiltWorkerFactory
@@ -48,8 +48,9 @@ class VodovozApplication : Application(), Configuration.Provider, SingletonImage
 
     //todo - need review
     private fun initYandexMetrica() {
-        if(!BuildConfig.DEBUG) {
-            val config: YandexMetricaConfig = YandexMetricaConfig.newConfigBuilder(YANDEX_METRICA_KEY)
+        if (!BuildConfig.DEBUG) {
+            val config: YandexMetricaConfig =
+                YandexMetricaConfig.newConfigBuilder(YANDEX_METRICA_KEY)
                     .withNativeCrashReporting(false)
                     .withLocationTracking(false)
                     .withAppVersion(BuildConfig.VERSION_NAME)

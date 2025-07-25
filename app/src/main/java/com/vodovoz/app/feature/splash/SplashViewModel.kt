@@ -2,8 +2,8 @@ package com.vodovoz.app.feature.splash
 
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.viewModelScope
-import com.vodovoz.app.common.like.LikeManager
 import com.vodovoz.app.common.account.LogoutManager
+import com.vodovoz.app.common.like.LikeManager
 import com.vodovoz.app.common.token.FirebaseTokenManager
 import com.vodovoz.app.feature.splash.model.SplashEvent
 import com.vodovoz.app.feature.splash.model.SplashState
@@ -21,7 +21,7 @@ import javax.inject.Inject
 class SplashViewModel @Inject constructor(
     private val likeManager: LikeManager,
     private val firebaseTokenManager: FirebaseTokenManager,
-    private val logoutManager: LogoutManager
+    private val logoutManager: LogoutManager,
 ) : MviViewModel<SplashState, SplashEvent>(SplashState()) {
 
     fun sendFirebaseToken() = viewModelScope.launch {
@@ -44,10 +44,11 @@ class SplashViewModel @Inject constructor(
     }
 
     fun changeToAnimation(splashFile: File) = viewModelScope.launch {
+
         _state.update { s ->
             s.copy(
                 filePath = splashFile.absolutePath,
-                uiState = SplashUiState.Animation
+                uiState = if (s.uiState is SplashUiState.Error) SplashUiState.Error else SplashUiState.Animation
             )
         }
     }

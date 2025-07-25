@@ -19,7 +19,6 @@ import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.feature.auth.recover_password.model.RecoverPasswordEvent
 import com.vodovoz.app.feature.auth.recover_password.model.RecoverPasswordState
 import com.vodovoz.app.feature.auth.recover_password.model.RecoverPasswordUiState
-import com.vodovoz.app.feature.sitestate.SiteStateManager
 import com.vodovoz.app.ui.mvi.MviViewModel
 import com.vodovoz.app.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -89,7 +88,7 @@ class RecoverPasswordViewModel @Inject constructor(
                     fields = recoverPasswordDetails.fields.mapToUi(),
                     agreementHtml = agreementText,
                     uiState = RecoverPasswordUiState.Body,
-                    showAgreement = recoverPasswordDetails.haveAgreement,
+                    showAgreement = recoverPasswordDetails.showAgreement,
                 )
             }
         }.onFailure {
@@ -108,18 +107,18 @@ class RecoverPasswordViewModel @Inject constructor(
         }
 
 
-        val requestPhoneCodeResult = vodovozServiceRepository.recoverPassword(
+        val recoverPasswordResult = vodovozServiceRepository.recoverPassword(
             stateSnapshot.fields.mapToDomain()
         ).singleResult()
 
-        requestPhoneCodeResult.onFailure { t ->
+        recoverPasswordResult.onFailure { t ->
             val errorMessage = when (t) {
                 is RequestException -> {
-                    ""
+                    t.message ?: resourcesProvider.getString(R.string.error_send_data)
                 }
 
                 else -> {
-                    ""
+                    resourcesProvider.getString(R.string.error_send_data)
                 }
             }
 

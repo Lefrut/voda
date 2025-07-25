@@ -147,11 +147,9 @@ class ProfileFlowViewModel @Inject constructor(
         eventListener.emit(ProfileEvents.ActivateVodovozAction(banner.action))
     }
 
-    fun closeSupportingBottomSheet() = viewModelScope.launch {
+    fun closeSupportingBottomSheet() {
         uiStateListener.updateData { s ->
-            s.copy(
-                showSupportingBS = false
-            )
+            s.copy(showSupportingBS = false)
         }
     }
 
@@ -161,6 +159,7 @@ class ProfileFlowViewModel @Inject constructor(
     }
 
     fun navigateByChatItem(chatItem: ProfileChatItemUi) = viewModelScope.launch {
+        if(chatItem.id == "") closeSupportingBottomSheet()
         eventListener.emit(ProfileEvents.GoByChatItemId(chatItem.id, chatItem.navigationData))
     }
 

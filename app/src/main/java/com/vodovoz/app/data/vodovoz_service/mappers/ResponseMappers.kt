@@ -1,5 +1,6 @@
 package com.vodovoz.app.data.vodovoz_service.mappers
 
+import android.util.Log
 import androidx.annotation.Keep
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
@@ -60,7 +61,8 @@ inline fun <reified T, R> executeRequest(
 
         onResponse(response)
 
-        val stringBody = response.stringBody().ifEmpty { response.stringErrorBody() }.decodeUnicodeEscapes()
+        val stringBody =
+            response.stringBody().ifEmpty { response.stringErrorBody() }.decodeUnicodeEscapes()
 
         val bodyResult = kotlin.runCatching {
             val adapter = moshiWithJsonAdapter.adapter<T>(type).lenient()
@@ -72,17 +74,19 @@ inline fun <reified T, R> executeRequest(
 
         bodyResult.onSuccess {
             if (body != null && responseCode == 200) {
-                val result = kotlin.runCatching { mapper(body) }
+                val mapResult = kotlin.runCatching { mapper(body) }
 
-                if (result.isFailure) {
+                mapResult.onSuccess {
+                    emit(mapResult)
+                }.onFailure {
+                    debugLog { it.message + it.stackTraceToString() }
                     emit(onFail(Response.error(errorCode, stringBody.jsonToResponseBody())))
-                } else {
-                    emit(result)
                 }
             } else {
                 emit(onFail(Response.error(errorCode, stringBody.jsonToResponseBody())))
             }
         }.onFailure {
+            debugLog { it.message + it.stackTraceToString() }
             val onFailResult = onFail(Response.error(errorCode, stringBody.jsonToResponseBody()))
             emit(onFailResult)
         }

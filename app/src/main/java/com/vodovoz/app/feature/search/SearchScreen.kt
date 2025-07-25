@@ -20,7 +20,7 @@ import com.vodovoz.app.feature.search.composables.SearchTopBar
 @Composable
 fun SearchScreen(viewModel: SearchFlowViewModel, viewState: SearchFlowViewModel.SearchState) {
     Scaffold(
-        modifier = Modifier.windowInsetsPadding(WindowInsets.statusBars),
+        modifier = Modifier,
         topBar = {
             SearchTopBar(
                 value = viewState.query,

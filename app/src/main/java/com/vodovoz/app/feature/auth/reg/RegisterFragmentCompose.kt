@@ -11,10 +11,10 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.core.os.bundleOf
-import androidx.core.view.WindowCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.compose.LifecycleStartEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
@@ -46,17 +46,6 @@ class RegisterFragment : Fragment() {
     @Inject
     lateinit var tabManager: TabManager
 
-    override fun onStart() {
-        super.onStart()
-        WindowCompat.setDecorFitsSystemWindows(requireActivity().window, false)
-        tabManager.changeTabVisibility(false)
-    }
-
-    override fun onStop() {
-        super.onStop()
-        WindowCompat.setDecorFitsSystemWindows(requireActivity().window, true)
-        tabManager.changeTabVisibility(true)
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -67,6 +56,13 @@ class RegisterFragment : Fragment() {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
 
             setContent {
+                LifecycleStartEffect(Unit) {
+                    tabManager.changeTabVisibility(false)
+                    onStopOrDispose {
+                        tabManager.changeTabVisibility(true)
+                    }
+                }
+
                 VodovozTheme {
                     val pagingState by viewModel.observeUiState().collectAsStateWithLifecycle()
                     val viewState by rememberUpdatedState(pagingState.data)

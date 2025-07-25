@@ -12,5 +12,7 @@ data class ORDER_POLYSHATEL_ITEM_DTO(
     @Json(name = "OPISANIE")
     val OPISANIE: String?,
     @Json(name = "ID")
-    val ID: String?
+    val ID: String?,
+    @Json(name = "DEFAULTVALUE")
+    val DEFAULTVALUE: String?,
 )

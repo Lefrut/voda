@@ -35,7 +35,7 @@ import com.vodovoz.app.domain.general.model.order.OrderingDetailsModel
 import com.vodovoz.app.domain.general.model.order.OrdersHistoryDetailsModel
 import com.vodovoz.app.domain.general.model.order.OrdersHistoryItemModel
 import com.vodovoz.app.domain.general.model.order.PaymentMethodDetailsModel
-import com.vodovoz.app.domain.general.model.order.PreOrderSectionModel
+import com.vodovoz.app.domain.general.model.order.FormModel
 import com.vodovoz.app.domain.general.model.order.RecipientDetailsModel
 import com.vodovoz.app.domain.general.model.order.RecipientModel
 import com.vodovoz.app.domain.general.model.order.WhereOrderDetailsModel
@@ -73,6 +73,7 @@ import java.io.File
 import java.time.LocalDate
 
 interface VodovozServiceRepository {
+
 
     fun removeAddress(addressId: Int): Flow<Result<String>>
 
@@ -168,7 +169,7 @@ interface VodovozServiceRepository {
     fun requestPhoneCode(
         url: String,
         phone: String,
-        newsletter: Boolean? = null,
+        params: Map<String, String> = emptyMap(),
     ): Flow<Result<RequestCodeModel>>
 
     fun loginByPhone(
@@ -309,10 +310,10 @@ interface VodovozServiceRepository {
 
     fun relogin(): Flow<Result<Boolean>>
 
-    fun register(fields: List<FieldModel>): Flow<Result<UserAuthInfoModel>>
+    fun register(params: Map<String, String>): Flow<Result<UserAuthInfoModel>>
 
     fun loginByEmail(
-        fields: List<FieldModel>,
+        params: Map<String, String>
     ): Flow<Result<UserAuthInfoModel>>
 
     fun getCatalogDetails(): Flow<Result<CatalogDetailsModel>>
@@ -338,7 +339,7 @@ interface VodovozServiceRepository {
         sort: SortModel = SortModel.Empty,
     ): Flow<PagingData<ProductModel>>
 
-    fun getSearchProducts(query: String): Flow<Result<ProductsSectionModel>>
+    fun getSearchProducts(query: String, categoryId: Int): Flow<Result<ProductsSectionModel>>
 
     fun getBarCodeProducts(barCode: String): Flow<Result<List<ProductModel>>>
 
@@ -348,7 +349,7 @@ interface VodovozServiceRepository {
 
     fun getSiteState(): Flow<Result<VodovozSiteState>>
 
-    fun getPreorderFields(productId: Long): Flow<Result<PreOrderSectionModel>>
+    fun getPreorderFields(productId: Long): Flow<Result<FormModel>>
 
     fun sendPreorder(productId: Long, fields: List<FieldModel>): Flow<Result<String>>
 
@@ -410,6 +411,13 @@ interface VodovozServiceRepository {
         sort: SortModel,
     ): Flow<Result<ProductsSectionModel>>
 
+    fun getWriteMessageDetails(
+    ): Flow<Result<FormModel>>
+
+    fun sendMessage(
+        params: Map<String, String>
+    ): Flow<Result<VodovozPlaceholderModel>>
+
     fun sendComment(
         productId: Long,
         rating: Int,
@@ -463,7 +471,9 @@ interface VodovozServiceRepository {
 
     fun getNewProducts(): Flow<Result<SectionModel<ProductModel>>>
 
-    fun getAllNewProducts(): Flow<Result<ProductsSectionModel>>
+    fun getAllNewProducts(
+        categoryId: Int = -1
+    ): Flow<Result<ProductsSectionModel>>
 
     fun getAllNewProductsPaged(
         categoryId: Int = -1,
@@ -472,7 +482,9 @@ interface VodovozServiceRepository {
 
     fun getHurryUpBuyProducts(): Flow<Result<SectionModel<ProductModel>>>
 
-    suspend fun getAllHurryUpBuyProducts(): Flow<Result<ProductsSectionModel>>
+    suspend fun getAllHurryUpBuyProducts(
+        categoryId: Int = -1,
+    ): Flow<Result<ProductsSectionModel>>
 
     fun getAllHurryUpBuyProductsPaged(
         categoryId: Int = -1,
@@ -483,6 +495,7 @@ interface VodovozServiceRepository {
 
     fun getAllSuperTop(
         buttonId: Int,
+        categoryId: Int = -1,
     ): Flow<Result<ProductsSectionModel>>
 
     fun getAllSuperTopPaged(
@@ -493,7 +506,9 @@ interface VodovozServiceRepository {
 
     fun getViewedProducts(): Flow<Result<SectionModel<ProductModel>>>
 
-    fun getAllViewedProducts(): Flow<Result<ProductsSectionModel>>
+    fun getAllViewedProducts(
+        categoryId: Int
+    ): Flow<Result<ProductsSectionModel>>
 
     fun getAllViewedProductsPaged(
         categoryId: Int = -1,

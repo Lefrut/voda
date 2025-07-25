@@ -6,6 +6,8 @@ data class UserDataModel(
     val title: String,
     val photo: UserDataPhotoModel,
     val fields: List<FieldModel>,
+    val deleteTextPrefix: String,
+    val deleteText: String
 )
 
 data class UserDataPhotoModel(

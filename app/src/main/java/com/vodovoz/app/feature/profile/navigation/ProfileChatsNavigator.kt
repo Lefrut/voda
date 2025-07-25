@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.navigation.NavController
 import com.vodovoz.app.common.jivochat.JivoChatController
 import com.vodovoz.app.core.navigation.navigateToWebView
+import com.vodovoz.app.core.navigation.navigateToWriteMessage
 import com.vodovoz.app.util.extensions.dialPhoneNumber
 import com.vodovoz.app.util.extensions.startTelegram
 import com.vodovoz.app.util.extensions.startViber
@@ -36,8 +37,7 @@ object ProfileChatsNavigator {
             }
 
             else -> {
-                //todo - navigate to write message
-                //navController.navi()
+                navController.navigateToWriteMessage()
             }
         }
     }
