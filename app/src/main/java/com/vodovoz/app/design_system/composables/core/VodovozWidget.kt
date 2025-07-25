@@ -9,6 +9,7 @@ import com.vodovoz.app.design_system.composables.checkbox.VodovozSingleCheckboxC
 import com.vodovoz.app.design_system.composables.radio_button.VodovozRadioButtonColumn
 import com.vodovoz.app.design_system.composables.swich.VodovozSwitch
 import com.vodovoz.app.design_system.composables.text_fields.VodovozTextField
+import com.vodovoz.app.design_system.model.widgets.CheckboxUi
 import com.vodovoz.app.design_system.model.widgets.FieldUi
 import com.vodovoz.app.design_system.model.widgets.RadioButtonGroupUi
 import com.vodovoz.app.design_system.model.widgets.SingleCheckboxGroup
@@ -44,6 +45,10 @@ fun VodovozWidget(
                     singleCheckboxGroup = widget,
                     onCheckboxClick = onWidgetChange
                 )
+            }
+
+            is CheckboxUi -> {
+                //todo
             }
         }
     }

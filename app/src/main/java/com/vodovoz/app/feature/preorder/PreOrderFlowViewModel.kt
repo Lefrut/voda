@@ -15,7 +15,7 @@ import com.vodovoz.app.design_system.model.widgets.toDomain
 import com.vodovoz.app.design_system.model.widgets.vodovozValidators
 import com.vodovoz.app.domain.general.model.ValidationException
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
-import com.vodovoz.app.feature.preorder.model.PreOrderSectionUi
+import com.vodovoz.app.feature.preorder.model.FormUi
 import com.vodovoz.app.feature.preorder.model.toUi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.collect
@@ -126,7 +126,7 @@ class PreOrderFlowViewModel @Inject constructor(
     }
 
     data class PreOrderState(
-        val sectionPreOrder: PreOrderSectionUi = PreOrderSectionUi.Empty,
+        val sectionPreOrder: FormUi = FormUi.Empty,
         val uiState: UiState = UiState.Loading,
     ) : State
 

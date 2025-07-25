@@ -29,6 +29,7 @@ import com.vodovoz.app.feature.cart.CartFlowViewModel
 import com.vodovoz.app.feature.favorite.FavoriteFlowViewModel
 import com.vodovoz.app.feature.home.HomeFlowViewModel
 import com.vodovoz.app.feature.profile.ProfileFlowViewModel
+import com.vodovoz.app.ui.insets.InsetsVisibilityState
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import javax.inject.Inject
@@ -47,13 +48,11 @@ class LoginByEmailFragment : Fragment() {
 
     override fun onStart() {
         super.onStart()
-        WindowCompat.setDecorFitsSystemWindows(requireActivity().window, false)
         tabManager.changeTabVisibility(false)
     }
 
     override fun onStop() {
         super.onStop()
-        WindowCompat.setDecorFitsSystemWindows(requireActivity().window, true)
         tabManager.changeTabVisibility(true)
     }
 

@@ -13,6 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.vodovoz.app.design_system.composables.button.VodovozButton
+import com.vodovoz.app.design_system.composables.button.VodovozButtonsColumn
 import com.vodovoz.app.design_system.composables.snackbar.VodovozSnackbarHost
 import com.vodovoz.app.design_system.composables.text_fields.VodovozTextFieldsColumn
 import com.vodovoz.app.design_system.model.ColorfulButtonUi
@@ -45,18 +46,13 @@ fun PreOrderBody(
                 onDone = {}
             )
 
-            VodovozButton(
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 24.dp),
-                text = colorfulButton.name,
-                onClick = {
-                    onOrderSend()
-                },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = colorfulButton.backgroundColor,
-                    contentColor = colorfulButton.textColor
-                )
-            )
 
+            VodovozButtonsColumn(
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 24.dp),
+                buttons = listOf(colorfulButton)
+            ) {
+                onOrderSend()
+            }
         }
 
         VodovozSnackbarHost(

@@ -39,7 +39,6 @@ class UserDataFlowViewModel @Inject constructor(
 
 
     init {
-
         viewModelScope.launch {
             mediaManager
                 .observeAvatarImage()
@@ -66,13 +65,15 @@ class UserDataFlowViewModel @Inject constructor(
                     photo = photoModel.imageUrl,
                     photoDescription = photoModel.description,
                     photoTitle = photoModel.title,
-                    uiState = UserDataUiState.Success
+                    uiState = UserDataUiState.Success,
+                    deleteText = userData.deleteText,
+                    deleteTextPrefix = userData.deleteTextPrefix
                 )
             }
 
         }.onFailure { t ->
             if (t is UserNotLoginException && t.placeholder != null) {
-                eventListener.emit(UserDataEvents.GoBack)
+                eventListener.emit(UserDataEvents.RefreshAllAndGoBack)
             } else {
                 uiStateListener.updateData { s ->
                     s.copy(uiState = UserDataUiState.Error)
@@ -279,6 +280,8 @@ class UserDataFlowViewModel @Inject constructor(
         val showLogoutDialog: Boolean = false,
         val showDeleteAccountDialog: Boolean = false,
         val showDatePicker: Boolean = false,
+        val deleteTextPrefix: String = "",
+        val deleteText: String = "",
     ) : State
 
 }

@@ -92,9 +92,7 @@ class StoriesViewModel @Inject constructor(
 
     fun stopStory() = viewModelScope.launch {
         uiStateListener.updateData { s ->
-            s.copy(
-                storyIsPlay = false
-            )
+            s.copy(storyIsPlay = false)
         }
     }
 
@@ -114,9 +112,12 @@ class StoriesViewModel @Inject constructor(
             s.copy(
                 currentStoryIndex = currentStoryPage,
                 currentPageIndex = 0,
-                timePassed = 0L
+                timePassed = 0L,
             )
         }
+
+        startStory()
+
         dataState.stories.getOrNull(currentStoryPage)?.let { story ->
             userPreferencesRepository.addViewedStoryId(story.id)
         }

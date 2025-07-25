@@ -7,7 +7,7 @@ import com.squareup.moshi.Json
 @Keep
 data class ProductDetailsDTO(
     @Json(name = "BLOCTOVAR")
-    val BLOCTOVAR: BLOCTOVAR_DTO?,
+    val BLOCTOVAR: List<TOVAR_SECTION_DTO>?,
     @Json(name = "COMMENTS")
     val COMMENTS: COMMENTS_DTO?,
     @Json(name = "DETAILTEXT")

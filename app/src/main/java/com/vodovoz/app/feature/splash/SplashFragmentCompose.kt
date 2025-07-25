@@ -28,6 +28,7 @@ import com.vodovoz.app.feature.home.HomeFlowViewModel
 import com.vodovoz.app.feature.profile.ProfileFlowViewModel
 import com.vodovoz.app.feature.sitestate.SiteStateManager
 import com.vodovoz.app.feature.splash.model.SplashEvent
+import com.vodovoz.app.feature.splash.model.SplashUiState
 import com.vodovoz.app.ui.base.MainActivityViewModel
 import com.vodovoz.app.ui.base.SplashFileViewModel
 import com.vodovoz.app.ui.base.model.AppState
@@ -167,6 +168,7 @@ class SplashFragment : Fragment() {
                 }
 
                 AppState.ErrorLoading -> {
+                    delay(100L)
                     splashViewModel.setErrorUiState()
                     if (androidSplash) {
                         splashViewModel.hideAndroidSplash()

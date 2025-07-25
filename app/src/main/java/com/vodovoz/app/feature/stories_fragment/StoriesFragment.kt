@@ -8,10 +8,13 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.core.view.WindowCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.compose.LifecycleStartEffect
@@ -21,10 +24,11 @@ import com.vodovoz.app.common.cookie.CookieManager
 import com.vodovoz.app.common.tab.TabManager
 import com.vodovoz.app.core.navigation.activate
 import com.vodovoz.app.design_system.VodovozTheme
-import com.vodovoz.app.design_system.composables.placeholders.LoadingPlaceholder
+import com.vodovoz.app.design_system.effects.AppearanceSystemBarsEffect
 import com.vodovoz.app.design_system.effects.LifecycleEffect
-import com.vodovoz.app.design_system.effects.SystemBarsEffect
+import com.vodovoz.app.ui.insets.InsetsVisibilityState
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -39,6 +43,9 @@ class StoriesFragment : Fragment() {
     @Inject
     lateinit var cookieManager: CookieManager
 
+    @Inject
+    lateinit var insetsVisibilityState: InsetsVisibilityState
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -48,13 +55,24 @@ class StoriesFragment : Fragment() {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
 
             setContent {
+                val coroutineScope = rememberCoroutineScope()
 
                 LifecycleStartEffect(Unit) {
                     tabManager.changeTabVisibility(false)
+                    coroutineScope.launch {
+                        delay(100)
+                        insetsVisibilityState.insertSystemBarInsets(false)
+                    }
                     onStopOrDispose {
+                        insetsVisibilityState.insertSystemBarInsets(true)
                         tabManager.changeTabVisibility(true)
                     }
                 }
+
+                AppearanceSystemBarsEffect(
+                    lightNavigationBar = false,
+                    lightStatusBar = false
+                )
 
                 VodovozTheme {
                     val pagingState by viewModel.observeUiState().collectAsStateWithLifecycle()
@@ -69,14 +87,7 @@ class StoriesFragment : Fragment() {
 
 
                     when (viewState.uiState) {
-                        StoriesViewModel.StoriesUiState.Loading -> {
-                            LoadingPlaceholder(
-                                modifier = Modifier,
-                                containerColor = MaterialTheme.colorScheme.onBackground
-                            )
-                        }
-
-                        StoriesViewModel.StoriesUiState.Success -> {
+                        StoriesViewModel.StoriesUiState.Loading, StoriesViewModel.StoriesUiState.Success -> {
                             StoriesScreen(
                                 viewState = viewState,
                                 viewModel = viewModel,
@@ -85,14 +96,13 @@ class StoriesFragment : Fragment() {
                         }
                     }
 
-                    SystemBarsEffect(
-                        statusBarColor = MaterialTheme.colorScheme.onBackground,
-                        navigationBarColor = MaterialTheme.colorScheme.onBackground,
-                        handleDecorFitsSystemWindows = false
-                    )
-
-                    LaunchedEffect(pagerState.currentPage) {
-                        viewModel.changeStoryIndex(pagerState.currentPage)
+                    LaunchedEffect(pagerState.currentPage, pagerState.isScrollInProgress) {
+                        if(!pagerState.isScrollInProgress){
+                            viewModel.changeStoryIndex(pagerState.currentPage)
+                        }
+                        else{
+                            viewModel.stopStory()
+                        }
                     }
 
 

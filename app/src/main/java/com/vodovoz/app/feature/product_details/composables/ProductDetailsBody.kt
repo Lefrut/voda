@@ -26,8 +26,7 @@ fun ProductDetailsBody(
     mediaPagerState: PagerState,
     productDetails: ProductDetailsUi,
     comments: List<CommentUi>,
-    sectionAccessory: SectionUi<ProductUi>,
-    sectionSimilarProducts: SectionUi<ProductUi>,
+    moreProductSections: List<SectionUi<ProductUi>>,
     buttons: ProductDetailsButtonsUi,
     totalPrice: Int,
     productCartQuantity: Int,
@@ -157,29 +156,18 @@ fun ProductDetailsBody(
         )
 
 
-        if (sectionAccessory.items.isNotEmpty()) {
-            ProductDetailsAccessoryProducts(
-                modifier = Modifier.padding(top = 32.dp),
-                sectionAccessory = sectionAccessory,
-                onProductLike = onProductLikeClick,
-                onProductClick = onProductClick,
-                onIncrementProductToCart = onIncrementProductToCart,
-                onDecrementProductToCart = onDecrementProductToCart,
-                onProductAnalogsClick = onProductAnalogsClick
-            )
-        }
-
-
-        if (sectionSimilarProducts.items.isNotEmpty()) {
-            ProductDetailsSimilarProducts(
-                modifier = Modifier.padding(top = 32.dp),
-                sectionSimilarProducts = sectionSimilarProducts,
-                onProductLike = onProductLikeClick,
-                onProductClick = onProductClick,
-                onIncrementProductToCart = onIncrementProductToCart,
-                onDecrementProductToCart = onDecrementProductToCart,
-                onProductAnalogsClick = onProductAnalogsClick
-            )
+        if(moreProductSections.isNotEmpty()){
+            moreProductSections.forEach { section ->
+                ProductDetailsAccessoryProducts(
+                    modifier = Modifier.padding(top = 32.dp),
+                    productSection = section,
+                    onProductLike = onProductLikeClick,
+                    onProductClick = onProductClick,
+                    onIncrementProductToCart = onIncrementProductToCart,
+                    onDecrementProductToCart = onDecrementProductToCart,
+                    onProductAnalogsClick = onProductAnalogsClick
+                )
+            }
         }
 
         Spacer(modifier = Modifier.height(30.dp))

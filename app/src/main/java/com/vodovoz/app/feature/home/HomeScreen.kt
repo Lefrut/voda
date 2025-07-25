@@ -1,10 +1,12 @@
 package com.vodovoz.app.feature.home
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -31,6 +33,7 @@ import com.vodovoz.app.R
 import com.vodovoz.app.design_system.composables.dialogs.VodovozDialog
 import com.vodovoz.app.design_system.composables.placeholders.NetworkErrorPlaceholder
 import com.vodovoz.app.feature.all.promotions.composables.AdvertisingInfoBottomSheet
+import com.vodovoz.app.feature.home.composables.AppUpdateBottomSheet
 import com.vodovoz.app.feature.home.composables.HomeBody
 import com.vodovoz.app.feature.home.composables.HomeLoadingPlaceholder
 import com.vodovoz.app.feature.home.composables.HomeTopBar
@@ -112,7 +115,7 @@ fun HomeScreen(
                     }
                 }
 
-                HomeFlowViewModel.HomeUiState.Success -> {
+                HomeFlowViewModel.HomeUiState.Success, is HomeFlowViewModel.HomeUiState.AppNeedUpdate -> {
                     HomeBody(
                         modifier = Modifier.nestedScroll(homeNestedScrollConnection),
                         topProductsLazyListState = topProductsLazyListState,
@@ -240,6 +243,19 @@ fun HomeScreen(
             onDismiss = { viewModel.hideExitDialog() },
             onAccept = { viewModel.closeApplication() }
         )
+    }
+
+    val uiState = viewState.uiState
+    if (uiState is HomeFlowViewModel.HomeUiState.AppNeedUpdate) {
+        AppUpdateBottomSheet(
+            appUpdateInfoUi = uiState.info,
+            onDismissRequest = {},
+            onButtonClick = { appUpdateInfo ->
+                viewModel.openGooglePlay(appUpdateInfo)
+            }
+        )
+
+        BackHandler {}
     }
 
 }

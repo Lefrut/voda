@@ -53,6 +53,17 @@ fun NavOptionsBuilder.expandAnim() {
     }
 }
 
+fun NavController.navigateToWriteMessage() {
+    navigate(
+        R.id.writeMessageFragment,
+        Bundle.EMPTY,
+        navOptions {
+            launchSingleTop = true
+            slideAnim()
+        }
+    )
+}
+
 fun NavController.navigateToAddAddress(
     mapAddress: MapAddressUi? = null,
     addressId: Long? = null,
@@ -415,7 +426,6 @@ fun NavController.navigateToStories(storyId: Long, stories: List<StoryUi>) {
         bundle,
         navOptions {
             anim {
-                popExit = R.anim.slide_out_bottom
                 exit = R.anim.fade_out
                 enter = R.anim.scale_in
             }

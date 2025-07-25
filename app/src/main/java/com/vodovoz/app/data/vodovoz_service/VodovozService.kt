@@ -15,7 +15,7 @@ import com.vodovoz.app.data.vodovoz_service.model.OrderPlaceholderDTO
 import com.vodovoz.app.data.vodovoz_service.model.OrderQuestionDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.PopularCategoriesDTO
 import com.vodovoz.app.data.vodovoz_service.model.PopupWindowDTO
-import com.vodovoz.app.data.vodovoz_service.model.PreOrderDTO
+import com.vodovoz.app.data.vodovoz_service.model.FormDTO
 import com.vodovoz.app.data.vodovoz_service.model.PresentDTO
 import com.vodovoz.app.data.vodovoz_service.model.ProductCommentsDTO
 import com.vodovoz.app.data.vodovoz_service.model.ProductsSectionDTO
@@ -24,7 +24,6 @@ import com.vodovoz.app.data.vodovoz_service.model.PromotionsDTO
 import com.vodovoz.app.data.vodovoz_service.model.QuestionnairesDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.QuestionnairesWelcomeDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.RAZDEL_DTO
-import com.vodovoz.app.data.vodovoz_service.model.RegistrationDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.SearchRecommendationsDTO
 import com.vodovoz.app.data.vodovoz_service.model.SiteStateResponseDTO
 import com.vodovoz.app.data.vodovoz_service.model.StoriesDTO
@@ -489,7 +488,7 @@ interface VodovozService {
     suspend fun getLoginByEmailDetails(): Response<VodovozResponseDTO<AuthDetailsDTO>>
 
     @GET("reg.php?action=glav")
-    suspend fun getRegisterFields(): Response<VodovozResponseDTO<RegistrationDetailsDTO>>
+    suspend fun getRegisterFields(): Response<VodovozResponseDTO<AuthDetailsDTO>>
 
     @GET("auth.php?action=otpravka")
     suspend fun loginByEmail(
@@ -506,7 +505,7 @@ interface VodovozService {
     suspend fun requestPhoneCode(
         @Path("path", encoded = true) url: String,
         @Query("telefon") phone: String,
-        @Query("podpiska") newsletter: String?,
+        @QueryMap params: Map<String, String>
     ): Response<VodovozResponseDTO<RequestCodeDTO>>
 
     @GET("{path}?action=tochkakarta")
@@ -545,7 +544,7 @@ interface VodovozService {
     suspend fun getPreOrderFields(
         @Query("userid") userId: Long,
         @Query("tovar") productId: Long,
-    ): Response<VodovozResponseDTO<PreOrderDTO>>
+    ): Response<VodovozResponseDTO<FormDTO>>
 
     @GET("osnova/predzakaz.php?action=otpravka")
     suspend fun sendPreorder(
@@ -621,6 +620,17 @@ interface VodovozService {
         @Query("message") message: String,
     ): Response<VodovozResponseDTO<VodovozPlaceholderDTO>>
 
+    @GET("osnova/form/obratnayasvyaz.php?action=glav")
+    suspend fun getWriteMessageDetails(
+        @Query("userid") userId: Long?,
+    ): Response<VodovozResponseDTO<FormDTO>>
+
+    @GET("osnova/form/obratnayasvyaz.php?action=otpravka")
+    suspend fun sendMessage(
+        @Query("userid") userId: Long?,
+        @QueryMap queries: Map<String, String>
+    ): Response<VodovozResponseDTO<VodovozPlaceholderDTO>>
+
     /**
      * ProductDetails screen
      */
@@ -689,7 +699,7 @@ interface VodovozService {
 
     @GET("glavnaya/otzivtovari.php?action=tovarglav")
     suspend fun getUnratedProductsDetails(
-        @Query("userid") userId: Long,
+        @Query("userid") userId: Long?,
     ): Response<VodovozResponseDTO<UnratedProductsSectionDTO>>
 
     @GET("glavnaya/otzivtovari.php?action=addblock")
@@ -744,7 +754,7 @@ interface VodovozService {
     @GET("glavnaya/novinki.php?new=specpredlosh&detail=Y&android=${BuildConfig.VERSION_NAME}")
     suspend fun getAllHurryUpBuyProducts(
         @Query("nav") page: Int = 1,
-        @Query("sect") categoryId: Int = -1,
+        @Query("sect") categoryId: Int?,
         @Query("sort") sort: String = "",
         @Query("ascdesc") order: String = "",
     ): Response<VodovozResponseDTO<ProductsSectionDTO>>

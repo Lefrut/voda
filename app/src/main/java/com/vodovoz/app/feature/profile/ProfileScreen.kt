@@ -5,8 +5,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.systemBarsPadding
-import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.verticalScroll
@@ -21,10 +19,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.LifecycleStartEffect
 import com.vodovoz.app.design_system.composables.bottom_sheet.InfoBottomSheet
 import com.vodovoz.app.design_system.composables.decoration.AdvertisingChip
 import com.vodovoz.app.feature.all.promotions.composables.AdvertisingInfoBottomSheet
-import com.vodovoz.app.feature.home.composables.AuthScrollImagePager
+import com.vodovoz.app.feature.home.composables.AutoScrollImagePager
+import com.vodovoz.app.feature.home.composables.rememberAutoScrollPagerState
 import com.vodovoz.app.feature.profile.composables.BonusesBottomSheet
 import com.vodovoz.app.feature.profile.composables.ProfileCardsRow
 import com.vodovoz.app.feature.profile.composables.ProfileMenuColumn
@@ -93,9 +93,9 @@ fun ProfileScreen(
                 )
 
                 val bannerImages = viewState.banners.map { bannerUi -> bannerUi.detailPicture }
-                val pagerState = rememberPagerState { bannerImages.size }
+                val pagerState = rememberAutoScrollPagerState(itemsCount = bannerImages.size)
 
-                AuthScrollImagePager(
+                AutoScrollImagePager(
                     modifier = Modifier
                         .padding(top = 17.dp, bottom = 16.dp)
                         .height(68.dp),
@@ -163,10 +163,11 @@ fun ProfileScreen(
                 viewModel.closeSupportingBottomSheet()
             }
         )
+
     }
 
     val currentBalanceBSData = viewState.currentTextBSData
-    if(viewState.showTextBS && currentBalanceBSData !=null){
+    if (viewState.showTextBS && currentBalanceBSData != null) {
         InfoBottomSheet(
             title = currentBalanceBSData.title,
             text = currentBalanceBSData.text,
@@ -180,7 +181,7 @@ fun ProfileScreen(
     }
 
     val bonusesBSData = viewState.currentBonusesBSData
-    if(bonusesBSData != null && viewState.showBonusesBS){
+    if (bonusesBSData != null && viewState.showBonusesBS) {
         BonusesBottomSheet(
             data = bonusesBSData,
             onDismissRequest = {

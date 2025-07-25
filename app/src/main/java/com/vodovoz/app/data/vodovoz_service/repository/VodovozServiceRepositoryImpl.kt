@@ -71,7 +71,7 @@ import com.vodovoz.app.domain.general.model.order.OrderingDetailsModel
 import com.vodovoz.app.domain.general.model.order.OrdersHistoryDetailsModel
 import com.vodovoz.app.domain.general.model.order.OrdersHistoryItemModel
 import com.vodovoz.app.domain.general.model.order.PaymentMethodDetailsModel
-import com.vodovoz.app.domain.general.model.order.PreOrderSectionModel
+import com.vodovoz.app.domain.general.model.order.FormModel
 import com.vodovoz.app.domain.general.model.order.RecipientDetailsModel
 import com.vodovoz.app.domain.general.model.order.RecipientModel
 import com.vodovoz.app.domain.general.model.order.WhereOrderDetailsModel
@@ -567,14 +567,14 @@ class VodovozServiceRepositoryImpl @Inject constructor(
     override fun requestPhoneCode(
         url: String,
         phone: String,
-        newsletter: Boolean?,
+        params: Map<String, String>,
     ): Flow<Result<RequestCodeModel>> {
         return executeRequest(
             request = {
                 vodovozService.requestPhoneCode(
                     url = url,
                     phone = phone,
-                    newsletter = null  //todo - newsletter?.let { VodovozBoolean.from(newsletter).value })
+                    params = params
                 )
             },
             mapper = {
@@ -668,7 +668,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
             },
             onFail = { response ->
                 val message =
-                    moshi.fromJson<VodovozResponseDTO<String>>(response.stringErrorBody()).data
+                    moshi.fromJson<VodovozResponseDTO<String>>(response.stringErrorBody()).message
                         ?: ""
 
                 throw RequestException(message = message)
@@ -1372,10 +1372,10 @@ class VodovozServiceRepositoryImpl @Inject constructor(
         )
     }
 
-    override fun register(fields: List<FieldModel>): Flow<Result<UserAuthInfoModel>> {
+    override fun register(params: Map<String, String>): Flow<Result<UserAuthInfoModel>> {
         return executeRequest(
             request = {
-                vodovozService.register(fields.toQueries())
+                vodovozService.register(params)
             },
             mapper = { registerDTO ->
                 registerDTO.data!!.toDomain()
@@ -1400,10 +1400,10 @@ class VodovozServiceRepositoryImpl @Inject constructor(
         )
     }
 
-    override fun loginByEmail(fields: List<FieldModel>): Flow<Result<UserAuthInfoModel>> {
+    override fun loginByEmail(params: Map<String, String>): Flow<Result<UserAuthInfoModel>> {
         return executeRequest(
             request = {
-                vodovozService.loginByEmail(fields.toQueries())
+                vodovozService.loginByEmail(params)
             },
             mapper = { response ->
                 response.data!!.toDomain()
@@ -1543,10 +1543,16 @@ class VodovozServiceRepositoryImpl @Inject constructor(
         ).flow
     }
 
-    override fun getSearchProducts(query: String): Flow<Result<ProductsSectionModel>> {
+    override fun getSearchProducts(
+        query: String,
+        categoryId: Int,
+    ): Flow<Result<ProductsSectionModel>> {
         return executeRequest(
             request = {
-                vodovozService.getSearchProducts(query = query)
+                vodovozService.getSearchProducts(
+                    query = query,
+                    categoryId = categoryId.takeIf { it > -1 }
+                )
             },
             mapper = { response ->
                 response.data!!.toDomain()
@@ -1624,7 +1630,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
         )
     }
 
-    override fun getPreorderFields(productId: Long): Flow<Result<PreOrderSectionModel>> {
+    override fun getPreorderFields(productId: Long): Flow<Result<FormModel>> {
         return executeRequest(
             request = {
                 val userId = accountManager.fetchAccountId() ?: -1L
@@ -1654,8 +1660,8 @@ class VodovozServiceRepositoryImpl @Inject constructor(
     override fun getUnratedProductsDetails(): Flow<Result<UnratedProductsSectionModel>> {
         return executeRequest(
             request = {
-                val userId = accountManager.fetchAccountId() ?: throw UserNotLoginException()
-                vodovozService.getUnratedProductsDetails(userId)
+                val userId = accountManager.fetchAccountId()
+                vodovozService.getUnratedProductsDetails(userId = userId)
             },
             mapper = {
                 it.data!!.toDomain()
@@ -1840,6 +1846,28 @@ class VodovozServiceRepositoryImpl @Inject constructor(
                 ?: throw IllegalArgumentException("ProductAnalogsDTO can't be null")
         }
     )
+
+    override fun getWriteMessageDetails(): Flow<Result<FormModel>> {
+        return executeRequest(
+            request = {
+                vodovozService.getWriteMessageDetails(accountManager.fetchAccountId())
+            },
+            mapper = {
+                it.data!!.toDomain()
+            }
+        )
+    }
+
+    override fun sendMessage(params: Map<String, String>): Flow<Result<VodovozPlaceholderModel>> {
+        return executeRequest(
+            request = {
+                vodovozService.sendMessage(accountManager.fetchAccountId(), params)
+            },
+            mapper = {
+                it.data!!.toDomain()
+            }
+        )
+    }
 
     override fun sendComment(
         productId: Long,
@@ -2059,15 +2087,16 @@ class VodovozServiceRepositoryImpl @Inject constructor(
         }
     )
 
-    override fun getAllNewProducts(): Flow<Result<ProductsSectionModel>> = executeRequest(
-        request = {
-            vodovozService.getAllNewProducts()
-        },
-        mapper = { response ->
-            response.data?.toDomain()
-                ?: throw IllegalArgumentException("NewProductsDTO can't be null")
-        }
-    )
+    override fun getAllNewProducts(categoryId: Int): Flow<Result<ProductsSectionModel>> =
+        executeRequest(
+            request = {
+                vodovozService.getAllNewProducts(categoryId = categoryId)
+            },
+            mapper = { response ->
+                response.data?.toDomain()
+                    ?: throw IllegalArgumentException("NewProductsDTO can't be null")
+            }
+        )
 
     override fun getAllNewProductsPaged(
         categoryId: Int,
@@ -2104,10 +2133,14 @@ class VodovozServiceRepositoryImpl @Inject constructor(
         }
     )
 
-    override suspend fun getAllHurryUpBuyProducts(): Flow<Result<ProductsSectionModel>> =
+    override suspend fun getAllHurryUpBuyProducts(
+        categoryId: Int,
+    ): Flow<Result<ProductsSectionModel>> =
         executeRequest(
             request = {
-                vodovozService.getAllHurryUpBuyProducts()
+                vodovozService.getAllHurryUpBuyProducts(
+                    categoryId = categoryId.takeIf { it > -1 }
+                )
             },
             mapper = { responseDto ->
                 responseDto.data?.toDomain()
@@ -2151,9 +2184,14 @@ class VodovozServiceRepositoryImpl @Inject constructor(
     )
 
 
-    override fun getAllSuperTop(buttonId: Int): Flow<Result<ProductsSectionModel>> = executeRequest(
+    override fun getAllSuperTop(
+        buttonId: Int,
+        categoryId: Int,
+    ): Flow<Result<ProductsSectionModel>> = executeRequest(
         request = {
-            vodovozService.getAllSuperTop(buttonId.toLong())
+            vodovozService.getAllSuperTop(
+                buttonId.toLong(),
+                categoryId = categoryId.takeIf { it > -1 })
         },
         mapper = { superTopResponse ->
             superTopResponse.data!!.toDomain()
@@ -2210,11 +2248,16 @@ class VodovozServiceRepositoryImpl @Inject constructor(
         )
     }
 
-    override fun getAllViewedProducts(): Flow<Result<ProductsSectionModel>> {
+    override fun getAllViewedProducts(
+        categoryId: Int,
+    ): Flow<Result<ProductsSectionModel>> {
         return executeRequest(
             request = {
                 val userId = accountManager.fetchAccountId()
-                vodovozService.getAllViewedProducts(userId)
+                vodovozService.getAllViewedProducts(
+                    userId = userId,
+                    categoryId = categoryId.takeIf { it > -1 }
+                )
             },
             mapper = {
                 it.data?.toDomain()

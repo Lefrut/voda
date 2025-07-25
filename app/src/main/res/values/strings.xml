@@ -298,5 +298,6 @@
     <string name="block_hours">ЧАСОВ</string>
     <string name="block_minutes">МИНУТ</string>
     <string name="block_seconds">СЕКУНД</string>
+    <string name="error_send_data">Не удалось отправить данные, попробуйте снова!</string>
 
 </resources>

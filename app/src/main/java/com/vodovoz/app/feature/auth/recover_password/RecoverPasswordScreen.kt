@@ -19,11 +19,7 @@ import com.vodovoz.app.feature.auth.recover_password.model.RecoverPasswordState
 @Composable
 fun RecoverPasswordScreen(viewModel: RecoverPasswordViewModel, viewState: RecoverPasswordState) {
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-            .systemBarsPadding()
-            .consumeWindowInsets(WindowInsets.systemBars)
+        modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)
     ) {
         VodovozTopBar(
             title = viewState.title.ifEmpty {

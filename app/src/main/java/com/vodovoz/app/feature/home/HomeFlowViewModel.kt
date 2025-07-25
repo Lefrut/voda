@@ -3,6 +3,7 @@ package com.vodovoz.app.feature.home
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.viewModelScope
+import com.vodovoz.app.BuildConfig
 import com.vodovoz.app.R
 import com.vodovoz.app.common.account.AccountManager
 import com.vodovoz.app.common.cart.CartManager
@@ -32,6 +33,7 @@ import com.vodovoz.app.design_system.model.withUpdatedLoading
 import com.vodovoz.app.domain.general.model.promotion.toUi
 import com.vodovoz.app.domain.general.respository.UserPreferencesRepository
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
+import com.vodovoz.app.feature.home.model.AppUpdateInfoUi
 import com.vodovoz.app.feature.home.model.HomeOrderUi
 import com.vodovoz.app.feature.home.model.MenuItemTypeUi
 import com.vodovoz.app.feature.home.model.MenuItemUi
@@ -39,6 +41,7 @@ import com.vodovoz.app.feature.home.model.OrderWithMenuUi
 import com.vodovoz.app.feature.home.model.PopularCategoryUi
 import com.vodovoz.app.feature.home.model.UnratedProductUi
 import com.vodovoz.app.feature.home.model.UnratedProductsSectionUi
+import com.vodovoz.app.feature.home.model.compareVersions
 import com.vodovoz.app.feature.home.model.toUi
 import com.vodovoz.app.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -268,18 +271,24 @@ class HomeFlowViewModel @Inject constructor(
 
         val sectionViewedProducts =
             viewedProductsDeferred.await().getOrNull()?.toUi()
+
+        val popupWindowInfoModel = popupWindowsInfoDeferred.await().getOrNull()
         val specialPromotion =
-            popupWindowsInfoDeferred.await().getOrNull()?.specialPromotion?.toUi()
+            popupWindowInfoModel?.specialPromotion?.toUi()
         val sectionUnratedProducts = unratedProductsSectionDeferred.await().getOrNull()
 
-
+        val updateAppWindow: AppUpdateInfoUi? =
+            popupWindowInfoModel?.appUpdateInfo?.toUi()?.takeIf { appUpdateInfo ->
+                compareVersions(BuildConfig.VERSION_NAME, appUpdateInfo.androidVersion) == -1
+            }
 
         uiStateListener.updateData { s ->
             s.copy(
                 sectionViewedProducts = sectionViewedProducts ?: s.sectionViewedProducts,
                 specialPromotion = specialPromotion ?: s.specialPromotion,
-                showSpecialPromotionBS = specialPromotion != null,
+                showSpecialPromotionBS = specialPromotion != null && s.specialPromotion == SpecialPromotionUi.Empty && updateAppWindow == null,
                 sectionUnratedProducts = sectionUnratedProducts?.toUi() ?: s.sectionUnratedProducts,
+                uiState = if (updateAppWindow != null) HomeUiState.AppNeedUpdate(updateAppWindow) else s.uiState
             )
         }
 
@@ -291,11 +300,7 @@ class HomeFlowViewModel @Inject constructor(
         uiStateListener.updateData { s -> s.copy(uiState = HomeUiState.Loading) }
         fetchPrimaryDetails()
         fetchSecondaryDetails()
-        if (
-            accountManager.fetchAccountId() != null && dataState.specialPromotion == SpecialPromotionUi.Empty
-        ) {
-            fetchOptionalDetails()
-        }
+        fetchOptionalDetails()
     }
 
     fun refresh() = viewModelScope.launch {
@@ -538,6 +543,10 @@ class HomeFlowViewModel @Inject constructor(
         }
     }
 
+    fun openGooglePlay(appUpdateInfo: AppUpdateInfoUi) = viewModelScope.launch {
+        eventListener.emit(HomeEvents.OpenGooglePlay(appUpdateInfo.playMarketUrl))
+    }
+
     @Stable
     sealed class HomeEvents : Event {
         data class GoToPreOrder(val id: Long, val name: String, val detailPicture: String) :
@@ -551,6 +560,7 @@ class HomeFlowViewModel @Inject constructor(
         data object GoToOrdersHistory : HomeEvents()
         data object GoToQrCode : HomeEvents()
         data object CloseApp : HomeEvents()
+        data class OpenGooglePlay(val url: String) : HomeEvents()
         data object GoToViewedProductList : HomeEvents()
 
         data class WriteComment(
@@ -578,15 +588,14 @@ class HomeFlowViewModel @Inject constructor(
         data object Success : HomeUiState()
         data object Loading : HomeUiState()
         data object NetworkError : HomeUiState()
+        data class AppNeedUpdate(val info: AppUpdateInfoUi) : HomeUiState()
     }
 
     @Immutable
     data class HomeState(
-
         val banners: List<BannerUi> = emptyList(),
         val stories: List<StoryUi> = emptyList(),
         val orderWithMenu: OrderWithMenuUi = OrderWithMenuUi.Empty,
-
         val sectionPromotions: SectionUi<PromotionUi> = SectionUi.empty(),
         val sectionPopularCategories: SectionUi<PopularCategoryUi> = SectionUi.empty(),
         val sectionNewProducts: SectionUi<ProductUi> = SectionUi.empty(),
@@ -598,14 +607,12 @@ class HomeFlowViewModel @Inject constructor(
         val sectionUnratedProducts: UnratedProductsSectionUi = UnratedProductsSectionUi.Empty,
         val specialPromotion: SpecialPromotionUi = SpecialPromotionUi.Empty,
         val currentAdvertising: AboutAdvertisingUi = AboutAdvertisingUi.Empty,
-
         val uiState: HomeUiState = HomeUiState.Loading,
         val showSpecialPromotionBS: Boolean = false,
         val showUnratedProductsBS: Boolean = false,
         val showAdvertisingBS: Boolean = false,
         val showRefreshIndicator: Boolean = false,
         val showExitDialog: Boolean = false,
-
         val showedVpnWarning: Boolean = false,
         val showedUnratedProducts: Boolean = false,
     ) : State

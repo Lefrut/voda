@@ -30,47 +30,49 @@ fun ProductListTitle(
     showShare: Boolean,
     onShareClick: () -> Unit,
 ) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.background)
-            .padding(horizontal = 16.dp)
-    ) {
-        Column(
-            modifier = Modifier
-                .weight(1f)
-                .align(Alignment.CenterVertically)
+    if (showShare || title.isNotBlank()) {
+        Row(
+            modifier = modifier
+                .fillMaxWidth()
+                .background(MaterialTheme.colorScheme.background)
+                .padding(horizontal = 16.dp)
         ) {
-            if (title.isNotBlank()) {
-                Text(
-                    text = title,
-                    color = MaterialTheme.colorScheme.onBackground,
-                    style = MaterialTheme.typography.headlineSmall,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
-            if (productsQuantity.isNotBlank()) {
-                Text(
-                    text = productsQuantity,
-                    color = MaterialTheme.colorScheme.surfaceTint,
-                    style = MaterialTheme.typography.labelSmall,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
-        }
-        if(showShare){
-            Icon(
-                painter = painterResource(id = R.drawable.ic_share),
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onBackground,
+            Column(
                 modifier = Modifier
-                    .padding(start = 10.dp)
-                    .size(24.dp)
-                    .clip(MaterialTheme.shapes.small)
-                    .clickable { onShareClick() }
-            )
+                    .weight(1f)
+                    .align(Alignment.CenterVertically)
+            ) {
+                if (title.isNotBlank()) {
+                    Text(
+                        text = title,
+                        color = MaterialTheme.colorScheme.onBackground,
+                        style = MaterialTheme.typography.headlineSmall,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+                if (productsQuantity.isNotBlank() && title.isNotBlank()) {
+                    Text(
+                        text = productsQuantity,
+                        color = MaterialTheme.colorScheme.surfaceTint,
+                        style = MaterialTheme.typography.labelSmall,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
+            if (showShare) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_share),
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onBackground,
+                    modifier = Modifier
+                        .padding(start = 10.dp)
+                        .size(24.dp)
+                        .clip(MaterialTheme.shapes.small)
+                        .clickable { onShareClick() }
+                )
+            }
         }
     }
 }

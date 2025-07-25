@@ -33,19 +33,6 @@ class PreOrderFragment : Fragment() {
 
     private val viewModel: PreOrderFlowViewModel by viewModels()
 
-    @Inject
-    lateinit var tabManager: TabManager
-
-    override fun onStart() {
-        super.onStart()
-        tabManager.changeTabVisibility(false)
-    }
-
-    override fun onStop() {
-        super.onStop()
-        tabManager.changeTabVisibility(true)
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         viewModel.fetchPreOrderData()

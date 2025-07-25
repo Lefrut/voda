@@ -1,6 +1,9 @@
 package com.vodovoz.app.feature.home
 
+import android.content.ActivityNotFoundException
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -306,6 +309,20 @@ class HomeFragment : Fragment() {
 
                 HomeFlowViewModel.HomeEvents.GoToViewedProductList -> {
                     findNavController().navigateToViewedProductList()
+                }
+
+                is HomeFlowViewModel.HomeEvents.OpenGooglePlay -> {
+                    try {
+                        startActivity(
+                            Intent(
+                                Intent.ACTION_VIEW,
+                                Uri.parse("market://details?id=${context.packageName}")
+                            )
+                        )
+                    } catch (e: ActivityNotFoundException) {
+                        startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(event.url)))
+                    }
+
                 }
             }
         }

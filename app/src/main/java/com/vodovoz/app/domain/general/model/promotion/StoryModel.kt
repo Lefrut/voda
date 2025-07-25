@@ -4,14 +4,15 @@ import com.vodovoz.app.common.model.VodovozAction
 
 data class StoryModel(
     val id: Long,
-    val image: String,
-    val actionWithButtonList: List<ActionWithButtonModel>,
+    val previewImage: String,
+    val pages: List<ActionWithButtonModel>,
     val viewed: Boolean
 )
 
 data class ActionWithButtonModel(
     val action: VodovozAction,
-    val colorfulButton: ColorfulButtonModel
+    val colorfulButton: ColorfulButtonModel,
+    val image: String
 )
 
 data class ColorfulButtonModel(

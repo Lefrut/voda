@@ -2,6 +2,7 @@ package com.vodovoz.app.feature.profile.change_password
 
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
@@ -27,6 +28,7 @@ fun ChangePasswordScreen(
 ) {
 
     Scaffold(
+        modifier = Modifier.imePadding(),
         topBar = {
             VodovozTopBar(
                 onBack = { viewModel.navigateBack() },
@@ -52,9 +54,7 @@ fun ChangePasswordScreen(
         contentWindowInsets = WindowInsets(0, 0, 0, 0)
     ) { paddingValues ->
         ChangePasswordBody(
-            modifier = Modifier
-                .padding(paddingValues)
-                .consumeWindowInsets(paddingValues),
+            modifier = Modifier.padding(paddingValues),
             fields = viewState.fields,
             onFieldChange = { field, updatedField ->
                 viewModel.changeField(field, updatedField)

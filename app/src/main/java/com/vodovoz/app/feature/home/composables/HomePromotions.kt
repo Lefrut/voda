@@ -20,9 +20,7 @@ fun HomePromotions(
     onPromotionClick: (PromotionUi) -> Unit,
     onAboutAdvertisingClick: (AboutAdvertisingUi) -> Unit,
     ) {
-    val pagerState = rememberPagerState {
-        sectionPromotions.items.count()
-    }
+    val pagerState = rememberAutoScrollPagerState(itemsCount = sectionPromotions.items.size)
 
     Column(modifier = modifier) {
         TitleAndButton(
@@ -31,7 +29,7 @@ fun HomePromotions(
             onShowAllClick = { buttonAction -> onShowAllClick(buttonAction) }
         )
 
-        AuthScrollImagePager(
+        AutoScrollImagePager(
             pagerState = pagerState,
             modifier = Modifier.padding(top = 16.dp),
             images = sectionPromotions.items.map { promotionUi -> promotionUi.picture },

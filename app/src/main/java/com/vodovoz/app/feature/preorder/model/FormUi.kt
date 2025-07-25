@@ -5,24 +5,24 @@ import com.vodovoz.app.design_system.model.ColorfulButtonUi
 import com.vodovoz.app.design_system.model.toUi
 import com.vodovoz.app.design_system.model.widgets.FieldUi
 import com.vodovoz.app.design_system.model.widgets.toUi
-import com.vodovoz.app.domain.general.model.order.PreOrderSectionModel
+import com.vodovoz.app.domain.general.model.order.FormModel
 
 @Immutable
-data class PreOrderSectionUi(
+data class FormUi(
     val title: String,
     val fields: List<FieldUi>,
     val colorfulButton: ColorfulButtonUi,
 ) {
     companion object {
-        val Empty = PreOrderSectionUi("", emptyList(), ColorfulButtonUi.Empty)
+        val Empty = FormUi("", emptyList(), ColorfulButtonUi.Empty)
     }
 }
 
-fun PreOrderSectionModel.toUi(): PreOrderSectionUi {
-    return PreOrderSectionUi(
+fun FormModel.toUi(): FormUi {
+    return FormUi(
         title = title,
         fields = fields.map { field -> field.toUi() },
-        colorfulButton = colorfulButton.toUi()
+        colorfulButton = button.toUi()
     )
 }
 

@@ -9,22 +9,26 @@ import com.vodovoz.app.common.account.LoginManager
 import com.vodovoz.app.common.agreement.AgreementController
 import com.vodovoz.app.common.content.Event
 import com.vodovoz.app.common.content.PagingContractViewModel
-import com.vodovoz.app.common.content.State
 import com.vodovoz.app.common.content.updateData
 import com.vodovoz.app.common.resources.ResourcesProvider
 import com.vodovoz.app.design_system.model.ColorfulButtonUi
 import com.vodovoz.app.design_system.model.mapToUi
 import com.vodovoz.app.design_system.model.updateButton
+import com.vodovoz.app.design_system.model.widgets.CheckboxUi
 import com.vodovoz.app.design_system.model.widgets.EmptyTextValidator
 import com.vodovoz.app.design_system.model.widgets.FieldUi
 import com.vodovoz.app.design_system.model.widgets.PhoneNumberValidator
 import com.vodovoz.app.design_system.model.widgets.checkFields
 import com.vodovoz.app.design_system.model.widgets.getErrorText
-import com.vodovoz.app.design_system.model.widgets.mapToDomain
-import com.vodovoz.app.design_system.model.widgets.mapToUi
+import com.vodovoz.app.design_system.model.widgets.updateCheckbox
 import com.vodovoz.app.design_system.model.widgets.updateFieldAndResetError
 import com.vodovoz.app.domain.general.model.ValidationException
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
+import com.vodovoz.app.feature.auth.model.AuthDetailsUi
+import com.vodovoz.app.feature.auth.model.AuthState
+import com.vodovoz.app.feature.auth.model.agreementIsCheckedWhenAvailable
+import com.vodovoz.app.feature.auth.model.authValidators
+import com.vodovoz.app.feature.auth.model.toUi
 import com.vodovoz.app.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -36,7 +40,7 @@ class RegFlowViewModel @Inject constructor(
     private val accountManager: AccountManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val resourceProvider: ResourcesProvider,
-    private val loginManager: LoginManager
+    private val loginManager: LoginManager,
 ) : PagingContractViewModel<RegFlowViewModel.RegState, RegFlowViewModel.RegEvents>(RegState()) {
 
     companion object {
@@ -48,7 +52,7 @@ class RegFlowViewModel @Inject constructor(
         fetchRegisterDetails()
     }
 
-    fun fetchRegisterDetails() = viewModelScope.launch {
+    private fun fetchRegisterDetails() = viewModelScope.launch {
         uiStateListener.updateData { s -> s.copy(uiState = RegUiState.Loading) }
 
         val registerFieldsResult =
@@ -58,16 +62,15 @@ class RegFlowViewModel @Inject constructor(
             uiStateListener.updateData { s ->
                 s.copy(
                     uiState = RegUiState.Success,
-                    fields = registerDetails.fields.mapToUi(),
-                    title = registerDetails.title,
-                    showAgreement = registerDetails.haveAgreement,
-                    agreementTextHtml = AgreementController.getText(),
-                    buttons = registerDetails.buttons.mapToUi()
-                        .updateButton(REGISTER_BUTTON) { btn ->
-                            btn.copy(
-                                enabled = false
-                            )
-                        }
+                    authDetails = registerDetails.toUi(AgreementController.getText()).copy(
+                        buttons = registerDetails.buttons.mapToUi()
+                            .updateButton(REGISTER_BUTTON) { btn ->
+                                btn.copy(
+                                    enabled = false
+                                )
+                            }
+
+                    )
                 )
             }
         }.onFailure {
@@ -75,17 +78,19 @@ class RegFlowViewModel @Inject constructor(
         }
     }
 
-    fun register() = viewModelScope.launch {
+    private fun register() = viewModelScope.launch {
         val isValid = dataState.fields.checkFields(
             putErrors = true,
             getSupportingText = { field -> field.getErrorText { id -> resourceProvider.getString(id) } }
         ) { updatedFields, _ ->
             uiStateListener.updateData { s ->
                 s.copy(
-                    fields = updatedFields,
-                    buttons = s.buttons.updateButton(REGISTER_BUTTON) { btn ->
-                        btn.copy(enabled = false)
-                    }
+                    authDetails = s.authDetails.copy(
+                        fields = updatedFields,
+                        buttons = s.buttons.updateButton(REGISTER_BUTTON) { btn ->
+                            btn.copy(enabled = false)
+                        }
+                    )
                 )
             }
         }
@@ -96,16 +101,21 @@ class RegFlowViewModel @Inject constructor(
 
         uiStateListener.updateData { s ->
             s.copy(
-                buttons = s.buttons.updateButton(REGISTER_BUTTON) { btn ->
-                    btn.copy(loading = true)
-                }
+                authDetails = s.authDetails.copy(
+                    buttons = s.buttons.updateButton(REGISTER_BUTTON) { btn ->
+                        btn.copy(loading = true)
+                    }
+
+                )
             )
         }
 
         val failMessage = resourceProvider.getString(R.string.error_registration)
 
         val registerResult = vodovozServiceRepository.register(
-            dataState.fields.mapToDomain()
+            dataState.fields.associate {
+                it.id to it.value()
+            } + dataState.fields.associate { it.id to it.value() }
         ).singleResult()
 
         registerResult.onSuccess { authInfo ->
@@ -124,9 +134,12 @@ class RegFlowViewModel @Inject constructor(
 
             uiStateListener.updateData { s ->
                 s.copy(
-                    buttons = s.buttons.updateButton(REGISTER_BUTTON) { btn ->
-                        btn.copy(loading = false, enabled = false)
-                    }
+                    authDetails = s.authDetails.copy(
+                        buttons = s.buttons.updateButton(REGISTER_BUTTON) { btn ->
+                            btn.copy(loading = false, enabled = false)
+                        }
+
+                    )
                 )
             }
 
@@ -141,9 +154,12 @@ class RegFlowViewModel @Inject constructor(
 
             uiStateListener.updateData { s ->
                 s.copy(
-                    buttons = s.buttons.updateButton(REGISTER_BUTTON) { btn ->
-                        btn.copy(loading = false, enabled = t !is ValidationException)
-                    }
+                    authDetails = s.authDetails.copy(
+                        buttons = s.buttons.updateButton(REGISTER_BUTTON) { btn ->
+                            btn.copy(loading = false, enabled = t !is ValidationException)
+                        }
+
+                    )
                 )
             }
 
@@ -167,10 +183,12 @@ class RegFlowViewModel @Inject constructor(
         ) { fields, isValid ->
             uiStateListener.updateData { s ->
                 s.copy(
-                    fields = fields,
-                    buttons = s.buttons.updateButton(REGISTER_BUTTON) { btn ->
-                        btn.copy(enabled = isValid && (s.agreementChecked || !s.showAgreement))
-                    }
+                    authDetails = s.authDetails.copy(
+                        fields = fields,
+                        buttons = s.buttons.updateButton(REGISTER_BUTTON) { btn ->
+                            btn.copy(enabled = isValid && s.checkboxes.agreementIsCheckedWhenAvailable())
+                        }
+                    )
                 )
             }
         }
@@ -179,17 +197,6 @@ class RegFlowViewModel @Inject constructor(
     fun openAgreementUrl(url: String, urlIndex: Int) = viewModelScope.launch {
         val title = AgreementController.getTitle(urlIndex) ?: ""
         eventListener.emit(RegEvents.GoToWebView(url, title))
-    }
-
-    fun checkAgreement(checked: Boolean) = viewModelScope.launch {
-        uiStateListener.updateData { s ->
-            s.copy(
-                agreementChecked = checked,
-                buttons = s.buttons.updateButton(REGISTER_BUTTON) { btn ->
-                    btn.copy(enabled = s.fields.checkFields() && (checked || !s.showAgreement))
-                }
-            )
-        }
     }
 
     private fun navigateToLoginByEmail() = viewModelScope.launch {
@@ -212,6 +219,28 @@ class RegFlowViewModel @Inject constructor(
         }
     }
 
+    fun changeCheckbox(checkbox: CheckboxUi, updatedCheckbox: CheckboxUi) {
+        uiStateListener.updateData { s ->
+            val authDetails = s.authDetails
+            val updatedCheckboxes = authDetails.checkboxes.updateCheckbox(
+                checkbox, updatedCheckbox
+            )
+
+            s.copy(
+                authDetails = authDetails.copy(
+                    checkboxes = updatedCheckboxes,
+                    buttons = authDetails.buttons.updateButton(REGISTER_BUTTON) { button ->
+                        button.copy(
+                            enabled = authDetails.fields.checkFields(
+                                validators = AuthDetailsUi.authValidators()
+                            ) && updatedCheckboxes.agreementIsCheckedWhenAvailable()
+                        )
+                    }
+                )
+            )
+        }
+    }
+
 
     sealed class RegEvents : Event {
         data class ShowSnackbar(val message: String) : RegEvents()
@@ -227,14 +256,9 @@ class RegFlowViewModel @Inject constructor(
 
     @Immutable
     data class RegState(
-        val agreementTextHtml: String = "",
-        val showAgreement: Boolean = false,
-        val agreementChecked: Boolean = true,
-        val fields: List<FieldUi> = emptyList(),
         val uiState: RegUiState = RegUiState.Loading,
-        val title: String = "",
-        val buttons: List<ColorfulButtonUi> = emptyList(),
-    ) : State
+        override val authDetails: AuthDetailsUi = AuthDetailsUi.Empty,
+    ) : AuthState(authDetails)
 
     @Stable
     sealed interface RegUiState {

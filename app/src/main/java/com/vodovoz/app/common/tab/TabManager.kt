@@ -39,9 +39,6 @@ class TabManager @Inject constructor(
     private val tabVisibilityListener = MutableStateFlow(true)
     fun observeTabVisibility() = tabVisibilityListener.asStateFlow()
 
-    private val tabBottomPadding = MutableStateFlow(false)
-    fun observeBottomPadding() = tabBottomPadding.asStateFlow()
-
     fun setAuthRedirect(graphId: Int) {
         tabAuthRedirectListener.value = graphId
     }
@@ -75,10 +72,6 @@ class TabManager @Inject constructor(
 
     fun changeTabVisibility(vis: Boolean) {
         tabVisibilityListener.value = vis
-    }
-
-    fun changeBottomPadding(have: Boolean) {
-        tabBottomPadding.value = have
     }
 
     fun clearBottomNavCartState() {

@@ -15,8 +15,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import com.vodovoz.app.design_system.composables.placeholders.LoadingPlaceholder
 import com.vodovoz.app.design_system.composables.placeholders.NetworkErrorPlaceholder
-import com.vodovoz.app.design_system.composables.placeholders.VodovozLongPlaceholder
-import com.vodovoz.app.design_system.composables.placeholders.VodovozPlaceholder
 import com.vodovoz.app.design_system.composables.top_bar.VodovozTopBar
 import com.vodovoz.app.feature.cart.ordering.composables.OrderingBody
 import com.vodovoz.app.util.extensions.deviceInfo
@@ -60,7 +58,7 @@ fun OrderingScreen(
                 viewModel.refreshRecipient()
             }
         ) {
-            when (val uiState = viewState.uiState) {
+            when (viewState.uiState) {
                 OrderingFlowViewModel.OrderingUiState.Error -> {
                     NetworkErrorPlaceholder {
                         viewModel.fetchOrderingDetails()

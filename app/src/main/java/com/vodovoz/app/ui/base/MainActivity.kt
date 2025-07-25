@@ -3,10 +3,12 @@ package com.vodovoz.app.ui.base
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.ui.graphics.toArgb
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.fragment.app.FragmentContainerView
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.navOptions
@@ -60,19 +62,10 @@ class MainActivity : AppCompatActivity(), BlockAppSignalProvider {
         splashFileViewModel.downloadSplashFile()
         viewModel.checkAppState()
 
-        binding = ActivityMainBinding.inflate(layoutInflater).apply { setContentView(root) }
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        val navHostFragment = supportFragmentManager
-            .findFragmentById(binding.fcvMainContainer.id) as? NavHostFragment
-        val navController = navHostFragment?.navController
-        navController?.setGraph(R.navigation.nav_graph)
-        navController?.navigate(
-            resId = R.id.splashFragment,
-            args = null,
-            navOptions = navOptions {
-                launchSingleTop = true
-            }
-        )
+        binding.fcvMainContainer.setSplashScreen()
 
         processIntent(intent)
     }
@@ -96,8 +89,7 @@ class MainActivity : AppCompatActivity(), BlockAppSignalProvider {
 
         val jsonData = if (params.isNotEmpty()) {
             JSONObject(params)
-        }
-        else null
+        } else null
 
         lifecycleScope.launch {
             if (jsonData != null) siteStateManager.savePushData(jsonData)
@@ -109,5 +101,19 @@ class MainActivity : AppCompatActivity(), BlockAppSignalProvider {
         val appLinkData: Uri? = intent.data
         val path = appLinkData?.lastPathSegment
         siteStateManager.saveDeepLinkPath(path)
+    }
+
+    private fun FragmentContainerView.setSplashScreen() {
+        val navHostFragment = supportFragmentManager
+            .findFragmentById(id) as? NavHostFragment
+        val navController = navHostFragment?.navController
+        navController?.setGraph(R.navigation.nav_graph)
+        navController?.navigate(
+            resId = R.id.splashFragment,
+            args = null,
+            navOptions = navOptions {
+                launchSingleTop = true
+            }
+        )
     }
 }

@@ -13,5 +13,7 @@ data class CallYouItemDTO(
     @Json(name = "CODE")
     val CODE: String?,
     @Json(name = "VALUE")
-    val VALUE: String?
+    val VALUE: String?,
+    @Json(name = "ZABLOCKPOLE")
+    val ZABLOCKPOLE: String?,
 )

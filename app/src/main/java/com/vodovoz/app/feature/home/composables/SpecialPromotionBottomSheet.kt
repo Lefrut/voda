@@ -44,54 +44,12 @@ fun SpecialPromotionBottomSheet(
         containerColor = MaterialTheme.colorScheme.background,
         shape = RoundedCornerShape(topStart = 10.dp, topEnd = 10.dp)
     ) {
-        Column(modifier = Modifier.padding(horizontal = 16.dp)) {
-            Text(
-                text = specialPromotionUi.name,
-                modifier = Modifier.padding(top = 8.dp),
-                color = MaterialTheme.colorScheme.onBackground,
-                style = MaterialTheme.typography.titleMedium
-            )
-            val painter = rememberAsyncImagePainter(
-                specialPromotionUi.picture
-            )
-
-            if (specialPromotionUi.picture.isNotEmpty()) {
-                Image(
-                    painter = painter,
-                    contentDescription = null,
-                    modifier = Modifier
-                        .padding(top = 8.dp)
-                        .fillMaxWidth()
-                        .height(220.dp)
-                        .clip(MaterialTheme.shapes.large),
-                    contentScale = ContentScale.Crop,
-                    alignment = Alignment.TopStart
-                )
-            }
-
-            if (specialPromotionUi.text.isNotEmpty()) {
-                Text(
-                    modifier = Modifier.padding(top = 8.dp),
-                    text = specialPromotionUi.text,
-                    color = MaterialTheme.colorScheme.onBackground,
-                    style = MaterialTheme.typography.bodySmall
-                )
-            }
-
-            val button = specialPromotionUi.actionWithButton.colorfulButton
-
-            VodovozButton(
-                modifier = Modifier
-                    .padding(top = 20.dp)
-                    .padding(bottom = 18.dp),
-                text = button.name,
-                onClick = { onButtonClick(specialPromotionUi) },
-                colors = ButtonDefaults.filledTonalButtonColors(
-                    contentColor = button.textColor.takeIf { button.backgroundColor != it }
-                        ?: MaterialTheme.colorScheme.background,
-                    containerColor = button.backgroundColor
-                )
-            )
-        }
+        BaseBottomSheetContent(
+            name = specialPromotionUi.name,
+            picture = specialPromotionUi.picture,
+            description = specialPromotionUi.text,
+            button = specialPromotionUi.actionWithButton.colorfulButton,
+            onButtonClick = { onButtonClick(specialPromotionUi) }
+        )
     }
 }

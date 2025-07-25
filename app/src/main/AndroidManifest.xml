@@ -77,12 +77,6 @@
                     android:pathPrefix="/landings/kalkulyator_vody/"
                     android:scheme="https" />
 
-                <data
-                    android:host="vodovoz.ru"
-                    android:pathPrefix="/catalog/"
-                    android:scheme="https" />
-
-
             </intent-filter>
 
         </activity>

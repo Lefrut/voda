@@ -9,7 +9,7 @@ import com.vodovoz.app.domain.general.model.promotion.LabelModel
 data class ProductDetailsScreenModel(
     val details: ProductDetailsModel,
     val buttons: ProductDetailsButtonsModel,
-    val moreProducts: ProductDetailsMoreProducts,
+    val moreProducts: List<SectionModel<ProductModel>>,
     val comments: List<CommentModel>,
     val tabs: List<ProductDetailsTabModel>,
 )
@@ -26,12 +26,6 @@ data class CommentModel(
     val dateText: String,
     val rating: Int,
     val purchased: String,
-)
-
-
-data class ProductDetailsMoreProducts(
-    val sectionAccessory: SectionModel<ProductModel>,
-    val sectionSimilar: SectionModel<ProductModel>,
 )
 
 data class ProductDetailsModel(

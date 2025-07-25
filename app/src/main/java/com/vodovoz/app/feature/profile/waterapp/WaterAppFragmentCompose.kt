@@ -33,8 +33,8 @@ import com.vodovoz.app.R
 import com.vodovoz.app.common.tab.TabManager
 import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.composables.dialogs.VodovozDialog
+import com.vodovoz.app.design_system.effects.AppearanceSystemBarsEffect
 import com.vodovoz.app.design_system.effects.LifecycleEffect
-import com.vodovoz.app.design_system.effects.SystemBarsEffect
 import com.vodovoz.app.feature.profile.waterapp.composables.WaterAppBottleScreen
 import com.vodovoz.app.feature.profile.waterapp.composables.WaterAppGoalCompletedScreen
 import com.vodovoz.app.feature.profile.waterapp.composables.WaterAppGoalScreen
@@ -42,6 +42,7 @@ import com.vodovoz.app.feature.profile.waterapp.composables.WaterAppSettingsScre
 import com.vodovoz.app.feature.profile.waterapp.composables.WaterAppUserDataScreen
 import com.vodovoz.app.feature.profile.waterapp.composables.WaterAppWelcomeScreen
 import com.vodovoz.app.feature.profile.waterapp.model.WaterAppUiState
+import com.vodovoz.app.ui.insets.InsetsVisibilityState
 import com.vodovoz.app.util.extensions.openAppNotificationSettings
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
@@ -54,6 +55,9 @@ class WaterAppFragment : Fragment() {
 
     @Inject
     lateinit var tabManager: TabManager
+
+    @Inject
+    lateinit var insertVisibilityState: InsetsVisibilityState
 
     @Inject
     lateinit var waterAppHelper: WaterAppHelper
@@ -87,13 +91,14 @@ class WaterAppFragment : Fragment() {
     override fun onStart() {
         super.onStart()
         tabManager.changeTabVisibility(false)
+        insertVisibilityState.insertSystemBarInsets(false)
     }
 
     override fun onStop() {
         super.onStop()
         waterAppHelper.saveWaterAppRateData()
+        insertVisibilityState.insertSystemBarInsets(true)
         tabManager.changeTabVisibility(true)
-
     }
 
     override fun onCreateView(
@@ -106,14 +111,7 @@ class WaterAppFragment : Fragment() {
 
             setContent {
                 VodovozTheme {
-
-                    SystemBarsEffect(
-                        statusBarColor = Color.Transparent,
-                        navigationBarColor = Color.Transparent,
-                        navigationBarContrastEnforced = false,
-                        handleDecorFitsSystemWindows = true,
-                        darkIcons = true
-                    )
+                    AppearanceSystemBarsEffect()
 
                     val context = LocalContext.current
                     val pagingState by viewModel.observeUiState().collectAsStateWithLifecycle()

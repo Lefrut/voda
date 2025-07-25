@@ -4,7 +4,11 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.isImeVisible
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.ComposeView
@@ -29,7 +33,11 @@ class ChangePasswordFragment : Fragment() {
 
     val viewModel: ChangePasswordViewModel by viewModels()
 
+    @Inject
+    lateinit var tabManager: TabManager
 
+
+    @OptIn(ExperimentalLayoutApi::class)
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -43,6 +51,14 @@ class ChangePasswordFragment : Fragment() {
                 VodovozTheme {
                     val viewState by viewModel.state.collectAsStateWithLifecycle()
                     val snackbarHostState = remember { SnackbarHostState() }
+
+                    val imeIsVisible = WindowInsets.isImeVisible
+                    DisposableEffect(imeIsVisible) {
+                        tabManager.changeTabVisibility(!imeIsVisible)
+                        onDispose {
+                            tabManager.changeTabVisibility(true)
+                        }
+                    }
 
                     when (val uiState = viewState.uiState) {
                         ChangePasswordUiState.ChangePassword -> {

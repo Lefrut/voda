@@ -14,7 +14,6 @@ import com.vodovoz.app.data.vodovoz_service.model.cart.OKNO_PROMOKOD_DTO
 import com.vodovoz.app.data.vodovoz_service.model.cart.PODAROK_DTO
 import com.vodovoz.app.data.vodovoz_service.model.cart.PODAROK_KNOPKA_DTO
 import com.vodovoz.app.data.vodovoz_service.model.cart.PRODUCT_PRODAROK_DTO
-import com.vodovoz.app.domain.general.model.promotion.ColorfulButtonModel
 import com.vodovoz.app.domain.general.model.cart.CartButtonModel
 import com.vodovoz.app.domain.general.model.cart.CartDetailsModel
 import com.vodovoz.app.domain.general.model.cart.CartItemModel
@@ -24,17 +23,19 @@ import com.vodovoz.app.domain.general.model.cart.CartPresentPopupWindowModel
 import com.vodovoz.app.domain.general.model.cart.CartPromoButtonModel
 import com.vodovoz.app.domain.general.model.cart.CartPromoPopupWindowModel
 import com.vodovoz.app.domain.general.model.cart.OrderSummaryItemModel
+import com.vodovoz.app.domain.general.model.promotion.ColorfulButtonModel
 
 fun CartDetailsDTO.toDomain(): CartDetailsModel {
 
-    val orderSummary = ITOG?.mapToDomain() ?: throw IllegalArgumentException("OrderSummary can't be null")
+    val orderSummary =
+        ITOG?.mapToDomain() ?: throw IllegalArgumentException("OrderSummary can't be null")
 
     return CartDetailsModel(
         title = TITLE ?: "",
         countText = COUNT ?: "",
         items = KORZINA.mapToDomain(),
         present = PODAROK?.toDomain(
-            orderPrice = orderSummary.firstOrNull()?.value?.filter {
+            orderPrice = orderSummary.getOrNull(1)?.value?.filter {
                 it.isDigit()
             }?.toIntOrNull() ?: 0
         ),
@@ -46,7 +47,7 @@ fun CartDetailsDTO.toDomain(): CartDetailsModel {
 }
 
 @JvmName("mapToOrderSummaryItemModelList")
-fun List<ITOG_ITEM_DTO>.mapToDomain(): List<OrderSummaryItemModel>{
+fun List<ITOG_ITEM_DTO>.mapToDomain(): List<OrderSummaryItemModel> {
     return mapNotNull { it.toDomain() }.ifEmpty { throw IllegalArgumentException("OrderSummary can't be null") }
 }
 

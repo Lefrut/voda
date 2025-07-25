@@ -151,13 +151,15 @@ fun HomeBody(
         }
 
         key("HomePromotions") {
-            HomePromotions(
-                modifier = Modifier.padding(top = 32.dp),
-                onShowAllClick = onShowAllClick,
-                onPromotionClick = onPromotionClick,
-                sectionPromotions = sectionPromotions,
-                onAboutAdvertisingClick = onAboutAdvertisingClick
-            )
+            if(sectionPromotions.items.isNotEmpty()){
+                HomePromotions(
+                    modifier = Modifier.padding(top = 32.dp),
+                    onShowAllClick = onShowAllClick,
+                    onPromotionClick = onPromotionClick,
+                    sectionPromotions = sectionPromotions,
+                    onAboutAdvertisingClick = onAboutAdvertisingClick
+                )
+            }
         }
 
 

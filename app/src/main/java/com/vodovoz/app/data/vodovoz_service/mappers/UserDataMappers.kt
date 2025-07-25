@@ -14,7 +14,9 @@ fun UserDataDTO.toDomain(): UserDataModel {
         title = TITLE ?: "",
         photo = FOTO?.toDomain() ?: throw IllegalArgumentException("UserDataPhoto can't be null"),
         fields = POLYA?.mapToDomain()
-            ?: throw IllegalArgumentException("UserDataFields can't be null")
+            ?: throw IllegalArgumentException("UserDataFields can't be null"),
+        deleteTextPrefix = TEXT?.NAME ?: "",
+        deleteText = TEXT?.TEXTID ?: ""
     )
 }
 

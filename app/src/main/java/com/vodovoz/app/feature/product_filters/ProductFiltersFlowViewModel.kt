@@ -15,6 +15,7 @@ import com.vodovoz.app.design_system.model.filters.FiltersUi
 import com.vodovoz.app.design_system.model.filters.toUi
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.util.extensions.singleResult
+import com.vodovoz.app.util.roundToOneDecimal
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.map
@@ -303,57 +304,59 @@ class ProductFiltersFlowViewModel @Inject constructor(
                 val target = s.filters.filters.find { it.id == filter.id } ?: return@updateData s
                 val bounds = target.bounds ?: return@updateData s
 
-                val delta = bounds.last - bounds.first
+                val delta = bounds.endInclusive - bounds.start
 
-                val newMin = bounds.first + (delta * range.start).roundToInt()
-                val newMax = bounds.first + (delta * range.endInclusive).roundToInt()
+                val newMin = (bounds.start + delta * range.start).roundToOneDecimal()
+                val newMax = (bounds.start + delta * range.endInclusive).roundToOneDecimal()
 
-                val updated = target.copy(currentBounds = newMin..newMax)
+                val updatedBounds = target.copy(
+                    currentBounds = newMin..newMax
+                )
 
                 s.copy(
                     filters = s.filters.copy(
                         filters = s.filters.filters.map {
-                            if (it.id == filter.id) updated else it
+                            if (it.id == filter.id) updatedBounds else it
                         }
                     )
                 )
             }
         }
 
-    fun changeFilterFrom(filter: FilterUi, value: String) {
+    fun changeFilterFrom(filter: FilterUi, value: Float) {
         uiStateListener.updateData { s ->
 
             val target = s.filters.filters.find { it.id == filter.id } ?: return@updateData s
             val bounds = target.bounds ?: return@updateData s
             val current = target.currentBounds ?: bounds
 
-            val newMin = value.toIntOrNull() ?: Int.MIN_VALUE
-            val updated = target.copy(currentBounds = newMin..current.last)
+            val updatedBounds =
+                target.copy(currentBounds = min(current.endInclusive, value)..current.endInclusive)
 
             s.copy(
                 filters = s.filters.copy(
                     filters = s.filters.filters.map {
-                        if (it.id == filter.id) updated else it
+                        if (it.id == filter.id) updatedBounds else it
                     }
                 )
             )
         }
     }
 
-    fun changeFilterTo(filter: FilterUi, value: String) {
+    fun changeFilterTo(filter: FilterUi, value: Float) {
         uiStateListener.updateData { s ->
 
             val target = s.filters.filters.find { it.id == filter.id } ?: return@updateData s
             val bounds = target.bounds ?: return@updateData s
             val current = target.currentBounds ?: bounds
 
-            val newMax = value.toIntOrNull() ?: Int.MIN_VALUE
-            val updated = target.copy(currentBounds = current.first..newMax)
+            val updatedBounds =
+                target.copy(currentBounds = current.start..max(current.start, value))
 
             s.copy(
                 filters = s.filters.copy(
                     filters = s.filters.filters.map {
-                        if (it.id == filter.id) updated else it
+                        if (it.id == filter.id) updatedBounds else it
                     }
                 )
             )

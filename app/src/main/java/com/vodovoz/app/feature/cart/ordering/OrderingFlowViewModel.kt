@@ -79,7 +79,18 @@ class OrderingFlowViewModel @Inject constructor(
                         items.mapToUi()
                     },
                     recipientSection = orderingDetails.recipientSection.toUi { items ->
-                        items.mapToUi()
+                        items.mapToUi().map { menuItemUi ->
+                            if (menuItemUi.id == CALL_YOU_MENU_ID && menuItemUi.defaultValue != null) {
+                                uiStateListener.updateData { s ->
+                                    s.copy(
+                                        ordering = s.ordering.copy(
+                                            callYouId = menuItemUi.defaultValue
+                                        )
+                                    )
+                                }
+                                menuItemUi
+                            } else menuItemUi
+                        }
                     },
                     notifySection = notifySection,
                     totals = orderingDetails.totals.mapToUi(),
@@ -280,7 +291,7 @@ class OrderingFlowViewModel @Inject constructor(
         if (
             ordering.addressId != null && ordering.date != null
             && ordering.timeInterval != null && ordering.recipientPhone != null
-            && ordering.paymentId != null
+            && ordering.paymentId != null && ordering.callYouId != null
         ) {
             uiStateListener.updateData { s ->
                 s.copy(button = s.button.copy(loading = true))
@@ -324,6 +335,7 @@ class OrderingFlowViewModel @Inject constructor(
 
         val paymentErrors = buildList {
             if (ordering.paymentId == null) add(PAYMENT_MENU_ID)
+            if (ordering.callYouId == null) add(CALL_YOU_MENU_ID)
         }
 
         uiStateListener.updateData { s ->
@@ -574,16 +586,16 @@ class OrderingFlowViewModel @Inject constructor(
     }
 
     fun activatePayButton(button: ColorfulButtonUi?) = viewModelScope.launch {
-        if(button?.url == null) {
+        if (button?.url == null) {
             navigateBackWithRefresh()
             return@launch
         }
 
         eventListener.emit(OrderingEvents.RefreshCart)
 
-        if(button.browser == true){
+        if (button.browser == true) {
             eventListener.emit(OrderingEvents.GoToWebView(button.url))
-        }else{
+        } else {
             eventListener.emit(OrderingEvents.OpenUrl(button.url))
         }
     }

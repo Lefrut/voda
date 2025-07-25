@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PageSize
 import androidx.compose.foundation.pager.PagerState
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -19,19 +20,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.isUnspecified
 import coil3.compose.AsyncImage
 
-import coil3.request.crossfade
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 
 @Suppress("NonSkippableComposable")
 @Composable
-fun AuthScrollImagePager(
+fun AutoScrollImagePager(
     modifier: Modifier = Modifier,
     pagerState: PagerState,
     images: List<String>,
@@ -40,7 +39,6 @@ fun AuthScrollImagePager(
     chip: @Composable (page: Int) -> Unit = {},
 ) {
     val isDraggedState = pagerState.interactionSource.collectIsDraggedAsState()
-    val context = LocalContext.current
 
     HorizontalPager(
         modifier = modifier.fillMaxWidth(),
@@ -53,7 +51,8 @@ fun AuthScrollImagePager(
         snapPosition = SnapPosition.Start,
 
         ) { page ->
-        val currentImage = images[page]
+        val imageIndex = page % images.size
+        val currentImage = images[imageIndex]
 
         Box {
             AsyncImage(
@@ -65,13 +64,13 @@ fun AuthScrollImagePager(
                     .clip(MaterialTheme.shapes.large)
                     .background(MaterialTheme.colorScheme.surface)
                     .clickable {
-                        onImageClick(page)
+                        onImageClick(imageIndex)
                     },
                 contentScale = ContentScale.Crop,
                 alignment = Alignment.TopStart
             )
             Box(modifier = Modifier.align(Alignment.TopEnd)) {
-                chip(page)
+                chip(imageIndex)
             }
         }
     }
@@ -92,5 +91,14 @@ fun AuthScrollImagePager(
                 }
             }
     }
+}
+
+@Composable
+fun rememberAutoScrollPagerState(initialIndex: Int = 0, itemsCount: Int): PagerState{
+    val pageCount = itemsCount * 100
+    val halfOfPageCount = pageCount / 2
+
+     return rememberPagerState(halfOfPageCount - (halfOfPageCount % itemsCount) + initialIndex) { pageCount }
+
 }
 

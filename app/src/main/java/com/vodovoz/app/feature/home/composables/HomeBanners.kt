@@ -18,10 +18,10 @@ fun HomeBanners(
     onBannerClick: (BannerUi) -> Unit,
     onAdvertisingClick: (AboutAdvertisingUi) -> Unit,
 ) {
-    val pagerState = rememberPagerState(0) { banners.size }
+    val pagerState = rememberAutoScrollPagerState(itemsCount = banners.size)
     val pictures = banners.map { banner -> banner.detailPicture }
 
-    AuthScrollImagePager(
+    AutoScrollImagePager(
         modifier = modifier.padding(top = 8.dp),
         images = pictures,
         onImageClick = { page ->

@@ -11,6 +11,7 @@ import android.view.animation.LinearInterpolator
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.Insets
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsCompat.CONSUMED
@@ -33,6 +34,9 @@ import com.vodovoz.app.core.android.locationPermissions
 import com.vodovoz.app.core.android.notificationPermissionGranted
 import com.vodovoz.app.core.navigation.setupWithNavController
 import com.vodovoz.app.databinding.FragmentMainBinding
+import com.vodovoz.app.ui.insets.InsetsVisibilityState
+import com.vodovoz.app.ui.insets.ime.handleImeInsetIfNeeded
+import com.vodovoz.app.ui.insets.ime.removeImeHandling
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -61,6 +65,9 @@ class MainFragment : Fragment(R.layout.fragment_main) {
     lateinit var accountManager: AccountManager
 
     @Inject
+    lateinit var insetsVisibilityState: InsetsVisibilityState
+
+    @Inject
     lateinit var appUpdateFactory: AppUpdateController.Factory
     private val appUpdateController by lazy {
         appUpdateFactory.create { popupSnackbarForCompleteUpdate() }
@@ -86,11 +93,48 @@ class MainFragment : Fragment(R.layout.fragment_main) {
 
         observeTabState()
         observeCartState()
-
         observeTabVisibility()
-        observeTabWindowInsets()
+
+        listenImeHandling()
+        listenNavigationBarInsets()
+        listenStatusBarInsets()
 
         checkForUpdate()
+
+        setMainOnApplyWindowInsets()
+    }
+
+    private fun setMainOnApplyWindowInsets() {
+        ViewCompat.setOnApplyWindowInsetsListener(
+            binding.root
+        ) { _, applyInsets ->
+            return@setOnApplyWindowInsetsListener WindowInsetsCompat.Builder(
+                applyInsets
+            ).apply {
+
+                if (insetsVisibilityState.navigationBarInsets.value) {
+                    setInsets(
+                        WindowInsetsCompat.Type.navigationBars(),
+                        Insets.NONE
+                    )
+                }
+
+                if (insetsVisibilityState.statusBarInsets.value) {
+                    setInsets(
+                        WindowInsetsCompat.Type.statusBars(),
+                        Insets.NONE
+                    )
+                }
+
+                if(insetsVisibilityState.handleIme.value){
+                    setInsets(
+                        WindowInsetsCompat.Type.ime(),
+                        Insets.NONE
+                    )
+                }
+
+            }.build()
+        }
 
         ViewCompat.setOnApplyWindowInsetsListener(
             binding.nvNavigation
@@ -145,21 +189,45 @@ class MainFragment : Fragment(R.layout.fragment_main) {
         }
     }
 
-    private fun observeTabWindowInsets() = lifecycleScope.launch {
+    private fun listenImeHandling() = viewLifecycleOwner.lifecycleScope.launch {
         repeatOnLifecycle(Lifecycle.State.STARTED) {
-            tabManager
-                .observeBottomPadding()
-                .collect { has ->
-                    val insets = ViewCompat.getRootWindowInsets(binding.root)
-                    val bottomPadding =
-                        insets?.getInsetsIgnoringVisibility(WindowInsetsCompat.Type.navigationBars())?.bottom
-                            ?: 0
-
-                    binding.root.updatePadding(
-                        bottom = if (has) bottomPadding else 0
-                    )
+            insetsVisibilityState.handleIme.collect { handleIme ->
+                if (handleIme) {
+                    binding.root.handleImeInsetIfNeeded()
+                } else {
+                    binding.root.removeImeHandling()
                 }
+            }
         }
+    }
+
+    private fun listenNavigationBarInsets() = viewLifecycleOwner.lifecycleScope.launch {
+        repeatOnLifecycle(Lifecycle.State.STARTED) {
+            insetsVisibilityState.navigationBarInsets.collect { insertInsets ->
+                val insets = ViewCompat.getRootWindowInsets(binding.root)
+                val bottomPadding = if (insertInsets) insets?.getInsetsIgnoringVisibility(
+                    WindowInsetsCompat.Type.navigationBars()
+                )?.bottom ?: 0 else 0
+
+                binding.root.requestApplyInsets()
+                binding.root.updatePadding(bottom = if (insertInsets) bottomPadding else 0)
+            }
+        }
+    }
+
+    private fun listenStatusBarInsets() = viewLifecycleOwner.lifecycleScope.launch {
+        repeatOnLifecycle(Lifecycle.State.STARTED) {
+            insetsVisibilityState.statusBarInsets.collect { insertInsets ->
+                val insets = ViewCompat.getRootWindowInsets(binding.root)
+                val topPadding = if (insertInsets) insets?.getInsetsIgnoringVisibility(
+                    WindowInsetsCompat.Type.statusBars()
+                )?.top ?: 0 else 0
+
+                binding.root.requestApplyInsets()
+                binding.root.updatePadding(top = if (insertInsets) topPadding else 0)
+            }
+        }
+
     }
 
 

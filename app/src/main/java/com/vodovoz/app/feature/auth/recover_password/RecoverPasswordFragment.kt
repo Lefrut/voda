@@ -33,13 +33,11 @@ class RecoverPasswordFragment : Fragment() {
 
     override fun onStart() {
         super.onStart()
-        WindowCompat.setDecorFitsSystemWindows(requireActivity().window, false)
         tabManager.changeTabVisibility(false)
     }
 
     override fun onStop() {
         super.onStop()
-        WindowCompat.setDecorFitsSystemWindows(requireActivity().window, true)
         tabManager.changeTabVisibility(true)
     }
 

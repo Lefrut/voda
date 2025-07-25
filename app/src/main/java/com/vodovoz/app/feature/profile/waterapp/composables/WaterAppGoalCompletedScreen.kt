@@ -27,7 +27,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.vodovoz.app.R
-import com.vodovoz.app.design_system.effects.SystemBarsEffect
 import com.vodovoz.app.design_system.robotoFontFamily
 import com.vodovoz.app.feature.profile.waterapp.WaterAppHelper
 import com.vodovoz.app.design_system.modifiers.radialGradientBackground

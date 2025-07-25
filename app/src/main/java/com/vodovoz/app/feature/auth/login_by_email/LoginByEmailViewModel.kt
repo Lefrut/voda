@@ -10,14 +10,14 @@ import com.vodovoz.app.common.resources.ResourcesProvider
 import com.vodovoz.app.design_system.model.ColorfulButtonUi
 import com.vodovoz.app.design_system.model.toUi
 import com.vodovoz.app.design_system.model.updateButton
+import com.vodovoz.app.design_system.model.widgets.CheckboxUi
 import com.vodovoz.app.design_system.model.widgets.EmailValidator
 import com.vodovoz.app.design_system.model.widgets.FieldUi
 import com.vodovoz.app.design_system.model.widgets.MessageValidator
 import com.vodovoz.app.design_system.model.widgets.NameValidator
 import com.vodovoz.app.design_system.model.widgets.NoRequiredValidator
 import com.vodovoz.app.design_system.model.widgets.checkFields
-import com.vodovoz.app.design_system.model.widgets.mapToDomain
-import com.vodovoz.app.design_system.model.widgets.mapToUi
+import com.vodovoz.app.design_system.model.widgets.updateCheckbox
 import com.vodovoz.app.design_system.model.widgets.updateField
 import com.vodovoz.app.design_system.model.widgets.updateFieldAndResetError
 import com.vodovoz.app.domain.general.model.ValidationException
@@ -25,6 +25,10 @@ import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.feature.auth.login.composables.LoginByEmailUiState
 import com.vodovoz.app.feature.auth.login.model.LoginByEmailEvent
 import com.vodovoz.app.feature.auth.login.model.LoginByEmailState
+import com.vodovoz.app.feature.auth.model.AuthDetailsUi
+import com.vodovoz.app.feature.auth.model.agreementIsCheckedWhenAvailable
+import com.vodovoz.app.feature.auth.model.authValidators
+import com.vodovoz.app.feature.auth.model.toUi
 import com.vodovoz.app.feature.sitestate.SiteStateManager
 import com.vodovoz.app.ui.mvi.MviViewModel
 import com.vodovoz.app.util.extensions.singleResult
@@ -60,16 +64,21 @@ class LoginByEmailViewModel @Inject constructor(
     private fun loginByEmail() = viewModelScope.launch {
         _state.update { s ->
             s.copy(
-                buttons = s.buttons.updateButton(LOGIN_BY_EMAIL_BUTTON) { btn ->
-                    btn.copy(loading = true)
-                }
+                authDetails = s.authDetails.copy(
+                    buttons = s.buttons.updateButton(LOGIN_BY_EMAIL_BUTTON) { btn ->
+                        btn.copy(loading = true)
+                    }
+                ),
             )
         }
 
 
         val fields = stateSnapshot.fields
-        val loginByEmailResult =
-            vodovozServiceRepository.loginByEmail(stateSnapshot.fields.mapToDomain()).singleResult()
+        val loginByEmailResult = vodovozServiceRepository.loginByEmail(
+            stateSnapshot.fields.associate {
+                it.id to it.value()
+            } + stateSnapshot.checkboxes.associate { it.id to it.value() }
+        ).singleResult()
 
 
         loginByEmailResult.onSuccess { userAuthInfo ->
@@ -87,12 +96,15 @@ class LoginByEmailViewModel @Inject constructor(
 
             _state.update { s ->
                 s.copy(
-                    buttons = s.buttons.updateButton(LOGIN_BY_EMAIL_BUTTON) { btn ->
-                        btn.copy(
-                            loading = false,
-                            enabled = false
-                        )
-                    }
+                    authDetails = s.authDetails.copy(
+                        buttons = s.buttons.updateButton(LOGIN_BY_EMAIL_BUTTON) { btn ->
+                            btn.copy(
+                                loading = false,
+                                enabled = false
+                            )
+                        }
+
+                    )
                 )
             }
 
@@ -113,15 +125,17 @@ class LoginByEmailViewModel @Inject constructor(
                 val lastField = s.fields.lastOrNull()
 
                 s.copy(
-                    buttons = s.buttons.updateButton(LOGIN_BY_EMAIL_BUTTON) { btn ->
-                        btn.copy(loading = false)
-                    },
-                    fields = lastField?.let { field ->
-                        s.fields.updateField(
-                            field,
-                            field.copy(supportingText = errorMessage, isError = true)
-                        )
-                    } ?: s.fields
+                    authDetails = s.authDetails.copy(
+                        buttons = s.buttons.updateButton(LOGIN_BY_EMAIL_BUTTON) { btn ->
+                            btn.copy(loading = false)
+                        },
+                        fields = lastField?.let { field ->
+                            s.fields.updateField(
+                                field,
+                                field.copy(supportingText = errorMessage, isError = true)
+                            )
+                        } ?: s.fields
+                    )
                 )
             }
 
@@ -145,18 +159,15 @@ class LoginByEmailViewModel @Inject constructor(
 
             _state.update { s ->
                 s.copy(
-                    description = loginDetails.description,
-                    title = loginDetails.title,
-                    buttons = buildList {
-                        addAll(buttons)
-                        if (siteState?.isSmsEnabled == true) {
-                            removeIf { btn -> btn.id == NAVIGATION_BUTTON }
+                    authDetails = loginDetails.toUi(AgreementController.getText()).copy(
+                        buttons = buildList {
+                            addAll(buttons)
+                            if (siteState?.isSmsEnabled == true) {
+                                removeIf { btn -> btn.id == NAVIGATION_BUTTON }
+                            }
                         }
-                    },
-                    fields = loginDetails.fields.mapToUi(),
+                    ),
                     uiState = LoginByEmailUiState.Success,
-                    agreementHtml = AgreementController.getText(),
-                    showAgreement = loginDetails.haveAgreement
                 )
             }
         }.onFailure {
@@ -171,20 +182,23 @@ class LoginByEmailViewModel @Inject constructor(
             val updatedFields = s.fields.updateFieldAndResetError(field, updatedField)
 
             s.copy(
-                fields = updatedFields,
-                buttons = s.buttons.updateButton(LOGIN_BY_EMAIL_BUTTON) { button ->
-                    button.copy(
-                        enabled = updatedFields.checkFields(
-                            validators = listOf(
-                                NoRequiredValidator,
-                                EmailValidator,
-                                NameValidator,
-                                MessageValidator
-                            )
-                        ) && s.agreementChecked
-                    )
-                }
-            )
+                authDetails = s.authDetails.copy(
+                    fields = updatedFields,
+                    buttons = s.buttons.updateButton(LOGIN_BY_EMAIL_BUTTON) { button ->
+                        button.copy(
+                            enabled = updatedFields.checkFields(
+                                validators = listOf(
+                                    NoRequiredValidator,
+                                    EmailValidator,
+                                    NameValidator,
+                                    MessageValidator
+                                )
+                            ) && s.checkboxes.agreementIsCheckedWhenAvailable()
+                        )
+                    }
+                ),
+
+                )
         }
     }
 
@@ -211,19 +225,32 @@ class LoginByEmailViewModel @Inject constructor(
         _events.emit(LoginByEmailEvent.GoToWebView(url, title))
     }
 
-    fun checkAgreement(checked: Boolean) = viewModelScope.launch {
+    fun navigateToRecoveryPassword() = viewModelScope.launch {
+        _events.emit(LoginByEmailEvent.GoToRecoverPassword)
+    }
+
+
+    fun changeCheckbox(checkbox: CheckboxUi, updatedCheckbox: CheckboxUi) {
         _state.update { s ->
+            val authDetails = s.authDetails
+            val updatedCheckboxes = authDetails.checkboxes.updateCheckbox(
+                checkbox, updatedCheckbox
+            )
+
             s.copy(
-                agreementChecked = checked,
-                buttons = s.buttons.updateButton(LOGIN_BY_EMAIL_BUTTON) { button ->
-                    button.copy(enabled = s.fields.checkFields() && checked)
-                }
+                authDetails = authDetails.copy(
+                    checkboxes = updatedCheckboxes,
+                    buttons = authDetails.buttons.updateButton(LOGIN_BY_EMAIL_BUTTON) { button ->
+                        button.copy(
+                            enabled = authDetails.fields.checkFields(
+                                validators = AuthDetailsUi.authValidators()
+                            ) && updatedCheckboxes.agreementIsCheckedWhenAvailable()
+                        )
+                    }
+                )
             )
         }
     }
 
-    fun navigateToRecoveryPassword() = viewModelScope.launch {
-        _events.emit(LoginByEmailEvent.GoToRecoverPassword)
-    }
 
 }
