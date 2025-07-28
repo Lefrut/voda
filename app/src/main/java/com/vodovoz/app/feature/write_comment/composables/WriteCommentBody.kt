@@ -29,7 +29,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -38,7 +37,6 @@ import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import coil3.compose.rememberAsyncImagePainter
 
-import coil3.request.crossfade
 import com.vodovoz.app.R
 import com.vodovoz.app.design_system.composables.button.VodovozButton
 import com.vodovoz.app.design_system.composables.decoration.VodovozRatingBar
@@ -60,7 +58,7 @@ fun WriteCommentBody(
     snackbarHostState: SnackbarHostState,
     onRatingChange: (Float) -> Unit,
     onCommentChange: (FieldUi) -> Unit,
-    onRateSend: () -> Unit,
+    onCommentSend: () -> Unit,
     onImagePickerOpen: () -> Unit,
     onImageRemove: (String) -> Unit,
 ) {
@@ -150,7 +148,7 @@ fun WriteCommentBody(
             modifier = Modifier.padding(vertical = 24.dp, horizontal = 16.dp),
             text = stringResource(id = R.string.leave_rate),
             isLoading = buttonIsLoading,
-            onClick = onRateSend
+            onClick = onCommentSend
         )
     }
 }

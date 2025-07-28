@@ -5,20 +5,16 @@ import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.statusBars
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
-import coil3.compose.LocalAsyncImageModelEqualityDelegate
-import coil3.compose.LocalAsyncImagePreviewHandler
+import com.google.accompanist.insets.ProvideWindowInsets
 import com.valentinilk.shimmer.LocalShimmerTheme
 import com.valentinilk.shimmer.defaultShimmerTheme
 
@@ -45,7 +41,7 @@ private val extendedLightColors = ExtendedColors(
 
 val vodovozTextLinkStyle: TextLinkStyles
     @Composable
-    get(){
+    get() {
         return TextLinkStyles(
             style = MaterialTheme.typography.labelSmall.copy(
                 color = MaterialTheme.colorScheme.primary,
@@ -72,7 +68,9 @@ fun VodovozTheme(
             LocalExtendedTypography provides extendedTypography,
             LocalShimmerTheme provides VodovozShimmerTheme,
         ) {
-            content()
+            ProvideWindowInsets {
+                content()
+            }
         }
     }
 }

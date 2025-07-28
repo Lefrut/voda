@@ -1,5 +1,6 @@
 package com.vodovoz.app.feature.cart.composables
 
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -14,13 +15,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
-
-import coil3.request.crossfade
 import com.vodovoz.app.R
 
 @Composable
@@ -29,16 +28,25 @@ fun CartButton(
     image: String,
     name: String,
     label: String? = null,
+    enabled: Boolean = true,
     onClick: () -> Unit,
 ) {
-    val context = LocalContext.current
+
+    val animatedAlpha = animateFloatAsState(targetValue = if (enabled) 1f else 0.45f, label = "")
 
     Row(
         modifier = modifier
+            .graphicsLayer {
+                alpha = animatedAlpha.value
+            }
             .fillMaxWidth()
             .border(1.dp, MaterialTheme.colorScheme.outline, MaterialTheme.shapes.large)
             .clip(MaterialTheme.shapes.large)
-            .clickable(onClick = onClick)
+            .clickable {
+                if (enabled) {
+                    onClick()
+                }
+            }
             .padding(horizontal = 16.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {

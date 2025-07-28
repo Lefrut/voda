@@ -34,6 +34,8 @@ fun VodovozRatingBar(
         onValueChange = { newRating ->
             localRating = newRating
         },
-        onRatingChanged = onRatingChange
+        onRatingChanged = { newRating ->
+            onRatingChange(newRating)
+        }
     )
 }

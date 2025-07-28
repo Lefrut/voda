@@ -126,7 +126,7 @@ class MainFragment : Fragment(R.layout.fragment_main) {
                     )
                 }
 
-                if(insetsVisibilityState.handleIme.value){
+                if (insetsVisibilityState.handleIme.value) {
                     setInsets(
                         WindowInsetsCompat.Type.ime(),
                         Insets.NONE

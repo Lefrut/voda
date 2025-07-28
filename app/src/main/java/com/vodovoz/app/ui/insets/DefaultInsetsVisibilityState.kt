@@ -1,5 +1,6 @@
 package com.vodovoz.app.ui.insets
 
+import android.os.Build
 import androidx.compose.runtime.Stable
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -22,11 +23,15 @@ class DefaultInsetsVisibilityState @Inject constructor() : InsetsVisibilityState
         get() = _navigationBarInsets.asStateFlow()
 
     override fun insertStatusBarInsets(insert: Boolean) {
-        _statusBarInsets.value = insert
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R || insert) {
+            _statusBarInsets.value = insert
+        }
     }
 
     override fun insertNavigationBarInsets(insert: Boolean) {
-        _navigationBarInsets.value = insert
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R || insert) {
+            _navigationBarInsets.value = insert
+        }
     }
 
     override val handleIme: StateFlow<Boolean>

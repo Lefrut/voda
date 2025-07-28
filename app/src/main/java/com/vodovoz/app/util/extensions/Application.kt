@@ -39,10 +39,13 @@ import com.google.android.material.snackbar.Snackbar
 import com.vodovoz.app.BuildConfig
 import com.vodovoz.app.R
 import com.vodovoz.app.common.resources.ResourcesProvider
+import java.io.ByteArrayOutputStream
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 import kotlin.properties.ReadOnlyProperty
+
+
 
 
 fun Context.isVpnActive(): Boolean {
@@ -55,6 +58,25 @@ fun Context.isVpnActive(): Boolean {
     val capabilities = connectivityManager.getNetworkCapabilities(network) ?: return false
 
     return capabilities.hasTransport(NetworkCapabilities.TRANSPORT_VPN)
+}
+
+fun Bitmap.compress(maxSizeBytes: Int): ByteArray {
+    var quality = 90
+    var bytes: ByteArray
+    do {
+        val stream = ByteArrayOutputStream()
+        compress(Bitmap.CompressFormat.JPEG, quality, stream)
+        bytes = stream.toByteArray()
+        quality -= 10
+    } while (bytes.size > maxSizeBytes && quality > 10)
+    return bytes
+}
+
+fun Bitmap.resizeBitmap(maxWidth: Int): Bitmap {
+    if (width <= maxWidth) return this
+    val aspectRatio = height.toFloat() / width
+    val height = (maxWidth * aspectRatio).toInt()
+    return Bitmap.createScaledBitmap(this, maxWidth, height, true)
 }
 
 fun Context.getBitmap(drawableId: Int): Bitmap {

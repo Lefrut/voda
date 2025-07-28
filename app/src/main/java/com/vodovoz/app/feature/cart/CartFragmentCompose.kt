@@ -98,7 +98,6 @@ class CartFragment : Fragment() {
                                 viewModel = viewModel,
                                 viewState = viewState
                             )
-
                         }
 
                         is CartFlowViewModel.CartUiState.Empty -> {
@@ -133,10 +132,11 @@ class CartFragment : Fragment() {
                     LifecycleEffect {
                         observeEvents()
                     }
+
                     LaunchedEffect(viewState.showPromotionCodeBottomSheet) {
                         if (viewState.showPromotionCodeBottomSheet) tabManager.changeTabVisibility(false)
                         else {
-                            delay(75)
+                            delay(100)
                             tabManager.changeTabVisibility(true)
                         }
                     }

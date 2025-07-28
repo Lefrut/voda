@@ -40,7 +40,7 @@ fun WriteCommentScreen(viewModel: WriteCommentViewModel, viewState: WriteComment
             onCommentChange = { field ->
                 viewModel.changeComment(field)
             },
-            onRateSend = {
+            onCommentSend = {
                 viewModel.writeComment()
             },
             onImagePickerOpen = {

@@ -90,8 +90,11 @@ class WaterAppFragment : Fragment() {
 
     override fun onStart() {
         super.onStart()
+
         tabManager.changeTabVisibility(false)
-        insertVisibilityState.insertSystemBarInsets(false)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            insertVisibilityState.insertSystemBarInsets(false)
+        }
     }
 
     override fun onStop() {

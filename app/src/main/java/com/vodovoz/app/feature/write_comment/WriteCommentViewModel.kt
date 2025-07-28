@@ -1,17 +1,21 @@
 package com.vodovoz.app.feature.write_comment
 
+import android.graphics.BitmapFactory
 import android.net.Uri
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.core.net.toUri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.vodovoz.app.R
+import com.vodovoz.app.common.resources.ContentProvider
 import com.vodovoz.app.common.resources.ResourcesProvider
 import com.vodovoz.app.design_system.model.toUi
 import com.vodovoz.app.design_system.model.widgets.FieldTypeUi
 import com.vodovoz.app.design_system.model.widgets.FieldUi
 import com.vodovoz.app.design_system.model.widgets.FieldValidationResult
 import com.vodovoz.app.design_system.model.widgets.FieldValidator
+import com.vodovoz.app.design_system.model.widgets.NoRequiredValidator
 import com.vodovoz.app.design_system.model.widgets.checkFields
 import com.vodovoz.app.design_system.model.widgets.getErrorText
 import com.vodovoz.app.design_system.model.widgets.resetError
@@ -21,6 +25,8 @@ import com.vodovoz.app.feature.write_comment.model.WriteCommentEvent
 import com.vodovoz.app.feature.write_comment.model.WriteCommentState
 import com.vodovoz.app.feature.write_comment.model.WriteCommentUiState
 import com.vodovoz.app.ui.mvi.MviViewModel
+import com.vodovoz.app.util.extensions.compress
+import com.vodovoz.app.util.extensions.resizeBitmap
 import com.vodovoz.app.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -37,6 +43,7 @@ class WriteCommentViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val siteStateManager: SiteStateManager,
     private val resourcesProvider: ResourcesProvider,
+    private val contentProvider: ContentProvider,
     private val vodovozServiceRepository: VodovozServiceRepository,
 ) : MviViewModel<WriteCommentState, WriteCommentEvent>(WriteCommentState()) {
 
@@ -58,7 +65,7 @@ class WriteCommentViewModel @Inject constructor(
         type = FieldTypeUi.Text,
         isValueVisible = true
     )
-    private val commentValidator = FieldValidator {
+    private val CommentValidator = FieldValidator {
         if (it.value.length in 15..1000) FieldValidationResult.VALID else FieldValidationResult.INVALID
     }
 
@@ -97,7 +104,7 @@ class WriteCommentViewModel @Inject constructor(
     fun writeComment() = viewModelScope.launch {
         val isValid = listOf(stateSnapshot.field).checkFields(
             putErrors = true,
-            validators = listOf(commentValidator),
+            validators = listOf(NoRequiredValidator, CommentValidator),
             getSupportingText = { field ->
                 field.getErrorText { resId -> resourcesProvider.getString(resId) }
             }
@@ -107,16 +114,24 @@ class WriteCommentViewModel @Inject constructor(
             }
         }
 
-        if (!isValid || rating == 0) return@launch
+        if (!isValid || stateSnapshot.rating == 0) return@launch
 
         _state.update { s ->
             s.copy(buttonIsLoading = true)
         }
 
+
+        val imageBytesArray = stateSnapshot.imagesUri.mapNotNull { uri ->
+            val byteArray = contentProvider.getBytesArray(uri.toUri()) ?: return@mapNotNull null
+            val bitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
+            bitmap.resizeBitmap(1080).compress(150_000)
+        }
+
         vodovozServiceRepository.sendComment(
             productId = productId,
             rating = stateSnapshot.rating,
-            message = stateSnapshot.field.value
+            message = stateSnapshot.field.value,
+            imageBytesArray = imageBytesArray
         ).singleResult().onSuccess { placeholder ->
             _events.emit(WriteCommentEvent.SetRatedProductResult(productId))
             _state.update { s ->
@@ -164,18 +179,5 @@ class WriteCommentViewModel @Inject constructor(
             )
         }
     }
-
-//    fun prepareImagesForUpload(context: Context, uris: List<Uri>): List<MultipartBody.Part> {
-//        return uris.mapIndexedNotNull { index, uri ->
-//            val inputStream = context.contentResolver.openInputStream(uri) ?: return@mapIndexedNotNull null
-//            val fileBytes = inputStream.readBytes()
-//            val requestFile = fileBytes.toRequestBody("image/*".toMediaTypeOrNull())
-//            MultipartBody.Part.createFormData(
-//                name = "images[$index]",
-//                filename = "photo_$index.jpg",
-//                body = requestFile
-//            )
-//        }
-//    }
 
 }

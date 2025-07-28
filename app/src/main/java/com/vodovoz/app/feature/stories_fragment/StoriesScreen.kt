@@ -55,8 +55,8 @@ fun StoriesScreen(
     val context = LocalContext.current
 
     LaunchedEffect(viewState.currentStoryIndex) {
-        delay(100L)
-        stories.getOrNull(pagerState.currentPage)?.pages?.forEach { storyPage ->
+        delay(75L)
+        stories.getOrNull(viewState.currentStoryIndex)?.pages?.forEach { storyPage ->
             val key = MemoryCache.Key(storyPage.image)
 
             val alreadyInMemory = context.imageLoader.memoryCache?.get(key) != null
@@ -133,8 +133,6 @@ fun StoriesScreen(
                     alpha = alphaValue
                     scaleX = scale
                     scaleY = scale
-
-
                 }
                 .clip(MaterialTheme.shapes.large)
         ) {

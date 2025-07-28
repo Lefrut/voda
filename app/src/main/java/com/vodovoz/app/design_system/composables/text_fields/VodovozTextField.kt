@@ -210,13 +210,12 @@ private fun VodovozTextField(
                     )
                 }
                 Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .horizontalScroll(rememberScrollState()),
+                    modifier = Modifier.weight(1f).fillMaxWidth(),
                     contentAlignment = Alignment.TopStart
                 ) {
                     if (value.text.isEmpty()) {
                         Text(
+                            modifier = Modifier.matchParentSize().horizontalScroll(rememberScrollState()),
                             text = hint,
                             color = MaterialTheme.colorScheme.surfaceTint,
                             style = MaterialTheme.typography.bodyMedium,
@@ -224,7 +223,6 @@ private fun VodovozTextField(
                             overflow = TextOverflow.Ellipsis
                         )
                     }
-
 
                     innerTextField()
                 }

@@ -26,7 +26,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
@@ -111,9 +110,12 @@ fun CartPresentCard(
                             .wrapContentWidth(Alignment.Start, true),
                         onClick = onChoosePresentClick,
                         colors = ButtonDefaults.buttonColors(
-                            contentColor = button.textColor.takeOrElse { MaterialTheme.colorScheme.onBackground },
-                            containerColor = button.backgroundColor.takeOrElse { MaterialTheme.colorScheme.primary }
-                        )
+                            contentColor = button.textColor,
+                            containerColor = button.backgroundColor,
+                            disabledContainerColor = button.backgroundColor.copy(0.45f),
+                            disabledContentColor = button.textColor.copy(0.75f)
+                        ),
+                        enabled = button.enabled
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(

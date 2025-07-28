@@ -3,6 +3,7 @@ package com.vodovoz.app.common.resources
 import android.content.Context
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
+import android.net.Uri
 import androidx.annotation.DrawableRes
 import androidx.annotation.PluralsRes
 import androidx.annotation.StringRes
@@ -12,8 +13,29 @@ import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import java.io.FileOutputStream
 import javax.inject.Inject
 import javax.inject.Singleton
+
+
+interface ContentProvider {
+
+    fun getBytesArray(uri: Uri): ByteArray?
+
+}
+
+@Singleton
+class ContentProviderImpl @Inject constructor(
+    @ApplicationContext
+    private val context: Context,
+) : ContentProvider {
+
+    override fun getBytesArray(uri: Uri): ByteArray? {
+        return context.contentResolver.openInputStream(uri)?.readBytes()
+    }
+
+
+}
 
 interface ResourcesProvider {
     fun getString(@StringRes resId: Int, vararg args: Any): String
@@ -50,11 +72,17 @@ class ResourcesProviderImpl @Inject constructor(
 
 @Module
 @InstallIn(SingletonComponent::class)
-abstract class StringProviderModule {
+abstract class ProvidersModule {
 
     @Binds
     @Singleton
     abstract fun provideStringProvider(
         resourcesProvider: ResourcesProviderImpl,
     ): ResourcesProvider
+
+    @Binds
+    @Singleton
+    abstract fun provideContentProvider(
+        contentProvider: ContentProviderImpl,
+    ): ContentProvider
 }
