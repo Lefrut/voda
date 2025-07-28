@@ -1,6 +1,7 @@
 package com.vodovoz.app.feature.write_message.composables
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -22,16 +23,6 @@ fun WriteMessageBody(
             .padding(top = 8.dp)
             .verticalScroll(rememberScrollState())
     ) {
-//        if (description.isNotBlank()) {
-//            Text(
-//                text = description,
-//                modifier = Modifier.padding(
-//                    bottom = 24.dp
-//                ),
-//                color = MaterialTheme.colorScheme.onBackground
-//            )
-//        }
-
         VodovozTextFieldsColumn(
             modifier = Modifier.padding(horizontal = 16.dp),
             fields = fields,

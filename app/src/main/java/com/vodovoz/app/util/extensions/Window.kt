@@ -11,8 +11,8 @@ fun Window.setSystemBarColors(
     lightNavigationBarIcons: Boolean = true,
 ) {
     val insetsController = WindowCompat.getInsetsController(this, decorView)
-    insetsController.isAppearanceLightStatusBars = lightStatusBarIcons
-    insetsController.isAppearanceLightNavigationBars = lightNavigationBarIcons
+    insetsController.isAppearanceLightStatusBars = !lightStatusBarIcons
+    insetsController.isAppearanceLightNavigationBars = !lightNavigationBarIcons
     statusBarColor = statusColor
     navigationBarColor = navigationColor
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {

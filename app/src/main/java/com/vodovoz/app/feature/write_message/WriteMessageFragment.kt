@@ -4,20 +4,24 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.fragment.findNavController
 import com.vodovoz.app.design_system.VodovozTheme
+import com.vodovoz.app.design_system.composables.placeholders.VodovozLongPlaceholder
 import com.vodovoz.app.design_system.effects.LifecycleEffect
 import com.vodovoz.app.feature.write_message.model.WriteMessageEvent
+import com.vodovoz.app.feature.write_message.model.WriteMessageUiState
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class WriteMessageFragment @Inject constructor(): Fragment() {
+class WriteMessageFragment @Inject constructor() : Fragment() {
 
     private val viewModel by viewModels<WriteMessageViewModel>()
 
@@ -30,14 +34,38 @@ class WriteMessageFragment @Inject constructor(): Fragment() {
             setContent {
                 VodovozTheme {
                     val viewState by viewModel.state.collectAsStateWithLifecycle()
+                    val snackbarHostState = remember { SnackbarHostState() }
 
-                    WriteMessageScreen(viewModel = viewModel, viewState = viewState)
+                    when(val uiState = viewState.uiState){
+                        is WriteMessageUiState.Success -> {
+                            VodovozLongPlaceholder(
+                                data = uiState.placeholder,
+                                onButtonClick = {
+                                    viewModel.navigateBack()
+                                },
+                                onCloseClick = {
+                                    viewModel.navigateBack()
+                                }
+                            )
+                        }
+                        else ->{
+                            WriteMessageScreen(
+                                viewModel = viewModel,
+                                viewState = viewState,
+                                snackbarHostState = snackbarHostState
+                            )
+                        }
+                    }
 
                     LifecycleEffect(Unit) {
                         viewModel.events.collect { event ->
                             when (event) {
                                 WriteMessageEvent.GoBack -> {
                                     findNavController().popBackStack()
+                                }
+
+                                is WriteMessageEvent.ShowSnackbar -> {
+                                    snackbarHostState.showSnackbar(event.message)
                                 }
                             }
                         }

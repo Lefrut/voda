@@ -4,17 +4,15 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.ViewCompositionStrategy
-import androidx.core.view.WindowCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.compose.LifecycleStartEffect
@@ -24,6 +22,7 @@ import com.vodovoz.app.common.cookie.CookieManager
 import com.vodovoz.app.common.tab.TabManager
 import com.vodovoz.app.core.navigation.activate
 import com.vodovoz.app.design_system.VodovozTheme
+import com.vodovoz.app.design_system.composables.placeholders.LoadingPlaceholder
 import com.vodovoz.app.design_system.effects.AppearanceSystemBarsEffect
 import com.vodovoz.app.design_system.effects.LifecycleEffect
 import com.vodovoz.app.ui.insets.InsetsVisibilityState
@@ -86,21 +85,32 @@ class StoriesFragment : Fragment() {
                         }
 
 
-                    when (viewState.uiState) {
-                        StoriesViewModel.StoriesUiState.Loading, StoriesViewModel.StoriesUiState.Success -> {
-                            StoriesScreen(
-                                viewState = viewState,
-                                viewModel = viewModel,
-                                pagerState = pagerState
-                            )
+                    Crossfade(
+                        targetState = viewState.uiState,
+                        label = "stories cross fade"
+                    ) { uiState ->
+                        when (uiState) {
+                            StoriesViewModel.StoriesUiState.Success -> {
+                                StoriesScreen(
+                                    viewState = viewState,
+                                    viewModel = viewModel,
+                                    pagerState = pagerState
+                                )
+                            }
+
+                            StoriesViewModel.StoriesUiState.Loading -> {
+                                LoadingPlaceholder(
+                                    containerColor = MaterialTheme.colorScheme.onBackground
+                                )
+                            }
                         }
+
                     }
 
                     LaunchedEffect(pagerState.currentPage, pagerState.isScrollInProgress) {
-                        if(!pagerState.isScrollInProgress){
+                        if (!pagerState.isScrollInProgress) {
                             viewModel.changeStoryIndex(pagerState.currentPage)
-                        }
-                        else{
+                        } else {
                             viewModel.stopStory()
                         }
                     }

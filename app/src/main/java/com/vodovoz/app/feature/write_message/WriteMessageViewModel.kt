@@ -1,6 +1,7 @@
 package com.vodovoz.app.feature.write_message
 
 import androidx.lifecycle.viewModelScope
+import com.vodovoz.app.R
 import com.vodovoz.app.common.resources.ResourcesProvider
 import com.vodovoz.app.design_system.model.toUi
 import com.vodovoz.app.design_system.model.widgets.EmptyTextValidator
@@ -111,6 +112,11 @@ class WriteMessageViewModel @Inject constructor(
                 )
             }
         }.onFailure {
+            _events.emit(
+                WriteMessageEvent.ShowSnackbar(
+                    resourcesProvider.getString(R.string.error_send_data)
+                )
+            )
             _state.update { s ->
                 s.copy(button = s.button.copy(loading = false, enabled = false))
             }

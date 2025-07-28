@@ -612,12 +612,14 @@ interface VodovozService {
         @Query("nav") page: Int = 1,
     ): Response<VodovozResponseDTO<WaitFeedbackProductsDTO>>
 
-    @GET("comments.php?action=add")
+    @Multipart
+    @POST("comments.php?action=add")
     suspend fun sendComment(
         @Query("userid") userId: Long?,
         @Query("id") productId: Long?,
         @Query("rating_value") rating: Int,
         @Query("message") message: String,
+        @Part images: List<MultipartBody.Part>
     ): Response<VodovozResponseDTO<VodovozPlaceholderDTO>>
 
     @GET("osnova/form/obratnayasvyaz.php?action=glav")

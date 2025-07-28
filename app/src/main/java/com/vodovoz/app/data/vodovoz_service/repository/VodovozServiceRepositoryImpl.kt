@@ -12,6 +12,7 @@ import com.vodovoz.app.common.model.VodovozBoolean
 import com.vodovoz.app.common.model.VodovozSiteState
 import com.vodovoz.app.common.model.from
 import com.vodovoz.app.core.network.retrofit.messageWithCode
+import com.vodovoz.app.core.network.retrofit.prepareImageParts
 import com.vodovoz.app.core.network.retrofit.stringBody
 import com.vodovoz.app.core.network.retrofit.stringErrorBody
 import com.vodovoz.app.core.network.serialization.fromJson
@@ -1854,7 +1855,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
             },
             mapper = {
                 it.data!!.toDomain()
-            }
+            },
         )
     }
 
@@ -1873,14 +1874,18 @@ class VodovozServiceRepositoryImpl @Inject constructor(
         productId: Long,
         rating: Int,
         message: String,
+        imageBytesArray: List<ByteArray>,
     ): Flow<Result<VodovozPlaceholderModel>> {
         return executeRequest(
             request = {
                 vodovozService.sendComment(
-                    accountManager.fetchAccountId(),
-                    productId,
-                    rating,
-                    message
+                    userId = accountManager.fetchAccountId(),
+                    productId = productId,
+                    rating = rating,
+                    message = message,
+                    images = imageBytesArray.prepareImageParts(
+                        "comment_images"
+                    )
                 )
             },
             mapper = {

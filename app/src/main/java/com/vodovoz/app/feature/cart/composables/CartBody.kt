@@ -49,14 +49,14 @@ fun CartBody(
     onPromotionCodeButtonClick: (CartPromoButtonUi) -> Unit,
     onPresentButtonClick: () -> Unit,
     onBottlesButtonClick: () -> Unit,
-    onOrderClick: () -> Unit
+    onOrderClick: () -> Unit,
 ) {
     LazyColumn(
         modifier = modifier.fillMaxSize(),
         contentPadding = PaddingValues(top = 8.dp, bottom = 28.dp),
     ) {
         item(contentType = { "CartPresentCard" }) {
-            cartPresent?.let {
+            if (cartPresent != null) {
                 CartPresentCard(
                     modifier = Modifier
                         .padding(bottom = 24.dp, start = 16.dp, end = 16.dp)
@@ -105,7 +105,6 @@ fun CartBody(
             }
 
 
-
             val restriction = cartItem.restriction
             val notHaveDeleteRestriction = restriction != ProductRestrictionUi.FULL_RESTRICTION
                     && restriction != ProductRestrictionUi.NO_DELETE
@@ -131,7 +130,7 @@ fun CartBody(
             }
         }
 
-        item{
+        item {
             Spacer(modifier = Modifier.height(8.dp))
         }
 
@@ -164,6 +163,7 @@ fun CartBody(
                     modifier = Modifier.padding(top = 16.dp, start = 16.dp, end = 16.dp),
                     image = image,
                     name = name,
+                    enabled = enabled,
                     onClick = onPresentButtonClick
                 )
             }

@@ -7,7 +7,8 @@ import com.vodovoz.app.domain.general.model.cart.CartButtonModel
 data class CartButtonUi(
     val id: String,
     val image: String,
-    val name: String
+    val name: String,
+    val enabled: Boolean = true
 ){
     companion object{
         val Empty = CartButtonUi("","","")

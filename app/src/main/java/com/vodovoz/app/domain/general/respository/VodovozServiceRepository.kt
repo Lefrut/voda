@@ -422,6 +422,7 @@ interface VodovozServiceRepository {
         productId: Long,
         rating: Int,
         message: String,
+        imageBytesArray: List<ByteArray>
     ): Flow<Result<VodovozPlaceholderModel>>
 
     fun getProductCommentsInfo(

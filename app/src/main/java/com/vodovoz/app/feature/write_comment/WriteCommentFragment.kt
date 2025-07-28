@@ -34,7 +34,7 @@ class WriteCommentFragment : Fragment() {
 
     override fun onStart() {
         super.onStart()
-        tabManager.changeTabVisibility(false)
+            tabManager.changeTabVisibility(false)
     }
 
     override fun onStop() {
@@ -57,8 +57,6 @@ class WriteCommentFragment : Fragment() {
                     ) { uri -> viewModel.addUri(uri) }
 
                     val snackbarHostState = remember { SnackbarHostState() }
-
-
                     val viewState by viewModel.state.collectAsStateWithLifecycle()
 
 

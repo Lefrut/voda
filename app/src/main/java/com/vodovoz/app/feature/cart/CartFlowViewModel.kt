@@ -43,7 +43,7 @@ class CartFlowViewModel @Inject constructor(
     private val likeManager: LikeManager,
     private val accountManager: AccountManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
-    private val tabManager: TabManager
+    private val tabManager: TabManager,
 ) : PagingContractViewModel<CartFlowViewModel.CartState, CartFlowViewModel.CartEvents>(CartState()) {
 
     init {
@@ -111,9 +111,12 @@ class CartFlowViewModel @Inject constructor(
 
 
             if (currentCartVersion >= cartManager.cartVersion) {
+
                 cartManager.syncCart(
                     cartItems.associate { item -> item.productId to item.quantity }
                 )
+
+                setPresentButtonsAvailability(true)
             }
 
         }.onFailure { t ->
@@ -173,11 +176,25 @@ class CartFlowViewModel @Inject constructor(
     }
 
     fun incrementCartItem(cartItem: CartItemUi) = viewModelScope.launch {
+        setPresentButtonsAvailability(false)
         cartManager.change(cartItem.productId, cartItem.quantity + 1)
     }
 
     fun decrementCartItem(cartItem: CartItemUi) = viewModelScope.launch {
+        setPresentButtonsAvailability(false)
         cartManager.change(cartItem.productId, cartItem.quantity - 1)
+    }
+
+    private fun setPresentButtonsAvailability(buttonEnabled: Boolean){
+        uiStateListener.updateData { s ->
+            s.copy(
+                present = s.present?.copy(
+                    button = s.present.button?.copy(enabled = buttonEnabled)
+                ),
+                presentButton = s.presentButton?.copy(enabled = buttonEnabled)
+            )
+        }
+
     }
 
     fun changeFavorite(cartItem: CartItemUi) = viewModelScope.launch {

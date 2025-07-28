@@ -1,13 +1,16 @@
 package com.vodovoz.app.ui.base
 
 import android.content.Intent
+import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
+import androidx.activity.SystemBarStyle
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.ui.graphics.toArgb
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.core.view.WindowCompat
 import androidx.fragment.app.FragmentContainerView
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.NavHostFragment
@@ -18,6 +21,7 @@ import com.vodovoz.app.common.block_app_signal.BlockAppSignal
 import com.vodovoz.app.common.block_app_signal.BlockAppSignalProvider
 import com.vodovoz.app.databinding.ActivityMainBinding
 import com.vodovoz.app.design_system.black
+import com.vodovoz.app.design_system.white
 import com.vodovoz.app.feature.sitestate.SiteStateManager
 import com.vodovoz.app.util.extensions.debugLog
 import com.vodovoz.app.util.extensions.setSystemBarColors
@@ -48,8 +52,10 @@ class MainActivity : AppCompatActivity(), BlockAppSignalProvider {
         super.onStart()
 
         window.setSystemBarColors(
-            black.toArgb(),
-            black.toArgb()
+            statusColor = Color.TRANSPARENT,
+            navigationColor = Color.TRANSPARENT,
+            lightNavigationBarIcons = false,
+            lightStatusBarIcons = false
         )
     }
 
@@ -58,6 +64,12 @@ class MainActivity : AppCompatActivity(), BlockAppSignalProvider {
         installSplashScreen().setKeepOnScreenCondition {
             viewModel.androidSplash.value
         }
+
+        enableEdgeToEdge(
+            SystemBarStyle.auto(Color.TRANSPARENT, Color.TRANSPARENT),
+            SystemBarStyle.auto(Color.TRANSPARENT, Color.TRANSPARENT)
+        )
+
         supportActionBar?.hide()
         splashFileViewModel.downloadSplashFile()
         viewModel.checkAppState()
