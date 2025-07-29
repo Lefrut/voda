@@ -3,9 +3,9 @@ package com.vodovoz.app.data.vodovoz_service.model.ordering
 
 import com.squareup.moshi.Json
 import androidx.annotation.Keep
+import com.vodovoz.app.data.vodovoz_service.model.CHECKBOX_DTO
 import com.vodovoz.app.data.vodovoz_service.model.cart.ITOG_ITEM_DTO
 import com.vodovoz.app.data.vodovoz_service.model.cart.PODAROK_KNOPKA_DTO
-import com.vodovoz.app.design_system.model.ColorfulButtonUi
 
 @Keep
 data class OrderingDetailsDTO(

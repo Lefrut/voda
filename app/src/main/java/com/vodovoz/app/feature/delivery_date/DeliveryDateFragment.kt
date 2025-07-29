@@ -65,6 +65,7 @@ class DeliveryDateFragment : Fragment() {
                                     navController.previousBackStackEntry?.savedStateHandle?.apply {
                                         set("timeInterval", event.timeInterval)
                                         set("dateOption", event.dateOption)
+                                        set("earlierCheckbox", event.earlierCheckbox)
                                     }
                                     navController.popBackStack()
                                 }

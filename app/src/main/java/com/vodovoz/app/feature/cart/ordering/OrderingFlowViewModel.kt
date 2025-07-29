@@ -18,6 +18,7 @@ import com.vodovoz.app.design_system.model.VodovozPlaceholderUi
 import com.vodovoz.app.design_system.model.order.OrderSummaryItemUi
 import com.vodovoz.app.design_system.model.order.mapToUi
 import com.vodovoz.app.design_system.model.toUi
+import com.vodovoz.app.design_system.model.widgets.CheckboxUi
 import com.vodovoz.app.design_system.model.widgets.FieldUi
 import com.vodovoz.app.design_system.model.widgets.toUi
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
@@ -98,7 +99,7 @@ class OrderingFlowViewModel @Inject constructor(
                     selectedNotifyItem = s.selectedNotifyItem.takeIf { it ->
                         it != OrderNotifyItemUi.Empty
                     } ?: notifySection.items.firstOrNull() ?: s.selectedNotifyItem,
-                    uiState = OrderingUiState.Order
+                    uiState = OrderingUiState.Order,
                 )
             }
         }.onFailure {
@@ -287,6 +288,7 @@ class OrderingFlowViewModel @Inject constructor(
 
     fun doOrder(deviceInfo: String) = viewModelScope.launch {
         val ordering = dataState.ordering
+        val earlierDelivery = ordering.earlierDelivery
 
         if (
             ordering.addressId != null && ordering.date != null
@@ -303,11 +305,12 @@ class OrderingFlowViewModel @Inject constructor(
                 deliveryTimeInterval = ordering.timeInterval,
                 phone = ordering.recipientPhone,
                 paymentMethodId = ordering.paymentId.toLongOrNull() ?: 0,
-                callYouId = ordering.callYouId?.toLongOrNull(),
+                callYouId = ordering.callYouId.toLongOrNull(),
                 coupon = coupon,
                 balance = VodovozBoolean.from(ordering.paymentBalance).value,
                 deviceInfo = deviceInfo,
-                notifyDriverId = dataState.selectedNotifyItem.value
+                notifyDriverId = dataState.selectedNotifyItem.value,
+                params = earlierDelivery?.let { mapOf(earlierDelivery) }
             ).singleResult().onSuccess { placeholder ->
                 uiStateListener.updateData { s ->
                     s.copy(uiState = OrderingUiState.Success(placeholder.toUi()))
@@ -506,22 +509,21 @@ class OrderingFlowViewModel @Inject constructor(
                 addressId = ordering.addressId,
                 date = ordering.date,
                 timeInterval = ordering.timeInterval
-            ).singleResult()
-                .onSuccess { orderingDetails ->
-                    uiStateListener.updateData { s ->
-                        s.copy(
-                            paymentSection = s.paymentSection.copy(
-                                items = s.paymentSection.items.map { menuItem ->
-                                    if (menuItem.id == PAYMENT_MENU_ID) {
-                                        orderingDetails.paymentSection.items.mapToUi()
-                                            .find { it.id == PAYMENT_MENU_ID } ?: menuItem
-                                    } else menuItem
-                                }
-                            ),
-                            totals = orderingDetails.totals.mapToUi()
-                        )
-                    }
+            ).singleResult().onSuccess { orderingDetails ->
+                uiStateListener.updateData { s ->
+                    s.copy(
+                        paymentSection = s.paymentSection.copy(
+                            items = s.paymentSection.items.map { menuItem ->
+                                if (menuItem.id == PAYMENT_MENU_ID) {
+                                    orderingDetails.paymentSection.items.mapToUi()
+                                        .find { it.id == PAYMENT_MENU_ID } ?: menuItem
+                                } else menuItem
+                            }
+                        ),
+                        totals = orderingDetails.totals.mapToUi()
+                    )
                 }
+            }
 
             uiStateListener.updateData { s ->
                 s.copy(showRefreshIndicator = false)
@@ -597,6 +599,14 @@ class OrderingFlowViewModel @Inject constructor(
             eventListener.emit(OrderingEvents.GoToWebView(button.url))
         } else {
             eventListener.emit(OrderingEvents.OpenUrl(button.url))
+        }
+    }
+
+    fun setEarlierDelivery(checkbox: CheckboxUi) = viewModelScope.launch {
+        uiStateListener.updateData { s ->
+            s.copy(
+                ordering = s.ordering.copy(earlierDelivery = checkbox.id to checkbox.value())
+            )
         }
     }
 

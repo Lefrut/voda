@@ -3,6 +3,7 @@ package com.vodovoz.app.data.vodovoz_service.model.auth
 
 import androidx.annotation.Keep
 import com.squareup.moshi.Json
+import com.vodovoz.app.data.vodovoz_service.model.CHECKBOX_DTO
 import com.vodovoz.app.data.vodovoz_service.model.user_data.POLE_DTO
 
 @Keep
@@ -18,5 +19,5 @@ data class AuthDetailsDTO(
     @Json(name = "KNOPKA")
     val KNOPKA: List<KNOPKA_AUTH_DTO>?,
     @Json(name = "PODPISKA")
-    val PODPISKA: List<AUTH_CHECKBOX_DTO>?
+    val PODPISKA: List<CHECKBOX_DTO>?
 )

@@ -82,7 +82,7 @@ class ProductDetailsFragment : Fragment() {
                                 description = stringResource(R.string.product_not_found_details),
                                 item = EmptyResultPlaceholderItem.Arrow,
                                 imagePainter = rememberAsyncImagePainter(
-                                    model = "",
+                                    model = Unit,
                                     error = painterResource(
                                         id = R.drawable.pic_search
                                     )

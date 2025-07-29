@@ -102,10 +102,10 @@ fun VodovozTextField(
                     onFieldChange(field, field.copy(value = newValue))
                 },
                 isError = field.isError,
-                keyboardOptions = keyboardOptions,
-                keyboardActions = KeyboardActions(
-                    onDone = onDone,
+                keyboardOptions = keyboardOptions.copy(
+                    keyboardType = field.keyboardType
                 ),
+                keyboardActions = KeyboardActions(onDone = onDone),
                 readOnly = field.readOnly,
                 label = field.label,
                 hint = field.hint,
@@ -155,7 +155,7 @@ private fun VodovozTextField(
     maxLines: Int = if (singleLine) 1 else Int.MAX_VALUE,
     minLines: Int = 1,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
-    colors: VodovozTextFieldColors = VodovozTextFieldDefaults.colors()
+    colors: VodovozTextFieldColors = VodovozTextFieldDefaults.colors(),
 ) {
     val isFocused by interactionSource.collectIsFocusedAsState()
 
@@ -183,7 +183,7 @@ private fun VodovozTextField(
             if (!label.isNullOrEmpty()) {
                 Text(
                     text = label,
-                    color = if(isFocused) colors.focusedLabelColor else colors.labelColor,
+                    color = if (isFocused) colors.focusedLabelColor else colors.labelColor,
                     style = MaterialTheme.typography.bodySmall,
                     modifier = Modifier.padding(bottom = 4.dp)
                 )
@@ -210,12 +210,16 @@ private fun VodovozTextField(
                     )
                 }
                 Box(
-                    modifier = Modifier.weight(1f).fillMaxWidth(),
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth(),
                     contentAlignment = Alignment.TopStart
                 ) {
                     if (value.text.isEmpty()) {
                         Text(
-                            modifier = Modifier.matchParentSize().horizontalScroll(rememberScrollState()),
+                            modifier = Modifier
+                                .matchParentSize()
+                                .horizontalScroll(rememberScrollState()),
                             text = hint,
                             color = MaterialTheme.colorScheme.surfaceTint,
                             style = MaterialTheme.typography.bodyMedium,
@@ -367,7 +371,7 @@ data object VodovozTextFieldDefaults {
         focusedTextColor: Color = MaterialTheme.colorScheme.onBackground,
         borderColor: Color = MaterialTheme.colorScheme.surfaceVariant,
         focusedBorderColor: Color = MaterialTheme.colorScheme.primary,
-        errorColor: Color = MaterialTheme.colorScheme.error
+        errorColor: Color = MaterialTheme.colorScheme.error,
     ) = VodovozTextFieldColors(
         focusedLabelColor = focusedLabelColor,
         labelColor = labelColor,

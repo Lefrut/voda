@@ -3,7 +3,7 @@ package com.vodovoz.app.data.vodovoz_service.mappers
 import com.vodovoz.app.common.model.VodovozBoolean
 import com.vodovoz.app.common.model.boolean
 import com.vodovoz.app.common.model.from
-import com.vodovoz.app.data.vodovoz_service.model.auth.AUTH_CHECKBOX_DTO
+import com.vodovoz.app.data.vodovoz_service.model.CHECKBOX_DTO
 import com.vodovoz.app.data.vodovoz_service.model.auth.AuthDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.auth.KNOPKA_AUTH_DTO
 import com.vodovoz.app.data.vodovoz_service.model.auth.LoginByPhoneDTO
@@ -30,11 +30,11 @@ fun AuthDetailsDTO.toDomain(): AuthDetailsModel {
     )
 }
 
-fun List<AUTH_CHECKBOX_DTO>.mapToDomain(): List<CheckBoxModel> {
+fun List<CHECKBOX_DTO>.mapToDomain(): List<CheckBoxModel> {
     return mapNotNull { it.toDomain() }
 }
 
-fun AUTH_CHECKBOX_DTO.toDomain(): CheckBoxModel? {
+fun CHECKBOX_DTO.toDomain(): CheckBoxModel? {
     return CheckBoxModel(
         isRequired = VodovozBoolean.from(OBYAZATELNO).boolean,
         name = NAME ?: "",

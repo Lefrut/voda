@@ -94,14 +94,18 @@ fun DeliveryDateBody(
         if (timeSections.isNotEmpty()) {
             VodovozTabRow(
                 modifier = Modifier.padding(16.dp),
-                selectedTabPosition = timeSections.indexOfOrNull(selectedTimeSection) ?: (timeSections.size / 3)
+                selectedTabPosition = timeSections.indexOfOrNull(selectedTimeSection)
+                    ?: (timeSections.size / 3)
             ) {
                 timeSections.forEachIndexed { index, timeSection ->
                     key(timeSection.title) {
                         VodovozTab(
                             title = timeSection.title,
                             position = index,
-                            selected = timeSection == selectedTimeSection
+                            selected = timeSection == selectedTimeSection,
+                            textStyle = MaterialTheme.typography.bodyMedium.copy(
+                                fontWeight = FontWeight.Medium
+                            )
                         ) { onTimeSectionSelect(timeSection) }
                     }
                 }

@@ -22,24 +22,6 @@ data class SingleCheckbox<out T : Any>(
     val value: T
 )
 
-fun List<VodovozAddressType>.mapToSingleCheckboxes(getString: (Int) -> String): List<SingleCheckbox<Int>>{
-    return mapNotNull { addressType ->
-        when(addressType){
-            VodovozAddressType.Personal -> { null }
-            VodovozAddressType.Company -> {
-                SingleCheckbox(
-                    name = getString(
-                        R.string.company_office_delivery_text,
-                    ),
-                    value = VodovozAddressType.Company.value
-                )
-            }
-        }
-    }
-
-}
-
-
 
 
 

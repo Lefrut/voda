@@ -132,6 +132,7 @@ interface VodovozServiceRepository {
         deviceInfo: String?,
         notifyDriverId: String? = null,
         message: String? = null,
+        params: Map<String, String>?
     ): Flow<Result<VodovozPlaceholderModel>>
 
     fun orderService(

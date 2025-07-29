@@ -30,6 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.platform.debugInspectorInfo
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -71,7 +72,8 @@ fun VodovozTabRow(
             val spacingPx = tabSpacing.roundToPx()
             val tabsWidth = preMeasured.map { placeable -> placeable.width }
             val totalSpacing = if (tabsCount > 1) (tabsCount - 1) * spacingPx else 0
-            val paddingWidth = (constraints.maxWidth - tabsWidth.sum() - totalSpacing) / tabsCount.coerceAtLeast(1)
+            val paddingWidth =
+                (constraints.maxWidth - tabsWidth.sum() - totalSpacing) / tabsCount.coerceAtLeast(1)
             val maxItemHeight = preMeasured.maxOf { it.height }
 
 
@@ -159,11 +161,14 @@ fun VodovozTab(
     title: String,
     position: Int,
     selected: Boolean,
+    textStyle: TextStyle = MaterialTheme.typography.bodySmall.copy(
+        fontWeight = FontWeight.Medium
+    ),
     onClick: (Int) -> Unit,
 ) {
     Text(
         text = title,
-        Modifier
+        modifier = Modifier
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,
@@ -171,7 +176,7 @@ fun VodovozTab(
             .wrapContentSize(Alignment.Center)
             .padding(vertical = 6.dp),
         color = if (selected) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.surfaceTint,
-        style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Medium),
+        style = textStyle,
         maxLines = 1,
         overflow = TextOverflow.Ellipsis
     )

@@ -29,6 +29,7 @@ import com.vodovoz.app.core.navigation.navigateToWebView
 import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.composables.placeholders.VodovozLongPlaceholder
 import com.vodovoz.app.design_system.effects.LifecycleEffect
+import com.vodovoz.app.design_system.model.widgets.CheckboxUi
 import com.vodovoz.app.feature.addresses.model.AddressScreenTypeUi
 import com.vodovoz.app.feature.addresses.model.AddressUi
 import com.vodovoz.app.feature.cart.CartFlowViewModel
@@ -82,7 +83,8 @@ class OrderingFragment : Fragment() {
                     when (val uiState = viewState.uiState) {
                         OrderingFlowViewModel.OrderingUiState.Error,
                         OrderingFlowViewModel.OrderingUiState.Loading,
-                        OrderingFlowViewModel.OrderingUiState.Order -> {
+                        OrderingFlowViewModel.OrderingUiState.Order,
+                        -> {
                             OrderingScreen(
                                 viewModel = viewModel,
                                 viewState = viewState,
@@ -142,6 +144,9 @@ class OrderingFragment : Fragment() {
             if (timeInterval != null && date != null) {
                 viewModel.setDeliveryDateTime(timeInterval, date)
             }
+
+            backEntrySavedStateHandle?.remove<CheckboxUi>("earlierCheckbox")
+                ?.let { checkbox -> viewModel.setEarlierDelivery(checkbox) }
 
             backEntrySavedStateHandle?.remove<CallYouItemUi>("callYou")
                 ?.let { callYouItem -> viewModel.setCallYou(callYouItem) }
@@ -210,12 +215,13 @@ class OrderingFragment : Fragment() {
                         ) ?: "",
                         url = event.url,
                         navOptions = navOptions {
-                            popUpTo(R.id.cartFragment){
+                            popUpTo(R.id.cartFragment) {
                                 inclusive = false
                             }
                         }
                     )
                 }
+
                 is OrderingFlowViewModel.OrderingEvents.OpenUrl -> {
                     context?.openUrl(event.url)
                     findNavController().popBackStack()

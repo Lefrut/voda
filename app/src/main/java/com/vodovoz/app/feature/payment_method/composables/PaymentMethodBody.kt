@@ -102,9 +102,9 @@ private fun PaymentMethodItemRow(
     onFieldChange: (FieldUi, FieldUi) -> Unit,
 ) {
     Column(
-        Modifier
-            .background(MaterialTheme.colorScheme.background)
-            .animateContentSize()
+        Modifier.background(
+            MaterialTheme.colorScheme.background
+        ).animateContentSize()
     ) {
         Row(
             modifier = modifier
