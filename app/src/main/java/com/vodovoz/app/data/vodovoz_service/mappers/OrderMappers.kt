@@ -167,7 +167,8 @@ fun DeliveryDateDetailsDTO.toDomain(): DeliveryDateDetailsModel {
         button = KNOPKA?.toDomain()
             ?: throw IllegalArgumentException("DeliveryDate button can't be null"),
         timeSections = INTERVAL?.mapToDomain()
-            ?: throw IllegalArgumentException("DeliveryDate intervals can't be null")
+            ?: throw IllegalArgumentException("DeliveryDate intervals can't be null"),
+        earlierCheckbox = RANSHE?.toDomain()
     )
 }
 
@@ -224,7 +225,7 @@ fun OrderingDetailsDTO.toDomain(): OrderingDetailsModel {
         paymentSection = OPLATA?.toDomain()
             ?: throw IllegalArgumentException("Ordering payment can't be null"),
         totals = ITOG?.mapToDomain() ?: emptyList(),
-        button = KNOPKA?.toDomain() ?: throw IllegalArgumentException("Ordering button can't be null")
+        button = KNOPKA?.toDomain() ?: throw IllegalArgumentException("Ordering button can't be null"),
     )
 }
 

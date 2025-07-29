@@ -1,17 +1,20 @@
 package com.vodovoz.app.design_system.model.widgets
 
+import android.os.Parcelable
 import androidx.compose.runtime.Immutable
 import com.vodovoz.app.common.model.VodovozBoolean
 import com.vodovoz.app.common.model.from
 import com.vodovoz.app.domain.general.model.CheckBoxModel
+import kotlinx.parcelize.Parcelize
 
 @Immutable
+@Parcelize
 data class CheckboxUi(
     override val id: String,
     val checked: Boolean,
     val isRequired: Boolean,
     val name: String,
-) : WidgetUi(id) {
+) : WidgetUi(id), Parcelable {
     override fun value(): String {
         return VodovozBoolean.from(checked).value
     }

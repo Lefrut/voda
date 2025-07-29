@@ -14,6 +14,7 @@ data class OrderingUi(
     val paymentChange: String?,
     val paymentBalance: Boolean = false,
     val callYouId: String?,
+    val earlierDelivery: Pair<String, String>?
 ) {
     companion object {
         val Empty = OrderingUi(
@@ -26,7 +27,8 @@ data class OrderingUi(
             paymentId = null,
             paymentChange = null,
             callYouId = null,
-            paymentBalance = false
+            paymentBalance = false,
+            earlierDelivery = null
         )
     }
 }

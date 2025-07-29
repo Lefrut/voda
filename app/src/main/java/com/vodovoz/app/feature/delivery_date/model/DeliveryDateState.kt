@@ -3,6 +3,7 @@ package com.vodovoz.app.feature.delivery_date.model
 import androidx.compose.runtime.Immutable
 import com.vodovoz.app.design_system.model.ColorfulButtonUi
 import com.vodovoz.app.design_system.model.SectionUi
+import com.vodovoz.app.design_system.model.widgets.CheckboxUi
 import com.vodovoz.app.util.formatters.VodovozDateFormatters
 import java.time.LocalDate
 
@@ -18,5 +19,6 @@ data class DeliveryDateState(
     val selectedTimeSection: SectionUi<DeliveryTimeIntervalUi> = SectionUi.empty(),
     val selectedTimeInterval: DeliveryTimeIntervalUi = DeliveryTimeIntervalUi.Empty,
     val uiState: DeliveryDateUiState = DeliveryDateUiState.Loading,
+    val earlierCheckbox: CheckboxUi? = null,
     val showCalendarDialog: Boolean = false,
 )

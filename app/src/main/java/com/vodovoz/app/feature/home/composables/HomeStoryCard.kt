@@ -1,5 +1,6 @@
 package com.vodovoz.app.feature.home.composables
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
@@ -17,11 +18,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
-
-import coil3.request.crossfade
 import com.vodovoz.app.design_system.composables.card.VodovozOutlinedCard
 import com.vodovoz.app.design_system.model.StoryUi
 
@@ -62,6 +60,8 @@ private fun HomeStoryCard(
     viewed: Boolean,
     onClick: () -> Unit,
 ) {
+
+
     VodovozOutlinedCard(
         modifier = modifier.size(96.dp),
         contentPadding = PaddingValues(2.dp),
@@ -76,6 +76,7 @@ private fun HomeStoryCard(
             modifier = Modifier
                 .fillMaxSize()
                 .clip(MaterialTheme.shapes.medium)
+                .background(MaterialTheme.colorScheme.surface)
 
         )
     }

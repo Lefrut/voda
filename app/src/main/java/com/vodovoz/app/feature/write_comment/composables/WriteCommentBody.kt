@@ -106,18 +106,24 @@ fun WriteCommentBody(
 
         if (havePhotos) {
             BoxWithConstraints(
-                modifier = Modifier.padding(top = 24.dp, start = 16.dp, end = 16.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(
+                        top = 24.dp,
+                        start = 16.dp,
+                        end = 16.dp
+                    )
             ) {
                 val maxItemsInRow = 4
                 val space = 8.dp
-                val imageWidth = (maxWidth + space) / maxItemsInRow - space
+                val imageWidth = (maxWidth + space - 2.dp) / maxItemsInRow - space
 
                 val flowRowItemModifier = Modifier
                     .width(imageWidth)
                     .aspectRatio(0.8f)
 
                 FlowRow(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier,
                     maxItemsInEachRow = maxItemsInRow,
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)

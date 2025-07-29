@@ -2,7 +2,6 @@ package com.vodovoz.app.feature.product_comments
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -41,6 +40,7 @@ import com.vodovoz.app.design_system.composables.tab_row.VodovozScrollableTabRow
 import com.vodovoz.app.design_system.composables.top_bar.VodovozTopBar
 import com.vodovoz.app.feature.product_comments.model.ProductCommentsInfoUi
 import com.vodovoz.app.util.extensions.indexOfOrNull
+import java.math.RoundingMode
 
 @Suppress("NonSkippableComposable")
 @Composable
@@ -160,10 +160,19 @@ private fun CommentsInfoCard(modifier: Modifier = Modifier, aboutComments: Produ
             .fillMaxWidth()
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
+
             Text(
                 text = stringResource(
                     R.string.rating_value,
-                    aboutComments.ratingText
+                    try {
+                        aboutComments.ratingText.toBigDecimal()
+                            .setScale(2, RoundingMode.HALF_UP)
+                            .stripTrailingZeros()
+                            .toString()
+                    }catch (_: Throwable){
+                        aboutComments.ratingText
+                    }
+
                 ),
                 color = MaterialTheme.colorScheme.onBackground,
                 style = MaterialTheme.typography.headlineSmall

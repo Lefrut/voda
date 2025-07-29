@@ -5,6 +5,8 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.vodovoz.app.design_system.model.SectionUi
 import com.vodovoz.app.design_system.model.toUi
+import com.vodovoz.app.design_system.model.widgets.CheckboxUi
+import com.vodovoz.app.design_system.model.widgets.toUi
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.feature.delivery_date.model.DeliveryDateEvent
 import com.vodovoz.app.feature.delivery_date.model.DeliveryDateOptionUi
@@ -71,9 +73,6 @@ class DeliveryDateViewModel @Inject constructor(
             }
 
             _state.update { s ->
-
-
-
                 val timeSectionBySelectedTimeInterval = timeSections.find { section ->
                     section.items.find { it.value == s.selectedTimeInterval.value } != null
                 }
@@ -104,7 +103,8 @@ class DeliveryDateViewModel @Inject constructor(
                     selectedTimeInterval = if (timeSectionBySelectedTimeInterval == null) {
                         baseSelectedTimeInterval
                     } else s.selectedTimeInterval,
-                    uiState = DeliveryDateUiState.Success
+                    uiState = DeliveryDateUiState.Success,
+                    earlierCheckbox = deliveryDateDetails.earlierCheckbox?.toUi()
                 )
             }
 
@@ -152,10 +152,13 @@ class DeliveryDateViewModel @Inject constructor(
     fun chooseDeliveryDate() = viewModelScope.launch {
         val dateOption = stateSnapshot.selectedDateOption
         val timeInterval = stateSnapshot.selectedTimeInterval
+        val earlierCheckbox = stateSnapshot.earlierCheckbox
+
         _events.emit(
             DeliveryDateEvent.GoBackToOrdering(
                 timeInterval = timeInterval,
-                dateOption = dateOption
+                dateOption = dateOption,
+                earlierCheckbox = earlierCheckbox
             )
         )
     }
@@ -202,6 +205,10 @@ class DeliveryDateViewModel @Inject constructor(
         if (uiState == DeliveryDateUiState.Loading || uiState == DeliveryDateUiState.BodyLoading) {
             fetchDeliveryDateDetails()
         }
+    }
+
+    fun changeCheckbox(newEarlierCheckbox: CheckboxUi) {
+        _state.update { s -> s.copy(earlierCheckbox = newEarlierCheckbox) }
     }
 
 }

@@ -148,6 +148,7 @@ interface VodovozService {
         @Query("device") deviceInfo: String?,
         @Query("driver") notifyDriverId: String? = null,
         @Query("comment") message: String? = null,
+        @QueryMap queries: Map<String, String>? = null
     ): Response<VodovozResponseDTO<VodovozPlaceholderDTO>>
 
     @GET("oformlenie/zvonok.php?action=vampozvonit")
@@ -619,7 +620,7 @@ interface VodovozService {
         @Query("id") productId: Long?,
         @Query("rating_value") rating: Int,
         @Query("message") message: String,
-        @Part images: List<MultipartBody.Part>
+        @Part images: List<MultipartBody.Part>?
     ): Response<VodovozResponseDTO<VodovozPlaceholderDTO>>
 
     @GET("osnova/form/obratnayasvyaz.php?action=glav")

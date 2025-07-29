@@ -65,6 +65,7 @@ import com.vodovoz.app.domain.general.model.location.MapAddressModel
 import com.vodovoz.app.domain.general.model.location.MapAreaModel
 import com.vodovoz.app.domain.general.model.order.CancelOrderDetailsModel
 import com.vodovoz.app.domain.general.model.order.DeliveryDateDetailsModel
+import com.vodovoz.app.domain.general.model.order.FormModel
 import com.vodovoz.app.domain.general.model.order.OrderCallYouDetailsModel
 import com.vodovoz.app.domain.general.model.order.OrderDetailsModel
 import com.vodovoz.app.domain.general.model.order.OrderQuestionDetailsModel
@@ -72,7 +73,6 @@ import com.vodovoz.app.domain.general.model.order.OrderingDetailsModel
 import com.vodovoz.app.domain.general.model.order.OrdersHistoryDetailsModel
 import com.vodovoz.app.domain.general.model.order.OrdersHistoryItemModel
 import com.vodovoz.app.domain.general.model.order.PaymentMethodDetailsModel
-import com.vodovoz.app.domain.general.model.order.FormModel
 import com.vodovoz.app.domain.general.model.order.RecipientDetailsModel
 import com.vodovoz.app.domain.general.model.order.RecipientModel
 import com.vodovoz.app.domain.general.model.order.WhereOrderDetailsModel
@@ -339,6 +339,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
         deviceInfo: String?,
         notifyDriverId: String?,
         message: String?,
+        params: Map<String, String>?,
     ): Flow<Result<VodovozPlaceholderModel>> {
         return executeRequest(
             request = {
@@ -352,7 +353,8 @@ class VodovozServiceRepositoryImpl @Inject constructor(
                     callYouId = callYouId,
                     coupon = coupon,
                     balance = balance,
-                    deviceInfo = URLEncoder.encode(deviceInfo, "UTF-8")
+                    deviceInfo = URLEncoder.encode(deviceInfo, "UTF-8"),
+                    queries = params
                 )
             },
             mapper = {

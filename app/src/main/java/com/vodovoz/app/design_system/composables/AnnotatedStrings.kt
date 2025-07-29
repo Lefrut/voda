@@ -10,6 +10,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import com.vodovoz.app.R
 import com.vodovoz.app.design_system.ExtendedTheme
+import com.vodovoz.app.util.formatPrice
 
 
 @Composable
@@ -22,8 +23,8 @@ fun buildPriceAndOldPriceAnnotatedString(
     )
     val bodySmall = MaterialTheme.typography.bodySmall
 
-    val priceText = stringResource(id = R.string.price, price)
-    val oldPriceText = stringResource(id = R.string.price, oldPrice)
+    val priceText = stringResource(id = R.string.price, price.formatPrice())
+    val oldPriceText = stringResource(id = R.string.price, oldPrice.formatPrice())
     val space = stringResource(id = R.string.space)
 
     return buildAnnotatedString {

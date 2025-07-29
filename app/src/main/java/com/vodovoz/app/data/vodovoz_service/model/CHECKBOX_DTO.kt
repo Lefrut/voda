@@ -6,8 +6,14 @@ import androidx.annotation.Keep
 
 @Keep
 data class CHECKBOX_DTO(
+    @Json(name = "NAME")
+    val NAME: String?,
+    @Json(name = "TYPE")
+    val TYPE: String?,
+    @Json(name = "OBYAZATELNO")
+    val OBYAZATELNO: String?,
     @Json(name = "VALUE")
     val VALUE: String?,
     @Json(name = "ID")
-    val GROUP_ID: String?
+    val ID: String?
 )

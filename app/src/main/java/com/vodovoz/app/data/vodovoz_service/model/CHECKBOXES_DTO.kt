@@ -9,5 +9,5 @@ data class CHECKBOXES_DTO(
     @Json(name = "OBYZATELEN")
     val OBYZATELEN: String?,
     @Json(name = "ZNACHWNIYA")
-    val ZNACHWNIYA: List<CHECKBOX_DTO>?
+    val ZNACHWNIYA: List<CANCEL_ORDER_CHECKBOX_DTO>?
 )
