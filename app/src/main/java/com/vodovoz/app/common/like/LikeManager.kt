@@ -51,37 +51,6 @@ class LikeManager @Inject constructor(
         selectedCategoryId = categoryId
     }
 
-
-    /*
-    suspend fun changeFavorite(productId: Long, newValue: Boolean, categoryId: Int? = null) {
-
-        val (likeVersion, userId) = mutex.withLock {
-
-            val updatedVersion = updateFavoritesOptimistically(productId, newValue)
-
-            if (updatedVersion < getLikeVersion(productId)) return
-
-            likesCategories[productId] = categoryId
-            val userId = accountManager.fetchAccountId()
-            updatedVersion to userId
-        }
-
-        kotlin.runCatching {
-            if (userId != null) {
-                updateFavoritesOnline(productId, newValue)
-            } else {
-                updateFavoritesLocal(productId, newValue)
-            }
-        }.onFailure {
-            mutex.withLock {
-                if (likeVersion == getLikeVersion(productId)) {
-                    updateFavoritesOptimistically(productId, newValue)
-                }
-            }
-        }
-    }*/
-
-
     suspend fun changeFavorite(productId: Long, newValue: Boolean) {
 
         val (likeVersion, userId) = mutex.withLock {
@@ -149,7 +118,9 @@ class LikeManager @Inject constructor(
     fun fetchLocalFavorites(): String {
         return formatFavorites(
             parseFavorites(
-                dataStorePrefs.getString(FAV_IDS)?.dropLastWhile { char -> char == ',' } ?: ""
+                dataStorePrefs.getString(FAV_IDS)?.dropLastWhile { char ->
+                    char == ','
+                } ?: ""
             )
         )
     }
@@ -215,8 +186,8 @@ class LikeManager @Inject constructor(
 
     private fun rewriteFavoritesLocal(favorites: Map<Long, Boolean>) {
         dataStorePrefs.putString(
-            FAV_IDS,
-            formatFavorites(
+            key = FAV_IDS,
+            value = formatFavorites(
                 favorites.filter { favorite ->
                     favorite.value
                 }.keys.toList()
@@ -224,8 +195,7 @@ class LikeManager @Inject constructor(
         )
     }
 
-    suspend fun updateLikesAfterLogin(userId: Long) {
-
+    suspend fun updateLikesAfterLogin() {
         val localLikesListString = dataStorePrefs.getString(FAV_IDS)?.dropLast(1) ?: ""
 
         runCatching {

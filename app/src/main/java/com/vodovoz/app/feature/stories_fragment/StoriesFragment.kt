@@ -90,17 +90,14 @@ class StoriesFragment : Fragment() {
                         label = "stories cross fade"
                     ) { uiState ->
                         when (uiState) {
-                            StoriesViewModel.StoriesUiState.Success -> {
+                            StoriesViewModel.StoriesUiState.Success, StoriesViewModel.StoriesUiState.Loading -> {
+                                LoadingPlaceholder(
+                                    containerColor = MaterialTheme.colorScheme.onBackground
+                                )
                                 StoriesScreen(
                                     viewState = viewState,
                                     viewModel = viewModel,
                                     pagerState = pagerState
-                                )
-                            }
-
-                            StoriesViewModel.StoriesUiState.Loading -> {
-                                LoadingPlaceholder(
-                                    containerColor = MaterialTheme.colorScheme.onBackground
                                 )
                             }
                         }

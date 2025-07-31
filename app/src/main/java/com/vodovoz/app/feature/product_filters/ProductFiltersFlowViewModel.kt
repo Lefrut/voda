@@ -108,7 +108,9 @@ class ProductFiltersFlowViewModel @Inject constructor(
             s.copy(
                 filters = s.filters.copy(
                     price = price.copy(
-                        currentMin = min.toIntOrNull() ?: Int.MIN_VALUE
+                        currentMin = min.toFloatOrNull()?.toInt()
+                            ?.takeIf { it != Int.MAX_VALUE }
+                            ?: s.filters.price.min
                     )
                 )
             )
@@ -121,7 +123,9 @@ class ProductFiltersFlowViewModel @Inject constructor(
             s.copy(
                 filters = s.filters.copy(
                     price = price.copy(
-                        currentMax = max.toIntOrNull() ?: Int.MIN_VALUE
+                        currentMax = max.toFloatOrNull()?.toInt()
+                            ?.takeIf { it != Int.MAX_VALUE }
+                            ?: s.filters.price.max
                     )
                 )
             )

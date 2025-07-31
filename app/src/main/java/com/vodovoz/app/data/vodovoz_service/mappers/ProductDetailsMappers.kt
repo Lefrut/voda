@@ -28,6 +28,8 @@ import com.vodovoz.app.data.vodovoz_service.model.product_details.TAGS_DTO
 import com.vodovoz.app.data.vodovoz_service.model.product_details.TOVAR_DETAIL_DTO
 import com.vodovoz.app.data.vodovoz_service.model.product_details.TOVAR_DETAIL_TEXT_DTO
 import com.vodovoz.app.data.vodovoz_service.model.product_details.ZALOG_DTO
+import com.vodovoz.app.domain.general.model.ContentBlockModel
+import com.vodovoz.app.domain.general.model.PresentInfoModel
 import com.vodovoz.app.domain.general.model.product.BlockPromoDataModel
 import com.vodovoz.app.domain.general.model.product.BrandCategoryBlockModel
 import com.vodovoz.app.domain.general.model.product.BrandCategoryItemDataModel
@@ -37,14 +39,11 @@ import com.vodovoz.app.domain.general.model.product.ButtonDesignBlockModel
 import com.vodovoz.app.domain.general.model.product.BuyButtonModel
 import com.vodovoz.app.domain.general.model.product.CharacteristicModel
 import com.vodovoz.app.domain.general.model.product.CharacteristicsBlockModel
-import com.vodovoz.app.domain.general.model.promotion.ColorfulButtonModel
 import com.vodovoz.app.domain.general.model.product.CommentModel
-import com.vodovoz.app.domain.general.model.ContentBlockModel
 import com.vodovoz.app.domain.general.model.product.DepositModel
 import com.vodovoz.app.domain.general.model.product.DesignBlockModel
 import com.vodovoz.app.domain.general.model.product.DocumentModel
 import com.vodovoz.app.domain.general.model.product.OldNewPriceModel
-import com.vodovoz.app.domain.general.model.PresentInfoModel
 import com.vodovoz.app.domain.general.model.product.ProductDetailsButtonsModel
 import com.vodovoz.app.domain.general.model.product.ProductDetailsModel
 import com.vodovoz.app.domain.general.model.product.ProductDetailsScreenModel
@@ -52,6 +51,7 @@ import com.vodovoz.app.domain.general.model.product.ProductDetailsTabModel
 import com.vodovoz.app.domain.general.model.product.ProductVideoModel
 import com.vodovoz.app.domain.general.model.product.PromoProductModel
 import com.vodovoz.app.domain.general.model.product.SectionModel
+import com.vodovoz.app.domain.general.model.promotion.ColorfulButtonModel
 
 fun PresentDTO.toDomain(): PresentInfoModel {
     return PresentInfoModel(html = TEXT ?: "")
@@ -326,7 +326,10 @@ fun COMMENT_DTO.toDomain(): CommentModel {
         text = TEXT ?: "",
         dateText = DATA ?: "",
         rating = RATING ?: 0,
-        purchased = KYPLEN ?: ""
+        purchased = KYPLEN ?: "",
+        images = IMAGES?.map { image ->
+            image.SRC.toVodovozUrl()
+        } ?: emptyList()
     )
 }
 

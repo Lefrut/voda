@@ -11,9 +11,16 @@ data class ProductCommentsInfoUi(
     val ratingText: String,
     val commentsCount: Int,
     val commentsCountText: String,
+    val images: List<String>,
 ) {
     companion object {
-        val Empty = ProductCommentsInfoUi(emptyList(), "", 0, "")
+        val Empty = ProductCommentsInfoUi(
+            sorting = emptyList(),
+            ratingText = "",
+            commentsCount = 0,
+            commentsCountText = "",
+            images = emptyList()
+        )
     }
 }
 
@@ -22,7 +29,8 @@ fun ProductCommentsInfoModel.toUi(): ProductCommentsInfoUi {
         sorting = sorting.map { it.toUi() },
         ratingText = ratingText,
         commentsCount = commentsCount,
-        commentsCountText = commentsCountText
+        commentsCountText = commentsCountText,
+        images = images
     )
 }
 
@@ -31,7 +39,8 @@ fun ProductCommentsInfoUi.toDomain(): ProductCommentsInfoModel {
         sorting = sorting.map { sort -> sort.toDomain() },
         ratingText = ratingText,
         commentsCount = commentsCount,
-        commentsCountText = commentsCountText
+        commentsCountText = commentsCountText,
+        images = images
     )
 }
 
@@ -54,7 +63,7 @@ fun SortModel.toUi(): SortUi {
     )
 }
 
-fun List<SortModel>.mapToUi(): List<SortUi>{
+fun List<SortModel>.mapToUi(): List<SortUi> {
     return map { it.toUi() }
 }
 

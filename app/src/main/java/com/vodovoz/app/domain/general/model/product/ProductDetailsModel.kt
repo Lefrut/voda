@@ -22,6 +22,7 @@ data class ProductDetailsTabModel(
 data class CommentModel(
     val userName: String,
     val userPhoto: String,
+    val images: List<String>,
     val text: String,
     val dateText: String,
     val rating: Int,

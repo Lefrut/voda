@@ -5,9 +5,10 @@ data class ProductCommentsInfoModel(
     val ratingText: String,
     val commentsCount: Int,
     val commentsCountText: String,
+    val images: List<String>
 ) {
     companion object {
-        val Empty = ProductCommentsInfoModel(emptyList(), "", 0, "")
+        val Empty = ProductCommentsInfoModel(emptyList(), "", 0, "", emptyList())
     }
 }
 

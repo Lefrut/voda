@@ -55,7 +55,6 @@ fun StoriesScreen(
     val context = LocalContext.current
 
     LaunchedEffect(viewState.currentStoryIndex) {
-        delay(75L)
         stories.getOrNull(viewState.currentStoryIndex)?.pages?.forEach { storyPage ->
             val key = MemoryCache.Key(storyPage.image)
 

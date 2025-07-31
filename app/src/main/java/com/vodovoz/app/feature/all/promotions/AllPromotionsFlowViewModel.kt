@@ -21,6 +21,7 @@ import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.ui.paging.PagingDataListener
 import com.vodovoz.app.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -101,12 +102,10 @@ class AllPromotionsFlowViewModel @Inject constructor(
                 )
             }
             vodovozServiceRepository.getPromotionsPaged(categoryId = currentCategory.id)
-                .collect { pagingData ->
-                    pagingListener.collectPagingData(
-                        pagingData.map { promotionModel ->
-                            promotionModel.toUi()
-                        }
-                    )
+                .map { pagingData ->
+                    pagingData.map { promotionModel -> promotionModel.toUi() }
+                }.collect { pagingData ->
+                    pagingListener.collectPagingData(pagingData)
                 }
         } else {
             uiStateListener.updateData { s -> s.copy(uiState = UiState.Error) }

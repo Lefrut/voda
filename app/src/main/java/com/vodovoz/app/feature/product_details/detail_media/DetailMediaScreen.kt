@@ -68,7 +68,7 @@ fun DetailMediaScreen(
             state = pagerState,
             key = { i -> mediaList.getOrElse(i) { i } },
             pageSpacing = 2.dp,
-            beyondViewportPageCount = viewState.mediaList.lastIndex,
+            beyondViewportPageCount = 2,
             userScrollEnabled = viewState.portraitOrientation
         ) { pageIndex ->
             val media = mediaList.getOrNull(pageIndex) ?: return@HorizontalPager

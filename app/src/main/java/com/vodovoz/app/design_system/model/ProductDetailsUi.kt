@@ -480,6 +480,7 @@ fun BrandCategoryItemDataModel.toUi(): BrandCategoryItemDataUi {
 data class CommentUi(
     val userName: String,
     val userPhoto: String,
+    val images: List<String>,
     val text: String,
     val dateText: String,
     val rating: Int,
@@ -491,6 +492,6 @@ fun List<CommentModel>.mapToUi(): List<CommentUi> {
 }
 
 fun CommentModel.toUi(): CommentUi {
-    return CommentUi(userName, userPhoto, text, dateText, rating, purchased)
+    return CommentUi(userName, userPhoto, images, text, dateText, rating, purchased)
 }
 

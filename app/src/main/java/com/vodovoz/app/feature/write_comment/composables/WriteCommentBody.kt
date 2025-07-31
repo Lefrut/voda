@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -146,12 +147,20 @@ fun WriteCommentBody(
             }
         }
 
-        Spacer(modifier = Modifier.weight(1f))
+        Spacer(
+            modifier = Modifier
+                .weight(1f)
+                .height(24.dp)
+        )
 
         VodovozSnackbarHost(hostState = snackbarHostState)
 
         VodovozButton(
-            modifier = Modifier.padding(vertical = 24.dp, horizontal = 16.dp),
+            modifier = Modifier.padding(
+                start = 16.dp,
+                end = 16.dp,
+                bottom = 24.dp
+            ),
             text = stringResource(id = R.string.leave_rate),
             isLoading = buttonIsLoading,
             onClick = onCommentSend

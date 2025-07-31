@@ -78,6 +78,7 @@ fun ProductFiltersBody(
             onSliderRangeChange = onPriceRangeChange
         )
 
+
         filters.forEachIndexed { _, filter ->
             key(filter.name + filter.id) {
                 FilterItem(

@@ -1,5 +1,6 @@
 package com.vodovoz.app.feature.product_details.composables
 
+import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
@@ -66,6 +67,7 @@ fun ProductDetailsComments(
     }
 }
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Suppress("NonSkippableComposable")
 @Composable
 private fun CommentsPager(

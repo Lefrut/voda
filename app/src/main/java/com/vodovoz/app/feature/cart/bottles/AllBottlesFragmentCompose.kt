@@ -50,7 +50,7 @@ class AllBottlesFlowFragment : Fragment() {
     ): View {
         return ComposeView(requireContext()).apply {
             setContent {
-                setViewCompositionStrategy(ViewCompositionStrategy.Default)
+                setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
 
                 VodovozTheme {
                     val pagingState by viewModel.observeUiState().collectAsStateWithLifecycle()

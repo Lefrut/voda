@@ -89,4 +89,5 @@ inline fun ProductFilterSlider(
             state = sliderState
         )
     }
+
 }
