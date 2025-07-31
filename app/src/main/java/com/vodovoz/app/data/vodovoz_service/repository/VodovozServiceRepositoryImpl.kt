@@ -1135,8 +1135,11 @@ class VodovozServiceRepositoryImpl @Inject constructor(
         return executeRequest(
             request = {
                 val requestBody = avatarFile.asRequestBody(avatarFile.extension.toMediaTypeOrNull())
-                val filePart =
-                    MultipartBody.Part.createFormData("userpic", avatarFile.name, requestBody)
+                val filePart = MultipartBody.Part.createFormData(
+                    name = "userpic",
+                    filename = avatarFile.name,
+                    body = requestBody
+                )
                 vodovozService.updateUserAvatar(accountManager.fetchAccountId() ?: -1, filePart)
             },
             mapper = {

@@ -1,5 +1,6 @@
 package com.vodovoz.app.feature.product_comments
 
+import androidx.compose.runtime.Immutable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
@@ -93,11 +94,29 @@ class ProductCommentsFlowViewModel @Inject constructor(
     }
 
     fun navigateToWriteComment() = viewModelScope.launch {
-        eventListener.emit(ProductCommentsEvents.GoToWriteComment(productId = productId, productName = productName, productImage = productImage))
+        eventListener.emit(
+            ProductCommentsEvents.GoToWriteComment(
+                productId = productId,
+                productName = productName,
+                productImage = productImage
+            )
+        )
     }
 
     fun navigateBack() = viewModelScope.launch {
         eventListener.emit(ProductCommentsEvents.GoBack)
+    }
+
+    fun setFullScreenImage(image: String) = viewModelScope.launch {
+        uiStateListener.updateData { s ->
+            s.copy(fullScreenImage = image)
+        }
+    }
+
+    fun resetFullScreenImage() = viewModelScope.launch {
+        uiStateListener.updateData { s ->
+            s.copy(fullScreenImage = null)
+        }
     }
 
     sealed class ProductCommentsEvents : Event {
@@ -110,10 +129,12 @@ class ProductCommentsFlowViewModel @Inject constructor(
         ) : ProductCommentsEvents()
     }
 
+    @Immutable
     data class ProductCommentsState(
         val productCommentsInfo: ProductCommentsInfoUi = ProductCommentsInfoUi.Empty,
         val pagedComments: Flow<PagingData<CommentUi>> = emptyFlow(),
         val currentSort: SortUi = SortUi.Empty,
         val showWriteComment: Boolean = false,
+        val fullScreenImage: String? = null,
     ) : State
 }

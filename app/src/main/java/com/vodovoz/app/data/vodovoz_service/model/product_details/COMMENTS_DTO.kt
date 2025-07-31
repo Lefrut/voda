@@ -14,5 +14,6 @@ data class COMMENTS_DTO(
     @Json(name = "COMMENT_COUNT_TEXT")
     val COMMENT_COUNT_TEXT: String?,
     @Json(name = "KARTINKI")
-    val KARTINKI: String?
+    //todo
+    val KARTINKI: List<String>?
 )

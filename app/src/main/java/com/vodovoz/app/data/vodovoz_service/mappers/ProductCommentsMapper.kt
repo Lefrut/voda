@@ -15,7 +15,10 @@ fun ProductCommentsDTO.toDomain(): ProductCommentsInfoModel {
         sorting = SORTIROVKA?.mapNotNull { sortDto -> sortDto?.toDomain() } ?: emptyList(),
         ratingText = RAITINGOSNOVA ?: "",
         commentsCount = COMMENT_COUNT ?: 0,
-        commentsCountText = COMMENT_COUNT_TEXT ?: ""
+        commentsCountText = COMMENT_COUNT_TEXT ?: "",
+        images = IMAGES?.map { s ->
+            s.toVodovozUrl()
+        } ?: emptyList()
     )
 }
 

@@ -152,5 +152,4 @@ private fun View.updateVideoWebView(
             windowWidth * videoHeight / videoWidth.coerceAtLeast(1)
         }
     }
-    fitsSystemWindows = false
 }

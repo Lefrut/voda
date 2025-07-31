@@ -187,7 +187,7 @@ fun OrdersHistoryItemCard(
             modifier = Modifier.padding(horizontal = 18.5.dp),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Row(Modifier.weight(1f)) {
+            Row(Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     text = AnnotatedString.fromHtml(orderHistoryItem.description),
                     color = MaterialTheme.colorScheme.surfaceTint,

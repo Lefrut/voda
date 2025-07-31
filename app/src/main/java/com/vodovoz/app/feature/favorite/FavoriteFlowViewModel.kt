@@ -32,7 +32,6 @@ import com.vodovoz.app.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -106,7 +105,6 @@ class FavoriteFlowViewModel @Inject constructor(
     suspend fun listenCart() =
         uiStateListener
             .map { pagingState -> pagingState.data.products }
-            .distinctUntilChanged()
             .combine(cartManager.observeCarts()) { _, cart ->
                 cart
             }.collectLatest { cart ->
@@ -118,7 +116,7 @@ class FavoriteFlowViewModel @Inject constructor(
             }
 
     suspend fun listenProductLoadings() =
-        uiStateListener.map { it.data.products }.distinctUntilChanged()
+        uiStateListener.map { it.data.products }
             .combine(cartManager.blockedProductsState) { _, blockedProducts ->
                 blockedProducts
             }.collectLatest { blockedProducts ->
@@ -248,9 +246,7 @@ class FavoriteFlowViewModel @Inject constructor(
         uiStateListener.updateData { s ->
             s.copy(
                 currentCategory = newCategory,
-                productsLoadStates = s.productsLoadStates.copy(
-                    refresh = LoadState.Loading,
-                )
+                productsLoadStates = s.productsLoadStates.copy(refresh = LoadState.Loading)
             )
         }
 

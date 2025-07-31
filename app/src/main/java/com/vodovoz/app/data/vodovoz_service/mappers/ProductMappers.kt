@@ -120,8 +120,8 @@ fun List<NALICHIE_MORE_DTO?>.mapToDomain(): List<LabelModel> {
         labelDTO ?: return@mapNotNull null
         LabelModel(
             name = labelDTO.NAME ?: return@mapNotNull null,
-            colorHex = labelDTO.CVET ?: return@mapNotNull null,
-            backgroundHex = labelDTO.BACKGROUND ?: return@mapNotNull null
+            colorHex = labelDTO.CVET ?: "",
+            backgroundHex = labelDTO.BACKGROUND ?: ""
         )
     }
 }

@@ -63,18 +63,17 @@ import androidx.compose.ui.graphics.drawOutline
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
-import coil3.request.crossfade
 import com.gowtham.ratingbar.RatingBar
 import com.vodovoz.app.R
 import com.vodovoz.app.design_system.VodovozTheme
@@ -103,7 +102,7 @@ fun UnratedProductsBottomSheet(
 
     val partiallyExpandedHeight = with(density) { 120.dp.toPx() }
 
-    val expandedPaddingTopPx = with(density) { 8.dp.toPx() }
+    val expandedPaddingTopPx = with(density) { 32.dp.toPx() }
 
     BoxWithConstraints(
         modifier = modifier.fillMaxSize()
@@ -150,7 +149,9 @@ fun UnratedProductsBottomSheet(
                             SheetValue.Expanded at expandedPaddingTopPx
                         }
                     )
-                    state.animateTo(SheetValue.Expanded)
+                    runCatching {
+                        state.animateTo(SheetValue.Expanded)
+                    }
                 }
 
                 SheetValue.PartiallyExpanded -> {}
@@ -284,9 +285,14 @@ fun UpdatedProductsExpanded(
     onNoRateProductClick: (UnratedProductUi) -> Unit,
     onClose: () -> Unit,
 ) {
-    val pagerState = rememberPagerState(products.size) { products.size }
+    val pagerState = rememberPagerState(0) { products.size }
 
-    Column(modifier = modifier.fillMaxSize().background(MaterialTheme.colorScheme.background), horizontalAlignment = Alignment.CenterHorizontally) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -340,13 +346,14 @@ fun UpdatedProductsExpanded(
                         contentScale = ContentScale.Inside,
                     )
                     Text(
-                        modifier = Modifier.padding(16.dp),
+                        modifier = Modifier.padding(top = 16.dp, start = 16.dp, end = 16.dp),
                         text = product.name,
                         color = MaterialTheme.colorScheme.onBackground,
                         style = MaterialTheme.typography.headlineSmall,
                         textAlign = TextAlign.Center,
-                        minLines = 3,
-                        maxLines = 3
+                        minLines = 2,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
                     )
 
 
@@ -354,20 +361,30 @@ fun UpdatedProductsExpanded(
                         mutableFloatStateOf(0f)
                     }
 
-                    RatingBar(
-                        value = rating,
-                        modifier = Modifier.padding(top = 32.dp),
-                        painterEmpty = painterResource(id = R.drawable.ic_star_inactive),
-                        painterFilled = painterResource(id = R.drawable.ic_star_active),
-                        size = 48.dp,
-                        spaceBetween = 8.dp,
-                        onValueChange = { newRating ->
-                            rating = newRating
-                        },
-                        onRatingChanged = { newRating ->
-                            onProductRatingChanged(product, newRating)
-                        }
-                    )
+                    Box(
+                        modifier = Modifier
+                            .padding(top = 16.dp)
+                            .background(
+                                MaterialTheme.colorScheme.surface,
+                                MaterialTheme.shapes.small
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        RatingBar(
+                            value = rating,
+                            modifier = Modifier.padding(vertical = 24.dp, horizontal = 36.dp),
+                            painterEmpty = painterResource(id = R.drawable.ic_star_inactive),
+                            painterFilled = painterResource(id = R.drawable.ic_star_active),
+                            size = 36.dp,
+                            spaceBetween = 8.dp,
+                            onValueChange = { newRating ->
+                                rating = newRating
+                            },
+                            onRatingChanged = { newRating ->
+                                onProductRatingChanged(product, newRating)
+                            }
+                        )
+                    }
                 }
             }
         }
@@ -434,8 +451,7 @@ fun UnratedProductsPartially(
             products.take(10).forEach { product ->
                 key(product.id) {
                     AsyncImage(
-                        modifier = Modifier
-                            .size(120.dp),
+                        modifier = Modifier.size(100.dp),
                         model = product.detailPicture,
                         contentDescription = null,
                         contentScale = ContentScale.Crop,
@@ -458,22 +474,22 @@ private fun UnratedProductsExpandedPreview() {
                 detailPicture = "https://example.com/images/pepsi.png"
             ),
             UnratedProductUi(
-                name = "Pepsi",
+                name = "PepsiPepsiPepsiPepsiPepsiPepsiPepsiPepsiPepsiPepsiPepsiPepsiPepsiPepsiPepsiPepsiPepsiPepsiPepsiPepsiPepsiPepsiPepsiPepsiPepsiPepsiPepsiPepsiPepsiPepsiPepsiPepsiPepsiPepsiPepsiPepsi",
                 id = 2L,
                 detailPicture = "https://example.com/images/pepsi.png"
             ),
             UnratedProductUi(
-                name = "Sprite",
+                name = "Spriteqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq",
                 id = 3L,
                 detailPicture = "https://example.com/images/sprite.png"
             ),
             UnratedProductUi(
-                name = "Fanta",
+                name = "Fantadqwdddddddddddddddddddddddddddddddddddddddddddddddd",
                 id = 4L,
                 detailPicture = "https://example.com/images/fanta.png"
             ),
             UnratedProductUi(
-                name = "Dr Pepper",
+                name = "",
                 id = 5L,
                 detailPicture = "https://example.com/images/dr_pepper.png"
             )

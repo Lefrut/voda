@@ -34,7 +34,7 @@ class WriteCommentFragment : Fragment() {
 
     override fun onStart() {
         super.onStart()
-            tabManager.changeTabVisibility(false)
+        tabManager.changeTabVisibility(false)
     }
 
     override fun onStop() {

@@ -83,7 +83,7 @@ open class ZoomableViewState(
             }
         }
 
-    var containerSize = mutableStateOf(Size.Zero)
+    private var containerSize = mutableStateOf(Size.Zero)
 
     val containerWidth: Float
         get() = containerSize.value.width
@@ -104,7 +104,7 @@ open class ZoomableViewState(
     private val widthFixed: Boolean
         get() = contentRatio > containerRatio
 
-    internal val scale1x: Float
+    private val scale1x: Float
         get() {
             return if (widthFixed) {
                 containerSize.value.width.div(contentSize.width)
@@ -278,7 +278,7 @@ open class ZoomableViewState(
 
 @Composable
 fun rememberZoomableState(
-    contentSize: Size? = null,
+    contentSize: Size,
     @FloatRange(from = 1.0) maxScale: Float = MAX_SCALE_RATE,
     animationSpec: AnimationSpec<Float>? = tween(300, easing = LinearEasing),
 ): ZoomableViewState {
@@ -289,7 +289,7 @@ fun rememberZoomableState(
             animationSpec = animationSpec,
         )
     }.apply {
-        contentSize?.let {
+        contentSize.let {
             this.contentSize = it
             scope.launch { fixToBound() }
         }

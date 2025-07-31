@@ -19,7 +19,7 @@ class LoginManager @Inject constructor(
     ) {
         accountManager.updateUserId(userId)
         accountManager.updateUserToken(userToken)
-        likeManager.updateLikesAfterLogin(userId)
+        likeManager.updateLikesAfterLogin()
         firebaseTokenManager.sendFirebaseToken()
     }
 

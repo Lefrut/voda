@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -19,6 +20,7 @@ import com.vodovoz.app.common.tab.TabManager
 import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.effects.LifecycleEffect
 import com.vodovoz.app.feature.product_details.detail_media.model.DetailMediaEvent
+import com.vodovoz.app.ui.insets.InsetsVisibilityState
 import com.vodovoz.app.util.extensions.disableFullScreen
 import com.vodovoz.app.util.extensions.enableFullScreen
 import com.vodovoz.app.util.extensions.indexOfOrNull
@@ -35,6 +37,9 @@ class DetailMediaFragment : Fragment() {
     @Inject
     lateinit var tabManager: TabManager
 
+    @Inject
+    lateinit var insetsVisibilityState: InsetsVisibilityState
+
     override fun onStart() {
         super.onStart()
         tabManager.changeTabVisibility(false)
@@ -43,6 +48,7 @@ class DetailMediaFragment : Fragment() {
     override fun onStop() {
         super.onStop()
         tabManager.changeTabVisibility(true)
+        insetsVisibilityState.insertSystemBarInsets(true)
     }
 
     override fun onCreateView(
@@ -97,6 +103,7 @@ class DetailMediaFragment : Fragment() {
                                     activity.requestedOrientation =
                                         ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
                                     activity.enableFullScreen()
+                                    insetsVisibilityState.insertSystemBarInsets(false)
 
                                 }
 
@@ -105,6 +112,7 @@ class DetailMediaFragment : Fragment() {
                                     activity.requestedOrientation =
                                         ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
                                     activity.disableFullScreen()
+                                    insetsVisibilityState.insertSystemBarInsets(true)
 
                                 }
                             }

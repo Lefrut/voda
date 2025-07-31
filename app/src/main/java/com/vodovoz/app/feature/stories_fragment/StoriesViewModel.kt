@@ -39,13 +39,11 @@ class StoriesViewModel @Inject constructor(
             s.copy(uiState = StoriesUiState.Loading)
         }
 
-        userPreferencesRepository.addViewedStoryId(startStoryId)
-
-
         if (stories != null) {
-            val storyIndex = stories.indexOfOrNull(stories.firstOrNull { it -> it.id == startStoryId }) ?: 0
+            val storyIndex = stories.indexOfOrNull(
+                stories.firstOrNull { story -> story.id == startStoryId }
+            ) ?: 0
 
-            delay(150L)
 
             uiStateListener.updateData { s ->
                 s.copy(
@@ -62,6 +60,7 @@ class StoriesViewModel @Inject constructor(
             navigateBack()
         }
 
+        userPreferencesRepository.addViewedStoryId(startStoryId)
     }
 
     private fun startStory() = viewModelScope.launch {
