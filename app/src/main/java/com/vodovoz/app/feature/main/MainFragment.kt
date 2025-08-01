@@ -3,6 +3,8 @@ package com.vodovoz.app.feature.main
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity.RESULT_OK
+import android.content.ClipboardManager
+import android.content.Context
 import android.os.Build
 import android.os.Bundle
 import android.view.View
@@ -10,6 +12,12 @@ import android.view.animation.AccelerateInterpolator
 import android.view.animation.LinearInterpolator
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.Insets
 import androidx.core.view.ViewCompat
@@ -34,10 +42,17 @@ import com.vodovoz.app.core.android.locationPermissions
 import com.vodovoz.app.core.android.notificationPermissionGranted
 import com.vodovoz.app.core.navigation.setupWithNavController
 import com.vodovoz.app.databinding.FragmentMainBinding
+import com.vodovoz.app.design_system.VodovozTheme
+import com.vodovoz.app.design_system.composables.snackbar.VodovozSnackBarVisuals
+import com.vodovoz.app.design_system.composables.snackbar.VodovozSnackbarHost
 import com.vodovoz.app.ui.insets.InsetsVisibilityState
 import com.vodovoz.app.ui.insets.ime.handleImeInsetIfNeeded
 import com.vodovoz.app.ui.insets.ime.removeImeHandling
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.consumeAsFlow
+import kotlinx.coroutines.flow.sample
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -79,6 +94,8 @@ class MainFragment : Fragment(R.layout.fragment_main) {
         FragmentMainBinding.bind(fragment.view ?: View(requireContext()))
     }
 
+    private val snackbarHostState = SnackbarHostState()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && !requireContext().notificationPermissionGranted) {
@@ -98,10 +115,22 @@ class MainFragment : Fragment(R.layout.fragment_main) {
         listenImeHandling()
         listenNavigationBarInsets()
         listenStatusBarInsets()
+        listenClipboard()
 
         checkForUpdate()
 
         setMainOnApplyWindowInsets()
+
+        val snackbarHostView = view.findViewById<ComposeView>(R.id.snackbar_host)
+        snackbarHostView.setContent {
+            VodovozTheme {
+                VodovozSnackbarHost(
+                    modifier = Modifier.padding(top = 24.dp),
+                    hostState = snackbarHostState,
+                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp)
+                )
+            }
+        }
     }
 
     private fun setMainOnApplyWindowInsets() {
@@ -187,6 +216,40 @@ class MainFragment : Fragment(R.layout.fragment_main) {
                 }
             }
         }
+    }
+
+    @OptIn(FlowPreview::class)
+    @SuppressLint("ServiceCast")
+    private fun listenClipboard() = viewLifecycleOwner.lifecycleScope.launch {
+        repeatOnLifecycle(Lifecycle.State.STARTED) {
+
+            val channel = Channel<String>()
+
+            val clipboardManager =
+                context?.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
+                    ?: return@repeatOnLifecycle
+
+            clipboardManager.addPrimaryClipChangedListener {
+                val clip = clipboardManager.primaryClip
+                val item = clip?.getItemAt(0)
+                val text = item?.coerceToText(requireContext())?.toString()
+                    ?: return@addPrimaryClipChangedListener
+
+                viewLifecycleOwner.lifecycleScope.launch {
+                    channel.trySend(text)
+                }
+            }
+
+            channel.consumeAsFlow().sample(1500).collect {
+                snackbarHostState.showSnackbar(
+                    VodovozSnackBarVisuals.create(
+                        getString(R.string.text_copied_in_buffer),
+                        R.drawable.ic_success
+                    )
+                )
+            }
+        }
+
     }
 
     private fun listenImeHandling() = viewLifecycleOwner.lifecycleScope.launch {

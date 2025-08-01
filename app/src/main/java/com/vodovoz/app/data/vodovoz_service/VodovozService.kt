@@ -662,7 +662,7 @@ interface VodovozService {
      * Promotion screens
      */
     @GET("glavnaya/akcii.php?action=akcii")
-    suspend fun getPromotionsWithSections(
+    suspend fun getAllPromotions(
         @Query("nav") page: Int = 1,
         @Query("limit") limit: Int = 10,
         @Query("sect") categoryId: Int? = null,

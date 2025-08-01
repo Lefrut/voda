@@ -18,17 +18,15 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.Text
-import androidx.compose.material3.TooltipBox
-import androidx.compose.material3.TooltipDefaults
-import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -43,6 +41,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.vodovoz.app.R
 import com.vodovoz.app.design_system.VodovozTheme
+import com.vodovoz.app.design_system.composables.bottom_sheet.InfoBottomSheet
 import com.vodovoz.app.design_system.model.CharacteristicUi
 import com.vodovoz.app.design_system.model.CharacteristicsBlockUi
 import com.vodovoz.app.design_system.model.ContentBlockUi
@@ -174,11 +173,10 @@ fun ProductDetailsInfo(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CharacteristicItem(modifier: Modifier = Modifier, characteristic: CharacteristicUi) {
-    val tooltipState = rememberTooltipState(isPersistent = true)
     val coroutineScope = rememberCoroutineScope()
+    var showInfoBS by rememberSaveable { mutableStateOf(false) }
 
     Row(modifier = modifier, verticalAlignment = Alignment.Top) {
         Row(modifier = Modifier.weight(1f)) {
@@ -199,35 +197,16 @@ fun CharacteristicItem(modifier: Modifier = Modifier, characteristic: Characteri
                             placeholderVerticalAlign = PlaceholderVerticalAlign.TextCenter
                         )
                     ) {
-                        TooltipBox(
-                            modifier = Modifier.padding(start = 4.dp),
-                            positionProvider = TooltipDefaults.rememberRichTooltipPositionProvider(),
-                            tooltip = {
-                                PlainTooltip(
-                                    containerColor = MaterialTheme.colorScheme.background,
-                                    shape = MaterialTheme.shapes.small,
-                                    tonalElevation = 1.dp,
-                                    shadowElevation = 1.dp
-                                ) {
-                                    Text(
-                                        text = characteristic.hint ?: "",
-                                        color = MaterialTheme.colorScheme.onBackground,
-                                        style = MaterialTheme.typography.labelSmall
-                                    )
-                                }
-                            },
-                            state = tooltipState,
-                        ) {
-                            Icon(
-                                painter = painterResource(id = R.drawable.ic_question_circle),
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier
-                                    .size(20.dp)
-                                    .clip(CircleShape)
-                                    .clickable { coroutineScope.launch { tooltipState.show() } }
-                            )
-                        }
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_question_circle),
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier
+                                .padding(start = 4.dp)
+                                .size(20.dp)
+                                .clip(CircleShape)
+                                .clickable { coroutineScope.launch { showInfoBS = true } }
+                        )
                     }
                 ),
                 color = MaterialTheme.colorScheme.onBackground,
@@ -246,7 +225,18 @@ fun CharacteristicItem(modifier: Modifier = Modifier, characteristic: Characteri
                 )
             }
         }
+    }
 
+
+    if (showInfoBS && characteristic.hint != null) {
+        InfoBottomSheet(
+            title = "",
+            text = characteristic.hint,
+            onDismissRequest = {
+                showInfoBS = false
+            },
+            onApply = null
+        )
     }
 
 }

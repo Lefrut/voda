@@ -65,6 +65,10 @@ fun AllPromotionsScreen(
                     },
                     onPromotionClick = { promotion ->
                         viewModel.navigateToPromotionDetails(promotion)
+                    },
+                    onPromotionSee = { index ->
+                        viewModel.notifyPagingPromotions(index)
+
                     }
                 )
             }

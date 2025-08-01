@@ -8,6 +8,8 @@
     android:theme="@style/Theme.Vodovoz"
     android:background="@color/white">
 
+
+
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/nvNavigation"
         android:layout_width="match_parent"
@@ -55,5 +57,13 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         />
+
+    <androidx.compose.ui.platform.ComposeView
+        android:id="@+id/snackbar_host"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

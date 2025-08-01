@@ -255,6 +255,13 @@ interface VodovozServiceRepository {
         categoryId: Int = -1,
     ): Flow<Result<PromotionsSectionModel>>
 
+    fun getBannerPromotionsPaged(
+        bannerId: Long,
+        blockId: Long,
+        categoryId: Int = -1,
+    ): Flow<PagingData<PromotionModel>>
+
+
 
     fun getBannerProducts(
         bannerId: Long,
@@ -456,11 +463,11 @@ interface VodovozServiceRepository {
         limit: Int = 5,
     ): Flow<PagingData<ProductModel>>
 
-    fun getPromotionsWithSections(
+    fun getAllPromotionsDetails(
         categoryId: Int = -1,
     ): Flow<Result<PromotionsSectionModel>>
 
-    fun getPromotionsPaged(
+    fun getAllPromotionsPaged(
         limit: Int = 10,
         categoryId: Int = -1,
     ): Flow<PagingData<PromotionModel>>

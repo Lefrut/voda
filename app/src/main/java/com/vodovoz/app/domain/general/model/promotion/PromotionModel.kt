@@ -37,7 +37,7 @@ data class PromotionModel(
     val sectionId: Int,
     val detailPicture: String,
     val endDate: ZonedDateTime,
-    val label: LabelModel,
+    val label: LabelModel?,
     val advertising: AboutAdvertisingModel?,
 )
 

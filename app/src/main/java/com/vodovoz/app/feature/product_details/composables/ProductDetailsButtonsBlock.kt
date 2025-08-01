@@ -143,8 +143,7 @@ fun ProductDetailsButtonsBlock(
             VodovozButton(
                 text = preOrderButton.name,
                 onClick = onPreOrderButtonClick,
-                modifier = Modifier
-                    .padding(top = 16.dp),
+                modifier = Modifier.padding(top = 16.dp),
                 colors = ButtonDefaults.filledTonalButtonColors(
                     contentColor = preOrderButton.textColor,
                     containerColor = preOrderButton.backgroundColor

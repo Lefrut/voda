@@ -1,6 +1,8 @@
 package com.vodovoz.app.design_system.composables.bottom_sheet
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -23,7 +25,7 @@ fun InfoBottomSheet(
     title: String,
     text: String,
     onDismissRequest: () -> Unit,
-    onApply: () -> Unit,
+    onApply: (() -> Unit)?,
 ) {
     ModalBottomSheet(
         sheetState = rememberModalBottomSheetState(true),
@@ -38,12 +40,15 @@ fun InfoBottomSheet(
         )
     ) {
         Column(modifier = Modifier.padding(horizontal = 16.dp)) {
-            Text(
-                modifier = Modifier.padding(top = 20.dp),
-                text = title,
-                color = MaterialTheme.colorScheme.onBackground,
-                style = MaterialTheme.typography.headlineSmall
-            )
+            if (title.isNotEmpty()) {
+                Text(
+                    modifier = Modifier.padding(top = 20.dp),
+                    text = title,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    style = MaterialTheme.typography.headlineSmall
+                )
+            }
+
             Text(
                 modifier = Modifier.padding(top = 8.dp),
                 text = text,
@@ -53,15 +58,15 @@ fun InfoBottomSheet(
                 )
             )
 
-            VodovozButton(
-                modifier = Modifier.padding(
-                    top = 20.dp,
-                    bottom = 16.dp
-                ),
-                text = stringResource(id = R.string.its_clear),
-                onClick = onApply,
-                colors = VodovozButtonDefaults.secondaryColors()
-            )
+            onApply?.let {
+                VodovozButton(
+                    modifier = Modifier.padding(top = 20.dp),
+                    text = stringResource(id = R.string.its_clear),
+                    onClick = onApply,
+                    colors = VodovozButtonDefaults.secondaryColors()
+                )
+            }
+            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 
