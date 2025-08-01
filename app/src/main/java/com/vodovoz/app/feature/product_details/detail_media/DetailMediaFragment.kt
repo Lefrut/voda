@@ -47,7 +47,7 @@ class DetailMediaFragment : Fragment() {
 
     override fun onStop() {
         super.onStop()
-        //todo - fix landscape state
+        insetsVisibilityState.insertSystemBarInsets(false)
         insetsVisibilityState.insertSystemBarInsets(true)
         tabManager.changeTabVisibility(true)
     }
@@ -102,18 +102,18 @@ class DetailMediaFragment : Fragment() {
 
                                 DetailMediaEvent.MakeLandscape -> {
                                     val activity = requireActivity()
-                                    activity.requestedOrientation =
-                                        ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
                                     activity.enableFullScreen()
                                     insetsVisibilityState.insertSystemBarInsets(false)
+                                    activity.requestedOrientation =
+                                        ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
                                 }
 
                                 DetailMediaEvent.MakePortrait -> {
                                     val activity = requireActivity()
-                                    activity.requestedOrientation =
-                                        ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
                                     activity.disableFullScreen()
                                     insetsVisibilityState.insertSystemBarInsets(true)
+                                    activity.requestedOrientation =
+                                        ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
                                 }
                             }
                         }

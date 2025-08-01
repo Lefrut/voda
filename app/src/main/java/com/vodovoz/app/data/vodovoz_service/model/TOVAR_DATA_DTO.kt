@@ -3,6 +3,7 @@ package com.vodovoz.app.data.vodovoz_service.model
 
 import androidx.annotation.Keep
 import com.squareup.moshi.Json
+import com.vodovoz.app.data.vodovoz_service.model.auth.KNOPKA_AUTH_DTO
 
 @Keep
 data class TOVAR_DATA_DTO(
@@ -31,5 +32,7 @@ data class TOVAR_DATA_DTO(
     @Json(name = "PROPERTY_ZALOG_VALUE")
     val PROPERTY_ZALOG_VALUE: Int?,
     @Json(name = "TOVAR18")
-    val TOVAR18: TOVAR_18_DTO?
+    val TOVAR18: TOVAR_18_DTO?,
+    @Json(name = "KNOPKI")
+    val KNOPKI: KNOPKA_AUTH_DTO?
 )

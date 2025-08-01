@@ -184,4 +184,16 @@ data object VodovozButtonDefaults {
         containerColor = MaterialTheme.colorScheme.primaryContainer
     )
 
+    @Composable
+    fun colors(
+        contentColor: Color,
+        containerColor: Color
+    ) = ButtonDefaults.filledTonalButtonColors(
+        contentColor = contentColor,
+        disabledContentColor = contentColor.copy(0.75f),
+        containerColor = containerColor,
+        disabledContainerColor = containerColor.copy(0.45f),
+
+    )
+
 }

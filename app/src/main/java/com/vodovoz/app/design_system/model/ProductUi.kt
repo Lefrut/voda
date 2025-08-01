@@ -1,8 +1,16 @@
 package com.vodovoz.app.design_system.model
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
+import com.vodovoz.app.R
 import com.vodovoz.app.common.model.ButtonAction
+import com.vodovoz.app.design_system.composables.button.QuantityButtonSmall
+import com.vodovoz.app.design_system.composables.button.VodovozButtonDefaults
+import com.vodovoz.app.design_system.composables.button.VodovozButtonSmall
 import com.vodovoz.app.domain.general.model.product.ButtonModel
 import com.vodovoz.app.domain.general.model.product.CategoryWithProductsModel
 import com.vodovoz.app.domain.general.model.promotion.LabelModel
@@ -124,6 +132,7 @@ fun CategoryWithProductsModel.toUi(): CategoryWithProductsUi {
     )
 }
 
+@Immutable
 data class ButtonUi(
     val name: String,
     val action: ButtonAction,
@@ -189,8 +198,52 @@ data class ProductUi(
     val isAvailable: Boolean,
     val pricePerUnit: Int?,
     val unitOfMeasurement: String?,
-    val forAdults: ForAdultsUi?
+    val forAdults: ForAdultsUi?,
+    val button: ColorfulButtonUi?
 )
+
+
+@Composable
+fun ProductUi.Button(
+    modifier: Modifier = Modifier,
+    isLoading: Boolean,
+    onAnalogsClick: (ProductUi) -> Unit,
+    onIncrementToCart: (ProductUi) -> Unit,
+    onDecrementToCart: (ProductUi) -> Unit,
+){
+    val product = this@Button
+
+    Box(modifier = modifier) {
+        when {
+            button != null -> {
+                VodovozButtonSmall(
+                    text = button.name,
+                    onClick = { onAnalogsClick(product) },
+                    colors = VodovozButtonDefaults.colors(
+                        contentColor = button.textColor,
+                        containerColor = button.backgroundColor
+                    )
+                )
+            }
+
+            cartQuantity > 0 -> {
+                QuantityButtonSmall(
+                    isLoading = isLoading,
+                    quantity = cartQuantity,
+                    onPlus = { onIncrementToCart(product) },
+                    onMinus = { onDecrementToCart(product) }
+                )
+            }
+
+            else -> {
+                VodovozButtonSmall(
+                    text = stringResource(id = R.string.to_cart),
+                    onClick = { onIncrementToCart(product) },
+                )
+            }
+        }
+    }
+}
 
 
 fun List<ProductModel>.mapToUi(): List<ProductUi>{
@@ -212,7 +265,8 @@ fun ProductModel.toUi(): ProductUi {
         isAvailable = quantity > 0,
         pricePerUnit = pricePerUnit,
         unitOfMeasurement = unitOfMeasurement,
-        forAdults = forAdults?.toUi()
+        forAdults = forAdults?.toUi(),
+        button = analogButton?.toUi()
     )
 }
 
