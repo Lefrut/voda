@@ -10,19 +10,19 @@ import com.vodovoz.app.data.vodovoz_service.model.ProductsSectionDTO
 import com.vodovoz.app.data.vodovoz_service.model.TOVAR_18_DTO
 import com.vodovoz.app.data.vodovoz_service.model.TOVAR_DATA_DTO
 import com.vodovoz.app.domain.general.model.CategoryModel
-import com.vodovoz.app.domain.general.model.user.ForAdultsModel
-import com.vodovoz.app.domain.general.model.promotion.LabelModel
 import com.vodovoz.app.domain.general.model.product.PriceModel
 import com.vodovoz.app.domain.general.model.product.ProductModel
 import com.vodovoz.app.domain.general.model.product.ProductsSectionModel
 import com.vodovoz.app.domain.general.model.product.ShareModel
+import com.vodovoz.app.domain.general.model.promotion.LabelModel
+import com.vodovoz.app.domain.general.model.user.ForAdultsModel
 
 fun ProductsSectionDTO.toDomain(): ProductsSectionModel {
 
     val sorting = SORTIROVKA?.DANNIESORT?.mapNotNull { it?.toDomain() } ?: emptyList()
     val products = (DATA ?: TOVAR)?.mapToDomain() ?: emptyList()
 
-    if(sorting.isEmpty() && products.isEmpty()){
+    if (sorting.isEmpty() && products.isEmpty()) {
         throw IllegalArgumentException("Product section products and sorting can't be bull")
     }
 
@@ -43,7 +43,8 @@ fun TOVAR_18_DTO.toDomain(): ForAdultsModel {
         title = TITLE ?: "",
         textBlur = TEXTBLUR ?: "",
         description = OPISANIE ?: "",
-        button = KNOPKA?.toDomain() ?: throw IllegalArgumentException("TOVAR18 button can't be null")
+        button = KNOPKA?.toDomain()
+            ?: throw IllegalArgumentException("TOVAR18 button can't be null")
     )
 }
 
@@ -60,8 +61,8 @@ fun PODELITCA_DTO.toDomain(): ShareModel? {
 
 fun AnalogsSectionDTO.toDomain(): ProductsSectionModel {
     val sorting = SORTIROVKA?.DANNIESORT?.mapNotNull { sortDto ->
-            sortDto?.toDomain()
-        } ?: emptyList()
+        sortDto?.toDomain()
+    } ?: emptyList()
 
     val products = TOVAR?.mapNotNull { tovarDto ->
         tovarDto.toDomain()
@@ -101,7 +102,8 @@ fun TOVAR_DATA_DTO.toDomain(): ProductModel? {
         prices = EXTENDED_PRICE.mapNotNull { it?.toDomain() },
         labels = NALICHIE_MORE?.mapToDomain() ?: emptyList(),
         cartQuantity = 0,
-        forAdults = TOVAR18?.toDomain()
+        forAdults = TOVAR18?.toDomain(),
+        analogButton = KNOPKI?.toDomain()
     )
 }
 

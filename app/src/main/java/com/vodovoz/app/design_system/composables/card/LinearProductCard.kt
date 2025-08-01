@@ -18,7 +18,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -30,23 +29,19 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.vodovoz.app.R
 import com.vodovoz.app.design_system.ExtendedTheme
 import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.composables.blur.VodovozBlur
-import com.vodovoz.app.design_system.composables.button.QuantityButtonSmall
-import com.vodovoz.app.design_system.composables.button.VodovozButtonDefaults
-import com.vodovoz.app.design_system.composables.button.VodovozButtonSmall
 import com.vodovoz.app.design_system.composables.chip.VodovozColorChipSmall
+import com.vodovoz.app.design_system.model.Button
 import com.vodovoz.app.design_system.model.ColorfulButtonUi
 import com.vodovoz.app.design_system.model.ForAdultsUi
 import com.vodovoz.app.design_system.model.LabelUi
 import com.vodovoz.app.design_system.model.ProductUi
 import com.vodovoz.app.util.extensions.formatRating
 import com.vodovoz.app.util.formatPrice
-import java.util.Locale
 import kotlin.math.roundToInt
 
 @Composable
@@ -182,33 +177,13 @@ fun LinearProductCard(
 
 
                 Spacer(modifier = Modifier.height(8.dp))
-                val buttonIsLoading = product.cartLoading
 
-                when {
-                    !product.isAvailable -> {
-                        VodovozButtonSmall(
-                            text = stringResource(id = R.string.analogs),
-                            onClick = { onAnalogsClick(product) },
-                            colors = VodovozButtonDefaults.secondaryColors()
-                        )
-                    }
-
-                    product.cartQuantity > 0 -> {
-                        QuantityButtonSmall(
-                            isLoading = buttonIsLoading,
-                            quantity = product.cartQuantity,
-                            onPlus = { onIncrementToCart(product) },
-                            onMinus = { onDecrementToCart(product) }
-                        )
-                    }
-
-                    else -> {
-                        VodovozButtonSmall(
-                            text = stringResource(id = R.string.to_cart),
-                            onClick = { onIncrementToCart(product) },
-                        )
-                    }
-                }
+                product.Button(
+                    isLoading = product.cartLoading,
+                    onAnalogsClick = onAnalogsClick,
+                    onIncrementToCart = onIncrementToCart,
+                    onDecrementToCart = onDecrementToCart
+                )
             }
         }
     }
@@ -291,7 +266,8 @@ private fun LinearProductCardPreview() {
             isAvailable = true,
             pricePerUnit = null,
             unitOfMeasurement = null,
-            ForAdultsUi("eqweq", "dqwdqw", "dwqdwq", ColorfulButtonUi.Empty)
+            ForAdultsUi("eqweq", "dqwdqw", "dwqdwq", ColorfulButtonUi.Empty),
+            button = null
         )
 
 

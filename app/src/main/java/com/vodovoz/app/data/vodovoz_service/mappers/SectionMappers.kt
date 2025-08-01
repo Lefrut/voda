@@ -42,7 +42,9 @@ fun RAZDEL_DTO.toDomain(): SectionModel<ProductModel> {
     return SectionModel(
         title = TITLE ?: "",
         button = KNOPKA?.toDomain(),
-        items = DATA?.mapNotNull { tovarDataDto -> tovarDataDto?.toDomain() } ?: emptyList()
+        items = DATA?.mapNotNull { tovarDataDto ->
+            tovarDataDto?.toDomain()
+        } ?: emptyList()
     )
 }
 

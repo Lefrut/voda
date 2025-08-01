@@ -38,17 +38,14 @@ import com.vodovoz.app.R
 import com.vodovoz.app.design_system.ExtendedTheme
 import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.composables.blur.VodovozBlur
-import com.vodovoz.app.design_system.composables.button.QuantityButtonSmall
-import com.vodovoz.app.design_system.composables.button.VodovozButtonDefaults
-import com.vodovoz.app.design_system.composables.button.VodovozButtonSmall
 import com.vodovoz.app.design_system.composables.chip.VodovozColorChipSmall
+import com.vodovoz.app.design_system.model.Button
 import com.vodovoz.app.design_system.model.ColorfulButtonUi
 import com.vodovoz.app.design_system.model.ForAdultsUi
 import com.vodovoz.app.design_system.model.LabelUi
 import com.vodovoz.app.design_system.model.ProductUi
 import com.vodovoz.app.util.extensions.formatRating
 import com.vodovoz.app.util.formatPrice
-import java.util.Locale
 import kotlin.math.roundToInt
 
 
@@ -74,7 +71,11 @@ fun GridProductCard(
 
         val forAdults = product.forAdults
 
-        VodovozBlur(modifier = Modifier.clip(MaterialTheme.shapes.small),showBlur = forAdults != null, text = forAdults?.textBlur ?: "") {
+        VodovozBlur(
+            modifier = Modifier.clip(MaterialTheme.shapes.small),
+            showBlur = forAdults != null,
+            text = forAdults?.textBlur ?: ""
+        ) {
             ImageSection(
                 image = product.image,
                 percentLabels = percentLabels,
@@ -100,35 +101,15 @@ fun GridProductCard(
             )
 
 
-            val buttonIsLoading = product.cartLoading
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            when {
-                !product.isAvailable -> {
-                    VodovozButtonSmall(
-                        text = stringResource(id = R.string.analogs),
-                        onClick = { onAnalogsClick(product) },
-                        colors = VodovozButtonDefaults.secondaryColors()
-                    )
-                }
-
-                product.cartQuantity > 0 -> {
-                    QuantityButtonSmall(
-                        isLoading = buttonIsLoading,
-                        quantity = product.cartQuantity,
-                        onPlus = { onIncrementToCart(product) },
-                        onMinus = { onDecrementToCart(product) }
-                    )
-                }
-
-                else -> {
-                    VodovozButtonSmall(
-                        text = stringResource(id = R.string.to_cart),
-                        onClick = { onIncrementToCart(product) },
-                    )
-                }
-            }
+            product.Button(
+                isLoading = product.cartLoading,
+                onAnalogsClick = onAnalogsClick,
+                onIncrementToCart = onIncrementToCart,
+                onDecrementToCart = onDecrementToCart
+            )
         }
     }
 }
@@ -156,7 +137,9 @@ private fun ImageSection(
             percentLabels.forEach { label ->
                 VodovozColorChipSmall(color = label.color, text = label.name)
             }
-            Spacer(modifier = Modifier.weight(1f).pointerInput(Unit){ detectTapGestures {  } })
+            Spacer(modifier = Modifier
+                .weight(1f)
+                .pointerInput(Unit) { detectTapGestures { } })
 
             Icon(
                 painter = painterResource(id = if (isFavorite) R.drawable.ic_favorite_filled else R.drawable.ic_favorite_outline),
@@ -274,7 +257,8 @@ private fun GridProductCardPreview() {
             isAvailable = false,
             pricePerUnit = null,
             unitOfMeasurement = null,
-            forAdults = ForAdultsUi("dwqqwd", "dqwdqw", "Не нажимай", ColorfulButtonUi.Empty)
+            forAdults = ForAdultsUi("dwqqwd", "dqwdqw", "Не нажимай", ColorfulButtonUi.Empty),
+            button = null
         )
 
         GridProductCard(

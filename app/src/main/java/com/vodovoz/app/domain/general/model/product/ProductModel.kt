@@ -1,7 +1,8 @@
 package com.vodovoz.app.domain.general.model.product
 
-import com.vodovoz.app.domain.general.model.user.ForAdultsModel
+import com.vodovoz.app.domain.general.model.promotion.ColorfulButtonModel
 import com.vodovoz.app.domain.general.model.promotion.LabelModel
+import com.vodovoz.app.domain.general.model.user.ForAdultsModel
 
 data class ProductModel(
     val id: Long,
@@ -18,7 +19,8 @@ data class ProductModel(
     val firstPrice: PriceModel,
     val prices: List<PriceModel>,
     val labels: List<LabelModel>,
-    val forAdults: ForAdultsModel?
+    val forAdults: ForAdultsModel?,
+    val analogButton: ColorfulButtonModel?,
 )
 
 data class PriceModel(
