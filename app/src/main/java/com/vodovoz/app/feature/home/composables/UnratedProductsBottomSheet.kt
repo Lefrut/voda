@@ -441,17 +441,19 @@ fun UnratedProductsPartially(
 
         Row(
             modifier = Modifier
+                .padding(top = 4.dp)
                 .fillMaxWidth()
                 .horizontalScroll(
                     rememberScrollState(),
                     rememberOverscrollEffect()
-                ),
+                )
+                .padding(start = 16.dp),
             horizontalArrangement = Arrangement.Center
         ) {
             products.take(10).forEach { product ->
                 key(product.id) {
                     AsyncImage(
-                        modifier = Modifier.size(100.dp),
+                        modifier = Modifier.size(90.dp),
                         model = product.detailPicture,
                         contentDescription = null,
                         contentScale = ContentScale.Crop,

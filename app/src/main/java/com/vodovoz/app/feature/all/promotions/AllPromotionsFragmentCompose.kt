@@ -41,7 +41,6 @@ class AllPromotionsFragment : Fragment() {
 
                     val lazyListState = rememberLazyListState()
 
-
                     AllPromotionsScreen(
                         viewModel = viewModel,
                         viewState = viewState,

@@ -162,7 +162,7 @@ fun PromotionModel.toUi(): PromotionUi {
     return PromotionUi(
         id = id,
         picture = detailPicture,
-        label = label.toUi(),
+        label = label?.toUi(),
         categoryId = sectionId,
         blockId = blockId,
         timeLeft = timeRemainingToEnd(endDate),

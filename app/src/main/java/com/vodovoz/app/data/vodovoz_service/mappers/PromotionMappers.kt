@@ -68,7 +68,7 @@ fun PROMOTION_DATA_DTO.toDomain(): PromotionModel? {
         sectionId = IBLOCK_SECTION_ID ?: -1,
         detailPicture = DETAIL_PICTURE?.toVodovozUrl() ?: return null,
         endDate = mapToZonedDateTime(DATA_OUT ?: return null) ?: return null,
-        label = HIT?.toDomain() ?: LabelModel.Empty,
+        label = HIT?.toDomain(),
         advertising = OREKLAME?.toDomain()
     )
 }

@@ -14,6 +14,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.fromHtml
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImagePainter
@@ -21,6 +23,7 @@ import coil3.compose.rememberAsyncImagePainter
 import com.vodovoz.app.design_system.composables.button.VodovozButton
 import com.vodovoz.app.design_system.composables.button.VodovozButtonsColumn
 import com.vodovoz.app.design_system.model.ColorfulButtonUi
+import com.vodovoz.app.design_system.vodovozTextLinkStyle
 
 @Composable
 fun BaseBottomSheetContent(
@@ -58,7 +61,10 @@ fun BaseBottomSheetContent(
         if (description.isNotEmpty()) {
             Text(
                 modifier = Modifier.padding(top = 8.dp),
-                text = description,
+                text = AnnotatedString.fromHtml(
+                    htmlString = description,
+                    linkStyles = vodovozTextLinkStyle
+                ),
                 color = MaterialTheme.colorScheme.onBackground,
                 style = MaterialTheme.typography.bodySmall
             )

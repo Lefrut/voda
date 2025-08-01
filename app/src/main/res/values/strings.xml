@@ -299,5 +299,6 @@
     <string name="block_minutes">МИНУТ</string>
     <string name="block_seconds">СЕКУНД</string>
     <string name="error_send_data">Не удалось отправить данные, попробуйте снова!</string>
+    <string name="text_copied_in_buffer">Текст скопирован в буфер обмена</string>
 
 </resources>

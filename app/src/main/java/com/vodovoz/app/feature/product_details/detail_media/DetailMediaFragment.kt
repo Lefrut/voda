@@ -1,11 +1,11 @@
 package com.vodovoz.app.feature.product_details.detail_media
 
+import android.annotation.SuppressLint
 import android.content.pm.ActivityInfo
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -47,10 +47,12 @@ class DetailMediaFragment : Fragment() {
 
     override fun onStop() {
         super.onStop()
-        tabManager.changeTabVisibility(true)
+        //todo - fix landscape state
         insetsVisibilityState.insertSystemBarInsets(true)
+        tabManager.changeTabVisibility(true)
     }
 
+    @SuppressLint("SourceLockedOrientationActivity")
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -104,7 +106,6 @@ class DetailMediaFragment : Fragment() {
                                         ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
                                     activity.enableFullScreen()
                                     insetsVisibilityState.insertSystemBarInsets(false)
-
                                 }
 
                                 DetailMediaEvent.MakePortrait -> {
@@ -113,7 +114,6 @@ class DetailMediaFragment : Fragment() {
                                         ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
                                     activity.disableFullScreen()
                                     insetsVisibilityState.insertSystemBarInsets(true)
-
                                 }
                             }
                         }

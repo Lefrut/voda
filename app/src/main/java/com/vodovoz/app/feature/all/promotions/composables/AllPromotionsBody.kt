@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
@@ -34,6 +35,7 @@ fun AllPromotionsBody(
     onSectionSelect: (PromotionCategoryUi) -> Unit,
     onAdvertisingClick: (PromotionUi) -> Unit,
     onPromotionClick: (PromotionUi) -> Unit,
+    onPromotionSee: (Int) -> Unit,
 ) {
     Column(
         modifier = modifier
@@ -73,12 +75,16 @@ fun AllPromotionsBody(
             when {
                 promotions.isNotEmpty() -> {
                     items(count = promotions.size) { i ->
-                        val promotion = promotions[i]
+                        val promotion = promotions.getOrNull(i) ?: return@items
                         PromotionCard(
                             promotion = promotion,
                             onClick = onPromotionClick,
                             onAdvertisingClick = onAdvertisingClick
                         )
+
+                        SideEffect {
+                            onPromotionSee(i)
+                        }
                     }
                 }
 

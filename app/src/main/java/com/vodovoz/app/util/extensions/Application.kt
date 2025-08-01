@@ -199,7 +199,6 @@ fun fetchCurrentDayInTimeMillis(): Long {
 }
 
 fun Activity.enableFullScreen() {
-    WindowCompat.setDecorFitsSystemWindows(window, false)
     val insetsController = WindowCompat.getInsetsController(window, window.decorView)
     insetsController.systemBarsBehavior =
         WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE

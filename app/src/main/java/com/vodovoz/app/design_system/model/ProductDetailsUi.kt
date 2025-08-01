@@ -48,7 +48,7 @@ fun ProductDetailsButtonsModel.toUi(): ProductDetailsButtonsUi {
         blockDesignButton = blockDesignButton?.toUi(),
         multiBuyButton = multiBuyButton?.toUi(),
         analogButton = analogButton?.toUi(),
-        preOrderButton = analogButton?.toUi()
+        preOrderButton = preOrderButton?.toUi()
     )
 }
 
@@ -56,7 +56,6 @@ fun ProductDetailsButtonsModel.toUi(): ProductDetailsButtonsUi {
 data class ProductDetailsButtonsUi(
     val blockButton: ButtonBlockUi?,
     val blockDesignButton: ButtonDesignBlockUi?,
-
     val multiBuyButton: ColorfulButtonUi?,
     val analogButton: ColorfulButtonUi?,
     val preOrderButton: ColorfulButtonUi?,

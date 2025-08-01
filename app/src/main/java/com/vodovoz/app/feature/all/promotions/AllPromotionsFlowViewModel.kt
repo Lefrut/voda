@@ -5,6 +5,7 @@ import androidx.compose.runtime.Stable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.paging.LoadState
+import androidx.paging.PagingData
 import androidx.paging.map
 import com.vodovoz.app.common.content.Event
 import com.vodovoz.app.common.content.PagingContractViewModel
@@ -21,6 +22,7 @@ import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.ui.paging.PagingDataListener
 import com.vodovoz.app.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -60,56 +62,83 @@ class AllPromotionsFlowViewModel @Inject constructor(
 
     }
 
+    private suspend fun getAllPromotions(): PromotionsSectionModel? {
+        return when (dataSource) {
+            AllPromotionsFragment.DataSource.All -> vodovozServiceRepository.getAllPromotionsDetails()
+                .singleResult().getOrNull()
+
+            is AllPromotionsFragment.DataSource.ByBanner -> vodovozServiceRepository.getBannerPromotions(
+                bannerId = dataSource.bannerId,
+                blockId = dataSource.blockId,
+                categoryId = dataState.currentCategory.id
+            ).singleResult().getOrNull()
+        }
+    }
+
+    private fun getAllPromotionsPaged(categoryId: Int): Flow<PagingData<PromotionUi>> {
+        return when (dataSource) {
+            AllPromotionsFragment.DataSource.All -> vodovozServiceRepository.getAllPromotionsPaged(
+                categoryId = categoryId
+            )
+
+            is AllPromotionsFragment.DataSource.ByBanner -> vodovozServiceRepository.getBannerPromotionsPaged(
+                bannerId = dataSource.bannerId,
+                blockId = dataSource.blockId,
+                categoryId = categoryId
+            )
+        }.map { pagingData ->
+            pagingData.map { promotionModel -> promotionModel.toUi() }
+        }
+    }
+
     fun fetchPromotions() = viewModelScope.launch {
         uiStateListener.updateData { s ->
             s.copy(uiState = UiState.Loading)
         }
 
-        val sectionPromotions = with(dataState) {
-            if (categories.isEmpty()) {
-                when (dataSource) {
-                    AllPromotionsFragment.DataSource.All -> vodovozServiceRepository.getPromotionsWithSections()
-                        .singleResult().getOrNull()
-
-                    is AllPromotionsFragment.DataSource.ByBanner -> vodovozServiceRepository.getBannerPromotions(
-                        dataSource.bannerId,
-                        dataSource.blockId,
-                        dataState.currentCategory.id
-                    ).singleResult().getOrNull()
-                }
-
-            } else PromotionsSectionModel(title, categories.mapToDomain(), emptyList(), null)
-        }
-
-        if (sectionPromotions != null) {
-
-            val categories = sectionPromotions.categories.mapToUi()
-            val currentCategory =
-                if (dataState.currentCategory == PromotionCategoryUi.Empty) {
-                    (categories.firstOrNull() ?: PromotionCategoryUi.Empty)
-                } else {
-                    dataState.currentCategory
-                }
-
-            uiStateListener.updateData { s ->
-                val title = sectionPromotions.title
-
-                s.copy(
-                    title = title,
-                    categories = categories,
-                    currentCategory = currentCategory,
-                    uiState = UiState.Success
-                )
-            }
-            vodovozServiceRepository.getPromotionsPaged(categoryId = currentCategory.id)
-                .map { pagingData ->
-                    pagingData.map { promotionModel -> promotionModel.toUi() }
-                }.collect { pagingData ->
-                    pagingListener.collectPagingData(pagingData)
-                }
+        val sectionPromotions = if (dataState.categories.isNotEmpty()) {
+            getAllPromotions()
         } else {
-            uiStateListener.updateData { s -> s.copy(uiState = UiState.Error) }
+            PromotionsSectionModel(
+                title = dataState.title,
+                categories = dataState.categories.mapToDomain(),
+                promotions = emptyList(),
+                button = null
+            )
         }
+
+
+        if (sectionPromotions == null) {
+            uiStateListener.updateData { s ->
+                s.copy(uiState = UiState.Error)
+            }
+            return@launch
+        }
+
+
+        val categories = sectionPromotions.categories.mapToUi()
+        val currentCategory =
+            if (dataState.currentCategory == PromotionCategoryUi.Empty) {
+                (categories.firstOrNull() ?: PromotionCategoryUi.Empty)
+            } else {
+                dataState.currentCategory
+            }
+
+        uiStateListener.updateData { s ->
+            val title = sectionPromotions.title
+
+            s.copy(
+                title = title,
+                categories = categories,
+                currentCategory = currentCategory,
+                uiState = UiState.Success
+            )
+        }
+
+        getAllPromotionsPaged(currentCategory.id).collect { pagingData ->
+            pagingListener.collectPagingData(pagingData)
+        }
+
     }
 
     fun selectSection(category: PromotionCategoryUi) = viewModelScope.launch {
@@ -142,11 +171,15 @@ class AllPromotionsFlowViewModel @Inject constructor(
     }
 
     fun navigateToPromotionDetails(promotion: PromotionUi) = viewModelScope.launch {
-        eventListener.emit(AllPromotionsEvent.GoToProductDetails(promotionId = promotion.id.toLong()))
+        eventListener.emit(AllPromotionsEvent.GoToProductDetails(promotionId = promotion.id))
     }
 
     fun navigateBack() = viewModelScope.launch {
         eventListener.emit(AllPromotionsEvent.GoBack)
+    }
+
+    fun notifyPagingPromotions(index: Int) = viewModelScope.launch {
+        kotlin.runCatching { pagingListener[index] }
     }
 
     @Immutable

@@ -32,6 +32,7 @@ import com.vodovoz.app.data.vodovoz_service.model.WaitFeedbackProductsDTO
 import com.vodovoz.app.data.vodovoz_service.model.order_details.OrderDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.order_history.OrdersHistoryDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.paging.VodovozPagingSource
+import com.vodovoz.app.design_system.model.toUi
 import com.vodovoz.app.design_system.model.widgets.FieldUi
 import com.vodovoz.app.domain.general.model.CatalogDetailsModel
 import com.vodovoz.app.domain.general.model.EmptyResultException
@@ -1008,6 +1009,40 @@ class VodovozServiceRepositoryImpl @Inject constructor(
                 it.data!!.toDomain()
             }
         )
+    }
+
+    override fun getBannerPromotionsPaged(
+        bannerId: Long,
+        blockId: Long,
+        categoryId: Int,
+    ): Flow<PagingData<PromotionModel>> {
+        return Pager(
+            config = PagingConfig(pageSize = 5),
+            pagingSourceFactory = {
+                VodovozPagingSource(
+                    clazz = PromotionsDTO::class,
+                    request = { page, _ ->
+                        vodovozService.getBannerPromotions(
+                            bannerId = bannerId,
+                            blockId = blockId,
+                            page = page,
+                            categoryId = categoryId.takeIf { categoryId >= 0 }
+                        )
+                    },
+                    mapper = { response ->
+                        response.data!!.DATA!!.mapNotNull { it?.toDomain() }
+                    },
+                    onFail = { response ->
+                        val placeholder = moshi.fromJson<VodovozResponseDTO<VodovozPlaceholderDTO>>(
+                            response.stringErrorBody()
+                        ).data!!.toDomain()
+
+                        throw EmptyResultException(placeholder = placeholder)
+                    }
+                )
+            }
+        ).flow
+
     }
 
     override fun getBannerProducts(
@@ -2034,10 +2069,10 @@ class VodovozServiceRepositoryImpl @Inject constructor(
     }
 
 
-    override fun getPromotionsWithSections(categoryId: Int): Flow<Result<PromotionsSectionModel>> =
+    override fun getAllPromotionsDetails(categoryId: Int): Flow<Result<PromotionsSectionModel>> =
         executeRequest(
             request = {
-                vodovozService.getPromotionsWithSections(
+                vodovozService.getAllPromotions(
                     categoryId = categoryId.takeIf { categoryId >= 0 }
                 )
             },
@@ -2046,14 +2081,14 @@ class VodovozServiceRepositoryImpl @Inject constructor(
             },
         )
 
-    override fun getPromotionsPaged(limit: Int, categoryId: Int): Flow<PagingData<PromotionModel>> {
+    override fun getAllPromotionsPaged(limit: Int, categoryId: Int): Flow<PagingData<PromotionModel>> {
         return Pager(
             config = PagingConfig(pageSize = limit, initialLoadSize = limit),
             pagingSourceFactory = {
                 VodovozPagingSource(
                     clazz = PromotionsDTO::class,
                     request = { page, limit ->
-                        vodovozService.getPromotionsWithSections(
+                        vodovozService.getAllPromotions(
                             page = page,
                             limit = limit,
                             categoryId = categoryId.takeIf { categoryId >= 0 }

@@ -72,7 +72,7 @@ fun VerticalImagePager(
         val zoomableState =
             rememberZoomableState(
                 contentSize = asyncImagePainter.intrinsicSize,
-                maxScale = 2f,
+                maxScale = 3f,
                 animationSpec = tween(1000, easing = LinearEasing),
             )
 
@@ -83,7 +83,7 @@ fun VerticalImagePager(
             contentAlignment = Alignment.Center
         ) {
             val isVerticalImage =
-                asyncImagePainter.intrinsicSize.height < asyncImagePainter.intrinsicSize.width
+                asyncImagePainter.intrinsicSize.height > asyncImagePainter.intrinsicSize.width
 
             sharedTransitionScope.apply {
 
