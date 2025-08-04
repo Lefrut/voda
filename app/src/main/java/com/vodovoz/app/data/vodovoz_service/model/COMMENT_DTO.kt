@@ -19,5 +19,5 @@ data class COMMENT_DTO(
     @Json(name = "USER_PHOTO")
     val USER_PHOTO: String?,
     @Json(name = "IMAGES")
-    val IMAGES: List<IMAGE_DTO>?,
+    val IMAGES: List<String>?,
 )

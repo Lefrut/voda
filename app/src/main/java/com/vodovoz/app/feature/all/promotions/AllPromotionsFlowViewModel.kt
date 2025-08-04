@@ -55,6 +55,7 @@ class AllPromotionsFlowViewModel @Inject constructor(
         pagingListener.collectLoadState { combinedLoadStates ->
             uiStateListener.updateData { s ->
                 s.copy(
+
                     appendState = combinedLoadStates.append
                 )
             }
@@ -96,7 +97,7 @@ class AllPromotionsFlowViewModel @Inject constructor(
             s.copy(uiState = UiState.Loading)
         }
 
-        val sectionPromotions = if (dataState.categories.isNotEmpty()) {
+        val sectionPromotions = if (dataState.categories.isEmpty()) {
             getAllPromotions()
         } else {
             PromotionsSectionModel(

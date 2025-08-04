@@ -60,8 +60,6 @@ private fun HomeStoryCard(
     viewed: Boolean,
     onClick: () -> Unit,
 ) {
-
-
     VodovozOutlinedCard(
         modifier = modifier.size(96.dp),
         contentPadding = PaddingValues(2.dp),
@@ -76,7 +74,7 @@ private fun HomeStoryCard(
             modifier = Modifier
                 .fillMaxSize()
                 .clip(MaterialTheme.shapes.medium)
-                .background(MaterialTheme.colorScheme.surface)
+                .background(MaterialTheme.colorScheme.surface.copy(0.7f))
 
         )
     }

@@ -22,6 +22,8 @@ data class SiteStateResponseDTO(
     val REGISTRACION_SMS: String?,
     @Json(name = "SMSRASSILKA")
     val SMSRASSILKA: String?,
+    @Json(name = "SMSPOLE")
+    val SMSPOLE: Int?,
     @Json(name = "SOGLASHENIE")
     val SOGLASHENIE: SOGLASHENIE_DTO?,
     @Json(name = "TESTSAITSSILKA")

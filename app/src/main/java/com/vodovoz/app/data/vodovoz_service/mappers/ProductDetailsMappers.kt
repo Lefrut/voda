@@ -328,7 +328,7 @@ fun COMMENT_DTO.toDomain(): CommentModel {
         rating = RATING ?: 0,
         purchased = KYPLEN ?: "",
         images = IMAGES?.map { image ->
-            image.SRC.toVodovozUrl()
+            image.toVodovozUrl()
         } ?: emptyList()
     )
 }

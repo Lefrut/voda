@@ -22,6 +22,7 @@ fun SiteStateResponseDTO.toDomain(): VodovozSiteState {
         testUrl = TESTSAITSSILKA ?: "",
         smsUrl = SMSRASSILKA ?: "",
         isSmsEnabled = VodovozBoolean.from(REGISTRACION_SMS).boolean,
+        smsCodeCount = SMSPOLE ?: 4,
         jivoChat = CHATJIVO?.toJivoChatModel() ?: JivoChatModel(isActive = false, url = ""),
         tracking = GENERATION?.toTrackingConfig() ?: TrackingConfig(
             trackingIsEnabled = false,

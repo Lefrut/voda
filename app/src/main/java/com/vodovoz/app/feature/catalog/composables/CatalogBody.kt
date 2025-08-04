@@ -1,8 +1,8 @@
 package com.vodovoz.app.feature.catalog.composables
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Spacer
@@ -15,6 +15,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -24,8 +25,11 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
-
+import com.valentinilk.shimmer.ShimmerBounds
+import com.valentinilk.shimmer.rememberShimmer
 import com.vodovoz.app.design_system.composables.decoration.AdvertisingChip
+import com.vodovoz.app.design_system.composables.decoration.LocalShimmer
+import com.vodovoz.app.design_system.composables.decoration.SkeletonBox
 import com.vodovoz.app.design_system.model.AboutAdvertisingUi
 import com.vodovoz.app.design_system.model.BannerUi
 import com.vodovoz.app.design_system.model.ParentCategoryUi
@@ -40,7 +44,7 @@ fun CatalogBody(
     banners: List<BannerUi>,
     onBannerClick: (BannerUi) -> Unit,
     onCategoryClick: (ParentCategoryUi) -> Unit,
-    onAboutAdvertisingClick: (AboutAdvertisingUi) -> Unit
+    onAboutAdvertisingClick: (AboutAdvertisingUi) -> Unit,
 ) {
     Column(
         modifier = modifier
@@ -50,7 +54,7 @@ fun CatalogBody(
         val pictures = banners.map { it.detailPicture }
         val pagerState = rememberAutoScrollPagerState(itemsCount = pictures.size)
 
-        if(banners.size > 1){
+        if (banners.size > 1) {
             AutoScrollImagePager(
                 modifier = Modifier
                     .padding(top = 8.dp)
@@ -73,28 +77,29 @@ fun CatalogBody(
 
 
         val cardModifier = Modifier.weight(1f)
+        CompositionLocalProvider(value = LocalShimmer provides rememberShimmer(shimmerBounds = ShimmerBounds.View)) {
+            FlowRow(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                maxItemsInEachRow = 2
+            ) {
+                categories.forEach { category ->
+                    CatalogCard(
+                        modifier = cardModifier,
+                        title = category.name,
+                        image = category.picture,
+                        onClick = {
+                            onCategoryClick(category)
+                        }
+                    )
+                }
 
-        FlowRow(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-            maxItemsInEachRow = 2
-        ) {
-            categories.forEach { category ->
-                CatalogCard(
-                    modifier = cardModifier,
-                    title = category.name,
-                    image = category.picture,
-                    onClick = {
-                        onCategoryClick(category)
-                    }
-                )
-            }
-
-            if(categories.size % 2 == 1){
-                Spacer(modifier = cardModifier)
+                if (categories.size % 2 == 1) {
+                    Spacer(modifier = cardModifier)
+                }
             }
         }
     }
@@ -107,11 +112,13 @@ private fun CatalogCard(
     modifier: Modifier = Modifier,
     onClick: () -> Unit,
 ) {
-    Box(
+    SkeletonBox(
         modifier = modifier
             .height(140.dp)
             .clip(MaterialTheme.shapes.large)
-            .clickable { onClick() }
+            .background(MaterialTheme.colorScheme.surface.copy(0.7f))
+            .clickable { onClick() },
+        shimmerState = LocalShimmer.current
     ) {
         AsyncImage(
             model = image,

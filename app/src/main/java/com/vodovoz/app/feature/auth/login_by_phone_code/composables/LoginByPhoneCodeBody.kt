@@ -33,6 +33,7 @@ fun LoginByPhoneCodeBody(
     code: String,
     phone: String,
     secondsText: String,
+    otpCount: Int,
     canRequestCode: Boolean,
     requestCodeLoading: Boolean,
     onCodeChange: (String) -> Unit,
@@ -64,6 +65,7 @@ fun LoginByPhoneCodeBody(
                 .focusable()
                 .focusRequester(focusRequester),
             otpText = code,
+            otpCount = otpCount,
             onOtpTextChange = onCodeChange,
             onDone = onCodeSend
         )
@@ -88,6 +90,7 @@ fun LoginByPhoneCodeBody(
                         color = MaterialTheme.colorScheme.primary
                     )
                 }
+
                 canRequestCode -> {
                     Text(
                         modifier = Modifier.clickable(onClick = onCodeRequest),
@@ -96,6 +99,7 @@ fun LoginByPhoneCodeBody(
                         style = MaterialTheme.typography.bodyMedium.copy(letterSpacing = 0.sp)
                     )
                 }
+
                 else -> {
                     Text(
                         text = stringResource(id = R.string.resend_sms_hint),

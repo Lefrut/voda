@@ -723,7 +723,7 @@ interface VodovozService {
     @GET("glavnaya/razdel.php?action=popylrazdel")
     suspend fun getPopularCategories(): Response<VodovozResponseDTO<PopularCategoriesDTO>>
 
-    @GET("glavnaya/akcii.php?action=akcii&limit=10")
+    @GET("glavnaya/akcii.php?action=akcii&limit=10&nav=1")
     suspend fun getPromotions(): Response<VodovozResponseDTO<PromotionsDTO>>
 
     @GET("glavnaya/novinki.php?new=novinki")
