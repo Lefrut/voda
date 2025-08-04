@@ -32,7 +32,6 @@ import com.vodovoz.app.data.vodovoz_service.model.WaitFeedbackProductsDTO
 import com.vodovoz.app.data.vodovoz_service.model.order_details.OrderDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.order_history.OrdersHistoryDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.paging.VodovozPagingSource
-import com.vodovoz.app.design_system.model.toUi
 import com.vodovoz.app.design_system.model.widgets.FieldUi
 import com.vodovoz.app.domain.general.model.CatalogDetailsModel
 import com.vodovoz.app.domain.general.model.EmptyResultException

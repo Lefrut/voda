@@ -39,8 +39,8 @@ import coil3.memory.MemoryCache
 import coil3.request.ImageRequest
 import com.vodovoz.app.R
 import com.vodovoz.app.design_system.composables.button.VodovozButton
+import com.vodovoz.app.design_system.composables.placeholders.LoadingPlaceholder
 import com.vodovoz.app.feature.stories_fragment.composables.StoriesIndicator
-import kotlinx.coroutines.delay
 import kotlin.math.absoluteValue
 
 
@@ -73,7 +73,6 @@ fun StoriesScreen(
     HorizontalPager(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.onBackground)
             .windowInsetsPadding(WindowInsets.systemBars)
             .pointerInput(Unit) {
                 awaitPointerEventScope {

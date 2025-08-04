@@ -4,14 +4,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.systemBarsPadding
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -43,6 +38,7 @@ fun LoginByPhoneCodeScreen(viewState: LoginByPhoneCodeState, viewModel: LoginByP
             secondsText = viewState.waitSecondsText,
             canRequestCode = viewState.canRequestCode,
             requestCodeLoading = viewState.requestCodeLoading,
+            otpCount = viewModel.smsCodeCount,
             onCodeChange = { code ->
                 viewModel.changeCode(code)
             },

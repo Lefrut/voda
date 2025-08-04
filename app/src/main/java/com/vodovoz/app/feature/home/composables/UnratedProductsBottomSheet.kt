@@ -4,6 +4,9 @@ import android.graphics.BlurMaskFilter
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.SizeTransform
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.VectorConverter
 import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -61,6 +64,7 @@ import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.drawOutline
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
@@ -101,7 +105,6 @@ fun UnratedProductsBottomSheet(
     val density = LocalDensity.current
 
     val partiallyExpandedHeight = with(density) { 120.dp.toPx() }
-
     val expandedPaddingTopPx = with(density) { 32.dp.toPx() }
 
     BoxWithConstraints(
@@ -109,19 +112,21 @@ fun UnratedProductsBottomSheet(
     ) {
         val layoutHeight = constraints.maxHeight.toFloat()
 
-        val state = rememberSaveable(layoutHeight, saver = AnchoredDraggableState.Saver()) {
+        val state = rememberSaveable(saver = AnchoredDraggableState.Saver()) {
             AnchoredDraggableState(initialValue = SheetValue.PartiallyExpanded)
         }
 
-        LaunchedEffect(layoutHeight) {
-            state.updateAnchors(
-                DraggableAnchors {
-                    SheetValue.Hidden at (layoutHeight - expandedPaddingTopPx).coerceAtLeast(0f)
-                    SheetValue.PartiallyExpanded at layoutHeight - partiallyExpandedHeight
-                    SheetValue.Expanded at expandedPaddingTopPx
-                }
-            )
 
+        if (state.currentValue == SheetValue.PartiallyExpanded) {
+            LaunchedEffect(layoutHeight) {
+                state.updateAnchors(
+                    newAnchors = DraggableAnchors {
+                        SheetValue.Hidden at layoutHeight.coerceAtLeast(0f)
+                        SheetValue.PartiallyExpanded at layoutHeight - partiallyExpandedHeight
+                        SheetValue.Expanded at expandedPaddingTopPx
+                    }
+                )
+            }
         }
 
         when (state.currentValue) {
@@ -143,19 +148,26 @@ fun UnratedProductsBottomSheet(
                 SheetValue.Expanded -> {
                     state.updateAnchors(
                         DraggableAnchors {
-                            SheetValue.Hidden at (layoutHeight - expandedPaddingTopPx).coerceAtLeast(
-                                0f
-                            )
+                            SheetValue.Hidden at layoutHeight.coerceAtLeast(0f)
                             SheetValue.Expanded at expandedPaddingTopPx
                         }
                     )
-                    runCatching {
-                        state.animateTo(SheetValue.Expanded)
-                    }
+                    state.animateTo(SheetValue.Expanded)
                 }
 
                 SheetValue.PartiallyExpanded -> {}
             }
+        }
+
+        val animatedAlpha = remember {
+            Animatable(0f, Float.VectorConverter)
+        }
+
+        LaunchedEffect(Unit) {
+            animatedAlpha.animateTo(
+                targetValue = 1f,
+                animationSpec = tween(400, 0, LinearEasing)
+            )
         }
 
         val columnHeight = remember(layoutHeight) {
@@ -164,13 +176,16 @@ fun UnratedProductsBottomSheet(
 
         Column(
             modifier = Modifier
+                .graphicsLayer {
+                    alpha = animatedAlpha.value
+                }
                 .fillMaxWidth()
                 .height(columnHeight)
                 .offset {
                     val sheetOffsetY = try {
                         state.requireOffset()
                     } catch (_: RuntimeException) {
-                        layoutHeight / 1.2f
+                        layoutHeight
                     }
                     IntOffset(x = 0, y = sheetOffsetY.toInt())
                 }
@@ -357,7 +372,7 @@ fun UpdatedProductsExpanded(
                     )
 
 
-                    var rating by rememberSaveable {
+                    var rating by remember {
                         mutableFloatStateOf(0f)
                     }
 

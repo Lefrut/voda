@@ -1,6 +1,5 @@
 package com.vodovoz.app.data.vodovoz_service.mappers
 
-import android.text.Html
 import androidx.core.text.HtmlCompat
 import com.vodovoz.app.data.vodovoz_service.di.toVodovozUrl
 import com.vodovoz.app.data.vodovoz_service.model.AKCIYA_DTO
@@ -31,7 +30,7 @@ fun AKCIYA_DTO.toDomain(): PromotionDetailsModel? {
 fun PromotionsDTO.toDomain(): PromotionsSectionModel {
     return PromotionsSectionModel(
         title = TITLE ?: "",
-        categories = RAZDELI?.filterNotNull()?.toDomain() ?: emptyList(),
+        categories = RAZDELI?.mapToDomain() ?: emptyList(),
         promotions = DATA?.toDomain() ?: emptyList(),
         button = KNOPKA?.toDomain()
     )
@@ -39,7 +38,7 @@ fun PromotionsDTO.toDomain(): PromotionsSectionModel {
 }
 
 @JvmName("mapPromotionRazdelToDomain")
-fun List<PROMOTION_RAZDEL_DTO>.toDomain(): List<PromotionCategoryModel> {
+fun List<PROMOTION_RAZDEL_DTO>.mapToDomain(): List<PromotionCategoryModel> {
     return mapNotNull { promotionRazdelDto ->
         promotionRazdelDto.toDomain()
     }

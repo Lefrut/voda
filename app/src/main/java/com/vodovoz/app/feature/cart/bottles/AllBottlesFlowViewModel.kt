@@ -130,7 +130,10 @@ class AllBottlesFlowViewModel @Inject constructor(
         }
 
 
-        val bottlesMap = dataState.bottles.associate { it.id to it.cartQuantity }
+        val bottlesMap = dataState.bottles.associate {
+            it.id to it.cartQuantity
+        }.filter { it.value > 0 }
+
         val addBottlesResult = vodovozServiceRepository
             .addMultipleProductsToCart(cartManager.formatCart(bottlesMap))
             .singleResult()

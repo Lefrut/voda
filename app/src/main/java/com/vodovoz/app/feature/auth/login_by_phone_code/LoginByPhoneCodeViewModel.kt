@@ -3,10 +3,7 @@ package com.vodovoz.app.feature.auth.login_by_phone_code
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import com.vodovoz.app.common.account.AccountManager
 import com.vodovoz.app.common.account.LoginManager
-import com.vodovoz.app.common.like.LikeManager
-import com.vodovoz.app.common.token.FirebaseTokenManager
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.feature.auth.login_by_phone_code.model.LoginByPhoneCodeEvent
 import com.vodovoz.app.feature.auth.login_by_phone_code.model.LoginByPhoneCodeState
@@ -36,6 +33,7 @@ class LoginByPhoneCodeViewModel @Inject constructor(
 ) {
 
     private val waitRequestCodeSeconds: Int = savedStateHandle["waitRequestCodeSeconds"] ?: 60
+    val smsCodeCount = siteStateManager.siteStateFlow.value?.smsCodeCount ?: 4
 
     init {
         startWaiting(waitRequestCodeSeconds.toLong())
@@ -46,17 +44,19 @@ class LoginByPhoneCodeViewModel @Inject constructor(
     }
 
     fun changeCode(code: String) = viewModelScope.launch {
-        val newCode = code.filter { c -> c.isDigit() }.take(4)
+        val newCode = code.filter { c -> c.isDigit() }.take(smsCodeCount)
         _state.update { s ->
             s.copy(code = newCode)
         }
 
-        if(newCode.length == 4){ sendCode() }
+        if (newCode.length == smsCodeCount) {
+            sendCode()
+        }
 
     }
 
     fun sendCode() = viewModelScope.launch {
-        val currentCode = stateSnapshot.code.take(4)
+        val currentCode = stateSnapshot.code.take(smsCodeCount)
         loadingByPhone(currentCode)
     }
 

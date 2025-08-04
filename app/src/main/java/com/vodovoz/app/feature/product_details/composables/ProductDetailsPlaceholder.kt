@@ -78,12 +78,15 @@ fun ProductDetailsPlaceholder(modifier: Modifier = Modifier) {
                 .fillMaxWidth(0.8f)
         )
 
-        SkeletonBox(
-            shimmerState = shimmer, modifier = Modifier
-                .padding(top = 16.dp)
-                .height(36.dp)
-                .fillMaxWidth()
-        )
+
+        repeat(5){
+            SkeletonBox(
+                shimmerState = shimmer, modifier = Modifier
+                    .padding(top = 16.dp)
+                    .height(36.dp)
+                    .fillMaxWidth()
+            )
+        }
     }
 }
 

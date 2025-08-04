@@ -210,6 +210,7 @@ fun HomeScreen(
             animationSpec = tween(300, 0),
         )
 
+
     val showUnratedProductBottomSheet by remember {
         derivedStateOf { animatedUnratedAlpha.value > 0f }
     }

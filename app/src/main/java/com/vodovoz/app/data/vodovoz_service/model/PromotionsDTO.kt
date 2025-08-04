@@ -11,7 +11,7 @@ data class PromotionsDTO(
     @Json(name = "KNOPKA")
     val KNOPKA: KNOPKA_DTO?,
     @Json(name = "RAZDELI")
-    val RAZDELI: List<PROMOTION_RAZDEL_DTO?>?,
+    val RAZDELI: List<PROMOTION_RAZDEL_DTO>?,
     @Json(name = "TITLE")
     val TITLE: String?,
 )

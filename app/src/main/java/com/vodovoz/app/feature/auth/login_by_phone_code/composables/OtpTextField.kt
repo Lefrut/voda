@@ -23,11 +23,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 
-private const val OTP_COUNT = 4
 
 @Composable
 fun OtpTextField(
     modifier: Modifier = Modifier,
+    otpCount: Int,
     otpText: String,
     onOtpTextChange: (String) -> Unit,
     onDone: () -> Unit,
@@ -36,7 +36,7 @@ fun OtpTextField(
         modifier = modifier,
         value = TextFieldValue(otpText, selection = TextRange(otpText.length)),
         onValueChange = onValueChange@{ fieldValue ->
-            if (fieldValue.text.length > OTP_COUNT) return@onValueChange
+            if (fieldValue.text.length > otpCount) return@onValueChange
 
             onOtpTextChange(fieldValue.text)
 
@@ -57,7 +57,7 @@ fun OtpTextField(
                     Alignment.CenterHorizontally
                 ),
             ) {
-                repeat(OTP_COUNT) { index ->
+                repeat(otpCount) { index ->
                     OtpCell(
                         value = otpText.getOrNull(index)?.toString() ?: "",
                         selected = index <= otpText.length - 1
