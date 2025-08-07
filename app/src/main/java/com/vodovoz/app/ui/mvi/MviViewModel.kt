@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 
 open class MviViewModel<STATE, EVENT>(state: STATE): ViewModel() {
 
@@ -14,8 +15,10 @@ open class MviViewModel<STATE, EVENT>(state: STATE): ViewModel() {
 
     protected val stateSnapshot get() = _state.value
 
-    protected val _events = MutableSharedFlow<EVENT>(0)
+    private val _events = MutableSharedFlow<EVENT>(0)
     val events = _events.asSharedFlow()
+
+    protected suspend fun sendEvent(event: EVENT) = _events.emit(event)
 
 
 }

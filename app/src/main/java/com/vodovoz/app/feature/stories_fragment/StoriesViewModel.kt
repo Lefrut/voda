@@ -11,7 +11,6 @@ import com.vodovoz.app.common.content.updateData
 import com.vodovoz.app.common.model.VodovozAction
 import com.vodovoz.app.design_system.model.StoryUi
 import com.vodovoz.app.domain.general.respository.UserPreferencesRepository
-import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.util.extensions.indexOfOrNull
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
@@ -117,14 +116,14 @@ class StoriesViewModel @Inject constructor(
 
         startStory()
 
-        dataState.stories.getOrNull(currentStoryPage)?.let { story ->
+        stateSnapshot.stories.getOrNull(currentStoryPage)?.let { story ->
             userPreferencesRepository.addViewedStoryId(story.id)
         }
     }
 
     fun goPreviousStoryPage() = viewModelScope.launch {
-        val isFirstPage = dataState.currentPageIndex == 0
-        val isFirstStory = dataState.currentStoryIndex == 0
+        val isFirstPage = stateSnapshot.currentPageIndex == 0
+        val isFirstStory = stateSnapshot.currentStoryIndex == 0
 
         when {
             isFirstPage && isFirstStory -> {
@@ -132,14 +131,14 @@ class StoriesViewModel @Inject constructor(
             }
 
             isFirstPage -> {
-                val prevStoryIndex = dataState.currentStoryIndex - 1
+                val prevStoryIndex = stateSnapshot.currentStoryIndex - 1
                 eventListener.emit(StoriesEvents.ChangePagerIndex(prevStoryIndex))
             }
 
             else -> {
                 uiStateListener.updateData { state ->
                     state.copy(
-                        currentPageIndex = dataState.currentPageIndex - 1,
+                        currentPageIndex = stateSnapshot.currentPageIndex - 1,
                         timePassed = 0L
                     )
                 }
@@ -148,10 +147,10 @@ class StoriesViewModel @Inject constructor(
     }
 
     fun goNextStoryPage() = viewModelScope.launch {
-        val maxStoryPageIndex = dataState.currentStory.pages.size - 1
-        val nextPageIndex = dataState.currentPageIndex + 1
+        val maxStoryPageIndex = stateSnapshot.currentStory.pages.size - 1
+        val nextPageIndex = stateSnapshot.currentPageIndex + 1
         val isLastPage = nextPageIndex > maxStoryPageIndex
-        val isLastStory = dataState.currentStoryIndex >= dataState.stories.lastIndex
+        val isLastStory = stateSnapshot.currentStoryIndex >= stateSnapshot.stories.lastIndex
 
         when {
             isLastPage && isLastStory -> {
@@ -163,7 +162,7 @@ class StoriesViewModel @Inject constructor(
 
             isLastPage -> {
                 eventListener.emit(
-                    StoriesEvents.ChangePagerIndex(dataState.currentStoryIndex + 1)
+                    StoriesEvents.ChangePagerIndex(stateSnapshot.currentStoryIndex + 1)
                 )
             }
 

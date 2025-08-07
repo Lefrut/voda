@@ -129,14 +129,14 @@ class ProductCatalogViewModel @Inject constructor(
 
 
     private fun fetchProductListData() = viewModelScope.launch {
-        if (dataState.productsSection == ProductsSectionUi.Empty) {
+        if (stateSnapshot.productsSection == ProductsSectionUi.Empty) {
             uiStateListener.updateData { s ->
                 s.copy(uiState = ProductCatalogUiState.Loading)
             }
         }
 
-        val categoryId = dataState.currentCategory.id
-        val sortModel = dataState.currentSort.toDomain()
+        val categoryId = stateSnapshot.currentCategory.id
+        val sortModel = stateSnapshot.currentSort.toDomain()
 
         when (dataSource) {
             is DataSource.Brand -> {
@@ -292,7 +292,7 @@ class ProductCatalogViewModel @Inject constructor(
     }
 
     private fun extractSelectedFilters(): FiltersModel {
-        val dataStateFilters = dataState.currentFilters
+        val dataStateFilters = stateSnapshot.currentFilters
 
         val filteredFilters = dataStateFilters.filters.filter { filterUi ->
             filterUi.values.any { filterValueUi -> filterValueUi.selected } || (filterUi.bounds != null && filterUi.currentBounds != null)
@@ -314,7 +314,7 @@ class ProductCatalogViewModel @Inject constructor(
 
 
     fun refresh() = viewModelScope.launch {
-        if (dataState.uiState is ProductCatalogUiState.Loading) return@launch
+        if (stateSnapshot.uiState is ProductCatalogUiState.Loading) return@launch
         uiStateListener.updateData { s ->
             s.copy(showRefreshIndicator = true)
         }
@@ -351,7 +351,7 @@ class ProductCatalogViewModel @Inject constructor(
 
         val canViewAdultProducts =
             userPreferencesRepository.canViewAdultProducts.firstOrNull() ?: false
-        val categoriesTreeJob = fetchCategoriesTree(dataState.currentCategory.id.toLong())
+        val categoriesTreeJob = fetchCategoriesTree(stateSnapshot.currentCategory.id.toLong())
         val productsSectionResult =
             fetchProductsSection().map { productsSectionModel ->
                 productsSectionModel.toUi()
@@ -365,7 +365,7 @@ class ProductCatalogViewModel @Inject constructor(
             uiStateListener.updateData { state ->
 
                 val categoryTreeList: List<CategoryUi> = buildList {
-                    addAll(dataState.categoryTree.allCategories()
+                    addAll(stateSnapshot.categoryTree.allCategories()
                         .map { category -> category.toCategory() }
                     )
                     removeIf { categoryUi -> categoryUi.id == state.currentCategory.id }
@@ -414,11 +414,11 @@ class ProductCatalogViewModel @Inject constructor(
             }
 
 
-            if (uiState is ProductCatalogUiState.Empty && dataState.productsSection == ProductsSectionUi.Empty) {
+            if (uiState is ProductCatalogUiState.Empty && stateSnapshot.productsSection == ProductsSectionUi.Empty) {
                 uiStateListener.updateData { s ->
                     s.copy(uiState = uiState)
                 }
-            } else if (dataState.productsSection != ProductsSectionUi.Empty) {
+            } else if (stateSnapshot.productsSection != ProductsSectionUi.Empty) {
                 uiStateListener.updateData { s ->
                     s.copy(
                         productsLoadStates = s.productsLoadStates.copy(
@@ -478,8 +478,8 @@ class ProductCatalogViewModel @Inject constructor(
     private fun listenProductsLoadStates() = viewModelScope.launch {
         pagingProductsListener.collectLoadState { combinedLoadStates ->
             val refreshState = when {
-                combinedLoadStates.refresh is LoadState.Loading && dataState.products.isNotEmpty() -> {
-                    dataState.productsLoadStates.refresh
+                combinedLoadStates.refresh is LoadState.Loading && stateSnapshot.products.isNotEmpty() -> {
+                    stateSnapshot.productsLoadStates.refresh
                 }
 
                 else -> combinedLoadStates.refresh
@@ -517,9 +517,9 @@ class ProductCatalogViewModel @Inject constructor(
     }
 
     private fun fetchCategoriesTree(categoryId: Long) = viewModelScope.launch {
-        if (dataState.currentBottomSheetCategory.takeIf { it.id == categoryId && it.countChildren == 0 } != null) return@launch
+        if (stateSnapshot.currentBottomSheetCategory.takeIf { it.id == categoryId && it.countChildren == 0 } != null) return@launch
         if (
-            dataState.categoryTree.allCategories().firstOrNull {
+            stateSnapshot.categoryTree.allCategories().firstOrNull {
                 it.id == categoryId && it.countChildren == 0
             } != null
         ) return@launch
@@ -546,7 +546,7 @@ class ProductCatalogViewModel @Inject constructor(
                 s.copy(categoryTree = childrenCategoriesOfParent)
             }
         }.onFailure {
-            if (dataState.categoryTree.isEmpty()) {
+            if (stateSnapshot.categoryTree.isEmpty()) {
                 uiStateListener.updateData { s ->
                     s.copy(showCategoriesBottomSheet = false)
                 }
@@ -564,8 +564,8 @@ class ProductCatalogViewModel @Inject constructor(
 
     fun selectCategory(category: CategoryUi) = viewModelScope.launch {
         val newCategory =
-            if (category == dataState.currentCategory && dataSource !is DataSource.Category) CategoryUi.Empty
-            else if (category == dataState.currentCategory) return@launch
+            if (category == stateSnapshot.currentCategory && dataSource !is DataSource.Category) CategoryUi.Empty
+            else if (category == stateSnapshot.currentCategory) return@launch
             else category
 
         uiStateListener.updateData { s ->
@@ -605,7 +605,7 @@ class ProductCatalogViewModel @Inject constructor(
     }
 
     fun navigateToProductFilters() = viewModelScope.launch {
-        with(dataState) {
+        with(stateSnapshot) {
             eventListener.emit(
                 ProductCatalogEvent.GoToProductFilters(
                     currentCategory.id.toLong(),
@@ -628,7 +628,7 @@ class ProductCatalogViewModel @Inject constructor(
     }
 
     fun shareProducts() = viewModelScope.launch {
-        val share = dataState.productsSection.share
+        val share = stateSnapshot.productsSection.share
         eventListener.emit(
             ProductCatalogEvent.Share(
                 resourcesProvider.getString(R.string.share, share.text, share.url)
@@ -654,7 +654,7 @@ class ProductCatalogViewModel @Inject constructor(
     }
 
     fun chooseBottomSheetCategory() = viewModelScope.launch {
-        val currentCategory = dataState.currentBottomSheetCategory.toCategory()
+        val currentCategory = stateSnapshot.currentBottomSheetCategory.toCategory()
         selectCategory(currentCategory)
     }
 

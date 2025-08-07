@@ -21,11 +21,11 @@ class ImagePickerViewModel @Inject constructor(
     }
 
     fun navigateBack() = viewModelScope.launch {
-        _events.emit(ImagePickerEvent.GoBack)
+        sendEvent(ImagePickerEvent.GoBack)
     }
 
     fun getBitmapFromImageUri() = viewModelScope.launch {
-        _events.emit(ImagePickerEvent.GetBitmap(stateSnapshot.imageUri))
+        sendEvent(ImagePickerEvent.GetBitmap(stateSnapshot.imageUri))
     }
 
     fun saveBitmapToFile(
@@ -71,7 +71,7 @@ class ImagePickerViewModel @Inject constructor(
                     .coerceAtMost(sourceBitmap.height - cropTopInBitmap.toInt())
             )
 
-            _events.emit(ImagePickerEvent.SaveInFile(croppedBitmap))
+            sendEvent(ImagePickerEvent.SaveInFile(croppedBitmap))
         }
     }
 

@@ -154,7 +154,7 @@ class OrderingFlowViewModel @Inject constructor(
     }
 
     fun navigateByRecipientItem(orderRecipientItem: OrderingMenuItemUi) = viewModelScope.launch {
-        val ordering = dataState.ordering
+        val ordering = stateSnapshot.ordering
         val addressId = ordering.addressId
         val timeInterval = ordering.timeInterval
         val date = ordering.date
@@ -221,7 +221,7 @@ class OrderingFlowViewModel @Inject constructor(
     }
 
     fun navigateByPaymentItem(orderPaymentItem: OrderingMenuItemUi) = viewModelScope.launch {
-        val ordering = dataState.ordering
+        val ordering = stateSnapshot.ordering
         val addressId = ordering.addressId
         val timeInterval = ordering.timeInterval
         val date = ordering.date
@@ -287,7 +287,7 @@ class OrderingFlowViewModel @Inject constructor(
     }
 
     fun doOrder(deviceInfo: String) = viewModelScope.launch {
-        val ordering = dataState.ordering
+        val ordering = stateSnapshot.ordering
         val earlierDelivery = ordering.earlierDelivery
 
         if (
@@ -309,7 +309,7 @@ class OrderingFlowViewModel @Inject constructor(
                 coupon = coupon,
                 balance = VodovozBoolean.from(ordering.paymentBalance).value,
                 deviceInfo = deviceInfo,
-                notifyDriverId = dataState.selectedNotifyItem.value,
+                notifyDriverId = stateSnapshot.selectedNotifyItem.value,
                 params = earlierDelivery?.let { mapOf(earlierDelivery) }
             ).singleResult().onSuccess { placeholder ->
                 uiStateListener.updateData { s ->
@@ -327,7 +327,7 @@ class OrderingFlowViewModel @Inject constructor(
     }
 
     private fun validateOrderingDetails() = viewModelScope.launch {
-        val ordering = dataState.ordering
+        val ordering = stateSnapshot.ordering
         val recipientErrors = buildList {
             if (ordering.addressId == null) add(ADDRESS_MENU_ID)
             if (ordering.recipientName == null || ordering.recipientPhone == null) add(
@@ -388,7 +388,7 @@ class OrderingFlowViewModel @Inject constructor(
     }
 
     private fun fetchRecipient() = viewModelScope.launch {
-        val addressId = dataState.ordering.addressId ?: return@launch
+        val addressId = stateSnapshot.ordering.addressId ?: return@launch
         val recipientResult = vodovozServiceRepository.getRecipient(addressId).singleResult()
 
         recipientResult.onSuccess { recipientModel ->
@@ -503,7 +503,7 @@ class OrderingFlowViewModel @Inject constructor(
                 )
             }
 
-            val ordering = dataState.ordering
+            val ordering = stateSnapshot.ordering
 
             vodovozServiceRepository.getOrderingDetails(
                 addressId = ordering.addressId,

@@ -34,7 +34,7 @@ class OrderCallYouViewModel @Inject constructor(
     }
 
     fun navigateBack() = viewModelScope.launch {
-        _events.emit(OrderCallYouEvent.GoBack)
+        sendEvent(OrderCallYouEvent.GoBack)
     }
 
     fun fetchOrderCallYouDetails() = viewModelScope.launch {
@@ -74,7 +74,7 @@ class OrderCallYouViewModel @Inject constructor(
     }
 
     fun chooseOrderingCallYou(button: ColorfulButtonUi) = viewModelScope.launch {
-        _events.emit(OrderCallYouEvent.GoBackToOrdering(stateSnapshot.currentItem))
+        sendEvent(OrderCallYouEvent.GoBackToOrdering(stateSnapshot.currentItem))
     }
 
     fun selectCallYouItem(item: CallYouItemUi) = viewModelScope.launch {

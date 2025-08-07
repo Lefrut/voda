@@ -88,14 +88,14 @@ class AllBottlesFlowViewModel @Inject constructor(
             )
         }
 
-        if (dataState.isSingleBottleMode) {
+        if (stateSnapshot.isSingleBottleMode) {
             addBottlesToCart()
             return@launch
         }
     }
 
     fun incrementBottle(bottle: BottleUi) = viewModelScope.launch {
-        if (dataState.isSingleBottleMode) return@launch
+        if (stateSnapshot.isSingleBottleMode) return@launch
 
         uiStateListener.updateData { s ->
             s.copy(bottles = s.bottles.map { if (it.id == bottle.id) it.copy(cartQuantity = it.cartQuantity + 1) else it })
@@ -104,7 +104,7 @@ class AllBottlesFlowViewModel @Inject constructor(
     }
 
     fun decrementBottle(bottle: BottleUi) = viewModelScope.launch {
-        if (bottle.cartQuantity <= 0 || dataState.isSingleBottleMode) return@launch
+        if (bottle.cartQuantity <= 0 || stateSnapshot.isSingleBottleMode) return@launch
 
         uiStateListener.updateData { s ->
             s.copy(
@@ -117,7 +117,7 @@ class AllBottlesFlowViewModel @Inject constructor(
     }
 
     fun addBottlesToCart() = viewModelScope.launch {
-        if (dataState.isSingleBottleMode) {
+        if (stateSnapshot.isSingleBottleMode) {
             uiStateListener.updateData { s ->
                 s.copy(uiState = BottlesUiState.Loading)
             }
@@ -130,7 +130,7 @@ class AllBottlesFlowViewModel @Inject constructor(
         }
 
 
-        val bottlesMap = dataState.bottles.associate {
+        val bottlesMap = stateSnapshot.bottles.associate {
             it.id to it.cartQuantity
         }.filter { it.value > 0 }
 
@@ -150,7 +150,7 @@ class AllBottlesFlowViewModel @Inject constructor(
             uiStateListener.updateData { s ->
                 s.copy(buttonIsLoading = false)
             }
-            if (dataState.isSingleBottleMode) {
+            if (stateSnapshot.isSingleBottleMode) {
                 eventListener.emit(BottlesEvent.GoBack)
             }
         }

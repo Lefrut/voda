@@ -31,7 +31,7 @@ class DocumentViewerViewModel @Inject constructor() : MviViewModel<DocumentViewe
     }
 
     fun navigateBack() = viewModelScope.launch {
-        _events.emit(DocumentViewerEvent.GoBack)
+        sendEvent(DocumentViewerEvent.GoBack)
     }
 
 }

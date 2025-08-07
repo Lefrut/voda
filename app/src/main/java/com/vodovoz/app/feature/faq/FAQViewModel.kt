@@ -34,7 +34,7 @@ class FAQViewModel @Inject constructor(savedStateHandle: SavedStateHandle) :
     }
 
     fun navigateBack() = viewModelScope.launch {
-        _events.emit(FAQEvent.GoBack)
+        sendEvent(FAQEvent.GoBack)
     }
 
     fun changeExpand(faqItem: FAQItemUi) = viewModelScope.launch {

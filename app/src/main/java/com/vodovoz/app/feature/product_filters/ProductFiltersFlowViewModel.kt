@@ -195,7 +195,7 @@ class ProductFiltersFlowViewModel @Inject constructor(
                 )
             )
         }
-        eventListener.emit(ProductFiltersEvent.GoToProductList(dataState.filters))
+        eventListener.emit(ProductFiltersEvent.GoToProductList(stateSnapshot.filters))
     }
 
 

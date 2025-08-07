@@ -70,7 +70,7 @@ class OrderRecipientViewModel @Inject constructor(
     }
 
     fun navigateBack() = viewModelScope.launch {
-        _events.emit(OrderRecipientEvent.GoBack)
+        sendEvent(OrderRecipientEvent.GoBack)
     }
 
     fun changeField(field: FieldUi, updatedField: FieldUi) {
@@ -127,7 +127,7 @@ class OrderRecipientViewModel @Inject constructor(
             fields = stateSnapshot.fields.mapToDomain()
         ).singleResult()
 
-        _events.emit(OrderRecipientEvent.GoBackToOrdering)
+        sendEvent(OrderRecipientEvent.GoBackToOrdering)
 
 
         _state.update { s ->

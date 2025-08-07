@@ -47,11 +47,11 @@ class GiftsViewModel @Inject constructor(
     }
 
     fun navigateBack() = viewModelScope.launch {
-        _events.emit(GiftsEvent.GoBack)
+        sendEvent(GiftsEvent.GoBack)
     }
 
     fun chooseGift() = viewModelScope.launch {
-        _events.emit(GiftsEvent.GoToCart(stateSnapshot.currentGift))
+        sendEvent(GiftsEvent.GoToCart(stateSnapshot.currentGift))
     }
 
     fun selectGift(presentItem: CartPresentItemUi) = viewModelScope.launch {

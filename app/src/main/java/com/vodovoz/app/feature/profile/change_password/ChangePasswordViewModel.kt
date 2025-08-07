@@ -37,7 +37,7 @@ class ChangePasswordViewModel @Inject constructor(
     }
 
     fun navigateBack() = viewModelScope.launch {
-        _events.emit(ChangePasswordEvent.GoBack)
+        sendEvent(ChangePasswordEvent.GoBack)
     }
 
 
@@ -57,7 +57,7 @@ class ChangePasswordViewModel @Inject constructor(
                 )
             }
         }.onFailure {
-            _events.emit(ChangePasswordEvent.GoBack)
+            sendEvent(ChangePasswordEvent.GoBack)
         }
     }
 
@@ -100,7 +100,7 @@ class ChangePasswordViewModel @Inject constructor(
                 }
             }
 
-            _events.emit(
+            sendEvent(
                 ChangePasswordEvent.ShowSnackbar(message)
             )
         }

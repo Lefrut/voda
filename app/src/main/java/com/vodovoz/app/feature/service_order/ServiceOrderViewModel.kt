@@ -82,7 +82,7 @@ class ServiceOrderViewModel @Inject constructor(
             s.copy(button = s.button.copy(loading = true))
         }
 
-        dataState.fields.checkFields(
+        stateSnapshot.fields.checkFields(
             putErrors = true,
             validators = listOf(
                 NoRequiredValidator,
@@ -113,7 +113,7 @@ class ServiceOrderViewModel @Inject constructor(
 
         }
 
-        vodovozServiceRepository.orderService(serviceType, dataState.fields.mapToDomain())
+        vodovozServiceRepository.orderService(serviceType, stateSnapshot.fields.mapToDomain())
             .singleResult().onSuccess { placeholder ->
                 uiStateListener.updateData { s ->
                     s.copy(uiState = ServiceOrderUiState.Success(placeholder.toUi()))

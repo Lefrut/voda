@@ -47,11 +47,11 @@ class CategoriesViewModel @Inject constructor(
     fun navigateBackWithArgs() = viewModelScope.launch {
         if(stateSnapshot.currentCategory == CategoryUi.Empty) return@launch
 
-        _events.emit(CategoriesEvent.GoBackWithArguments(stateSnapshot.currentCategory))
+        sendEvent(CategoriesEvent.GoBackWithArguments(stateSnapshot.currentCategory))
     }
 
     fun navigateBack() = viewModelScope.launch {
-        _events.emit(CategoriesEvent.GoBack)
+        sendEvent(CategoriesEvent.GoBack)
     }
 
 

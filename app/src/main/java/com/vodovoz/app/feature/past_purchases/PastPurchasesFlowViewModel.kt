@@ -6,7 +6,6 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.CombinedLoadStates
 import androidx.paging.LoadState
 import androidx.paging.map
-import com.vodovoz.app.common.account.AccountManager
 import com.vodovoz.app.common.cart.CartManager
 import com.vodovoz.app.common.content.Event
 import com.vodovoz.app.common.content.PagingContractViewModel
@@ -104,8 +103,8 @@ class PastPurchasesFlowViewModel @Inject constructor(
     private fun listenProductsLoadStates() = viewModelScope.launch {
         pagingProductsListener.collectLoadState { combinedLoadStates ->
             val refreshState = when {
-                combinedLoadStates.refresh is LoadState.Loading && dataState.products.isNotEmpty() -> {
-                    dataState.productsLoadStates.refresh
+                combinedLoadStates.refresh is LoadState.Loading && stateSnapshot.products.isNotEmpty() -> {
+                    stateSnapshot.productsLoadStates.refresh
                 }
 
                 else -> combinedLoadStates.refresh
@@ -154,7 +153,7 @@ class PastPurchasesFlowViewModel @Inject constructor(
     }
 
     fun selectSort(sort: SortUi) = viewModelScope.launch {
-        if (dataState.currentSort == sort) return@launch
+        if (stateSnapshot.currentSort == sort) return@launch
 
         uiStateListener.updateData { s ->
             s.copy(
@@ -205,12 +204,12 @@ class PastPurchasesFlowViewModel @Inject constructor(
     }
 
     fun fetchPastPurchasesDetails() = viewModelScope.launch {
-        if (dataState.uiState !is PastPurchasesUiState.Success) uiStateListener.updateData { s ->
+        if (stateSnapshot.uiState !is PastPurchasesUiState.Success) uiStateListener.updateData { s ->
             s.copy(uiState = PastPurchasesUiState.Loading)
         }
 
-        val currentSort = dataState.currentSort.toDomain()
-        val currentCategoryId = dataState.currentCategory.id
+        val currentSort = stateSnapshot.currentSort.toDomain()
+        val currentCategoryId = stateSnapshot.currentCategory.id
 
         val pastPurchasesDetailsResult =
             vodovozServiceRepository.getPastPurchasesDetails(
@@ -240,8 +239,8 @@ class PastPurchasesFlowViewModel @Inject constructor(
 
             viewModelScope.launch {
                 vodovozServiceRepository.getPastPurchasesPaged(
-                    sort = dataState.currentSort.toDomain(),
-                    categoryId = dataState.currentCategory.id
+                    sort = stateSnapshot.currentSort.toDomain(),
+                    categoryId = stateSnapshot.currentCategory.id
                 ).map { pagingData ->
                     pagingData.map { productModel -> productModel.toUi() }
                 }.collect { pagingData ->
@@ -258,7 +257,7 @@ class PastPurchasesFlowViewModel @Inject constructor(
                 else -> PastPurchasesUiState.Error
             }
 
-            if (dataState.uiState !is PastPurchasesUiState.Success) {
+            if (stateSnapshot.uiState !is PastPurchasesUiState.Success) {
                 uiStateListener.updateData { s ->
                     val title = (uiState as? PastPurchasesUiState.Empty)?.placeholder?.title
                     s.copy(

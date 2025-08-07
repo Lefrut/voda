@@ -96,20 +96,20 @@ class WaterAppViewModel @Inject constructor(
     }
 
     fun goToPreviousStage() = viewModelScope.launch {
-        val prevUiState = when (val currentUiState = dataState.uiState) {
+        val prevUiState = when (val currentUiState = stateSnapshot.uiState) {
             is WaterAppUiState.UserData -> currentUiState.previous() ?: WaterAppUiState.Welcome
             else -> currentUiState
         }
         uiStateListener.updateData { s ->
             s.copy(
-                uiState = if (dataState.notificationData.started) WaterAppUiState.Settings
+                uiState = if (stateSnapshot.notificationData.started) WaterAppUiState.Settings
                 else prevUiState
             )
         }
     }
 
     fun goToNextStage() = viewModelScope.launch {
-        val nextUiState = when (val currentUiState = dataState.uiState) {
+        val nextUiState = when (val currentUiState = stateSnapshot.uiState) {
             is WaterAppUiState.UserData -> currentUiState.next() ?: run {
 
                 waterAppHelper.saveUserData()
@@ -128,7 +128,7 @@ class WaterAppViewModel @Inject constructor(
 
         uiStateListener.updateData { s ->
             s.copy(
-                uiState = if (dataState.notificationData.firstShow) {
+                uiState = if (stateSnapshot.notificationData.firstShow) {
                     WaterAppUiState.Settings
                 } else {
                     nextUiState
@@ -146,7 +146,7 @@ class WaterAppViewModel @Inject constructor(
     }
 
     fun checkHaveNotifications() = viewModelScope.launch {
-        eventListener.emit(WaterAppEvents.SwitchNotifications(!dataState.notificationData.switch))
+        eventListener.emit(WaterAppEvents.SwitchNotifications(!stateSnapshot.notificationData.switch))
     }
 
     fun changeHaveNotifications(haveNotifications: Boolean) = viewModelScope.launch {
@@ -200,16 +200,16 @@ class WaterAppViewModel @Inject constructor(
     fun changeWaterLevel(progress: Float) = viewModelScope.launch {
 
 
-        val rateData = dataState.rateData
+        val rateData = stateSnapshot.rateData
         val currentLevel = (progress * rateData.rate).toInt()
         waterAppHelper.setWaterLevel(currentLevel)
         checkGoalCompleted()
     }
 
     fun addWater() = viewModelScope.launch {
-        if (!dataState.rateData.canFill) return@launch
+        if (!stateSnapshot.rateData.canFill) return@launch
 
-        waterAppHelper.tryToAddWater(dataState.changeWaterStep)
+        waterAppHelper.tryToAddWater(stateSnapshot.changeWaterStep)
 
         checkGoalCompleted()
     }
@@ -227,7 +227,7 @@ class WaterAppViewModel @Inject constructor(
 
     fun addChangeWaterStep() = viewModelScope.launch {
         val levels = WaterAppHelper.waterCupLevels
-        val currentValue = dataState.changeWaterStep
+        val currentValue = stateSnapshot.changeWaterStep
 
         val nextStep = when (val currentIndex = levels.indexOf(currentValue)) {
             -1 -> currentValue
@@ -242,7 +242,7 @@ class WaterAppViewModel @Inject constructor(
 
     fun subtractChangeWaterStep() = viewModelScope.launch {
         val levels = WaterAppHelper.waterCupLevels
-        val currentValue = dataState.changeWaterStep
+        val currentValue = stateSnapshot.changeWaterStep
 
         val prevStep = when (val currentIndex = levels.indexOf(currentValue)) {
             -1 -> currentValue

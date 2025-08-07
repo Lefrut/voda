@@ -58,7 +58,7 @@ class PreOrderFlowViewModel @Inject constructor(
     fun sendPreOrder() = viewModelScope.launch {
         if (!validateFields()) return@launch
 
-        val fields = dataState.sectionPreOrder.fields.map { field -> field.toDomain() }
+        val fields = stateSnapshot.sectionPreOrder.fields.map { field -> field.toDomain() }
 
         vodovozServiceRepository.sendPreorder(productId, fields).take(1).collect { result ->
             result.onSuccess { message ->
@@ -85,7 +85,7 @@ class PreOrderFlowViewModel @Inject constructor(
 
     private fun validateFields(): Boolean {
 
-        val fields = dataState.sectionPreOrder.fields
+        val fields = stateSnapshot.sectionPreOrder.fields
 
         return fields.checkFields(
             putErrors = true,

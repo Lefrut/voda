@@ -24,21 +24,21 @@ class AboutAppViewModel @Inject constructor(
     fun fetchUserId() = accountManager.fetchAccountId()
 
     fun navigateBack() = viewModelScope.launch {
-        _events.emit(AboutAppEvent.GoBack)
+        sendEvent(AboutAppEvent.GoBack)
     }
 
     fun share() = viewModelScope.launch {
-        _events.emit(AboutAppEvent.Share)
+        sendEvent(AboutAppEvent.Share)
     }
 
     fun activateOption(aboutAppOption: AboutAppOption) = viewModelScope.launch {
         when (aboutAppOption) {
             AboutAppOption.ContactDevelopers -> {
-                _events.emit(AboutAppEvent.WriteToDevelopers(accountManager.fetchAccountId() ?: -1))
+                sendEvent(AboutAppEvent.WriteToDevelopers(accountManager.fetchAccountId() ?: -1))
             }
 
             AboutAppOption.RateApp -> {
-                _events.emit(AboutAppEvent.RateApp)
+                sendEvent(AboutAppEvent.RateApp)
             }
 
             AboutAppOption.PrivacyPolicy -> {
@@ -46,7 +46,7 @@ class AboutAppViewModel @Inject constructor(
                 val link = links.getOrElse(0) { "" }
                 val title =
                     AgreementController.getTitle(0) ?: resourcesProvider.getString(R.string.space)
-                _events.emit(AboutAppEvent.GoToWebView(link, title))
+                sendEvent(AboutAppEvent.GoToWebView(link, title))
 
             }
 
@@ -55,7 +55,7 @@ class AboutAppViewModel @Inject constructor(
                 val link = links.getOrElse(1) { "" }
                 val title =
                     AgreementController.getTitle(1) ?: resourcesProvider.getString(R.string.space)
-                _events.emit(AboutAppEvent.GoToWebView(link, title))
+                sendEvent(AboutAppEvent.GoToWebView(link, title))
             }
         }
     }

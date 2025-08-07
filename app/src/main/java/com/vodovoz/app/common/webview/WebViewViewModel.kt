@@ -34,7 +34,7 @@ class WebViewViewModel @Inject constructor(
     }
 
     fun navigateBack() = viewModelScope.launch {
-        _events.emit(WebViewEvents.GoBack)
+        sendEvent(WebViewEvents.GoBack)
     }
 
 }

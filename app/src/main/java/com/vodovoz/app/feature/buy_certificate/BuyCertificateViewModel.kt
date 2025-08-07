@@ -136,7 +136,7 @@ class BuyCertificateViewModel @Inject constructor(
     }
 
     private fun buyCertificate() = viewModelScope.launch {
-        val currentTab = dataState.currentTab
+        val currentTab = stateSnapshot.currentTab
 
         currentTab.fields.checkFields(
             putErrors = true,
@@ -147,8 +147,8 @@ class BuyCertificateViewModel @Inject constructor(
             },
             validators = vodovozValidators
         ) { fields, isValid ->
-            val certificateError = dataState.currentCertificate == CertificateUi.Empty
-            val paymentError = dataState.currentPaymentType == PaymentTypeUi.Empty
+            val certificateError = stateSnapshot.currentCertificate == CertificateUi.Empty
+            val paymentError = stateSnapshot.currentPaymentType == PaymentTypeUi.Empty
 
             uiStateListener.updateData { s ->
                 s.copy(
@@ -169,11 +169,11 @@ class BuyCertificateViewModel @Inject constructor(
             s.copy(button = s.button.copy(loading = true))
         }
 
-        val certificate = dataState.currentCertificate
-        val tab = dataState.currentTab
+        val certificate = stateSnapshot.currentCertificate
+        val tab = stateSnapshot.currentTab
         val fields = tab.fields
-        val codes = dataState.codes
-        val paymentType = dataState.currentPaymentType
+        val codes = stateSnapshot.codes
+        val paymentType = stateSnapshot.currentPaymentType
 
 
         val buyCertificateResult = vodovozServiceRepository.buyCertificate(
@@ -205,7 +205,7 @@ class BuyCertificateViewModel @Inject constructor(
     }
 
     fun pay() = viewModelScope.launch {
-        val paymentInfo = dataState.paymentInfo ?: return@launch
+        val paymentInfo = stateSnapshot.paymentInfo ?: return@launch
         if (paymentInfo.browser) {
             eventListener.emit(BuyCertificateEvents.OpenUrl(paymentInfo.url))
         } else {

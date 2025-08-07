@@ -116,7 +116,7 @@ class SearchFlowViewModel @Inject constructor(
             emit(previousSearchQuery)
         }.debounceWithMax(200L, 5).mapLatest { query ->
             fun checkAvailableData() {
-                if (dataState.matchingQueries.isEmpty() && dataState.sectionRecommendations.items.isEmpty()) {
+                if (stateSnapshot.matchingQueries.isEmpty() && stateSnapshot.sectionRecommendations.items.isEmpty()) {
                     uiStateListener.updateData { s ->
                         s.copy(uiState = UiState.Error)
                     }
@@ -124,7 +124,7 @@ class SearchFlowViewModel @Inject constructor(
             }
 
             val timeout: Long =
-                if (dataState.uiState == UiState.Loading) 30_000L else 3_000L
+                if (stateSnapshot.uiState == UiState.Loading) 30_000L else 3_000L
 
             withTimeoutOrNull(timeout) {
                 if (query.isBlank()) {
@@ -166,7 +166,7 @@ class SearchFlowViewModel @Inject constructor(
                 else -> UiState.Error
             }
 
-            if (uiState is UiState.Empty || (uiState is UiState.Error && dataState.sectionRecommendations.items.isEmpty())) {
+            if (uiState is UiState.Empty || (uiState is UiState.Error && stateSnapshot.sectionRecommendations.items.isEmpty())) {
                 uiStateListener.updateData { s ->
                     s.copy(uiState = uiState)
                 }
@@ -189,8 +189,8 @@ class SearchFlowViewModel @Inject constructor(
                 )
             }
         }.onFailure {
-            val currentQuery = dataState.query
-            if (dataState.matchingQueries.isEmpty() && dataState.sectionRecommendations.items.isEmpty() && currentQuery.isBlank()) {
+            val currentQuery = stateSnapshot.query
+            if (stateSnapshot.matchingQueries.isEmpty() && stateSnapshot.sectionRecommendations.items.isEmpty() && currentQuery.isBlank()) {
                 uiStateListener.updateData { s ->
                     s.copy(uiState = UiState.Error)
                 }
@@ -201,7 +201,7 @@ class SearchFlowViewModel @Inject constructor(
 
     fun retrySearchQuery() = viewModelScope.launch {
         uiStateListener.updateData { s -> s.copy(uiState = UiState.Loading) }
-        val query = dataState.query
+        val query = stateSnapshot.query
         if (query.isBlank()) {
             searchByEmptyQuery()
         } else {
@@ -210,7 +210,7 @@ class SearchFlowViewModel @Inject constructor(
     }
 
     fun search() = viewModelScope.launch {
-        val currentQuery = dataState.query
+        val currentQuery = stateSnapshot.query
         if (currentQuery.isBlank()) return@launch
 
         launch { searchManager.addQueryToHistory(currentQuery) }
@@ -224,7 +224,7 @@ class SearchFlowViewModel @Inject constructor(
     }
 
     fun changeQuery(query: String) = viewModelScope.launch {
-        val currentQuery = dataState.query
+        val currentQuery = stateSnapshot.query
         if (query == currentQuery) return@launch
 
         uiStateListener.updateData { s ->

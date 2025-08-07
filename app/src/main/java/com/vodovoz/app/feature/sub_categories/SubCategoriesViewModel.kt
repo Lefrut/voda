@@ -28,28 +28,28 @@ class SubCategoriesViewModel(
 
     fun chooseCatalogCategory(catalogCategory: ParentCategoryUi) = viewModelScope.launch {
         if (catalogCategory.childCategories.isNotEmpty()) {
-            _events.emit(SubCategoriesEvent.GoToSubCategories(catalogCategory))
+            sendEvent(SubCategoriesEvent.GoToSubCategories(catalogCategory))
         } else if (catalogCategory.action != null) {
-            _events.emit(SubCategoriesEvent.ActivateDataAllAction(catalogCategory.action))
+            sendEvent(SubCategoriesEvent.ActivateDataAllAction(catalogCategory.action))
         } else {
-            _events.emit(SubCategoriesEvent.GoToProductList(catalogCategory.id))
+            sendEvent(SubCategoriesEvent.GoToProductList(catalogCategory.id))
 
         }
     }
 
     fun navigateToSearch() = viewModelScope.launch {
-        _events.emit(SubCategoriesEvent.GoToSearch)
+        sendEvent(SubCategoriesEvent.GoToSearch)
     }
 
     fun navigateBack() = viewModelScope.launch {
-        _events.emit(SubCategoriesEvent.GoBack)
+        sendEvent(SubCategoriesEvent.GoBack)
     }
 
     fun chooseParentCatalogCategory(catalogCategory: ParentCategoryUi) = viewModelScope.launch {
         if (catalogCategory.action != null) {
-            _events.emit(SubCategoriesEvent.ActivateDataAllAction(catalogCategory.action))
+            sendEvent(SubCategoriesEvent.ActivateDataAllAction(catalogCategory.action))
         } else {
-            _events.emit(SubCategoriesEvent.GoToProductList(catalogCategory.id))
+            sendEvent(SubCategoriesEvent.GoToProductList(catalogCategory.id))
         }
 
 

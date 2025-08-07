@@ -92,7 +92,7 @@ class WriteCommentViewModel @Inject constructor(
     }.launchIn(viewModelScope)
 
     fun navigateBack() = viewModelScope.launch {
-        _events.emit(WriteCommentEvent.GoBack)
+        sendEvent(WriteCommentEvent.GoBack)
     }
 
     fun changeRating(rating: Float) = viewModelScope.launch {
@@ -133,7 +133,7 @@ class WriteCommentViewModel @Inject constructor(
             message = stateSnapshot.field.value,
             imageBytesArray = imageBytesArray
         ).singleResult().onSuccess { placeholder ->
-            _events.emit(WriteCommentEvent.SetRatedProductResult(productId))
+            sendEvent(WriteCommentEvent.SetRatedProductResult(productId))
             _state.update { s ->
                 s.copy(
                     uiState = WriteCommentUiState.Success(
@@ -142,7 +142,7 @@ class WriteCommentViewModel @Inject constructor(
                 )
             }
         }.onFailure {
-            _events.emit(
+            sendEvent(
                 WriteCommentEvent.ShowSnackbar(
                     resourcesProvider.getString(R.string.send_cooment_error)
                 )
@@ -160,7 +160,7 @@ class WriteCommentViewModel @Inject constructor(
     }
 
     fun openImagePicker() = viewModelScope.launch {
-        _events.emit(WriteCommentEvent.OpenImagePicker)
+        sendEvent(WriteCommentEvent.OpenImagePicker)
     }
 
     fun addUri(uri: List<@JvmSuppressWildcards Uri>) = viewModelScope.launch {

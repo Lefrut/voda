@@ -104,8 +104,8 @@ class PromotionDetailsViewModel @Inject constructor(
     private fun listenProductsLoadStates() = viewModelScope.launch {
         pagingProductsListener.collectLoadState { combinedLoadStates ->
             val refreshState = when {
-                combinedLoadStates.refresh is LoadState.Loading && dataState.products.isNotEmpty() -> {
-                    dataState.productsLoadStates.refresh
+                combinedLoadStates.refresh is LoadState.Loading && stateSnapshot.products.isNotEmpty() -> {
+                    stateSnapshot.productsLoadStates.refresh
                 }
 
                 else -> combinedLoadStates.refresh

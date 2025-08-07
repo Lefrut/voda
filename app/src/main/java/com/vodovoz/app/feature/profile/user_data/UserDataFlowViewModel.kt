@@ -108,7 +108,7 @@ class UserDataFlowViewModel @Inject constructor(
         }
 
         val updateUserDataResult =
-            vodovozServiceRepository.updateUserData(dataState.fields.mapToDomain()).singleResult()
+            vodovozServiceRepository.updateUserData(stateSnapshot.fields.mapToDomain()).singleResult()
         updateUserDataResult.onSuccess { message ->
             eventListener.emit(UserDataEvents.UpdateProfile)
             eventListener.emit(UserDataEvents.ShowSnackbar(message))
@@ -220,7 +220,7 @@ class UserDataFlowViewModel @Inject constructor(
     }
 
     fun changeDate(date: LocalDate) = viewModelScope.launch {
-        val dateField = dataState.fields.firstOrNull { it.id == "data" } ?: return@launch
+        val dateField = stateSnapshot.fields.firstOrNull { it.id == "data" } ?: return@launch
         uiStateListener.updateData { s ->
             val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
             val formattedDate = date.format(formatter)
@@ -238,7 +238,7 @@ class UserDataFlowViewModel @Inject constructor(
     }
 
     fun changeField(field: FieldUi, updatedField: FieldUi) = viewModelScope.launch {
-        val updatedFields = dataState.fields.updateFieldAndResetError(field, updatedField)
+        val updatedFields = stateSnapshot.fields.updateFieldAndResetError(field, updatedField)
 
         updatedFields.checkFields(false) { fields, _ ->
             uiStateListener.updateData { s ->

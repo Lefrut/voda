@@ -85,7 +85,7 @@ class AddressesFlowViewModel @Inject constructor(
 
     fun navigateToOrdering() = viewModelScope.launch {
 
-        eventListener.emit(AddressesEvents.GoBackToOrdering(dataState.selectedAddress))
+        eventListener.emit(AddressesEvents.GoBackToOrdering(stateSnapshot.selectedAddress))
     }
 
     fun editAddress(address: AddressUi) = viewModelScope.launch {

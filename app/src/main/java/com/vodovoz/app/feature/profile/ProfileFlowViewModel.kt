@@ -53,7 +53,7 @@ class ProfileFlowViewModel @Inject constructor(
 
     fun fetchProfileDetails() = viewModelScope.launch {
         uiStateListener.updateData { s ->
-            s.copy(uiState = if (dataState.uiState != ProfileUiState.Profile) ProfileUiState.Loading else s.uiState)
+            s.copy(uiState = if (stateSnapshot.uiState != ProfileUiState.Profile) ProfileUiState.Loading else s.uiState)
         }
 
         val bonusesPopupWindowDeferred =

@@ -43,7 +43,7 @@ class NotificationSettingsViewModel @Inject constructor(
     }
 
     fun fetchNotificationSettingsDetails() = viewModelScope.launch {
-        if (dataState.uiState !is NotSettingsUiState.Success) {
+        if (stateSnapshot.uiState !is NotSettingsUiState.Success) {
             uiStateListener.updateData { s ->
                 s.copy(uiState = NotSettingsUiState.Loading)
             }
@@ -66,7 +66,7 @@ class NotificationSettingsViewModel @Inject constructor(
             }
 
         }.onFailure {
-            if (dataState.uiState !is NotSettingsUiState.Success) {
+            if (stateSnapshot.uiState !is NotSettingsUiState.Success) {
                 uiStateListener.updateData { s ->
                     s.copy(uiState = NotSettingsUiState.Error)
                 }
@@ -86,7 +86,7 @@ class NotificationSettingsViewModel @Inject constructor(
     fun changeWidget(widget: WidgetUi, updatedWidget: WidgetUi) = viewModelScope.launch {
 
         val currentSection =
-            dataState.sections.firstOrNull { section ->
+            stateSnapshot.sections.firstOrNull { section ->
                 section.items.firstOrNull { widgetUi -> widgetUi.id == widget.id } != null
             } ?: return@launch
 
@@ -109,7 +109,7 @@ class NotificationSettingsViewModel @Inject constructor(
                 s.copy(button = s.button.copy(loading = true))
             }
 
-            val widgets = dataState.sections.map { sectionUi ->
+            val widgets = stateSnapshot.sections.map { sectionUi ->
                 sectionUi.items
             }.flatten()
 

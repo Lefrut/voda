@@ -40,7 +40,7 @@ class LoginByPhoneCodeViewModel @Inject constructor(
     }
 
     fun navigateBack() = viewModelScope.launch {
-        _events.emit(LoginByPhoneCodeEvent.GoBack)
+        sendEvent(LoginByPhoneCodeEvent.GoBack)
     }
 
     fun changeCode(code: String) = viewModelScope.launch {
@@ -104,7 +104,7 @@ class LoginByPhoneCodeViewModel @Inject constructor(
                 s.copy(blockScreen = false)
             }
 
-            _events.emit(LoginByPhoneCodeEvent.RefreshProfile)
+            sendEvent(LoginByPhoneCodeEvent.RefreshProfile)
         }.onFailure {
             _state.update { s ->
                 s.copy(
