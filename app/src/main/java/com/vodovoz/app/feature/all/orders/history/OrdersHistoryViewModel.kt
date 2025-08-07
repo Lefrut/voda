@@ -187,7 +187,7 @@ class OrdersHistoryViewModel @Inject constructor(
             val currentFilters = s.currentFilters
             s.copy(
                 currentFilters = if (currentFilters.contains(filter)) currentFilters.minus(filter)
-                else listOf(filter)
+                else (currentFilters + listOf(filter)).distinct()
             )
         }
 
@@ -263,7 +263,7 @@ class OrdersHistoryViewModel @Inject constructor(
         data class GoToWebView(val url: String) : AllOrdersEvent()
     }
 
-    @Immutable
+    @Stable
     sealed interface AllOrdersUiState {
         data object Loading : AllOrdersUiState
         data object Error : AllOrdersUiState

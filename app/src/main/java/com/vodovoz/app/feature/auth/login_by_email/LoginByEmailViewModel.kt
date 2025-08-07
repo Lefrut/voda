@@ -42,7 +42,6 @@ import javax.inject.Inject
 class LoginByEmailViewModel @Inject constructor(
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val siteStateManager: SiteStateManager,
-    private val accountManager: AccountManager,
     private val resourcesProvider: ResourcesProvider,
     private val loginManager: LoginManager,
 ) : MviViewModel<LoginByEmailState, LoginByEmailEvent>(LoginByEmailState()) {
@@ -73,7 +72,6 @@ class LoginByEmailViewModel @Inject constructor(
         }
 
 
-        val fields = stateSnapshot.fields
         val loginByEmailResult = vodovozServiceRepository.loginByEmail(
             stateSnapshot.fields.associate {
                 it.id to it.value()
@@ -82,12 +80,6 @@ class LoginByEmailViewModel @Inject constructor(
 
 
         loginByEmailResult.onSuccess { userAuthInfo ->
-            val email = fields.firstOrNull { it.id == "email" }?.value ?: ""
-            val password = fields.firstOrNull { it.id == "pass" }?.value ?: ""
-
-            accountManager.updateLastLoginSetting(
-                AccountManager.UserSettings(email = email, password = password)
-            )
 
             loginManager.initializeUserSession(
                 userAuthInfo.userId,
@@ -151,8 +143,6 @@ class LoginByEmailViewModel @Inject constructor(
 
 
         loginByEmailResult.onSuccess { loginDetails ->
-            val siteState = siteStateManager.siteStateSnapshot
-
             val buttons = loginDetails.buttons.map { colorfulButtonModel ->
                 colorfulButtonModel.toUi()
             }.updateButton(LOGIN_BY_EMAIL_BUTTON) { it.copy(enabled = false) }
@@ -160,12 +150,7 @@ class LoginByEmailViewModel @Inject constructor(
             _state.update { s ->
                 s.copy(
                     authDetails = loginDetails.toUi(AgreementController.getText()).copy(
-                        buttons = buildList {
-                            addAll(buttons)
-                            if (siteState?.isSmsEnabled == true) {
-                                removeIf { btn -> btn.id == NAVIGATION_BUTTON }
-                            }
-                        }
+                        buttons = buttons
                     ),
                     uiState = LoginByEmailUiState.Success,
                 )

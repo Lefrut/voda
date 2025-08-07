@@ -30,7 +30,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.PlaceholderVerticalAlign
@@ -56,9 +56,9 @@ fun ProductDetailsInfo(
     detailInfo: ContentBlockUi<String>,
     contentBlockCharacteristics: ContentBlockUi<List<CharacteristicsBlockUi>>,
     showDetailText: Boolean,
-    onDetailTextSwitch: () -> Unit,
     showAllProperties: Boolean,
-    onAllPropertiesShow: () -> Unit,
+    onDescriptionArrowClick: () -> Unit,
+    onPropertiesArrowClick: () -> Unit,
 ) {
     Column(
         modifier = modifier
@@ -86,7 +86,7 @@ fun ProductDetailsInfo(
         }
 
 
-        val animatedRotateFloat by animateFloatAsState(
+        val animatedDescriptionArrow by animateFloatAsState(
             targetValue = if (showDetailText) 180f else 0f, label = "arrow down animation"
         )
 
@@ -116,8 +116,10 @@ fun ProductDetailsInfo(
                         .padding(start = 16.dp)
                         .size(24.dp)
                         .clip(MaterialTheme.shapes.small)
-                        .rotate(animatedRotateFloat)
-                        .clickable { onDetailTextSwitch() },
+                        .clickable { onDescriptionArrowClick() }
+                        .graphicsLayer {
+                            rotationZ = animatedDescriptionArrow
+                        },
                     tint = MaterialTheme.colorScheme.surfaceTint
                 )
             }
@@ -131,6 +133,10 @@ fun ProductDetailsInfo(
                 text = contentBlockCharacteristics.title,
                 color = MaterialTheme.colorScheme.onBackground,
                 style = MaterialTheme.typography.headlineSmall
+            )
+
+            val animatedCharacteristicArrow by animateFloatAsState(
+                targetValue = if (showAllProperties) 180f else 0f, label = "arrow down animation"
             )
 
             Column(
@@ -156,7 +162,7 @@ fun ProductDetailsInfo(
                     )
                 }
 
-                if (!showAllProperties && minCharacteristic < commonCharacteristics.size) {
+                if (minCharacteristic < commonCharacteristics.size) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_arrow_down),
                         contentDescription = null,
@@ -164,7 +170,10 @@ fun ProductDetailsInfo(
                             .align(Alignment.End)
                             .size(24.dp)
                             .clip(MaterialTheme.shapes.small)
-                            .clickable { onAllPropertiesShow() },
+                            .clickable { onPropertiesArrowClick() }
+                            .graphicsLayer {
+                                rotationZ = animatedCharacteristicArrow
+                            },
                         tint = MaterialTheme.colorScheme.surfaceTint
                     )
                 }

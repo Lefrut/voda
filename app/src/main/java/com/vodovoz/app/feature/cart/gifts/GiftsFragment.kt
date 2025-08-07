@@ -26,13 +26,13 @@ class GiftsFragment : Fragment() {
     lateinit var tabManager: TabManager
 
     override fun onStart() {
-        super.onStart()
         tabManager.changeTabVisibility(false)
+        super.onStart()
     }
 
     override fun onStop() {
-        super.onStop()
         tabManager.changeTabVisibility(true)
+        super.onStop()
     }
 
     override fun onCreateView(

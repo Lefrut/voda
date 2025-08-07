@@ -7,12 +7,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -46,6 +47,15 @@ fun OrderQuestionScreen(
                 title = viewState.title,
                 onCloseClick = { viewModel.navigateBack() }
             )
+
+            if (viewState.description.isNotBlank()) {
+                Text(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    text = viewState.description,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
 
             VodovozTextFieldsColumn(
                 modifier = Modifier.padding(top = 8.dp, start = 16.dp, end = 16.dp),

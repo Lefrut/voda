@@ -52,15 +52,14 @@ import com.vodovoz.app.domain.general.model.order.CancelOrderDetailsModel
 import com.vodovoz.app.domain.general.model.order.DeliveryDateDetailsModel
 import com.vodovoz.app.domain.general.model.order.DeliveryDateOptionModel
 import com.vodovoz.app.domain.general.model.order.DeliveryTimeIntervalModel
+import com.vodovoz.app.domain.general.model.order.FormModel
 import com.vodovoz.app.domain.general.model.order.OrderCallYouDetailsModel
 import com.vodovoz.app.domain.general.model.order.OrderDetailsButtonModel
 import com.vodovoz.app.domain.general.model.order.OrderDetailsModel
-import com.vodovoz.app.domain.general.model.order.OrderDetailsSummaryModel
 import com.vodovoz.app.domain.general.model.order.OrderFilterModel
 import com.vodovoz.app.domain.general.model.order.OrderNotifyItemModel
 import com.vodovoz.app.domain.general.model.order.OrderProductModel
 import com.vodovoz.app.domain.general.model.order.OrderProductPresentModel
-import com.vodovoz.app.domain.general.model.order.OrderQuestionDetailsModel
 import com.vodovoz.app.domain.general.model.order.OrderStatusModel
 import com.vodovoz.app.domain.general.model.order.OrderingDetailsModel
 import com.vodovoz.app.domain.general.model.order.OrderingMenuItemModel
@@ -225,7 +224,8 @@ fun OrderingDetailsDTO.toDomain(): OrderingDetailsModel {
         paymentSection = OPLATA?.toDomain()
             ?: throw IllegalArgumentException("Ordering payment can't be null"),
         totals = ITOG?.mapToDomain() ?: emptyList(),
-        button = KNOPKA?.toDomain() ?: throw IllegalArgumentException("Ordering button can't be null"),
+        button = KNOPKA?.toDomain()
+            ?: throw IllegalArgumentException("Ordering button can't be null"),
     )
 }
 
@@ -340,22 +340,27 @@ fun OrderPlaceholderDTO.toVodovozPlaceholder(): VodovozPlaceholderModel {
 }
 
 fun OrderDetailsDTO.toDomain(): OrderDetailsModel {
+
+    val topButtons = BLOCK?.KNOPKI?.mapToDomain() ?: emptyList()
+    val middleButtons = BLOCK?.KNOPKIOPIS?.mapToDomain() ?: emptyList()
+
     return OrderDetailsModel(
         title = TITLE?.ZAGOLOVOK ?: "",
         subtitle = TITLE?.OPIS ?: "",
         currentStatus = BLOCK?.STATUS?.mapToDomain() ?: emptyList(),
         header = BLOCK?.GLAV ?: "",
         statuses = BLOCK?.STATUSY?.mapToDomain() ?: emptyList(),
-        topButtons = BLOCK?.KNOPKI?.mapToDomain() ?: emptyList(),
+        topButtons = topButtons + middleButtons,
         products = TOVARY?.TOVAR?.mapToDomain() ?: emptyList(),
         productsTitle = TOVARY?.TITLE ?: "",
         bottomButtons = KNOPKI_NIZ?.mapToDomain() ?: emptyList(),
-        orderSummary = ITOG?.mapToDomain() ?: throw IllegalArgumentException("Order details summary can't be null")
+        orderSummary = ITOG?.mapToDomain()
+            ?: throw IllegalArgumentException("Order details summary can't be null")
     )
 }
 
-fun OrderQuestionDetailsDTO.toDomain(): OrderQuestionDetailsModel {
-    return OrderQuestionDetailsModel(
+fun OrderQuestionDetailsDTO.toDomain(): FormModel {
+    return FormModel(
         title = TITLE ?: "",
         description = INFORMIROVANIE ?: "",
         fields = LISTADATA?.mapToDomain() ?: emptyList(),
@@ -436,7 +441,8 @@ fun ORDER_DETAILS_KNOPKA_DTO.toDomain(): OrderDetailsButtonModel {
         textColor = COLOR_TEXT ?: "",
         url = URL?.toVodovozUrl() ?: "",
         browser = (BRAYZER == "Y").takeIf { useBrowser -> useBrowser },
-        driverId = VODITEL
+        driverId = VODITEL,
+        isSmall = KNOPKASTYLE == "low"
     )
 }
 
@@ -467,7 +473,8 @@ fun ORDER_STATUS_DTO.toDomain(): OrderStatusModel? {
         name = NAME ?: return null,
         background = BACKGROUND ?: "",
         image = IMAGE?.toVodovozUrl() ?: "",
-        color = COLOR ?: ""
+        color = COLOR ?: "",
+        backgroundAlpha = BACKGROUNDOPACITY ?: 0.05f
     )
 }
 

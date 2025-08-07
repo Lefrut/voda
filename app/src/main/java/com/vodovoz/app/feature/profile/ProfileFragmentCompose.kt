@@ -28,18 +28,21 @@ import androidx.navigation.fragment.findNavController
 import com.vodovoz.app.R
 import com.vodovoz.app.common.tab.TabManager
 import com.vodovoz.app.core.navigation.ProfileMainNavigator
+import com.vodovoz.app.core.navigation.activate
+import com.vodovoz.app.core.navigation.mainFragment
 import com.vodovoz.app.core.navigation.navigateToLogin
+import com.vodovoz.app.core.navigation.navigateToLoginByEmail
 import com.vodovoz.app.core.navigation.navigateToUserData
 import com.vodovoz.app.core.navigation.navigateToWaitFeedbackProducts
 import com.vodovoz.app.core.navigation.navigateToWaterApp
-import com.vodovoz.app.core.navigation.activate
-import com.vodovoz.app.core.navigation.navigateToLoginByEmail
 import com.vodovoz.app.core.navigation.navigateToWebView
 import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.composables.placeholders.LoadingPlaceholder
 import com.vodovoz.app.design_system.composables.placeholders.NetworkErrorPlaceholder
 import com.vodovoz.app.design_system.composables.placeholders.VodovozPlaceholder
+import com.vodovoz.app.design_system.composables.snackbar.VodovozSnackBarVisuals
 import com.vodovoz.app.feature.profile.navigation.ProfileChatsNavigator
+import com.vodovoz.app.ui.snackbar.snackBarHostState
 import com.vodovoz.app.util.extensions.copyText
 import com.vodovoz.app.util.extensions.openUrl
 import dagger.hilt.android.AndroidEntryPoint
@@ -163,6 +166,9 @@ class ProfileFragment : Fragment() {
 
                         is ProfileFlowViewModel.ProfileEvents.Copy -> {
                             requireContext().copyText(events.value)
+                            mainFragment?.snackBarHostState?.showSnackbar(
+                                VodovozSnackBarVisuals.create(events.snackbarMessage)
+                            )
                         }
 
                         is ProfileFlowViewModel.ProfileEvents.GoByChatItemId -> {
@@ -185,6 +191,7 @@ class ProfileFragment : Fragment() {
                         is ProfileFlowViewModel.ProfileEvents.GoToWebView -> {
                             findNavController().navigateToWebView(events.url, events.title)
                         }
+
                         is ProfileFlowViewModel.ProfileEvents.OpenUrl -> {
                             requireContext().openUrl(events.url)
                         }

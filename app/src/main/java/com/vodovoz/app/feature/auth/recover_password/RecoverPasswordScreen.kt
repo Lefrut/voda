@@ -33,7 +33,6 @@ fun RecoverPasswordScreen(viewModel: RecoverPasswordViewModel, viewState: Recove
             description = viewState.description,
             fields = viewState.fields,
             buttons = viewState.buttons,
-            showAgreements = viewState.showAgreement,
             agreementChecked = viewState.agreementChecked,
             agreementHtml = viewState.agreementHtml,
             onAgreementCheck = { newValue ->

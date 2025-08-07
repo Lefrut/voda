@@ -3,7 +3,6 @@ package com.vodovoz.app.feature.all.orders.detail
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -59,7 +58,7 @@ fun OrderDetailsScreen(
             onRefresh = {
                 viewModel.refresh()
             }
-        ){
+        ) {
             OrderDetailsBody(
                 header = viewState.header,
                 statuses = viewState.statuses,
@@ -68,6 +67,7 @@ fun OrderDetailsScreen(
                 productsTitle = viewState.productsTitle,
                 products = viewState.products,
                 bottomButtons = viewState.bottomButtons,
+                questionButton = viewState.questionButton,
                 orderSummary = viewState.orderSummary,
                 onTopButtonClick = { orderDetailsButton ->
                     viewModel.activateTopButton(orderDetailsButton)

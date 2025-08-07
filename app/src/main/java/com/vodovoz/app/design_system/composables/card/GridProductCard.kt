@@ -212,7 +212,7 @@ fun PriceAndRating(modifier: Modifier = Modifier, product: ProductUi) {
 
 
         Icon(
-            painter = painterResource(id = R.drawable.ic_star_active),
+            painter = painterResource(id = R.drawable.ic_star_active_v2),
             contentDescription = null,
             tint = if (product.rating <= 0.0f) MaterialTheme.colorScheme.surfaceVariant else MaterialTheme.colorScheme.tertiary,
             modifier = Modifier

@@ -16,4 +16,6 @@ data class ORDER_STATUS_DTO(
     val COLOR: String?,
     @Json(name = "IMAGE")
     val IMAGE: String?,
+    @Json(name = "BACKGROUNDOPACITY")
+    val BACKGROUNDOPACITY: Float?
 )

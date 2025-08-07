@@ -8,7 +8,7 @@ data class AuthDetailsModel(
     val title: String,
     val description: String,
     val fields: List<FieldModel>,
-    val showAgreement: Boolean,
+    val agreementChecked: Boolean,
     val buttons: List<ColorfulButtonModel>,
     val checkboxes: List<CheckBoxModel>
 )

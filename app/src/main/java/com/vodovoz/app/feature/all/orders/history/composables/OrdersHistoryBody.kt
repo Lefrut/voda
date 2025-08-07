@@ -56,6 +56,7 @@ import com.vodovoz.app.feature.all.orders.history.model.OrdersHistoryButtonUi
 import com.vodovoz.app.feature.all.orders.history.model.OrdersHistoryItemUi
 import com.vodovoz.app.feature.all.orders.history.model.OrdersHistoryProductUi
 import com.vodovoz.app.feature.home.composables.dropShadow
+import com.vodovoz.app.util.extensions.indexOfOrNull
 
 @Suppress("NonSkippableComposable")
 @Composable
@@ -87,6 +88,11 @@ fun OrdersHistoryBody(
                 key = "TabRow",
                 contentType = "TabRow"
             ) {
+
+                val middleTabIndex =
+                    (filters.indexOfOrNull(currentFilters.getOrNull(currentFilters.size / 2))
+                        ?.plus(1)) ?: 0
+
                 VodovozScrollableTabRow(
                     modifier = Modifier
                         .dropShadow(
@@ -102,11 +108,12 @@ fun OrdersHistoryBody(
                                 topEnd = CornerSize(0.dp)
                             )
                         )
+
                         .padding(bottom = 20.dp, top = 8.dp)
                         .fillParentMaxWidth(),
-                    selectedTabIndex = 0,
+                    selectedTabIndex = middleTabIndex,
                     edgePadding = 16.dp,
-                    spacing = 8.dp
+                    spacing = 8.dp,
                 ) {
                     VodovozChip(
                         text = stringResource(id = R.string.all),

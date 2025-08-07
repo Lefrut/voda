@@ -201,7 +201,7 @@ interface VodovozServiceRepository {
         fields: List<FieldModel>,
     ): Flow<Result<VodovozPlaceholderModel>>
 
-    fun getOrderQuestionDetails(orderId: Long): Flow<Result<OrderQuestionDetailsModel>>
+    fun getOrderQuestionDetails(orderId: Long): Flow<Result<FormModel>>
 
     fun getOrderDetails(orderId: Long): Flow<Result<OrderDetailsModel>>
 

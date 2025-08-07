@@ -20,6 +20,7 @@ import com.vodovoz.app.data.vodovoz_service.VodovozService
 import com.vodovoz.app.data.vodovoz_service.mappers.executeRequest
 import com.vodovoz.app.data.vodovoz_service.mappers.mapToDomain
 import com.vodovoz.app.data.vodovoz_service.mappers.toDomain
+import com.vodovoz.app.data.vodovoz_service.model.AnalogsSectionDTO
 import com.vodovoz.app.data.vodovoz_service.model.BrandSectionDTO
 import com.vodovoz.app.data.vodovoz_service.model.ProductCommentsDTO
 import com.vodovoz.app.data.vodovoz_service.model.ProductsSectionDTO
@@ -727,7 +728,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
         )
     }
 
-    override fun getOrderQuestionDetails(orderId: Long): Flow<Result<OrderQuestionDetailsModel>> {
+    override fun getOrderQuestionDetails(orderId: Long): Flow<Result<FormModel>> {
         return executeRequest(
             request = {
                 val userId = accountManager.fetchAccountId()

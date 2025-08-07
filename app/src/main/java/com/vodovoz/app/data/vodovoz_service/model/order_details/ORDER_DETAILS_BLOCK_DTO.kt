@@ -13,5 +13,7 @@ data class ORDER_DETAILS_BLOCK_DTO(
     @Json(name = "STATUSY")
     val STATUSY: List<ORDER_STATUS_DTO>?,
     @Json(name = "KNOPKI")
-    val KNOPKI: List<ORDER_DETAILS_KNOPKA_DTO>?
+    val KNOPKI: List<ORDER_DETAILS_KNOPKA_DTO>?,
+    @Json(name = "KNOPKIOPIS")
+    val KNOPKIOPIS: List<ORDER_DETAILS_KNOPKA_DTO>?,
 )

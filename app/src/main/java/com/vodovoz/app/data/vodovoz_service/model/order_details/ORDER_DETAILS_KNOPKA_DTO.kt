@@ -25,5 +25,7 @@ data class ORDER_DETAILS_KNOPKA_DTO(
     @Json(name = "URL")
     val URL: String?,
     @Json(name = "VODITEL")
-    val VODITEL: String?
+    val VODITEL: String?,
+    @Json(name = "KNOPKASTYLE")
+    val KNOPKASTYLE: String?
 )

@@ -169,9 +169,7 @@ fun ProductCommentsScreen(
 
             if (loadState.refresh is LoadState.Loading) {
                 item {
-                    LoadingPlaceholder(
-                        modifier = Modifier.fillParentMaxSize()
-                    )
+                    LoadingPlaceholder(modifier = Modifier.padding(top = 16.dp))
                 }
             } else {
 

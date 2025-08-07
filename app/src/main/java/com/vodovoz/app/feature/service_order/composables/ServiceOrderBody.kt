@@ -33,12 +33,11 @@ fun ServiceOrderBody(
             .fillMaxSize()
             .imePadding()
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = 16.dp)
+            .padding(start = 16.dp, end = 16.dp, top = 8.dp)
     ) {
-        Spacer(modifier = Modifier.height(8.dp))
-
         if (subtitle.isNotBlank()) {
             Text(
+                modifier = Modifier.padding(bottom = 24.dp),
                 text = subtitle,
                 color = MaterialTheme.colorScheme.onBackground,
                 style = MaterialTheme.typography.bodySmall
@@ -46,10 +45,9 @@ fun ServiceOrderBody(
         }
 
         VodovozTextFieldsColumn(
-            modifier = Modifier.padding(top = 16.dp),
             fields = fields,
             onFieldChange = onFieldChange,
-            onDone = {}
+            onDone = {},
         )
 
         Spacer(modifier = Modifier.weight(1f))

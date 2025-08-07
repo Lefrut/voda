@@ -56,6 +56,7 @@ fun WriteMessageScreen(
                 WriteMessageUiState.Body -> {
                     WriteMessageBody(
                         fields = viewState.fields,
+                        description = viewState.description,
                         onFieldChange = { field, updatedField ->
                             viewModel.changeField(field, updatedField)
                         },

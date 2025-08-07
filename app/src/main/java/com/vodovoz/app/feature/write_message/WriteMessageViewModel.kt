@@ -50,7 +50,8 @@ class WriteMessageViewModel @Inject constructor(
                     button = form.button.toUi().copy(
                         enabled = false
                     ),
-                    title = form.title
+                    title = form.title,
+                    description = form.description
                 )
             }
         }.onFailure {

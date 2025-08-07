@@ -5,12 +5,15 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.compose.animation.Crossfade
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
@@ -86,14 +89,19 @@ class StoriesFragment : Fragment() {
 
 
                     Crossfade(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(MaterialTheme.colorScheme.onBackground),
                         targetState = viewState.uiState,
                         label = "stories cross fade"
                     ) { uiState ->
                         when (uiState) {
                             StoriesViewModel.StoriesUiState.Success, StoriesViewModel.StoriesUiState.Loading -> {
-                                LoadingPlaceholder(
-                                    containerColor = MaterialTheme.colorScheme.onBackground
-                                )
+                                if (!pagerState.isScrollInProgress) {
+                                    LoadingPlaceholder(
+                                        containerColor = MaterialTheme.colorScheme.onBackground
+                                    )
+                                }
                                 StoriesScreen(
                                     viewState = viewState,
                                     viewModel = viewModel,

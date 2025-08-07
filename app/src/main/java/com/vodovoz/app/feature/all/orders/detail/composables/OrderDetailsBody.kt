@@ -1,9 +1,13 @@
 package com.vodovoz.app.feature.all.orders.detail.composables
 
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -21,7 +25,6 @@ import com.vodovoz.app.design_system.model.ColorfulButtonUi
 import com.vodovoz.app.design_system.model.OrderProductUi
 import com.vodovoz.app.design_system.model.order.OrderSummaryItemUi
 import com.vodovoz.app.feature.all.orders.detail.model.OrderDetailsButtonUi
-import com.vodovoz.app.feature.all.orders.detail.model.OrderDetailsSummaryUi
 import com.vodovoz.app.feature.all.orders.detail.model.OrderStatusUi
 
 @Suppress("NonSkippableComposable")
@@ -35,6 +38,7 @@ fun OrderDetailsBody(
     productsTitle: String,
     products: List<OrderProductUi>,
     bottomButtons: List<ColorfulButtonUi>,
+    questionButton: ColorfulButtonUi?,
     orderSummary: List<OrderSummaryItemUi>,
     onTopButtonClick: (OrderDetailsButtonUi) -> Unit,
     onBottomButtonClick: (ColorfulButtonUi) -> Unit,
@@ -46,6 +50,7 @@ fun OrderDetailsBody(
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
     ) {
+
         if (header.isNotEmpty()) {
             Text(
                 modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 24.dp),
@@ -58,13 +63,27 @@ fun OrderDetailsBody(
         }
 
         if (currentStatuses.isNotEmpty()) {
-            FlowRow(
-                modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp),
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .horizontalScroll(rememberScrollState())
+                    .padding(start = 16.dp, end = 16.dp, top = 16.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 currentStatuses.forEach { status ->
                     OrderStatusChip(status = status)
+                }
+
+                Spacer(modifier = Modifier.weight(1f))
+                questionButton?.let {
+                    Text(
+                        modifier = Modifier.clickable(null, null) {
+                            onBottomButtonClick(questionButton)
+                        },
+                        text = questionButton.name,
+                        color = questionButton.textColor,
+                        style = MaterialTheme.typography.bodySmall
+                    )
                 }
             }
         }

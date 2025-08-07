@@ -35,8 +35,8 @@ fun ProductDetailsBody(
     quantityButtonIsLoading: Boolean,
     onFloatingButtonChange: (Boolean) -> Unit,
     onProductMediaClick: (ProductMediaUi) -> Unit,
-    onDetailPreviewTextShowOrHide: () -> Unit,
-    onAllPropertiesShow: () -> Unit,
+    onDescriptionShowOrHide: () -> Unit,
+    onAllPropertiesShowOrHide: () -> Unit,
     onDecrementProduct: () -> Unit,
     onIncrementProduct: () -> Unit,
     onAboutProductClick: () -> Unit,
@@ -121,9 +121,9 @@ fun ProductDetailsBody(
             onAboutProductClick = onAboutProductClick,
             detailInfo = productDetails.detailInfo,
             showDetailText = showDetailText,
-            onDetailTextSwitch = onDetailPreviewTextShowOrHide,
+            onDescriptionArrowClick = onDescriptionShowOrHide,
             showAllProperties = showAllProperties,
-            onAllPropertiesShow = onAllPropertiesShow,
+            onPropertiesArrowClick = onAllPropertiesShowOrHide,
             contentBlockCharacteristics = productDetails.characteristics
         )
 

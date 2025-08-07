@@ -88,7 +88,7 @@ class RecoverPasswordViewModel @Inject constructor(
                     fields = recoverPasswordDetails.fields.mapToUi(),
                     agreementHtml = agreementText,
                     uiState = RecoverPasswordUiState.Body,
-                    showAgreement = recoverPasswordDetails.showAgreement,
+                    agreementChecked = recoverPasswordDetails.agreementChecked,
                 )
             }
         }.onFailure {
@@ -157,7 +157,7 @@ class RecoverPasswordViewModel @Inject constructor(
             s.copy(
                 fields = updatedFields,
                 buttons = s.buttons.updateButton(RECOVER_PASSWORD_BUTTON) { button ->
-                    button.copy(enabled = updatedFields.checkFields() && (s.agreementChecked || !s.showAgreement))
+                    button.copy(enabled = updatedFields.checkFields() && s.agreementChecked)
                 },
             )
         }

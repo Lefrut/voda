@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.rememberAsyncImagePainter
 import com.vodovoz.app.design_system.ExtendedTheme
 import com.vodovoz.app.design_system.composables.button.VodovozButton
+import com.vodovoz.app.design_system.composables.button.VodovozButtonDefaults
 import com.vodovoz.app.design_system.composables.button.VodovozButtonSmall
 import com.vodovoz.app.design_system.composables.button.VodovozOutlineButton
 import com.vodovoz.app.feature.all.orders.detail.model.OrderDetailsButtonUi
@@ -38,7 +39,7 @@ fun OrderDetailsButtonsColumn(
     ) {
         topButtons.forEach { button ->
             when (button) {
-                is OrderDetailsButtonUi.AboutOrderButton -> {
+                is OrderDetailsButtonUi.OutlineButton -> {
                     VodovozOutlineButton(
                         imagePainter = rememberAsyncImagePainter(model = button.image),
                         name = button.name,
@@ -48,38 +49,30 @@ fun OrderDetailsButtonsColumn(
                 }
 
                 is OrderDetailsButtonUi.ImageButton -> {
-                    ImageOrderButton(button = button) { onButtonClick(button) }
+                    ImageOrderButton(button = button) {
+                        onButtonClick(button)
+                    }
                 }
 
-                is OrderDetailsButtonUi.PayButton -> {
-                    VodovozButton(
-                        text = button.name,
-                        colors = ButtonDefaults.filledTonalButtonColors(
-                            containerColor = button.backgroundColor,
-                            contentColor = button.textColor
-                        ),
-                        onClick = { onButtonClick(button) }
+                is OrderDetailsButtonUi.Button -> {
+                    val buttonColors = VodovozButtonDefaults.colors(
+                        contentColor = button.textColor,
+                        containerColor = button.backgroundColor
                     )
-                }
 
-                is OrderDetailsButtonUi.TipsButton -> {
-                    VodovozOutlineButton(
-                        imagePainter = rememberAsyncImagePainter(model = button.image),
-                        name = button.name,
-                        description = button.description,
-                        onClick = { onButtonClick(button) }
-                    )
-                }
-
-                is OrderDetailsButtonUi.WhereOrderButton -> {
-                    VodovozButtonSmall(
-                        text = button.name,
-                        onClick = { onButtonClick(button) },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = button.backgroundColor,
-                            contentColor = button.textColor
+                    if (button.isSmall) {
+                        VodovozButtonSmall(
+                            text = button.name,
+                            colors = buttonColors,
+                            onClick = { onButtonClick(button) }
                         )
-                    )
+                    } else {
+                        VodovozButton(
+                            text = button.name,
+                            colors = buttonColors,
+                            onClick = { onButtonClick(button) }
+                        )
+                    }
                 }
             }
         }
@@ -100,7 +93,7 @@ private fun ImageOrderButton(
         onClick = onClick,
         contentPadding = PaddingValues(horizontal = 16.dp),
         shape = MaterialTheme.shapes.large,
-        colors = ButtonDefaults.filledTonalButtonColors(
+        colors = VodovozButtonDefaults.colors(
             containerColor = button.backgroundColor,
             contentColor = button.textColor
         )

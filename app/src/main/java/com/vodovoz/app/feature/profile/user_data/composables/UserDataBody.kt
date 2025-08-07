@@ -64,7 +64,7 @@ fun UserDataBody(
             ),
             fields = fields,
             onFieldChange = onFieldChange,
-            onFieldClick = onFieldClick
+            onFieldClick = onFieldClick,
         )
 
         VodovozButton(

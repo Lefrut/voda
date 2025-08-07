@@ -35,7 +35,7 @@ fun OrderRecipientBody(
                 top = 16.dp
             ),
             fields = fields,
-            onFieldChange = onFieldChange
+            onFieldChange = onFieldChange,
         )
 
         Spacer(modifier = Modifier.weight(1f))

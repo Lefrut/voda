@@ -23,7 +23,7 @@ fun AuthDetailsDTO.toDomain(): AuthDetailsModel {
         description = OPISANIE ?: "",
         fields = DATA?.mapToDomain()
             ?: throw IllegalArgumentException("Login fields can't be null"),
-        showAgreement = VodovozBoolean.from(SOGLASHENIE).boolean,
+        agreementChecked = VodovozBoolean.from(SOGLASHENIE).boolean,
         buttons = KNOPKA?.map { it.toDomain() }
             ?: throw IllegalArgumentException("Auth button can't be null"),
         checkboxes = PODPISKA?.mapToDomain() ?: emptyList()

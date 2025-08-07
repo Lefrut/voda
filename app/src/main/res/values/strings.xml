@@ -300,5 +300,10 @@
     <string name="block_seconds">СЕКУНД</string>
     <string name="error_send_data">Не удалось отправить данные, попробуйте снова!</string>
     <string name="text_copied_in_buffer">Текст скопирован в буфер обмена</string>
+    <string name="back">Назад</string>
+    <string name="article_copied">Артикул скопирован</string>
+    <string name="order_number_copied">Номер заказа скопирован</string>
+    <string name="your_id_copied">Ваш идентификатор скопирован</string>
+    <string name="refereal_code_copied">Реферальный код скопирован</string>
 
 </resources>

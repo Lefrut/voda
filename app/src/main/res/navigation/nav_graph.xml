@@ -16,4 +16,9 @@
         android:name="com.vodovoz.app.feature.block_app.BlockAppFragment"
         android:label="BlockAppFragment" />
 
+    <fragment
+        android:id="@+id/imagePickerFragment"
+        android:name="com.vodovoz.app.common.media.ImagePickerFragment"
+        android:label="ImagePickerFragment" />
+
 </navigation>

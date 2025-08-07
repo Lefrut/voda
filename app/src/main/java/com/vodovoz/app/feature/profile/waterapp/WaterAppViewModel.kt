@@ -159,7 +159,10 @@ class WaterAppViewModel @Inject constructor(
         waterAppHelper.saveWaterAppNotificationData()
         waterAppHelper.saveUserData()
         waterAppHelper.calculateAndSaveRate()
+
         uiStateListener.updateData { s -> s.copy(uiState = WaterAppUiState.Main) }
+
+
     }
 
     fun goToWaterApp() = viewModelScope.launch {
@@ -167,12 +170,9 @@ class WaterAppViewModel @Inject constructor(
         waterAppHelper.fetchWaterAppUserData()
         waterAppHelper.fetchWaterAppNotificationData()
 
-        delay(150L)
         uiStateListener.updateData { s ->
             s.copy(uiState = WaterAppUiState.Main)
         }
-
-
     }
 
     fun goToSettings() = viewModelScope.launch {

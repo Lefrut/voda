@@ -23,7 +23,10 @@ import com.vodovoz.app.feature.all.orders.detail.model.OrderStatusUi
 fun OrderStatusChip(modifier: Modifier = Modifier, status: OrderStatusUi) {
     Row(
         modifier = modifier
-            .background(status.background.copy(0.05f), MaterialTheme.shapes.medium)
+            .background(
+                color = status.background.copy(status.backgroundAlpha),
+                shape = MaterialTheme.shapes.medium
+            )
             .padding(end = 8.dp, start = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(4.dp)
@@ -55,7 +58,8 @@ private fun OrderStatusChipPreview() {
                 "Не оплачен",
                 "",
                 Color.Red,
-                Color(0xFFF91155).copy(0.05f)
+                Color(0xFFF91155).copy(0.05f),
+                0.05f
             )
         )
     }

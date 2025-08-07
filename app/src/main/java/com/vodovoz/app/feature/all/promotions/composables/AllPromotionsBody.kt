@@ -76,11 +76,13 @@ fun AllPromotionsBody(
                 promotions.isNotEmpty() -> {
                     items(count = promotions.size) { i ->
                         val promotion = promotions.getOrNull(i) ?: return@items
-                        PromotionCard(
-                            promotion = promotion,
-                            onClick = onPromotionClick,
-                            onAdvertisingClick = onAdvertisingClick
-                        )
+                        SkeletonBox(shimmerState = shimmerState){
+                            PromotionCard(
+                                promotion = promotion,
+                                onClick = onPromotionClick,
+                                onAdvertisingClick = onAdvertisingClick
+                            )
+                        }
 
                         SideEffect {
                             onPromotionSee(i)

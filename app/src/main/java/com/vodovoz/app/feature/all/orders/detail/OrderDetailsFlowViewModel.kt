@@ -19,10 +19,8 @@ import com.vodovoz.app.design_system.model.withUpdatedFavorites
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.feature.all.orders.detail.composables.AboutOrderPopupWindowUi
 import com.vodovoz.app.feature.all.orders.detail.model.OrderDetailsButtonUi
-import com.vodovoz.app.feature.all.orders.detail.model.OrderDetailsSummaryUi
 import com.vodovoz.app.feature.all.orders.detail.model.OrderStatusUi
 import com.vodovoz.app.feature.all.orders.detail.model.mapToUi
-import com.vodovoz.app.feature.all.orders.detail.model.toUi
 import com.vodovoz.app.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -43,6 +41,10 @@ class OrderDetailsFlowViewModel @Inject constructor(
 ) : PagingContractViewModel<OrderDetailsFlowViewModel.OrderDetailsState, OrderDetailsFlowViewModel.OrderDetailsEvent>(
     OrderDetailsState()
 ) {
+
+    companion object {
+        const val QUESTION_BUTTON_ID = "voproszakaz"
+    }
 
     private val orderId = savedState.get<Long>("orderId") ?: navigateBack().run { -1 }
 
@@ -77,10 +79,14 @@ class OrderDetailsFlowViewModel @Inject constructor(
 
         orderDetailsResult.onSuccess { orderDetails ->
 
+            val bottomButtons = orderDetails.bottomButtons.mapToUi()
+            val questionButton = bottomButtons.find { it.id == QUESTION_BUTTON_ID }
+
             uiStateListener.updateData { s ->
                 s.copy(
                     topButtons = orderDetails.topButtons.mapToUi(),
-                    bottomButtons = orderDetails.bottomButtons.mapToUi(),
+                    bottomButtons = bottomButtons,
+                    questionButton = questionButton,
                     title = orderDetails.title,
                     subtitle = orderDetails.subtitle,
                     header = orderDetails.header,
@@ -101,53 +107,46 @@ class OrderDetailsFlowViewModel @Inject constructor(
     }
 
     fun activateTopButton(orderDetailsButton: OrderDetailsButtonUi) = viewModelScope.launch {
-        when (orderDetailsButton) {
-            is OrderDetailsButtonUi.AboutOrderButton -> {
-                showAboutOrderBottomSheet(orderDetailsButton.popupWindow)
-            }
-
-            is OrderDetailsButtonUi.ImageButton -> {
-                if (orderDetailsButton.id == "povtorit") {
-                    vodovozServiceRepository.repeatOrder(orderId).singleResult().onSuccess {
-                        cartManager.updateCartListState(true)
-                        eventListener.emit(OrderDetailsEvent.GoToCart)
-                    }
-                }
-            }
-
-            is OrderDetailsButtonUi.PayButton -> {
-                val payButtonEvent = if (orderDetailsButton.browser) {
-                    OrderDetailsEvent.OpenUrl(orderDetailsButton.url)
-                } else {
-                    OrderDetailsEvent.GoToWebView(orderDetailsButton.url)
-                }
-                eventListener.emit(payButtonEvent)
-            }
-
-            is OrderDetailsButtonUi.TipsButton -> {
-                val tipsButtonEvent = if (orderDetailsButton.browser) {
-                    OrderDetailsEvent.OpenUrl(orderDetailsButton.url)
-                } else {
-                    OrderDetailsEvent.GoToWebView(orderDetailsButton.url)
-                }
-                eventListener.emit(tipsButtonEvent)
-            }
-
-            is OrderDetailsButtonUi.WhereOrderButton -> {
+        when {
+            orderDetailsButton.id == "voditel" -> {
                 eventListener.emit(
                     OrderDetailsEvent.GoToTraceOrder(
-                        orderDetailsButton.driverId,
+                        orderDetailsButton.driverId ?: return@launch,
                         orderId
                     )
                 )
             }
+
+            orderDetailsButton.id == "oplata" || orderDetailsButton.url != null -> {
+                val url = orderDetailsButton.url ?: return@launch
+                val event = if (orderDetailsButton.browser == true) {
+                    OrderDetailsEvent.OpenUrl(url)
+                } else {
+                    OrderDetailsEvent.GoToWebView(url)
+                }
+                eventListener.emit(event)
+            }
+
+            orderDetailsButton.id == "povtorit" -> {
+                vodovozServiceRepository.repeatOrder(orderId).singleResult()
+                    .onSuccess {
+                        cartManager.updateCartListState(true)
+                        eventListener.emit(OrderDetailsEvent.GoToCart)
+                    }
+            }
+
+            orderDetailsButton.popupWindow != null -> {
+                showAboutOrderBottomSheet(orderDetailsButton.popupWindow ?: return@launch)
+            }
+
+
         }
     }
 
 
     fun activateBottomButton(button: ColorfulButtonUi) = viewModelScope.launch {
         when (button.id) {
-            "voproszakaz" -> {
+            QUESTION_BUTTON_ID -> {
                 eventListener.emit(OrderDetailsEvent.GoToOrderQuestion(orderId))
             }
 
@@ -201,6 +200,7 @@ class OrderDetailsFlowViewModel @Inject constructor(
         val header: String = "",
         val topButtons: List<OrderDetailsButtonUi> = emptyList(),
         val bottomButtons: List<ColorfulButtonUi> = emptyList(),
+        val questionButton: ColorfulButtonUi? = null,
         val orderSummary: List<OrderSummaryItemUi> = emptyList(),
         val currentStatuses: List<OrderStatusUi> = emptyList(),
         val statuses: List<OrderStatusUi> = emptyList(),
@@ -209,7 +209,7 @@ class OrderDetailsFlowViewModel @Inject constructor(
         val currentAboutOrderBS: AboutOrderPopupWindowUi? = null,
         val showAboutOrderBS: Boolean = false,
         val uiState: OrderDetailsUiState = OrderDetailsUiState.Loading,
-        val showRefreshIndicator: Boolean = false
+        val showRefreshIndicator: Boolean = false,
     ) : State
 
     sealed class OrderDetailsEvent : Event {

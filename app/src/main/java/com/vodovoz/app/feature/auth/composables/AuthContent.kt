@@ -71,7 +71,7 @@ fun AuthContent(
                 VodovozTextFieldsColumn(
                     fields = authDetails.fields,
                     onFieldChange = onFieldChange,
-                    onDone = { }
+                    onDone = { },
                 )
             }
 
