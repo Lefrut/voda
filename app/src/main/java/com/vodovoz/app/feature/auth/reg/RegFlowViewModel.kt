@@ -65,9 +65,7 @@ class RegFlowViewModel @Inject constructor(
                     authDetails = registerDetails.toUi(AgreementController.getText()).copy(
                         buttons = registerDetails.buttons.mapToUi()
                             .updateButton(REGISTER_BUTTON) { btn ->
-                                btn.copy(
-                                    enabled = false
-                                )
+                                btn.copy(enabled = false)
                             }
 
                     )

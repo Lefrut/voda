@@ -203,25 +203,10 @@ fun HomeScreen(
         }
     }
 
-    val animatedUnratedAlpha =
-        animateFloatAsState(
-            targetValue = if (viewState.showUnratedProductsBS && !viewState.showedUnratedProducts) 1f else 0f,
-            label = "animatedUnratedAlpha",
-            animationSpec = tween(300, 0),
-        )
 
-
-    val showUnratedProductBottomSheet by remember {
-        derivedStateOf { animatedUnratedAlpha.value > 0f }
-    }
-
-    if (showUnratedProductBottomSheet) {
+    if (viewState.showUnratedProductsBS && !viewState.showedUnratedProducts) {
         UnratedProductsBottomSheet(
-            modifier = Modifier
-                .zIndex(Float.MAX_VALUE)
-                .graphicsLayer {
-                    alpha = animatedUnratedAlpha.value
-                },
+            modifier = Modifier.zIndex(Float.MAX_VALUE),
             sectionUnratedProducts = viewState.sectionUnratedProducts,
             onProductRatingChanged = { product, rating ->
                 viewModel.navigateToWriteComment(product, rating)

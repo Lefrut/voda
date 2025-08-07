@@ -77,7 +77,7 @@ class FavoriteFlowViewModel @Inject constructor(
         }
     }
 
-    fun checkFavoritesChanges() = viewModelScope.launch {
+    private fun hasFavoriteChanges(): Boolean {
         val oldLikes = dataState.lastSavedLikes
 
         val newLikes = likeManager.getLikes()
@@ -96,9 +96,16 @@ class FavoriteFlowViewModel @Inject constructor(
             val oldLike = oldLikes[id]
 
             if ((newLike != oldLike || newLike == null) && (newLikeCategory == selectedCategory || selectedCategory == null || newLikeCategory == null)) {
-                fetchFavoriteProducts()
-                return@forEach
+                return true
             }
+        }
+
+        return false
+    }
+
+    fun fetchFavoritesIfChanges() = viewModelScope.launch {
+        if (hasFavoriteChanges()) {
+            fetchFavoriteProducts().join()
         }
     }
 
@@ -148,8 +155,9 @@ class FavoriteFlowViewModel @Inject constructor(
         val favoriteProductsResult =
             vodovozServiceRepository.getFavoriteProducts(
                 productsIds = likeManager.fetchLocalFavorites()
-            ).singleResult()
-                .map { productsSectionModel -> productsSectionModel.toUi() }
+            ).singleResult().map { productsSectionModel ->
+                productsSectionModel.toUi()
+            }
 
 
         favoriteProductsResult.onSuccess { productsSectionUi ->
@@ -171,18 +179,19 @@ class FavoriteFlowViewModel @Inject constructor(
                 it == CategoryUi.Empty || dataState.productsSection.categories.contains(it)
             } ?: CategoryUi.Empty
 
-            vodovozServiceRepository.getFavoriteProductsPaged(
-                categoryId = currentCategory.id,
-                sort = dataState.currentSort.toDomain(),
-                productsIds = likeManager.fetchLocalFavorites()
-            ).map { pagingData ->
-                pagingData.map { productModel -> productModel.toUi() }
-            }.collectLatest { pagingData ->
-                pagingProductsListener.collectPagingData(
-                    pagingData
-                )
+            viewModelScope.launch {
+                vodovozServiceRepository.getFavoriteProductsPaged(
+                    categoryId = currentCategory.id,
+                    sort = dataState.currentSort.toDomain(),
+                    productsIds = likeManager.fetchLocalFavorites()
+                ).map { pagingData ->
+                    pagingData.map { productModel -> productModel.toUi() }
+                }.collectLatest { pagingData ->
+                    pagingProductsListener.collectPagingData(
+                        pagingData
+                    )
+                }
             }
-
 
         }.onFailure { t ->
             val uiState = when (t) {
@@ -206,7 +215,6 @@ class FavoriteFlowViewModel @Inject constructor(
         }
 
     }
-
 
     fun refresh() = viewModelScope.launch {
         if (dataState.uiState !is FavoriteUiState.Loading) {
@@ -252,13 +260,13 @@ class FavoriteFlowViewModel @Inject constructor(
 
         eventListener.emit(FavoriteEvents.ScrollToTop)
         likeManager.changeCategory(category.id.takeIf { it != CategoryUi.Empty.id })
-        fetchFavoriteProducts()
+        fetchFavoriteProducts().join()
     }
 
     fun selectSort(sort: SortUi) = viewModelScope.launch {
         if (sort == dataState.currentSort) return@launch
         uiStateListener.updateData { s -> s.copy(currentSort = sort, showSortBottomSheet = false) }
-        fetchFavoriteProducts()
+        fetchFavoriteProducts().join()
     }
 
     fun navigateToProductDetails(product: ProductUi) = viewModelScope.launch {

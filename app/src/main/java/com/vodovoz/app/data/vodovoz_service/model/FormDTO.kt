@@ -11,6 +11,8 @@ data class FormDTO(
     val POLYA: List<FIELD_DTO>?,
     @Json(name = "KNOPKA")
     val KNOPKA: COLORFUL_KNOPKA_DTO?,
+    @Json(name = "INFORMIROVANIE")
+    val INFORMIROVANIE: String?
 )
 
 

@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -18,10 +17,11 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.fromHtml
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import coil3.compose.AsyncImagePainter
 import coil3.compose.rememberAsyncImagePainter
-import com.vodovoz.app.design_system.composables.button.VodovozButton
+import com.valentinilk.shimmer.ShimmerBounds
+import com.valentinilk.shimmer.rememberShimmer
 import com.vodovoz.app.design_system.composables.button.VodovozButtonsColumn
+import com.vodovoz.app.design_system.composables.decoration.SkeletonBox
 import com.vodovoz.app.design_system.model.ColorfulButtonUi
 import com.vodovoz.app.design_system.vodovozTextLinkStyle
 
@@ -42,9 +42,8 @@ fun BaseBottomSheetContent(
             style = MaterialTheme.typography.titleMedium
         )
         val painter = rememberAsyncImagePainter(picture)
-        val painterState by painter.state.collectAsStateWithLifecycle()
 
-        if (painterState is AsyncImagePainter.State.Success) {
+        SkeletonBox(shimmerState = rememberShimmer(ShimmerBounds.View)){
             Image(
                 painter = painter,
                 contentDescription = null,

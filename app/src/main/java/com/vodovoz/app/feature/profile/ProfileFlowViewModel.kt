@@ -3,11 +3,13 @@ package com.vodovoz.app.feature.profile
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.viewModelScope
+import com.vodovoz.app.R
 import com.vodovoz.app.common.content.Event
 import com.vodovoz.app.common.content.PagingContractViewModel
 import com.vodovoz.app.common.content.State
 import com.vodovoz.app.common.content.updateData
 import com.vodovoz.app.common.model.VodovozAction
+import com.vodovoz.app.common.resources.ResourcesProvider
 import com.vodovoz.app.design_system.model.AboutAdvertisingUi
 import com.vodovoz.app.design_system.model.BannerUi
 import com.vodovoz.app.design_system.model.VodovozPlaceholderUi
@@ -38,6 +40,7 @@ import javax.inject.Inject
 class ProfileFlowViewModel @Inject constructor(
     private val siteStateManager: SiteStateManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
+    private val resourcesProvider: ResourcesProvider,
 ) : PagingContractViewModel<ProfileFlowViewModel.ProfileState, ProfileFlowViewModel.ProfileEvents>(
     ProfileState()
 ) {
@@ -155,11 +158,16 @@ class ProfileFlowViewModel @Inject constructor(
 
     fun copyUserId(text: String) = viewModelScope.launch {
         val userId = text.trim().filter { c -> c.isDigit() }
-        eventListener.emit(ProfileEvents.Copy(userId))
+        eventListener.emit(
+            ProfileEvents.Copy(
+                userId,
+                resourcesProvider.getString(R.string.your_id_copied)
+            )
+        )
     }
 
     fun navigateByChatItem(chatItem: ProfileChatItemUi) = viewModelScope.launch {
-        if(chatItem.id == "") closeSupportingBottomSheet()
+        if (chatItem.id == "") closeSupportingBottomSheet()
         eventListener.emit(ProfileEvents.GoByChatItemId(chatItem.id, chatItem.navigationData))
     }
 
@@ -216,8 +224,13 @@ class ProfileFlowViewModel @Inject constructor(
         }
     }
 
-    fun copyText(text: String) = viewModelScope.launch {
-        eventListener.emit(ProfileEvents.Copy(text))
+    fun copyBonusesCode(text: String) = viewModelScope.launch {
+        eventListener.emit(
+            ProfileEvents.Copy(
+                text,
+                resourcesProvider.getString(R.string.refereal_code_copied)
+            )
+        )
     }
 
     fun navigateToBonusesConditions(bonusesPopupWindow: BonusesPopupWindowUi) =
@@ -281,7 +294,7 @@ class ProfileFlowViewModel @Inject constructor(
 
         data class GoByMenuItemId(val itemId: String) : ProfileEvents()
         data class ActivateVodovozAction(val action: VodovozAction) : ProfileEvents()
-        data class Copy(val value: String) : ProfileEvents()
+        data class Copy(val value: String, val snackbarMessage: String) : ProfileEvents()
         data class GoByChatItemId(val chatId: String, val data: String) : ProfileEvents()
         data class OpenUrl(val url: String) : ProfileEvents()
         data class GoToWebView(val url: String, val title: String) : ProfileEvents()

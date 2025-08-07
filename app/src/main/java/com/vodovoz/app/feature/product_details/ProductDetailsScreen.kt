@@ -106,10 +106,10 @@ fun ProductDetailsScreen(
                     onFloatingButtonChange = { isVisible ->
                         viewModel.changeFloatingButton(isVisible)
                     },
-                    onAllPropertiesShow = {
-                        viewModel.showAllProperties()
+                    onAllPropertiesShowOrHide = {
+                        viewModel.showAllOrHideProperties()
                     },
-                    onDetailPreviewTextShowOrHide = {
+                    onDescriptionShowOrHide = {
                         viewModel.showOrHideDetailText()
                     },
                     onProductMediaClick = { media ->

@@ -28,6 +28,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.vodovoz.app.R
 import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.feature.home.composables.dropShadow
 import kotlinx.coroutines.delay
@@ -47,6 +48,7 @@ fun VodovozSnackbarHost(
 }
 
 
+
 @Stable
 class VodovozSnackBarVisuals(
     override val actionLabel: String?,
@@ -61,7 +63,7 @@ class VodovozSnackBarVisuals(
         fun create(
             message: String,
             @DrawableRes
-            iconId: Int? = null,
+            iconId: Int? = R.drawable.ic_success,
             actionLabel: String? = null,
             duration: SnackbarDuration = SnackbarDuration.Short,
             withDismissAction: Boolean = false,

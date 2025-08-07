@@ -4,15 +4,12 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
-import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
@@ -20,8 +17,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.navOptions
 import com.vodovoz.app.R
-import com.vodovoz.app.common.media.ImagePickerFragment
-import com.vodovoz.app.common.tab.TabManager
+import com.vodovoz.app.core.navigation.findRootNavController
+import com.vodovoz.app.core.navigation.slideAnim
 import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.composables.placeholders.LoadingPlaceholder
 import com.vodovoz.app.design_system.composables.placeholders.NetworkErrorPlaceholder
@@ -34,7 +31,6 @@ import com.vodovoz.app.feature.profile.ProfileFlowViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 @AndroidEntryPoint
 class UserDataFragment : Fragment() {
@@ -120,9 +116,10 @@ class UserDataFragment : Fragment() {
                                 }
 
                                 UserDataFlowViewModel.UserDataEvents.OpenImagePicker -> {
-                                    findNavController().navigate(
+                                    findRootNavController()?.navigate(
                                         R.id.imagePickerFragment,
-                                        bundleOf(ImagePickerFragment.IMAGE_PICKER_RECEIVER to ImagePickerFragment.AVATAR)
+                                        Bundle.EMPTY,
+                                        navOptions { slideAnim() }
                                     )
                                 }
                             }

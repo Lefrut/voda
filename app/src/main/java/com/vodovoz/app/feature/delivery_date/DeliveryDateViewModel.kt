@@ -84,9 +84,7 @@ class DeliveryDateViewModel @Inject constructor(
 
 
                 val baseSelectedTimeInterval =
-                    if (s.selectedTimeInterval == DeliveryTimeIntervalUi.Empty) {
-                        DeliveryTimeIntervalUi.Empty
-                    } else selectedTimeSection.items.firstOrNull() ?: DeliveryTimeIntervalUi.Empty
+                    selectedTimeSection.items.firstOrNull() ?: DeliveryTimeIntervalUi.Empty
 
 
                 s.copy(
@@ -102,7 +100,9 @@ class DeliveryDateViewModel @Inject constructor(
                     } ?: dateOptions.firstOrNull() ?: DeliveryDateOptionUi.Empty,
                     selectedTimeInterval = if (timeSectionBySelectedTimeInterval == null) {
                         baseSelectedTimeInterval
-                    } else s.selectedTimeInterval,
+                    } else selectedTimeSection.items.firstOrNull {
+                        it.value == s.selectedTimeInterval.value
+                    } ?: s.selectedTimeInterval,
                     uiState = DeliveryDateUiState.Success,
                     earlierCheckbox = deliveryDateDetails.earlierCheckbox?.toUi()
                 )

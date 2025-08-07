@@ -22,7 +22,7 @@ abstract class PagingContractViewModel<S : State, E : Event>(
     protected val state
         get() = uiStateListener.value
 
-    protected val dataState get() = state.data
+    val dataState get() = state.data
 
     @Stable
     fun observeUiState() = uiStateListener.asStateFlow()
@@ -48,7 +48,7 @@ interface Event
 data class PagingState<S>(
     val data: S,
     val loadingPage: Boolean = false,
-    val error: ErrorState?,
+    val error: ErrorState? = null,
     val page: Int? = 1,
 ) {
     companion object {

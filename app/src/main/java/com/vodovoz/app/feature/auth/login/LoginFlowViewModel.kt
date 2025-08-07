@@ -35,7 +35,6 @@ import javax.inject.Inject
 @HiltViewModel
 @Stable
 class LoginFlowViewModel @Inject constructor(
-    private val accountManager: AccountManager,
     private val siteStateManager: SiteStateManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val resourcesProvider: ResourcesProvider,
@@ -49,15 +48,6 @@ class LoginFlowViewModel @Inject constructor(
     }
 
     init {
-        viewModelScope.launch {
-            val settings = accountManager.fetchUserSettings()
-            viewModelScope.launch {
-                uiStateListener.value = state.copy(
-                    data = state.data.copy(settings = settings)
-                )
-            }
-        }
-
         fetchLoginDetails()
     }
 

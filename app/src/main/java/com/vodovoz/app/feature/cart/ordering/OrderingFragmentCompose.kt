@@ -83,14 +83,12 @@ class OrderingFragment : Fragment() {
                     when (val uiState = viewState.uiState) {
                         OrderingFlowViewModel.OrderingUiState.Error,
                         OrderingFlowViewModel.OrderingUiState.Loading,
-                        OrderingFlowViewModel.OrderingUiState.Order,
-                        -> {
+                        OrderingFlowViewModel.OrderingUiState.Order -> {
                             OrderingScreen(
                                 viewModel = viewModel,
                                 viewState = viewState,
                                 scrollState = scrollState
                             )
-
                         }
 
                         is OrderingFlowViewModel.OrderingUiState.Success -> {
@@ -134,32 +132,39 @@ class OrderingFragment : Fragment() {
             val backEntrySavedStateHandle =
                 findNavController().currentBackStackEntry?.savedStateHandle
 
-            backEntrySavedStateHandle?.remove<AddressUi>("address")
-                ?.let { address -> viewModel.setAddress(address) }
+            backEntrySavedStateHandle?.apply {
+                remove<AddressUi>("address")?.let { address ->
+                    viewModel.setAddress(address)
+                }
 
-            val timeInterval =
-                backEntrySavedStateHandle?.remove<DeliveryTimeIntervalUi>("timeInterval")
-            val date = backEntrySavedStateHandle?.remove<DeliveryDateOptionUi>("dateOption")
+                val timeInterval = remove<DeliveryTimeIntervalUi>("timeInterval")
+                val date = remove<DeliveryDateOptionUi>("dateOption")
 
-            if (timeInterval != null && date != null) {
-                viewModel.setDeliveryDateTime(timeInterval, date)
+                if (timeInterval != null && date != null) {
+                    viewModel.setDeliveryDateTime(timeInterval, date)
+                }
+
+                remove<CheckboxUi>("earlierCheckbox")?.let { checkbox ->
+                    viewModel.setEarlierDelivery(checkbox)
+                }
+
+                remove<CallYouItemUi>("callYou")?.let { callYouItem ->
+                    viewModel.setCallYou(callYouItem)
+                }
+
+                remove<PaymentMethodItemNav>("paymentBalance")?.toUi()?.let { paymentBalance ->
+                    viewModel.setPaymentBalance(paymentBalance)
+                }
+
+                remove<PaymentMethodItemNav>("paymentMethod")?.toUi()?.let { paymentMethod ->
+                    viewModel.setPaymentMethod(paymentMethod)
+                }
+
+                remove<Boolean>("updateRecipient")?.let {
+                    viewModel.refreshRecipient()
+                }
             }
 
-            backEntrySavedStateHandle?.remove<CheckboxUi>("earlierCheckbox")
-                ?.let { checkbox -> viewModel.setEarlierDelivery(checkbox) }
-
-            backEntrySavedStateHandle?.remove<CallYouItemUi>("callYou")
-                ?.let { callYouItem -> viewModel.setCallYou(callYouItem) }
-
-            backEntrySavedStateHandle?.remove<PaymentMethodItemNav>("paymentBalance")?.toUi()
-                ?.let { paymentBalance -> viewModel.setPaymentBalance(paymentBalance) }
-
-            backEntrySavedStateHandle?.remove<PaymentMethodItemNav>("paymentMethod")?.toUi()
-                ?.let { paymentMethod -> viewModel.setPaymentMethod(paymentMethod) }
-
-            backEntrySavedStateHandle?.remove<Boolean>("updateRecipient")?.let {
-                viewModel.refreshRecipient()
-            }
 
         }.collect { event ->
             when (event) {

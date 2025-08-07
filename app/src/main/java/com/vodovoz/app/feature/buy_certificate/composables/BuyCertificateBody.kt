@@ -69,7 +69,7 @@ fun BuyCertificateBody(
                 modifier = Modifier.padding(top = 16.dp, start = 16.dp, end = 16.dp),
                 fields = currentTab.fields,
                 onFieldChange = onFieldChange,
-                onDone = {}
+                onDone = {},
             )
         }
 

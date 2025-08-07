@@ -11,7 +11,6 @@ data class RecoverPasswordState(
     val fields: List<FieldUi> = emptyList(),
     val buttons: List<ColorfulButtonUi> = emptyList(),
     val agreementHtml: String = "",
-    val showAgreement: Boolean = false,
     val agreementChecked: Boolean = false,
     val errorText: String = "",
     val uiState: RecoverPasswordUiState = RecoverPasswordUiState.Loading

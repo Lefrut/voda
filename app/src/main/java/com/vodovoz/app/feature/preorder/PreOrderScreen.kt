@@ -7,25 +7,27 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.vodovoz.app.feature.preorder.composables.PreOrderBody
 import com.vodovoz.app.design_system.composables.top_bar.ClosingTopBar
+import com.vodovoz.app.feature.preorder.composables.PreOrderBody
 
 @Composable
 fun PreOrderScreen(
     viewModel: PreOrderFlowViewModel,
     viewState: PreOrderFlowViewModel.PreOrderState,
-    snackbarHostState: SnackbarHostState
+    snackbarHostState: SnackbarHostState,
 ) {
 
     val sectionPreOrder = viewState.sectionPreOrder
     Column(
-        modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)
-
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
     ) {
         ClosingTopBar(title = sectionPreOrder.title, onCloseClick = { viewModel.navigateBack() })
 
         PreOrderBody(
             colorfulButton = sectionPreOrder.colorfulButton,
+            description = sectionPreOrder.description,
             fields = sectionPreOrder.fields,
             snackbarHostState = snackbarHostState,
             onOrderSend = { viewModel.sendPreOrder() },

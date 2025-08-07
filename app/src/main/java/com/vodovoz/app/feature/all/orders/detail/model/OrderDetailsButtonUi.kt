@@ -9,100 +9,82 @@ import com.vodovoz.app.feature.all.orders.detail.composables.toUi
 import com.vodovoz.app.ui.graphics.fromHexOrUnspecified
 
 @Stable
-sealed class OrderDetailsButtonUi {
+sealed class OrderDetailsButtonUi(
+    open val id: String,
+    open val name: String,
+    open val isSmall: Boolean = false,
+    open val popupWindow: AboutOrderPopupWindowUi? = null,
+    open val url: String? = null,
+    open val browser: Boolean? = null,
+    open val driverId: String? = null
+) {
 
     @Immutable
     data class ImageButton(
-        val name: String,
+        override val id: String,
+        override val name: String,
         val image: String,
         val backgroundColor: Color,
         val textColor: Color,
-        val id: String,
-    ) : OrderDetailsButtonUi()
+    ) : OrderDetailsButtonUi(id, name)
 
     @Immutable
-    data class AboutOrderButton(
-        val name: String,
+    data class OutlineButton(
+        override val id: String,
+        override val name: String,
         val description: String,
         val image: String,
-        val popupWindow: AboutOrderPopupWindowUi,
-    ) : OrderDetailsButtonUi()
+        override val popupWindow: AboutOrderPopupWindowUi?,
+        override val url: String?,
+        override val browser: Boolean?,
+    ) : OrderDetailsButtonUi(id, name)
 
     @Immutable
-    data class TipsButton(
-        val name: String,
-        val description: String,
-        val image: String,
-        val url: String,
-        val browser: Boolean,
-    ) : OrderDetailsButtonUi()
-
-    @Immutable
-    data class PayButton(
-        val name: String,
+    data class Button(
+        override val id: String,
+        override val name: String,
         val backgroundColor: Color,
         val textColor: Color,
-        val browser: Boolean,
-        val url: String,
-    ) : OrderDetailsButtonUi()
-
-    @Immutable
-    data class WhereOrderButton(
-        val name: String,
-        val backgroundColor: Color,
-        val textColor: Color,
-        val id: String,
-        val driverId: String,
-    ) : OrderDetailsButtonUi()
-
+        override val url: String?,
+        override val browser: Boolean?,
+        override val driverId: String?,
+        override val isSmall: Boolean,
+    ) : OrderDetailsButtonUi(id, name, isSmall)
 }
 
 fun List<OrderDetailsButtonModel>.mapToUi(): List<OrderDetailsButtonUi> {
     return mapNotNull { buttonModel -> buttonModel.toUi() }
 }
 
-fun OrderDetailsButtonModel.toUi(): OrderDetailsButtonUi? {
+fun OrderDetailsButtonModel.toUi(): OrderDetailsButtonUi {
     return when {
-        popupWindow != null -> OrderDetailsButtonUi.AboutOrderButton(
+        description.isNotBlank() && image.isNotBlank() -> OrderDetailsButtonUi.OutlineButton(
+            id = id,
             name = name,
             description = description,
             image = image,
-            popupWindow = popupWindow.toUi()
-        )
-
-        browser != null && image.isNotEmpty() -> OrderDetailsButtonUi.TipsButton(
-            name = name,
-            description = description,
-            image = image,
-            url = url ?: "",
+            popupWindow = popupWindow?.toUi(),
+            url = url,
             browser = browser
         )
 
-        driverId != null -> OrderDetailsButtonUi.WhereOrderButton(
-            name = name,
-            backgroundColor = Color.fromHexOrUnspecified(backgroundColor),
-            textColor = Color.fromHexOrUnspecified(textColor),
+        image.isNotBlank() -> OrderDetailsButtonUi.ImageButton(
             id = id,
-            driverId = driverId
-        )
-
-
-        image.isNotEmpty() -> OrderDetailsButtonUi.ImageButton(
             name = name,
             image = image,
             backgroundColor = Color.fromHexOrUnspecified(backgroundColor),
-            textColor = Color.fromHexOrUnspecified(textColor),
-            id = id
+            textColor = Color.fromHexOrUnspecified(textColor)
         )
 
-        backgroundColor.isNotEmpty() -> OrderDetailsButtonUi.PayButton(
+        else -> OrderDetailsButtonUi.Button(
+            id = id,
             name = name,
             backgroundColor = Color.fromHexOrUnspecified(backgroundColor),
             textColor = Color.fromHexOrUnspecified(textColor),
-            browser = browser == true,
-            url = url ?: ""
+            url = url,
+            browser = browser,
+            driverId = driverId,
+            isSmall = isSmall
         )
-
-        else -> null
     }
 }

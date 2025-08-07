@@ -116,7 +116,7 @@ class CartFlowViewModel @Inject constructor(
                     cartItems.associate { item -> item.productId to item.quantity }
                 )
 
-                setPresentButtonsAvailability(true)
+                setSensitiveButtonsAvailability(true)
             }
 
         }.onFailure { t ->
@@ -176,22 +176,23 @@ class CartFlowViewModel @Inject constructor(
     }
 
     fun incrementCartItem(cartItem: CartItemUi) = viewModelScope.launch {
-        setPresentButtonsAvailability(false)
+        setSensitiveButtonsAvailability(false)
         cartManager.change(cartItem.productId, cartItem.quantity + 1)
     }
 
     fun decrementCartItem(cartItem: CartItemUi) = viewModelScope.launch {
-        setPresentButtonsAvailability(false)
+        setSensitiveButtonsAvailability(false)
         cartManager.change(cartItem.productId, cartItem.quantity - 1)
     }
 
-    private fun setPresentButtonsAvailability(buttonEnabled: Boolean){
+    private fun setSensitiveButtonsAvailability(buttonEnabled: Boolean){
         uiStateListener.updateData { s ->
             s.copy(
                 present = s.present?.copy(
                     button = s.present.button?.copy(enabled = buttonEnabled)
                 ),
-                presentButton = s.presentButton?.copy(enabled = buttonEnabled)
+                presentButton = s.presentButton?.copy(enabled = buttonEnabled),
+                blockOrderButton = !buttonEnabled
             )
         }
 
@@ -351,6 +352,7 @@ class CartFlowViewModel @Inject constructor(
         val blockCart: Boolean = false,
         val orderSummary: List<OrderSummaryItemUi> = emptyList(),
         val showPromotionCodeBottomSheet: Boolean = false,
+        val blockOrderButton: Boolean = false,
         val promoCode: String = "",
     ) : State {
     }

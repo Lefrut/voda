@@ -214,11 +214,9 @@ class ProductDetailsFlowViewModel @Inject constructor(
         }
     }
 
-    fun showAllProperties() = viewModelScope.launch {
+    fun showAllOrHideProperties() = viewModelScope.launch {
         uiStateListener.update { s ->
-            s.copy(
-                showAllProperties = true
-            )
+            s.copy(showAllProperties = !s.showAllProperties)
         }
     }
 

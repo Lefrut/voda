@@ -268,9 +268,7 @@
         android:id="@+id/imagePickerFragment"
         android:name="com.vodovoz.app.common.media.ImagePickerFragment"
         android:label="ImagePickerFragment">
-        <argument
-            android:name="image picker receiver"
-            app:argType="long" />
+
     </fragment>
 
     <fragment

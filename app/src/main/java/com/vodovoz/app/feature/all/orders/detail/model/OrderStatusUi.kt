@@ -11,9 +11,10 @@ data class OrderStatusUi(
     val icon: String,
     val color: Color,
     val background: Color,
+    val backgroundAlpha: Float
 ) {
     companion object {
-        val Empty = OrderStatusUi("", "", Color.Unspecified, Color.Unspecified)
+        val Empty = OrderStatusUi("", "", Color.Unspecified, Color.Unspecified, 1f)
     }
 }
 
@@ -26,6 +27,7 @@ fun OrderStatusModel.toUi(): OrderStatusUi {
         name = name,
         icon = image,
         color = Color.fromHexOrUnspecified(color),
-        background = Color.fromHexOrUnspecified(background)
+        background = Color.fromHexOrUnspecified(background),
+        backgroundAlpha = backgroundAlpha
     )
 }

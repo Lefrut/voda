@@ -19,7 +19,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.LifecycleStartEffect
 import com.vodovoz.app.design_system.composables.bottom_sheet.InfoBottomSheet
 import com.vodovoz.app.design_system.composables.decoration.AdvertisingChip
 import com.vodovoz.app.feature.all.promotions.composables.AdvertisingInfoBottomSheet
@@ -188,7 +187,7 @@ fun ProfileScreen(
                 viewModel.hideBonusesBottomSheet()
             },
             onCopyClick = { s ->
-                viewModel.copyText(s)
+                viewModel.copyBonusesCode(s)
             },
             onSubscribeChange = { subscribe ->
                 viewModel.changeBonusesSubscribe(subscribe)

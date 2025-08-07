@@ -40,6 +40,7 @@ fun CartBody(
     bottlesButton: CartButtonUi?,
     promotionCodeButton: CartPromoButtonUi?,
     presentButton: CartButtonUi?,
+    blockOrderButton: Boolean,
     onClearCartClick: () -> Unit,
     onRemoveCartItem: (CartItemUi) -> Unit,
     onIncrementCartItem: (CartItemUi) -> Unit,
@@ -180,7 +181,9 @@ fun CartBody(
             VodovozButton(
                 modifier = Modifier.padding(top = 24.dp, start = 16.dp, end = 16.dp),
                 text = stringResource(id = R.string.place_order),
-                onClick = onOrderClick
+                onClick = {
+                    if (!blockOrderButton) onOrderClick()
+                }
             )
         }
     }

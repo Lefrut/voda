@@ -11,4 +11,5 @@ data class OrderDetailsButtonModel(
     val url: String?,
     val browser: Boolean?,
     val driverId: String?,
+    val isSmall: Boolean,
 )

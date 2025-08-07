@@ -27,6 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.PointerInputScope
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -39,7 +40,6 @@ import coil3.memory.MemoryCache
 import coil3.request.ImageRequest
 import com.vodovoz.app.R
 import com.vodovoz.app.design_system.composables.button.VodovozButton
-import com.vodovoz.app.design_system.composables.placeholders.LoadingPlaceholder
 import com.vodovoz.app.feature.stories_fragment.composables.StoriesIndicator
 import kotlin.math.absoluteValue
 
@@ -75,23 +75,12 @@ fun StoriesScreen(
             .fillMaxSize()
             .windowInsetsPadding(WindowInsets.systemBars)
             .pointerInput(Unit) {
-                awaitPointerEventScope {
-                    while (true) {
-                        val change = awaitFirstDown()
-                        val startTime = System.currentTimeMillis()
-                        viewModel.stopStory()
-                        waitForUpOrCancellation()
-                        if (System.currentTimeMillis() - startTime < 160) {
-                            if (change.position.x < size.width / 2.5) {
-                                viewModel.goPreviousStoryPage()
-                            } else if (change.position.x > size.width - (size.width / 2.5)) {
-                                viewModel.goNextStoryPage()
-                            }
-                        }
-                        viewModel.resumeStory()
-
-                    }
-                }
+                handleStoryTaps(
+                    onTapStart = { viewModel.stopStory() },
+                    onPrev = { viewModel.goPreviousStoryPage() },
+                    onNext = { viewModel.goNextStoryPage() },
+                    onTapEnd = { viewModel.resumeStory() }
+                )
             },
         state = pagerState,
         beyondViewportPageCount = stories.size,
@@ -146,32 +135,19 @@ fun StoriesScreen(
             val timePassed = rememberUpdatedState(newValue = viewState.timePassed.toFloat())
             val storyDuration = rememberUpdatedState(newValue = storyPage.durationMillis)
 
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-            ) {
-                StoriesIndicator(
-                    modifier = Modifier
-                        .padding(horizontal = 12.dp)
-                        .padding(top = 8.dp),
-                    countPages = story.pages.size,
-                    pageIndex = if (viewState.currentStoryIndex != i) 0 else viewState.currentPageIndex,
-                    progress = {
-                        if (viewState.currentStoryIndex != i) 0f
-                        else timePassed.value / storyDuration.value
-                    }
-                )
-                CloseButton(
-                    modifier = Modifier
-                        .align(Alignment.End)
-                        .padding(16.dp),
-                    onCloseClick = {
-                        viewModel.navigateBack()
-                    }
-                )
-                Spacer(modifier = Modifier.weight(1f))
+            val actionWithButton = storyPage.actionWithButton
 
-                val actionWithButton = storyPage.actionWithButton
+            StoryDecorations(
+                countPages = story.pages.size,
+                pageIndex = if (viewState.currentStoryIndex != i) 0 else viewState.currentPageIndex,
+                pageProgress = {
+                    if (viewState.currentStoryIndex != i) 0f
+                    else timePassed.value / storyDuration.value
+                },
+                onCloseClick = {
+                    viewModel.navigateBack()
+                },
+            ) {
                 val colorfulButton = actionWithButton.colorfulButton
 
                 VodovozButton(
@@ -186,9 +162,44 @@ fun StoriesScreen(
                     )
                 )
             }
+
         }
 
     }
+}
+
+@Composable
+private fun StoryDecorations(
+    modifier: Modifier = Modifier,
+    countPages: Int,
+    pageIndex: Int,
+    pageProgress: () -> Float,
+    onCloseClick: () -> Unit,
+    bottomButton: @Composable () -> Unit,
+) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+    ) {
+        StoriesIndicator(
+            modifier = Modifier
+                .padding(horizontal = 12.dp)
+                .padding(top = 8.dp),
+            countPages = countPages,
+            pageIndex = pageIndex,
+            progress = pageProgress
+        )
+        CloseButton(
+            modifier = Modifier
+                .align(Alignment.End)
+                .padding(16.dp),
+            onCloseClick = onCloseClick
+        )
+        Spacer(modifier = Modifier.weight(1f))
+
+        bottomButton()
+    }
+
 }
 
 
@@ -208,5 +219,36 @@ private fun CloseButton(modifier: Modifier = Modifier, onCloseClick: () -> Unit)
             modifier = Modifier.size(13.dp),
             tint = MaterialTheme.colorScheme.background
         )
+    }
+}
+
+private suspend fun PointerInputScope.handleStoryTaps(
+    onPrev: () -> Unit,
+    onNext: () -> Unit,
+    onTapEnd: () -> Unit,
+    onTapStart: () -> Unit,
+    tapTimeout: Long = 160,
+    moveThreshold: Float = 10f,
+) {
+    awaitPointerEventScope {
+        while (true) {
+            val down = awaitFirstDown()
+            onTapStart()
+            val start = down.position
+            val startTime = System.currentTimeMillis()
+            val up = waitForUpOrCancellation()
+            val duration = System.currentTimeMillis() - startTime
+
+            if (up != null && (up.position - start).getDistance() < moveThreshold && duration < tapTimeout) {
+                val x = up.position.x
+                val width = size.width.toFloat()
+                when {
+                    x < width / 2.5f -> onPrev()
+                    x > width - width / 2.5f -> onNext()
+                }
+            }
+
+            onTapEnd()
+        }
     }
 }

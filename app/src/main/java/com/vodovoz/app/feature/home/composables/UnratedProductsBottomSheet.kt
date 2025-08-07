@@ -4,6 +4,7 @@ import android.graphics.BlurMaskFilter
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.SizeTransform
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.VectorConverter
@@ -200,7 +201,8 @@ fun UnratedProductsBottomSheet(
                 .anchoredDraggable(
                     state = state,
                     orientation = Orientation.Vertical,
-                ),
+                )
+            ,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             VodovozDragHandle()

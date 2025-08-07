@@ -24,7 +24,6 @@ import com.vodovoz.app.design_system.model.widgets.FieldUi
 fun RecoverPasswordBody(
     modifier: Modifier = Modifier,
     description: String,
-    showAgreements: Boolean,
     agreementHtml: String,
     agreementChecked: Boolean,
     fields: List<FieldUi>,
@@ -42,9 +41,11 @@ fun RecoverPasswordBody(
             .imePadding(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        if(description.isNotEmpty()){
+        if (description.isNotEmpty()) {
             Text(
-                modifier = Modifier.align(Alignment.Start).padding(top = 8.dp),
+                modifier = Modifier
+                    .align(Alignment.Start)
+                    .padding(top = 8.dp),
                 text = description,
                 color = MaterialTheme.colorScheme.onBackground,
                 style = MaterialTheme.typography.bodySmall
@@ -54,18 +55,16 @@ fun RecoverPasswordBody(
             modifier = Modifier.padding(top = 24.dp),
             fields = fields,
             onFieldChange = onFieldChange,
-            onDone = {}
+            onDone = {},
         )
 
-        if (showAgreements) {
-            AgreementRow(
-                modifier = Modifier.padding(top = 24.dp),
-                checked = agreementChecked,
-                htmlText = agreementHtml,
-                onCheckedChange = onAgreementCheck,
-                onUrlClick = onHyperlinkClick
-            )
-        }
+        AgreementRow(
+            modifier = Modifier.padding(top = 24.dp),
+            checked = agreementChecked,
+            htmlText = agreementHtml,
+            onCheckedChange = onAgreementCheck,
+            onUrlClick = onHyperlinkClick
+        )
 
         Spacer(modifier = Modifier.weight(1f))
 

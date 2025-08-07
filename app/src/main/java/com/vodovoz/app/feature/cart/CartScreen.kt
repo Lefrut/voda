@@ -53,6 +53,7 @@ fun CartScreen(viewModel: CartFlowViewModel, viewState: CartFlowViewModel.CartSt
                 onShareClick = { }
             )
             CartBody(
+                blockOrderButton = viewState.blockOrderButton || viewState.showRefreshIndicator,
                 cartItems = viewState.cartItems,
                 cartPresent = viewState.present,
                 countCartItemsText = viewState.countText,

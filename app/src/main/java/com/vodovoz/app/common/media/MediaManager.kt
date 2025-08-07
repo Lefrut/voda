@@ -10,9 +10,7 @@ import javax.inject.Singleton
 @Singleton
 class MediaManager @Inject constructor() {
 
-    private val publicationImageListener = MutableStateFlow<List<File>?>(null)
     private val avatarImageListener = MutableStateFlow<File?>(null)
-    private val commentDataListener = MutableStateFlow<CommentData?>(null)
 
     fun observeAvatarImage(): StateFlow<File?> = avatarImageListener.asStateFlow()
 
@@ -23,26 +21,4 @@ class MediaManager @Inject constructor() {
     fun removeAvatarImage() {
         avatarImageListener.value = null
     }
-
-    fun savePublicationImage(files: List<File>) {
-        publicationImageListener.value = publicationImageListener.value?.plus(files) ?: files
-    }
-
-
-
-    fun showComment() {
-        if (commentDataListener.value != null) {
-            commentDataListener.value = commentDataListener.value?.copy(
-                show = true
-            )
-        }
-    }
-
-    data class CommentData(
-        val productId: Long,
-        val rate: Int,
-        val text: String,
-        val show: Boolean = false,
-    )
-
 }

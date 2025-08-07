@@ -12,6 +12,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.fragment.findNavController
 import com.vodovoz.app.R
 import com.vodovoz.app.common.tab.TabManager
+import com.vodovoz.app.core.navigation.mainFragment
 import com.vodovoz.app.core.navigation.navigateToCancelOrder
 import com.vodovoz.app.core.navigation.navigateToOrderQuestion
 import com.vodovoz.app.core.navigation.navigateToProductDetails
@@ -20,8 +21,10 @@ import com.vodovoz.app.core.navigation.navigateToWebView
 import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.composables.placeholders.LoadingPlaceholder
 import com.vodovoz.app.design_system.composables.placeholders.NetworkErrorPlaceholder
+import com.vodovoz.app.design_system.composables.snackbar.VodovozSnackBarVisuals
 import com.vodovoz.app.design_system.effects.LifecycleEffect
 import com.vodovoz.app.feature.all.orders.detail.composables.AboutOrderBottomSheet
+import com.vodovoz.app.ui.snackbar.snackBarHostState
 import com.vodovoz.app.util.extensions.copyText
 import com.vodovoz.app.util.extensions.openUrl
 import dagger.hilt.android.AndroidEntryPoint
@@ -91,6 +94,9 @@ class OrderDetailsFragment : Fragment() {
                             when (event) {
                                 is OrderDetailsFlowViewModel.OrderDetailsEvent.CopyText -> {
                                     requireContext().copyText(event.text)
+                                    mainFragment?.snackBarHostState?.showSnackbar(
+                                        VodovozSnackBarVisuals.create(getString(R.string.order_number_copied))
+                                    )
                                 }
 
                                 OrderDetailsFlowViewModel.OrderDetailsEvent.GoBack -> {

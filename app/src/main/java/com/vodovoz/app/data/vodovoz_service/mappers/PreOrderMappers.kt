@@ -11,6 +11,7 @@ import com.vodovoz.app.domain.general.model.order.FormModel
 fun FormDTO.toDomain(): FormModel {
     return FormModel(
         title = TITLE ?: "",
+        description = INFORMIROVANIE ?: "",
         fields = (POLYA ?: DANNYE)?.mapNotNull { it.toDomain() } ?: emptyList(),
         button = KNOPKA?.toDomain()
             ?: throw IllegalArgumentException("Colorful button can't be null in PreOrder:$this")

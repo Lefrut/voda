@@ -19,6 +19,7 @@ import androidx.navigation.fragment.findNavController
 import coil3.compose.rememberAsyncImagePainter
 import com.vodovoz.app.R
 import com.vodovoz.app.common.tab.TabManager
+import com.vodovoz.app.core.navigation.mainFragment
 import com.vodovoz.app.core.navigation.navigateToAboutProduct
 import com.vodovoz.app.core.navigation.navigateToBrandProductList
 import com.vodovoz.app.core.navigation.navigateToCategoryProductList
@@ -34,7 +35,9 @@ import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.composables.placeholders.EmptyResultPlaceholder
 import com.vodovoz.app.design_system.composables.placeholders.EmptyResultPlaceholderItem
 import com.vodovoz.app.design_system.composables.placeholders.ForAdultsPlaceholder
+import com.vodovoz.app.design_system.composables.snackbar.VodovozSnackBarVisuals
 import com.vodovoz.app.design_system.effects.LifecycleEffect
+import com.vodovoz.app.ui.snackbar.snackBarHostState
 import com.vodovoz.app.util.extensions.copyText
 import com.vodovoz.app.util.extensions.shareText
 import dagger.hilt.android.AndroidEntryPoint
@@ -198,6 +201,11 @@ class ProductDetailsFragment : Fragment() {
 
                 is ProductDetailsFlowViewModel.ProductDetailsEvents.Copy -> {
                     requireContext().copyText(event.text)
+
+                    mainFragment?.snackBarHostState?.showSnackbar(
+                        VodovozSnackBarVisuals.create(getString(R.string.article_copied))
+                    )
+
                 }
 
                 is ProductDetailsFlowViewModel.ProductDetailsEvents.GoToBrandProducts -> {

@@ -23,8 +23,8 @@ import com.vodovoz.app.design_system.ExtendedTheme
 fun VodovozButton(
     modifier: Modifier = Modifier,
     text: String,
-    isLoading: Boolean,
     onClick: () -> Unit,
+    isLoading: Boolean = false,
     enabled: Boolean = true,
     colors: ButtonColors = VodovozButtonDefaults.primaryColors(),
     textStyle: TextStyle = ExtendedTheme.typography.buttonMedium,
@@ -34,7 +34,9 @@ fun VodovozButton(
             .height(48.dp)
             .fillMaxWidth(),
         onClick = {
-            if (!isLoading) { onClick() }
+            if (!isLoading) {
+                onClick()
+            }
         },
         colors = colors,
         shape = MaterialTheme.shapes.large,
@@ -63,14 +65,16 @@ fun VodovozButtonSmall(
     enabled: Boolean = true,
     colors: ButtonColors = VodovozButtonDefaults.primaryColors(),
     contentPadding: PaddingValues = PaddingValues(horizontal = 16.dp),
-    content: @Composable () -> Unit
+    content: @Composable () -> Unit,
 ) {
     FilledTonalButton(
         modifier = modifier
             .height(38.dp)
             .fillMaxWidth(),
         onClick = {
-            if (!isLoading) { onClick() }
+            if (!isLoading) {
+                onClick()
+            }
         },
         colors = colors,
         shape = MaterialTheme.shapes.large,
@@ -91,31 +95,6 @@ fun VodovozButtonSmall(
     }
 }
 
-
-
-@Composable
-fun VodovozButton(
-    modifier: Modifier = Modifier,
-    text: String,
-    onClick: () -> Unit,
-    enabled: Boolean = true,
-    colors: ButtonColors = VodovozButtonDefaults.primaryColors(),
-    textStyle: TextStyle = ExtendedTheme.typography.buttonMedium,
-) {
-    FilledTonalButton(
-        modifier = modifier
-            .height(48.dp)
-            .fillMaxWidth(),
-        onClick = onClick,
-        colors = colors,
-        shape = MaterialTheme.shapes.large,
-        contentPadding = PaddingValues(horizontal = 16.dp),
-        enabled = enabled,
-        elevation = null
-    ) {
-        Text(text = text, style = textStyle, maxLines = 1)
-    }
-}
 
 @Composable
 fun VodovozButton(
@@ -146,20 +125,18 @@ fun VodovozButtonSmall(
     modifier: Modifier = Modifier,
     text: String,
     onClick: () -> Unit,
+    isLoading: Boolean = false,
     enabled: Boolean = true,
     colors: ButtonColors = VodovozButtonDefaults.primaryColors(),
     textStyle: TextStyle = ExtendedTheme.typography.buttonSmall,
 ) {
-    FilledTonalButton(
-        modifier = modifier
-            .height(38.dp)
-            .fillMaxWidth(),
+    VodovozButtonSmall(
+        modifier = modifier,
+        isLoading = isLoading,
         onClick = onClick,
-        colors = colors,
-        shape = MaterialTheme.shapes.large,
-        contentPadding = PaddingValues(horizontal = 16.dp),
         enabled = enabled,
-        elevation = null
+        colors = colors,
+        contentPadding = PaddingValues(horizontal = 16.dp)
     ) {
         Text(text = text, style = textStyle, maxLines = 1)
     }
@@ -187,13 +164,12 @@ data object VodovozButtonDefaults {
     @Composable
     fun colors(
         contentColor: Color,
-        containerColor: Color
+        containerColor: Color,
     ) = ButtonDefaults.filledTonalButtonColors(
         contentColor = contentColor,
         disabledContentColor = contentColor.copy(0.75f),
         containerColor = containerColor,
-        disabledContainerColor = containerColor.copy(0.45f),
-
+        disabledContainerColor = containerColor.copy(0.45f)
     )
 
 }

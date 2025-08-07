@@ -1,8 +1,8 @@
 package com.vodovoz.app.domain.general.model.product
 
 import com.vodovoz.app.domain.general.model.CategoryModel
-import com.vodovoz.app.domain.general.model.user.ForAdultsModel
 import com.vodovoz.app.domain.general.model.SortModel
+import com.vodovoz.app.domain.general.model.user.ForAdultsModel
 
 data class ProductsSectionModel(
     val title: String,
@@ -12,14 +12,27 @@ data class ProductsSectionModel(
     val products: List<ProductModel>,
     val categories: List<CategoryModel>,
     val share: ShareModel,
-    val forAdults: ForAdultsModel?
-)
+    val forAdults: ForAdultsModel?,
+) {
+    companion object {
+        val Empty = ProductsSectionModel(
+            title = "",
+            sortingTitle = "",
+            productsQuantityText = "",
+            sorting = emptyList(),
+            products = emptyList(),
+            categories = emptyList(),
+            share = ShareModel.Empty,
+            forAdults = null
+        )
+    }
+}
 
 data class ShareModel(
     val url: String,
-    val text: String
-){
-    companion object{
-        val Empty = ShareModel("","")
+    val text: String,
+) {
+    companion object {
+        val Empty = ShareModel("", "")
     }
 }

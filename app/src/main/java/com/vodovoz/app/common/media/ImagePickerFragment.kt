@@ -1,182 +1,278 @@
 package com.vodovoz.app.common.media
 
-import android.Manifest
-import android.app.Activity
-import android.content.Intent
-import android.content.pm.PackageManager
+import android.graphics.Bitmap
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
-import android.os.Environment
-import androidx.activity.result.ActivityResultLauncher
+import android.provider.MediaStore
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.content.ContextCompat
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.gestures.detectTransformGestures
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.min
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.fragment.findNavController
-import com.github.dhaval2404.imagepicker.ImagePicker
-import com.vodovoz.app.R
+import coil3.compose.rememberAsyncImagePainter
+import com.vodovoz.app.common.media.composables.PickerBottomPanel
+import com.vodovoz.app.common.media.model.ImagePickerEvent
 import com.vodovoz.app.common.tab.TabManager
-import com.vodovoz.app.util.extensions.debugLog
-import com.vodovoz.app.util.extensions.longArgs
-import com.vodovoz.app.util.extensions.millisToItemDate
-import com.vodovoz.app.util.extensions.snack
+import com.vodovoz.app.design_system.VodovozTheme
+import com.vodovoz.app.design_system.effects.LifecycleEffect
+import com.vodovoz.app.ui.insets.InsetsVisibilityState
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.io.File
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class ImagePickerFragment : Fragment(R.layout.fragment_image_picker) {
-
-    companion object {
-        private const val READ_EXTERNAL = Manifest.permission.READ_EXTERNAL_STORAGE
-        private const val READ_IMAGES = Manifest.permission.READ_MEDIA_IMAGES
-        const val CREATE = 1L
-        const val AVATAR = 2L
-        const val IMAGE_PICKER_RECEIVER = "image picker receiver"
-    }
-
-    private val receiver by longArgs(IMAGE_PICKER_RECEIVER)
+class ImagePickerFragment : Fragment() {
 
     @Inject
     internal lateinit var tabManager: TabManager
 
+    @Inject
+    internal lateinit var insetsVisibilityState: InsetsVisibilityState
 
     private val viewModel: ImagePickerViewModel by viewModels()
 
-    override fun onStart() {
-        super.onStart()
-        tabManager.changeTabVisibility(false)
-    }
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?,
+    ): View {
+        return ComposeView(requireContext()).apply {
 
-    override fun onStop() {
-        super.onStop()
-        tabManager.changeTabVisibility(true)
-    }
+            setContent {
+                VodovozTheme {
+                    val viewState by viewModel.state.collectAsStateWithLifecycle()
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        storagePermission.launch(
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                READ_IMAGES
-            } else {
-                READ_EXTERNAL
-            }
-        )
-    }
+                    val density = LocalDensity.current
+                    var scale by rememberSaveable { mutableFloatStateOf(1f) }
+                    var offsetX by rememberSaveable { mutableFloatStateOf(0f) }
+                    var offsetY by rememberSaveable { mutableFloatStateOf(0f) }
+                    var imageContainerSize by remember { mutableStateOf(IntSize.Zero) }
+                    var lensSize by remember { mutableStateOf(0.dp) }
+                    val lensSizePx by rememberUpdatedState(with(density) { lensSize.toPx() })
+                    val asyncImagePainter = rememberAsyncImagePainter(viewState.imageUri)
 
-    private val storagePermission: ActivityResultLauncher<String> =
-        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
-            onPermissionResult(isGranted)
-        }
 
-    private val getPictureFromGalleryResultLauncher =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            val resultCode = result.resultCode
-            val data = result.data
-            if (resultCode == Activity.RESULT_OK) {
-                val uri = data?.data
-                if (uri != null) {
-                    val file = saveFileFromGallery(uri)
-                    viewModel.saveAvatarImage(file)
-                }
-            }
-            findNavController().popBackStack()
-        }
+                    val contentColor = Color.White
+                    val containerColor = Color.Black
 
-    private val getMultiplePictureFromGalleryResultLauncher =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            val resultCode = result.resultCode
-            val clipData = result.data?.clipData
-            debugLog { "before result itemCount ${clipData?.itemCount}" }
-            if (resultCode == Activity.RESULT_OK) {
-                if (clipData != null && clipData.itemCount > 0) {
-                    if (clipData.itemCount > 5) {
-                        requireActivity().snack("Максимум 5 изображений")
-                        findNavController().popBackStack()
-
-                        return@registerForActivityResult
-                    }
-
-                    val filesList = mutableListOf<File>()
-                    for (i in 0 until clipData.itemCount) {
-                        debugLog { "itemCount ${clipData.itemCount} i $i" }
-                        val file = saveFileFromGallery(clipData.getItemAt(i).uri)
-                        filesList.add(file)
-                    }
-
-                    viewModel.savePublicationImage(filesList)
-                } else {
-                    val uri = result.data?.data
-                    if (uri != null) {
-                        val file = saveFileFromGallery(uri)
-                        viewModel.savePublicationImage(listOf(file))
-                    }
-                }
-            }
-            viewModel.show()
-            findNavController().navigateUp()
-
-        }
-
-    private fun saveFileFromGallery(uri: Uri): File {
-        val inputStream = requireContext().contentResolver.openInputStream(uri)
-        val file = createImageFile()
-        file.outputStream().use {
-            inputStream?.copyTo(it)
-        }
-        inputStream?.close()
-        return file
-    }
-
-    private fun createImageFile(): File {
-        val timeStamp = System.currentTimeMillis().millisToItemDate()
-        val storageDir = requireContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES)
-        val file = File.createTempFile("JPEG_${timeStamp}_", ".jpeg", storageDir).apply {
-            createNewFile()
-            deleteOnExit()
-        }
-        return file
-    }
-
-    private fun onPermissionResult(isGranted: Boolean) {
-        val permission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            READ_IMAGES
-        } else {
-            READ_EXTERNAL
-        }
-
-        if (ContextCompat.checkSelfPermission(
-                requireContext(),
-                permission
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            findNavController().popBackStack()
-            return
-        }
-
-        if (isGranted) {
-            when (receiver) {
-                CREATE -> {
-                    val intent = Intent().apply {
-                        putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
-                        action = Intent.ACTION_GET_CONTENT
-                        type = "image/*"
-                    }
-                    getMultiplePictureFromGalleryResultLauncher.launch(intent)
-                }
-
-                AVATAR -> {
-                    ImagePicker.with(this)
-                        .galleryOnly()
-                        .cropSquare()
-                        .createIntent { intent ->
-                            getPictureFromGalleryResultLauncher.launch(intent)
+                    val pickImagesLauncher =
+                        rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+                            if (uri != null) {
+                                viewModel.setImageUri(uri.toString())
+                            } else {
+                                findNavController().popBackStack()
+                            }
                         }
+
+                    LaunchedEffect(Unit) {
+                        pickImagesLauncher.launch(arrayOf("image/*"))
+                    }
+
+                    Column(
+                        modifier = Modifier
+                            .background(containerColor)
+                            .windowInsetsPadding(WindowInsets.systemBars)
+                    ) {
+
+                        BoxWithConstraints(
+                            modifier = Modifier
+                                .weight(1f)
+                                .pointerInput(lensSize) {
+                                    detectTransformGestures { _, pan, zoom, _ ->
+                                        scale = (scale * zoom).coerceIn(1f, 5f)
+
+                                        val imageW = imageContainerSize.width.toFloat()
+                                        val imageH = imageContainerSize.height.toFloat()
+
+                                        val halfLens = lensSizePx / 2f
+
+                                        val halfImageW = imageW * scale / 2f
+                                        val halfImageH = imageH * scale / 2f
+
+                                        val maxOffsetX =
+                                            (halfImageW - halfLens).coerceAtLeast(0f)
+                                        val maxOffsetY =
+                                            (halfImageH - halfLens).coerceAtLeast(0f)
+
+                                        offsetX =
+                                            (offsetX + pan.x).coerceIn(-maxOffsetX, maxOffsetX)
+                                        offsetY =
+                                            (offsetY + pan.y).coerceIn(-maxOffsetY, maxOffsetY)
+                                    }
+                                },
+                            contentAlignment = Alignment.Center
+                        ) {
+
+
+                            lensSize = with(density) {
+                                min(
+                                    asyncImagePainter.intrinsicSize.height.toDp(),
+                                    (constraints.maxWidth * 0.9f).toDp()
+                                )
+                            }
+
+                            Image(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .fillMaxHeight(0.65f)
+                                    .onSizeChanged { size ->
+                                        imageContainerSize = size
+                                    }
+                                    .clip(RectangleShape)
+                                    .graphicsLayer {
+                                        scaleX = scale
+                                        scaleY = scale
+                                        translationX = offsetX
+                                        translationY = offsetY
+                                    },
+                                painter = asyncImagePainter,
+                                contentDescription = null,
+                                contentScale = ContentScale.FillWidth
+                            )
+
+                            Box(
+                                modifier = Modifier
+                                    .size(lensSize)
+                                    .border(2.dp, contentColor)
+                                    .drawGrid(contentColor)
+                            )
+                        }
+
+
+                        PickerBottomPanel(
+                            modifier = Modifier.padding(
+                                start = 32.dp, end = 32.dp,
+                                top = 16.dp, bottom = 32.dp
+                            ),
+                            onBackClick = { viewModel.navigateBack() },
+                            onSaveClick = {
+                                viewModel.getBitmapFromImageUri()
+                            }
+                        )
+                    }
+
+                    LifecycleEffect {
+                        viewModel.events.collect { event ->
+                            when (event) {
+                                ImagePickerEvent.GoBack -> {
+                                    findNavController().popBackStack()
+                                }
+
+                                is ImagePickerEvent.GetBitmap -> {
+                                    val bitmap = MediaStore.Images.Media.getBitmap(
+                                        context.contentResolver,
+                                        Uri.parse(event.imageUri)
+                                    )
+                                    viewModel.saveBitmapToFile(
+                                        sourceBitmap = bitmap,
+                                        lensSize = lensSizePx,
+                                        containerWidth = imageContainerSize.width.toFloat(),
+                                        containerHeight = imageContainerSize.height.toFloat(),
+                                        scale = scale,
+                                        offsetX = offsetX,
+                                        offsetY = offsetY
+                                    )
+                                }
+
+                                is ImagePickerEvent.SaveInFile -> {
+                                    createAvatarFile(event.bitmap).onSuccess { file ->
+                                        viewModel.saveImageFile(file)
+                                    }
+                                }
+                            }
+                        }
+                    }
+
                 }
             }
-        } else {
-            findNavController().popBackStack()
         }
     }
+
+    private suspend fun createAvatarFile(bitmap: Bitmap) = withContext(Dispatchers.IO) {
+        runCatching {
+            val file = File.createTempFile("_avatar_", ".jpg", context?.cacheDir)
+            file.outputStream().use { out ->
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 85, out)
+            }
+            file
+        }
+    }
+
+    private fun Modifier.drawGrid(
+        color: Color = Color.White,
+        countColumns: Int = 3,
+        countRows: Int = 3,
+    ) =
+        drawBehind {
+            val cellWidth = size.width / countColumns
+            val cellHeight = size.height / countRows
+
+            for (i in 1 until countColumns) {
+                drawLine(
+                    color = color,
+                    start = Offset(x = cellWidth * i, y = 0f),
+                    end = Offset(
+                        x = cellWidth * i,
+                        y = size.height
+                    ),
+                    strokeWidth = 1.dp.toPx()
+                )
+            }
+
+            for (i in 1 until countRows) {
+                drawLine(
+                    color = color,
+                    start = Offset(x = 0f, y = cellHeight * i),
+                    end = Offset(
+                        x = size.width,
+                        y = cellHeight * i
+                    ),
+                    strokeWidth = 1.dp.toPx()
+                )
+            }
+        }
 }
