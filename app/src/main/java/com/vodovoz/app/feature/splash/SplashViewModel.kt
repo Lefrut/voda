@@ -40,7 +40,7 @@ class SplashViewModel @Inject constructor(
         _state.update { s ->
             s.copy(uiState = if (showAnimation) SplashUiState.Animation else SplashUiState.Placeholder)
         }
-        _events.emit(SplashEvent.RefreshApp)
+        sendEvent(SplashEvent.RefreshApp)
     }
 
     fun changeToAnimation(splashFile: File) = viewModelScope.launch {
@@ -54,7 +54,7 @@ class SplashViewModel @Inject constructor(
     }
 
     fun hideAndroidSplash() = viewModelScope.launch {
-        _events.emit(SplashEvent.HideAndroidSplash)
+        sendEvent(SplashEvent.HideAndroidSplash)
     }
 
     fun logout() = viewModelScope.launch {

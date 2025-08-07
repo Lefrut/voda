@@ -142,7 +142,7 @@ class ProductAnalogsViewModel @Inject constructor(
     }
 
     fun navigateBack() = viewModelScope.launch {
-        _events.emit(ProductAnalogsEvent.GoBack)
+        sendEvent(ProductAnalogsEvent.GoBack)
     }
 
     fun switchLayout() = viewModelScope.launch {
@@ -152,7 +152,7 @@ class ProductAnalogsViewModel @Inject constructor(
     }
 
     fun navigateToProductDetails(product: ProductUi) = viewModelScope.launch {
-        _events.emit(ProductAnalogsEvent.GoToProductDetails(product.id))
+        sendEvent(ProductAnalogsEvent.GoToProductDetails(product.id))
     }
 
     fun changeProductFavorite(product: ProductUi) = viewModelScope.launch {
@@ -160,7 +160,7 @@ class ProductAnalogsViewModel @Inject constructor(
     }
 
     fun navigateToProductAnalogs(product: ProductUi) = viewModelScope.launch {
-        _events.emit(ProductAnalogsEvent.GoToProductAnalogs(product.id))
+        sendEvent(ProductAnalogsEvent.GoToProductAnalogs(product.id))
     }
 
     fun incrementProductToCart(product: ProductUi) = viewModelScope.launch {

@@ -77,9 +77,9 @@ class AddAddressViewModel @Inject constructor(
 
     fun navigateBack() = viewModelScope.launch {
         if (addressId == null) {
-            _events.emit(AddAddressEvent.GoBackToMap)
+            sendEvent(AddAddressEvent.GoBackToMap)
         } else {
-            _events.emit(AddAddressEvent.GoBackToAddresses)
+            sendEvent(AddAddressEvent.GoBackToAddresses)
         }
     }
 
@@ -151,9 +151,9 @@ class AddAddressViewModel @Inject constructor(
 
 
         addAddressResult.onSuccess {
-            _events.emit(AddAddressEvent.GoBackToAddresses)
+            sendEvent(AddAddressEvent.GoBackToAddresses)
         }.onFailure { throwable ->
-            _events.emit(
+            sendEvent(
                 AddAddressEvent.ShowSnackbar(
                     throwable.message ?: resourcesProvider.getString(R.string.add_address_error)
                 )
@@ -197,9 +197,9 @@ class AddAddressViewModel @Inject constructor(
         ).singleResult()
 
         updateAddressResult.onSuccess {
-            _events.emit(AddAddressEvent.GoBackToAddresses)
+            sendEvent(AddAddressEvent.GoBackToAddresses)
         }.onFailure { throwable ->
-            _events.emit(
+            sendEvent(
                 AddAddressEvent.ShowSnackbar(
                     throwable.message ?: resourcesProvider.getString(R.string.update_address_error)
                 )
@@ -354,9 +354,9 @@ class AddAddressViewModel @Inject constructor(
 
     fun checkWidgetOnAddress(widget: WidgetUi) = viewModelScope.launch {
         if (addressId == null) {
-            _events.emit(AddAddressEvent.GoBackToMap)
+            sendEvent(AddAddressEvent.GoBackToMap)
         } else {
-            _events.emit(AddAddressEvent.GoToMap(widget.value()))
+            sendEvent(AddAddressEvent.GoToMap(widget.value()))
         }
     }
 

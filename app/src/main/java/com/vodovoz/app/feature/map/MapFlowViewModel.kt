@@ -21,11 +21,9 @@ import com.vodovoz.app.feature.map.model.findNearestPointTo
 import com.vodovoz.app.feature.map.model.mapToUi
 import com.vodovoz.app.feature.map.model.toUi
 import com.vodovoz.app.util.extensions.debounceWithMax
-import com.vodovoz.app.util.extensions.debugLog
 import com.vodovoz.app.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.channels.produce
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.catch
@@ -50,7 +48,7 @@ class MapFlowViewModel @Inject constructor(
         uiStateListener.updateData { s -> s.copy(screenType = MapScreenTypeUi.Edit) }
     }
 
-    private val searchQueryFlow = MutableStateFlow(dataState.query)
+    private val searchQueryFlow = MutableStateFlow(stateSnapshot.query)
 
     companion object {
         const val CORE_AREA_ID = 91851
@@ -85,7 +83,7 @@ class MapFlowViewModel @Inject constructor(
     }
 
     fun navigateBack() = viewModelScope.launch {
-        when (dataState.mode) {
+        when (stateSnapshot.mode) {
             MapUiMode.OnlyMap -> {
                 eventListener.emit(MapFlowEvents.GoBack)
             }
@@ -136,13 +134,13 @@ class MapFlowViewModel @Inject constructor(
     }
 
     fun searchAddressByQuery() {
-        searchAddress(dataState.query)
+        searchAddress(stateSnapshot.query)
     }
 
     private suspend fun calculateDistanceFromMoscowToAddress(addressPoint: MapPointUi): Float? {
-        if(dataState.areas.isEmpty()){ delay(850L) }
+        if(stateSnapshot.areas.isEmpty()){ delay(850L) }
 
-        val coreMapArea = dataState.areas.find { area ->
+        val coreMapArea = stateSnapshot.areas.find { area ->
             area.id == CORE_AREA_ID && area.isMoscowRingRow
         } ?: run {
             return null
@@ -166,7 +164,7 @@ class MapFlowViewModel @Inject constructor(
     }
 
     fun moveToAvailableGeo() = viewModelScope.launch {
-        val addressPoint = dataState.currentMapAddress?.point
+        val addressPoint = stateSnapshot.currentMapAddress?.point
         if (addressPoint != null) {
             eventListener.emit(MapFlowEvents.MoveToAddress(addressPoint))
         } else if (addressName != null) {
@@ -203,7 +201,7 @@ class MapFlowViewModel @Inject constructor(
     private var searchAddressJob: Job? = null
 
     fun searchAddress(addressName: String) = viewModelScope.launch {
-        if (addressName == dataState.currentMapAddress?.name || addressName.any { c -> c.isDigit() } || dataState.query == addressName) {
+        if (addressName == stateSnapshot.currentMapAddress?.name || addressName.any { c -> c.isDigit() } || stateSnapshot.query == addressName) {
 
             uiStateListener.updateData { s ->
                 s.copy(addressIsLoading = true)
@@ -228,7 +226,7 @@ class MapFlowViewModel @Inject constructor(
 
 
     fun searchAddress(point: MapPointUi?) = viewModelScope.launch {
-        if (point == null || point == dataState.currentMapAddress?.point) return@launch
+        if (point == null || point == stateSnapshot.currentMapAddress?.point) return@launch
 
         searchAddressJob?.cancel()
 
@@ -286,14 +284,14 @@ class MapFlowViewModel @Inject constructor(
     }
 
     fun navigateToAddAddress() = viewModelScope.launch {
-        if (dataState.addressIsLoading || dataState.addressIsError || dataState.buttonIsLoading) return@launch
+        if (stateSnapshot.addressIsLoading || stateSnapshot.addressIsError || stateSnapshot.buttonIsLoading) return@launch
 
         uiStateListener.updateData { s ->
             s.copy(buttonIsLoading = true)
         }
 
-        val mapAddress = dataState.currentMapAddress
-        val screenType = dataState.screenType
+        val mapAddress = stateSnapshot.currentMapAddress
+        val screenType = stateSnapshot.screenType
 
         when {
             screenType == MapScreenTypeUi.Add && mapAddress != null -> {

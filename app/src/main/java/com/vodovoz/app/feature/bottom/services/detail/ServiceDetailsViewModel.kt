@@ -115,11 +115,11 @@ class ServiceDetailsViewModel @Inject constructor(
     }
 
     fun navigateBack() = viewModelScope.launch {
-        _events.emit(ServiceDetailsEvent.GoBack)
+        sendEvent(ServiceDetailsEvent.GoBack)
     }
 
     fun navigateToProductDetails(product: ProductUi) = viewModelScope.launch {
-        _events.emit(ServiceDetailsEvent.GoToProductDetails(product.id))
+        sendEvent(ServiceDetailsEvent.GoToProductDetails(product.id))
     }
 
     fun changeFavorite(product: ProductUi) = viewModelScope.launch {
@@ -127,7 +127,7 @@ class ServiceDetailsViewModel @Inject constructor(
     }
 
     fun navigateToAnalogs(product: ProductUi) = viewModelScope.launch {
-        _events.emit(ServiceDetailsEvent.GoToAnalogs(product.id))
+        sendEvent(ServiceDetailsEvent.GoToAnalogs(product.id))
     }
 
     fun incrementProductToCard(product: ProductUi) = viewModelScope.launch {
@@ -151,7 +151,7 @@ class ServiceDetailsViewModel @Inject constructor(
     }
 
     fun navigateToServiceOrder(button: ColorfulButtonUi) = viewModelScope.launch {
-        _events.emit(ServiceDetailsEvent.GoToServiceOrder(button.id))
+        sendEvent(ServiceDetailsEvent.GoToServiceOrder(button.id))
     }
 
     fun changeLoading(loading: Boolean) = viewModelScope.launch {

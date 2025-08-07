@@ -37,7 +37,7 @@ class PaymentMethodViewModel @Inject constructor(
     private val balance = savedStateHandle.get<Boolean>("balance")
 
     fun navigateBack() = viewModelScope.launch {
-        _events.emit(PaymentMethodEvent.GoBack)
+        sendEvent(PaymentMethodEvent.GoBack)
     }
 
     init {
@@ -110,7 +110,7 @@ class PaymentMethodViewModel @Inject constructor(
         val paymentMethod = paymentSections
             .flatMap { it.items }
             .firstOrNull { !it.isSwitch && it.value } ?: return@launch
-        _events.emit(PaymentMethodEvent.GoBackToOrdering(paymentMethod, paymentBalance))
+        sendEvent(PaymentMethodEvent.GoBackToOrdering(paymentMethod, paymentBalance))
     }
 
     fun changePaymentMethodItem(paymentMethod: PaymentMethodItemUi) = viewModelScope.launch {

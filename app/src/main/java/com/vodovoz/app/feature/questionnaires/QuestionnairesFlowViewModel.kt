@@ -82,7 +82,7 @@ class QuestionnairesFlowViewModel @Inject constructor(
     }
 
     private fun fetchQuestionnairesDetails() = viewModelScope.launch {
-        val currentWho = dataState.currentWho ?: return@launch
+        val currentWho = stateSnapshot.currentWho ?: return@launch
 
         uiStateListener.updateData { s ->
             s.copy(uiState = QuestionnairesUiState.Loading)
@@ -109,7 +109,7 @@ class QuestionnairesFlowViewModel @Inject constructor(
     }
 
     fun updateText(id: String, newValue: String) = viewModelScope.launch {
-        val newComponents = dataState.components.map { comp ->
+        val newComponents = stateSnapshot.components.map { comp ->
             if (comp is FieldComponentUi && comp.id == id) {
                 comp.copy(
                     ui = comp.ui.copy(
@@ -123,7 +123,7 @@ class QuestionnairesFlowViewModel @Inject constructor(
     }
 
     fun updateSwitch(id: String, option: String) = viewModelScope.launch {
-        val newComponents = dataState.components.map { comp ->
+        val newComponents = stateSnapshot.components.map { comp ->
             if (comp is SwitchUi && comp.id == id) {
                 comp.copy(
                     selectedOption = option,
@@ -135,7 +135,7 @@ class QuestionnairesFlowViewModel @Inject constructor(
     }
 
     fun updateCheckbox(id: String, option: CheckOption) = viewModelScope.launch {
-        val newComponents = dataState.components.map { comp ->
+        val newComponents = stateSnapshot.components.map { comp ->
             if (comp is CheckboxListUi && comp.id == id) {
                 val updatedOptions = comp.options.map { opt ->
                     if (opt.label == option.label) opt.copy(isChecked = !opt.isChecked)
@@ -148,7 +148,7 @@ class QuestionnairesFlowViewModel @Inject constructor(
     }
 
     fun updateToggle(id: String, option: ToggleOption) = viewModelScope.launch {
-        val newComponents = dataState.components.map { comp ->
+        val newComponents = stateSnapshot.components.map { comp ->
             if (comp is ToggleListUi && comp.id == id) {
                 val updatedOptions = comp.options.map { opt ->
                     opt.copy(isSelected = (opt.label == option.label))
@@ -160,7 +160,7 @@ class QuestionnairesFlowViewModel @Inject constructor(
     }
 
     fun updateConditionCheckbox(id: String, option: CheckOption) = viewModelScope.launch {
-        val newComponents = dataState.components.map { comp ->
+        val newComponents = stateSnapshot.components.map { comp ->
             if (comp is ConditionsCheckboxListUi && comp.id == id) {
                 val updatedOptions = comp.options.map { opt ->
                     if (opt.label == option.label) opt.copy(isChecked = !opt.isChecked)
@@ -198,9 +198,9 @@ class QuestionnairesFlowViewModel @Inject constructor(
 
 
     fun navigateBack() = viewModelScope.launch {
-        val uiState = dataState.uiState
+        val uiState = stateSnapshot.uiState
         if (uiState is QuestionnairesUiState.Body
-            || dataState.currentWho != null
+            || stateSnapshot.currentWho != null
             && uiState !is QuestionnairesUiState.Success
         ) {
             showCancelDialog()
@@ -230,7 +230,7 @@ class QuestionnairesFlowViewModel @Inject constructor(
     }
 
     fun sendAnswers() = viewModelScope.launch {
-        val checkedComponents = dataState.components.map { component ->
+        val checkedComponents = stateSnapshot.components.map { component ->
             when (component) {
                 is CheckboxListUi -> {
                     if (component.options.none { it.isChecked }) component.copy(error = true)
@@ -270,13 +270,13 @@ class QuestionnairesFlowViewModel @Inject constructor(
             s.copy(components = checkedComponents)
         }
 
-        val currentWho = dataState.currentWho
+        val currentWho = stateSnapshot.currentWho
         if (checkedComponents.any { component -> component.error } || currentWho == null) {
             eventListener.emit(QuestionnaireEvents.ScrollToTop)
             return@launch
         }
 
-        val answers = dataState.components.toAnswerString()
+        val answers = stateSnapshot.components.toAnswerString()
 
         uiStateListener.updateData { s ->
             s.copy(button = s.button.copy(loading = true))
@@ -350,7 +350,7 @@ class QuestionnairesFlowViewModel @Inject constructor(
     fun changeDate(selectedDate: LocalDate) = viewModelScope.launch {
         val value = kotlin.runCatching { selectedDate.format(VodovozDateFormatters.DMY) }
             .getOrElse { "" }
-        val currentDateField = dataState.currentDateField ?: return@launch
+        val currentDateField = stateSnapshot.currentDateField ?: return@launch
         val updatedCurrentDateField = currentDateField.copy(
             ui = currentDateField.ui.copy(value = value, isError = false)
         )

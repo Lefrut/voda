@@ -68,7 +68,7 @@ class OrderDetailsFlowViewModel @Inject constructor(
     }
 
     fun fetchOrderDetails() = viewModelScope.launch {
-        if (dataState.uiState !is OrderDetailsUiState.Body) {
+        if (stateSnapshot.uiState !is OrderDetailsUiState.Body) {
             uiStateListener.updateData { s ->
                 s.copy(uiState = OrderDetailsUiState.Loading)
             }

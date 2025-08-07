@@ -92,7 +92,7 @@ class HomeFlowViewModel @Inject constructor(
             uiStateListener.updateData { s ->
 
                 val currentCategoryWithProducts =
-                    dataState.currentCategoryWithProducts.withUpdatedLoading(blockedProductsIds)
+                    stateSnapshot.currentCategoryWithProducts.withUpdatedLoading(blockedProductsIds)
 
                 s.copy(
                     currentCategoryWithProducts = currentCategoryWithProducts,
@@ -118,7 +118,7 @@ class HomeFlowViewModel @Inject constructor(
         uiStateListener.updateData { s ->
 
             val currentCategoryWithProducts =
-                dataState.currentCategoryWithProducts.withUpdatedCart(cartMap)
+                stateSnapshot.currentCategoryWithProducts.withUpdatedCart(cartMap)
 
             s.copy(
                 currentCategoryWithProducts = currentCategoryWithProducts,
@@ -141,27 +141,27 @@ class HomeFlowViewModel @Inject constructor(
                 if (uiState != HomeUiState.Success) return@collectLatest
 
                 val sectionTopDeferred =
-                    async(Dispatchers.Default) { dataState.sectionTop.withUpdatedFavorites(favorites) }
+                    async(Dispatchers.Default) { stateSnapshot.sectionTop.withUpdatedFavorites(favorites) }
                 val sectionBottomDeferred =
                     async(Dispatchers.Default) {
-                        dataState.sectionBottom.withUpdatedFavorites(
+                        stateSnapshot.sectionBottom.withUpdatedFavorites(
                             favorites
                         )
                     }
                 val sectionViewedProductsDeferred =
                     async(Dispatchers.Default) {
-                        dataState.sectionViewedProducts.withUpdatedFavorites(favorites)
+                        stateSnapshot.sectionViewedProducts.withUpdatedFavorites(favorites)
                     }
                 val sectionNewProductsDeferred =
                     async(Dispatchers.Default) {
-                        dataState.sectionNewProducts.withUpdatedFavorites(favorites)
+                        stateSnapshot.sectionNewProducts.withUpdatedFavorites(favorites)
                     }
                 val sectionHurryUpBuyProducts =
-                    dataState.sectionHurryUpBuyProducts.withUpdatedFavorites(favorites)
+                    stateSnapshot.sectionHurryUpBuyProducts.withUpdatedFavorites(favorites)
 
 
                 val currentCategoryWithProducts =
-                    dataState.currentCategoryWithProducts.withUpdatedFavorites(favorites)
+                    stateSnapshot.currentCategoryWithProducts.withUpdatedFavorites(favorites)
 
                 val sectionTop = sectionTopDeferred.await()
                 val sectionBottom = sectionBottomDeferred.await()
@@ -304,7 +304,7 @@ class HomeFlowViewModel @Inject constructor(
     }
 
     fun refresh() = viewModelScope.launch {
-        if (dataState.uiState is HomeUiState.Loading) return@launch
+        if (stateSnapshot.uiState is HomeUiState.Loading) return@launch
 
         uiStateListener.updateData { s ->
             s.copy(
@@ -348,7 +348,7 @@ class HomeFlowViewModel @Inject constructor(
         eventListener.emit(
             HomeEvents.GoToStories(
                 storyId = startStory.id,
-                stories = dataState.stories
+                stories = stateSnapshot.stories
             )
         )
     }

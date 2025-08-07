@@ -2,11 +2,9 @@ package com.vodovoz.app.feature.all.brands
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.map
-import com.vodovoz.app.common.account.AccountManager
 import com.vodovoz.app.common.content.Event
 import com.vodovoz.app.common.content.PagingContractViewModel
 import com.vodovoz.app.common.content.State
@@ -43,12 +41,12 @@ class AllBrandsFlowViewModel @Inject constructor(
     private fun fetchBrands() = viewModelScope.launch {
 
         val brandsFlow =
-            vodovozServiceRepository.getBrandsPaged(dataState.searchQuery).map { pagingData ->
+            vodovozServiceRepository.getBrandsPaged(stateSnapshot.searchQuery).map { pagingData ->
                 pagingData.map { brand -> brand.toUi() }
             }
 
 
-        vodovozServiceRepository.getBrands(dataState.searchQuery).singleResult()
+        vodovozServiceRepository.getBrands(stateSnapshot.searchQuery).singleResult()
             .onSuccess { brandSectionModel ->
                 uiStateListener.updateData { s ->
                     s.copy(

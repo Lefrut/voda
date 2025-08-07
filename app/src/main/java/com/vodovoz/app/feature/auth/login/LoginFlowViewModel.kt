@@ -79,8 +79,8 @@ class LoginFlowViewModel @Inject constructor(
     }
 
     private fun requestCode() = viewModelScope.launch {
-        val fields = dataState.authDetails.fields
-        val buttons = dataState.authDetails.buttons
+        val fields = stateSnapshot.authDetails.fields
+        val buttons = stateSnapshot.authDetails.buttons
 
         val phoneField = fields.firstOrNull() ?: return@launch
 
@@ -122,9 +122,9 @@ class LoginFlowViewModel @Inject constructor(
         val requestPhoneCodeResult = vodovozServiceRepository.requestPhoneCode(
             url = requestPhoneCodeUrl,
             phone = phoneField.value,
-            params = dataState.checkboxes.associate { checkbox ->
+            params = stateSnapshot.checkboxes.associate { checkbox ->
                 checkbox.id to checkbox.value()
-            } + dataState.fields.associate { field ->
+            } + stateSnapshot.fields.associate { field ->
                 field.id to field.value()
             }
         ).singleResult()
@@ -210,7 +210,7 @@ class LoginFlowViewModel @Inject constructor(
     }
 
     private fun updateFieldsErrorText(errorText: String): List<FieldUi> {
-        val authDetails = dataState.authDetails
+        val authDetails = stateSnapshot.authDetails
         val fields = authDetails.fields
         val lastField = fields.lastOrNull()
 

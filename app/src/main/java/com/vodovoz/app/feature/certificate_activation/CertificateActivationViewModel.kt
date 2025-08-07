@@ -58,7 +58,7 @@ class CertificateActivationViewModel @Inject constructor(
     }
 
     fun navigateBack() = viewModelScope.launch {
-        _events.emit(CertificateActivationEvent.GoBack)
+        sendEvent(CertificateActivationEvent.GoBack)
     }
 
     fun activateCertificate() = viewModelScope.launch {
@@ -100,7 +100,7 @@ class CertificateActivationViewModel @Inject constructor(
     }
 
     fun openUrl(url: String) = viewModelScope.launch {
-        _events.emit(CertificateActivationEvent.GoToWebView(url))
+        sendEvent(CertificateActivationEvent.GoToWebView(url))
     }
 
 

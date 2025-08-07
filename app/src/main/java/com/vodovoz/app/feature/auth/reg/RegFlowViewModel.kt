@@ -77,7 +77,7 @@ class RegFlowViewModel @Inject constructor(
     }
 
     private fun register() = viewModelScope.launch {
-        val isValid = dataState.fields.checkFields(
+        val isValid = stateSnapshot.fields.checkFields(
             putErrors = true,
             getSupportingText = { field -> field.getErrorText { id -> resourceProvider.getString(id) } }
         ) { updatedFields, _ ->
@@ -111,15 +111,15 @@ class RegFlowViewModel @Inject constructor(
         val failMessage = resourceProvider.getString(R.string.error_registration)
 
         val registerResult = vodovozServiceRepository.register(
-            dataState.fields.associate {
+            stateSnapshot.fields.associate {
                 it.id to it.value()
-            } + dataState.fields.associate { it.id to it.value() }
+            } + stateSnapshot.fields.associate { it.id to it.value() }
         ).singleResult()
 
         registerResult.onSuccess { authInfo ->
 
-            val email = dataState.fields.firstOrNull { it.id == "email" }?.value ?: ""
-            val password = dataState.fields.firstOrNull { it.id == "pass" }?.value ?: ""
+            val email = stateSnapshot.fields.firstOrNull { it.id == "email" }?.value ?: ""
+            val password = stateSnapshot.fields.firstOrNull { it.id == "pass" }?.value ?: ""
 
             loginManager.initializeUserSession(
                 authInfo.userId,
@@ -173,7 +173,7 @@ class RegFlowViewModel @Inject constructor(
 
 
     fun changeField(field: FieldUi, updatedField: FieldUi) = viewModelScope.launch {
-        val updatedFields = dataState.fields.updateFieldAndResetError(field, updatedField)
+        val updatedFields = stateSnapshot.fields.updateFieldAndResetError(field, updatedField)
 
 
         updatedFields.checkFields(

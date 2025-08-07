@@ -43,7 +43,7 @@ class OrderQuestionViewModel @Inject constructor(
     }
 
     fun navigateBack() = viewModelScope.launch {
-        _events.emit(OrderQuestionEvent.GoBack)
+        sendEvent(OrderQuestionEvent.GoBack)
     }
 
     fun changeField(field: FieldUi, updatedField: FieldUi) = viewModelScope.launch {
@@ -101,7 +101,7 @@ class OrderQuestionViewModel @Inject constructor(
                 )
             }
         }.onFailure { t ->
-            _events.emit(
+            sendEvent(
                 OrderQuestionEvent.ShowToast(
                     resourcesProvider.getString(R.string.order_question_send_error)
                 )

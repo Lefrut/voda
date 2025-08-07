@@ -34,7 +34,7 @@ class WriteMessageViewModel @Inject constructor(
     }
 
     fun navigateBack() = viewModelScope.launch {
-        _events.emit(WriteMessageEvent.GoBack)
+        sendEvent(WriteMessageEvent.GoBack)
     }
 
     fun fetchWriteMessageDetails() = viewModelScope.launch {
@@ -113,7 +113,7 @@ class WriteMessageViewModel @Inject constructor(
                 )
             }
         }.onFailure {
-            _events.emit(
+            sendEvent(
                 WriteMessageEvent.ShowSnackbar(
                     resourcesProvider.getString(R.string.error_send_data)
                 )

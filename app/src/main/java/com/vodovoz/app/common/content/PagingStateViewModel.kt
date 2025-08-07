@@ -7,11 +7,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import retrofit2.HttpException
-import java.net.ConnectException
-import java.net.SocketTimeoutException
-import java.net.UnknownHostException
-import javax.net.ssl.SSLException
 
 
 abstract class PagingContractViewModel<S : State, E : Event>(
@@ -22,7 +17,7 @@ abstract class PagingContractViewModel<S : State, E : Event>(
     protected val state
         get() = uiStateListener.value
 
-    val dataState get() = state.data
+    val stateSnapshot get() = state.data
 
     @Stable
     fun observeUiState() = uiStateListener.asStateFlow()
@@ -46,69 +41,13 @@ interface Event
 
 @Stable
 data class PagingState<S>(
-    val data: S,
-    val loadingPage: Boolean = false,
-    val error: ErrorState? = null,
-    val page: Int? = 1,
+    val data: S
 ) {
     companion object {
         fun <S> idle(idleState: S): PagingState<S> {
-            return PagingState(
-                data = idleState,
-                error = null,
-            )
+            return PagingState(data = idleState)
         }
     }
-}
-
-@Stable
-sealed class ErrorState(
-    val message: String,
-    val description: String,
-) {
-    data class Error(
-        val messageInfo: String = "Ошибка загрузки.",
-        val desc: String = "Пропробуйте снова.",
-    ) : ErrorState(message = messageInfo, description = desc)
-
-    data class NetworkError(
-        val messageInfo: String = "Проблемы с интернетом.",
-        val desc: String = "Проверьте соединение с сетью и обновите страницу",
-    ) : ErrorState(
-        message = messageInfo,
-        description = desc
-    )
-
-    data class Empty(
-        val messageInfo: String = "Список пуст.",
-        val desc: String = "",
-    ) : ErrorState(message = messageInfo, description = desc)
-
-    data object BadGateway :
-        ErrorState(message = "Слишком частый запрос.", description = "Обновите страницу.")
-}
-
-fun Throwable.toErrorState(): ErrorState {
-
-    return when (this) {
-        is UnknownHostException,
-        is SocketTimeoutException,
-        is ConnectException,
-        is SSLException,
-        -> ErrorState.NetworkError()
-
-        else -> {
-            if ((this as? HttpException)?.code() == 502) {
-                ErrorState.BadGateway
-            } else {
-                ErrorState.Error()
-            }
-        }
-    }
-}
-
-fun String.stringToErrorState(): ErrorState {
-    return ErrorState.Error(this)
 }
 
 interface State

@@ -69,13 +69,13 @@ class BlockAppViewModel @Inject constructor(
     fun navigateByContact(contact: BlockAppContactUi) = viewModelScope.launch {
         when (contact.urlType) {
             "phone" -> {
-                _events.emit(BlockAppEvent.DialPhoneNumber(contact.url))
+                sendEvent(BlockAppEvent.DialPhoneNumber(contact.url))
             }
             "url" -> {
-                _events.emit(BlockAppEvent.OpenUrl(contact.url))
+                sendEvent(BlockAppEvent.OpenUrl(contact.url))
             }
             else -> {
-                _events.emit(BlockAppEvent.OpenUrl(contact.url))
+                sendEvent(BlockAppEvent.OpenUrl(contact.url))
             }
         }
     }

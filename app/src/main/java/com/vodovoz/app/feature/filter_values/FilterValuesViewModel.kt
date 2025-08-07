@@ -82,7 +82,7 @@ class FilterValuesViewModel @Inject constructor(
     }
 
     fun navigateToProductFilters() = viewModelScope.launch {
-        val currentFilter = dataState.filter
+        val currentFilter = stateSnapshot.filter
 
         eventListener.emit(
             ConcreteFilterEvent.GoToProductFilters(

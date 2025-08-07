@@ -81,13 +81,13 @@ class CartFlowViewModel @Inject constructor(
     }
 
     fun fetchCartDetails() = viewModelScope.launch {
-        if (dataState.uiState is CartUiState.Empty || dataState.uiState == CartUiState.Error) {
+        if (stateSnapshot.uiState is CartUiState.Empty || stateSnapshot.uiState == CartUiState.Error) {
             uiStateListener.updateData { s -> s.copy(uiState = CartUiState.Loading) }
         }
 
         val currentCartVersion = cartManager.cartVersion
         val cartDetailsResult = vodovozServiceRepository.getCartDetails(
-            dataState.promoCode
+            stateSnapshot.promoCode
         ).singleResult()
 
         cartDetailsResult.onSuccess { cartDetails ->
@@ -282,7 +282,7 @@ class CartFlowViewModel @Inject constructor(
         }
         fetchCartDetails().join()
 
-        val correctCoupon = dataState.promotionalCodeButton?.coupon
+        val correctCoupon = stateSnapshot.promotionalCodeButton?.coupon
         if (correctCoupon.isNullOrEmpty()) {
             return@launch
         }
@@ -305,8 +305,8 @@ class CartFlowViewModel @Inject constructor(
         if (userId == null) {
             eventListener.emit(CartEvents.GoToProfile)
         } else {
-            val present = dataState.present ?: return@launch
-            val popupWindow = dataState.present?.popupWindow ?: return@launch
+            val present = stateSnapshot.present ?: return@launch
+            val popupWindow = stateSnapshot.present?.popupWindow ?: return@launch
             if (popupWindow.items.isEmpty()) return@launch
 
             eventListener.emit(CartEvents.GoToGifts(present, popupWindow))

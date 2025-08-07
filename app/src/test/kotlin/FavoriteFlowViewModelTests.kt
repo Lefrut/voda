@@ -1,6 +1,4 @@
 import app.cash.turbine.test
-import com.vodovoz.app.design_system.model.ProductUi
-import com.vodovoz.app.design_system.model.mapToUi
 import com.vodovoz.app.domain.general.model.product.ProductsSectionModel
 import com.vodovoz.app.feature.favorite.FavoriteFlowViewModel
 import com.vodovoz.app.feature.home.model.CategoryUi
@@ -119,7 +117,7 @@ class FavoriteFlowViewModelTests : ViewModelTestBase<FavoriteFlowViewModel>() {
         )
 
         coEvery {
-            viewModel.dataState.lastSavedLikes
+            viewModel.stateSnapshot.lastSavedLikes
         } returnsMany lastSavedLikesList
         coEvery {
             likeManager.getLikes()

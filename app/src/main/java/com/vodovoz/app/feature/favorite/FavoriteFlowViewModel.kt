@@ -78,7 +78,7 @@ class FavoriteFlowViewModel @Inject constructor(
     }
 
     private fun hasFavoriteChanges(): Boolean {
-        val oldLikes = dataState.lastSavedLikes
+        val oldLikes = stateSnapshot.lastSavedLikes
 
         val newLikes = likeManager.getLikes()
         val newLikeCategories = likeManager.getLikesCategories()
@@ -146,7 +146,7 @@ class FavoriteFlowViewModel @Inject constructor(
     }
 
     fun fetchFavoriteProducts() = viewModelScope.launch {
-        if (dataState.uiState != FavoriteUiState.Success) {
+        if (stateSnapshot.uiState != FavoriteUiState.Success) {
             uiStateListener.updateData { s ->
                 s.copy(uiState = FavoriteUiState.Loading)
             }
@@ -175,14 +175,14 @@ class FavoriteFlowViewModel @Inject constructor(
                 )
             }
 
-            val currentCategory = dataState.currentCategory.takeIf {
-                it == CategoryUi.Empty || dataState.productsSection.categories.contains(it)
+            val currentCategory = stateSnapshot.currentCategory.takeIf {
+                it == CategoryUi.Empty || stateSnapshot.productsSection.categories.contains(it)
             } ?: CategoryUi.Empty
 
             viewModelScope.launch {
                 vodovozServiceRepository.getFavoriteProductsPaged(
                     categoryId = currentCategory.id,
-                    sort = dataState.currentSort.toDomain(),
+                    sort = stateSnapshot.currentSort.toDomain(),
                     productsIds = likeManager.fetchLocalFavorites()
                 ).map { pagingData ->
                     pagingData.map { productModel -> productModel.toUi() }
@@ -217,7 +217,7 @@ class FavoriteFlowViewModel @Inject constructor(
     }
 
     fun refresh() = viewModelScope.launch {
-        if (dataState.uiState !is FavoriteUiState.Loading) {
+        if (stateSnapshot.uiState !is FavoriteUiState.Loading) {
             uiStateListener.updateData { s ->
                 s.copy(showRefreshIndicator = true)
             }
@@ -228,8 +228,8 @@ class FavoriteFlowViewModel @Inject constructor(
     fun navigateToCategories() = viewModelScope.launch {
         eventListener.emit(
             FavoriteEvents.GoToCategories(
-                dataState.productsSection.categories,
-                dataState.currentCategory
+                stateSnapshot.productsSection.categories,
+                stateSnapshot.currentCategory
             )
         )
     }
@@ -248,7 +248,7 @@ class FavoriteFlowViewModel @Inject constructor(
     }
 
     fun selectCategory(category: CategoryUi) = viewModelScope.launch {
-        val newCategory = if (category == dataState.currentCategory) CategoryUi.Empty
+        val newCategory = if (category == stateSnapshot.currentCategory) CategoryUi.Empty
         else category
 
         uiStateListener.updateData { s ->
@@ -264,7 +264,7 @@ class FavoriteFlowViewModel @Inject constructor(
     }
 
     fun selectSort(sort: SortUi) = viewModelScope.launch {
-        if (sort == dataState.currentSort) return@launch
+        if (sort == stateSnapshot.currentSort) return@launch
         uiStateListener.updateData { s -> s.copy(currentSort = sort, showSortBottomSheet = false) }
         fetchFavoriteProducts().join()
     }

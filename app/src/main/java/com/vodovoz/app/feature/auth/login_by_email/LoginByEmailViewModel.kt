@@ -57,7 +57,7 @@ class LoginByEmailViewModel @Inject constructor(
 
 
     fun navigateBack() = viewModelScope.launch {
-        _events.emit(LoginByEmailEvent.GoBack)
+        sendEvent(LoginByEmailEvent.GoBack)
     }
 
     private fun loginByEmail() = viewModelScope.launch {
@@ -100,7 +100,7 @@ class LoginByEmailViewModel @Inject constructor(
                 )
             }
 
-            _events.emit(LoginByEmailEvent.RefreshAll)
+            sendEvent(LoginByEmailEvent.RefreshAll)
 
         }.onFailure { t ->
             val defaultMessage = resourcesProvider.getString(R.string.error_login)
@@ -202,16 +202,16 @@ class LoginByEmailViewModel @Inject constructor(
     }
 
     private fun navigateToRegister() = viewModelScope.launch {
-        _events.emit(LoginByEmailEvent.GoToRegister)
+        sendEvent(LoginByEmailEvent.GoToRegister)
     }
 
     fun openAgreementUrl(url: String, titleIndex: Int) = viewModelScope.launch {
         val title = AgreementController.getTitle(titleIndex) ?: ""
-        _events.emit(LoginByEmailEvent.GoToWebView(url, title))
+        sendEvent(LoginByEmailEvent.GoToWebView(url, title))
     }
 
     fun navigateToRecoveryPassword() = viewModelScope.launch {
-        _events.emit(LoginByEmailEvent.GoToRecoverPassword)
+        sendEvent(LoginByEmailEvent.GoToRecoverPassword)
     }
 
 

@@ -24,7 +24,7 @@ class DetailMediaViewModel @Inject constructor(
 ){
 
     fun navigateBack() = viewModelScope.launch {
-        _events.emit(DetailMediaEvent.GoBack)
+        sendEvent(DetailMediaEvent.GoBack)
     }
 
     fun setMediaByIndex(index: Int) = viewModelScope.launch {
@@ -37,12 +37,12 @@ class DetailMediaViewModel @Inject constructor(
 
     fun makePortrait() = viewModelScope.launch {
         _state.update{ s -> s.copy(portraitOrientation = true) }
-        _events.emit(DetailMediaEvent.MakePortrait)
+        sendEvent(DetailMediaEvent.MakePortrait)
     }
 
     fun makeLandscape() = viewModelScope.launch {
         _state.update{ s -> s.copy(portraitOrientation = false) }
-        _events.emit(DetailMediaEvent.MakeLandscape)
+        sendEvent(DetailMediaEvent.MakeLandscape)
     }
 
 }

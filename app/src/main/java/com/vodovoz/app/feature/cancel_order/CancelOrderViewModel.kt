@@ -36,7 +36,7 @@ class CancelOrderViewModel @Inject constructor(
     }
 
     fun navigateBack() = viewModelScope.launch {
-        _events.emit(CancelOrderEvent.GoBack)
+        sendEvent(CancelOrderEvent.GoBack)
     }
 
     fun fetchCancelOrderDetails() = viewModelScope.launch {
@@ -103,7 +103,7 @@ class CancelOrderViewModel @Inject constructor(
         val cancelOrderResult = vodovozServiceRepository.cancelOrder(orderId, params).singleResult()
 
         cancelOrderResult.onSuccess {
-            _events.emit(CancelOrderEvent.GoBack)
+            sendEvent(CancelOrderEvent.GoBack)
         }
 
         _state.update { s ->

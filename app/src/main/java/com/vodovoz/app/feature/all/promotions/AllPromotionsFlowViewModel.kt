@@ -71,7 +71,7 @@ class AllPromotionsFlowViewModel @Inject constructor(
             is AllPromotionsFragment.DataSource.ByBanner -> vodovozServiceRepository.getBannerPromotions(
                 bannerId = dataSource.bannerId,
                 blockId = dataSource.blockId,
-                categoryId = dataState.currentCategory.id
+                categoryId = stateSnapshot.currentCategory.id
             ).singleResult().getOrNull()
         }
     }
@@ -97,12 +97,12 @@ class AllPromotionsFlowViewModel @Inject constructor(
             s.copy(uiState = UiState.Loading)
         }
 
-        val sectionPromotions = if (dataState.categories.isEmpty()) {
+        val sectionPromotions = if (stateSnapshot.categories.isEmpty()) {
             getAllPromotions()
         } else {
             PromotionsSectionModel(
-                title = dataState.title,
-                categories = dataState.categories.mapToDomain(),
+                title = stateSnapshot.title,
+                categories = stateSnapshot.categories.mapToDomain(),
                 promotions = emptyList(),
                 button = null
             )
@@ -119,10 +119,10 @@ class AllPromotionsFlowViewModel @Inject constructor(
 
         val categories = sectionPromotions.categories.mapToUi()
         val currentCategory =
-            if (dataState.currentCategory == PromotionCategoryUi.Empty) {
+            if (stateSnapshot.currentCategory == PromotionCategoryUi.Empty) {
                 (categories.firstOrNull() ?: PromotionCategoryUi.Empty)
             } else {
-                dataState.currentCategory
+                stateSnapshot.currentCategory
             }
 
         uiStateListener.updateData { s ->
@@ -143,7 +143,7 @@ class AllPromotionsFlowViewModel @Inject constructor(
     }
 
     fun selectSection(category: PromotionCategoryUi) = viewModelScope.launch {
-        if (category == dataState.currentCategory) return@launch
+        if (category == stateSnapshot.currentCategory) return@launch
 
         eventListener.emit(AllPromotionsEvent.ScrollTop)
         uiStateListener.updateData { s ->

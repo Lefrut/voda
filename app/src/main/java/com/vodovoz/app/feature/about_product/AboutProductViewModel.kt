@@ -131,15 +131,15 @@ class AboutProductViewModel @Inject constructor(
     }
 
     fun navigateBack() = viewModelScope.launch {
-        _events.emit(AboutProductEvent.GoBack)
+        sendEvent(AboutProductEvent.GoBack)
     }
 
     fun navigateToDocumentViewer(document: DocumentUi) = viewModelScope.launch {
-        _events.emit(AboutProductEvent.GoToDocumentViewer(document))
+        sendEvent(AboutProductEvent.GoToDocumentViewer(document))
     }
 
     fun navigateToProductAnalogs() = viewModelScope.launch {
-        _events.emit(AboutProductEvent.GoToProductAnalogs(productId))
+        sendEvent(AboutProductEvent.GoToProductAnalogs(productId))
     }
 
     fun incrementProductToCart() = viewModelScope.launch {

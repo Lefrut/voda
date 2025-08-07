@@ -45,7 +45,7 @@ class RecoverPasswordViewModel @Inject constructor(
     }
 
     fun navigateBack() = viewModelScope.launch {
-        _events.emit(RecoverPasswordEvent.GoBack)
+        sendEvent(RecoverPasswordEvent.GoBack)
     }
 
     fun activateButton(button: ColorfulButtonUi) = viewModelScope.launch {
@@ -178,7 +178,7 @@ class RecoverPasswordViewModel @Inject constructor(
     fun navigateToWebView(url: String, urlIndex: Int) = viewModelScope.launch {
         val title =
             AgreementController.getTitle(urlIndex) ?: resourcesProvider.getString(R.string.space)
-        _events.emit(RecoverPasswordEvent.GoToWebView(url, title))
+        sendEvent(RecoverPasswordEvent.GoToWebView(url, title))
     }
 
 }

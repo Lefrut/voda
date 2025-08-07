@@ -13,12 +13,10 @@ import com.vodovoz.app.design_system.model.ImageAndTextUi
 import com.vodovoz.app.design_system.model.ImageButtonUi
 import com.vodovoz.app.design_system.model.MapPointUi
 import com.vodovoz.app.design_system.model.mapToUi
-import com.vodovoz.app.design_system.model.toDomain
 import com.vodovoz.app.design_system.model.toUi
 import com.vodovoz.app.domain.general.respository.MapServiceRepository
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.feature.sitestate.SiteStateManager
-import com.vodovoz.app.ui.yandex_map.getNearestRoutePoint
 import com.vodovoz.app.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.awaitClose
@@ -144,11 +142,11 @@ class TraceOrderViewModel @Inject constructor(
     }
 
     fun moveToAvailableGeo() = viewModelScope.launch {
-        if (dataState.carPoint != null) {
+        if (stateSnapshot.carPoint != null) {
             eventListener.emit(
                 TraceOrderEvents.MoveToDeliveryGeo(
-                    dataState.finishPoint,
-                    dataState.carPoint
+                    stateSnapshot.finishPoint,
+                    stateSnapshot.carPoint
                 )
             )
         } else {

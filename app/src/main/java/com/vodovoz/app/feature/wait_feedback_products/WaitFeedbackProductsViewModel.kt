@@ -117,20 +117,20 @@ class WaitFeedbackProductsViewModel @Inject constructor(
     }
 
     fun navigateBack() = viewModelScope.launch {
-        _events.emit(WaitFeedbackProductsEvent.GoBack)
+        sendEvent(WaitFeedbackProductsEvent.GoBack)
     }
 
     fun navigateToProductDetails(product: WaitFeedbackProductUi) = viewModelScope.launch {
-        _events.emit(WaitFeedbackProductsEvent.GoToProductsDetails(product.id))
+        sendEvent(WaitFeedbackProductsEvent.GoToProductsDetails(product.id))
     }
 
     fun navigateToCatalog() = viewModelScope.launch {
-        _events.emit(WaitFeedbackProductsEvent.GoToCatalog)
+        sendEvent(WaitFeedbackProductsEvent.GoToCatalog)
     }
 
     fun navigateToWriteComment(product: WaitFeedbackProductUi, rating: Int) =
         viewModelScope.launch {
-            _events.emit(
+            sendEvent(
                 WaitFeedbackProductsEvent.GoToWriteComment(
                     product.id,
                     product.name,

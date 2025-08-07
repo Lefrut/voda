@@ -51,7 +51,7 @@ class DeliveryDateViewModel @Inject constructor(
     }
 
     fun navigateBack() = viewModelScope.launch {
-        _events.emit(DeliveryDateEvent.GoBack)
+        sendEvent(DeliveryDateEvent.GoBack)
     }
 
     fun fetchDeliveryDateDetails() = viewModelScope.launch {
@@ -154,7 +154,7 @@ class DeliveryDateViewModel @Inject constructor(
         val timeInterval = stateSnapshot.selectedTimeInterval
         val earlierCheckbox = stateSnapshot.earlierCheckbox
 
-        _events.emit(
+        sendEvent(
             DeliveryDateEvent.GoBackToOrdering(
                 timeInterval = timeInterval,
                 dateOption = dateOption,

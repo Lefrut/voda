@@ -67,15 +67,15 @@ class OrdersHistoryViewModel @Inject constructor(
 
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun handleQueries() =
-        querySharedFlow.debounceWithMax(200L, 5).filter { dataState.searchMode }.mapLatest {
+        querySharedFlow.debounceWithMax(200L, 5).filter { stateSnapshot.searchMode }.mapLatest {
             fetchOrdersHistoryDetails()
         }.launchIn(viewModelScope)
 
     private fun listenProductsLoadStates() = viewModelScope.launch {
         pagingProductsListener.collectLoadState { combinedLoadStates ->
             val refreshState = when {
-                combinedLoadStates.refresh is LoadState.Loading && dataState.items.isNotEmpty() -> {
-                    dataState.loadStates.refresh
+                combinedLoadStates.refresh is LoadState.Loading && stateSnapshot.items.isNotEmpty() -> {
+                    stateSnapshot.loadStates.refresh
                 }
 
                 else -> combinedLoadStates.refresh
@@ -95,7 +95,7 @@ class OrdersHistoryViewModel @Inject constructor(
 
 
     fun fetchOrdersHistoryDetails() = viewModelScope.launch {
-        if (dataState.uiState !is AllOrdersUiState.Body) {
+        if (stateSnapshot.uiState !is AllOrdersUiState.Body) {
             uiStateListener.updateData { s ->
                 s.copy(uiState = AllOrdersUiState.Loading)
             }
@@ -117,8 +117,8 @@ class OrdersHistoryViewModel @Inject constructor(
             }
 
             vodovozServiceRepository.getOrdersHistoryItemsPaged(
-                dataState.currentFilters.joinToString(",") { it.id },
-                dataState.searchQuery
+                stateSnapshot.currentFilters.joinToString(",") { it.id },
+                stateSnapshot.searchQuery
             ).collectLatest { pagingData ->
                 val pg = pagingData.map { historyItemModel ->
                     historyItemModel.toUi()
@@ -173,7 +173,7 @@ class OrdersHistoryViewModel @Inject constructor(
     }
 
     fun selectAllFilters() = viewModelScope.launch {
-        if (dataState.currentFilters.isEmpty()) return@launch
+        if (stateSnapshot.currentFilters.isEmpty()) return@launch
 
         uiStateListener.updateData { s ->
             s.copy(currentFilters = emptyList())
