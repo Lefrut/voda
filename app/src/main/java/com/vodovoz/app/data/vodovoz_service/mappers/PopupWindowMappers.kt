@@ -16,13 +16,13 @@ fun PopupWindowDTO.toDomain(): PopupWindowInfoModel {
 }
 
 
-fun SPECTIAL_PROMOTION_DTO.toDomain(): SpecialPromotionModel? {
+fun SPECTIAL_PROMOTION_DTO.toDomain(): SpecialPromotionModel {
     return SpecialPromotionModel(
         id = ID ?: -1,
         name = NAME ?: "",
         text = TEXT ?: "",
-        picture = KARTINKA?.toVodovozUrl() ?: return null,
-        actionWithButton = HARAKTERISTIK?.toDomain() ?: return null
+        picture = KARTINKA?.toVodovozUrl() ?: "",
+        actionWithButton = HARAKTERISTIK?.toDomain()
     )
 }
 

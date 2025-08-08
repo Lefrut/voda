@@ -1,23 +1,20 @@
 package com.vodovoz.app.feature.home.composables
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.fromHtml
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import coil3.compose.rememberAsyncImagePainter
+import coil3.compose.AsyncImage
 import com.valentinilk.shimmer.ShimmerBounds
 import com.valentinilk.shimmer.rememberShimmer
 import com.vodovoz.app.design_system.composables.button.VodovozButtonsColumn
@@ -31,7 +28,7 @@ fun BaseBottomSheetContent(
     name: String,
     picture: String,
     description: String,
-    button: ColorfulButtonUi,
+    button: ColorfulButtonUi?,
     onButtonClick: (ColorfulButtonUi) -> Unit,
 ) {
     Column(modifier = modifier.padding(horizontal = 16.dp)) {
@@ -41,20 +38,23 @@ fun BaseBottomSheetContent(
             color = MaterialTheme.colorScheme.onBackground,
             style = MaterialTheme.typography.titleMedium
         )
-        val painter = rememberAsyncImagePainter(picture)
 
-        SkeletonBox(shimmerState = rememberShimmer(ShimmerBounds.View)){
-            Image(
-                painter = painter,
-                contentDescription = null,
+        if (picture.isNotBlank()) {
+            SkeletonBox(
                 modifier = Modifier
-                    .padding(top = 8.dp)
-                    .fillMaxWidth()
-                    .height(220.dp)
-                    .clip(MaterialTheme.shapes.large),
-                contentScale = ContentScale.Crop,
-                alignment = Alignment.TopStart
-            )
+                    .padding(top = 8.dp),
+                shimmerState = rememberShimmer(ShimmerBounds.Window)
+            ) {
+                AsyncImage(
+                    model = picture,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .height(220.dp)
+                        .fillMaxWidth()
+                        .clip(MaterialTheme.shapes.large),
+                    contentScale = ContentScale.FillBounds
+                )
+            }
         }
 
         if (description.isNotEmpty()) {
@@ -69,12 +69,15 @@ fun BaseBottomSheetContent(
             )
         }
 
-        VodovozButtonsColumn(
-            modifier = Modifier.padding(top = 20.dp, bottom = 18.dp),
-            buttons = listOf(button)
-        ) {
-            onButtonClick(it)
+        button?.let {
+            VodovozButtonsColumn(
+                modifier = Modifier.padding(top = 20.dp, bottom = 18.dp),
+                buttons = listOf(button)
+            ) {
+                onButtonClick(it)
+            }
         }
+
     }
 
 }

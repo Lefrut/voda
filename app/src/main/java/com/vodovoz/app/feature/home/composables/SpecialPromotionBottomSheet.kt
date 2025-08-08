@@ -48,7 +48,7 @@ fun SpecialPromotionBottomSheet(
             name = specialPromotionUi.name,
             picture = specialPromotionUi.picture,
             description = specialPromotionUi.text,
-            button = specialPromotionUi.actionWithButton.colorfulButton,
+            button = specialPromotionUi.actionWithButton?.colorfulButton,
             onButtonClick = { onButtonClick(specialPromotionUi) }
         )
     }

@@ -29,7 +29,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.Navigation
-import by.kirich1409.viewbindingdelegate.viewBinding
 import com.google.android.material.snackbar.Snackbar
 import com.vodovoz.app.R
 import com.vodovoz.app.common.account.AccountManager
@@ -84,8 +83,8 @@ class MainFragment : Fragment(R.layout.fragment_main), SnackbarHostStateOwner {
 
     private val viewModel: MainViewModel by viewModels()
 
-    private val binding: FragmentMainBinding by viewBinding { fragment ->
-        FragmentMainBinding.bind(fragment.view ?: View(requireContext()))
+    private val binding: FragmentMainBinding by lazy {
+        FragmentMainBinding.bind(view ?: View(requireContext()))
     }
 
     override val snackbarHostState = SnackbarHostState()

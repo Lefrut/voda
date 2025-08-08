@@ -8,7 +8,6 @@ import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.biometric.BiometricManager
 import androidx.fragment.app.Fragment
-import by.kirich1409.viewbindingdelegate.viewBinding
 import com.vodovoz.app.R
 import com.vodovoz.app.common.account.AccountManager
 import com.vodovoz.app.databinding.FragmentBiometricSettingsBinding
@@ -23,8 +22,8 @@ class BiometricSettingsFragment : Fragment(R.layout.fragment_biometric_settings)
 
     private val biometricManager by lazy { BiometricManager.from(requireContext()) }
 
-    private val binding: FragmentBiometricSettingsBinding by viewBinding { biometricSettingsFragment ->
-        FragmentBiometricSettingsBinding.bind(biometricSettingsFragment.requireView())
+    private val binding: FragmentBiometricSettingsBinding by lazy {
+        FragmentBiometricSettingsBinding.bind(view ?: View(requireContext()))
 
     }
 
@@ -70,6 +69,7 @@ class BiometricSettingsFragment : Fragment(R.layout.fragment_biometric_settings)
                 }
                 biometricResultLauncher.launch(enrollIntent)
             }
+
             else -> {
 
             }

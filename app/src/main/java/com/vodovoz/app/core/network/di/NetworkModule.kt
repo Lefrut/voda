@@ -3,13 +3,11 @@ package com.vodovoz.app.core.network.di
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import com.vodovoz.app.BuildConfig
-import com.vodovoz.app.common.block_app_signal.BlockAppSignal
-import com.vodovoz.app.common.block_app_signal.BlockAppSignalImpl
-import com.vodovoz.app.common.block_app_signal.BlockAppSignalProvider
 import com.vodovoz.app.core.network.converters.LocalDateTimeJsonAdapter
 import com.vodovoz.app.core.network.interceptor.BaseUrlInterceptor
 import com.vodovoz.app.core.network.interceptor.BlockAppInterceptor
 import com.vodovoz.app.core.network.interceptor.CookieHandlerInterceptor
+import com.vodovoz.app.core.network.interceptor.LastErrorInterceptor
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -42,6 +40,14 @@ abstract class NetworkModule {
         baseUrlInterceptor: BaseUrlInterceptor,
     ): Interceptor
 
+    @Binds
+    @Singleton
+    @IntoSet
+    @VodovozInterceptor
+    abstract fun providerErrorCacheInterceptor(
+        lastErrorInterceptor: LastErrorInterceptor,
+    ): Interceptor
+
 
     @Binds
     @Singleton
@@ -56,7 +62,7 @@ abstract class NetworkModule {
     @IntoSet
     @VodovozInterceptor
     abstract fun bindAppSignalInterceptor(
-        interceptor: BlockAppInterceptor
+        interceptor: BlockAppInterceptor,
     ): Interceptor
 
 

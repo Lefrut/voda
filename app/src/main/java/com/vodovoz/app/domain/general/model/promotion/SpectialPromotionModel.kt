@@ -5,7 +5,7 @@ data class SpecialPromotionModel(
     val name: String,
     val text: String,
     val picture: String,
-    val actionWithButton: ActionWithButtonModel,
+    val actionWithButton: ActionWithButtonModel?,
 )
 
 data class AppUpdateInfoModel(

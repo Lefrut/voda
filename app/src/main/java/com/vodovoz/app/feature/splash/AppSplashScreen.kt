@@ -34,7 +34,9 @@ import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.vodovoz.app.R
 import com.vodovoz.app.design_system.VodovozTheme
+import com.vodovoz.app.design_system.composables.placeholders.ErrorPlaceholderMode
 import com.vodovoz.app.design_system.composables.placeholders.NetworkErrorPlaceholder
+import com.vodovoz.app.design_system.composables.placeholders.PlaceholderType
 import com.vodovoz.app.feature.splash.model.SplashState
 import com.vodovoz.app.feature.splash.model.SplashUiState
 import com.vodovoz.app.util.extensions.isTablet
@@ -57,9 +59,12 @@ fun AppSplashScreen(viewModel: SplashViewModel, viewState: SplashState) {
     Box(modifier = Modifier.fillMaxSize()) {
         when (viewState.uiState) {
             SplashUiState.Error -> {
-                NetworkErrorPlaceholder {
-                    viewModel.refreshApp(viewState.filePath.isNotBlank())
-                }
+                NetworkErrorPlaceholder(
+                    mode = ErrorPlaceholderMode.Fixed(PlaceholderType.NetworkError),
+                    onTryAgainClick = {
+                        viewModel.refreshApp(viewState.filePath.isNotBlank())
+                    }
+                )
             }
 
             SplashUiState.Animation -> {

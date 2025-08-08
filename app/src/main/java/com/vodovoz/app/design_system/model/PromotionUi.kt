@@ -17,7 +17,7 @@ data class SpecialPromotionUi(
     val name: String,
     val text: String,
     val picture: String,
-    val actionWithButton: ActionWithButtonUi,
+    val actionWithButton: ActionWithButtonUi?,
 ) {
 
     companion object {
@@ -33,7 +33,7 @@ fun SpecialPromotionModel.toUi(): SpecialPromotionUi {
         name = name,
         text = text,
         picture = picture,
-        actionWithButton = actionWithButton.toUi()
+        actionWithButton = actionWithButton?.toUi()
     )
 }
 
