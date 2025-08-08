@@ -11,12 +11,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.vodovoz.app.R
 import dev.chrisbanes.haze.HazeStyle
 import dev.chrisbanes.haze.HazeTint
@@ -26,13 +27,10 @@ import dev.chrisbanes.haze.hazeEffect
 private val blurStyle: HazeStyle
     @Composable
     get() {
-        val containerColor = MaterialTheme.colorScheme.surface
         return HazeStyle(
-            blurRadius = 30.dp,
-            backgroundColor = containerColor,
-            tint = HazeTint(
-                containerColor.copy(alpha = 0.15f),
-            ),
+            blurRadius = 14.dp,
+            tint = null,
+            noiseFactor = 0f,
         )
     }
 
@@ -57,7 +55,7 @@ fun VodovozBlur(
     modifier: Modifier = Modifier,
     showBlur: Boolean = true,
     text: String = "",
-    textStyle: TextStyle = MaterialTheme.typography.labelSmall,
+    textStyle: TextStyle = MaterialTheme.typography.labelSmall.copy(letterSpacing = 0.sp),
     content: @Composable BoxScope.() -> Unit,
 ) {
     Box(modifier = modifier, contentAlignment = Alignment.Center) {

@@ -8,9 +8,7 @@ import androidx.activity.SystemBarStyle
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.ui.graphics.toArgb
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import androidx.core.view.WindowCompat
 import androidx.fragment.app.FragmentContainerView
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.NavHostFragment
@@ -19,9 +17,9 @@ import com.google.firebase.messaging.RemoteMessage
 import com.vodovoz.app.R
 import com.vodovoz.app.common.block_app_signal.BlockAppSignal
 import com.vodovoz.app.common.block_app_signal.BlockAppSignalProvider
+import com.vodovoz.app.common.cache.HttpErrorCache
+import com.vodovoz.app.common.cache.HttpErrorCacheProvider
 import com.vodovoz.app.databinding.ActivityMainBinding
-import com.vodovoz.app.design_system.black
-import com.vodovoz.app.design_system.white
 import com.vodovoz.app.feature.sitestate.SiteStateManager
 import com.vodovoz.app.util.extensions.debugLog
 import com.vodovoz.app.util.extensions.setSystemBarColors
@@ -32,15 +30,17 @@ import javax.inject.Inject
 
 
 @AndroidEntryPoint
-class MainActivity : AppCompatActivity(), BlockAppSignalProvider {
+class MainActivity : AppCompatActivity(), BlockAppSignalProvider, HttpErrorCacheProvider {
 
     private lateinit var binding: ActivityMainBinding
 
     @Inject
-    lateinit var reloadAppSignalInject: BlockAppSignal
+    lateinit var blockAppSignalInject: BlockAppSignal
+    override val blockAppSignal get() = blockAppSignalInject
 
-    @get:Inject
-    override val appSignal get() = reloadAppSignalInject
+    @Inject
+    lateinit var httpErrorCacheInject: HttpErrorCache
+    override val httpErrorCache: HttpErrorCache get() = httpErrorCacheInject
 
     @Inject
     lateinit var siteStateManager: SiteStateManager
@@ -128,4 +128,6 @@ class MainActivity : AppCompatActivity(), BlockAppSignalProvider {
             }
         )
     }
+
+
 }

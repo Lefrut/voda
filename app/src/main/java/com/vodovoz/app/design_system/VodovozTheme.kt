@@ -14,7 +14,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
-import com.google.accompanist.insets.ProvideWindowInsets
 import com.valentinilk.shimmer.LocalShimmerTheme
 import com.valentinilk.shimmer.defaultShimmerTheme
 
@@ -68,9 +67,7 @@ fun VodovozTheme(
             LocalExtendedTypography provides extendedTypography,
             LocalShimmerTheme provides VodovozShimmerTheme,
         ) {
-            ProvideWindowInsets {
-                content()
-            }
+            content()
         }
     }
 }

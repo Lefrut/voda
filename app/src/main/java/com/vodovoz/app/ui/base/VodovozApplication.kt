@@ -24,7 +24,7 @@ import timber.log.Timber
 import javax.inject.Inject
 
 @HiltAndroidApp
-class VodovozApplication : Application(), Configuration.Provider, SingletonImageLoader.Factory {
+class VodovozApplication() : Application(), Configuration.Provider, SingletonImageLoader.Factory {
 
     @Inject
     lateinit var workerFactory: HiltWorkerFactory

@@ -17,7 +17,6 @@ class CookieHandlerInterceptor @Inject constructor(
 
         val builder = chain.request().newBuilder()
         cookieManager.fetchCookieSessionId()?.let { cookieSessionId ->
-            debugLog { "Cookie added: $cookieSessionId" }
             builder.addHeader("Cookie", cookieSessionId)
         }
 
@@ -29,7 +28,6 @@ class CookieHandlerInterceptor @Inject constructor(
 
         val cookieAvail = cookieManager.isAvailableCookieSessionId()
         val cookieIsOld = cookieManager.isOldCookie()
-        debugLog { "cookieAvail: $cookieAvail, cookieIsOld: $cookieIsOld" }
         if (!cookieAvail || cookieIsOld) {
             val setCookie = originalResponse.headers.values("Set-Cookie")
             if (setCookie.isNotEmpty()) {

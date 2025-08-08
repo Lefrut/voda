@@ -305,5 +305,6 @@
     <string name="order_number_copied">Номер заказа скопирован</string>
     <string name="your_id_copied">Ваш идентификатор скопирован</string>
     <string name="refereal_code_copied">Реферальный код скопирован</string>
+    <string name="unknown_error">Неизвестная ошибка</string>
 
 </resources>

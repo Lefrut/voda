@@ -13,7 +13,6 @@ import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import java.io.FileOutputStream
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -30,8 +29,10 @@ class ContentProviderImpl @Inject constructor(
     private val context: Context,
 ) : ContentProvider {
 
+    private val contentResolver = context.contentResolver
+
     override fun getBytesArray(uri: Uri): ByteArray? {
-        return context.contentResolver.openInputStream(uri)?.readBytes()
+        return contentResolver.openInputStream(uri)?.readBytes()
     }
 
 

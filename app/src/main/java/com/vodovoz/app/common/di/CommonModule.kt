@@ -2,6 +2,8 @@ package com.vodovoz.app.common.di
 
 import com.vodovoz.app.common.block_app_signal.BlockAppSignal
 import com.vodovoz.app.common.block_app_signal.BlockAppSignalImpl
+import com.vodovoz.app.common.cache.HttpErrorCache
+import com.vodovoz.app.common.cache.VodovozHttpErrorCache
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -33,6 +35,12 @@ abstract class CommonModule {
     abstract fun bindAppSignal(
         impl: BlockAppSignalImpl
     ): BlockAppSignal
+
+    @Singleton
+    @Binds
+    abstract fun bindVodovozCache(
+        impl: VodovozHttpErrorCache
+    ): HttpErrorCache
 
     companion object {
         @Provides

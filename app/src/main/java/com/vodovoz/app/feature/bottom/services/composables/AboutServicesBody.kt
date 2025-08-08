@@ -19,14 +19,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.text.HtmlCompat
 import coil3.compose.AsyncImage
-
-import coil3.request.crossfade
 import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.utils.toAnnotatedString
 import com.vodovoz.app.design_system.vodovozTextLinkStyle
@@ -86,22 +83,20 @@ private fun ServiceCard(
     service: ServiceUi,
     onClick: (ServiceUi) -> Unit,
 ) {
-    val context = LocalContext.current
     Box(
         Modifier.dropShadow(
-            shape = MaterialTheme.shapes.large,
+            shape = MaterialTheme.shapes.medium,
             color = MaterialTheme.colorScheme.onBackground.copy(0.2f),
-            offsetY = 2.dp,
-            blur = 4.dp,
-            spread = 1.dp
+            offsetY = 1.dp,
+            blur = 5.dp
         )
     ) {
         Column(
             modifier = modifier
-                .clip(MaterialTheme.shapes.large)
+                .clip(MaterialTheme.shapes.medium)
                 .background(
                     color = MaterialTheme.colorScheme.background,
-                    shape = MaterialTheme.shapes.large
+                    shape = MaterialTheme.shapes.medium
                 )
                 .clickable { onClick(service) }
         ) {
@@ -110,17 +105,20 @@ private fun ServiceCard(
                 contentDescription = null,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .aspectRatio(2f),
+                    .aspectRatio(1.8f),
                 contentScale = ContentScale.Crop
             )
 
             Text(
                 modifier = Modifier.padding(
-                    start = 12.dp, top = 10.dp, end = 16.dp, bottom = 8.dp
+                    start = 12.dp,
+                    top = 10.dp,
+                    end = 16.dp,
+                    bottom = 8.dp
                 ),
                 text = service.name,
                 color = MaterialTheme.colorScheme.onBackground,
-                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold)
+                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
             )
         }
     }

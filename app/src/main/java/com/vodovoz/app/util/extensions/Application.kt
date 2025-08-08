@@ -15,11 +15,8 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Build
 import android.provider.Settings
-import android.text.Html
 import android.text.Spanned
-import android.view.ContextThemeWrapper
 import android.view.View
-import android.view.ViewTreeObserver
 import android.view.Window
 import androidx.activity.OnBackPressedCallback
 import androidx.annotation.ColorRes
@@ -29,16 +26,11 @@ import androidx.annotation.StringRes
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import androidx.core.text.HtmlCompat
-import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
-import androidx.core.widget.NestedScrollView
 import androidx.fragment.app.Fragment
 import com.google.android.material.snackbar.Snackbar
-import com.vodovoz.app.BuildConfig
-import com.vodovoz.app.R
-import com.vodovoz.app.common.resources.ResourcesProvider
 import java.io.ByteArrayOutputStream
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -46,7 +38,12 @@ import java.util.Locale
 import kotlin.properties.ReadOnlyProperty
 
 
-
+fun Context.isInternetAvailable(): Boolean? {
+    val cm = getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager
+        ?: return null
+    val activeNetwork = cm.activeNetworkInfo
+    return activeNetwork?.isConnectedOrConnecting == true
+}
 
 fun Context.isVpnActive(): Boolean {
     val connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
