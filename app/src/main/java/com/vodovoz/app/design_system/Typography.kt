@@ -11,272 +11,151 @@ import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.unit.sp
 import com.vodovoz.app.R
 
+private val baseTextStyle = TextStyle(
+    lineHeightStyle = LineHeightStyle(
+        LineHeightStyle.Alignment.Center,
+        LineHeightStyle.Trim.None
+    ),
+    platformStyle = PlatformTextStyle(
+        includeFontPadding = false
+    )
+)
 
 val vodovozTypography = Typography(
-    displayLarge = TextStyle(
+    displayLarge = baseTextStyle.copy(
         fontSize = 50.sp,
         fontFamily = robotoFontFamily,
-        lineHeightStyle = LineHeightStyle(
-            LineHeightStyle.Alignment.Center,
-            LineHeightStyle.Trim.None
-        ),
-        platformStyle = PlatformTextStyle(
-            includeFontPadding = false
-        ),
         fontWeight = FontWeight.Medium
     ),
-    displaySmall = TextStyle(
+    displaySmall = baseTextStyle.copy(
         fontSize = 32.sp,
         lineHeight = 40.sp,
         fontFamily = robotoFontFamily,
-        lineHeightStyle = LineHeightStyle(
-            LineHeightStyle.Alignment.Center,
-            LineHeightStyle.Trim.None
-        ),
-        platformStyle = PlatformTextStyle(
-            includeFontPadding = false
-        ),
         fontWeight = FontWeight.Normal
     ),
-    labelMedium = TextStyle(
+    labelMedium = baseTextStyle.copy(
         fontSize = 13.sp,
         lineHeight = 24.sp,
         letterSpacing = 0.1.sp,
         fontFamily = robotoFontFamily,
-        lineHeightStyle = LineHeightStyle(
-            LineHeightStyle.Alignment.Center,
-            LineHeightStyle.Trim.None
-        ),
-        platformStyle = PlatformTextStyle(
-            includeFontPadding = false
-        ),
         fontWeight = FontWeight.Normal
     ),
-    labelSmall = TextStyle(
+    labelSmall = baseTextStyle.copy(
         fontSize = 12.sp,
         lineHeight = 16.sp,
         letterSpacing = 0.4.sp,
         fontFamily = robotoFontFamily,
-        lineHeightStyle = LineHeightStyle(
-            LineHeightStyle.Alignment.Center,
-            LineHeightStyle.Trim.None
-        ),
-        platformStyle = PlatformTextStyle(
-            includeFontPadding = false
-        ),
         fontWeight = FontWeight.Normal
     ),
-    labelLarge = TextStyle(
+    labelLarge = baseTextStyle.copy(
         fontSize = 15.sp,
         lineHeight = 24.sp,
         letterSpacing = 0.1.sp,
         fontFamily = robotoFontFamily,
-        lineHeightStyle = LineHeightStyle(
-            LineHeightStyle.Alignment.Center,
-            LineHeightStyle.Trim.None
-        ),
-        platformStyle = PlatformTextStyle(
-            includeFontPadding = false
-        ),
         fontWeight = FontWeight.Normal
     ),
-    titleLarge = TextStyle(
+    titleLarge = baseTextStyle.copy(
         fontSize = 24.sp,
         lineHeight = 24.sp,
         letterSpacing = 0.18.sp,
         fontFamily = robotoFontFamily,
-        lineHeightStyle = LineHeightStyle(
-            LineHeightStyle.Alignment.Center,
-            LineHeightStyle.Trim.None
-        ),
-        platformStyle = PlatformTextStyle(
-            includeFontPadding = false
-        ),
         fontWeight = FontWeight.Medium
     ),
-    titleMedium = TextStyle(
+    titleMedium = baseTextStyle.copy(
         fontSize = 20.sp,
         lineHeight = 24.sp,
         letterSpacing = 0.15.sp,
         fontFamily = robotoFontFamily,
-        lineHeightStyle = LineHeightStyle(
-            LineHeightStyle.Alignment.Center,
-            LineHeightStyle.Trim.None
-        ),
-        platformStyle = PlatformTextStyle(
-            includeFontPadding = false
-        ),
         fontWeight = FontWeight.Medium
     ),
-    titleSmall = TextStyle(
+    titleSmall = baseTextStyle.copy(
         fontSize = 14.sp,
         lineHeight = 24.sp,
         letterSpacing = 0.1.sp,
         fontFamily = robotoFontFamily,
-        lineHeightStyle = LineHeightStyle(
-            LineHeightStyle.Alignment.Center,
-            LineHeightStyle.Trim.None
-        ),
-        platformStyle = PlatformTextStyle(
-            includeFontPadding = false
-        ),
         fontWeight = FontWeight.Medium
     ),
-    headlineMedium = TextStyle(
+    headlineMedium = baseTextStyle.copy(
         fontSize = 20.sp,
         lineHeight = 24.sp,
         letterSpacing = 0.15.sp,
         fontFamily = robotoFontFamily,
-        lineHeightStyle = LineHeightStyle(
-            LineHeightStyle.Alignment.Center,
-            LineHeightStyle.Trim.None
-        ),
-        platformStyle = PlatformTextStyle(
-            includeFontPadding = false
-        ),
         fontWeight = FontWeight.Medium
     ),
-    headlineSmall = TextStyle(
+    headlineSmall = baseTextStyle.copy(
         fontSize = 18.sp,
         lineHeight = 24.sp,
         letterSpacing = 0.15.sp,
         fontFamily = robotoFontFamily,
-        lineHeightStyle = LineHeightStyle(
-            LineHeightStyle.Alignment.Center,
-            LineHeightStyle.Trim.None
-        ),
-        platformStyle = PlatformTextStyle(
-            includeFontPadding = false
-        ),
+     
         fontWeight = FontWeight.Medium
     ),
-    bodySmall = TextStyle(
+    bodySmall = baseTextStyle.copy(
         fontSize = 14.sp,
         lineHeight = 20.sp,
         fontFamily = robotoFontFamily,
-        lineHeightStyle = LineHeightStyle(
-            LineHeightStyle.Alignment.Center,
-            LineHeightStyle.Trim.None
-        ),
-        platformStyle = PlatformTextStyle(
-            includeFontPadding = false
-        ),
+     
         fontWeight = FontWeight.Normal,
         letterSpacing = 0.15.sp
     ),
-    bodyMedium = TextStyle(
+    bodyMedium = baseTextStyle.copy(
         fontSize = 16.sp,
         lineHeight = 24.sp,
         letterSpacing = 0.25.sp,
         fontFamily = robotoFontFamily,
-        lineHeightStyle = LineHeightStyle(
-            LineHeightStyle.Alignment.Center,
-            LineHeightStyle.Trim.None
-        ),
-        platformStyle = PlatformTextStyle(
-            includeFontPadding = false
-        ),
+     
         fontWeight = FontWeight.Normal
     ),
-    bodyLarge = TextStyle(
+    bodyLarge = baseTextStyle.copy(
         fontSize = 18.sp,
         lineHeight = 24.sp,
         letterSpacing = 0.25.sp,
         fontFamily = robotoFontFamily,
-        lineHeightStyle = LineHeightStyle(
-            LineHeightStyle.Alignment.Center,
-            LineHeightStyle.Trim.None
-        ),
-        platformStyle = PlatformTextStyle(
-            includeFontPadding = false
-        ),
         fontWeight = FontWeight.Normal
     )
 )
 
 val extendedTypography = ExtendedTypography(
-    buttonMedium = TextStyle(
+    buttonMedium = baseTextStyle.copy(
         fontSize = 17.sp,
         lineHeight = 24.sp,
         fontFamily = robotoFontFamily,
         letterSpacing = 0.15.sp,
-        lineHeightStyle = LineHeightStyle(
-            LineHeightStyle.Alignment.Center,
-            LineHeightStyle.Trim.None
-        ),
-        platformStyle = PlatformTextStyle(
-            includeFontPadding = false
-        ),
         fontWeight = FontWeight.Medium
     ),
-    buttonSmall = TextStyle(
+    buttonSmall = baseTextStyle.copy(
         fontSize = 14.sp,
         lineHeight = 20.sp,
         fontFamily = robotoFontFamily,
         letterSpacing = 0.1.sp,
-        lineHeightStyle = LineHeightStyle(
-            LineHeightStyle.Alignment.Center,
-            LineHeightStyle.Trim.None
-        ),
-        platformStyle = PlatformTextStyle(
-            includeFontPadding = false
-        ),
         fontWeight = FontWeight.Medium
     ),
-    labelExtraSmall = TextStyle(
+    labelExtraSmall = baseTextStyle.copy(
         fontSize = 9.sp,
         lineHeight = 24.sp,
         fontFamily = robotoFontFamily,
         letterSpacing = 0.1.sp,
-        lineHeightStyle = LineHeightStyle(
-            LineHeightStyle.Alignment.Center,
-            LineHeightStyle.Trim.None
-        ),
-        platformStyle = PlatformTextStyle(
-            includeFontPadding = false
-        ),
         fontWeight = FontWeight.Normal
     ),
-    labelExtraSmallVariant = TextStyle(
+    labelExtraSmallVariant = baseTextStyle.copy(
         fontSize = 10.sp,
         lineHeight = 16.sp,
         fontFamily = robotoFontFamily,
         letterSpacing = 0.4.sp,
-        lineHeightStyle = LineHeightStyle(
-            LineHeightStyle.Alignment.Center,
-            LineHeightStyle.Trim.None
-        ),
-        platformStyle = PlatformTextStyle(
-            includeFontPadding = false
-        ),
         fontWeight = FontWeight.Normal
     ),
-    labelMediumVariant = TextStyle(
+    labelMediumVariant = baseTextStyle.copy(
         fontSize = 12.sp,
         lineHeight = 24.sp,
         fontFamily = robotoFontFamily,
         letterSpacing = 0.1.sp,
-        lineHeightStyle = LineHeightStyle(
-            LineHeightStyle.Alignment.Center,
-            LineHeightStyle.Trim.None
-        ),
-        platformStyle = PlatformTextStyle(
-            includeFontPadding = false
-        ),
         fontWeight = FontWeight.Medium
     ),
-    labelSmallVariant = TextStyle(
+    labelSmallVariant = baseTextStyle.copy(
         fontSize = 11.sp,
         lineHeight = 16.sp,
         fontFamily = robotoFontFamily,
         letterSpacing = 0.25.sp,
-        lineHeightStyle = LineHeightStyle(
-            LineHeightStyle.Alignment.Center,
-            LineHeightStyle.Trim.None
-        ),
-        platformStyle = PlatformTextStyle(
-            includeFontPadding = false
-        ),
         fontWeight = FontWeight.Normal
     )
 )

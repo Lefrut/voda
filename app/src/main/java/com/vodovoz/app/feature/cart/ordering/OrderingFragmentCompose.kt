@@ -83,7 +83,8 @@ class OrderingFragment : Fragment() {
                     when (val uiState = viewState.uiState) {
                         OrderingFlowViewModel.OrderingUiState.Error,
                         OrderingFlowViewModel.OrderingUiState.Loading,
-                        OrderingFlowViewModel.OrderingUiState.Order -> {
+                        OrderingFlowViewModel.OrderingUiState.Order,
+                        -> {
                             OrderingScreen(
                                 viewModel = viewModel,
                                 viewState = viewState,
@@ -181,6 +182,7 @@ class OrderingFragment : Fragment() {
 
                 is OrderingFlowViewModel.OrderingEvents.GoToDeliveryDate -> {
                     findNavController().navigateToDeliveryDate(
+                        earlierDelivery = event.earlierDelivery,
                         addressId = event.addressId,
                         date = event.date,
                         timeInterval = event.timeInterval

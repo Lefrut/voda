@@ -26,7 +26,7 @@ data class ORDER_DETAILS_TOVAR_DTO(
     @Json(name = "ZAPRET_FISHKAM")
     val ZAPRET_FISHKAM: Int?,
     @Json(name = "EXTENDED_PRICE")
-    val EXTENDED_PRICE: List<EXTENDED_PRICE_DTO?>?,
+    val EXTENDED_PRICE: List<EXTENDED_PRICE_DTO>?,
     @Json(name = "URL")
     val URL: Boolean?,
     @Json(name = "TOVAR18")

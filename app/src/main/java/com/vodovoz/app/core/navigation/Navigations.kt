@@ -265,6 +265,7 @@ fun NavController.navigateToAddresses(
 
 fun NavController.navigateToDeliveryDate(
     addressId: Long,
+    earlierDelivery: Boolean = false,
     date: String? = null,
     timeInterval: String? = null,
     navOptions: NavOptions? = null,
@@ -274,7 +275,8 @@ fun NavController.navigateToDeliveryDate(
         bundleOf(
             "addressId" to addressId,
             "date" to date,
-            "timeInterval" to timeInterval
+            "timeInterval" to timeInterval,
+            "earlierDelivery" to earlierDelivery
         ),
         navOptions ?: navOptions {
             slideAnim()

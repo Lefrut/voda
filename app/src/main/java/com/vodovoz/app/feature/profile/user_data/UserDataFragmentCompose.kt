@@ -28,9 +28,11 @@ import com.vodovoz.app.feature.catalog.CatalogFlowViewModel
 import com.vodovoz.app.feature.favorite.FavoriteFlowViewModel
 import com.vodovoz.app.feature.home.HomeFlowViewModel
 import com.vodovoz.app.feature.profile.ProfileFlowViewModel
+import com.vodovoz.app.ui.insets.InsetsVisibilityState
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class UserDataFragment : Fragment() {
@@ -41,6 +43,14 @@ class UserDataFragment : Fragment() {
     private val cartViewModel: CartFlowViewModel by activityViewModels()
     private val catalogViewModel: CatalogFlowViewModel by activityViewModels()
     private val favoriteViewModel: FavoriteFlowViewModel by activityViewModels()
+
+    @Inject
+    internal lateinit var insetsVisibilityState: InsetsVisibilityState
+
+    override fun onStart() {
+        insetsVisibilityState.insertSystemBarInsets(true)
+        super.onStart()
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,

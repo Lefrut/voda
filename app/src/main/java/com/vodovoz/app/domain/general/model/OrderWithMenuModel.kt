@@ -22,5 +22,5 @@ data class MenuItemModel(
 )
 
 enum class MenuItemTypeModel(val id: String) {
-    History("history"), Payment("oplata"), None("")
+    History("history"), Payment("oplata"), Delivery("dostavka"), None("")
 }

@@ -70,9 +70,6 @@ class ImagePickerFragment : Fragment() {
     @Inject
     internal lateinit var tabManager: TabManager
 
-    @Inject
-    internal lateinit var insetsVisibilityState: InsetsVisibilityState
-
     private val viewModel: ImagePickerViewModel by viewModels()
 
     override fun onCreateView(
@@ -101,11 +98,8 @@ class ImagePickerFragment : Fragment() {
 
                     val pickImagesLauncher =
                         rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
-                            if (uri != null) {
-                                viewModel.setImageUri(uri.toString())
-                            } else {
-                                findNavController().popBackStack()
-                            }
+                            if (uri != null) { viewModel.setImageUri(uri.toString())
+                            } else { findNavController().popBackStack() }
                         }
 
                     LaunchedEffect(Unit) {
@@ -146,8 +140,6 @@ class ImagePickerFragment : Fragment() {
                                 },
                             contentAlignment = Alignment.Center
                         ) {
-
-
                             lensSize = with(density) {
                                 min(
                                     asyncImagePainter.intrinsicSize.height.toDp(),

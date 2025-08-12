@@ -26,6 +26,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -39,6 +40,7 @@ import com.vodovoz.app.design_system.model.Button
 import com.vodovoz.app.design_system.model.ColorfulButtonUi
 import com.vodovoz.app.design_system.model.ForAdultsUi
 import com.vodovoz.app.design_system.model.LabelUi
+import com.vodovoz.app.design_system.model.PricePerUnitText
 import com.vodovoz.app.design_system.model.ProductUi
 import com.vodovoz.app.util.extensions.formatRating
 import com.vodovoz.app.util.formatPrice
@@ -159,22 +161,7 @@ fun LinearProductCard(
                     )
                 }
 
-
-                val pricePerUnitText =
-                    if (product.pricePerUnit != null && product.unitOfMeasurement != null) stringResource(
-                        R.string.unit_of_measurement,
-                        product.pricePerUnit,
-                        product.unitOfMeasurement
-                    )
-                    else ""
-
-                Text(
-                    maxLines = 1,
-                    text = pricePerUnitText,
-                    color = MaterialTheme.colorScheme.surfaceTint,
-                    style = ExtendedTheme.typography.labelExtraSmallVariant
-                )
-
+                product.PricePerUnitText()
 
                 Spacer(modifier = Modifier.height(8.dp))
 

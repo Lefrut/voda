@@ -78,6 +78,7 @@ private fun WalletItemCard(
                 .padding(end = 4.dp, top = 4.dp, bottom = 4.dp)
         ) {
             Text(
+
                 text = walletItem.title,
                 color = walletItem.titleColor.takeOrElse { MaterialTheme.colorScheme.onBackground },
                 style = MaterialTheme.typography.bodyMedium.copy(

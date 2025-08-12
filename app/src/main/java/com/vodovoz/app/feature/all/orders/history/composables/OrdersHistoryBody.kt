@@ -1,5 +1,6 @@
 package com.vodovoz.app.feature.all.orders.history.composables
 
+import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -28,17 +29,22 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.fromHtml
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -194,20 +200,13 @@ fun OrdersHistoryItemCard(
             modifier = Modifier.padding(horizontal = 18.5.dp),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Row(Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    text = AnnotatedString.fromHtml(orderHistoryItem.description),
-                    color = MaterialTheme.colorScheme.surfaceTint,
-                    style = MaterialTheme.typography.bodySmall
-                )
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_arrow_right),
-                    contentDescription = null,
-                    modifier = Modifier.size(24.dp),
-                    tint = MaterialTheme.colorScheme.surfaceTint
+            Box(modifier = Modifier.weight(1f)) {
+
+                FirstLineWithIcon(
+                    text = orderHistoryItem.description,
+                    iconId = R.drawable.ic_arrow_right
                 )
             }
-
             orderHistoryItem.status?.let {
                 OrderStatusChip(
                     modifier = Modifier.padding(start = 12.dp),
@@ -329,4 +328,67 @@ private fun OrdersHistoryButton(
             overflow = TextOverflow.Ellipsis
         )
     }
+}
+
+
+@Composable
+private fun FirstLineWithIcon(
+    text: String,
+    @DrawableRes
+    iconId: Int,
+    modifier: Modifier = Modifier,
+    contentColor: Color = MaterialTheme.colorScheme.surfaceTint,
+    textStyle: TextStyle = MaterialTheme.typography.bodySmall,
+) {
+    var firstLine by remember { mutableStateOf(text) }
+    var restLines by remember { mutableStateOf("") }
+
+    Box(modifier = modifier) {
+        Row {
+            Text(
+                modifier = Modifier.weight(1f, false),
+                text = text,
+                style = textStyle,
+                maxLines = Int.MAX_VALUE,
+                onTextLayout = { layoutResult ->
+                    if (layoutResult.lineCount > 1) {
+                        val firstLineEnd = layoutResult.getLineEnd(0, visibleEnd = true)
+                        firstLine = text.substring(0, firstLineEnd)
+                        restLines = text.substring(firstLineEnd)
+                    }
+                },
+                color = Color.Transparent
+            )
+            Icon(
+                painter = painterResource(id = iconId),
+                contentDescription = null,
+                tint = Color.Transparent,
+                modifier = Modifier.size(24.dp)
+            )
+        }
+        Column(Modifier.matchParentSize()) {
+            Row(verticalAlignment = Alignment.Top) {
+                Text(
+                    modifier = Modifier.weight(1f, false),
+                    text = firstLine,
+                    style = textStyle,
+                    color = contentColor
+                )
+                Icon(
+                    painter = painterResource(id = iconId),
+                    contentDescription = null,
+                    tint = contentColor,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+            if (restLines.isNotEmpty()) {
+                Text(
+                    text = restLines.trim(),
+                    style = textStyle,
+                    color = contentColor
+                )
+            }
+        }
+    }
+
 }

@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -28,11 +27,11 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.vodovoz.app.R
 import com.vodovoz.app.design_system.ExtendedTheme
@@ -43,6 +42,7 @@ import com.vodovoz.app.design_system.model.Button
 import com.vodovoz.app.design_system.model.ColorfulButtonUi
 import com.vodovoz.app.design_system.model.ForAdultsUi
 import com.vodovoz.app.design_system.model.LabelUi
+import com.vodovoz.app.design_system.model.PricePerUnitText
 import com.vodovoz.app.design_system.model.ProductUi
 import com.vodovoz.app.util.extensions.formatRating
 import com.vodovoz.app.util.formatPrice
@@ -88,14 +88,22 @@ fun GridProductCard(
 
         Column(modifier = Modifier) {
             PriceAndRating(product = product)
-            val labelSmall = MaterialTheme.typography.labelSmall
+
+
+            product.PricePerUnitText()
+
+            val labelSmallVariant = ExtendedTheme.typography.labelSmallVariant.copy(
+                lineHeightStyle = LineHeightStyle(
+                    LineHeightStyle.Alignment.Top,
+                    LineHeightStyle.Trim.FirstLineTop
+                )
+            )
+
             Text(
                 text = product.name,
                 color = MaterialTheme.colorScheme.onBackground,
-                style = labelSmall.copy(fontSize = (labelSmall.fontSize.value - 1).sp),
-                modifier = Modifier
-                    .padding(top = 12.dp)
-                    .height(48.dp),
+                style = labelSmallVariant,
+                minLines = 3,
                 maxLines = 3,
                 overflow = TextOverflow.Ellipsis
             )
@@ -171,12 +179,10 @@ private fun ImageSection(
 @Composable
 fun PriceAndRating(modifier: Modifier = Modifier, product: ProductUi) {
     Row(
-        modifier = modifier
-            .padding(top = 4.dp)
-            .height(IntrinsicSize.Max),
+        modifier = modifier.padding(top = 4.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Row(verticalAlignment = Alignment.Bottom, modifier = Modifier) {
+        Row(verticalAlignment = Alignment.Bottom, modifier = Modifier.weight(1f)) {
 
             Text(
                 modifier = Modifier.alignByBaseline(),

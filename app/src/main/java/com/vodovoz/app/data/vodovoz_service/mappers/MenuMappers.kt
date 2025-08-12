@@ -38,9 +38,5 @@ fun MENU_DTO.toDomain(): MenuItemModel? {
 }
 
 fun String.mapToMenuItemTypeModel(): MenuItemTypeModel {
-    return when (this) {
-        "oplata" -> MenuItemTypeModel.Payment
-        "history" -> MenuItemTypeModel.History
-        else -> MenuItemTypeModel.None
-    }
+    return MenuItemTypeModel.entries.firstOrNull { it.id == this } ?: MenuItemTypeModel.None
 }

@@ -21,14 +21,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
-
-import coil3.request.crossfade
 import com.vodovoz.app.R
+import com.vodovoz.app.design_system.ExtendedTheme
 import com.vodovoz.app.design_system.composables.button.VodovozButton
 import com.vodovoz.app.design_system.composables.button.VodovozRadioButton
 import com.vodovoz.app.design_system.composables.top_bar.VodovozTopBar
@@ -110,7 +109,6 @@ private fun GiftItem(
     selected: Boolean,
     onClick: (CartPresentItemUi) -> Unit,
 ) {
-    val context = LocalContext.current
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -138,14 +136,31 @@ private fun GiftItem(
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onBackground
             )
-            Text(
-                text = stringResource(R.string.zero_with_rub),
-                modifier = Modifier.padding(top = 8.dp),
-                color = MaterialTheme.colorScheme.onBackground,
-                style = MaterialTheme.typography.bodyMedium.copy(
-                    fontWeight = FontWeight.Medium
-                )
-            )
+
+            Row(Modifier.padding(top = 8.dp)) {
+                item.price?.let {
+                    Text(
+                        text = item.price,
+                        modifier = Modifier.alignByBaseline(),
+                        color = MaterialTheme.colorScheme.onBackground,
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            fontWeight = FontWeight.Medium
+                        )
+                    )
+                }
+                item.oldPrice?.let {
+                    Text(
+                        text = item.oldPrice,
+                        modifier = Modifier
+                            .padding(start = 4.dp)
+                            .alignByBaseline(),
+                        color = MaterialTheme.colorScheme.surfaceTint,
+                        style = ExtendedTheme.typography.labelExtraSmallVariant.copy(
+                            textDecoration = TextDecoration.LineThrough
+                        )
+                    )
+                }
+            }
         }
 
         VodovozRadioButton(selected = selected, onClick = { onClick(item) })
