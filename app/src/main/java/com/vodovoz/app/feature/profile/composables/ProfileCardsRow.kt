@@ -6,23 +6,21 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
-
-import coil3.request.crossfade
 import com.vodovoz.app.feature.profile.model.ProfileCardUi
 
 @Suppress("NonSkippableComposable")
@@ -42,8 +40,7 @@ fun ProfileCardsRow(
             ProfileCard(
                 card = card,
                 modifier = Modifier
-                    .weight(1f)
-                    .height(76.dp),
+                    .weight(1f),
                 onClick = { profileCardUi ->
                     onCardClick(profileCardUi)
                 }
@@ -59,7 +56,13 @@ private fun ProfileCard(
     onClick: (ProfileCardUi) -> Unit,
 ) {
     val textStyle = with(MaterialTheme.typography.labelSmall) {
-        copy(lineHeight = fontSize, letterSpacing = 0.sp)
+        copy(
+            lineHeight = fontSize, letterSpacing = 0.sp,
+            lineHeightStyle = LineHeightStyle(
+                LineHeightStyle.Alignment.Top,
+                LineHeightStyle.Trim.None
+            )
+        )
     }
 
     Column(
@@ -69,7 +72,8 @@ private fun ProfileCard(
             .clickable {
                 onClick(card)
             }
-            .padding(start = 8.dp, end = 8.dp, top = 8.dp)
+            .padding(start = 8.dp, end = 4.dp, top = 8.dp, bottom = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterVertically)
     ) {
         AsyncImage(
             model = card.imageUrl,
@@ -78,7 +82,6 @@ private fun ProfileCard(
             contentScale = ContentScale.FillBounds
         )
         Text(
-            modifier = Modifier.padding(top = 4.dp),
             text = card.title,
             color = card.titleColor.takeOrElse { MaterialTheme.colorScheme.onBackground },
             style = textStyle,

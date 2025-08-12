@@ -11,9 +11,11 @@ data class CartPresentItemUi(
     val id: Long,
     val name: String,
     val image: String,
-): Parcelable {
+    val price: String?,
+    val oldPrice: String?,
+) : Parcelable {
     companion object {
-        val Empty = CartPresentItemUi(-1, "", " ")
+        val Empty = CartPresentItemUi(-1, "", "", "", "")
     }
 }
 
@@ -22,5 +24,5 @@ fun List<CartPresentItemModel>.mapToUi(): List<CartPresentItemUi> {
 }
 
 fun CartPresentItemModel.toUi(): CartPresentItemUi {
-    return CartPresentItemUi(id, name, image)
+    return CartPresentItemUi(id, name, image, price, oldPrice)
 }

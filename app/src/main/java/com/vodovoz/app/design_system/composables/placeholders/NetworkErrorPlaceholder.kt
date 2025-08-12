@@ -29,8 +29,6 @@ import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import com.vodovoz.app.R
 import com.vodovoz.app.common.block_app_signal.BlockAppSignal
-import com.vodovoz.app.common.block_app_signal.BlockAppSignalProvider
-import com.vodovoz.app.common.cache.HttpErrorCacheProvider
 import com.vodovoz.app.common.cache.VodovozHttpError
 import com.vodovoz.app.core.navigation.findRootNavController
 import com.vodovoz.app.core.navigation.slideAnim
@@ -38,6 +36,8 @@ import com.vodovoz.app.core.network.serialization.fromJson
 import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.composables.button.VodovozButton
 import com.vodovoz.app.design_system.effects.LifecycleEffect
+import com.vodovoz.app.ui.base.blockAppSignal
+import com.vodovoz.app.ui.base.httpErrorCache
 import com.vodovoz.app.util.extensions.isInternetAvailable
 
 
@@ -65,6 +65,7 @@ fun VodovozHttpError.toUi(): VodovozHttpErrorUi {
     )
 }
 
+@Stable
 sealed interface ErrorPlaceholderMode {
 
     data object Automatic : ErrorPlaceholderMode
@@ -78,7 +79,7 @@ private fun rememberAutoPlaceholderType(): PlaceholderType {
     val activity = LocalActivity.current
     val context = LocalContext.current
     return remember {
-        val httpErrorCache = (activity as? HttpErrorCacheProvider)?.httpErrorCache
+        val httpErrorCache = activity?.httpErrorCache
         val lastErrorData = httpErrorCache?.lastErrorData?.value ?: ""
 
         httpErrorCache?.setLastError(null)
@@ -86,7 +87,6 @@ private fun rememberAutoPlaceholderType(): PlaceholderType {
             moshi.fromJson<VodovozHttpError>(lastErrorData)
         }.getOrNull()
         val errorUi = error?.toUi()
-
 
         return@remember when {
             context.isInternetAvailable() == false -> {
@@ -99,8 +99,24 @@ private fun rememberAutoPlaceholderType(): PlaceholderType {
 
             else -> PlaceholderType.Unknown
         }
+    }
+}
 
+private suspend fun BlockAppSignal.Type.handleAppSignal(
+    onReload: suspend () -> Unit,
+    onBlock: suspend () -> Unit,
+    onNone: suspend () -> Unit = {},
+) {
+    when (this) {
+        BlockAppSignal.Type.Reload -> {
 
+        }
+
+        BlockAppSignal.Type.Block -> {
+
+        }
+
+        BlockAppSignal.Type.None -> {}
     }
 
 }
@@ -115,34 +131,33 @@ fun NetworkErrorPlaceholder(
     val view = LocalView.current
 
     val placeholderType = when (mode) {
-        ErrorPlaceholderMode.Automatic -> { rememberAutoPlaceholderType() }
+        ErrorPlaceholderMode.Automatic -> {
+            rememberAutoPlaceholderType()
+        }
 
-        is ErrorPlaceholderMode.Fixed -> { mode.type }
+        is ErrorPlaceholderMode.Fixed -> {
+            mode.type
+        }
     }
 
     LifecycleEffect {
-        val blockAppSignal =
-            (activity as? BlockAppSignalProvider)?.blockAppSignal ?: return@LifecycleEffect
+        val blockAppSignal = activity?.blockAppSignal ?: return@LifecycleEffect
+        val rootNavController = view.findRootNavController()
 
         blockAppSignal.getSignalFlow().collect { signalType ->
-            when (signalType) {
-                BlockAppSignal.Type.Reload -> {
+            signalType.handleAppSignal(
+                onReload = {
                     blockAppSignal.setSignal(BlockAppSignal.Type.None)
                     onTryAgainClick()
-                }
-
-                BlockAppSignal.Type.Block -> {
-                    val rootNavController = view.findRootNavController()
-
+                },
+                onBlock = {
                     rootNavController?.navigate(
                         R.id.blockAppFragment,
                         null,
                         navOptions { slideAnim() }
                     )
                 }
-
-                BlockAppSignal.Type.None -> {}
-            }
+            )
         }
     }
 

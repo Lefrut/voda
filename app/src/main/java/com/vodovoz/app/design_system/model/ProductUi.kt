@@ -1,21 +1,25 @@
 package com.vodovoz.app.design_system.model
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.LineHeightStyle
 import com.vodovoz.app.R
 import com.vodovoz.app.common.model.ButtonAction
+import com.vodovoz.app.design_system.ExtendedTheme
 import com.vodovoz.app.design_system.composables.button.QuantityButtonSmall
 import com.vodovoz.app.design_system.composables.button.VodovozButtonDefaults
 import com.vodovoz.app.design_system.composables.button.VodovozButtonSmall
 import com.vodovoz.app.domain.general.model.product.ButtonModel
 import com.vodovoz.app.domain.general.model.product.CategoryWithProductsModel
-import com.vodovoz.app.domain.general.model.promotion.LabelModel
 import com.vodovoz.app.domain.general.model.product.ProductModel
 import com.vodovoz.app.domain.general.model.product.SectionModel
+import com.vodovoz.app.domain.general.model.promotion.LabelModel
 import com.vodovoz.app.ui.graphics.fromHexOrUnspecified
 
 
@@ -34,7 +38,7 @@ fun SectionUi<CategoryWithProductsUi>.withUpdatedFavorites(favorites: Map<Long, 
 
 @JvmName("withUpdatedFavoritesCategoriesWithProducts")
 fun List<CategoryWithProductsUi>.withUpdatedFavorites(favorites: Map<Long, Boolean>): List<CategoryWithProductsUi> {
-    return map{ categoryWithProductsUi ->
+    return map { categoryWithProductsUi ->
         categoryWithProductsUi.withUpdatedFavorites(favorites)
     }
 }
@@ -154,7 +158,7 @@ data class SectionUi<E>(
     val title: String,
     val items: List<E>,
     val button: ButtonUi? = null,
-    val placeholder: VodovozPlaceholderUi? = null
+    val placeholder: VodovozPlaceholderUi? = null,
 ) {
 
     companion object {
@@ -199,8 +203,34 @@ data class ProductUi(
     val pricePerUnit: Int?,
     val unitOfMeasurement: String?,
     val forAdults: ForAdultsUi?,
-    val button: ColorfulButtonUi?
+    val button: ColorfulButtonUi?,
 )
+
+
+@Composable
+fun ProductUi.PricePerUnitText(modifier: Modifier = Modifier) {
+    val pricePerUnitText =
+        if (pricePerUnit != null && unitOfMeasurement != null) stringResource(
+            R.string.unit_of_measurement,
+            pricePerUnit,
+            unitOfMeasurement
+        )
+        else ""
+
+    Text(
+        modifier = modifier,
+        maxLines = 1,
+        text = pricePerUnitText,
+        color = MaterialTheme.colorScheme.surfaceTint,
+        style = ExtendedTheme.typography.labelExtraSmallVariant.copy(
+            lineHeightStyle = LineHeightStyle(
+                LineHeightStyle.Alignment.Top,
+                LineHeightStyle.Trim.FirstLineTop
+            )
+        )
+    )
+
+}
 
 
 @Composable
@@ -210,7 +240,7 @@ fun ProductUi.Button(
     onAnalogsClick: (ProductUi) -> Unit,
     onIncrementToCart: (ProductUi) -> Unit,
     onDecrementToCart: (ProductUi) -> Unit,
-){
+) {
     val product = this@Button
 
     Box(modifier = modifier) {
@@ -246,7 +276,7 @@ fun ProductUi.Button(
 }
 
 
-fun List<ProductModel>.mapToUi(): List<ProductUi>{
+fun List<ProductModel>.mapToUi(): List<ProductUi> {
     return mapNotNull { it.toUi() }
 }
 
@@ -275,7 +305,7 @@ fun ProductModel.toUi(): ProductUi {
 data class LabelUi(
     val name: String,
     val color: Color,
-    val background: Color = Color.Unspecified
+    val background: Color = Color.Unspecified,
 )
 
 fun List<LabelModel>.toUi(): List<LabelUi> {

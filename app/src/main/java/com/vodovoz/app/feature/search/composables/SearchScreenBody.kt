@@ -3,15 +3,15 @@ package com.vodovoz.app.feature.search.composables
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.key
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -19,6 +19,7 @@ import com.vodovoz.app.R
 import com.vodovoz.app.design_system.composables.card.GridProductCard
 import com.vodovoz.app.design_system.composables.chip.VodovozChip
 import com.vodovoz.app.design_system.composables.chip.VodovozClosableChip
+import com.vodovoz.app.design_system.composables.layout.FixedGridFlowRow
 import com.vodovoz.app.design_system.model.ProductUi
 import com.vodovoz.app.design_system.model.SectionUi
 
@@ -35,9 +36,9 @@ fun SearchScreenBody(
     onProductCardClick: (ProductUi) -> Unit,
     onProductIncrementToCartClick: (ProductUi) -> Unit,
     onProductDecrementToCartClick: (ProductUi) -> Unit,
-    onProductAnalogsClick: (ProductUi) -> Unit
+    onProductAnalogsClick: (ProductUi) -> Unit,
 
-) {
+    ) {
     Column(
         modifier = modifier
             .verticalScroll(rememberScrollState())
@@ -64,7 +65,7 @@ fun SearchScreenBody(
                         text = query,
                         selected = false,
                         onSelect = { onQueryChoose(query) },
-                        onClose = { onQueryClose(query)}
+                        onClose = { onQueryClose(query) }
                     )
                 }
             }
@@ -107,28 +108,26 @@ fun SearchScreenBody(
 
 
         if (products.isNotEmpty()) {
-            FlowRow(
-                modifier = Modifier
-                    .padding(vertical = 16.dp)
-                    .fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(10.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                maxItemsInEachRow = 2
-            ) {
+            FixedGridFlowRow(
+                modifier = Modifier.padding(vertical = 16.dp),
+                itemsInRow = 2,
+                horizontalSpacing = 8.dp,
+                verticalSpacing = 10.dp
+            ) { itemWidth ->
                 products.forEach { product ->
-                    GridProductCard(
-                        modifier = Modifier.weight(1f),
-                        product = product,
-                        onClick = onProductCardClick,
-                        onLike = onProductLikeClick,
-                        onAnalogsClick = onProductAnalogsClick,
-                        onDecrementToCart = onProductDecrementToCartClick,
-                        onIncrementToCart = onProductIncrementToCartClick
-                    )
+                    key(product.id) {
+                        GridProductCard(
+                            modifier = Modifier.width(itemWidth),
+                            product = product,
+                            onClick = onProductCardClick,
+                            onLike = onProductLikeClick,
+                            onAnalogsClick = onProductAnalogsClick,
+                            onDecrementToCart = onProductDecrementToCartClick,
+                            onIncrementToCart = onProductIncrementToCartClick
+                        )
+                    }
                 }
-                if (products.size % 2 == 1) {
-                    Spacer(modifier = Modifier.weight(1f))
-                }
+
             }
         }
     }

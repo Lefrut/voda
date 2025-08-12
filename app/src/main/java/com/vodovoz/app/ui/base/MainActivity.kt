@@ -1,5 +1,6 @@
 package com.vodovoz.app.ui.base
 
+import android.app.Activity
 import android.content.Intent
 import android.graphics.Color
 import android.net.Uri
@@ -28,6 +29,12 @@ import kotlinx.coroutines.launch
 import org.json.JSONObject
 import javax.inject.Inject
 
+
+val Activity.blockAppSignal: BlockAppSignal?
+    get() = (this as? BlockAppSignalProvider)?.blockAppSignal
+
+val Activity.httpErrorCache: HttpErrorCache?
+    get() = (this as? HttpErrorCacheProvider)?.httpErrorCache
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity(), BlockAppSignalProvider, HttpErrorCacheProvider {
@@ -66,8 +73,8 @@ class MainActivity : AppCompatActivity(), BlockAppSignalProvider, HttpErrorCache
         }
 
         enableEdgeToEdge(
-            SystemBarStyle.auto(Color.TRANSPARENT, Color.TRANSPARENT),
-            SystemBarStyle.auto(Color.TRANSPARENT, Color.TRANSPARENT)
+            SystemBarStyle.light(Color.TRANSPARENT, Color.TRANSPARENT),
+            SystemBarStyle.light(Color.TRANSPARENT, Color.TRANSPARENT)
         )
 
         supportActionBar?.hide()

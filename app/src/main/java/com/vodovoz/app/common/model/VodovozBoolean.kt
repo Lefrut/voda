@@ -7,14 +7,12 @@ enum class VodovozBoolean(val value: String) {
     True("Y"), False("N");
 
     companion object
-
-
 }
 
 
 val VodovozBoolean.boolean: Boolean
     get() {
-        return when(this){
+        return when (this) {
             True -> true
             False -> false
         }
@@ -27,11 +25,19 @@ fun VodovozBoolean.toBoolean(): Boolean {
     }
 }
 
+fun String.toVodovozBoolean(): VodovozBoolean? {
+    return VodovozBoolean.entries.firstOrNull { it.value == this }
+}
+
 fun VodovozBoolean.Companion.from(value: String?): VodovozBoolean {
     return when (value) {
-        True.value -> { True }
+        True.value -> {
+            True
+        }
 
-        else -> { False }
+        else -> {
+            False
+        }
     }
 }
 

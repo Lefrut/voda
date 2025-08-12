@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
@@ -20,6 +21,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.LineHeightStyle
+import androidx.compose.ui.text.style.LineHeightStyle.Trim
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
@@ -39,7 +42,9 @@ fun HomeOrderMenu(
     val order = orderWithMenu.order
     val menuItems = orderWithMenu.menuItems
     LazyRow(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .height(72.dp),
         contentPadding = PaddingValues(horizontal = 15.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -100,7 +105,11 @@ fun MenuOrderItem(
 }
 
 @Composable
-private fun OrderItem(modifier: Modifier = Modifier, order: HomeOrderUi, onClick: (HomeOrderUi) -> Unit) {
+private fun OrderItem(
+    modifier: Modifier = Modifier,
+    order: HomeOrderUi,
+    onClick: (HomeOrderUi) -> Unit,
+) {
     VodovozOutlinedCard(
         modifier = modifier,
         contentPadding = PaddingValues(
@@ -114,7 +123,7 @@ private fun OrderItem(modifier: Modifier = Modifier, order: HomeOrderUi, onClick
     ) {
         Column {
             Row(
-                modifier = Modifier.defaultMinSize(minHeight = 24.dp),
+                modifier = Modifier.height(24.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Image(
@@ -131,13 +140,21 @@ private fun OrderItem(modifier: Modifier = Modifier, order: HomeOrderUi, onClick
             }
             Row(
                 verticalAlignment = Alignment.Bottom,
-                modifier = Modifier
+                modifier = Modifier.height(32.dp)
             ) {
+
+                val textStyle = MaterialTheme.typography.labelSmall.copy(
+                    lineHeightStyle = LineHeightStyle(
+                        LineHeightStyle.Alignment.Top,
+                        Trim.FirstLineTop
+                    )
+                )
+
                 Column(modifier = Modifier.defaultMinSize(minWidth = 156.dp)) {
                     Text(
                         text = order.text,
                         color = MaterialTheme.colorScheme.surfaceTint,
-                        style = MaterialTheme.typography.labelSmall,
+                        style = textStyle,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -147,7 +164,7 @@ private fun OrderItem(modifier: Modifier = Modifier, order: HomeOrderUi, onClick
                             order.orderId
                         ),
                         color = MaterialTheme.colorScheme.surfaceTint,
-                        style = MaterialTheme.typography.labelSmall,
+                        style = textStyle,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )

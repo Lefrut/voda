@@ -3,6 +3,7 @@ package com.vodovoz.app.data.vodovoz_service.mappers
 import com.vodovoz.app.common.model.VodovozBoolean
 import com.vodovoz.app.common.model.boolean
 import com.vodovoz.app.common.model.from
+import com.vodovoz.app.common.model.toVodovozBoolean
 import com.vodovoz.app.data.vodovoz_service.model.CHECKBOX_DTO
 import com.vodovoz.app.data.vodovoz_service.model.auth.AuthDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.auth.KNOPKA_AUTH_DTO
@@ -18,12 +19,14 @@ import java.time.Duration
 import java.time.LocalDateTime
 
 fun AuthDetailsDTO.toDomain(): AuthDetailsModel {
+
+
     return AuthDetailsModel(
         title = TITLE ?: "",
         description = OPISANIE ?: "",
         fields = DATA?.mapToDomain()
             ?: throw IllegalArgumentException("Login fields can't be null"),
-        agreementChecked = VodovozBoolean.from(SOGLASHENIE).boolean,
+        agreementChecked = SOGLASHENIE?.toVodovozBoolean()?.boolean,
         buttons = KNOPKA?.map { it.toDomain() }
             ?: throw IllegalArgumentException("Auth button can't be null"),
         checkboxes = PODPISKA?.mapToDomain() ?: emptyList()

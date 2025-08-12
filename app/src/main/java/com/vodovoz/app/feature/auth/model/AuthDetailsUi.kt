@@ -66,7 +66,7 @@ fun AuthDetailsModel.toUi(agreement: String): AuthDetailsUi {
     val agreementCheckbox = CheckboxUi(
         name = agreement,
         id = AGREEMENT_CHECKBOX_ID,
-        checked = agreementChecked,
+        checked = agreementChecked ?: false,
         isRequired = true
     )
 
@@ -76,7 +76,7 @@ fun AuthDetailsModel.toUi(agreement: String): AuthDetailsUi {
         fields = fields.mapToUi(),
         buttons = buttons.mapToUi(),
         checkboxes = buildList {
-            if (agreement.isNotBlank()) {
+            if (agreement.isNotBlank() && agreementChecked != null) {
                 add(agreementCheckbox)
             }
             addAll(checkboxes.mapToUi())

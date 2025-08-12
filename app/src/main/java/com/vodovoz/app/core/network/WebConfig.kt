@@ -26,8 +26,8 @@ object VodovozWebConfig {
     val ABOUT_DELIVERY_URL = "${VODOVOZ_URL}newmobile/informatsiya/dosytavka.php"
     val ABOUT_SHOP_URL = "${VODOVOZ_URL}newmobile/informatsiya/omagazine.php"
 
-    fun toFullUrl(suffix: String): String {
-        return VODOVOZ_URL.removeSuffix("/") + suffix
+    fun toFullUrl(path: String): String {
+        return VODOVOZ_URL.removeSuffix("/") + path
     }
 
 

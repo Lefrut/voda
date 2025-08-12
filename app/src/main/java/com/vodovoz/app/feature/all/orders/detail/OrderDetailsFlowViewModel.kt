@@ -108,6 +108,10 @@ class OrderDetailsFlowViewModel @Inject constructor(
 
     fun activateTopButton(orderDetailsButton: OrderDetailsButtonUi) = viewModelScope.launch {
         when {
+            orderDetailsButton.popupWindow != null -> {
+                showAboutOrderBottomSheet(orderDetailsButton.popupWindow ?: return@launch)
+            }
+
             orderDetailsButton.id == "voditel" -> {
                 eventListener.emit(
                     OrderDetailsEvent.GoToTraceOrder(
@@ -134,12 +138,6 @@ class OrderDetailsFlowViewModel @Inject constructor(
                         eventListener.emit(OrderDetailsEvent.GoToCart)
                     }
             }
-
-            orderDetailsButton.popupWindow != null -> {
-                showAboutOrderBottomSheet(orderDetailsButton.popupWindow ?: return@launch)
-            }
-
-
         }
     }
 

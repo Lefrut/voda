@@ -51,7 +51,7 @@ fun OrderStatusChip(modifier: Modifier = Modifier, status: OrderStatusUi) {
 @Preview(apiLevel = 34)
 @Composable
 private fun OrderStatusChipPreview() {
-    VodovozTheme() {
+    VodovozTheme {
         OrderStatusChip(
             modifier = Modifier.background(MaterialTheme.colorScheme.background),
             status = OrderStatusUi(

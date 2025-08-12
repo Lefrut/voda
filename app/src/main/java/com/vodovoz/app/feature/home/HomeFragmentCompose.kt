@@ -33,6 +33,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import com.vodovoz.app.R
 import com.vodovoz.app.common.account.AccountManager
+import com.vodovoz.app.common.cookie.CookieManager
 import com.vodovoz.app.common.tab.TabManager
 import com.vodovoz.app.core.navigation.ContentSearchNavigator
 import com.vodovoz.app.core.navigation.activate
@@ -88,7 +89,7 @@ class HomeFragment : Fragment() {
     lateinit var accountManager: AccountManager
 
     @Inject
-    lateinit var cookieManager: com.vodovoz.app.common.cookie.CookieManager
+    lateinit var cookieManager: CookieManager
 
     @Inject
     lateinit var navigatorFactory: ContentSearchNavigator.Factory

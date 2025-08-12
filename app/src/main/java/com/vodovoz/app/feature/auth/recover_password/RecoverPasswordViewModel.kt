@@ -8,14 +8,17 @@ import com.vodovoz.app.common.resources.ResourcesProvider
 import com.vodovoz.app.design_system.model.ColorfulButtonUi
 import com.vodovoz.app.design_system.model.toUi
 import com.vodovoz.app.design_system.model.updateButton
+import com.vodovoz.app.design_system.model.widgets.CheckboxUi
 import com.vodovoz.app.design_system.model.widgets.FieldUi
 import com.vodovoz.app.design_system.model.widgets.checkFields
 import com.vodovoz.app.design_system.model.widgets.mapToDomain
-import com.vodovoz.app.design_system.model.widgets.mapToUi
+import com.vodovoz.app.design_system.model.widgets.updateCheckbox
 import com.vodovoz.app.design_system.model.widgets.updateField
 import com.vodovoz.app.design_system.model.widgets.updateFieldAndResetError
 import com.vodovoz.app.domain.general.model.RequestException
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
+import com.vodovoz.app.feature.auth.model.agreementIsCheckedWhenAvailable
+import com.vodovoz.app.feature.auth.model.toUi
 import com.vodovoz.app.feature.auth.recover_password.model.RecoverPasswordEvent
 import com.vodovoz.app.feature.auth.recover_password.model.RecoverPasswordState
 import com.vodovoz.app.feature.auth.recover_password.model.RecoverPasswordUiState
@@ -73,22 +76,15 @@ class RecoverPasswordViewModel @Inject constructor(
         val agreementText = AgreementController.getText()
 
         recoverPasswordDetailsResult.onSuccess { recoverPasswordDetails ->
-
-            val buttons = recoverPasswordDetails.buttons.map { colorfulButtonModel ->
-                colorfulButtonModel.toUi()
-            }.updateButton(RECOVER_PASSWORD_BUTTON) { btn ->
-                btn.copy(enabled = false)
-            }
-
+            val authDetails = recoverPasswordDetails.toUi(agreementText)
             _state.update { s ->
                 s.copy(
-                    description = recoverPasswordDetails.description,
-                    title = recoverPasswordDetails.title,
-                    buttons = buttons,
-                    fields = recoverPasswordDetails.fields.mapToUi(),
-                    agreementHtml = agreementText,
                     uiState = RecoverPasswordUiState.Body,
-                    agreementChecked = recoverPasswordDetails.agreementChecked,
+                    authDetails = authDetails.copy(
+                        buttons = authDetails.buttons.updateButton(RECOVER_PASSWORD_BUTTON) {
+                            it.copy(enabled = false)
+                        }
+                    )
                 )
             }
         }.onFailure {
@@ -102,7 +98,12 @@ class RecoverPasswordViewModel @Inject constructor(
 
         _state.update { s ->
             s.copy(
-                buttons = s.buttons.updateButton(RECOVER_PASSWORD_BUTTON) { it.copy(loading = true) }
+                authDetails = s.authDetails.copy(
+                    buttons = s.buttons.updateButton(RECOVER_PASSWORD_BUTTON) {
+                        it.copy(loading = true)
+                    }
+                )
+
             )
         }
 
@@ -127,14 +128,16 @@ class RecoverPasswordViewModel @Inject constructor(
                 val field = s.fields.lastOrNull() ?: return@update s
 
                 s.copy(
-                    fields = s.fields.updateField(
-                        field,
-                        field.copy(
-                            isError = true,
-                            supportingText = errorMessage
-                        )
-                    ),
-                    buttons = s.buttons.updateButton(RECOVER_PASSWORD_BUTTON) { it.copy(loading = false) }
+                    authDetails = s.authDetails.copy(
+                        fields = s.fields.updateField(
+                            field,
+                            field.copy(
+                                isError = true,
+                                supportingText = errorMessage
+                            )
+                        ),
+                        buttons = s.buttons.updateButton(RECOVER_PASSWORD_BUTTON) { it.copy(loading = false) }
+                    )
                 )
             }
 
@@ -143,7 +146,12 @@ class RecoverPasswordViewModel @Inject constructor(
             _state.update { s ->
                 s.copy(
                     uiState = RecoverPasswordUiState.Success(placeholder.toUi()),
-                    buttons = s.buttons.updateButton(RECOVER_PASSWORD_BUTTON) { it.copy(loading = false) }
+                    authDetails = s.authDetails.copy(
+                        buttons = s.buttons.updateButton(RECOVER_PASSWORD_BUTTON) {
+                            it.copy(loading = false)
+                        }
+                    )
+
                 )
             }
         }
@@ -155,24 +163,15 @@ class RecoverPasswordViewModel @Inject constructor(
             val updatedFields = s.fields.updateFieldAndResetError(field, updatedField)
 
             s.copy(
-                fields = updatedFields,
-                buttons = s.buttons.updateButton(RECOVER_PASSWORD_BUTTON) { button ->
-                    button.copy(enabled = updatedFields.checkFields() && s.agreementChecked)
-                },
-            )
-        }
-    }
+                authDetails = s.authDetails.copy(
+                    fields = updatedFields,
+                    buttons = s.buttons.updateButton(RECOVER_PASSWORD_BUTTON) { button ->
+                        button.copy(enabled = updatedFields.checkFields() && s.checkboxes.agreementIsCheckedWhenAvailable())
+                    },
+                ),
 
-    fun checkAgreement(newValue: Boolean) = viewModelScope.launch {
-        _state.update { s ->
-            s.copy(
-                agreementChecked = newValue,
-                buttons = s.buttons.updateButton(RECOVER_PASSWORD_BUTTON) { button ->
-                    button.copy(enabled = s.fields.checkFields() && newValue)
-                }
-            )
+                )
         }
-
     }
 
     fun navigateToWebView(url: String, urlIndex: Int) = viewModelScope.launch {
@@ -180,5 +179,23 @@ class RecoverPasswordViewModel @Inject constructor(
             AgreementController.getTitle(urlIndex) ?: resourcesProvider.getString(R.string.space)
         sendEvent(RecoverPasswordEvent.GoToWebView(url, title))
     }
+
+    fun changeCheckbox(checkboxUi: CheckboxUi, updatedCheckbox: CheckboxUi) =
+        viewModelScope.launch {
+            _state.update { s ->
+                val updatedCheckboxes = s.checkboxes.updateCheckbox(
+                    checkboxUi, updatedCheckbox
+                )
+
+                s.copy(
+                    authDetails = s.authDetails.copy(
+                        checkboxes = updatedCheckboxes,
+                        buttons = s.buttons.updateButton(RECOVER_PASSWORD_BUTTON) { button ->
+                            button.copy(enabled = s.fields.checkFields() && updatedCheckboxes.agreementIsCheckedWhenAvailable())
+                        }
+                    ),
+                )
+            }
+        }
 
 }

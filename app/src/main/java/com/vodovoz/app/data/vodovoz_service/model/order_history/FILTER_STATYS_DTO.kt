@@ -9,5 +9,5 @@ data class FILTER_STATYS_DTO(
     @Json(name = "ID")
     val ID: String?,
     @Json(name = "NAME")
-    val NAME: String?
+    val NAME: String?,
 )

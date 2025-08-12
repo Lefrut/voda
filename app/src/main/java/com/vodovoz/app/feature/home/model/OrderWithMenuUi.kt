@@ -64,7 +64,7 @@ data class MenuItemUi(
 )
 
 enum class MenuItemTypeUi(val id: String) {
-    History("history"), Payment("oplata"), None("")
+    History("history"), Payment("oplata"), Delivery("dostavka"),None("")
 }
 
 fun MenuItemTypeModel.toUi(): MenuItemTypeUi{

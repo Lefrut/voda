@@ -141,7 +141,11 @@ class HomeFlowViewModel @Inject constructor(
                 if (uiState != HomeUiState.Success) return@collectLatest
 
                 val sectionTopDeferred =
-                    async(Dispatchers.Default) { stateSnapshot.sectionTop.withUpdatedFavorites(favorites) }
+                    async(Dispatchers.Default) {
+                        stateSnapshot.sectionTop.withUpdatedFavorites(
+                            favorites
+                        )
+                    }
                 val sectionBottomDeferred =
                     async(Dispatchers.Default) {
                         stateSnapshot.sectionBottom.withUpdatedFavorites(
@@ -452,9 +456,11 @@ class HomeFlowViewModel @Inject constructor(
         val event = when (menuItem.type) {
             MenuItemTypeUi.History -> HomeEvents.GoToOrdersHistory
             MenuItemTypeUi.Payment -> HomeEvents.GoToWebView(
-                VodovozWebConfig.ABOUT_PAYMENT_URL, resourcesProvider.getString(
-                    R.string.space
-                )
+                VodovozWebConfig.ABOUT_PAYMENT_URL, menuItem.title
+            )
+
+            MenuItemTypeUi.Delivery -> HomeEvents.GoToWebView(
+                VodovozWebConfig.ABOUT_DELIVERY_URL, menuItem.title
             )
 
             MenuItemTypeUi.None -> {

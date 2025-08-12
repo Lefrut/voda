@@ -10,6 +10,7 @@ import com.vodovoz.app.common.content.PagingContractViewModel
 import com.vodovoz.app.common.content.State
 import com.vodovoz.app.common.content.updateData
 import com.vodovoz.app.common.model.VodovozBoolean
+import com.vodovoz.app.common.model.boolean
 import com.vodovoz.app.common.model.from
 import com.vodovoz.app.common.resources.ResourcesProvider
 import com.vodovoz.app.design_system.model.ColorfulButtonUi
@@ -158,6 +159,7 @@ class OrderingFlowViewModel @Inject constructor(
         val addressId = ordering.addressId
         val timeInterval = ordering.timeInterval
         val date = ordering.date
+        val earlierDelivery = VodovozBoolean.from(ordering.earlierDelivery?.second).boolean
 
         when (orderRecipientItem.id) {
             ADDRESS_MENU_ID -> {
@@ -194,7 +196,8 @@ class OrderingFlowViewModel @Inject constructor(
                         OrderingEvents.GoToDeliveryDate(
                             addressId,
                             date,
-                            timeInterval
+                            timeInterval,
+                            earlierDelivery
                         )
                     )
                 }
@@ -635,6 +638,7 @@ class OrderingFlowViewModel @Inject constructor(
             val addressId: Long,
             val date: String?,
             val timeInterval: String?,
+            val earlierDelivery: Boolean
         ) : OrderingEvents()
 
         data class GoToPaymentMethod(

@@ -5,7 +5,9 @@ import android.annotation.SuppressLint
 import android.app.Activity.RESULT_OK
 import android.os.Build
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.view.animation.AccelerateInterpolator
 import android.view.animation.LinearInterpolator
 import androidx.activity.result.ActivityResult
@@ -14,13 +16,15 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.Insets
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsCompat.CONSUMED
+import androidx.core.view.WindowInsetsCompat.Type
+import androidx.core.view.WindowInsetsCompat.Type.InsetsType
+import androidx.core.view.doOnAttach
 import androidx.core.view.isVisible
 import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
@@ -51,7 +55,7 @@ import javax.inject.Inject
 
 
 @AndroidEntryPoint
-class MainFragment : Fragment(R.layout.fragment_main), SnackbarHostStateOwner {
+class MainFragment : Fragment(), SnackbarHostStateOwner {
 
     private val locationPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
@@ -83,9 +87,8 @@ class MainFragment : Fragment(R.layout.fragment_main), SnackbarHostStateOwner {
 
     private val viewModel: MainViewModel by viewModels()
 
-    private val binding: FragmentMainBinding by lazy {
-        FragmentMainBinding.bind(view ?: View(requireContext()))
-    }
+    private var _binding: FragmentMainBinding? = null
+    private val binding get() = _binding!!
 
     override val snackbarHostState = SnackbarHostState()
 
@@ -101,19 +104,19 @@ class MainFragment : Fragment(R.layout.fragment_main), SnackbarHostStateOwner {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        checkForUpdate()
+
+
         observeTabState()
         observeCartState()
         observeTabVisibility()
 
-        listenImeHandling()
-        listenNavigationBarInsets()
-        listenStatusBarInsets()
+        binding.root.doOnAttach {
+            setOnApplyWindowInsets()
+            binding.root.requestApplyInsets()
+        }
 
-        checkForUpdate()
-        setMainOnApplyWindowInsets()
-
-        val snackbarHostView = view.findViewById<ComposeView>(R.id.snackbar_host)
-        snackbarHostView.setContent {
+        binding.snackbarHost.setContent {
             VodovozTheme {
                 VodovozSnackbarHost(
                     modifier = Modifier.padding(top = 32.dp),
@@ -122,9 +125,13 @@ class MainFragment : Fragment(R.layout.fragment_main), SnackbarHostStateOwner {
                 )
             }
         }
+
+        listenImeHandling()
+        listenNavigationBarInsets()
+        listenStatusBarInsets()
     }
 
-    private fun setMainOnApplyWindowInsets() {
+    private fun setOnApplyWindowInsets() {
         ViewCompat.setOnApplyWindowInsetsListener(
             binding.root
         ) { _, applyInsets ->
@@ -133,26 +140,14 @@ class MainFragment : Fragment(R.layout.fragment_main), SnackbarHostStateOwner {
             ).apply {
 
                 if (insetsVisibilityState.navigationBarInsets.value) {
-                    setInsets(
-                        WindowInsetsCompat.Type.navigationBars(),
-                        Insets.NONE
-                    )
+                    consumeWindowInsets(Type.navigationBars())
                 }
-
                 if (insetsVisibilityState.statusBarInsets.value) {
-                    setInsets(
-                        WindowInsetsCompat.Type.statusBars(),
-                        Insets.NONE
-                    )
+                    consumeWindowInsets(Type.statusBars())
                 }
-
                 if (insetsVisibilityState.handleIme.value) {
-                    setInsets(
-                        WindowInsetsCompat.Type.ime(),
-                        Insets.NONE
-                    )
+                    consumeWindowInsets(Type.ime())
                 }
-
             }.build()
         }
 
@@ -162,6 +157,11 @@ class MainFragment : Fragment(R.layout.fragment_main), SnackbarHostStateOwner {
             return@setOnApplyWindowInsetsListener CONSUMED
         }
     }
+
+    private fun WindowInsetsCompat.Builder.consumeWindowInsets(@InsetsType typeMask: Int) {
+        setInsets(typeMask, Insets.NONE)
+    }
+
 
     private val updateResultLauncher =
         registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result: ActivityResult ->
@@ -184,9 +184,19 @@ class MainFragment : Fragment(R.layout.fragment_main), SnackbarHostStateOwner {
         }
     }
 
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?,
+    ): View {
+        _binding = FragmentMainBinding.inflate(inflater, container, false)
+        return binding.root
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
         viewModel.isBottomBarInitialized = false
+        _binding = null
     }
 
     private fun observeTabVisibility() = lifecycleScope.launch {
@@ -226,7 +236,7 @@ class MainFragment : Fragment(R.layout.fragment_main), SnackbarHostStateOwner {
             insetsVisibilityState.navigationBarInsets.collect { insertInsets ->
                 val insets = ViewCompat.getRootWindowInsets(binding.root)
                 val bottomPadding = if (insertInsets) insets?.getInsetsIgnoringVisibility(
-                    WindowInsetsCompat.Type.navigationBars()
+                    Type.navigationBars()
                 )?.bottom ?: 0 else 0
 
                 binding.root.requestApplyInsets()
@@ -240,7 +250,7 @@ class MainFragment : Fragment(R.layout.fragment_main), SnackbarHostStateOwner {
             insetsVisibilityState.statusBarInsets.collect { insertInsets ->
                 val insets = ViewCompat.getRootWindowInsets(binding.root)
                 val topPadding = if (insertInsets) insets?.getInsetsIgnoringVisibility(
-                    WindowInsetsCompat.Type.statusBars()
+                    Type.statusBars()
                 )?.top ?: 0 else 0
 
                 binding.root.requestApplyInsets()

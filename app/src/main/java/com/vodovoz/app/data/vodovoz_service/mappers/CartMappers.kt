@@ -13,7 +13,7 @@ import com.vodovoz.app.data.vodovoz_service.model.cart.OKNO_PODAROK_DTO
 import com.vodovoz.app.data.vodovoz_service.model.cart.OKNO_PROMOKOD_DTO
 import com.vodovoz.app.data.vodovoz_service.model.cart.PODAROK_DTO
 import com.vodovoz.app.data.vodovoz_service.model.cart.PODAROK_KNOPKA_DTO
-import com.vodovoz.app.data.vodovoz_service.model.cart.PRODUCT_PRODAROK_DTO
+import com.vodovoz.app.data.vodovoz_service.model.cart.PRODUCT_PODAROK_DTO
 import com.vodovoz.app.domain.general.model.cart.CartButtonModel
 import com.vodovoz.app.domain.general.model.cart.CartDetailsModel
 import com.vodovoz.app.domain.general.model.cart.CartItemModel
@@ -114,15 +114,17 @@ fun OKNO_PODAROK_DTO.toDomain(orderPrice: Int): CartPresentPopupWindowModel {
 }
 
 @JvmName("mapToCartPresentItemModeList")
-fun List<PRODUCT_PRODAROK_DTO>.mapToDomain(): List<CartPresentItemModel> {
+fun List<PRODUCT_PODAROK_DTO>.mapToDomain(): List<CartPresentItemModel> {
     return mapNotNull { it.toDomain() }
 }
 
-fun PRODUCT_PRODAROK_DTO.toDomain(): CartPresentItemModel? {
+fun PRODUCT_PODAROK_DTO.toDomain(): CartPresentItemModel? {
     return CartPresentItemModel(
         id = ID ?: return null,
         name = NAME ?: "",
-        image = DETAIL_PICTURE?.toVodovozUrl() ?: ""
+        image = DETAIL_PICTURE?.toVodovozUrl() ?: "",
+        price = EXTENDED_PRICE?.PRICE,
+        oldPrice = EXTENDED_PRICE?.PRICE
     )
 }
 

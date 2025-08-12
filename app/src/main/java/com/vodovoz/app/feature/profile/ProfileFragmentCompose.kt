@@ -26,6 +26,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import com.vodovoz.app.R
+import com.vodovoz.app.common.cookie.CookieManager
 import com.vodovoz.app.common.tab.TabManager
 import com.vodovoz.app.core.navigation.ProfileMainNavigator
 import com.vodovoz.app.core.navigation.activate
@@ -42,10 +43,12 @@ import com.vodovoz.app.design_system.composables.placeholders.NetworkErrorPlaceh
 import com.vodovoz.app.design_system.composables.placeholders.VodovozPlaceholder
 import com.vodovoz.app.design_system.composables.snackbar.VodovozSnackBarVisuals
 import com.vodovoz.app.feature.profile.navigation.ProfileChatsNavigator
+import com.vodovoz.app.ui.insets.InsetsVisibilityState
 import com.vodovoz.app.ui.snackbar.snackBarHostState
 import com.vodovoz.app.util.extensions.copyText
 import com.vodovoz.app.util.extensions.openUrl
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -58,13 +61,23 @@ class ProfileFragment : Fragment() {
     lateinit var tabManager: TabManager
 
     @Inject
-    lateinit var cookieManager: com.vodovoz.app.common.cookie.CookieManager
-
+    lateinit var cookieManager: CookieManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         observeEvents()
         observeTabReselect()
+    }
+
+    @Inject
+    lateinit var insertVisibilityState: InsetsVisibilityState
+
+    override fun onStart() {
+        super.onStart()
+        lifecycleScope.launch {
+            delay(300)
+            insertVisibilityState.insertSystemBarInsets(true)
+        }
     }
 
     @OptIn(ExperimentalMaterial3Api::class)
