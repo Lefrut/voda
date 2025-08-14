@@ -44,8 +44,8 @@ class ProductCommentsFragment : Fragment() {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
 
             setContent {
-                val pagingState by viewModel.observeUiState().collectAsStateWithLifecycle()
-                val viewState by rememberUpdatedState(pagingState.data)
+                val pagingState by viewModel.state.collectAsStateWithLifecycle()
+                val viewState by rememberUpdatedState(pagingState)
                 val lazyListState = rememberLazyListState()
 
                 VodovozTheme {
@@ -86,7 +86,7 @@ class ProductCommentsFragment : Fragment() {
 
 
                     LifecycleEffect {
-                        viewModel.observeEvent().collect { event ->
+                        viewModel.events.collect { event ->
                             when (event) {
                                 ProductCommentsFlowViewModel.ProductCommentsEvents.ScrollToTop -> {
                                     lazyListState.animateScrollToItem(0)

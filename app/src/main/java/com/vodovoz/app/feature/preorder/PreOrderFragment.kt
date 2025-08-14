@@ -1,9 +1,6 @@
 package com.vodovoz.app.feature.preorder
 
-import android.animation.Animator
-import android.animation.ObjectAnimator
 import android.os.Bundle
-import android.transition.TransitionInflater
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -14,19 +11,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.ViewCompositionStrategy
-import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.fragment.findNavController
-import com.vodovoz.app.common.tab.TabManager
 import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.composables.placeholders.LoadingPlaceholder
 import com.vodovoz.app.design_system.composables.placeholders.NetworkErrorPlaceholder
 import com.vodovoz.app.design_system.effects.LifecycleEffect
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.withTimeoutOrNull
-import javax.inject.Inject
 
 @AndroidEntryPoint
 class PreOrderFragment : Fragment() {
@@ -45,16 +39,16 @@ class PreOrderFragment : Fragment() {
     ): View {
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.Default)
+
             setContent {
                 VodovozTheme {
-                    val viewState by viewModel.observeUiState().collectAsStateWithLifecycle()
-                    val viewStateData = viewState.data
+                    val viewState by viewModel.state.collectAsStateWithLifecycle()
                     val keyboardController = LocalSoftwareKeyboardController.current
                     val snackbarHostState = remember {
                         SnackbarHostState()
                     }
 
-                    when (viewStateData.uiState) {
+                    when (viewState.uiState) {
                         PreOrderFlowViewModel.UiState.Error -> {
                             NetworkErrorPlaceholder { viewModel.fetchPreOrderData() }
                         }
@@ -66,14 +60,14 @@ class PreOrderFragment : Fragment() {
                         PreOrderFlowViewModel.UiState.Success -> {
                             PreOrderScreen(
                                 viewModel = viewModel,
-                                viewState = viewStateData,
+                                viewState = viewState,
                                 snackbarHostState = snackbarHostState
                             )
                         }
                     }
 
                     LifecycleEffect {
-                        viewModel.observeEvent().collect { event ->
+                        viewModel.events.collect { event ->
                             when (event) {
                                 PreOrderFlowViewModel.PreOrderEvent.GoBack -> {
                                     findNavController().popBackStack()

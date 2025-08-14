@@ -43,7 +43,7 @@ class CartManagerTests {
     }
 
     @Test
-    fun `multiple async cart changes with 5 success 2 fails`() = runTest {
+    fun `multiple async cart changes when 5 success 2 fails`() = runTest {
         val addOperations = listOf<Triple<Flow<Result<String>>, Long, Int>>(
             Triple(flowOf(Result.success("Success")), 1, 2),
             Triple(flowOf(Result.success("Success")), 2, 2),
@@ -150,6 +150,17 @@ class CartManagerTests {
             mapOf(1L to 10, 2L to 20),
             cart
         )
+    }
+
+    @Test
+    fun `format cart test`() = runTest {
+        assertEquals("1-20;2-30;3-40", cartManager.formatCart(mapOf(1L to 20L, 2L to 30L, 3L to 40L)))
+        assertEquals("a-b", cartManager.formatCart(mapOf("a" to "b")))
+        assertEquals("1-null;null-3", cartManager.formatCart(mapOf(1 to null, null to 3)))
+        assertEquals("1-20;2-30;3-40", cartManager.formatCart(listOf("1-20", "2-30", "3-40")))
+        assertEquals("x;y", cartManager.formatCart(listOf("x", "y")))
+        assertEquals("", cartManager.formatCart(""))
+        assertEquals("", cartManager.formatCart(12345))
     }
 
     @Test

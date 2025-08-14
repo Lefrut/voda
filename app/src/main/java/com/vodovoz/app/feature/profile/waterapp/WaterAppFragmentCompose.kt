@@ -117,8 +117,8 @@ class WaterAppFragment : Fragment() {
                     AppearanceSystemBarsEffect()
 
                     val context = LocalContext.current
-                    val pagingState by viewModel.observeUiState().collectAsStateWithLifecycle()
-                    val viewState by rememberUpdatedState(newValue = pagingState.data)
+                    val pagingState by viewModel.state.collectAsStateWithLifecycle()
+                    val viewState by rememberUpdatedState(newValue = pagingState)
                     val notificationPermissionLauncher = rememberLauncherForActivityResult(
                         contract = ActivityResultContracts.RequestPermission()
                     ) { isGranted ->
@@ -292,7 +292,7 @@ class WaterAppFragment : Fragment() {
                     }
 
                     LifecycleEffect {
-                        viewModel.observeEvent().collectLatest { event ->
+                        viewModel.events.collectLatest { event ->
                             when (event) {
                                 WaterAppViewModel.WaterAppEvents.GoBack -> {
                                     findNavController().popBackStack()

@@ -7,10 +7,6 @@ import androidx.paging.CombinedLoadStates
 import androidx.paging.LoadState
 import androidx.paging.map
 import com.vodovoz.app.common.cart.CartManager
-import com.vodovoz.app.common.content.Event
-import com.vodovoz.app.common.content.PagingContractViewModel
-import com.vodovoz.app.common.content.State
-import com.vodovoz.app.common.content.updateData
 import com.vodovoz.app.design_system.model.VodovozPlaceholderUi
 import com.vodovoz.app.design_system.model.toUi
 import com.vodovoz.app.domain.general.model.EmptyResultException
@@ -19,8 +15,9 @@ import com.vodovoz.app.feature.all.orders.history.model.OrderFilterUi
 import com.vodovoz.app.feature.all.orders.history.model.OrdersHistoryItemUi
 import com.vodovoz.app.feature.all.orders.history.model.mapToUi
 import com.vodovoz.app.feature.all.orders.history.model.toUi
-import com.vodovoz.app.ui.paging.PagingDataListener
-import com.vodovoz.app.ui.paging.copy
+import com.vodovoz.app.ui.mvi.Event
+import com.vodovoz.app.ui.paging.PagingMviViewModel
+import com.vodovoz.app.ui.paging.PagingState
 import com.vodovoz.app.ui.paging.emptyCombinedLoadStates
 import com.vodovoz.app.util.extensions.debounceWithMax
 import com.vodovoz.app.util.extensions.singleResult
@@ -32,6 +29,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -40,26 +38,14 @@ import javax.inject.Inject
 class OrdersHistoryViewModel @Inject constructor(
     private val cartManager: CartManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
-) : PagingContractViewModel<OrdersHistoryViewModel.AllOrdersState, OrdersHistoryViewModel.AllOrdersEvent>(
+) : PagingMviViewModel<OrdersHistoryItemUi, OrdersHistoryViewModel.AllOrdersState, OrdersHistoryViewModel.AllOrdersEvent>(
     AllOrdersState()
 ) {
 
     private val querySharedFlow = MutableSharedFlow<String>(0)
 
-    private val pagingProductsListener = PagingDataListener(
-        onUpdateItems = { itemSnapshotList ->
-            uiStateListener.updateData { s ->
-                val pagedItems = itemSnapshotList.mapNotNull { product ->
-                    product
-                }
-                s.copy(items = pagedItems)
-            }
-        }
-    )
-
     init {
         handleQueries()
-        listenProductsLoadStates()
         viewModelScope.launch { delay(200) }.invokeOnCompletion {
             fetchOrdersHistoryDetails()
         }
@@ -71,32 +57,10 @@ class OrdersHistoryViewModel @Inject constructor(
             fetchOrdersHistoryDetails()
         }.launchIn(viewModelScope)
 
-    private fun listenProductsLoadStates() = viewModelScope.launch {
-        pagingProductsListener.collectLoadState { combinedLoadStates ->
-            val refreshState = when {
-                combinedLoadStates.refresh is LoadState.Loading && stateSnapshot.items.isNotEmpty() -> {
-                    stateSnapshot.loadStates.refresh
-                }
-
-                else -> combinedLoadStates.refresh
-            }
-
-            uiStateListener.updateData { s ->
-                s.copy(loadStates = combinedLoadStates.copy(refresh = refreshState))
-            }
-        }
-
-    }
-
-
-    fun notifyPagingItems(index: Int) = viewModelScope.launch {
-        pagingProductsListener[index]
-    }
-
 
     fun fetchOrdersHistoryDetails() = viewModelScope.launch {
         if (stateSnapshot.uiState !is AllOrdersUiState.Body) {
-            uiStateListener.updateData { s ->
+            _state.update { s ->
                 s.copy(uiState = AllOrdersUiState.Loading)
             }
         }
@@ -107,7 +71,7 @@ class OrdersHistoryViewModel @Inject constructor(
         ordersHistoryDetailsResult.onSuccess { ordersHistoryDetails ->
 
 
-            uiStateListener.updateData { s ->
+            _state.update { s ->
                 s.copy(
                     title = ordersHistoryDetails.title,
                     filters = ordersHistoryDetails.filters.mapToUi(),
@@ -123,7 +87,7 @@ class OrdersHistoryViewModel @Inject constructor(
                 val pg = pagingData.map { historyItemModel ->
                     historyItemModel.toUi()
                 }
-                pagingProductsListener.collectPagingData(pg)
+                collectPagingData(pg)
             }
 
 
@@ -136,7 +100,7 @@ class OrdersHistoryViewModel @Inject constructor(
 
             if (uiState is AllOrdersUiState.Body) return@onFailure
 
-            uiStateListener.updateData { s ->
+            _state.update { s ->
                 s.copy(uiState = uiState)
             }
 
@@ -144,7 +108,7 @@ class OrdersHistoryViewModel @Inject constructor(
     }
 
     fun changeMode(searchMode: Boolean) = viewModelScope.launch {
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(
                 searchMode = searchMode,
                 searchQuery = ""
@@ -157,25 +121,25 @@ class OrdersHistoryViewModel @Inject constructor(
     }
 
     fun navigateBack() = viewModelScope.launch {
-        eventListener.emit(AllOrdersEvent.GoBack)
+        sendEvent(AllOrdersEvent.GoBack)
     }
 
 
     fun changeSearchQuery(query: String) = viewModelScope.launch {
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(searchQuery = query)
         }
         querySharedFlow.emit(query)
     }
 
     fun navigateToCatalog() = viewModelScope.launch {
-        eventListener.emit(AllOrdersEvent.GoToCatalog)
+        sendEvent(AllOrdersEvent.GoToCatalog)
     }
 
     fun selectAllFilters() = viewModelScope.launch {
         if (stateSnapshot.currentFilters.isEmpty()) return@launch
 
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(currentFilters = emptyList())
         }
 
@@ -183,7 +147,7 @@ class OrdersHistoryViewModel @Inject constructor(
     }
 
     fun selectFilter(filter: OrderFilterUi) = viewModelScope.launch {
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             val currentFilters = s.currentFilters
             s.copy(
                 currentFilters = if (currentFilters.contains(filter)) currentFilters.minus(filter)
@@ -195,7 +159,7 @@ class OrdersHistoryViewModel @Inject constructor(
     }
 
     fun navigateToOrderDetails(item: OrdersHistoryItemUi) = viewModelScope.launch {
-        eventListener.emit(AllOrdersEvent.GoToOrderDetails(item.id))
+        sendEvent(AllOrdersEvent.GoToOrderDetails(item.id))
     }
 
     fun activateOrderItemButton(ordersHistoryItem: OrdersHistoryItemUi) = viewModelScope.launch {
@@ -207,7 +171,7 @@ class OrdersHistoryViewModel @Inject constructor(
                 vodovozServiceRepository.repeatOrder(ordersHistoryItem.id).singleResult()
                     .onSuccess {
                         cartManager.updateCartListState(true)
-                        eventListener.emit(AllOrdersEvent.GoToCart)
+                        sendEvent(AllOrdersEvent.GoToCart)
                     }
             }
 
@@ -219,7 +183,7 @@ class OrdersHistoryViewModel @Inject constructor(
                 }
 
 
-                eventListener.emit(event)
+                sendEvent(event)
             }
 
             else -> {
@@ -229,13 +193,13 @@ class OrdersHistoryViewModel @Inject constructor(
     }
 
     fun refresh() = viewModelScope.launch {
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(showRefreshIndicator = true)
         }
 
         fetchOrdersHistoryDetails().join()
 
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(showRefreshIndicator = false)
         }
     }
@@ -248,10 +212,17 @@ class OrdersHistoryViewModel @Inject constructor(
         val searchMode: Boolean = false,
         val currentFilters: List<OrderFilterUi> = emptyList(),
         val filters: List<OrderFilterUi> = emptyList(),
-        val items: List<OrdersHistoryItemUi> = emptyList(),
-        val loadStates: CombinedLoadStates = emptyCombinedLoadStates,
+        override val items: List<OrdersHistoryItemUi> = emptyList(),
+        override val loadStates: CombinedLoadStates = emptyCombinedLoadStates,
         val showRefreshIndicator: Boolean = false,
-    ) : State
+    ) : PagingState<OrdersHistoryItemUi, AllOrdersState>() {
+
+        override fun copyPagingState(
+            items: List<OrdersHistoryItemUi>,
+            loadStates: CombinedLoadStates,
+        ): AllOrdersState = copy(items = items, loadStates = loadStates)
+
+    }
 
     sealed class AllOrdersEvent : Event {
         data object GoToCart : AllOrdersEvent()

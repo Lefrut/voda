@@ -93,7 +93,7 @@ fun OrdersHistoryScreen(
                             viewModel.selectAllFilters()
                         },
                         onProductSee = { i ->
-                            viewModel.notifyPagingItems(i)
+                            viewModel.notifyPaging(i)
                         },
                         onItemButtonClick = { ordersHistoryItem ->
                             viewModel.activateOrderItemButton(ordersHistoryItem)

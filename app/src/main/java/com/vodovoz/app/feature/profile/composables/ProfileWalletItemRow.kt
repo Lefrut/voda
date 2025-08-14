@@ -69,7 +69,7 @@ private fun WalletItemCard(
                 .size(56.dp),
             model = walletItem.imageUrl,
             contentDescription = null,
-            contentScale = ContentScale.Crop
+            contentScale = ContentScale.FillBounds,
         )
 
         Column(

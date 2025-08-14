@@ -66,10 +66,10 @@ fun PastPurchasesScreen(
                     currentCategory = viewState.currentCategory,
                     currentSort = viewState.currentSort,
                     isGridView = viewState.isGridView,
-                    products = viewState.products,
-                    productsLoadStates = viewState.productsLoadStates,
+                    products = viewState.items,
+                    productsLoadStates = viewState.loadStates,
                     onProductSee = { index ->
-                        viewModel.notifyPagingProducts(index)
+                        viewModel.notifyPaging(index)
                     },
                     onSortingClick = {
                         viewModel.showSortBottomSheet()

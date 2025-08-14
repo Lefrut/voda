@@ -4,10 +4,10 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.viewModelScope
 import com.vodovoz.app.R
-import com.vodovoz.app.common.content.Event
-import com.vodovoz.app.common.content.PagingContractViewModel
-import com.vodovoz.app.common.content.State
-import com.vodovoz.app.common.content.updateData
+import com.vodovoz.app.ui.mvi.Event
+import com.vodovoz.app.ui.mvi.MviViewModel
+import com.vodovoz.app.ui.mvi.State
+import kotlinx.coroutines.flow.update
 import com.vodovoz.app.common.model.VodovozAction
 import com.vodovoz.app.common.resources.ResourcesProvider
 import com.vodovoz.app.design_system.model.AboutAdvertisingUi
@@ -41,7 +41,7 @@ class ProfileFlowViewModel @Inject constructor(
     private val siteStateManager: SiteStateManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val resourcesProvider: ResourcesProvider,
-) : PagingContractViewModel<ProfileFlowViewModel.ProfileState, ProfileFlowViewModel.ProfileEvents>(
+) : MviViewModel<ProfileFlowViewModel.ProfileState, ProfileFlowViewModel.ProfileEvents>(
     ProfileState()
 ) {
 
@@ -52,7 +52,7 @@ class ProfileFlowViewModel @Inject constructor(
     }
 
     fun fetchProfileDetails() = viewModelScope.launch {
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(uiState = if (stateSnapshot.uiState != ProfileUiState.Profile) ProfileUiState.Loading else s.uiState)
         }
 
@@ -62,7 +62,7 @@ class ProfileFlowViewModel @Inject constructor(
         val bonusesPopupWindow = bonusesPopupWindowDeferred.await().getOrNull()?.toUi()
 
         profileDetailsResult.onSuccess { profileDetails ->
-            uiStateListener.updateData { s ->
+            _state.update { s ->
                 s.copy(
                     uiState = ProfileUiState.Profile,
                     banners = profileDetails.banners.mapToUi(),
@@ -84,7 +84,7 @@ class ProfileFlowViewModel @Inject constructor(
                 else -> ProfileUiState.Error
             }
 
-            uiStateListener.updateData { s ->
+            _state.update { s ->
                 s.copy(uiState = uiState)
             }
         }
@@ -92,45 +92,45 @@ class ProfileFlowViewModel @Inject constructor(
 
 
     fun refresh() = viewModelScope.launch {
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(showRefreshIndicator = true)
         }
         fetchProfileDetails().join()
 
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(showRefreshIndicator = false)
         }
     }
 
     fun navigateToLoginOrRegister() = viewModelScope.launch {
         if (!siteStateManager.smsEnabled()) {
-            eventListener.emit(ProfileEvents.GoToLoginByEmail)
+            sendEvent(ProfileEvents.GoToLoginByEmail)
         } else {
-            eventListener.emit(ProfileEvents.GoToLogin)
+            sendEvent(ProfileEvents.GoToLogin)
         }
     }
 
     fun navigateToUserData() = viewModelScope.launch {
-        eventListener.emit(ProfileEvents.GoToUserData)
+        sendEvent(ProfileEvents.GoToUserData)
     }
 
     fun activateMenuItem(menuItem: ProfileMenuItemUi) = viewModelScope.launch {
         val popupWindow = menuItem.popupWindow
 
         if (popupWindow != null) {
-            uiStateListener.updateData { s ->
+            _state.update { s ->
                 s.copy(
                     showSupportingBS = true,
                     currentSupportingBSData = popupWindow
                 )
             }
         } else {
-            eventListener.emit(ProfileEvents.GoByMenuItemId(menuItem.id))
+            sendEvent(ProfileEvents.GoByMenuItemId(menuItem.id))
         }
     }
 
     fun showAdvertisingBottomSheet(advertising: AboutAdvertisingUi) = viewModelScope.launch {
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(
                 currentAdvertising = advertising,
                 showAdvertisingBS = true
@@ -139,7 +139,7 @@ class ProfileFlowViewModel @Inject constructor(
     }
 
     fun closeAdvertisingBottomSheet() = viewModelScope.launch {
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(
                 showAdvertisingBS = false
             )
@@ -147,18 +147,18 @@ class ProfileFlowViewModel @Inject constructor(
     }
 
     fun activateBannerAction(banner: BannerUi) = viewModelScope.launch {
-        eventListener.emit(ProfileEvents.ActivateVodovozAction(banner.action))
+        sendEvent(ProfileEvents.ActivateVodovozAction(banner.action))
     }
 
     fun closeSupportingBottomSheet() {
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(showSupportingBS = false)
         }
     }
 
     fun copyUserId(text: String) = viewModelScope.launch {
         val userId = text.trim().filter { c -> c.isDigit() }
-        eventListener.emit(
+        sendEvent(
             ProfileEvents.Copy(
                 userId,
                 resourcesProvider.getString(R.string.your_id_copied)
@@ -168,7 +168,7 @@ class ProfileFlowViewModel @Inject constructor(
 
     fun navigateByChatItem(chatItem: ProfileChatItemUi) = viewModelScope.launch {
         if (chatItem.id == "") closeSupportingBottomSheet()
-        eventListener.emit(ProfileEvents.GoByChatItemId(chatItem.id, chatItem.navigationData))
+        sendEvent(ProfileEvents.GoByChatItemId(chatItem.id, chatItem.navigationData))
     }
 
     fun activateWalletItem(walletItem: ProfileWalletItemUi) = viewModelScope.launch {
@@ -178,7 +178,7 @@ class ProfileFlowViewModel @Inject constructor(
             }
 
             "bonus" -> {
-                uiStateListener.updateData { s ->
+                _state.update { s ->
                     s.copy(showBonusesBS = true)
                 }
             }
@@ -188,7 +188,7 @@ class ProfileFlowViewModel @Inject constructor(
     }
 
     private fun showTextBottomSheet(data: ProfilePopupWindowUi) = viewModelScope.launch {
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(
                 showTextBS = true,
                 currentTextBSData = data
@@ -197,7 +197,7 @@ class ProfileFlowViewModel @Inject constructor(
     }
 
     fun closeTextBottomSheet() = viewModelScope.launch {
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(showTextBS = false)
         }
     }
@@ -205,11 +205,11 @@ class ProfileFlowViewModel @Inject constructor(
     fun activateProfileCard(profileCard: ProfileCardUi) = viewModelScope.launch {
         when (profileCard.id) {
             "otziv" -> {
-                eventListener.emit(ProfileEvents.GoToWaitFeedbackProducts)
+                sendEvent(ProfileEvents.GoToWaitFeedbackProducts)
             }
 
             "treker" -> {
-                eventListener.emit(ProfileEvents.GoToWaterApp)
+                sendEvent(ProfileEvents.GoToWaterApp)
             }
 
             "" -> {
@@ -219,13 +219,13 @@ class ProfileFlowViewModel @Inject constructor(
     }
 
     fun hideBonusesBottomSheet() = viewModelScope.launch {
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(showBonusesBS = false)
         }
     }
 
     fun copyBonusesCode(text: String) = viewModelScope.launch {
-        eventListener.emit(
+        sendEvent(
             ProfileEvents.Copy(
                 text,
                 resourcesProvider.getString(R.string.refereal_code_copied)
@@ -237,14 +237,14 @@ class ProfileFlowViewModel @Inject constructor(
         viewModelScope.launch {
             val url = bonusesPopupWindow.url
             if (bonusesPopupWindow.browser) {
-                eventListener.emit(ProfileEvents.OpenUrl(url))
+                sendEvent(ProfileEvents.OpenUrl(url))
             } else {
-                eventListener.emit(ProfileEvents.GoToWebView(url, bonusesPopupWindow.button.name))
+                sendEvent(ProfileEvents.GoToWebView(url, bonusesPopupWindow.button.name))
             }
         }
 
     fun changeBonusesSubscribe(subscribe: Boolean) = viewModelScope.launch {
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(
                 currentBonusesBSData = s.currentBonusesBSData?.copy(warmAboutExpiration = subscribe)
             )

@@ -4,10 +4,10 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import com.vodovoz.app.common.content.Event
-import com.vodovoz.app.common.content.PagingContractViewModel
-import com.vodovoz.app.common.content.State
-import com.vodovoz.app.common.content.updateData
+import com.vodovoz.app.ui.mvi.Event
+import com.vodovoz.app.ui.mvi.MviViewModel
+import com.vodovoz.app.ui.mvi.State
+import kotlinx.coroutines.flow.update
 import com.vodovoz.app.common.resources.ResourcesProvider
 import com.vodovoz.app.design_system.model.ColorfulButtonUi
 import com.vodovoz.app.design_system.model.VodovozPlaceholderUi
@@ -36,7 +36,7 @@ class ServiceOrderViewModel @Inject constructor(
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val resourceProvider: ResourcesProvider,
     savedStateHandle: SavedStateHandle,
-) : PagingContractViewModel<ServiceOrderViewModel.ServiceOrderState, ServiceOrderViewModel.ServiceOrderEvent>(
+) : MviViewModel<ServiceOrderViewModel.ServiceOrderState, ServiceOrderViewModel.ServiceOrderEvent>(
     ServiceOrderState()
 ) {
 
@@ -50,7 +50,7 @@ class ServiceOrderViewModel @Inject constructor(
     }
 
     private fun fetchServiceOrderDetails() = viewModelScope.launch {
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(uiState = ServiceOrderUiState.Loading)
         }
 
@@ -59,7 +59,7 @@ class ServiceOrderViewModel @Inject constructor(
         ).singleResult()
 
         serviceOrderDetailsResult.onSuccess { serviceOrderDetails ->
-            uiStateListener.updateData { s ->
+            _state.update { s ->
                 s.copy(
                     title = serviceOrderDetails.title,
                     subtitle = serviceOrderDetails.subtitle,
@@ -74,11 +74,11 @@ class ServiceOrderViewModel @Inject constructor(
     }
 
     fun navigateBack() = viewModelScope.launch {
-        eventListener.emit(ServiceOrderEvent.GoBack)
+        sendEvent(ServiceOrderEvent.GoBack)
     }
 
     fun doOrderService() = viewModelScope.launch {
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(button = s.button.copy(loading = true))
         }
 
@@ -99,7 +99,7 @@ class ServiceOrderViewModel @Inject constructor(
 
             if (isValid) return@checkFields
 
-            uiStateListener.updateData { s ->
+            _state.update { s ->
                 s.copy(
                     fields = updatedFields,
                     button = s.button.copy(
@@ -115,11 +115,11 @@ class ServiceOrderViewModel @Inject constructor(
 
         vodovozServiceRepository.orderService(serviceType, stateSnapshot.fields.mapToDomain())
             .singleResult().onSuccess { placeholder ->
-                uiStateListener.updateData { s ->
+                _state.update { s ->
                     s.copy(uiState = ServiceOrderUiState.Success(placeholder.toUi()))
                 }
             }.onFailure { t ->
-                uiStateListener.updateData { s ->
+                _state.update { s ->
                     s.copy(
                         button = s.button.copy(
                             loading = false,
@@ -131,7 +131,7 @@ class ServiceOrderViewModel @Inject constructor(
     }
 
     fun changeField(field: FieldUi, updatedField: FieldUi) = viewModelScope.launch {
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             val updatedFields = s.fields.updateField(
                 field,
                 updatedField

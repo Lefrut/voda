@@ -110,8 +110,8 @@ class MapFragment : Fragment() {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
 
             setContent {
-                val pagingState by viewModel.observeUiState().collectAsStateWithLifecycle()
-                val viewState by rememberUpdatedState(pagingState.data)
+                val pagingState by viewModel.state.collectAsStateWithLifecycle()
+                val viewState by rememberUpdatedState(pagingState)
                 val locationPermissionLauncher = rememberLauncherForActivityResult(
                     contract = ActivityResultContracts.RequestMultiplePermissions()
                 ) { result ->
@@ -178,7 +178,7 @@ class MapFragment : Fragment() {
         mainScope: CoroutineScope,
         keyboardController: SoftwareKeyboardController?,
     ): Unit =
-        viewModel.observeEvent().onSubscription {
+        viewModel.events.onSubscription {
             delay(750L)
             viewModel.moveToAvailableGeo()
         }.collect { event ->

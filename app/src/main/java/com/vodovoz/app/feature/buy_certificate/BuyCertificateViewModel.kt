@@ -4,10 +4,10 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.viewModelScope
 import com.vodovoz.app.R
-import com.vodovoz.app.common.content.Event
-import com.vodovoz.app.common.content.PagingContractViewModel
-import com.vodovoz.app.common.content.State
-import com.vodovoz.app.common.content.updateData
+import com.vodovoz.app.ui.mvi.Event
+import com.vodovoz.app.ui.mvi.MviViewModel
+import com.vodovoz.app.ui.mvi.State
+import kotlinx.coroutines.flow.update
 import com.vodovoz.app.common.resources.ResourcesProvider
 import com.vodovoz.app.design_system.model.ColorfulButtonUi
 import com.vodovoz.app.design_system.model.PaymentTypeUi
@@ -39,7 +39,7 @@ import javax.inject.Inject
 class BuyCertificateViewModel @Inject constructor(
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val resourcesProvider: ResourcesProvider,
-) : PagingContractViewModel<BuyCertificateViewModel.BuyCertificateState, BuyCertificateViewModel.BuyCertificateEvents>(
+) : MviViewModel<BuyCertificateViewModel.BuyCertificateState, BuyCertificateViewModel.BuyCertificateEvents>(
     BuyCertificateState()
 ) {
 
@@ -52,7 +52,7 @@ class BuyCertificateViewModel @Inject constructor(
             vodovozServiceRepository.getBuyCertificateDetails().singleResult()
 
         buyCertificateDetailsResult.onSuccess { buyCertificateDetails ->
-            uiStateListener.updateData { s ->
+            _state.update { s ->
 
                 val tabs = buyCertificateDetails.tabs.mapToUi()
                 val paymentTypes = buyCertificateDetails.paymentTypes.mapToUi()
@@ -75,14 +75,14 @@ class BuyCertificateViewModel @Inject constructor(
                 )
             }
         }.onFailure {
-            uiStateListener.updateData { s ->
+            _state.update { s ->
                 s.copy(uiState = BuyCertificateUiState.Error)
             }
         }
     }
 
     fun selectCertificate(certificate: CertificateUi) = viewModelScope.launch {
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(
                 currentCertificate = certificate,
                 errors = s.errors.copy(certificate = false)
@@ -91,21 +91,21 @@ class BuyCertificateViewModel @Inject constructor(
     }
 
     fun openLink(url: String) = viewModelScope.launch {
-        eventListener.emit(BuyCertificateEvents.OpenLink(url))
+        sendEvent(BuyCertificateEvents.OpenLink(url))
     }
 
     fun navigateBack() = viewModelScope.launch {
-        eventListener.emit(BuyCertificateEvents.GoBack)
+        sendEvent(BuyCertificateEvents.GoBack)
     }
 
     fun selectTab(tab: BuyCertificateTabUi) = viewModelScope.launch {
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(currentTab = tab)
         }
     }
 
     fun changeField(field: FieldUi, updatedField: FieldUi) = viewModelScope.launch {
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(
                 currentTab = s.currentTab.copy(
                     fields = s.currentTab.fields.updateFieldAndResetError(field, updatedField)
@@ -115,7 +115,7 @@ class BuyCertificateViewModel @Inject constructor(
     }
 
     fun selectPaymentType(paymentType: PaymentTypeUi) = viewModelScope.launch {
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(
                 currentPaymentType = paymentType,
                 errors = s.errors.copy(payment = false)
@@ -130,7 +130,7 @@ class BuyCertificateViewModel @Inject constructor(
             }
 
             "auth" -> {
-                eventListener.emit(BuyCertificateEvents.GoToProfile)
+                sendEvent(BuyCertificateEvents.GoToProfile)
             }
         }
     }
@@ -150,7 +150,7 @@ class BuyCertificateViewModel @Inject constructor(
             val certificateError = stateSnapshot.currentCertificate == CertificateUi.Empty
             val paymentError = stateSnapshot.currentPaymentType == PaymentTypeUi.Empty
 
-            uiStateListener.updateData { s ->
+            _state.update { s ->
                 s.copy(
                     errors = s.errors.copy(
                         certificate = certificateError,
@@ -165,7 +165,7 @@ class BuyCertificateViewModel @Inject constructor(
             if (!isValid || certificateError || paymentError) return@launch
         }
 
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(button = s.button.copy(loading = true))
         }
 
@@ -186,7 +186,7 @@ class BuyCertificateViewModel @Inject constructor(
 
         buyCertificateResult.onSuccess { buyCertificate ->
             val paymentInfo = buyCertificate.payment.toUi()
-            uiStateListener.updateData { s ->
+            _state.update { s ->
                 s.copy(
                     uiState = BuyCertificateUiState.Success(buyCertificate.placeholder.toUi()),
                     paymentInfo = paymentInfo,
@@ -194,9 +194,9 @@ class BuyCertificateViewModel @Inject constructor(
                 )
             }
         }.onFailure {
-            eventListener.emit(BuyCertificateEvents.ShowToast(resourcesProvider.getString(R.string.order_failed)))
+            sendEvent(BuyCertificateEvents.ShowToast(resourcesProvider.getString(R.string.order_failed)))
 
-            uiStateListener.updateData { s ->
+            _state.update { s ->
                 s.copy(button = s.button.copy(loading = false))
             }
         }
@@ -207,15 +207,15 @@ class BuyCertificateViewModel @Inject constructor(
     fun pay() = viewModelScope.launch {
         val paymentInfo = stateSnapshot.paymentInfo ?: return@launch
         if (paymentInfo.browser) {
-            eventListener.emit(BuyCertificateEvents.OpenUrl(paymentInfo.url))
+            sendEvent(BuyCertificateEvents.OpenUrl(paymentInfo.url))
         } else {
-            eventListener.emit(BuyCertificateEvents.GoToWebView(paymentInfo.url))
+            sendEvent(BuyCertificateEvents.GoToWebView(paymentInfo.url))
         }
 
     }
 
     fun navigateToFAQ(faqUi: FAQUi) = viewModelScope.launch {
-        eventListener.emit(BuyCertificateEvents.GoToFAQ(faqUi))
+        sendEvent(BuyCertificateEvents.GoToFAQ(faqUi))
     }
 
     @Immutable

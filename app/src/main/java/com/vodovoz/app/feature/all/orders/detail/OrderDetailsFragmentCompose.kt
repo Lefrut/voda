@@ -54,8 +54,8 @@ class OrderDetailsFragment : Fragment() {
 
             setContent {
                 VodovozTheme {
-                    val pagingState by viewModel.observeUiState().collectAsStateWithLifecycle()
-                    val viewState by rememberUpdatedState(newValue = pagingState.data)
+                    val pagingState by viewModel.state.collectAsStateWithLifecycle()
+                    val viewState by rememberUpdatedState(newValue = pagingState)
 
                     when (viewState.uiState) {
                         OrderDetailsFlowViewModel.OrderDetailsUiState.Body -> {
@@ -90,7 +90,7 @@ class OrderDetailsFragment : Fragment() {
 
 
                     LifecycleEffect {
-                        viewModel.observeEvent().collectLatest { event ->
+                        viewModel.events.collectLatest { event ->
                             when (event) {
                                 is OrderDetailsFlowViewModel.OrderDetailsEvent.CopyText -> {
                                     requireContext().copyText(event.text)

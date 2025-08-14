@@ -32,7 +32,7 @@ class AddressesFragment : Fragment() {
 
     override fun onStart() {
         super.onStart()
-        val screenType = viewModel.observeUiState().value.data.screenType
+        val screenType = viewModel.state.value.screenType
         when(screenType){
             AddressScreenTypeUi.Add -> {}
             AddressScreenTypeUi.Choose -> {
@@ -50,8 +50,8 @@ class AddressesFragment : Fragment() {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
 
             setContent {
-                val pagingState by viewModel.observeUiState().collectAsStateWithLifecycle()
-                val viewState by rememberUpdatedState(pagingState.data)
+                val pagingState by viewModel.state.collectAsStateWithLifecycle()
+                val viewState by rememberUpdatedState(pagingState)
 
                 VodovozTheme {
                     AddressesScreen(
@@ -73,7 +73,7 @@ class AddressesFragment : Fragment() {
     }
 
     private suspend fun observeEvents() {
-        viewModel.observeEvent().collect { event ->
+        viewModel.events.collect { event ->
             when (event) {
                 AddressesFlowViewModel.AddressesEvents.GoBack -> {
                     findNavController().popBackStack()

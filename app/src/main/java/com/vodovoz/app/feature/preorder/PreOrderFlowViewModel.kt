@@ -3,10 +3,10 @@ package com.vodovoz.app.feature.preorder
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.vodovoz.app.R
-import com.vodovoz.app.common.content.Event
-import com.vodovoz.app.common.content.PagingContractViewModel
-import com.vodovoz.app.common.content.State
-import com.vodovoz.app.common.content.updateData
+import com.vodovoz.app.ui.mvi.Event
+import com.vodovoz.app.ui.mvi.MviViewModel
+import com.vodovoz.app.ui.mvi.State
+import kotlinx.coroutines.flow.update
 import com.vodovoz.app.common.resources.ResourcesProvider
 import com.vodovoz.app.design_system.model.widgets.FieldUi
 import com.vodovoz.app.design_system.model.widgets.checkFields
@@ -30,7 +30,7 @@ class PreOrderFlowViewModel @Inject constructor(
     savedState: SavedStateHandle,
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val resourcesProvider: ResourcesProvider,
-) : PagingContractViewModel<PreOrderFlowViewModel.PreOrderState, PreOrderFlowViewModel.PreOrderEvent>(
+) : MviViewModel<PreOrderFlowViewModel.PreOrderState, PreOrderFlowViewModel.PreOrderEvent>(
     PreOrderState()
 ) {
 
@@ -38,17 +38,17 @@ class PreOrderFlowViewModel @Inject constructor(
 
     fun fetchPreOrderData() = viewModelScope.launch {
         vodovozServiceRepository.getPreorderFields(productId)
-            .onStart { uiStateListener.updateData { s -> s.copy(uiState = UiState.Loading) } }
+            .onStart { _state.update { s -> s.copy(uiState = UiState.Loading) } }
             .onEach { preOrderSectionResult ->
                 preOrderSectionResult.onSuccess { preOrderSectionModel ->
-                    uiStateListener.updateData { s ->
+                    _state.update { s ->
                         s.copy(
                             uiState = UiState.Success,
                             sectionPreOrder = preOrderSectionModel.toUi(),
                         )
                     }
                 }.onFailure {
-                    uiStateListener.updateData { s ->
+                    _state.update { s ->
                         s.copy(uiState = UiState.Error)
                     }
                 }
@@ -62,8 +62,8 @@ class PreOrderFlowViewModel @Inject constructor(
 
         vodovozServiceRepository.sendPreorder(productId, fields).take(1).collect { result ->
             result.onSuccess { message ->
-                eventListener.emit(PreOrderEvent.ShowSnackbar(message, true))
-                eventListener.emit(PreOrderEvent.GoBack)
+                sendEvent(PreOrderEvent.ShowSnackbar(message, true))
+                sendEvent(PreOrderEvent.GoBack)
             }.onFailure { t ->
                 val errorMessage = when (t) {
                     is ValidationException -> {
@@ -75,11 +75,11 @@ class PreOrderFlowViewModel @Inject constructor(
                         resourcesProvider.getString(R.string.error_message_send_failed)
                     }
                 }
-                eventListener.emit(PreOrderEvent.ShowSnackbar(errorMessage))
+                sendEvent(PreOrderEvent.ShowSnackbar(errorMessage))
             }
         }
 
-        eventListener.emit(PreOrderEvent.HideKeyboard)
+        sendEvent(PreOrderEvent.HideKeyboard)
     }
 
 
@@ -94,7 +94,7 @@ class PreOrderFlowViewModel @Inject constructor(
                 f.getErrorText { id -> resourcesProvider.getString(id) }
             }
         ) { updatedFields, _ ->
-            uiStateListener.updateData { s ->
+            _state.update { s ->
                 s.copy(
                     sectionPreOrder = s.sectionPreOrder.copy(
                         fields = updatedFields
@@ -106,7 +106,7 @@ class PreOrderFlowViewModel @Inject constructor(
 
 
     fun changeFieldValue(field: FieldUi, newValue: String) = viewModelScope.launch {
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             val sectionPreOrder = s.sectionPreOrder
             val fields = sectionPreOrder.fields
             val fieldIndex = fields.indexOfFirst { field.id == it.id }
@@ -122,7 +122,7 @@ class PreOrderFlowViewModel @Inject constructor(
     }
 
     fun navigateBack() = viewModelScope.launch {
-        eventListener.emit(PreOrderEvent.GoBack)
+        sendEvent(PreOrderEvent.GoBack)
     }
 
     data class PreOrderState(

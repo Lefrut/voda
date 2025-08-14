@@ -35,8 +35,8 @@ class AllBrandsFragment : Fragment() {
 
             setContent {
                 VodovozTheme {
-                    val pagingState by viewModel.observeUiState().collectAsStateWithLifecycle()
-                    val viewState by rememberUpdatedState(newValue = pagingState.data)
+                    val pagingState by viewModel.state.collectAsStateWithLifecycle()
+                    val viewState by rememberUpdatedState(newValue = pagingState)
 
                     when (viewState.uiState) {
                         AllBrandsFlowViewModel.AllBrandsUiState.Loading -> {
@@ -50,7 +50,7 @@ class AllBrandsFragment : Fragment() {
 
 
                     LifecycleEffect {
-                        viewModel.observeEvent().collect { event ->
+                        viewModel.events.collect { event ->
                             when (event) {
                                 AllBrandsFlowViewModel.AllBrandsEvents.GoBack -> {
                                     findNavController().popBackStack()

@@ -20,10 +20,10 @@ fun FixedGridFlowRow(
     BoxWithConstraints(
         modifier = modifier.fillMaxWidth()
     ) {
-        val itemWidth = calcCardWidth(maxWidth, horizontalSpacing, itemsInRow)
+        val itemWidth = calcItemWidth(maxWidth, horizontalSpacing, itemsInRow)
 
         FlowRow(
-            modifier = Modifier.matchParentSize(),
+            modifier = Modifier,
             verticalArrangement = Arrangement.spacedBy(verticalSpacing),
             horizontalArrangement = Arrangement.spacedBy(horizontalSpacing),
             maxItemsInEachRow = itemsInRow,
@@ -34,7 +34,7 @@ fun FixedGridFlowRow(
     }
 }
 
-private fun calcCardWidth(totalWidth: Dp, spacing: Dp, itemsInRow: Int): Dp {
+private fun calcItemWidth(totalWidth: Dp, spacing: Dp, itemsInRow: Int): Dp {
     val totalSpacing = spacing * (itemsInRow - 1)
     val rawWidth = (totalWidth - totalSpacing) / itemsInRow
     return Dp(floor(rawWidth.value))

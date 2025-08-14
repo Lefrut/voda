@@ -7,7 +7,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
@@ -19,7 +18,6 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.fragment.findNavController
-import com.vodovoz.app.common.tab.TabManager
 import com.vodovoz.app.core.navigation.ContentSearchNavigator
 import com.vodovoz.app.core.navigation.navigateToCategories
 import com.vodovoz.app.core.navigation.navigateToProductAnalogs
@@ -41,7 +39,8 @@ class ProductCatalogFragment : Fragment() {
 
     internal val viewModel: ProductCatalogViewModel by viewModels()
 
-    @Inject lateinit var navigatorFactory: ContentSearchNavigator.Factory
+    @Inject
+    lateinit var navigatorFactory: ContentSearchNavigator.Factory
 
     private lateinit var searchNavigator: ContentSearchNavigator
 
@@ -78,8 +77,8 @@ class ProductCatalogFragment : Fragment() {
 
             setContent {
                 VodovozTheme {
-                    val pagingState = viewModel.observeUiState().collectAsStateWithLifecycle()
-                    val viewState by rememberUpdatedState(pagingState.value.data)
+                    val pagingState by viewModel.state.collectAsStateWithLifecycle()
+                    val viewState by rememberUpdatedState(pagingState)
                     val lazyGridState = rememberLazyGridState()
                     val context = LocalContext.current
 
@@ -115,11 +114,15 @@ class ProductCatalogFragment : Fragment() {
                     }
 
                     LifecycleEffect {
+                        viewModel.listenFavorites()
+                    }
+
+                    LifecycleEffect {
                         viewModel.listenProductLoadings()
                     }
 
                     LifecycleEffect {
-                        viewModel.observeEvent().collect { event ->
+                        viewModel.events.collect { event ->
                             when (event) {
                                 ProductCatalogViewModel.ProductCatalogEvent.GoBack -> {
                                     findNavController().popBackStack()

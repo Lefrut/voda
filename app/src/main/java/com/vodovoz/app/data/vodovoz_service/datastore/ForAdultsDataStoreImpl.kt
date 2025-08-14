@@ -29,10 +29,12 @@ private val Context.adultsPrefsDataStore by preferencesDataStore(
 @Singleton
 class ForAdultsDataStoreImpl @Inject constructor(
     @ApplicationContext
-    private val context: Context,
+    context: Context,
 ) : ForAdultsDataStore {
 
-    override val canViewFlow: Flow<Boolean> = context.adultsPrefsDataStore.data.onStart {
+    private val dataStore = context.adultsPrefsDataStore
+
+    override val canViewFlow: Flow<Boolean> = dataStore.data.onStart {
         ensureFresh()
     }.map { prefs ->
         val last = prefs[keyLastCheck] ?: 0L
@@ -46,17 +48,17 @@ class ForAdultsDataStoreImpl @Inject constructor(
     }
 
     override suspend fun setCanView(canView: Boolean) {
-        context.adultsPrefsDataStore.edit { prefs ->
+        dataStore.edit { prefs ->
             prefs[keyCanView] = canView
             prefs[keyLastCheck] = System.currentTimeMillis()
         }
     }
 
     private suspend fun ensureFresh() {
-        val prefs = context.adultsPrefsDataStore.data.firstOrNull() ?: return
+        val prefs = dataStore.data.firstOrNull() ?: return
         val last = prefs[keyLastCheck] ?: 0L
         if (System.currentTimeMillis() - last > TIMEOUT_MS) {
-            context.adultsPrefsDataStore.edit {
+            dataStore.edit {
                 it[keyCanView] = false
                 it[keyLastCheck] = System.currentTimeMillis()
             }

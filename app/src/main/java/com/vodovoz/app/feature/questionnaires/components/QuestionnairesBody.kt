@@ -25,6 +25,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -87,7 +88,7 @@ fun QuestionnairesBody(
                                     .padding(horizontal = 16.dp)
                                     .pointerInput(Unit) {
                                         awaitEachGesture {
-                                            awaitPointerEvent(androidx.compose.ui.input.pointer.PointerEventPass.Initial)
+                                            awaitPointerEvent(PointerEventPass.Initial)
                                             onFieldClick(component)
                                         }
                                     },

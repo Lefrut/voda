@@ -4,13 +4,10 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import androidx.paging.CombinedLoadStates
 import androidx.paging.LoadState
 import androidx.paging.PagingData
 import androidx.paging.map
-import com.vodovoz.app.common.content.Event
-import com.vodovoz.app.common.content.PagingContractViewModel
-import com.vodovoz.app.common.content.State
-import com.vodovoz.app.common.content.updateData
 import com.vodovoz.app.design_system.model.AboutAdvertisingUi
 import com.vodovoz.app.design_system.model.PromotionCategoryUi
 import com.vodovoz.app.design_system.model.PromotionUi
@@ -19,11 +16,15 @@ import com.vodovoz.app.design_system.model.mapToUi
 import com.vodovoz.app.design_system.model.toUi
 import com.vodovoz.app.domain.general.model.promotion.PromotionsSectionModel
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
-import com.vodovoz.app.ui.paging.PagingDataListener
+import com.vodovoz.app.ui.mvi.Event
+import com.vodovoz.app.ui.paging.PagingMviViewModel
+import com.vodovoz.app.ui.paging.PagingState
+import com.vodovoz.app.ui.paging.emptyCombinedLoadStates
 import com.vodovoz.app.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -31,37 +32,18 @@ import javax.inject.Inject
 class AllPromotionsFlowViewModel @Inject constructor(
     savedState: SavedStateHandle,
     private val vodovozServiceRepository: VodovozServiceRepository,
-) : PagingContractViewModel<AllPromotionsFlowViewModel.AllPromotionsState, AllPromotionsFlowViewModel.AllPromotionsEvent>(
+) : PagingMviViewModel<PromotionUi, AllPromotionsFlowViewModel.AllPromotionsState, AllPromotionsFlowViewModel.AllPromotionsEvent>(
     AllPromotionsState()
 ) {
 
     private val dataSource = savedState.get<AllPromotionsFragment.DataSource>("dataSource")
         ?: AllPromotionsFragment.DataSource.All
 
-    private val pagingListener = PagingDataListener { snapshotList ->
-        uiStateListener.updateData { s ->
-            s.copy(
-                promotions = snapshotList.mapNotNull { promotion -> promotion }
-            )
-        }
-    }
-
     init {
-        listenProductsLoadStates()
         fetchPromotions()
     }
 
-    private fun listenProductsLoadStates() = viewModelScope.launch {
-        pagingListener.collectLoadState { combinedLoadStates ->
-            uiStateListener.updateData { s ->
-                s.copy(
 
-                    appendState = combinedLoadStates.append
-                )
-            }
-        }
-
-    }
 
     private suspend fun getAllPromotions(): PromotionsSectionModel? {
         return when (dataSource) {
@@ -93,7 +75,7 @@ class AllPromotionsFlowViewModel @Inject constructor(
     }
 
     fun fetchPromotions() = viewModelScope.launch {
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(uiState = UiState.Loading)
         }
 
@@ -110,7 +92,7 @@ class AllPromotionsFlowViewModel @Inject constructor(
 
 
         if (sectionPromotions == null) {
-            uiStateListener.updateData { s ->
+            _state.update { s ->
                 s.copy(uiState = UiState.Error)
             }
             return@launch
@@ -125,7 +107,7 @@ class AllPromotionsFlowViewModel @Inject constructor(
                 stateSnapshot.currentCategory
             }
 
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             val title = sectionPromotions.title
 
             s.copy(
@@ -137,7 +119,7 @@ class AllPromotionsFlowViewModel @Inject constructor(
         }
 
         getAllPromotionsPaged(currentCategory.id).collect { pagingData ->
-            pagingListener.collectPagingData(pagingData)
+            collectPagingData(pagingData)
         }
 
     }
@@ -145,15 +127,15 @@ class AllPromotionsFlowViewModel @Inject constructor(
     fun selectSection(category: PromotionCategoryUi) = viewModelScope.launch {
         if (category == stateSnapshot.currentCategory) return@launch
 
-        eventListener.emit(AllPromotionsEvent.ScrollTop)
-        uiStateListener.updateData { s ->
+        sendEvent(AllPromotionsEvent.ScrollTop)
+        _state.update { s ->
             s.copy(currentCategory = category)
         }
         fetchPromotions()
     }
 
     fun closeAdvertisingBottomSheet() = viewModelScope.launch {
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(
                 showAdvertisingBottomSheet = false
             )
@@ -162,7 +144,7 @@ class AllPromotionsFlowViewModel @Inject constructor(
 
     fun showAdvertisingBottomSheet(promotionUi: PromotionUi) = viewModelScope.launch {
         promotionUi.aboutAdvertisingUi?.let {
-            uiStateListener.updateData { s ->
+            _state.update { s ->
                 s.copy(
                     currentAdvertising = promotionUi.aboutAdvertisingUi,
                     showAdvertisingBottomSheet = true
@@ -172,17 +154,13 @@ class AllPromotionsFlowViewModel @Inject constructor(
     }
 
     fun navigateToPromotionDetails(promotion: PromotionUi) = viewModelScope.launch {
-        eventListener.emit(AllPromotionsEvent.GoToProductDetails(promotionId = promotion.id))
+        sendEvent(AllPromotionsEvent.GoToProductDetails(promotionId = promotion.id))
     }
 
     fun navigateBack() = viewModelScope.launch {
-        eventListener.emit(AllPromotionsEvent.GoBack)
+        sendEvent(AllPromotionsEvent.GoBack)
     }
-
-    fun notifyPagingPromotions(index: Int) = viewModelScope.launch {
-        kotlin.runCatching { pagingListener[index] }
-    }
-
+    
     @Immutable
     data class AllPromotionsState(
         val title: String = "",
@@ -191,9 +169,16 @@ class AllPromotionsFlowViewModel @Inject constructor(
         val showAdvertisingBottomSheet: Boolean = false,
         val currentAdvertising: AboutAdvertisingUi = AboutAdvertisingUi.Empty,
         val uiState: UiState = UiState.Loading,
-        val promotions: List<PromotionUi> = emptyList(),
         val appendState: LoadState = LoadState.NotLoading(false),
-    ) : State
+        override val items: List<PromotionUi> = emptyList(),
+        override val loadStates: CombinedLoadStates = emptyCombinedLoadStates,
+    ) : PagingState<PromotionUi, AllPromotionsState>() {
+
+        override fun copyPagingState(
+            items: List<PromotionUi>,
+            loadStates: CombinedLoadStates,
+        ): AllPromotionsState = copy(items = items, loadStates = loadStates)
+    }
 
     @Stable
     sealed interface UiState {

@@ -3,10 +3,10 @@ package com.vodovoz.app.feature.filter_values
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import com.vodovoz.app.common.content.Event
-import com.vodovoz.app.common.content.PagingContractViewModel
-import com.vodovoz.app.common.content.State
-import com.vodovoz.app.common.content.updateData
+import com.vodovoz.app.ui.mvi.Event
+import com.vodovoz.app.ui.mvi.MviViewModel
+import com.vodovoz.app.ui.mvi.State
+import kotlinx.coroutines.flow.update
 import com.vodovoz.app.design_system.model.filters.FilterUi
 import com.vodovoz.app.design_system.model.filters.FilterValueUi
 import com.vodovoz.app.design_system.model.filters.mapToUi
@@ -21,7 +21,7 @@ import javax.inject.Inject
 class FilterValuesViewModel @Inject constructor(
     private val vodovozServiceRepository: VodovozServiceRepository,
     savedStateHandle: SavedStateHandle,
-) : PagingContractViewModel<FilterValuesViewModel.ConcreteFilterState, FilterValuesViewModel.ConcreteFilterEvent>(
+) : MviViewModel<FilterValuesViewModel.ConcreteFilterState, FilterValuesViewModel.ConcreteFilterEvent>(
     ConcreteFilterState()
 ) {
 
@@ -36,7 +36,7 @@ class FilterValuesViewModel @Inject constructor(
 
 
     private fun fetchFilterValues() = viewModelScope.launch {
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(uiState = ConcreteFilterUiState.Loading)
         }
         val filterValuesResult =
@@ -44,7 +44,7 @@ class FilterValuesViewModel @Inject constructor(
 
         filterValuesResult.onSuccess { filterValues ->
 
-            uiStateListener.updateData { s ->
+            _state.update { s ->
                 s.copy(
                     filter = filter.copy(
                         values = filterValues.mapToUi().map { value ->
@@ -61,7 +61,7 @@ class FilterValuesViewModel @Inject constructor(
     }
 
     fun selectFilterValue(filterValue: FilterValueUi) = viewModelScope.launch {
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             val filter = s.filter
             s.copy(
                 filter = filter.copy(
@@ -78,13 +78,13 @@ class FilterValuesViewModel @Inject constructor(
     }
 
     fun navigateBack() = viewModelScope.launch {
-        eventListener.emit(ConcreteFilterEvent.GoBack)
+        sendEvent(ConcreteFilterEvent.GoBack)
     }
 
     fun navigateToProductFilters() = viewModelScope.launch {
         val currentFilter = stateSnapshot.filter
 
-        eventListener.emit(
+        sendEvent(
             ConcreteFilterEvent.GoToProductFilters(
                 filter = currentFilter.copy(
                     values = currentFilter.values
@@ -94,13 +94,13 @@ class FilterValuesViewModel @Inject constructor(
     }
 
     fun changeSearchQuery(newSearchQuery: String) = viewModelScope.launch {
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(searchQuery = newSearchQuery)
         }
     }
 
     fun changeSearchMode(searchMode: Boolean) = viewModelScope.launch {
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(
                 isSearchMode = searchMode,
                 searchQuery = ""

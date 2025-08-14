@@ -9,6 +9,7 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -20,8 +21,7 @@ import com.valentinilk.shimmer.rememberShimmer
 import com.vodovoz.app.design_system.composables.list.ProductListCategoriesRow
 import com.vodovoz.app.design_system.composables.list.ProductListOptionsRow
 import com.vodovoz.app.design_system.composables.list.ProductListTitle
-import com.vodovoz.app.design_system.composables.list.gridProducts
-import com.vodovoz.app.design_system.composables.list.linearProducts
+import com.vodovoz.app.design_system.composables.list.linearOrGridProducts
 import com.vodovoz.app.design_system.composables.placeholders.VodovozPlaceholder
 import com.vodovoz.app.design_system.model.ParentCategoryUi
 import com.vodovoz.app.design_system.model.ProductUi
@@ -118,7 +118,6 @@ fun ProductCatalogBody(
             )
         }
 
-
         val refreshLoadState = productsLoadStates.refresh
         if (refreshLoadState is LoadState.Error && refreshLoadState.error is EmptyResultException) {
             item(span = { GridItemSpan(2) }) {
@@ -128,29 +127,18 @@ fun ProductCatalogBody(
 
                 VodovozPlaceholder(data = placeholder)
             }
-        } else if (isGridView) {
-            gridProducts(
-                products,
-                productsLoadStates,
-                shimmer,
-                onProductSee,
-                onProductClick,
-                onProductLike,
-                onProductAnalogsClick,
-                onIncrementProductToCart,
-                onDecrementProductToCart
-            )
         } else {
-            linearProducts(
-                products,
-                productsLoadStates,
-                shimmer,
-                onProductSee,
-                onProductClick,
-                onProductLike,
-                onProductAnalogsClick,
-                onIncrementProductToCart,
-                onDecrementProductToCart
+            linearOrGridProducts(
+                grid = isGridView,
+                products = products,
+                loadState = productsLoadStates,
+                shimmerState = shimmer,
+                onProductSee = onProductSee,
+                onProductClick = onProductClick,
+                onProductLike = onProductLike,
+                onProductAnalogsClick = onProductAnalogsClick,
+                onIncrementProductToCart = onIncrementProductToCart,
+                onDecrementProductToCart = onDecrementProductToCart
             )
         }
     }

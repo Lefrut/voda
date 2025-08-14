@@ -5,10 +5,10 @@ import androidx.compose.runtime.Stable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.vodovoz.app.common.cart.CartManager
-import com.vodovoz.app.common.content.Event
-import com.vodovoz.app.common.content.PagingContractViewModel
-import com.vodovoz.app.common.content.State
-import com.vodovoz.app.common.content.updateData
+import com.vodovoz.app.ui.mvi.Event
+import com.vodovoz.app.ui.mvi.MviViewModel
+import com.vodovoz.app.ui.mvi.State
+import kotlinx.coroutines.flow.update
 import com.vodovoz.app.common.like.LikeManager
 import com.vodovoz.app.common.search.SearchManager
 import com.vodovoz.app.design_system.model.ProductUi
@@ -42,7 +42,7 @@ class SearchFlowViewModel @Inject constructor(
     private val searchManager: SearchManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
     savedStateHandle: SavedStateHandle,
-) : PagingContractViewModel<SearchFlowViewModel.SearchState, SearchFlowViewModel.SearchEvents>(
+) : MviViewModel<SearchFlowViewModel.SearchState, SearchFlowViewModel.SearchEvents>(
     SearchState()
 ) {
 
@@ -55,19 +55,19 @@ class SearchFlowViewModel @Inject constructor(
         listenFavorites()
     }
 
-    suspend fun listenCart() = uiStateListener.combine(cartManager.observeCarts()) { _, cart ->
+    suspend fun listenCart() = _state.combine(cartManager.observeCarts()) { _, cart ->
         cart
     }.collectLatest { cart ->
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(sectionRecommendations = s.sectionRecommendations.withUpdatedCart(cart))
         }
     }
 
     suspend fun listenProductLoadings() =
-        uiStateListener.combine(cartManager.blockedProductsState) { _, blockedProducts ->
+        _state.combine(cartManager.blockedProductsState) { _, blockedProducts ->
             blockedProducts
         }.collectLatest { blockedProducts ->
-            uiStateListener.updateData { s ->
+            _state.update { s ->
                 s.copy(
                     sectionRecommendations = s.sectionRecommendations.withUpdatedLoading(
                         blockedProducts
@@ -77,11 +77,11 @@ class SearchFlowViewModel @Inject constructor(
         }
 
     private fun listenFavorites() = viewModelScope.launch {
-        uiStateListener.map { pagingState -> pagingState.data.sectionRecommendations.items }
+        _state.map { pagingState -> pagingState.sectionRecommendations.items }
             .combine(likeManager.observeLikes()) { products, favorites ->
                 products to favorites
             }.collectLatest { (products, favorites) ->
-                uiStateListener.updateData { s ->
+                _state.update { s ->
                     s.copy(
                         sectionRecommendations = s.sectionRecommendations.copy(
                             items = products.withUpdatedFavorites(favorites)
@@ -92,10 +92,10 @@ class SearchFlowViewModel @Inject constructor(
     }
 
     suspend fun listenSearchHistory() =
-        uiStateListener.combine(searchManager.fetchSearchHistoryFlow()) { _, searchHistory ->
+        _state.combine(searchManager.fetchSearchHistoryFlow()) { _, searchHistory ->
             searchHistory
         }.collectLatest { searchHistory ->
-            uiStateListener.updateData { s ->
+            _state.update { s ->
                 s.copy(
                     searchHistory = searchHistory.filter { query ->
                         query.contains(s.query)
@@ -107,7 +107,7 @@ class SearchFlowViewModel @Inject constructor(
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun handleQueries() =
         querySharedFlow.onStart {
-            uiStateListener.updateData { s ->
+            _state.update { s ->
                 s.copy(
                     uiState = UiState.Loading,
                     query = previousSearchQuery
@@ -117,7 +117,7 @@ class SearchFlowViewModel @Inject constructor(
         }.debounceWithMax(200L, 5).mapLatest { query ->
             fun checkAvailableData() {
                 if (stateSnapshot.matchingQueries.isEmpty() && stateSnapshot.sectionRecommendations.items.isEmpty()) {
-                    uiStateListener.updateData { s ->
+                    _state.update { s ->
                         s.copy(uiState = UiState.Error)
                     }
                 }
@@ -144,7 +144,7 @@ class SearchFlowViewModel @Inject constructor(
             val section = miniSearchRecommendations.section.toUi()
 
 
-            uiStateListener.updateData { s ->
+            _state.update { s ->
                 s.copy(
                     matchingQueries = queries,
                     sectionRecommendations = section,
@@ -167,7 +167,7 @@ class SearchFlowViewModel @Inject constructor(
             }
 
             if (uiState is UiState.Empty || (uiState is UiState.Error && stateSnapshot.sectionRecommendations.items.isEmpty())) {
-                uiStateListener.updateData { s ->
+                _state.update { s ->
                     s.copy(uiState = uiState)
                 }
             }
@@ -181,7 +181,7 @@ class SearchFlowViewModel @Inject constructor(
             val queries = searchRecommendations.queries
             val section = searchRecommendations.section.toUi()
 
-            uiStateListener.updateData { s ->
+            _state.update { s ->
                 s.copy(
                     matchingQueries = queries,
                     sectionRecommendations = section,
@@ -191,7 +191,7 @@ class SearchFlowViewModel @Inject constructor(
         }.onFailure {
             val currentQuery = stateSnapshot.query
             if (stateSnapshot.matchingQueries.isEmpty() && stateSnapshot.sectionRecommendations.items.isEmpty() && currentQuery.isBlank()) {
-                uiStateListener.updateData { s ->
+                _state.update { s ->
                     s.copy(uiState = UiState.Error)
                 }
             }
@@ -200,7 +200,7 @@ class SearchFlowViewModel @Inject constructor(
     }
 
     fun retrySearchQuery() = viewModelScope.launch {
-        uiStateListener.updateData { s -> s.copy(uiState = UiState.Loading) }
+        _state.update { s -> s.copy(uiState = UiState.Loading) }
         val query = stateSnapshot.query
         if (query.isBlank()) {
             searchByEmptyQuery()
@@ -214,7 +214,7 @@ class SearchFlowViewModel @Inject constructor(
         if (currentQuery.isBlank()) return@launch
 
         launch { searchManager.addQueryToHistory(currentQuery) }
-        eventListener.emit(SearchEvents.GoToSearchProductList(currentQuery))
+        sendEvent(SearchEvents.GoToSearchProductList(currentQuery))
     }
 
 
@@ -227,7 +227,7 @@ class SearchFlowViewModel @Inject constructor(
         val currentQuery = stateSnapshot.query
         if (query == currentQuery) return@launch
 
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(query = query)
         }
         querySharedFlow.emit(query)
@@ -235,11 +235,11 @@ class SearchFlowViewModel @Inject constructor(
 
 
     fun navigateToScan() = viewModelScope.launch {
-        eventListener.emit(SearchEvents.GoToScanner)
+        sendEvent(SearchEvents.GoToScanner)
     }
 
     fun navigateBack() = viewModelScope.launch {
-        eventListener.emit(SearchEvents.GoBack)
+        sendEvent(SearchEvents.GoBack)
     }
 
     fun removeSearchQuery(searchQuery: String) = viewModelScope.launch {
@@ -251,11 +251,11 @@ class SearchFlowViewModel @Inject constructor(
     }
 
     fun navigateToProductDetails(product: ProductUi) = viewModelScope.launch {
-        eventListener.emit(SearchEvents.GoToProductDetails(product.id))
+        sendEvent(SearchEvents.GoToProductDetails(product.id))
     }
 
     fun navigateToProductAnalogs(product: ProductUi) = viewModelScope.launch {
-        eventListener.emit(SearchEvents.GoToProductAnalogs(product.id))
+        sendEvent(SearchEvents.GoToProductAnalogs(product.id))
     }
 
     fun incrementProductToCart(product: ProductUi) = viewModelScope.launch {

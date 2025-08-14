@@ -48,8 +48,8 @@ class NotificationSettingsFragment : Fragment() {
 
             setContent {
                 VodovozTheme {
-                    val pagingState by viewModel.observeUiState().collectAsStateWithLifecycle()
-                    val viewState by rememberUpdatedState(newValue = pagingState.data)
+                    val pagingState by viewModel.state.collectAsStateWithLifecycle()
+                    val viewState by rememberUpdatedState(newValue = pagingState)
                     val snackbarHostState = remember { SnackbarHostState() }
 
                     NotificationSettingsScreen(
@@ -59,7 +59,7 @@ class NotificationSettingsFragment : Fragment() {
                     )
 
                     LifecycleEffect(snackbarHostState) {
-                        viewModel.observeEvent().collect { event ->
+                        viewModel.events.collect { event ->
                             when (event) {
                                 is NotificationSettingsViewModel.NotSettingsEvents.ShowToast -> {
                                     snackbarHostState.showSnackbar(event.message)

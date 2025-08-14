@@ -1,24 +1,31 @@
 package com.vodovoz.app.data.vodovoz_service.model.unrated_products
 
 import androidx.annotation.Keep
-import com.google.gson.annotations.Expose
-import com.google.gson.annotations.SerializedName
+import com.squareup.moshi.Json
 
 @Keep
 data class UnratedProductsSectionDTO(
-    @SerializedName("TITLERAZDEL")
-    @Expose
+    @Json(name = "TITLERAZDEL")
     val TITLERAZDEL: String?,
 
-    @SerializedName("TITLETOVAR")
-    @Expose
+    @Json(name = "TITLETOVAR")
     val TITLETOVAR: String?,
 
-    @SerializedName("LISTRAZDEL")
-    @Expose
+    @Json(name = "LISTRAZDEL")
     val LISTRAZDEL: List<UnratedProductDTO>?,
 
-    @SerializedName("VSEGOTOVAR")
-    @Expose
-    val VSEGOTOVAR: String?
+    @Json(name = "VSEGOTOVAR")
+    val VSEGOTOVAR: String?,
+
+    @Json(name = "KNOPKA")
+    val KNOPKA: UnratedProductsButton?,
 )
+
+@Keep
+data class UnratedProductsButton(
+    @Json(name = "NAME")
+    val NAME: String,
+    @Json(name = "ID")
+    val ID: String?,
+)
+

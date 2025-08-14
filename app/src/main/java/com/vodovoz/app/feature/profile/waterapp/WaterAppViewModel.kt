@@ -3,10 +3,10 @@ package com.vodovoz.app.feature.profile.waterapp
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.viewModelScope
-import com.vodovoz.app.common.content.Event
-import com.vodovoz.app.common.content.PagingContractViewModel
-import com.vodovoz.app.common.content.State
-import com.vodovoz.app.common.content.updateData
+import com.vodovoz.app.ui.mvi.Event
+import com.vodovoz.app.ui.mvi.MviViewModel
+import com.vodovoz.app.ui.mvi.State
+import kotlinx.coroutines.flow.update
 import com.vodovoz.app.feature.profile.waterapp.model.ReminderIntervalUi
 import com.vodovoz.app.feature.profile.waterapp.model.WaterAppActivityLevel
 import com.vodovoz.app.feature.profile.waterapp.model.WaterAppUiState
@@ -21,7 +21,7 @@ import javax.inject.Inject
 @Stable
 class WaterAppViewModel @Inject constructor(
     private val waterAppHelper: WaterAppHelper,
-) : PagingContractViewModel<WaterAppViewModel.WaterAppState, WaterAppViewModel.WaterAppEvents>(
+) : MviViewModel<WaterAppViewModel.WaterAppState, WaterAppViewModel.WaterAppEvents>(
     WaterAppState()
 ) {
 
@@ -40,20 +40,20 @@ class WaterAppViewModel @Inject constructor(
         } ?: (null to null)
 
         if (userStarted == true) {
-            uiStateListener.updateData { s ->
+            _state.update { s ->
                 s.copy(uiState = if (firstShow == true) WaterAppUiState.Main else WaterAppUiState.Settings)
             }
         }
 
         launch {
             waterAppHelper.observeWaterAppUserData().collectLatest { userData ->
-                uiStateListener.updateData { s -> s.copy(userData = userData ?: s.userData) }
+                _state.update { s -> s.copy(userData = userData ?: s.userData) }
             }
         }
 
         launch {
             waterAppHelper.observeWaterAppRateData().collectLatest {
-                uiStateListener.updateData { s ->
+                _state.update { s ->
                     val rateData = it ?: s.rateData
                     s.copy(rateData = rateData)
                 }
@@ -62,7 +62,7 @@ class WaterAppViewModel @Inject constructor(
 
         launch {
             waterAppHelper.observeWaterAppNotificationData().collectLatest { notificationData ->
-                uiStateListener.updateData { s ->
+                _state.update { s ->
                     val uiNotificationData = notificationData ?: s.notificationData
                     s.copy(
                         notificationData = uiNotificationData,
@@ -82,11 +82,11 @@ class WaterAppViewModel @Inject constructor(
     }
 
     fun navigateBack() = viewModelScope.launch {
-        eventListener.emit(WaterAppEvents.GoBack)
+        sendEvent(WaterAppEvents.GoBack)
     }
 
     fun goToUserFields() = viewModelScope.launch {
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(uiState = WaterAppUiState.UserData.Gender)
         }
     }
@@ -100,7 +100,7 @@ class WaterAppViewModel @Inject constructor(
             is WaterAppUiState.UserData -> currentUiState.previous() ?: WaterAppUiState.Welcome
             else -> currentUiState
         }
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(
                 uiState = if (stateSnapshot.notificationData.started) WaterAppUiState.Settings
                 else prevUiState
@@ -126,7 +126,7 @@ class WaterAppViewModel @Inject constructor(
 
 
 
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(
                 uiState = if (stateSnapshot.notificationData.firstShow) {
                     WaterAppUiState.Settings
@@ -146,7 +146,7 @@ class WaterAppViewModel @Inject constructor(
     }
 
     fun checkHaveNotifications() = viewModelScope.launch {
-        eventListener.emit(WaterAppEvents.SwitchNotifications(!stateSnapshot.notificationData.switch))
+        sendEvent(WaterAppEvents.SwitchNotifications(!stateSnapshot.notificationData.switch))
     }
 
     fun changeHaveNotifications(haveNotifications: Boolean) = viewModelScope.launch {
@@ -160,7 +160,7 @@ class WaterAppViewModel @Inject constructor(
         waterAppHelper.saveUserData()
         waterAppHelper.calculateAndSaveRate()
 
-        uiStateListener.updateData { s -> s.copy(uiState = WaterAppUiState.Main) }
+        _state.update { s -> s.copy(uiState = WaterAppUiState.Main) }
 
 
     }
@@ -170,13 +170,13 @@ class WaterAppViewModel @Inject constructor(
         waterAppHelper.fetchWaterAppUserData()
         waterAppHelper.fetchWaterAppNotificationData()
 
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(uiState = WaterAppUiState.Main)
         }
     }
 
     fun goToSettings() = viewModelScope.launch {
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(uiState = WaterAppUiState.Settings)
         }
     }
@@ -217,12 +217,12 @@ class WaterAppViewModel @Inject constructor(
     private fun checkGoalCompleted() = viewModelScope.launch {
         delay(2000L)
         if (waterAppHelper.observeWaterAppRateData().value?.canFill == false) {
-            uiStateListener.updateData { s -> s.copy(uiState = WaterAppUiState.GoalCompleted) }
+            _state.update { s -> s.copy(uiState = WaterAppUiState.GoalCompleted) }
         }
     }
 
     fun goToUserDataStage(stage: WaterAppUiState.UserData) = viewModelScope.launch {
-        uiStateListener.updateData { s -> s.copy(uiState = stage) }
+        _state.update { s -> s.copy(uiState = stage) }
     }
 
     fun addChangeWaterStep() = viewModelScope.launch {
@@ -235,7 +235,7 @@ class WaterAppViewModel @Inject constructor(
             else -> currentValue
         } ?: 250
 
-        uiStateListener.updateData { state ->
+        _state.update { state ->
             state.copy(changeWaterStep = nextStep)
         }
     }
@@ -250,23 +250,23 @@ class WaterAppViewModel @Inject constructor(
             else -> currentValue
         } ?: 250
 
-        uiStateListener.updateData { it.copy(changeWaterStep = prevStep) }
+        _state.update { it.copy(changeWaterStep = prevStep) }
     }
     fun showNotificationSettingsDialog() = viewModelScope.launch {
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(showNotificationSettingsDialog = true)
         }
     }
 
     fun closeNotificationSettingsDialog() = viewModelScope.launch {
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(showNotificationSettingsDialog = false)
         }
     }
 
     fun openNotificationSettings() = viewModelScope.launch {
-        uiStateListener.updateData { s -> s.copy(showNotificationSettingsDialog = false) }
-        eventListener.emit(WaterAppEvents.OpenNotificationSettings)
+        _state.update { s -> s.copy(showNotificationSettingsDialog = false) }
+        sendEvent(WaterAppEvents.OpenNotificationSettings)
     }
 
 

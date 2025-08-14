@@ -7,21 +7,21 @@ import androidx.paging.LoadStates
 import androidx.paging.PagingData
 import androidx.paging.PagingDataEvent
 import androidx.paging.PagingDataPresenter
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.filterNotNull
 
 
 class PagingDataListener<T : Any>(
-    onUpdateItems: suspend (ItemSnapshotList<T>) -> Unit,
+    private val dispatcher: CoroutineDispatcher = Dispatchers.Default,
+    private val onUpdateItems: suspend (ItemSnapshotList<T>) -> Unit,
 ) {
 
-    private val pagingDataPresenter = object : PagingDataPresenter<T>(Dispatchers.Default) {
+    private val pagingDataPresenter = object : PagingDataPresenter<T>(dispatcher) {
         override suspend fun presentPagingDataEvent(event: PagingDataEvent<T>) {
             onUpdateItems(snapshot())
         }
     }
-
-
 
     operator fun get(index: Int): T? = kotlin.runCatching { pagingDataPresenter[index] }.getOrNull()
 

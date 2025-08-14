@@ -4,10 +4,10 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import com.vodovoz.app.common.content.Event
-import com.vodovoz.app.common.content.PagingContractViewModel
-import com.vodovoz.app.common.content.State
-import com.vodovoz.app.common.content.updateData
+import com.vodovoz.app.ui.mvi.Event
+import com.vodovoz.app.ui.mvi.MviViewModel
+import com.vodovoz.app.ui.mvi.State
+import kotlinx.coroutines.flow.update
 import com.vodovoz.app.common.jivochat.JivoChatController
 import com.vodovoz.app.design_system.model.ImageAndTextUi
 import com.vodovoz.app.design_system.model.ImageButtonUi
@@ -34,7 +34,7 @@ class TraceOrderViewModel @Inject constructor(
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val siteStateManager: SiteStateManager,
     private val mapServiceRepository: MapServiceRepository,
-) : PagingContractViewModel<TraceOrderViewModel.TraceOrderState, TraceOrderViewModel.TraceOrderEvents>(
+) : MviViewModel<TraceOrderViewModel.TraceOrderState, TraceOrderViewModel.TraceOrderEvents>(
     TraceOrderState()
 ) {
 
@@ -48,7 +48,7 @@ class TraceOrderViewModel @Inject constructor(
     }
 
     fun navigateBack() = viewModelScope.launch {
-        eventListener.emit(TraceOrderEvents.GoBack)
+        sendEvent(TraceOrderEvents.GoBack)
     }
 
     fun orderDetailsCallbackFlow(): Flow<Unit> = callbackFlow {
@@ -76,7 +76,7 @@ class TraceOrderViewModel @Inject constructor(
                 .singleResult()
 
         whereOrderDetailsResult.onSuccess { whereOrderDetails ->
-            uiStateListener.updateData { s ->
+            _state.update { s ->
                 s.copy(
                     uiState = TraceOrderUiState.NotLoading,
                     carPoint = whereOrderDetails.driverPont?.toUi() ?: s.carPoint,
@@ -93,75 +93,75 @@ class TraceOrderViewModel @Inject constructor(
     }
 
     fun plusZoom() = viewModelScope.launch {
-        eventListener.emit(TraceOrderEvents.MoveCameraPlus)
+        sendEvent(TraceOrderEvents.MoveCameraPlus)
     }
 
     fun minusZoom() = viewModelScope.launch {
-        eventListener.emit(TraceOrderEvents.MoveCameraMinus)
+        sendEvent(TraceOrderEvents.MoveCameraMinus)
     }
 
     fun checkGeo() = viewModelScope.launch {
-        eventListener.emit(TraceOrderEvents.CheckUserGeo)
+        sendEvent(TraceOrderEvents.CheckUserGeo)
     }
 
     fun showSettingDialog() = viewModelScope.launch {
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(showSettingDialog = true)
         }
     }
 
     fun moveToUserGeo() = viewModelScope.launch {
-        eventListener.emit(TraceOrderEvents.MoveToUserGeo)
+        sendEvent(TraceOrderEvents.MoveToUserGeo)
     }
 
     fun closeSettingsDialog() = viewModelScope.launch {
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(showSettingDialog = false)
         }
     }
 
     fun navigateToLocationSettings() = viewModelScope.launch {
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(showSettingDialog = false)
         }
-        eventListener.emit(TraceOrderEvents.GoToLocationSettings)
+        sendEvent(TraceOrderEvents.GoToLocationSettings)
     }
 
     fun activateButton(imageButton: ImageButtonUi) = viewModelScope.launch {
         when (imageButton.id) {
             "chat" -> {
-                eventListener.emit(TraceOrderEvents.GoToJivoChat(JivoChatController.getLink()))
+                sendEvent(TraceOrderEvents.GoToJivoChat(JivoChatController.getLink()))
             }
 
             else -> {
                 val siteState = siteStateManager.siteStateFlow.value ?: return@launch
                 val phone = siteState.callPhoneNumber
-                eventListener.emit(TraceOrderEvents.Phone(phone))
+                sendEvent(TraceOrderEvents.Phone(phone))
             }
         }
     }
 
     fun moveToAvailableGeo() = viewModelScope.launch {
         if (stateSnapshot.carPoint != null) {
-            eventListener.emit(
+            sendEvent(
                 TraceOrderEvents.MoveToDeliveryGeo(
                     stateSnapshot.finishPoint,
                     stateSnapshot.carPoint
                 )
             )
         } else {
-            eventListener.emit(
+            sendEvent(
                 TraceOrderEvents.MoveToUserGeo
             )
         }
     }
 
     fun hideBottomSheet() = viewModelScope.launch {
-        eventListener.emit(TraceOrderEvents.HideBottomSheet)
+        sendEvent(TraceOrderEvents.HideBottomSheet)
     }
 
     fun showBottomSheet() = viewModelScope.launch {
-        eventListener.emit(TraceOrderEvents.ShowBottomSheet)
+        sendEvent(TraceOrderEvents.ShowBottomSheet)
     }
 
     @Immutable

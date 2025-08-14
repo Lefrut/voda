@@ -3,18 +3,16 @@ package com.vodovoz.app.data.vodovoz_service.model.unrated_products
 import androidx.annotation.Keep
 import com.google.gson.annotations.Expose
 import com.google.gson.annotations.SerializedName
+import com.squareup.moshi.Json
 
 @Keep
 data class UnratedProductDTO(
-    @SerializedName("NAME")
-    @Expose
+    @Json(name = "NAME")
     val NAME: String?,
 
-    @SerializedName("ID")
-    @Expose
+    @Json(name = "ID")
     val ID: Long?,
 
-    @SerializedName("DETAIL_PICTURE")
-    @Expose
+    @Json(name = "DETAIL_PICTURE")
     val DETAIL_PICTURE: String?
 )

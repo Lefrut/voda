@@ -53,8 +53,8 @@ class AllBottlesFlowFragment : Fragment() {
                 setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
 
                 VodovozTheme {
-                    val pagingState by viewModel.observeUiState().collectAsStateWithLifecycle()
-                    val viewState by rememberUpdatedState(pagingState.data)
+                    val pagingState by viewModel.state.collectAsStateWithLifecycle()
+                    val viewState by rememberUpdatedState(pagingState)
 
 
                     Crossfade(
@@ -76,7 +76,7 @@ class AllBottlesFlowFragment : Fragment() {
                     }
 
                     LifecycleEffect {
-                        viewModel.observeEvent().collect { event ->
+                        viewModel.events.collect { event ->
                             when (event) {
                                 AllBottlesFlowViewModel.BottlesEvent.GoBack -> {
                                     findNavController().popBackStack()

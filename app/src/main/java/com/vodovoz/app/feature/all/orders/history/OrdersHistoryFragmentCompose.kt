@@ -44,8 +44,8 @@ class OrdersHistoryFragment : Fragment() {
 
             setContent {
                 VodovozTheme {
-                    val pagingState by viewModel.observeUiState().collectAsStateWithLifecycle()
-                    val viewState by rememberUpdatedState(newValue = pagingState.data)
+                    val pagingState by viewModel.state.collectAsStateWithLifecycle()
+                    val viewState by rememberUpdatedState(newValue = pagingState)
 
                     OrdersHistoryScreen(
                         viewModel = viewModel,
@@ -75,7 +75,7 @@ class OrdersHistoryFragment : Fragment() {
     }
 
     private suspend fun observeEvents() {
-        viewModel.observeEvent().collect { event ->
+        viewModel.events.collect { event ->
             when (event) {
                 is OrdersHistoryViewModel.AllOrdersEvent.GoToCart -> {
                     tabManager.selectTab(R.id.graph_cart)

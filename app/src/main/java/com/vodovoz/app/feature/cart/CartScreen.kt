@@ -54,7 +54,7 @@ fun CartScreen(viewModel: CartFlowViewModel, viewState: CartFlowViewModel.CartSt
             )
             CartBody(
                 blockOrderButton = viewState.blockOrderButton || viewState.showRefreshIndicator,
-                cartItems = viewState.cartItems,
+                cartItems = viewState.items,
                 cartPresent = viewState.present,
                 countCartItemsText = viewState.countText,
                 bottlesButton = viewState.bottlesButton,

@@ -83,8 +83,8 @@ class SearchFragment : Fragment() {
 
             setContent {
                 VodovozTheme {
-                    val pagingState by viewModel.observeUiState().collectAsStateWithLifecycle()
-                    val viewState by rememberUpdatedState(pagingState.data)
+                    val pagingState by viewModel.state.collectAsStateWithLifecycle()
+                    val viewState by rememberUpdatedState(pagingState)
 
                     when (viewState.uiState) {
                         SearchFlowViewModel.UiState.Error -> {
@@ -128,7 +128,7 @@ class SearchFragment : Fragment() {
     }
 
     private suspend fun listenEvents() {
-        viewModel.observeEvent().collect { event ->
+        viewModel.events.collect { event ->
             when (event) {
                 is SearchFlowViewModel.SearchEvents.GoToPreOrder -> {
                     findNavController().navigateToPreOrder(event.productId)

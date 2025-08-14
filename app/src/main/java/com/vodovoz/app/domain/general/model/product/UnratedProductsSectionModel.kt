@@ -5,6 +5,7 @@ data class UnratedProductsSectionModel(
     val productTitle: String,
     val countProductsText: String,
     val products: List<UnratedProductModel>,
+    val buttonText: String,
 )
 
 

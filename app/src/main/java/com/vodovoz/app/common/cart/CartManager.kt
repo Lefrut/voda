@@ -19,6 +19,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withTimeout
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicLong
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -34,9 +35,7 @@ class CartManager @Inject constructor(
 
     private val updateCartListListener = MutableStateFlow(false)
     fun observeUpdateCartList() = updateCartListListener.asStateFlow()
-    fun updateCartListState(update: Boolean) {
-        updateCartListListener.value = update
-    }
+    fun updateCartListState(update: Boolean) { updateCartListListener.value = update }
 
     private val cart = ConcurrentHashMap<Long, Int>()
     private var firstCart: Map<Long, Int>? = null
@@ -46,39 +45,13 @@ class CartManager @Inject constructor(
     var cartVersion = 0
         private set
 
-    private fun calculateCartChanges(
-        firstCart: Map<Long, Int>,
-        cart: Map<Long, Int>,
-    ): Map<Long, Int> {
-        val firstCartCopy = firstCart.toMap()
-        val cartChanges = cart.filter { (key, value) ->
-            val oldValue = firstCartCopy[key]
-            value != oldValue
-        }
-
-        return cartChanges
-    }
-
-    private fun calculateCartWithoutChanges(
-        firstCart: Map<Long, Int>,
-        cartChanges: Map<Long, Int>,
-    ): Map<Long, Int> {
-        return cart.keys.associateWith { key ->
-            val newValue = cartChanges[key] ?: return@associateWith cart[key] ?: 0
-            val oldValue = firstCart[key] ?: 0
-            cart.getOrDefault(key, 0) - (newValue - oldValue)
-        }
-    }
-
-
     fun observeCarts() = cartSharedFlow.asSharedFlow()
 
     suspend fun change(productId: Long, count: Int) = coroutineScope.launch {
         val currentCartVersion = cartMutex.withLock {
             if (_blockedProductsState.value.contains(productId) || count < 0) return@launch
-
             val cartBeforeUpdate = cart.toMap()
-            updateCartItem(productId, count)
+            setCartItem(productId, count)
             if (firstCart == null) {
                 firstCart = cartBeforeUpdate
             }
@@ -88,19 +61,14 @@ class CartManager @Inject constructor(
         delay(365L)
 
         val (currentFirstCart, cartChanges) = cartMutex.withLock {
-
             if (currentCartVersion < cartVersion) return@launch
-
             val cartChanges = calculateCartChanges(
                 firstCart ?: emptyMap(), cart
             )
             val firstCartCopy = firstCart?.toMap()
-
             if (cartChanges.isEmpty() || firstCartCopy == null) return@launch
-
             firstCart = null
             _blockedProductsState.update { s -> s + cartChanges.keys }
-
             firstCartCopy to cartChanges
         }
 
@@ -113,28 +81,17 @@ class CartManager @Inject constructor(
         }
 
         cartMutex.withLock {
-            _blockedProductsState.update { productIds -> productIds - cartChanges.keys }
-            if (currentCartVersion >= cartVersion) {
-                updateCartListState(true)
-            }
+            unblockProducts(cartChanges.keys, currentCartVersion)
         }
     }
 
-    suspend fun clearCart() {
-        cartMutex.withLock {
-            cartVersion++
-            updateCart(emptyMap())
-            _blockedProductsState.update { emptySet() }
+    private fun unblockProducts(blockedProductsIds: Set<Long>, currentCartVersion: Int) {
+        _blockedProductsState.update { productIds -> productIds - blockedProductsIds }
+        if (currentCartVersion >= cartVersion) {
             updateCartListState(true)
         }
     }
 
-    suspend fun syncCart(newCart: Map<Long, Int>) = cartMutex.withLock {
-        if (firstCart != null || blockedProductsState.value.isNotEmpty()) {
-            return@withLock
-        }
-        updateCart(newCart)
-    }
 
     private suspend fun updateCartOnline(
         needUpdate: Map<Long, Int>,
@@ -153,13 +110,13 @@ class CartManager @Inject constructor(
         }.awaitAll()
     }
 
-    private suspend fun updateCart(cart: Map<Long, Int>) {
+    private suspend fun setCart(cart: Map<Long, Int>) {
         this.cart.clear()
         this.cart.putAll(cart)
         cartSharedFlow.emit(this.cart)
     }
 
-    private suspend fun addCart(cart: Map<Long, Int>) {
+    private suspend fun plusCart(cart: Map<Long, Int>) {
         for ((id, count) in cart) {
             val existing = this.cart[id] ?: 0
             this.cart[id] = existing + count
@@ -167,35 +124,37 @@ class CartManager @Inject constructor(
         cartSharedFlow.emit(this.cart)
     }
 
-    private suspend fun updateCartItem(id: Long, count: Int) {
+    private suspend fun setCartItem(id: Long, count: Int) {
         cart[id] = count
         cartSharedFlow.emit(cart)
     }
 
 
-    suspend fun add(
-        productIdWithQuantity: Map<Long, Int>,
-    ) = coroutineScope.launch {
-        val productIdsWithQuantity = formatCart(productIdWithQuantity)
-        add(productIdsWithQuantity).join()
+    suspend fun clearCart() {
+        cartMutex.withLock {
+            cartVersion++
+            setCart(emptyMap())
+            _blockedProductsState.update { emptySet() }
+            updateCartListState(true)
+        }
+    }
+
+    suspend fun syncCart(newCart: Map<Long, Int>) = cartMutex.withLock {
+        if (firstCart != null || blockedProductsState.value.isNotEmpty()) {
+            return@withLock
+        }
+        setCart(newCart)
     }
 
 
-    suspend fun add(
-        vararg productIdWithQuantity: String,
-    ) = coroutineScope.launch {
-        val productIdsWithQuantity = formatCart(*productIdWithQuantity)
-        add(productIdsWithQuantity).join()
-    }
-
-
-    suspend fun add(
-        productIdsWithQuantity: String,
+    suspend fun <T : Any> add(
+        cartItems: T,
     ) = coroutineScope.launch {
         if (cartMutex.isLocked) return@launch
 
         cartMutex.withLock {
-            val addInCart = parseCart(productIdsWithQuantity)
+            val formattedCartItems = formatCart(cartItems).ifEmpty { return@launch }
+            val addInCart = parseCart(formattedCartItems)
             if (blockedProductsState.value.any { id -> addInCart.contains(id) }) return@launch
 
             val currentCartVersion = ++cartVersion
@@ -203,13 +162,13 @@ class CartManager @Inject constructor(
             val firstCartCopy = firstCart?.toMap()
             val cartChanges = calculateCartChanges(
                 firstCart = firstCart ?: emptyMap(),
-                cart = cart
+                cart = this@CartManager.cart
             )
             firstCart = null
 
-            val cartWithoutAdd = cart.toMap()
-            addCart(addInCart)
-            val cartWithAdd = cart.toMap()
+            val cartWithoutAdd = this@CartManager.cart.toMap()
+            plusCart(addInCart)
+            val cartWithAdd = this@CartManager.cart.toMap()
 
             _blockedProductsState.update { s -> s + addInCart.keys }
 
@@ -232,17 +191,14 @@ class CartManager @Inject constructor(
                 withLock = false
             ) {
                 vodovozServiceRepository.addMultipleProductsToCart(
-                    productIdsWithQuantity
+                    formattedCartItems
                 ).singleResult().getOrThrow()
             }
 
-
-            _blockedProductsState.update { s ->
-                s - addInCart.keys
-            }
-            if (currentCartVersion >= cartVersion) {
-                updateCartListState(true)
-            }
+            unblockProducts(
+                addInCart.keys,
+                currentCartVersion
+            )
         }
     }
 
@@ -262,10 +218,10 @@ class CartManager @Inject constructor(
                 cartMutex.lock()
             }
 
-            val cartWithoutChanges = calculateCartWithoutChanges(
+            val cartWithoutChanges = cart.calculateCartWithoutChanges(
                 firstCart, cartChanges
             )
-            updateCart(cartWithoutChanges)
+            setCart(cartWithoutChanges)
 
             if (withLock) {
                 cartMutex.unlock()
@@ -275,12 +231,20 @@ class CartManager @Inject constructor(
     }
 
 
-    fun formatCart(cart: Map<Long, Int>): String {
-        return cart.entries.joinToString(";") { "${it.key}-${it.value}" }
-    }
-
-    private fun formatCart(vararg productIdWithQuantity: String): String {
-        return productIdWithQuantity.toList().joinToString(";")
+    fun <T : Any> formatCart(
+        cart: T,
+        formatters: List<CartFormatter<*>> = listOf(
+            mapCartFormatter,
+            listCartFormatter,
+        ),
+    ): String {
+        formatters.forEach { formatter ->
+            try {
+                @Suppress("UNCHECKED_CAST")
+                return (formatter as CartFormatter<T>).format(cart)
+            } catch (_: ClassCastException) {  }
+        }
+        return ""
     }
 
     private fun parseCart(productsIdsWithQuantity: String): Map<Long, Int> {
@@ -290,5 +254,41 @@ class CartManager @Inject constructor(
                 val (id, count) = it.split("-")
                 id.toLong() to count.toInt()
             }
+    }
+}
+
+fun interface CartFormatter<in T : Any> {
+    fun format(cart: T): String
+}
+
+val listCartFormatter = CartFormatter<List<*>> { list ->
+    list.joinToString(";")
+}
+val mapCartFormatter = CartFormatter<Map<*, *>> { map ->
+    map.entries.joinToString(";") { "${it.key}-${it.value}" }
+}
+
+
+private fun calculateCartChanges(
+    firstCart: Map<Long, Int>,
+    cart: Map<Long, Int>,
+): Map<Long, Int> {
+    val firstCartCopy = firstCart.toMap()
+    val cartChanges = cart.filter { (key, value) ->
+        val oldValue = firstCartCopy[key]
+        value != oldValue
+    }
+
+    return cartChanges
+}
+
+private fun Map<Long, Int>.calculateCartWithoutChanges(
+    firstCart: Map<Long, Int>,
+    cartChanges: Map<Long, Int>,
+): Map<Long, Int> {
+    return keys.associateWith { key ->
+        val newValue = cartChanges[key] ?: return@associateWith get(key) ?: 0
+        val oldValue = firstCart[key] ?: 0
+        getOrDefault(key, 0) - (newValue - oldValue)
     }
 }

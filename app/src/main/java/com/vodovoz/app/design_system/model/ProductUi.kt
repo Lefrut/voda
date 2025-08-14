@@ -204,7 +204,17 @@ data class ProductUi(
     val unitOfMeasurement: String?,
     val forAdults: ForAdultsUi?,
     val button: ColorfulButtonUi?,
-)
+) {
+
+
+}
+
+val ProductUi.percentLabels
+    get() = labels.filter { labelEntity ->
+        labelEntity.name.any { s -> s == '%' }
+    }
+
+val ProductUi.notPercentLables get() = labels - percentLabels.toSet()
 
 
 @Composable

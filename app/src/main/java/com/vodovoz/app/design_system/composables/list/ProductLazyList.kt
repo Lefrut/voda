@@ -15,7 +15,6 @@ import androidx.compose.foundation.lazy.grid.LazyGridScope
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
@@ -84,6 +83,47 @@ fun ProductLazyList(
             }
         }
     }
+}
+
+
+fun LazyGridScope.linearOrGridProducts(
+    grid: Boolean,
+    products: List<ProductUi>,
+    loadState: CombinedLoadStates,
+    shimmerState: Shimmer,
+    onProductSee: (Int) -> Unit,
+    onProductClick: (ProductUi) -> Unit,
+    onProductLike: (ProductUi) -> Unit,
+    onProductAnalogsClick: (ProductUi) -> Unit,
+    onIncrementProductToCart: (ProductUi) -> Unit,
+    onDecrementProductToCart: (ProductUi) -> Unit,
+) {
+    if (grid) {
+        gridProducts(
+            products,
+            loadState,
+            shimmerState,
+            onProductSee,
+            onProductClick,
+            onProductLike,
+            onProductAnalogsClick,
+            onIncrementProductToCart,
+            onDecrementProductToCart
+        )
+    } else {
+        linearProducts(
+            products,
+            loadState,
+            shimmerState,
+            onProductSee,
+            onProductClick,
+            onProductLike,
+            onProductAnalogsClick,
+            onIncrementProductToCart,
+            onDecrementProductToCart
+        )
+    }
+
 }
 
 fun LazyGridScope.linearProducts(
@@ -183,7 +223,7 @@ fun LazyGridScope.gridProducts(
             items(
                 count = products.size,
                 span = { GridItemSpan(1) },
-                key = { i -> products[i].id }
+                key = { i -> products.getOrNull(i)?.id ?: -i }
             ) { index ->
                 SideEffect { onProductSee(index) }
 

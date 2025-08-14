@@ -33,7 +33,8 @@ fun ProductDetailsTopBar(
     onLikeClick: () -> Unit,
     onShareClick: () -> Unit,
     isFavoriteProduct: Boolean,
-    isLoading: Boolean
+    loading: Boolean,
+    showActionIcons: Boolean,
 ) {
     Surface(
         modifier = modifier
@@ -55,9 +56,13 @@ fun ProductDetailsTopBar(
             Spacer(modifier = Modifier.weight(1f))
 
             val shimmer = rememberShimmer(ShimmerBounds.View)
-            if (isLoading) {
-                SkeletonBox(shimmerState = shimmer, modifier = Modifier.height(28.dp).width(124.dp))
-            } else {
+            if (loading) {
+                SkeletonBox(
+                    shimmerState = shimmer, modifier = Modifier
+                        .height(28.dp)
+                        .width(124.dp)
+                )
+            } else if (showActionIcons) {
                 Icon(
                     painter = painterResource(id = if (isFavoriteProduct) R.drawable.ic_favorite_filled else R.drawable.ic_favorite_outline),
                     contentDescription = null,
@@ -97,7 +102,8 @@ private fun ProductDetailTopBarPreview() {
             onLikeClick = { },
             isFavoriteProduct = true,
             onShareClick = {},
-            isLoading = true
+            loading = true,
+            showActionIcons = true
         )
     }
 }

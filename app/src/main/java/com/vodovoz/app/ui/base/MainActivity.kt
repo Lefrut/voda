@@ -18,8 +18,11 @@ import com.google.firebase.messaging.RemoteMessage
 import com.vodovoz.app.R
 import com.vodovoz.app.common.block_app_signal.BlockAppSignal
 import com.vodovoz.app.common.block_app_signal.BlockAppSignalProvider
+import com.vodovoz.app.common.cache.HttpError
 import com.vodovoz.app.common.cache.HttpErrorCache
+import com.vodovoz.app.common.cache.HttpErrorCacheMappers
 import com.vodovoz.app.common.cache.HttpErrorCacheProvider
+import com.vodovoz.app.common.cache.emptyHttpErrorCache
 import com.vodovoz.app.databinding.ActivityMainBinding
 import com.vodovoz.app.feature.sitestate.SiteStateManager
 import com.vodovoz.app.util.extensions.debugLog
@@ -33,8 +36,8 @@ import javax.inject.Inject
 val Activity.blockAppSignal: BlockAppSignal?
     get() = (this as? BlockAppSignalProvider)?.blockAppSignal
 
-val Activity.httpErrorCache: HttpErrorCache?
-    get() = (this as? HttpErrorCacheProvider)?.httpErrorCache
+val Activity?.httpErrorCache: HttpErrorCache
+    get() = ((this as? HttpErrorCacheProvider)?.httpErrorCache) ?: emptyHttpErrorCache
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity(), BlockAppSignalProvider, HttpErrorCacheProvider {

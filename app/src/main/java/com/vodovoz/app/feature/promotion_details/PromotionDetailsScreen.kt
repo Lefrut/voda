@@ -15,7 +15,7 @@ import com.vodovoz.app.feature.promotion_details.composables.PromotionDetailsLoa
 @Composable
 fun PromotionDetailsScreen(
     viewModel: PromotionDetailsViewModel,
-    viewState: PromotionDetailsViewModel.PromotionDetailFlowState,
+    viewState: PromotionDetailsViewModel.PromotionDetailsState,
 ) {
     Column(
         modifier = Modifier
@@ -37,8 +37,8 @@ fun PromotionDetailsScreen(
             PromotionDetailsViewModel.UiState.Success -> {
                 PromotionDetailsBody(
                     promotionDetails = viewState.promotionDetails,
-                    products = viewState.products,
-                    productsLoadStates = viewState.productsLoadStates,
+                    products = viewState.items,
+                    productsLoadStates = viewState.loadStates,
                     productsTitle = viewState.productsTitle,
                     onHyperlinkClick = { url ->
                         viewModel.navigateToWebView(url)
@@ -53,7 +53,7 @@ fun PromotionDetailsScreen(
                         viewModel.changeProductFavorite(product)
                     },
                     onProductSee = { index ->
-                        viewModel.notifyPagingProducts(index)
+                        viewModel.notifyPaging(index)
                     },
                     onIncrementProductToCart = { product ->
                         viewModel.incrementProductToCart(product)

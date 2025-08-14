@@ -87,15 +87,15 @@ fun ProductCatalogScreen(
                         categories = productsSection.categories,
                         currentCategory = viewState.currentCategory,
                         currentSort = viewState.currentSort,
-                        products = viewState.products,
-                        productsLoadStates = viewState.productsLoadStates,
+                        products = viewState.items,
+                        productsLoadStates = viewState.loadStates,
                         isGridView = viewState.isGridView,
                         showFilters = viewState.showFilters,
                         showEmptyCategory = viewState.showEmptyCategory,
                         showShare = viewState.showShare,
                         categoriesTree = viewState.categoryTree,
                         onProductSee = { index ->
-                            viewModel.notifyPagingProducts(index)
+                            viewModel.notifyPaging(index)
                         },
                         onSortingClick = {
                             viewModel.showSortBottomSheet()

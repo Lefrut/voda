@@ -122,8 +122,8 @@ class LoginFragment : Fragment() {
 
             setContent {
                 VodovozTheme {
-                    val pagingState by viewModel.observeUiState().collectAsStateWithLifecycle()
-                    val viewState by rememberUpdatedState(pagingState.data)
+                    val pagingState by viewModel.state.collectAsStateWithLifecycle()
+                    val viewState by rememberUpdatedState(pagingState)
 
                     when (viewState.uiState) {
                         LoginFlowViewModel.LoginUiState.Error -> {
@@ -153,7 +153,7 @@ class LoginFragment : Fragment() {
     }
 
 
-    private suspend fun observeEvents(): Unit = viewModel.observeEvent().collect { events ->
+    private suspend fun observeEvents(): Unit = viewModel.events.collect { events ->
         when (events) {
             LoginFlowViewModel.LoginEvents.AuthSuccess -> {
                 profileViewModel.refresh()

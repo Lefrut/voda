@@ -1,5 +1,6 @@
 package com.vodovoz.app.feature.product_details.composables
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -15,12 +16,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.vodovoz.app.R
 import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.util.extensions.formatRating
-import java.util.Locale
 
 @Composable
 fun ProductDetailsRatingBar(
@@ -44,12 +45,23 @@ fun ProductDetailsRatingBar(
             style = MaterialTheme.typography.titleSmall
         )
 
+        Text(
+            modifier = Modifier.padding(horizontal = 4.dp),
+            text = stringResource(R.string.middle_dot),
+            color = MaterialTheme.colorScheme.surfaceTint,
+            style = MaterialTheme.typography.titleMedium.copy(
+                lineHeightStyle = LineHeightStyle(
+                    LineHeightStyle.Alignment.Top,
+                    LineHeightStyle.Trim.FirstLineTop
+                )
+            )
+        )
+
         Icon(
             painter = painterResource(id = R.drawable.ic_star_active),
             contentDescription = null,
             tint = if (rating <= 0f) MaterialTheme.colorScheme.surfaceVariant else MaterialTheme.colorScheme.tertiary,
             modifier = Modifier
-                .padding(start = 4.dp)
                 .size(16.dp),
         )
 

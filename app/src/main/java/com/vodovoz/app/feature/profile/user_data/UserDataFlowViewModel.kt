@@ -5,10 +5,10 @@ import androidx.compose.runtime.Stable
 import androidx.lifecycle.viewModelScope
 import com.vodovoz.app.R
 import com.vodovoz.app.common.account.LogoutManager
-import com.vodovoz.app.common.content.Event
-import com.vodovoz.app.common.content.PagingContractViewModel
-import com.vodovoz.app.common.content.State
-import com.vodovoz.app.common.content.updateData
+import com.vodovoz.app.ui.mvi.Event
+import com.vodovoz.app.ui.mvi.MviViewModel
+import com.vodovoz.app.ui.mvi.State
+import kotlinx.coroutines.flow.update
 import com.vodovoz.app.common.media.MediaManager
 import com.vodovoz.app.common.resources.ResourcesProvider
 import com.vodovoz.app.design_system.model.widgets.FieldUi
@@ -33,7 +33,7 @@ class UserDataFlowViewModel @Inject constructor(
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val resourcesProvider: ResourcesProvider,
     private val logoutManager: LogoutManager,
-) : PagingContractViewModel<UserDataFlowViewModel.UserDataState, UserDataFlowViewModel.UserDataEvents>(
+) : MviViewModel<UserDataFlowViewModel.UserDataState, UserDataFlowViewModel.UserDataEvents>(
     UserDataState()
 ) {
 
@@ -51,13 +51,13 @@ class UserDataFlowViewModel @Inject constructor(
     }
 
     fun fetchUserData() = viewModelScope.launch {
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(uiState = UserDataUiState.Loading)
         }
         val userDataResult = vodovozServiceRepository.getUserData().singleResult()
 
         userDataResult.onSuccess { userData ->
-            uiStateListener.updateData { s ->
+            _state.update { s ->
                 val photoModel = userData.photo
                 s.copy(
                     title = userData.title,
@@ -73,9 +73,9 @@ class UserDataFlowViewModel @Inject constructor(
 
         }.onFailure { t ->
             if (t is UserNotLoginException && t.placeholder != null) {
-                eventListener.emit(UserDataEvents.RefreshAllAndGoBack)
+                sendEvent(UserDataEvents.RefreshAllAndGoBack)
             } else {
-                uiStateListener.updateData { s ->
+                _state.update { s ->
                     s.copy(uiState = UserDataUiState.Error)
                 }
             }
@@ -84,42 +84,42 @@ class UserDataFlowViewModel @Inject constructor(
 
 
     fun navigateBack() = viewModelScope.launch {
-        eventListener.emit(UserDataEvents.GoBack)
+        sendEvent(UserDataEvents.GoBack)
     }
 
     private fun updateUserAvatar(imageFile: File) = viewModelScope.launch {
         val updateUserAvatarResult =
             vodovozServiceRepository.updateUserAvatar(imageFile).singleResult()
         updateUserAvatarResult.onSuccess { message ->
-            uiStateListener.updateData { s ->
+            _state.update { s ->
                 s.copy(photo = imageFile.path)
             }
-            eventListener.emit(UserDataEvents.UpdateProfile)
-            eventListener.emit(UserDataEvents.ShowSnackbar(message))
+            sendEvent(UserDataEvents.UpdateProfile)
+            sendEvent(UserDataEvents.ShowSnackbar(message))
         }.onFailure {
             val message = it.message ?: return@onFailure
-            eventListener.emit(UserDataEvents.ShowSnackbar(message))
+            sendEvent(UserDataEvents.ShowSnackbar(message))
         }
     }
 
     fun updateUserData() = viewModelScope.launch {
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(buttonLoading = true)
         }
 
         val updateUserDataResult =
             vodovozServiceRepository.updateUserData(stateSnapshot.fields.mapToDomain()).singleResult()
         updateUserDataResult.onSuccess { message ->
-            eventListener.emit(UserDataEvents.UpdateProfile)
-            eventListener.emit(UserDataEvents.ShowSnackbar(message))
+            sendEvent(UserDataEvents.UpdateProfile)
+            sendEvent(UserDataEvents.ShowSnackbar(message))
 
         }.onFailure {
-            eventListener.emit(
+            sendEvent(
                 UserDataEvents.ShowSnackbar(resourcesProvider.getString(R.string.update_user_data_error))
             )
         }
 
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(
                 buttonEnabled = false,
                 buttonLoading = false
@@ -128,26 +128,26 @@ class UserDataFlowViewModel @Inject constructor(
     }
 
     fun logout() = viewModelScope.launch {
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(
                 showLogoutDialog = false,
                 uiState = UserDataUiState.Loading
             )
         }
         logoutManager.logout().singleResult().onSuccess {
-            eventListener.emit(UserDataEvents.RefreshAllAndGoBack)
+            sendEvent(UserDataEvents.RefreshAllAndGoBack)
         }.onFailure {
-            uiStateListener.updateData { s ->
+            _state.update { s ->
                 s.copy(showLogoutDialog = false, uiState = UserDataUiState.Success)
             }
-            eventListener.emit(
+            sendEvent(
                 UserDataEvents.ShowSnackbar(resourcesProvider.getString(R.string.logout_error))
             )
         }
     }
 
     fun deleteAccount() = viewModelScope.launch {
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(
                 showDeleteAccountDialog = false,
                 uiState = UserDataUiState.Loading
@@ -158,49 +158,49 @@ class UserDataFlowViewModel @Inject constructor(
 
         deleteAccountResult.onSuccess {
             logoutManager.logout().singleResult().onSuccess {
-                eventListener.emit(UserDataEvents.RefreshAllAndGoBack)
+                sendEvent(UserDataEvents.RefreshAllAndGoBack)
             }.onFailure {
-                eventListener.emit(UserDataEvents.ShowSnackbar(resourcesProvider.getString(R.string.logout_after_delete_error)))
+                sendEvent(UserDataEvents.ShowSnackbar(resourcesProvider.getString(R.string.logout_after_delete_error)))
             }
         }.onFailure {
-            eventListener.emit(UserDataEvents.ShowSnackbar(resourcesProvider.getString(R.string.delete_account_error)))
+            sendEvent(UserDataEvents.ShowSnackbar(resourcesProvider.getString(R.string.delete_account_error)))
         }
 
 
 
 
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(uiState = UserDataUiState.Success)
         }
 
     }
 
     fun chooseImage() = viewModelScope.launch {
-        eventListener.emit(UserDataEvents.OpenImagePicker)
+        sendEvent(UserDataEvents.OpenImagePicker)
     }
 
 
     fun showDeleteAccountDialog() = viewModelScope.launch {
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(showDeleteAccountDialog = true)
         }
     }
 
     fun showLogoutDialog() = viewModelScope.launch {
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(showLogoutDialog = true)
         }
     }
 
     fun closeLogoutDialog() = viewModelScope.launch {
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(showLogoutDialog = false)
         }
 
     }
 
     fun closeDeleteAccountDialog() = viewModelScope.launch {
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(showDeleteAccountDialog = false)
         }
     }
@@ -208,20 +208,20 @@ class UserDataFlowViewModel @Inject constructor(
     fun checkBirthdayField(field: FieldUi) = viewModelScope.launch {
         if (field.id != "data") return@launch
 
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(showDatePicker = true)
         }
     }
 
     fun closeDatePicker() = viewModelScope.launch {
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(showDatePicker = false)
         }
     }
 
     fun changeDate(date: LocalDate) = viewModelScope.launch {
         val dateField = stateSnapshot.fields.firstOrNull { it.id == "data" } ?: return@launch
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
             val formattedDate = date.format(formatter)
             val updatedFields = s.fields.updateFieldAndResetError(
@@ -241,7 +241,7 @@ class UserDataFlowViewModel @Inject constructor(
         val updatedFields = stateSnapshot.fields.updateFieldAndResetError(field, updatedField)
 
         updatedFields.checkFields(false) { fields, _ ->
-            uiStateListener.updateData { s ->
+            _state.update { s ->
                 s.copy(
                     fields = fields,
                     buttonEnabled = fields.checkFields()
