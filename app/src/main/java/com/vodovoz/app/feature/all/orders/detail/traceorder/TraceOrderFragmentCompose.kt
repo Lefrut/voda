@@ -125,8 +125,8 @@ class TraceOrderFragment : Fragment() {
 
                     val context = LocalContext.current
 
-                    val pagingState by viewModel.observeUiState().collectAsStateWithLifecycle()
-                    val viewState by rememberUpdatedState(newValue = pagingState.data)
+                    val pagingState by viewModel.state.collectAsStateWithLifecycle()
+                    val viewState by rememberUpdatedState(newValue = pagingState)
 
                     val locationPermissionLauncher = rememberLauncherForActivityResult(
                         contract = ActivityResultContracts.RequestMultiplePermissions()
@@ -164,7 +164,7 @@ class TraceOrderFragment : Fragment() {
                     }
 
                     LifecycleEffect(anchoredDraggableState) {
-                        viewModel.observeEvent().collect { event ->
+                        viewModel.events.collect { event ->
                             when (event) {
                                 TraceOrderViewModel.TraceOrderEvents.GoBack -> {
                                     findNavController().popBackStack()

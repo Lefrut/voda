@@ -134,8 +134,8 @@ class HomeFragment : Fragment() {
             setContent {
 
                 VodovozTheme {
-                    val pagingState by viewModel.observeUiState().collectAsStateWithLifecycle()
-                    val viewState by rememberUpdatedState(pagingState.data)
+                    val pagingState by viewModel.state.collectAsStateWithLifecycle()
+                    val viewState by rememberUpdatedState(pagingState)
                     val topProductLazyListState = rememberLazyListState()
                     val pullRefreshState = rememberPullToRefreshState()
                     val snackbarHostState = remember { SnackbarHostState() }
@@ -197,8 +197,8 @@ class HomeFragment : Fragment() {
         snackbarHostState: SnackbarHostState,
         context: Context,
     ): Unit =
-        viewModel.observeEvent().onSubscription {
-            val showedVpnWarning = viewModel.observeUiState().value.data.showedVpnWarning
+        viewModel.events.onSubscription {
+            val showedVpnWarning = viewModel.state.value.showedVpnWarning
             if (context.isVpnActive() && !showedVpnWarning) {
                 viewModel.showVpnWaring()
             }

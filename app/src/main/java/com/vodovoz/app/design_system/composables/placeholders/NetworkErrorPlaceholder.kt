@@ -2,6 +2,10 @@ package com.vodovoz.app.design_system.composables.placeholders
 
 import androidx.activity.compose.LocalActivity
 import androidx.annotation.DrawableRes
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.MutableTransitionState
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -14,7 +18,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.Saver
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -24,25 +31,20 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.navOptions
-import com.squareup.moshi.Moshi
-import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import com.vodovoz.app.R
 import com.vodovoz.app.common.block_app_signal.BlockAppSignal
 import com.vodovoz.app.common.cache.VodovozHttpError
 import com.vodovoz.app.core.navigation.findRootNavController
 import com.vodovoz.app.core.navigation.slideAnim
-import com.vodovoz.app.core.network.serialization.fromJson
 import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.composables.button.VodovozButton
 import com.vodovoz.app.design_system.effects.LifecycleEffect
 import com.vodovoz.app.ui.base.blockAppSignal
 import com.vodovoz.app.ui.base.httpErrorCache
 import com.vodovoz.app.util.extensions.isInternetAvailable
-
-
-private val moshi = Moshi.Builder().add(KotlinJsonAdapterFactory()).build()
-
+import kotlinx.coroutines.flow.map
 
 @Stable
 sealed class PlaceholderType {
@@ -57,7 +59,20 @@ sealed class PlaceholderType {
 data class VodovozHttpErrorUi(
     val title: String,
     val message: String,
-)
+) {
+
+    companion object {
+        val Unspecified = VodovozHttpErrorUi("Unspecified", "")
+        val Empty = VodovozHttpErrorUi("", "")
+
+        val Saver: Saver<VodovozHttpErrorUi, List<String>> = Saver(
+            save = { listOf(it.title, it.message) },
+            restore = { restoredList ->
+                restoredList.let { VodovozHttpErrorUi(it[0], it[1]) }
+            }
+        )
+    }
+}
 
 fun VodovozHttpError.toUi(): VodovozHttpErrorUi {
     return VodovozHttpErrorUi(
@@ -71,32 +86,35 @@ sealed interface ErrorPlaceholderMode {
     data object Automatic : ErrorPlaceholderMode
     data class Fixed(val type: PlaceholderType) : ErrorPlaceholderMode
 
+}
 
+
+@Composable
+private fun rememberHttpError(): VodovozHttpErrorUi {
+    val activity = LocalActivity.current
+
+    val httpErrorCache = remember { activity.httpErrorCache }
+    val httpErrorState by httpErrorCache.lastHttpError.map { httpError ->
+        (httpError as? VodovozHttpError)?.toUi()
+    }.collectAsStateWithLifecycle(VodovozHttpErrorUi.Unspecified)
+
+    val httpError: VodovozHttpErrorUi = rememberSaveable(
+        httpErrorState != VodovozHttpErrorUi.Unspecified,
+        saver = VodovozHttpErrorUi.Saver
+    ) { httpErrorState ?: VodovozHttpErrorUi.Empty }
+
+    return httpError
 }
 
 @Composable
 private fun rememberAutoPlaceholderType(): PlaceholderType {
-    val activity = LocalActivity.current
     val context = LocalContext.current
-    return remember {
-        val httpErrorCache = activity?.httpErrorCache
-        val lastErrorData = httpErrorCache?.lastErrorData?.value ?: ""
+    val httpError = rememberHttpError()
 
-        httpErrorCache?.setLastError(null)
-        val error = runCatching {
-            moshi.fromJson<VodovozHttpError>(lastErrorData)
-        }.getOrNull()
-        val errorUi = error?.toUi()
-
+    return remember(httpError) {
         return@remember when {
-            context.isInternetAvailable() == false -> {
-                PlaceholderType.NetworkError
-            }
-
-            errorUi != null -> {
-                PlaceholderType.Http(errorUi)
-            }
-
+            context.isInternetAvailable() == false -> PlaceholderType.NetworkError
+            httpError != VodovozHttpErrorUi.Empty -> PlaceholderType.Http(httpError)
             else -> PlaceholderType.Unknown
         }
     }
@@ -108,15 +126,11 @@ private suspend fun BlockAppSignal.Type.handleAppSignal(
     onNone: suspend () -> Unit = {},
 ) {
     when (this) {
-        BlockAppSignal.Type.Reload -> {
+        BlockAppSignal.Type.Reload -> onReload()
 
-        }
+        BlockAppSignal.Type.Block -> onBlock()
 
-        BlockAppSignal.Type.Block -> {
-
-        }
-
-        BlockAppSignal.Type.None -> {}
+        BlockAppSignal.Type.None -> onNone()
     }
 
 }
@@ -161,26 +175,31 @@ fun NetworkErrorPlaceholder(
         }
     }
 
-    when (placeholderType) {
-        is PlaceholderType.Http -> {
-            HttpError(
-                modifier = modifier,
-                httpError = placeholderType.error
-            )
-        }
-
-        PlaceholderType.NetworkError -> {
-            NetworkError(modifier = modifier) {
-                onTryAgainClick()
+    val expandedState = remember {
+        MutableTransitionState(false).apply { targetState = true }
+    }
+    AnimatedVisibility(visibleState = expandedState, enter = fadeIn(), exit = fadeOut()) {
+        when (placeholderType) {
+            is PlaceholderType.Http -> {
+                HttpError(
+                    modifier = modifier,
+                    httpError = placeholderType.error
+                )
             }
-        }
 
-        PlaceholderType.Unknown -> {
-            BaseError(
-                title = stringResource(R.string.unknown_error),
-                message = "",
-                imageId = R.drawable.pic_search
-            )
+            PlaceholderType.NetworkError -> {
+                NetworkError(modifier = modifier) {
+                    onTryAgainClick()
+                }
+            }
+
+            PlaceholderType.Unknown -> {
+                BaseError(
+                    title = stringResource(R.string.unknown_error),
+                    message = "",
+                    imageId = R.drawable.pic_search
+                )
+            }
         }
     }
 }

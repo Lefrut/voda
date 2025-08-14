@@ -3,7 +3,10 @@ package com.vodovoz.app.common.di
 import com.vodovoz.app.common.block_app_signal.BlockAppSignal
 import com.vodovoz.app.common.block_app_signal.BlockAppSignalImpl
 import com.vodovoz.app.common.cache.HttpErrorCache
+import com.vodovoz.app.common.cache.HttpErrorCacheMappers
+import com.vodovoz.app.common.cache.VodovozHttpError
 import com.vodovoz.app.common.cache.VodovozHttpErrorCache
+import com.vodovoz.app.common.cache.VodovozHttpErrorCacheMappers
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -33,30 +36,36 @@ abstract class CommonModule {
     @Singleton
     @Binds
     abstract fun bindAppSignal(
-        impl: BlockAppSignalImpl
+        impl: BlockAppSignalImpl,
     ): BlockAppSignal
 
     @Singleton
     @Binds
     abstract fun bindVodovozCache(
-        impl: VodovozHttpErrorCache
+        impl: VodovozHttpErrorCache,
     ): HttpErrorCache
+
+    @Singleton
+    @Binds
+    abstract fun bindHttpErrorCacheMappers(
+        impl: VodovozHttpErrorCacheMappers,
+    ): HttpErrorCacheMappers<VodovozHttpError>
 
     companion object {
         @Provides
         @IoDispatcher
         @Singleton
-        fun provideIoDispatcher() : CoroutineDispatcher = Dispatchers.IO
+        fun provideIoDispatcher(): CoroutineDispatcher = Dispatchers.IO
 
         @Provides
         @DefaultDispatcher
         @Singleton
-        fun provideDefaultDispatcher() : CoroutineDispatcher = Dispatchers.Default
+        fun provideDefaultDispatcher(): CoroutineDispatcher = Dispatchers.Default
 
         @Provides
         @MainDispatcher
         @Singleton
-        fun provideMainDispatcher() : CoroutineDispatcher = Dispatchers.Main
+        fun provideMainDispatcher(): CoroutineDispatcher = Dispatchers.Main
     }
 
 }

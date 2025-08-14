@@ -1,13 +1,13 @@
 package com.vodovoz.app.feature.questionnaires
 
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.Stable
 import androidx.lifecycle.viewModelScope
 import com.vodovoz.app.R
-import com.vodovoz.app.common.content.Event
-import com.vodovoz.app.common.content.PagingContractViewModel
-import com.vodovoz.app.common.content.State
-import com.vodovoz.app.common.content.updateData
-import com.vodovoz.app.util.formatters.VodovozDateFormatters
+import com.vodovoz.app.ui.mvi.Event
+import com.vodovoz.app.ui.mvi.MviViewModel
+import com.vodovoz.app.ui.mvi.State
+import kotlinx.coroutines.flow.update
 import com.vodovoz.app.common.resources.ResourcesProvider
 import com.vodovoz.app.design_system.model.ColorfulButtonUi
 import com.vodovoz.app.design_system.model.VodovozPlaceholderUi
@@ -15,9 +15,6 @@ import com.vodovoz.app.design_system.model.mapToUi
 import com.vodovoz.app.design_system.model.toUi
 import com.vodovoz.app.domain.general.model.RequestException
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
-import com.vodovoz.app.design_system.model.widgets.checkFields
-import com.vodovoz.app.design_system.model.widgets.getErrorText
-import com.vodovoz.app.design_system.model.widgets.vodovozValidators
 import com.vodovoz.app.feature.questionnaires.model.CheckOption
 import com.vodovoz.app.feature.questionnaires.model.CheckboxListUi
 import com.vodovoz.app.feature.questionnaires.model.ConditionUi
@@ -27,8 +24,11 @@ import com.vodovoz.app.feature.questionnaires.model.QuestionnaireComponentUi
 import com.vodovoz.app.feature.questionnaires.model.SwitchUi
 import com.vodovoz.app.feature.questionnaires.model.ToggleListUi
 import com.vodovoz.app.feature.questionnaires.model.ToggleOption
+import com.vodovoz.app.feature.questionnaires.model.errorIfInvalid
+import com.vodovoz.app.feature.questionnaires.model.ifSame
 import com.vodovoz.app.feature.questionnaires.model.toUi
 import com.vodovoz.app.util.extensions.singleResult
+import com.vodovoz.app.util.formatters.VodovozDateFormatters
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -39,7 +39,7 @@ import javax.inject.Inject
 class QuestionnairesFlowViewModel @Inject constructor(
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val resourcesProvider: ResourcesProvider,
-) : PagingContractViewModel<QuestionnairesFlowViewModel.QuestionnaireState, QuestionnairesFlowViewModel.QuestionnaireEvents>(
+) : MviViewModel<QuestionnairesFlowViewModel.QuestionnaireState, QuestionnairesFlowViewModel.QuestionnaireEvents>(
     QuestionnaireState()
 ) {
 
@@ -51,7 +51,7 @@ class QuestionnairesFlowViewModel @Inject constructor(
 
 
     fun fetchWelcomeDetails() = viewModelScope.launch {
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(
                 uiState = QuestionnairesUiState.Loading,
                 currentWho = null,
@@ -63,7 +63,7 @@ class QuestionnairesFlowViewModel @Inject constructor(
             vodovozServiceRepository.getQuestionnairesWelcomeDetails().singleResult()
 
         welcomeDetailsResult.onSuccess { welcomeDetails ->
-            uiStateListener.updateData { s ->
+            _state.update { s ->
                 s.copy(
                     uiState = QuestionnairesUiState.Welcome(
                         title = welcomeDetails.title,
@@ -75,7 +75,7 @@ class QuestionnairesFlowViewModel @Inject constructor(
                 )
             }
         }.onFailure {
-            uiStateListener.updateData { s ->
+            _state.update { s ->
                 s.copy(uiState = QuestionnairesUiState.Error)
             }
         }
@@ -84,7 +84,7 @@ class QuestionnairesFlowViewModel @Inject constructor(
     private fun fetchQuestionnairesDetails() = viewModelScope.launch {
         val currentWho = stateSnapshot.currentWho ?: return@launch
 
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(uiState = QuestionnairesUiState.Loading)
         }
 
@@ -93,7 +93,7 @@ class QuestionnairesFlowViewModel @Inject constructor(
 
         questionnairesDetailsResult.onSuccess { questionnairesDetails ->
 
-            uiStateListener.updateData { s ->
+            _state.update { s ->
                 s.copy(
                     button = questionnairesDetails.button.toUi(),
                     components = questionnairesDetails.items.mapNotNull { it.toUi() },
@@ -109,73 +109,64 @@ class QuestionnairesFlowViewModel @Inject constructor(
     }
 
     fun updateText(id: String, newValue: String) = viewModelScope.launch {
-        val newComponents = stateSnapshot.components.map { comp ->
-            if (comp is FieldComponentUi && comp.id == id) {
-                comp.copy(
-                    ui = comp.ui.copy(
-                        value = newValue,
-                        isError = false
-                    )
-                )
-            } else comp
+        mapThenUpdateComponents {
+            ifSame<FieldComponentUi>(id) {
+                copy(ui = ui.copy(value = newValue, isError = false))
+            }
         }
-        updateComponents(newComponents)
     }
 
+
     fun updateSwitch(id: String, option: String) = viewModelScope.launch {
-        val newComponents = stateSnapshot.components.map { comp ->
-            if (comp is SwitchUi && comp.id == id) {
-                comp.copy(
+        mapThenUpdateComponents {
+            ifSame<SwitchUi>(id) {
+                copy(
                     selectedOption = option,
                     error = false
                 )
-            } else comp
+            }
         }
-        updateComponents(newComponents)
     }
 
     fun updateCheckbox(id: String, option: CheckOption) = viewModelScope.launch {
-        val newComponents = stateSnapshot.components.map { comp ->
-            if (comp is CheckboxListUi && comp.id == id) {
-                val updatedOptions = comp.options.map { opt ->
+        mapThenUpdateComponents {
+            ifSame<CheckboxListUi>(id) {
+                val updatedOptions = options.map { opt ->
                     if (opt.label == option.label) opt.copy(isChecked = !opt.isChecked)
                     else opt
                 }
-                comp.copy(options = updatedOptions, error = false)
-            } else comp
+                copy(options = updatedOptions, error = false)
+            }
         }
-        updateComponents(newComponents)
     }
 
     fun updateToggle(id: String, option: ToggleOption) = viewModelScope.launch {
-        val newComponents = stateSnapshot.components.map { comp ->
-            if (comp is ToggleListUi && comp.id == id) {
-                val updatedOptions = comp.options.map { opt ->
+        mapThenUpdateComponents {
+            ifSame<ToggleListUi>(id) {
+                val updatedOptions = options.map { opt ->
                     opt.copy(isSelected = (opt.label == option.label))
                 }
-                comp.copy(options = updatedOptions, error = false)
-            } else comp
+                copy(options = updatedOptions, error = false)
+            }
         }
-        updateComponents(newComponents)
     }
 
     fun updateConditionCheckbox(id: String, option: CheckOption) = viewModelScope.launch {
-        val newComponents = stateSnapshot.components.map { comp ->
-            if (comp is ConditionsCheckboxListUi && comp.id == id) {
-                val updatedOptions = comp.options.map { opt ->
+        mapThenUpdateComponents {
+            ifSame<ConditionsCheckboxListUi>(id) {
+                val updatedOptions = options.map { opt ->
                     if (opt.label == option.label) opt.copy(isChecked = !opt.isChecked)
                     else opt
                 }
-                comp.copy(options = updatedOptions, error = false)
-            } else comp
+                copy(options = updatedOptions, error = false)
+            }
         }
-        updateComponents(newComponents)
     }
 
     fun checkBirthdayField(component: FieldComponentUi) = viewModelScope.launch {
         if (component.ui.id != "DR") return@launch
 
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(
                 showDatePicker = true,
                 currentDateField = component
@@ -185,14 +176,20 @@ class QuestionnairesFlowViewModel @Inject constructor(
     }
 
     fun closeDatePicker() = viewModelScope.launch {
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(showDatePicker = false)
         }
     }
 
-    private fun updateComponents(newComponents: List<QuestionnaireComponentUi>) {
-        uiStateListener.updateData { s ->
-            s.copy(components = newComponents)
+    private fun mapThenUpdateComponents(
+        onComponentChange: QuestionnaireComponentUi.() -> QuestionnaireComponentUi,
+    ) {
+        _state.update { s ->
+            s.copy(
+                components = stateSnapshot.components.map { component ->
+                    onComponentChange(component)
+                }
+            )
         }
     }
 
@@ -205,89 +202,57 @@ class QuestionnairesFlowViewModel @Inject constructor(
         ) {
             showCancelDialog()
         } else {
-            eventListener.emit(QuestionnaireEvents.GoBack)
+            sendEvent(QuestionnaireEvents.GoBack)
         }
     }
 
     private fun showCancelDialog() = viewModelScope.launch {
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(showCancelDialog = true)
         }
     }
 
     fun closeCancelDialog() = viewModelScope.launch {
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(showCancelDialog = false)
         }
     }
 
 
     fun activateWelcomeButton(btn: ColorfulButtonUi) = viewModelScope.launch {
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(currentWho = btn.id)
         }
         fetchQuestionnairesDetails()
     }
 
     fun sendAnswers() = viewModelScope.launch {
-        val checkedComponents = stateSnapshot.components.map { component ->
-            when (component) {
-                is CheckboxListUi -> {
-                    if (component.options.none { it.isChecked }) component.copy(error = true)
-                    else component
-                }
 
-                is FieldComponentUi -> {
-                    val field = component.ui
-                    if (!listOf(field).checkFields(validators = vodovozValidators)) {
-                        component.copy(
-                            ui = field.copy(
-                                isError = true,
-                                supportingText = field.getErrorText { resourcesProvider.getString(it) }
-                            )
-                        )
-                    } else component
-                }
-
-                is SwitchUi -> {
-                    if (component.selectedOption !in component.options) component.copy(error = true)
-                    else component
-                }
-
-                is ToggleListUi -> {
-                    if (component.options.none { it.isSelected }) component.copy(error = true)
-                    else component
-                }
-
-                is ConditionsCheckboxListUi -> {
-                    if (component.options.any { !it.isChecked }) component.copy(error = true)
-                    else component
-                }
-            }
-        }
-
-        uiStateListener.updateData { s ->
-            s.copy(components = checkedComponents)
+        mapThenUpdateComponents {
+            errorIfInvalid { resourcesProvider.getString(it) }
         }
 
         val currentWho = stateSnapshot.currentWho
-        if (checkedComponents.any { component -> component.error } || currentWho == null) {
-            eventListener.emit(QuestionnaireEvents.ScrollToTop)
+        val components = stateSnapshot.components
+        if (components.any { component -> component.error } || currentWho == null) {
+            sendEvent(QuestionnaireEvents.ScrollToTop)
             return@launch
         }
 
-        val answers = stateSnapshot.components.toAnswerString()
+        val answers = components.toAnswerString()
 
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(button = s.button.copy(loading = true))
         }
 
         val sendQuestionnairesResult =
-            vodovozServiceRepository.sendQuestionnairesAnswers(currentWho, answers).singleResult()
+            vodovozServiceRepository.sendQuestionnairesAnswers(
+                currentWho, answers
+            ).singleResult()
 
         sendQuestionnairesResult.onSuccess {
             val placeholder = it.toUi()
-            uiStateListener.updateData { s ->
+            _state.update { s ->
                 s.copy(
                     uiState = QuestionnairesUiState.Success(placeholder),
                     button = s.button.copy(loading = false)
@@ -295,16 +260,16 @@ class QuestionnairesFlowViewModel @Inject constructor(
             }
         }.onFailure { t ->
             if (t is RequestException) {
-                eventListener.emit(QuestionnaireEvents.ShowToast(t.message ?: ""))
+                sendEvent(QuestionnaireEvents.ShowToast(t.message ?: ""))
             } else {
-                eventListener.emit(
+                sendEvent(
                     QuestionnaireEvents.ShowToast(
                         resourcesProvider.getString(R.string.questionnaire_failed)
                     )
                 )
             }
 
-            uiStateListener.updateData { s ->
+            _state.update { s ->
                 s.copy(button = s.button.copy(loading = false))
             }
 
@@ -344,7 +309,7 @@ class QuestionnairesFlowViewModel @Inject constructor(
     }
 
     fun navigateToWebView(condition: ConditionUi) = viewModelScope.launch {
-        eventListener.emit(QuestionnaireEvents.GoToWebView(condition.url))
+        sendEvent(QuestionnaireEvents.GoToWebView(condition.url))
     }
 
     fun changeDate(selectedDate: LocalDate) = viewModelScope.launch {
@@ -355,7 +320,7 @@ class QuestionnairesFlowViewModel @Inject constructor(
             ui = currentDateField.ui.copy(value = value, isError = false)
         )
 
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(
                 showDatePicker = false,
                 currentDateField = updatedCurrentDateField,
@@ -376,7 +341,7 @@ class QuestionnairesFlowViewModel @Inject constructor(
         val components: List<QuestionnaireComponentUi> = emptyList(),
         val showDatePicker: Boolean = false,
         val currentDateField: FieldComponentUi? = null,
-        val showCancelDialog: Boolean = false
+        val showCancelDialog: Boolean = false,
     ) : State
 
     sealed class QuestionnaireEvents : Event {
@@ -387,7 +352,7 @@ class QuestionnairesFlowViewModel @Inject constructor(
         data object ScrollToTop : QuestionnaireEvents()
     }
 
-    @Immutable
+    @Stable
     sealed interface QuestionnairesUiState {
 
         data object Loading : QuestionnairesUiState

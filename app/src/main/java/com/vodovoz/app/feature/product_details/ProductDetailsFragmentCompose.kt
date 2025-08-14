@@ -10,13 +10,10 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.fragment.findNavController
-import coil3.compose.rememberAsyncImagePainter
 import com.vodovoz.app.R
 import com.vodovoz.app.common.tab.TabManager
 import com.vodovoz.app.core.navigation.mainFragment
@@ -32,8 +29,6 @@ import com.vodovoz.app.core.navigation.navigateToSearch
 import com.vodovoz.app.core.navigation.navigateToSearchProductList
 import com.vodovoz.app.core.navigation.navigateToWriteComment
 import com.vodovoz.app.design_system.VodovozTheme
-import com.vodovoz.app.design_system.composables.placeholders.EmptyResultPlaceholder
-import com.vodovoz.app.design_system.composables.placeholders.EmptyResultPlaceholderItem
 import com.vodovoz.app.design_system.composables.placeholders.ForAdultsPlaceholder
 import com.vodovoz.app.design_system.composables.snackbar.VodovozSnackBarVisuals
 import com.vodovoz.app.design_system.effects.LifecycleEffect
@@ -64,7 +59,7 @@ class ProductDetailsFragment : Fragment() {
 
             setContent {
                 VodovozTheme {
-                    val viewState by viewModel.observeUiState().collectAsStateWithLifecycle()
+                    val viewState by viewModel.state.collectAsStateWithLifecycle()
                     val uiState = viewState.uiState
 
                     val mediaPagerState = when (uiState) {
@@ -79,29 +74,6 @@ class ProductDetailsFragment : Fragment() {
 
 
                     when (uiState) {
-                        ProductDetailsFlowViewModel.ProductDetailsUiState.ProductNotFound -> {
-                            EmptyResultPlaceholder(
-                                title = stringResource(R.string.product_not_found),
-                                description = stringResource(R.string.product_not_found_details),
-                                item = EmptyResultPlaceholderItem.Arrow,
-                                imagePainter = rememberAsyncImagePainter(
-                                    model = Unit,
-                                    error = painterResource(
-                                        id = R.drawable.pic_search
-                                    )
-                                ),
-                                onItemClick = { viewModel.navigateBack() }
-                            )
-                        }
-
-                        ProductDetailsFlowViewModel.ProductDetailsUiState.Success, ProductDetailsFlowViewModel.ProductDetailsUiState.Loading -> {
-                            ProductDetailsScreen(
-                                viewState = viewState,
-                                viewModel = viewModel,
-                                mediaPagerState = mediaPagerState
-                            )
-                        }
-
                         is ProductDetailsFlowViewModel.ProductDetailsUiState.ForAdults -> {
                             ForAdultsPlaceholder(
                                 forAdults = uiState.forAdultsUi,
@@ -111,6 +83,14 @@ class ProductDetailsFragment : Fragment() {
                                 onApplyClick = {
                                     viewModel.setCanViewAdultProducts()
                                 }
+                            )
+                        }
+
+                        else -> {
+                            ProductDetailsScreen(
+                                viewState = viewState,
+                                viewModel = viewModel,
+                                mediaPagerState = mediaPagerState
                             )
                         }
                     }
@@ -130,7 +110,7 @@ class ProductDetailsFragment : Fragment() {
     }
 
     private suspend fun observeEvents(mediaPagerState: PagerState): Unit =
-        viewModel.observeEvent().onSubscription {
+        viewModel.events.onSubscription {
             val mediaIndex = findNavController().currentBackStackEntry
                 ?.savedStateHandle
                 ?.get<Int>("mediaIndex")

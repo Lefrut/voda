@@ -76,8 +76,8 @@ class OrderingFragment : Fragment() {
 
             setContent {
                 VodovozTheme {
-                    val pagingState by viewModel.observeUiState().collectAsStateWithLifecycle()
-                    val viewState by rememberUpdatedState(newValue = pagingState.data)
+                    val pagingState by viewModel.state.collectAsStateWithLifecycle()
+                    val viewState by rememberUpdatedState(newValue = pagingState)
                     val scrollState = rememberScrollState()
 
                     when (val uiState = viewState.uiState) {
@@ -128,7 +128,7 @@ class OrderingFragment : Fragment() {
 
 
     private suspend fun observeEvents(scrollState: ScrollState) {
-        viewModel.observeEvent().onSubscription {
+        viewModel.events.onSubscription {
 
             val backEntrySavedStateHandle =
                 findNavController().currentBackStackEntry?.savedStateHandle

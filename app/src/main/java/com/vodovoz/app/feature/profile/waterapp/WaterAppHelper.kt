@@ -51,11 +51,11 @@ class WaterAppHelper @Inject constructor(
             15L, 30L, 60L, 90L, 120L, 180L, 240L, 300L
         )
 
-        private val locale = Locale("en")
+        private val enLocale = Locale("en")
 
         val weights: List<Float> = (0..((300f - 20f) / 0.2f).toInt())
             .map { i ->
-                val a = String.format(locale, "%.1f", 20f + i * 0.2f)
+                val a = String.format(enLocale, "%.1f", 20f + i * 0.2f)
                 a.toFloatOrNull() ?: 0f
             }
 
@@ -290,7 +290,11 @@ class WaterAppHelper @Inject constructor(
                 .setInitialDelay(minutes, TimeUnit.MINUTES)
                 .addTag(waterTag)
                 .build()
-            workManager.enqueueUniquePeriodicWork(waterTag, ExistingPeriodicWorkPolicy.UPDATE, work)
+            workManager.enqueueUniquePeriodicWork(
+                waterTag,
+                ExistingPeriodicWorkPolicy.CANCEL_AND_REENQUEUE,
+                work
+            )
         }
 
         val notificationJson = notificationJsonAdapter.toJson(data)

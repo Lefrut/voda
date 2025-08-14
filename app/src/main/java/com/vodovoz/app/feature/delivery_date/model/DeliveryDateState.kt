@@ -13,7 +13,7 @@ data class DeliveryDateState(
     val button: ColorfulButtonUi = ColorfulButtonUi.Empty,
     val options: List<DeliveryDateOptionUi> = emptyList(),
     val selectedDateOption: DeliveryDateOptionUi = DeliveryDateOptionUi.Empty.copy(
-        value = VodovozDateFormatters.DMY.format(LocalDate.now())
+        value = VodovozDateFormatters.DMY.format(LocalDate.now().plusDays(1))
     ),
     val timeSections: List<SectionUi<DeliveryTimeIntervalUi>> = emptyList(),
     val selectedTimeSection: SectionUi<DeliveryTimeIntervalUi> = SectionUi.empty(),

@@ -89,8 +89,8 @@ class ProductFiltersFlowFragment : Fragment() {
 
             setContent {
                 VodovozTheme {
-                    val pagingState by viewModel.observeUiState().collectAsStateWithLifecycle()
-                    val viewState by rememberUpdatedState(newValue = pagingState.data)
+                    val pagingState by viewModel.state.collectAsStateWithLifecycle()
+                    val viewState by rememberUpdatedState(newValue = pagingState)
 
                     val filterPrice = viewState.filters.price
 
@@ -118,7 +118,7 @@ class ProductFiltersFlowFragment : Fragment() {
 
 
                     LifecycleEffect(sliderState) {
-                        viewModel.observeEvent().collect { event ->
+                        viewModel.events.collect { event ->
                             when (event) {
                                 is ProductFiltersFlowViewModel.ProductFiltersEvent.GoBack -> {
                                     findNavController().popBackStack()

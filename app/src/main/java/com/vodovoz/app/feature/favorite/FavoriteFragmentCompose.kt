@@ -63,8 +63,8 @@ class FavoriteFragment : Fragment() {
 
             setContent {
                 VodovozTheme {
-                    val pagingState by viewModel.observeUiState().collectAsStateWithLifecycle()
-                    val viewState by rememberUpdatedState(pagingState.data)
+                    val pagingState by viewModel.state.collectAsStateWithLifecycle()
+                    val viewState by rememberUpdatedState(pagingState)
                     val lazyGridState = rememberLazyGridState()
 
                     when (viewState.uiState) {
@@ -102,7 +102,7 @@ class FavoriteFragment : Fragment() {
     }
 
     private suspend fun observeEvents(lazyGridState: LazyGridState) {
-        viewModel.observeEvent()
+        viewModel.events
             .collect { event ->
                 when (event) {
                     is FavoriteFlowViewModel.FavoriteEvents.GoToProfile -> {

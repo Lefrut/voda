@@ -62,8 +62,8 @@ class UserDataFragment : Fragment() {
 
             setContent {
                 VodovozTheme {
-                    val pagingState by viewModel.observeUiState().collectAsStateWithLifecycle()
-                    val viewState by rememberUpdatedState(pagingState.data)
+                    val pagingState by viewModel.state.collectAsStateWithLifecycle()
+                    val viewState by rememberUpdatedState(pagingState)
                     val snackbarHostState = remember { SnackbarHostState() }
 
                     when (viewState.uiState) {
@@ -86,7 +86,7 @@ class UserDataFragment : Fragment() {
 
 
                     LifecycleEffect {
-                        viewModel.observeEvent().collect { event ->
+                        viewModel.events.collect { event ->
                             when (event) {
                                 UserDataFlowViewModel.UserDataEvents.RefreshAllAndGoBack -> {
                                     homeViewModel.refresh()

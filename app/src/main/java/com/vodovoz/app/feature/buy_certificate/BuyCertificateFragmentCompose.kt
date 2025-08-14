@@ -60,9 +60,9 @@ class BuyCertificateFragment : Fragment() {
             setContent {
                 VodovozTheme {
                     val pagingState by viewModel
-                        .observeUiState()
+                        .state
                         .collectAsStateWithLifecycle()
-                    val viewState by rememberUpdatedState(pagingState.data)
+                    val viewState by rememberUpdatedState(pagingState)
                     val snackbarHostState = remember { SnackbarHostState() }
 
                     when (val uiState = viewState.uiState) {
@@ -94,7 +94,7 @@ class BuyCertificateFragment : Fragment() {
                     }
 
                     LifecycleEffect(snackbarHostState) {
-                        viewModel.observeEvent().collect { event ->
+                        viewModel.events.collect { event ->
                             when (event) {
                                 BuyCertificateViewModel.BuyCertificateEvents.GoBack -> {
                                     findNavController().popBackStack()

@@ -2,7 +2,7 @@ package com.vodovoz.app.feature.auth.model
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
-import com.vodovoz.app.common.content.State
+import com.vodovoz.app.ui.mvi.State
 import com.vodovoz.app.design_system.model.ColorfulButtonUi
 import com.vodovoz.app.design_system.model.mapToUi
 import com.vodovoz.app.design_system.model.widgets.CheckboxUi

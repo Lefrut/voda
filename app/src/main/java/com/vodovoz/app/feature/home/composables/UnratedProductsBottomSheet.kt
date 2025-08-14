@@ -4,7 +4,6 @@ import android.graphics.BlurMaskFilter
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.SizeTransform
-import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.VectorConverter
@@ -70,7 +69,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -201,8 +199,7 @@ fun UnratedProductsBottomSheet(
                 .anchoredDraggable(
                     state = state,
                     orientation = Orientation.Vertical,
-                )
-            ,
+                ),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             VodovozDragHandle()
@@ -243,6 +240,7 @@ fun UnratedProductsBottomSheet(
                             modifier = Modifier.fillMaxSize(),
                             title = sectionUnratedProducts.productTitle,
                             products = sectionUnratedProducts.products,
+                            buttonText = sectionUnratedProducts.buttonText,
                             onProductRatingChanged = onProductRatingChanged,
                             onNoRateProductClick = onProductNoRateClick,
                             onClose = onDispose
@@ -298,6 +296,7 @@ fun UpdatedProductsExpanded(
     modifier: Modifier = Modifier,
     title: String,
     products: List<UnratedProductUi>,
+    buttonText: String,
     onProductRatingChanged: (UnratedProductUi, Float) -> Unit,
     onNoRateProductClick: (UnratedProductUi) -> Unit,
     onClose: () -> Unit,
@@ -422,7 +421,7 @@ fun UpdatedProductsExpanded(
                 .padding(horizontal = 16.dp, vertical = 12.dp), contentAlignment = Alignment.Center
         ) {
             Text(
-                text = stringResource(R.string.do_not_rate_this_product),
+                text = buttonText,
                 color = MaterialTheme.colorScheme.surfaceTint,
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier
@@ -517,6 +516,7 @@ private fun UnratedProductsExpandedPreview() {
 
         UpdatedProductsExpanded(
             title = "Это нижний лист",
+            buttonText = "No rate",
             onClose = {
 
             },

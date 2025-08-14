@@ -2,7 +2,6 @@ package com.vodovoz.app.feature.wait_feedback_products
 
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.viewModelScope
-import androidx.paging.LoadState
 import androidx.paging.map
 import com.vodovoz.app.design_system.model.toUi
 import com.vodovoz.app.domain.general.model.EmptyResultException
@@ -12,9 +11,7 @@ import com.vodovoz.app.feature.wait_feedback_products.model.WaitFeedbackProducts
 import com.vodovoz.app.feature.wait_feedback_products.model.WaitFeedbackProductsState
 import com.vodovoz.app.feature.wait_feedback_products.model.WaitFeedbackProductsUiState
 import com.vodovoz.app.feature.wait_feedback_products.model.toUi
-import com.vodovoz.app.ui.mvi.MviViewModel
-import com.vodovoz.app.ui.paging.PagingDataListener
-import com.vodovoz.app.ui.paging.copy
+import com.vodovoz.app.ui.paging.PagingMviViewModel
 import com.vodovoz.app.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
@@ -27,53 +24,15 @@ import javax.inject.Inject
 @Stable
 class WaitFeedbackProductsViewModel @Inject constructor(
     private val vodovozServiceRepository: VodovozServiceRepository,
-) : MviViewModel<WaitFeedbackProductsState, WaitFeedbackProductsEvent>(WaitFeedbackProductsState()) {
-
-
-    private val pagingProductsListener = PagingDataListener(
-        onUpdateItems = { itemSnapshotList ->
-            _state.update { s ->
-                val pagedProducts = itemSnapshotList.mapNotNull { product ->
-                    product
-                }
-                s.copy(products = pagedProducts)
-            }
-        }
-    )
-
-    private fun listenProductsLoadStates() = viewModelScope.launch {
-        pagingProductsListener.collectLoadState { combinedLoadStates ->
-            val refreshState = when {
-                combinedLoadStates.refresh is LoadState.Loading && stateSnapshot.products.isNotEmpty() -> {
-                    stateSnapshot.loadStates.refresh
-                }
-
-                else -> combinedLoadStates.refresh
-            }
-
-            _state.update { s ->
-                s.copy(
-                    loadStates = combinedLoadStates.copy(
-                        refresh = refreshState
-                    )
-                )
-            }
-        }
-
-
-    }
+) : PagingMviViewModel<WaitFeedbackProductUi, WaitFeedbackProductsState, WaitFeedbackProductsEvent>(
+    WaitFeedbackProductsState()
+) {
 
     init {
-        listenProductsLoadStates()
         viewModelScope.launch { delay(200) }.invokeOnCompletion {
             fetchWaitFeedbackProductsDetails()
         }
     }
-
-    fun notifyPagingProducts(index: Int) = viewModelScope.launch {
-        kotlin.runCatching { pagingProductsListener[index] }
-    }
-
 
     fun fetchWaitFeedbackProductsDetails() = viewModelScope.launch {
         if (stateSnapshot.uiState !is WaitFeedbackProductsUiState.Success) {
@@ -96,9 +55,7 @@ class WaitFeedbackProductsViewModel @Inject constructor(
             viewModelScope.launch {
                 vodovozServiceRepository.getWaitFeedbackProductsPaged().map { pagingData ->
                     pagingData.map { productModel -> productModel.toUi() }
-                }.collect { pagingData ->
-                    pagingProductsListener.collectPagingData(pagingData)
-                }
+                }.collectPagingData()
             }
         }.onFailure { t ->
             val uiState = if (t is EmptyResultException && t.placeholder != null) {
@@ -142,9 +99,9 @@ class WaitFeedbackProductsViewModel @Inject constructor(
 
     fun removeProduct(productId: Long) = viewModelScope.launch {
         _state.update { s ->
-            val products = s.products
+            val products = s.items
             s.copy(
-                products = products - products.filter { product ->
+                items = products - products.filter { product ->
                     product.id == productId
                 }.toSet()
             )

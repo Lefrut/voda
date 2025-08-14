@@ -18,8 +18,7 @@ import com.valentinilk.shimmer.ShimmerBounds
 import com.valentinilk.shimmer.rememberShimmer
 import com.vodovoz.app.design_system.composables.list.ProductListCategoriesRow
 import com.vodovoz.app.design_system.composables.list.ProductListOptionsRow
-import com.vodovoz.app.design_system.composables.list.gridProducts
-import com.vodovoz.app.design_system.composables.list.linearProducts
+import com.vodovoz.app.design_system.composables.list.linearOrGridProducts
 import com.vodovoz.app.design_system.model.ProductUi
 import com.vodovoz.app.feature.home.model.CategoryUi
 import com.vodovoz.app.feature.product_comments.model.SortUi
@@ -88,30 +87,18 @@ fun FavoriteBody(
         }
 
 
-        if (isGridView) {
-            gridProducts(
-                products = products,
-                loadState = productsLoadStates,
-                shimmerState = shimmer,
-                onProductSee = onProductSee,
-                onProductClick = onProductClick,
-                onProductLike = onProductLike,
-                onProductAnalogsClick = onProductAnalogsClick,
-                onIncrementProductToCart = onIncrementProductToCart,
-                onDecrementProductToCart = onDecrementProductToCart
-            )
-        } else {
-            linearProducts(
-                products = products,
-                loadState = productsLoadStates,
-                shimmerState = shimmer,
-                onProductSee = onProductSee,
-                onProductClick = onProductClick,
-                onProductLike = onProductLike,
-                onProductAnalogsClick = onProductAnalogsClick,
-                onIncrementProductToCart = onIncrementProductToCart,
-                onDecrementProductToCart = onDecrementProductToCart
-            )
-        }
+        linearOrGridProducts(
+            grid = isGridView,
+            products = products,
+            loadState = productsLoadStates,
+            shimmerState = shimmer,
+            onProductSee = onProductSee,
+            onProductClick = onProductClick,
+            onProductLike = onProductLike,
+            onProductAnalogsClick = onProductAnalogsClick,
+            onIncrementProductToCart = onIncrementProductToCart,
+            onDecrementProductToCart = onDecrementProductToCart
+        )
+
     }
 }

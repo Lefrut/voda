@@ -4,10 +4,10 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import com.vodovoz.app.common.content.Event
-import com.vodovoz.app.common.content.PagingContractViewModel
-import com.vodovoz.app.common.content.State
-import com.vodovoz.app.common.content.updateData
+import com.vodovoz.app.ui.mvi.Event
+import com.vodovoz.app.ui.mvi.MviViewModel
+import com.vodovoz.app.ui.mvi.State
+import kotlinx.coroutines.flow.update
 import com.vodovoz.app.design_system.model.SectionUi
 import com.vodovoz.app.design_system.model.VodovozPlaceholderUi
 import com.vodovoz.app.design_system.model.toUi
@@ -26,7 +26,7 @@ import javax.inject.Inject
 class AddressesFlowViewModel @Inject constructor(
     savedState: SavedStateHandle,
     private val vodovozServiceRepository: VodovozServiceRepository,
-) : PagingContractViewModel<AddressesFlowViewModel.AddressesState, AddressesFlowViewModel.AddressesEvents>(
+) : MviViewModel<AddressesFlowViewModel.AddressesState, AddressesFlowViewModel.AddressesEvents>(
     AddressesState(
         screenType = savedState.get<AddressScreenTypeUi>("screenType") ?: AddressScreenTypeUi.Add
     )
@@ -51,7 +51,7 @@ class AddressesFlowViewModel @Inject constructor(
             } ?: addressSections.firstOrNull()?.items?.firstOrNull() ?: AddressUi.Empty
 
 
-            uiStateListener.updateData { s ->
+            _state.update { s ->
                 s.copy(
                     addressSections = addressSections,
                     selectedAddress = selectedAddress,
@@ -63,7 +63,7 @@ class AddressesFlowViewModel @Inject constructor(
                 AddressesUiState.Empty(t.placeholder.toUi())
             } else AddressesUiState.Error
 
-            uiStateListener.updateData { s ->
+            _state.update { s ->
                 s.copy(
                     uiState = if (s.uiState != AddressesUiState.Success || uiState is AddressesUiState.Empty) {
                         uiState
@@ -76,30 +76,30 @@ class AddressesFlowViewModel @Inject constructor(
     }
 
     fun navigateBack() = viewModelScope.launch {
-        eventListener.emit(AddressesEvents.GoBack)
+        sendEvent(AddressesEvents.GoBack)
     }
 
     fun addAddress() = viewModelScope.launch {
-        eventListener.emit(AddressesEvents.GoToMap)
+        sendEvent(AddressesEvents.GoToMap)
     }
 
     fun navigateToOrdering() = viewModelScope.launch {
 
-        eventListener.emit(AddressesEvents.GoBackToOrdering(stateSnapshot.selectedAddress))
+        sendEvent(AddressesEvents.GoBackToOrdering(stateSnapshot.selectedAddress))
     }
 
     fun editAddress(address: AddressUi) = viewModelScope.launch {
-        eventListener.emit(AddressesEvents.GoToEditAddress(address.id, address.address))
+        sendEvent(AddressesEvents.GoToEditAddress(address.id, address.address))
     }
 
     fun selectAddress(address: AddressUi) = viewModelScope.launch {
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(selectedAddress = address)
         }
     }
 
     fun showRemoveAddressDialog(address: AddressUi) = viewModelScope.launch {
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(
                 currentRemoveAddress = address,
                 showRemoveAddressDialog = true
@@ -108,7 +108,7 @@ class AddressesFlowViewModel @Inject constructor(
     }
 
     fun hideRemoveAddressDialog() = viewModelScope.launch {
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(
                 currentRemoveAddress = null,
                 showRemoveAddressDialog = false
@@ -117,7 +117,7 @@ class AddressesFlowViewModel @Inject constructor(
     }
 
     fun removeAddress(currentRemoveAddress: AddressUi) = viewModelScope.launch {
-        uiStateListener.updateData { state ->
+        _state.update { state ->
             state.copy(
                 addressSections = state.addressSections.map { section ->
                     section.copy(items = section.items.filter { it.id != currentRemoveAddress.id })
@@ -131,13 +131,13 @@ class AddressesFlowViewModel @Inject constructor(
     }
 
     fun refresh() = viewModelScope.launch{
-        uiStateListener.updateData {
+        _state.update {
             it.copy(showRefreshIndicator = true)
         }
 
         fetchAddresses().join()
 
-        uiStateListener.updateData {
+        _state.update {
             it.copy(showRefreshIndicator = false)
         }
     }

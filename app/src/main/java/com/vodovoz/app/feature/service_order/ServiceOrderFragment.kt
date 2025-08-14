@@ -56,8 +56,8 @@ class ServiceOrderFragment : Fragment() {
 
             setContent {
                 VodovozTheme {
-                    val pagingState by viewModel.observeUiState().collectAsStateWithLifecycle()
-                    val viewState by rememberUpdatedState(newValue = pagingState.data)
+                    val pagingState by viewModel.state.collectAsStateWithLifecycle()
+                    val viewState by rememberUpdatedState(newValue = pagingState)
 
                     when (val uiState = viewState.uiState) {
                         is ServiceOrderViewModel.ServiceOrderUiState.Success -> {
@@ -82,7 +82,7 @@ class ServiceOrderFragment : Fragment() {
                     }
 
                     LifecycleEffect {
-                        viewModel.observeEvent().collect { event ->
+                        viewModel.events.collect { event ->
                             when (event) {
                                 ServiceOrderViewModel.ServiceOrderEvent.GoBack -> {
                                     findNavController().popBackStack()

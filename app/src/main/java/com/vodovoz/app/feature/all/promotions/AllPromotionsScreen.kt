@@ -12,9 +12,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
-import androidx.paging.compose.collectAsLazyPagingItems
-import com.vodovoz.app.R
 import com.vodovoz.app.design_system.composables.placeholders.NetworkErrorPlaceholder
 import com.vodovoz.app.design_system.composables.top_bar.VodovozTopBar
 import com.vodovoz.app.feature.all.promotions.composables.AdvertisingInfoBottomSheet
@@ -54,7 +51,7 @@ fun AllPromotionsScreen(
                 AllPromotionsBody(
                     categories = viewState.categories,
                     currentCategory = viewState.currentCategory,
-                    promotions = viewState.promotions,
+                    promotions = viewState.items,
                     lazyListState = lazyListState,
                     appendState = viewState.appendState,
                     onSectionSelect = { section ->
@@ -67,7 +64,7 @@ fun AllPromotionsScreen(
                         viewModel.navigateToPromotionDetails(promotion)
                     },
                     onPromotionSee = { index ->
-                        viewModel.notifyPagingPromotions(index)
+                        viewModel.notifyPaging(index)
 
                     }
                 )

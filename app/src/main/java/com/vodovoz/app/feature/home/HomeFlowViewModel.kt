@@ -7,10 +7,10 @@ import com.vodovoz.app.BuildConfig
 import com.vodovoz.app.R
 import com.vodovoz.app.common.account.AccountManager
 import com.vodovoz.app.common.cart.CartManager
-import com.vodovoz.app.common.content.Event
-import com.vodovoz.app.common.content.PagingContractViewModel
-import com.vodovoz.app.common.content.State
-import com.vodovoz.app.common.content.updateData
+import com.vodovoz.app.ui.mvi.Event
+import com.vodovoz.app.ui.mvi.MviViewModel
+import com.vodovoz.app.ui.mvi.State
+import kotlinx.coroutines.flow.update
 import com.vodovoz.app.common.like.LikeManager
 import com.vodovoz.app.common.model.ButtonAction
 import com.vodovoz.app.common.model.DataAllAction
@@ -68,13 +68,13 @@ class HomeFlowViewModel @Inject constructor(
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val resourcesProvider: ResourcesProvider,
     private val userPreferencesRepository: UserPreferencesRepository,
-) : PagingContractViewModel<HomeFlowViewModel.HomeState, HomeFlowViewModel.HomeEvents>(HomeState()) {
+) : MviViewModel<HomeFlowViewModel.HomeState, HomeFlowViewModel.HomeEvents>(HomeState()) {
 
-    suspend fun listenStories() = uiStateListener.map { it.data.stories }
+    suspend fun listenStories() = _state.map { stateSnapshot.stories }
         .combine(userPreferencesRepository.viewedStoryIds) { _, p2 ->
             p2
         }.collectLatest { storyIds ->
-            uiStateListener.updateData { s ->
+            _state.update { s ->
                 s.copy(
                     stories = s.stories.map { story ->
                         if (storyIds.contains(story.id)) story.copy(viewed = true) else story
@@ -84,12 +84,12 @@ class HomeFlowViewModel @Inject constructor(
         }
 
     suspend fun listenLoadingProducts() =
-        uiStateListener.map { pagingState -> pagingState.data.uiState }.combine(
+        _state.map { pagingState -> pagingState.uiState }.combine(
             cartManager.blockedProductsState
         ) { _, productIds ->
             productIds
         }.collectLatest { blockedProductsIds ->
-            uiStateListener.updateData { s ->
+            _state.update { s ->
 
                 val currentCategoryWithProducts =
                     stateSnapshot.currentCategoryWithProducts.withUpdatedLoading(blockedProductsIds)
@@ -110,12 +110,12 @@ class HomeFlowViewModel @Inject constructor(
         }
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    suspend fun listenCart() = uiStateListener.map { it.data.uiState }.combine(
+    suspend fun listenCart() = _state.map { stateSnapshot.uiState }.combine(
         cartManager.observeCarts()
     ) { _, cartMap ->
         cartMap
     }.mapLatest { cartMap ->
-        uiStateListener.updateData { s ->
+        _state.update { s ->
 
             val currentCategoryWithProducts =
                 stateSnapshot.currentCategoryWithProducts.withUpdatedCart(cartMap)
@@ -133,7 +133,7 @@ class HomeFlowViewModel @Inject constructor(
 
 
     suspend fun listenFavorites(mainScope: CoroutineScope) = mainScope.launch {
-        uiStateListener.map { pagingState -> pagingState.data.uiState }
+        _state.map { pagingState -> pagingState.uiState }
             .combine(likeManager.observeLikes()) { uiState, favorites ->
                 uiState to favorites
             }.collectLatest { (uiState, favorites) ->
@@ -173,7 +173,7 @@ class HomeFlowViewModel @Inject constructor(
                 val sectionNewProducts = sectionNewProductsDeferred.await()
 
 
-                uiStateListener.updateData { s ->
+                _state.update { s ->
                     s.copy(
                         sectionTop = sectionTop,
                         sectionBottom = sectionBottom,
@@ -215,7 +215,7 @@ class HomeFlowViewModel @Inject constructor(
                 mapItems = { items -> items.map { it.toUi() } }
             )
 
-            uiStateListener.updateData { s ->
+            _state.update { s ->
                 s.copy(
                     sectionPopularCategories = sectionPopularCategories.toUi { items -> items.map { it.toUi() } },
                     sectionTop = topSection,
@@ -229,7 +229,7 @@ class HomeFlowViewModel @Inject constructor(
                 )
             }
         } else {
-            uiStateListener.updateData { s -> s.copy(uiState = HomeUiState.NetworkError) }
+            _state.update { s -> s.copy(uiState = HomeUiState.NetworkError) }
             return false
         }
         return true
@@ -244,16 +244,16 @@ class HomeFlowViewModel @Inject constructor(
             viewModelScope.async { vodovozServiceRepository.getNewProducts().singleResult() }
 
         sectionPromotionsDeferred.await().onSuccess { value ->
-            uiStateListener.updateData { s -> s.copy(sectionPromotions = value.toUi()) }
+            _state.update { s -> s.copy(sectionPromotions = value.toUi()) }
         }.onFailure { return false }
 
         sectionHurryUpBuyProductsDeferred.await().onSuccess { value ->
-            uiStateListener.updateData { s -> s.copy(sectionHurryUpBuyProducts = value.toUi()) }
+            _state.update { s -> s.copy(sectionHurryUpBuyProducts = value.toUi()) }
         }.onFailure { return false }
 
 
         sectionNewProductsDeferred.await().onSuccess { value ->
-            uiStateListener.updateData { s -> s.copy(sectionNewProducts = value.toUi()) }
+            _state.update { s -> s.copy(sectionNewProducts = value.toUi()) }
         }.onFailure { return false }
 
         return true
@@ -286,7 +286,7 @@ class HomeFlowViewModel @Inject constructor(
                 compareVersions(BuildConfig.VERSION_NAME, appUpdateInfo.androidVersion) == -1
             }
 
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(
                 sectionViewedProducts = sectionViewedProducts ?: s.sectionViewedProducts,
                 specialPromotion = specialPromotion ?: s.specialPromotion,
@@ -301,7 +301,7 @@ class HomeFlowViewModel @Inject constructor(
 
 
     fun fetchHomeDetails() = viewModelScope.launch {
-        uiStateListener.updateData { s -> s.copy(uiState = HomeUiState.Loading) }
+        _state.update { s -> s.copy(uiState = HomeUiState.Loading) }
         fetchPrimaryDetails()
         fetchSecondaryDetails()
         fetchOptionalDetails()
@@ -310,7 +310,7 @@ class HomeFlowViewModel @Inject constructor(
     fun refresh() = viewModelScope.launch {
         if (stateSnapshot.uiState is HomeUiState.Loading) return@launch
 
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(
                 showRefreshIndicator = true,
                 sectionUnratedProducts = UnratedProductsSectionUi.Empty
@@ -319,7 +319,7 @@ class HomeFlowViewModel @Inject constructor(
 
         fetchHomeDetails().join()
 
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(showRefreshIndicator = false)
         }
     }
@@ -327,21 +327,21 @@ class HomeFlowViewModel @Inject constructor(
 
     fun goToProfile() {
         viewModelScope.launch {
-            eventListener.emit(HomeEvents.GoToProfile)
+            sendEvent(HomeEvents.GoToProfile)
         }
     }
 
     fun selectCategory(categoryWithProductsUi: CategoryWithProductsUi) = viewModelScope.launch {
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(
                 currentCategoryWithProducts = categoryWithProductsUi
             )
         }
-        eventListener.emit(HomeEvents.ScrollTopProductsToStart)
+        sendEvent(HomeEvents.ScrollTopProductsToStart)
     }
 
     fun closeSpecialPromotionBottomSheet() = viewModelScope.launch {
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(
                 showSpecialPromotionBS = false
             )
@@ -349,7 +349,7 @@ class HomeFlowViewModel @Inject constructor(
     }
 
     fun navigateToStories(startStory: StoryUi) = viewModelScope.launch {
-        eventListener.emit(
+        sendEvent(
             HomeEvents.GoToStories(
                 storyId = startStory.id,
                 stories = stateSnapshot.stories
@@ -358,19 +358,19 @@ class HomeFlowViewModel @Inject constructor(
     }
 
     fun navigateToPromotionDetails(promotion: PromotionUi) = viewModelScope.launch {
-        eventListener.emit(HomeEvents.GoToPromotionDetails(promotionId = promotion.id))
+        sendEvent(HomeEvents.GoToPromotionDetails(promotionId = promotion.id))
     }
 
     fun navigateToProductDetails(product: ProductUi) = viewModelScope.launch {
-        eventListener.emit(HomeEvents.GoToProductDetails(productId = product.id))
+        sendEvent(HomeEvents.GoToProductDetails(productId = product.id))
     }
 
     fun handleButtonAction(action: ButtonAction) = viewModelScope.launch {
-        eventListener.emit(HomeEvents.ActivateButtonAction(action))
+        sendEvent(HomeEvents.ActivateButtonAction(action))
     }
 
     fun navigateToSearch() = viewModelScope.launch {
-        eventListener.emit(HomeEvents.GoToSearch)
+        sendEvent(HomeEvents.GoToSearch)
     }
 
     fun changeFavorite(product: ProductUi) = viewModelScope.launch {
@@ -378,7 +378,7 @@ class HomeFlowViewModel @Inject constructor(
     }
 
     fun closeUnratedProductsBottomSheet() = viewModelScope.launch {
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(showUnratedProductsBS = false, showedUnratedProducts = true)
         }
     }
@@ -389,9 +389,9 @@ class HomeFlowViewModel @Inject constructor(
     ) = viewModelScope.launch {
         val accountId = accountManager.fetchAccountId()
         if (accountId == null) {
-            eventListener.emit(HomeEvents.GoToProfile)
+            sendEvent(HomeEvents.GoToProfile)
         } else {
-            eventListener.emit(
+            sendEvent(
                 HomeEvents.WriteComment(
                     product.id,
                     product.name,
@@ -399,7 +399,7 @@ class HomeFlowViewModel @Inject constructor(
                     rating.roundToInt()
                 )
             )
-            uiStateListener.updateData { s ->
+            _state.update { s ->
                 val sectionUnratedProducts = s.sectionUnratedProducts
                 val haveProducts = sectionUnratedProducts.products.isNotEmpty()
 
@@ -412,14 +412,14 @@ class HomeFlowViewModel @Inject constructor(
 
     fun navigateToPopularCategory(popularCategory: PopularCategoryUi) = viewModelScope.launch {
         if (popularCategory.action == null) {
-            eventListener.emit(HomeEvents.GoToCategoryProductList(popularCategory.id))
+            sendEvent(HomeEvents.GoToCategoryProductList(popularCategory.id))
         } else {
-            eventListener.emit(HomeEvents.ActivateDataAllAction(popularCategory.action))
+            sendEvent(HomeEvents.ActivateDataAllAction(popularCategory.action))
         }
     }
 
     fun showAdvertisingBottomSheet(aboutAdvertisingUi: AboutAdvertisingUi) = viewModelScope.launch {
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(
                 currentAdvertising = aboutAdvertisingUi,
                 showAdvertisingBS = true
@@ -428,28 +428,28 @@ class HomeFlowViewModel @Inject constructor(
     }
 
     fun closeAdvertisingBottomSheet() {
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(showAdvertisingBS = false)
         }
     }
 
     fun showSpeechRecognizer() = viewModelScope.launch {
-        eventListener.emit(HomeEvents.ShowSpeechRecognizer)
+        sendEvent(HomeEvents.ShowSpeechRecognizer)
     }
 
     fun activateBannerAction(banner: BannerUi) = viewModelScope.launch {
-        eventListener.emit(HomeEvents.ActivateVodovozAction(banner.action))
+        sendEvent(HomeEvents.ActivateVodovozAction(banner.action))
     }
 
     fun activateSpecialPromotionAction(action: VodovozAction) = viewModelScope.launch {
-        uiStateListener.updateData { s -> s.copy(showSpecialPromotionBS = false) }
+        _state.update { s -> s.copy(showSpecialPromotionBS = false) }
         delay(100L)
-        eventListener.emit(HomeEvents.ActivateVodovozAction(action))
+        sendEvent(HomeEvents.ActivateVodovozAction(action))
     }
 
 
     fun navigateToOrderDetails(order: HomeOrderUi) = viewModelScope.launch {
-        eventListener.emit(HomeEvents.GoToOrderDetails(order.orderId))
+        sendEvent(HomeEvents.GoToOrderDetails(order.orderId))
     }
 
     fun navigateByMenuItem(menuItem: MenuItemUi) = viewModelScope.launch {
@@ -467,7 +467,7 @@ class HomeFlowViewModel @Inject constructor(
                 return@launch
             }
         }
-        eventListener.emit(event)
+        sendEvent(event)
     }
 
     fun incrementProductToCart(product: ProductUi) = viewModelScope.launch {
@@ -479,22 +479,22 @@ class HomeFlowViewModel @Inject constructor(
     }
 
     fun navigateToProductAnalogs(product: ProductUi) = viewModelScope.launch {
-        eventListener.emit(HomeEvents.GoToProductAnalogs(product.id))
+        sendEvent(HomeEvents.GoToProductAnalogs(product.id))
     }
 
     fun navigateToQrCode() = viewModelScope.launch {
-        eventListener.emit(HomeEvents.GoToQrCode)
+        sendEvent(HomeEvents.GoToQrCode)
     }
 
     fun showVpnWaring() = viewModelScope.launch {
-        eventListener.emit(HomeEvents.ShowSnackbar(resourcesProvider.getString(R.string.vpn_warning)))
-        uiStateListener.updateData { s ->
+        sendEvent(HomeEvents.ShowSnackbar(resourcesProvider.getString(R.string.vpn_warning)))
+        _state.update { s ->
             s.copy(showedVpnWarning = true)
         }
     }
 
     fun showUnratedProducts() = viewModelScope.launch {
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(
                 showUnratedProductsBS = s.sectionUnratedProducts.products.isNotEmpty(),
             )
@@ -502,25 +502,25 @@ class HomeFlowViewModel @Inject constructor(
     }
 
     fun showExitDialog() = viewModelScope.launch {
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(showExitDialog = true)
         }
     }
 
     fun hideExitDialog() = viewModelScope.launch {
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(showExitDialog = false)
         }
     }
 
 
     fun closeApplication() = viewModelScope.launch {
-        uiStateListener.updateData { s -> s.copy(showExitDialog = false) }
-        eventListener.emit(HomeEvents.CloseApp)
+        _state.update { s -> s.copy(showExitDialog = false) }
+        sendEvent(HomeEvents.CloseApp)
     }
 
     fun noRateProduct(product: UnratedProductUi) = viewModelScope.launch {
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             val sectionUnratedProducts = s.sectionUnratedProducts.copy(
                 products = s.sectionUnratedProducts.products - product
             )
@@ -535,11 +535,11 @@ class HomeFlowViewModel @Inject constructor(
     }
 
     fun navigateToViewedProducts() = viewModelScope.launch {
-        eventListener.emit(HomeEvents.GoToViewedProductList)
+        sendEvent(HomeEvents.GoToViewedProductList)
     }
 
     fun removeUnratedProduct(productId: Long) = viewModelScope.launch {
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             val products = s.sectionUnratedProducts.products
             s.copy(
                 sectionUnratedProducts = s.sectionUnratedProducts.copy(
@@ -550,7 +550,7 @@ class HomeFlowViewModel @Inject constructor(
     }
 
     fun openGooglePlay(appUpdateInfo: AppUpdateInfoUi) = viewModelScope.launch {
-        eventListener.emit(HomeEvents.OpenGooglePlay(appUpdateInfo.playMarketUrl))
+        sendEvent(HomeEvents.OpenGooglePlay(appUpdateInfo.playMarketUrl))
     }
 
     @Stable

@@ -84,8 +84,8 @@ class QuestionnairesFlowFragment : Fragment() {
 
             setContent {
                 VodovozTheme {
-                    val pagingState by viewModel.observeUiState().collectAsStateWithLifecycle()
-                    val viewState by rememberUpdatedState(newValue = pagingState.data)
+                    val pagingState by viewModel.state.collectAsStateWithLifecycle()
+                    val viewState by rememberUpdatedState(newValue = pagingState)
                     val scrollState = rememberScrollState()
                     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -150,7 +150,7 @@ class QuestionnairesFlowFragment : Fragment() {
 
 
                     LifecycleEffect(snackbarHostState) {
-                        viewModel.observeEvent().collect { event ->
+                        viewModel.events.collect { event ->
                             when (event) {
                                 QuestionnairesFlowViewModel.QuestionnaireEvents.GoBack -> {
                                     findNavController().popBackStack()
@@ -200,31 +200,26 @@ class QuestionnairesFlowFragment : Fragment() {
             val handled = true
             val action = event.action and MotionEvent.ACTION_MASK
             val count = event.pointerCount
-            if (action == MotionEvent.ACTION_POINTER_DOWN) {
-                if (3 == count) {
-                    threeFingerTouchCount++
-                    if (threeFingerTouchCount == 3) {
-                        threeFingerTouchCount = 0
-                        MaterialAlertDialogBuilder(requireContext())
-                            .setMessage("Выберете текущий путь к серверу")
-                            .setNegativeButton("Рабочий") { dialog, _ ->
-                                dialog.dismiss()
-                                loadHomeFragmentWithNewServerURL(null)
-                            }
-                            .setPositiveButton("Тестовый") { dialog, _ ->
-                                dialog.dismiss()
-                                lifecycleScope.launch {
-                                    siteStateManager.requestSiteState()
-                                    siteStateManager.siteStateFlow.collect { state ->
-                                        if (state != null) {
-                                            val newLink = "${state.testUrl}/"
-                                            loadHomeFragmentWithNewServerURL(newLink)
-                                        }
-                                    }
-                                }
-                            }.show()
+            if (action == MotionEvent.ACTION_POINTER_DOWN && count == 3 && (++threeFingerTouchCount) == 3) {
+                threeFingerTouchCount = 0
+                MaterialAlertDialogBuilder(requireContext())
+                    .setMessage("Выберете текущий путь к серверу")
+                    .setNegativeButton("Рабочий") { dialog, _ ->
+                        dialog.dismiss()
+                        loadHomeFragmentWithNewServerURL(null)
                     }
-                }
+                    .setPositiveButton("Тестовый") { dialog, _ ->
+                        dialog.dismiss()
+                        lifecycleScope.launch {
+                            siteStateManager.requestSiteState()
+                            siteStateManager.siteStateFlow.collect { state ->
+                                if (state != null) {
+                                    val newLink = "${state.testUrl}/"
+                                    loadHomeFragmentWithNewServerURL(newLink)
+                                }
+                            }
+                        }
+                    }.show()
             }
             return@setOnTouchListener handled
         }

@@ -4,10 +4,10 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import com.vodovoz.app.common.content.Event
-import com.vodovoz.app.common.content.PagingContractViewModel
-import com.vodovoz.app.common.content.State
-import com.vodovoz.app.common.content.updateData
+import com.vodovoz.app.ui.mvi.Event
+import com.vodovoz.app.ui.mvi.MviViewModel
+import com.vodovoz.app.ui.mvi.State
+import kotlinx.coroutines.flow.update
 import com.vodovoz.app.design_system.model.MapPointUi
 import com.vodovoz.app.design_system.model.contains
 import com.vodovoz.app.design_system.model.distanceKm
@@ -40,12 +40,12 @@ class MapFlowViewModel @Inject constructor(
     savedState: SavedStateHandle,
     private val mapServiceRepository: MapServiceRepository,
     private val vodovozServiceRepository: VodovozServiceRepository,
-) : PagingContractViewModel<MapFlowViewModel.MapFlowState, MapFlowViewModel.MapFlowEvents>(
+) : MviViewModel<MapFlowViewModel.MapFlowState, MapFlowViewModel.MapFlowEvents>(
     MapFlowState()
 ) {
 
     private val addressName = savedState.get<String>("addressName")?.apply {
-        uiStateListener.updateData { s -> s.copy(screenType = MapScreenTypeUi.Edit) }
+        _state.update { s -> s.copy(screenType = MapScreenTypeUi.Edit) }
     }
 
     private val searchQueryFlow = MutableStateFlow(stateSnapshot.query)
@@ -74,7 +74,7 @@ class MapFlowViewModel @Inject constructor(
             .collect { mapAreasResult ->
                 mapAreasResult.onSuccess { mapAreas ->
 
-                    uiStateListener.updateData { s ->
+                    _state.update { s ->
                         s.copy(areas = mapAreas.mapToUi())
                     }
 
@@ -85,12 +85,12 @@ class MapFlowViewModel @Inject constructor(
     fun navigateBack() = viewModelScope.launch {
         when (stateSnapshot.mode) {
             MapUiMode.OnlyMap -> {
-                eventListener.emit(MapFlowEvents.GoBack)
+                sendEvent(MapFlowEvents.GoBack)
             }
 
             MapUiMode.Search -> {
-                eventListener.emit(MapFlowEvents.HideKeyboard)
-                uiStateListener.updateData { s ->
+                sendEvent(MapFlowEvents.HideKeyboard)
+                _state.update { s ->
                     s.copy(mode = MapUiMode.OnlyMap)
                 }
             }
@@ -98,15 +98,15 @@ class MapFlowViewModel @Inject constructor(
     }
 
     fun plusZoom() = viewModelScope.launch {
-        eventListener.emit(MapFlowEvents.MoveCameraPlus)
+        sendEvent(MapFlowEvents.MoveCameraPlus)
     }
 
     fun minusZoom() = viewModelScope.launch {
-        eventListener.emit(MapFlowEvents.MoveCameraMinus)
+        sendEvent(MapFlowEvents.MoveCameraMinus)
     }
 
     fun checkGeo() = viewModelScope.launch {
-        eventListener.emit(MapFlowEvents.CheckGeo)
+        sendEvent(MapFlowEvents.CheckGeo)
     }
 
     private fun handleSearchQueries() =
@@ -117,7 +117,7 @@ class MapFlowViewModel @Inject constructor(
 
 
                 addressesInMoscowByQueryResult.onSuccess { addresses ->
-                    uiStateListener.updateData { s ->
+                    _state.update { s ->
                         s.copy(recommendedAddresses = addresses)
                     }
                 }
@@ -127,7 +127,7 @@ class MapFlowViewModel @Inject constructor(
     fun changeQuery(query: String) {
         viewModelScope.launch {
             searchQueryFlow.emit(query)
-            uiStateListener.updateData { s ->
+            _state.update { s ->
                 s.copy(query = query)
             }
         }
@@ -166,36 +166,36 @@ class MapFlowViewModel @Inject constructor(
     fun moveToAvailableGeo() = viewModelScope.launch {
         val addressPoint = stateSnapshot.currentMapAddress?.point
         if (addressPoint != null) {
-            eventListener.emit(MapFlowEvents.MoveToAddress(addressPoint))
+            sendEvent(MapFlowEvents.MoveToAddress(addressPoint))
         } else if (addressName != null) {
             searchAddress(addressName)
         } else {
-            eventListener.emit(MapFlowEvents.MoveToGeoOrMoscow)
+            sendEvent(MapFlowEvents.MoveToGeoOrMoscow)
         }
     }
 
     fun moveToUserGeo() = viewModelScope.launch {
-        eventListener.emit(MapFlowEvents.MoveToGeoOrMoscow)
+        sendEvent(MapFlowEvents.MoveToGeoOrMoscow)
     }
 
     fun showSettingDialog() = viewModelScope.launch {
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(showSettingsDialog = true)
         }
     }
 
     fun closeSettingsDialog() = viewModelScope.launch {
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(showSettingsDialog = false)
         }
     }
 
     fun showAddressBottomSheet() = viewModelScope.launch {
-        eventListener.emit(MapFlowEvents.ShowAddressBottomSheet)
+        sendEvent(MapFlowEvents.ShowAddressBottomSheet)
     }
 
     fun hideAddressBottomSheet() = viewModelScope.launch {
-        eventListener.emit(MapFlowEvents.HideAddressBottomSheet)
+        sendEvent(MapFlowEvents.HideAddressBottomSheet)
     }
 
     private var searchAddressJob: Job? = null
@@ -203,7 +203,7 @@ class MapFlowViewModel @Inject constructor(
     fun searchAddress(addressName: String) = viewModelScope.launch {
         if (addressName == stateSnapshot.currentMapAddress?.name || addressName.any { c -> c.isDigit() } || stateSnapshot.query == addressName) {
 
-            uiStateListener.updateData { s ->
+            _state.update { s ->
                 s.copy(addressIsLoading = true)
             }
 
@@ -215,8 +215,8 @@ class MapFlowViewModel @Inject constructor(
 
                 val fromMoscowToPoint = calculateDistanceFromMoscowToAddress(mapAddress.point) ?: return@launch
                 changeAddress(currentAddress.copy(fromMoscowToPoint = fromMoscowToPoint))
-                eventListener.emit(MapFlowEvents.HideKeyboard)
-                eventListener.emit(MapFlowEvents.MoveToAddress(currentAddress.point))
+                sendEvent(MapFlowEvents.HideKeyboard)
+                sendEvent(MapFlowEvents.MoveToAddress(currentAddress.point))
             }
 
         } else {
@@ -231,7 +231,7 @@ class MapFlowViewModel @Inject constructor(
         searchAddressJob?.cancel()
 
         searchAddressJob = launch job@{
-            uiStateListener.updateData { s ->
+            _state.update { s ->
                 s.copy(addressIsLoading = true)
             }
 
@@ -259,7 +259,7 @@ class MapFlowViewModel @Inject constructor(
     }
 
     private fun changeAddress(address: MapAddressUi) {
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(
                 currentMapAddress = address,
                 mode = MapUiMode.OnlyMap,
@@ -271,22 +271,22 @@ class MapFlowViewModel @Inject constructor(
     }
 
     fun changeToSearchMode() {
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(mode = MapUiMode.Search)
         }
     }
 
     fun navigateToLocationSettings() = viewModelScope.launch {
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(showSettingsDialog = false)
         }
-        eventListener.emit(MapFlowEvents.GoToLocationSettings)
+        sendEvent(MapFlowEvents.GoToLocationSettings)
     }
 
     fun navigateToAddAddress() = viewModelScope.launch {
         if (stateSnapshot.addressIsLoading || stateSnapshot.addressIsError || stateSnapshot.buttonIsLoading) return@launch
 
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(buttonIsLoading = true)
         }
 
@@ -295,16 +295,16 @@ class MapFlowViewModel @Inject constructor(
 
         when {
             screenType == MapScreenTypeUi.Add && mapAddress != null -> {
-                eventListener.emit(MapFlowEvents.GoToAddAddress(mapAddress))
+                sendEvent(MapFlowEvents.GoToAddAddress(mapAddress))
 
             }
 
             screenType == MapScreenTypeUi.Edit && mapAddress != null -> {
-                eventListener.emit(MapFlowEvents.BackToAddAddress(mapAddress))
+                sendEvent(MapFlowEvents.BackToAddAddress(mapAddress))
             }
         }
 
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(buttonIsLoading = false)
         }
 

@@ -91,8 +91,8 @@ class ProfileFragment : Fragment() {
 
             setContent {
                 VodovozTheme {
-                    val pagingState by viewModel.observeUiState().collectAsStateWithLifecycle()
-                    val viewState by rememberUpdatedState(newValue = pagingState.data)
+                    val pagingState by viewModel.state.collectAsStateWithLifecycle()
+                    val viewState by rememberUpdatedState(newValue = pagingState)
                     val pullToRefreshState = rememberPullToRefreshState()
 
                     when (val uiState = viewState.uiState) {
@@ -145,7 +145,7 @@ class ProfileFragment : Fragment() {
 
     private fun observeEvents() = lifecycleScope.launch {
         repeatOnLifecycle(Lifecycle.State.STARTED) {
-            viewModel.observeEvent()
+            viewModel.events
                 .collect { events ->
                     when (events) {
                         ProfileFlowViewModel.ProfileEvents.GoToLogin -> {

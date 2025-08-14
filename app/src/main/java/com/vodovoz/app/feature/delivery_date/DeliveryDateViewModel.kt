@@ -59,9 +59,7 @@ class DeliveryDateViewModel @Inject constructor(
     fun fetchDeliveryDateDetails() = viewModelScope.launch {
         val selectedLocalDate = try {
             LocalDate.parse(stateSnapshot.selectedDateOption.value, VodovozDateFormatters.DMY)
-        } catch (_: Throwable) {
-            LocalDate.now().plusDays(1)
-        }
+        } catch (_: Throwable) { LocalDate.now().plusDays(1) }
 
         val deliveryDateDetailsResult = vodovozServiceRepository.getDeliveryDateDetails(
             addressId = addressId,

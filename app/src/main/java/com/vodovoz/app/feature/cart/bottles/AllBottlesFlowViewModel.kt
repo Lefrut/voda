@@ -4,10 +4,10 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.viewModelScope
 import com.vodovoz.app.common.cart.CartManager
-import com.vodovoz.app.common.content.Event
-import com.vodovoz.app.common.content.PagingContractViewModel
-import com.vodovoz.app.common.content.State
-import com.vodovoz.app.common.content.updateData
+import com.vodovoz.app.ui.mvi.Event
+import com.vodovoz.app.ui.mvi.MviViewModel
+import com.vodovoz.app.ui.mvi.State
+import kotlinx.coroutines.flow.update
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.feature.cart.bottles.model.BottleUi
 import com.vodovoz.app.feature.cart.bottles.model.mapToUi
@@ -24,7 +24,7 @@ import javax.inject.Inject
 class AllBottlesFlowViewModel @Inject constructor(
     private val cartManager: CartManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
-) : PagingContractViewModel<AllBottlesFlowViewModel.BottlesState, AllBottlesFlowViewModel.BottlesEvent>(
+) : MviViewModel<AllBottlesFlowViewModel.BottlesState, AllBottlesFlowViewModel.BottlesEvent>(
     BottlesState()
 ) {
 
@@ -35,22 +35,22 @@ class AllBottlesFlowViewModel @Inject constructor(
     }
 
     private fun listenBottlesChanges() = viewModelScope.launch {
-        uiStateListener.map { pagingState -> pagingState.data.bottles }.collectLatest {
-            uiStateListener.updateData { s ->
+        _state.map { pagingState -> pagingState.bottles }.collectLatest {
+            _state.update { s ->
                 s.copy(hideButton = !s.bottles.any { bottle -> bottle.cartQuantity > 0 } || s.isSingleBottleMode)
             }
         }
     }
 
     fun fetchAllBottlesDetails() = viewModelScope.launch(Dispatchers.IO) {
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(uiState = BottlesUiState.Loading)
         }
 
         val allBottlesResult = vodovozServiceRepository.getAllBottles().singleResult()
 
         allBottlesResult.onSuccess { allBottlesDetails ->
-            uiStateListener.updateData { s ->
+            _state.update { s ->
                 s.copy(
                     description = allBottlesDetails.description,
                     isSingleBottleMode = allBottlesDetails.isSingleBottleMode,
@@ -59,30 +59,30 @@ class AllBottlesFlowViewModel @Inject constructor(
                 )
             }
         }.onFailure {
-            uiStateListener.updateData { s ->
+            _state.update { s ->
                 s.copy(uiState = BottlesUiState.Error)
             }
         }
     }
 
     fun changeSearchMode(searchMode: Boolean) = viewModelScope.launch {
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(isSearchMode = searchMode, searchQuery = "")
         }
     }
 
     fun changeSearchQuery(newQuery: String) = viewModelScope.launch {
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(searchQuery = newQuery)
         }
     }
 
     fun navigateBack() = viewModelScope.launch {
-        eventListener.emit(BottlesEvent.GoBack)
+        sendEvent(BottlesEvent.GoBack)
     }
 
     fun addBottle(bottle: BottleUi) = viewModelScope.launch {
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(
                 bottles = s.bottles.map { b -> if (b.id == bottle.id) b.copy(cartQuantity = 1) else b }
             )
@@ -97,7 +97,7 @@ class AllBottlesFlowViewModel @Inject constructor(
     fun incrementBottle(bottle: BottleUi) = viewModelScope.launch {
         if (stateSnapshot.isSingleBottleMode) return@launch
 
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(bottles = s.bottles.map { if (it.id == bottle.id) it.copy(cartQuantity = it.cartQuantity + 1) else it })
         }
 
@@ -106,7 +106,7 @@ class AllBottlesFlowViewModel @Inject constructor(
     fun decrementBottle(bottle: BottleUi) = viewModelScope.launch {
         if (bottle.cartQuantity <= 0 || stateSnapshot.isSingleBottleMode) return@launch
 
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(
                 bottles = s.bottles.map {
                     if (it.id == bottle.id) it.copy(cartQuantity = it.cartQuantity - 1)
@@ -118,11 +118,11 @@ class AllBottlesFlowViewModel @Inject constructor(
 
     fun addBottlesToCart() = viewModelScope.launch {
         if (stateSnapshot.isSingleBottleMode) {
-            uiStateListener.updateData { s ->
+            _state.update { s ->
                 s.copy(uiState = BottlesUiState.Loading)
             }
         } else {
-            uiStateListener.updateData { s ->
+            _state.update { s ->
                 s.copy(
                     buttonIsLoading = true
                 )
@@ -142,16 +142,16 @@ class AllBottlesFlowViewModel @Inject constructor(
             cartManager.updateCartListState(true)
             cartManager.observeUpdateCartList().collectLatest { hasUpdates ->
                 if (!hasUpdates) {
-                    uiStateListener.updateData { s -> s.copy(buttonIsLoading = false) }
-                    eventListener.emit(BottlesEvent.GoBack)
+                    _state.update { s -> s.copy(buttonIsLoading = false) }
+                    sendEvent(BottlesEvent.GoBack)
                 }
             }
         }.onFailure {
-            uiStateListener.updateData { s ->
+            _state.update { s ->
                 s.copy(buttonIsLoading = false)
             }
             if (stateSnapshot.isSingleBottleMode) {
-                eventListener.emit(BottlesEvent.GoBack)
+                sendEvent(BottlesEvent.GoBack)
             }
         }
 

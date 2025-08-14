@@ -7,10 +7,6 @@ import androidx.paging.CombinedLoadStates
 import androidx.paging.LoadState
 import androidx.paging.map
 import com.vodovoz.app.common.cart.CartManager
-import com.vodovoz.app.common.content.Event
-import com.vodovoz.app.common.content.PagingContractViewModel
-import com.vodovoz.app.common.content.State
-import com.vodovoz.app.common.content.updateData
 import com.vodovoz.app.common.like.LikeManager
 import com.vodovoz.app.design_system.model.ProductUi
 import com.vodovoz.app.design_system.model.VodovozPlaceholderUi
@@ -25,7 +21,9 @@ import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.feature.home.model.CategoryUi
 import com.vodovoz.app.feature.product_comments.model.SortUi
 import com.vodovoz.app.feature.product_comments.model.toDomain
-import com.vodovoz.app.ui.paging.PagingDataListener
+import com.vodovoz.app.ui.mvi.Event
+import com.vodovoz.app.ui.paging.PagingMviViewModel
+import com.vodovoz.app.ui.paging.PagingState
 import com.vodovoz.app.ui.paging.copy
 import com.vodovoz.app.ui.paging.emptyCombinedLoadStates
 import com.vodovoz.app.util.extensions.singleResult
@@ -33,6 +31,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -42,39 +41,13 @@ class FavoriteFlowViewModel @Inject constructor(
     private val cartManager: CartManager,
     private val likeManager: LikeManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
-) : PagingContractViewModel<FavoriteFlowViewModel.FavoriteState, FavoriteFlowViewModel.FavoriteEvents>(
+) : PagingMviViewModel<ProductUi, FavoriteFlowViewModel.FavoriteState, FavoriteFlowViewModel.FavoriteEvents>(
     FavoriteState()
 ) {
 
 
-    private val pagingProductsListener = PagingDataListener(
-        onUpdateItems = { itemSnapshotList ->
-            val pagedProducts = itemSnapshotList.mapNotNull { product -> product }
-
-            uiStateListener.updateData { s ->
-                s.copy(products = pagedProducts)
-            }
-        }
-    )
-
-    fun notifyPagingProducts(productIndex: Int) = viewModelScope.launch {
-        pagingProductsListener[productIndex]
-    }
-
-
     init {
-        viewModelScope.launch {
-            listenFavorites()
-        }
-        listenPagingLoadStates()
-    }
-
-    private fun listenPagingLoadStates() = viewModelScope.launch {
-        pagingProductsListener.collectLoadState { combinedLoadStates ->
-            uiStateListener.updateData { s ->
-                s.copy(productsLoadStates = combinedLoadStates)
-            }
-        }
+        viewModelScope.launch { listenFavorites() }
     }
 
     private fun hasFavoriteChanges(): Boolean {
@@ -86,7 +59,7 @@ class FavoriteFlowViewModel @Inject constructor(
 
         val likesIds = (newLikes.keys + oldLikes.keys).toSet()
 
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(lastSavedLikes = newLikes)
         }
 
@@ -110,44 +83,44 @@ class FavoriteFlowViewModel @Inject constructor(
     }
 
     suspend fun listenCart() =
-        uiStateListener
-            .map { pagingState -> pagingState.data.products }
+        _state
+            .map { pagingState -> pagingState.items }
             .combine(cartManager.observeCarts()) { _, cart ->
                 cart
             }.collectLatest { cart ->
-                uiStateListener.updateData { s ->
+                _state.update { s ->
                     s.copy(
-                        products = s.products.withUpdatedCart(cart)
+                        items = s.items.withUpdatedCart(cart)
                     )
                 }
             }
 
     suspend fun listenProductLoadings() =
-        uiStateListener.map { it.data.products }
+        _state.map { it.items }
             .combine(cartManager.blockedProductsState) { _, blockedProducts ->
                 blockedProducts
             }.collectLatest { blockedProducts ->
-                uiStateListener.updateData { s ->
+                _state.update { s ->
                     s.copy(
-                        products = s.products.withUpdatedLoading(blockedProducts)
+                        items = s.items.withUpdatedLoading(blockedProducts)
                     )
                 }
             }
 
     private suspend fun listenFavorites() {
-        uiStateListener.map { pagingState -> pagingState.data.products }
+        _state.map { pagingState -> pagingState.items }
             .combine(likeManager.observeLikes()) { products, favorites ->
                 products to favorites
             }.collectLatest { (products, favorites) ->
-                uiStateListener.updateData { s ->
-                    s.copy(products = products.withUpdatedFavorites(favorites))
+                _state.update { s ->
+                    s.copy(items = products.withUpdatedFavorites(favorites))
                 }
             }
     }
 
     fun fetchFavoriteProducts() = viewModelScope.launch {
         if (stateSnapshot.uiState != FavoriteUiState.Success) {
-            uiStateListener.updateData { s ->
+            _state.update { s ->
                 s.copy(uiState = FavoriteUiState.Loading)
             }
         }
@@ -161,7 +134,7 @@ class FavoriteFlowViewModel @Inject constructor(
 
 
         favoriteProductsResult.onSuccess { productsSectionUi ->
-            uiStateListener.updateData { s ->
+            _state.update { s ->
                 val currentSort = s.currentSort.takeIf { value ->
                     value != SortUi.Empty
                 } ?: productsSectionUi.sorting.firstOrNull() ?: SortUi.Empty
@@ -170,7 +143,7 @@ class FavoriteFlowViewModel @Inject constructor(
                     productsSection = productsSectionUi,
                     currentSort = currentSort,
                     uiState = FavoriteUiState.Success,
-                    products = emptyList(),
+                    items = emptyList(),
                     showRefreshIndicator = false,
                 )
             }
@@ -186,11 +159,7 @@ class FavoriteFlowViewModel @Inject constructor(
                     productsIds = likeManager.fetchLocalFavorites()
                 ).map { pagingData ->
                     pagingData.map { productModel -> productModel.toUi() }
-                }.collectLatest { pagingData ->
-                    pagingProductsListener.collectPagingData(
-                        pagingData
-                    )
-                }
+                }.collectPagingData()
             }
 
         }.onFailure { t ->
@@ -202,7 +171,7 @@ class FavoriteFlowViewModel @Inject constructor(
                 else -> FavoriteUiState.Error
             }
 
-            uiStateListener.updateData { s ->
+            _state.update { s ->
                 val productsSection = s.productsSection
                 val title =
                     (uiState as? FavoriteUiState.Empty)?.placeholder?.title ?: productsSection.title
@@ -218,7 +187,7 @@ class FavoriteFlowViewModel @Inject constructor(
 
     fun refresh() = viewModelScope.launch {
         if (stateSnapshot.uiState !is FavoriteUiState.Loading) {
-            uiStateListener.updateData { s ->
+            _state.update { s ->
                 s.copy(showRefreshIndicator = true)
             }
             fetchFavoriteProducts()
@@ -226,7 +195,7 @@ class FavoriteFlowViewModel @Inject constructor(
     }
 
     fun navigateToCategories() = viewModelScope.launch {
-        eventListener.emit(
+        sendEvent(
             FavoriteEvents.GoToCategories(
                 stateSnapshot.productsSection.categories,
                 stateSnapshot.currentCategory
@@ -235,42 +204,42 @@ class FavoriteFlowViewModel @Inject constructor(
     }
 
     fun showSortBottomSheet() = viewModelScope.launch {
-        uiStateListener.updateData { s -> s.copy(showSortBottomSheet = true) }
+        _state.update { s -> s.copy(showSortBottomSheet = true) }
     }
 
     fun hideSortBottomSheet() = viewModelScope.launch {
-        uiStateListener.updateData { s -> s.copy(showSortBottomSheet = false) }
+        _state.update { s -> s.copy(showSortBottomSheet = false) }
     }
 
 
     fun switchLayout() = viewModelScope.launch {
-        uiStateListener.updateData { s -> s.copy(isGridView = !s.isGridView) }
+        _state.update { s -> s.copy(isGridView = !s.isGridView) }
     }
 
     fun selectCategory(category: CategoryUi) = viewModelScope.launch {
         val newCategory = if (category == stateSnapshot.currentCategory) CategoryUi.Empty
         else category
 
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(
                 currentCategory = newCategory,
-                productsLoadStates = s.productsLoadStates.copy(refresh = LoadState.Loading)
+                loadStates = s.loadStates.copy(refresh = LoadState.Loading)
             )
         }
 
-        eventListener.emit(FavoriteEvents.ScrollToTop)
+        sendEvent(FavoriteEvents.ScrollToTop)
         likeManager.changeCategory(category.id.takeIf { it != CategoryUi.Empty.id })
         fetchFavoriteProducts().join()
     }
 
     fun selectSort(sort: SortUi) = viewModelScope.launch {
         if (sort == stateSnapshot.currentSort) return@launch
-        uiStateListener.updateData { s -> s.copy(currentSort = sort, showSortBottomSheet = false) }
+        _state.update { s -> s.copy(currentSort = sort, showSortBottomSheet = false) }
         fetchFavoriteProducts().join()
     }
 
     fun navigateToProductDetails(product: ProductUi) = viewModelScope.launch {
-        eventListener.emit(FavoriteEvents.GoToProductDetails(product.id))
+        sendEvent(FavoriteEvents.GoToProductDetails(product.id))
     }
 
     fun changeFavorite(product: ProductUi) = viewModelScope.launch {
@@ -278,15 +247,15 @@ class FavoriteFlowViewModel @Inject constructor(
     }
 
     fun navigateToSearch() = viewModelScope.launch {
-        eventListener.emit(FavoriteEvents.GoToSearch)
+        sendEvent(FavoriteEvents.GoToSearch)
     }
 
     fun navigateToCatalog() = viewModelScope.launch {
-        eventListener.emit(FavoriteEvents.GoToCatalog)
+        sendEvent(FavoriteEvents.GoToCatalog)
     }
 
     fun navigateToProductAnalogs(product: ProductUi) = viewModelScope.launch {
-        eventListener.emit(FavoriteEvents.GoToProductAnalogs(product.id))
+        sendEvent(FavoriteEvents.GoToProductAnalogs(product.id))
     }
 
     fun incrementProductToCart(product: ProductUi) = viewModelScope.launch {
@@ -324,10 +293,15 @@ class FavoriteFlowViewModel @Inject constructor(
         val showSortBottomSheet: Boolean = false,
         val showRefreshIndicator: Boolean = false,
         val uiState: FavoriteUiState = FavoriteUiState.Loading,
-        val products: List<ProductUi> = emptyList(),
-        val productsLoadStates: CombinedLoadStates = emptyCombinedLoadStates,
+        override val items: List<ProductUi> = emptyList(),
+        override val loadStates: CombinedLoadStates = emptyCombinedLoadStates,
         val lastSavedLikes: Map<Long, Boolean> = emptyMap(),
-    ) : State
+    ) : PagingState<ProductUi, FavoriteState>() {
+        override fun copyPagingState(
+            items: List<ProductUi>,
+            loadStates: CombinedLoadStates,
+        ): FavoriteState = copy(items = items, loadStates = loadStates)
+    }
 
     @Stable
     sealed interface FavoriteUiState {

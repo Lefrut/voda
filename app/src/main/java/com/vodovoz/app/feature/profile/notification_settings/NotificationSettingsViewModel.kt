@@ -4,10 +4,10 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.viewModelScope
 import com.vodovoz.app.R
-import com.vodovoz.app.common.content.Event
-import com.vodovoz.app.common.content.PagingContractViewModel
-import com.vodovoz.app.common.content.State
-import com.vodovoz.app.common.content.updateData
+import com.vodovoz.app.ui.mvi.Event
+import com.vodovoz.app.ui.mvi.MviViewModel
+import com.vodovoz.app.ui.mvi.State
+import kotlinx.coroutines.flow.update
 import com.vodovoz.app.common.model.VodovozBoolean
 import com.vodovoz.app.common.model.from
 import com.vodovoz.app.common.resources.ResourcesProvider
@@ -32,7 +32,7 @@ import javax.inject.Inject
 class NotificationSettingsViewModel @Inject constructor(
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val resourcesProvider: ResourcesProvider,
-) : PagingContractViewModel<NotificationSettingsViewModel.NotSettingsState, NotificationSettingsViewModel.NotSettingsEvents>(
+) : MviViewModel<NotificationSettingsViewModel.NotSettingsState, NotificationSettingsViewModel.NotSettingsEvents>(
     NotSettingsState()
 ) {
 
@@ -44,7 +44,7 @@ class NotificationSettingsViewModel @Inject constructor(
 
     fun fetchNotificationSettingsDetails() = viewModelScope.launch {
         if (stateSnapshot.uiState !is NotSettingsUiState.Success) {
-            uiStateListener.updateData { s ->
+            _state.update { s ->
                 s.copy(uiState = NotSettingsUiState.Loading)
             }
         }
@@ -54,7 +54,7 @@ class NotificationSettingsViewModel @Inject constructor(
 
         notificationSettingDetailsResult.onSuccess { notificationSettingDetails ->
 
-            uiStateListener.updateData { s ->
+            _state.update { s ->
                 s.copy(
                     title = notificationSettingDetails.title,
                     uiState = NotSettingsUiState.Success,
@@ -67,7 +67,7 @@ class NotificationSettingsViewModel @Inject constructor(
 
         }.onFailure {
             if (stateSnapshot.uiState !is NotSettingsUiState.Success) {
-                uiStateListener.updateData { s ->
+                _state.update { s ->
                     s.copy(uiState = NotSettingsUiState.Error)
                 }
             }
@@ -75,7 +75,7 @@ class NotificationSettingsViewModel @Inject constructor(
     }
 
     fun navigateBack() = viewModelScope.launch {
-        eventListener.emit(NotSettingsEvents.GoBack)
+        sendEvent(NotSettingsEvents.GoBack)
     }
 
 
@@ -92,7 +92,7 @@ class NotificationSettingsViewModel @Inject constructor(
 
         val updatedWidgets = widgetUpdater.updateWidget(currentSection.items, widget, updatedWidget)
 
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(
                 sections = s.sections.map { section ->
                     if (section == currentSection) section.copy(items = updatedWidgets)
@@ -105,7 +105,7 @@ class NotificationSettingsViewModel @Inject constructor(
     fun saveNotificationSettings() {
         viewModelScope.launch {
 
-            uiStateListener.updateData { s ->
+            _state.update { s ->
                 s.copy(button = s.button.copy(loading = true))
             }
 
@@ -114,12 +114,12 @@ class NotificationSettingsViewModel @Inject constructor(
             }.flatten()
 
             if (!widgets.mapNotNull { it as? FieldUi }.checkFields(true)) {
-                eventListener.emit(
+                sendEvent(
                     NotSettingsEvents.ShowToast(
                         resourcesProvider.getString(R.string.notification_settings_validation_error)
                     )
                 )
-                uiStateListener.updateData { s ->
+                _state.update { s ->
                     s.copy(button = s.button.copy(loading = false))
                 }
             }
@@ -141,7 +141,7 @@ class NotificationSettingsViewModel @Inject constructor(
                 vodovozServiceRepository.updateNotificationSettings(queriesMap).singleResult()
 
             result.onFailure {
-                eventListener.emit(
+                sendEvent(
                     NotSettingsEvents.ShowToast(
                         resourcesProvider.getString(R.string.notification_settings_save_error)
                     )
@@ -149,7 +149,7 @@ class NotificationSettingsViewModel @Inject constructor(
                 fetchNotificationSettingsDetails()
             }
 
-            uiStateListener.updateData { s ->
+            _state.update { s ->
                 s.copy(button = s.button.copy(loading = false))
             }
         }

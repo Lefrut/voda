@@ -64,8 +64,8 @@ class CatalogFragment : Fragment() {
 
             setContent {
                 VodovozTheme {
-                    val pagingState by viewModel.observeUiState().collectAsStateWithLifecycle()
-                    val viewState by rememberUpdatedState(pagingState.data)
+                    val pagingState by viewModel.state.collectAsStateWithLifecycle()
+                    val viewState by rememberUpdatedState(pagingState)
 
                     when (viewState.uiState) {
                         CatalogFlowViewModel.CatalogUiState.Error -> {
@@ -91,7 +91,7 @@ class CatalogFragment : Fragment() {
 
 
     private suspend fun observeEvents() {
-        viewModel.observeEvent()
+        viewModel.events
             .collect { event ->
                 when (event) {
                     is CatalogFlowViewModel.CatalogEvents.GoToProfile -> {

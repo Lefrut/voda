@@ -190,9 +190,9 @@ class SplashFragment : Fragment() {
 
 
     private fun NavController.navigateToScreen(@IdRes screenId: Int) = navigate(
-        screenId,
-        null,
-        navOptions {
+        resId = screenId,
+        args = null,
+        navOptions = navOptions {
             currentDestination?.id?.let { id ->
                 popUpTo(id) { inclusive = true }
             }

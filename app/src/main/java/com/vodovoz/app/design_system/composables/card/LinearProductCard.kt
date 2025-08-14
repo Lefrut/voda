@@ -26,7 +26,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -42,6 +41,8 @@ import com.vodovoz.app.design_system.model.ForAdultsUi
 import com.vodovoz.app.design_system.model.LabelUi
 import com.vodovoz.app.design_system.model.PricePerUnitText
 import com.vodovoz.app.design_system.model.ProductUi
+import com.vodovoz.app.design_system.model.notPercentLables
+import com.vodovoz.app.design_system.model.percentLabels
 import com.vodovoz.app.util.extensions.formatRating
 import com.vodovoz.app.util.formatPrice
 import kotlin.math.roundToInt
@@ -56,9 +57,8 @@ fun LinearProductCard(
     onIncrementToCart: (ProductUi) -> Unit,
     onDecrementToCart: (ProductUi) -> Unit,
 ) {
-    val percentLabels =
-        product.labels.filter { labelEntity -> labelEntity.name.any { s -> s == '%' } }
-    val otherLabels = product.labels - percentLabels.toSet()
+    val percentLabels = product.percentLabels
+    val otherLabels = product.notPercentLables
     val forAdults = product.forAdults
 
     VodovozOutlinedCard(
@@ -75,7 +75,7 @@ fun LinearProductCard(
                 showBlur = forAdults != null,
                 text = forAdults?.textBlur ?: ""
             ) {
-                ImageSection(
+                LinearImageSection(
                     image = product.image,
                     percentLabels = percentLabels,
                     otherLabels = otherLabels,
@@ -136,12 +136,10 @@ fun LinearProductCard(
                         }
                     }
 
-
                     Spacer(modifier = Modifier.weight(1f))
 
-
                     Icon(
-                        painter = painterResource(id = R.drawable.ic_star_active),
+                        painter = painterResource(id = R.drawable.ic_star_active_v2),
                         contentDescription = null,
                         tint = if (product.rating <= 0.0f) MaterialTheme.colorScheme.surfaceVariant else MaterialTheme.colorScheme.tertiary,
                         modifier = Modifier
@@ -178,7 +176,7 @@ fun LinearProductCard(
 
 @Suppress("NonSkippableComposable")
 @Composable
-private fun ImageSection(
+private fun LinearImageSection(
     modifier: Modifier = Modifier,
     image: String,
     percentLabels: List<LabelUi>,

@@ -44,6 +44,8 @@ import com.vodovoz.app.design_system.model.ForAdultsUi
 import com.vodovoz.app.design_system.model.LabelUi
 import com.vodovoz.app.design_system.model.PricePerUnitText
 import com.vodovoz.app.design_system.model.ProductUi
+import com.vodovoz.app.design_system.model.notPercentLables
+import com.vodovoz.app.design_system.model.percentLabels
 import com.vodovoz.app.util.extensions.formatRating
 import com.vodovoz.app.util.formatPrice
 import kotlin.math.roundToInt
@@ -59,9 +61,8 @@ fun GridProductCard(
     onIncrementToCart: (ProductUi) -> Unit,
     onDecrementToCart: (ProductUi) -> Unit,
 ) {
-    val percentLabels =
-        product.labels.filter { labelEntity -> labelEntity.name.any { s -> s == '%' } }
-    val otherLabels = product.labels - percentLabels.toSet()
+    val percentLabels = product.percentLabels
+    val otherLabels = product.notPercentLables
 
     VodovozOutlinedCard(
         modifier = modifier,
@@ -76,7 +77,7 @@ fun GridProductCard(
             showBlur = forAdults != null,
             text = forAdults?.textBlur ?: ""
         ) {
-            ImageSection(
+            GridImageSection(
                 image = product.image,
                 percentLabels = percentLabels,
                 otherLabels = otherLabels,
@@ -88,7 +89,6 @@ fun GridProductCard(
 
         Column(modifier = Modifier) {
             PriceAndRating(product = product)
-
 
             product.PricePerUnitText()
 
@@ -124,7 +124,7 @@ fun GridProductCard(
 
 @Suppress("NonSkippableComposable")
 @Composable
-private fun ImageSection(
+private fun GridImageSection(
     modifier: Modifier = Modifier,
     image: String,
     percentLabels: List<LabelUi>,

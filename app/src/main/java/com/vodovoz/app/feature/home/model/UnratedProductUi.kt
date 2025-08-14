@@ -11,9 +11,10 @@ data class UnratedProductsSectionUi(
     val productTitle: String,
     val countProductsText: String,
     val products: List<UnratedProductUi>,
+    val buttonText: String,
 ) {
     companion object {
-        val Empty: UnratedProductsSectionUi = UnratedProductsSectionUi("", "", "", emptyList())
+        val Empty: UnratedProductsSectionUi = UnratedProductsSectionUi("", "", "", emptyList(), "")
     }
 }
 
@@ -22,7 +23,7 @@ data class UnratedProductUi(
     val name: String,
     val id: Long,
     val detailPicture: String,
-    val rating: Float = 0f
+    val rating: Float = 0f,
 )
 
 fun UnratedProductsSectionModel.toUi(): UnratedProductsSectionUi {
@@ -30,7 +31,8 @@ fun UnratedProductsSectionModel.toUi(): UnratedProductsSectionUi {
         title = title,
         productTitle = productTitle,
         countProductsText = countProductsText,
-        products = products.map { it.toUi() }
+        products = products.map { it.toUi() },
+        buttonText = buttonText
     )
 }
 

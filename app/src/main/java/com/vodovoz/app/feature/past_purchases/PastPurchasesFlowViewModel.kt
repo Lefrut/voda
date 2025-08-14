@@ -7,18 +7,11 @@ import androidx.paging.CombinedLoadStates
 import androidx.paging.LoadState
 import androidx.paging.map
 import com.vodovoz.app.common.cart.CartManager
-import com.vodovoz.app.common.content.Event
-import com.vodovoz.app.common.content.PagingContractViewModel
-import com.vodovoz.app.common.content.State
-import com.vodovoz.app.common.content.updateData
 import com.vodovoz.app.common.like.LikeManager
 import com.vodovoz.app.design_system.model.ProductUi
 import com.vodovoz.app.design_system.model.VodovozPlaceholderUi
 import com.vodovoz.app.design_system.model.mapToUi
 import com.vodovoz.app.design_system.model.toUi
-import com.vodovoz.app.design_system.model.withUpdatedCart
-import com.vodovoz.app.design_system.model.withUpdatedFavorites
-import com.vodovoz.app.design_system.model.withUpdatedLoading
 import com.vodovoz.app.domain.general.model.EmptyResultException
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.feature.home.model.CategoryUi
@@ -26,15 +19,16 @@ import com.vodovoz.app.feature.home.model.mapToUi
 import com.vodovoz.app.feature.product_comments.model.SortUi
 import com.vodovoz.app.feature.product_comments.model.mapToUi
 import com.vodovoz.app.feature.product_comments.model.toDomain
-import com.vodovoz.app.ui.paging.PagingDataListener
+import com.vodovoz.app.ui.mvi.Event
+import com.vodovoz.app.ui.paging.PagingProductsMviViewModel
+import com.vodovoz.app.ui.paging.PagingState
 import com.vodovoz.app.ui.paging.copy
 import com.vodovoz.app.ui.paging.emptyCombinedLoadStates
 import com.vodovoz.app.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -44,90 +38,28 @@ class PastPurchasesFlowViewModel @Inject constructor(
     private val cartManager: CartManager,
     private val likeManager: LikeManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
-) : PagingContractViewModel<PastPurchasesFlowViewModel.PastPurchasesState, PastPurchasesFlowViewModel.PastPurchasesEvents>(
-    PastPurchasesState()
+) : PagingProductsMviViewModel<PastPurchasesFlowViewModel.PastPurchasesState, PastPurchasesFlowViewModel.PastPurchasesEvents>(
+    state = PastPurchasesState(),
+    blockedProductsFlow = cartManager.blockedProductsState,
+    favoritesFlow = likeManager.observeLikes(),
+    cartFlow = cartManager.observeCarts()
 ) {
 
-    private val pagingProductsListener = PagingDataListener(
-        onUpdateItems = { itemSnapshotList ->
-            uiStateListener.updateData { s ->
-                val pagedProducts = itemSnapshotList.mapNotNull { product -> product }
-                s.copy(products = pagedProducts)
-            }
-        }
-    )
 
 
     init {
-        listenProductsLoadStates()
         viewModelScope.launch { delay(250) }.also {
             fetchPastPurchasesDetails()
         }
     }
 
-    suspend fun listenProductLoadings() = uiStateListener.map { state -> state.data.products }
-        .combine(cartManager.blockedProductsState) { _, blockedProducts ->
-            blockedProducts
-        }.collectLatest { blockedProducts ->
-            uiStateListener.updateData { s ->
-                s.copy(
-                    products = s.products.withUpdatedLoading(blockedProducts)
-                )
-            }
-        }
-
-    suspend fun listenCart() =
-        uiStateListener.map { state ->
-            state.data.products
-        }.combine(cartManager.observeCarts()) { _, cart ->
-            cart
-        }.collectLatest { cart ->
-            uiStateListener.updateData { s ->
-                s.copy(
-                    products = s.products.withUpdatedCart(cart)
-                )
-            }
-        }
-
-    suspend fun listenFavorites() = uiStateListener.map { pagingState -> pagingState.data.products }
-        .combine(likeManager.observeLikes()) { products, favorites ->
-            products to favorites
-        }.collectLatest { (products, favorites) ->
-            uiStateListener.updateData { s ->
-                s.copy(
-                    products = products.withUpdatedFavorites(favorites)
-                )
-            }
-        }
-
-    private fun listenProductsLoadStates() = viewModelScope.launch {
-        pagingProductsListener.collectLoadState { combinedLoadStates ->
-            val refreshState = when {
-                combinedLoadStates.refresh is LoadState.Loading && stateSnapshot.products.isNotEmpty() -> {
-                    stateSnapshot.productsLoadStates.refresh
-                }
-
-                else -> combinedLoadStates.refresh
-            }
-
-            uiStateListener.updateData { s ->
-                s.copy(
-                    productsLoadStates = combinedLoadStates.copy(
-                        refresh = refreshState
-                    )
-                )
-            }
-        }
-
-    }
-
     fun navigateBack() = viewModelScope.launch {
-        eventListener.emit(PastPurchasesEvents.GoBack)
+        sendEvent(PastPurchasesEvents.GoBack)
     }
 
 
     fun navigateToSearch() = viewModelScope.launch {
-        eventListener.emit(PastPurchasesEvents.GoToSearch)
+        sendEvent(PastPurchasesEvents.GoToSearch)
     }
 
     fun changeFavorite(product: ProductUi) = viewModelScope.launch {
@@ -135,7 +67,7 @@ class PastPurchasesFlowViewModel @Inject constructor(
     }
 
     fun navigateToProductAnalogs(product: ProductUi) = viewModelScope.launch {
-        eventListener.emit(PastPurchasesEvents.GoToProductAnalogs(product.id))
+        sendEvent(PastPurchasesEvents.GoToProductAnalogs(product.id))
     }
 
     fun incrementProductToCart(product: ProductUi) = viewModelScope.launch {
@@ -147,7 +79,7 @@ class PastPurchasesFlowViewModel @Inject constructor(
     }
 
     fun hideSortBottomSheet() {
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(showSortBottomSheet = false)
         }
     }
@@ -155,11 +87,11 @@ class PastPurchasesFlowViewModel @Inject constructor(
     fun selectSort(sort: SortUi) = viewModelScope.launch {
         if (stateSnapshot.currentSort == sort) return@launch
 
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(
                 currentSort = sort,
                 showSortBottomSheet = false,
-                productsLoadStates = s.productsLoadStates.copy(
+                loadStates = s.loadStates.copy(
                     refresh = LoadState.Loading
                 )
             )
@@ -168,22 +100,22 @@ class PastPurchasesFlowViewModel @Inject constructor(
     }
 
     fun showSortBottomSheet() = viewModelScope.launch {
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(showSortBottomSheet = true)
         }
     }
 
     fun switchLayout() = viewModelScope.launch {
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(isGridView = !s.isGridView)
         }
     }
 
     fun selectCategory(category: CategoryUi) = viewModelScope.launch {
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(
                 currentCategory = if (category == s.currentCategory) CategoryUi.Empty else category,
-                productsLoadStates = s.productsLoadStates.copy(
+                loadStates = s.loadStates.copy(
                     refresh = LoadState.Loading
                 )
             )
@@ -192,19 +124,15 @@ class PastPurchasesFlowViewModel @Inject constructor(
     }
 
     fun navigateToProductDetails(product: ProductUi) = viewModelScope.launch {
-        eventListener.emit(PastPurchasesEvents.GoToProductDetails(product.id))
-    }
-
-    fun notifyPagingProducts(index: Int) = viewModelScope.launch {
-        pagingProductsListener[index]
+        sendEvent(PastPurchasesEvents.GoToProductDetails(product.id))
     }
 
     fun navigateToCatalog() = viewModelScope.launch {
-        eventListener.emit(PastPurchasesEvents.GoToCatalog)
+        sendEvent(PastPurchasesEvents.GoToCatalog)
     }
 
     fun fetchPastPurchasesDetails() = viewModelScope.launch {
-        if (stateSnapshot.uiState !is PastPurchasesUiState.Success) uiStateListener.updateData { s ->
+        if (stateSnapshot.uiState !is PastPurchasesUiState.Success) updateState { s ->
             s.copy(uiState = PastPurchasesUiState.Loading)
         }
 
@@ -220,7 +148,7 @@ class PastPurchasesFlowViewModel @Inject constructor(
         pastPurchasesDetailsResult.onSuccess { pastPurchasesDetails ->
 
 
-            uiStateListener.updateData { s ->
+            _state.update { s ->
 
                 val sorting = pastPurchasesDetails.sorting.mapToUi()
                 val sort = s.currentSort.takeIf { sort ->
@@ -228,7 +156,7 @@ class PastPurchasesFlowViewModel @Inject constructor(
                 } ?: sorting.firstOrNull() ?: SortUi.Empty
 
                 s.copy(
-                    products = pastPurchasesDetails.products.mapToUi(),
+                    items = pastPurchasesDetails.products.mapToUi(),
                     sorting = pastPurchasesDetails.sorting.mapToUi(),
                     categories = pastPurchasesDetails.categories.mapToUi(),
                     title = pastPurchasesDetails.title,
@@ -243,9 +171,7 @@ class PastPurchasesFlowViewModel @Inject constructor(
                     categoryId = stateSnapshot.currentCategory.id
                 ).map { pagingData ->
                     pagingData.map { productModel -> productModel.toUi() }
-                }.collect { pagingData ->
-                    pagingProductsListener.collectPagingData(pagingData)
-                }
+                }.collectPagingData()
             }
 
         }.onFailure { t ->
@@ -258,7 +184,7 @@ class PastPurchasesFlowViewModel @Inject constructor(
             }
 
             if (stateSnapshot.uiState !is PastPurchasesUiState.Success) {
-                uiStateListener.updateData { s ->
+                _state.update { s ->
                     val title = (uiState as? PastPurchasesUiState.Empty)?.placeholder?.title
                     s.copy(
                         title = title ?: s.title,
@@ -289,12 +215,17 @@ class PastPurchasesFlowViewModel @Inject constructor(
         val currentCategory: CategoryUi = CategoryUi.Empty,
         val currentSort: SortUi = SortUi.Empty,
         val isGridView: Boolean = true,
-        val products: List<ProductUi> = emptyList(),
-        val productsLoadStates: CombinedLoadStates = emptyCombinedLoadStates,
+        override val items: List<ProductUi> = emptyList(),
+        override val loadStates: CombinedLoadStates = emptyCombinedLoadStates,
         val showSortBottomSheet: Boolean = false,
         val sorting: List<SortUi> = emptyList(),
         val uiState: PastPurchasesUiState = PastPurchasesUiState.Loading,
-    ) : State
+    ) : PagingState<ProductUi, PastPurchasesState>() {
+        override fun copyPagingState(
+            items: List<ProductUi>,
+            loadStates: CombinedLoadStates,
+        ): PastPurchasesState = copy(items = items, loadStates = loadStates)
+    }
 
     @Stable
     sealed interface PastPurchasesUiState {

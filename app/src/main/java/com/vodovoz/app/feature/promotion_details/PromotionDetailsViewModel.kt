@@ -1,127 +1,46 @@
 package com.vodovoz.app.feature.promotion_details
 
+import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.Stable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.paging.CombinedLoadStates
-import androidx.paging.LoadState
 import androidx.paging.map
-import com.vodovoz.app.common.account.AccountManager
 import com.vodovoz.app.common.cart.CartManager
-import com.vodovoz.app.common.content.Event
-import com.vodovoz.app.common.content.PagingContractViewModel
-import com.vodovoz.app.common.content.State
-import com.vodovoz.app.common.content.updateData
 import com.vodovoz.app.common.like.LikeManager
 import com.vodovoz.app.design_system.model.ProductUi
 import com.vodovoz.app.design_system.model.PromotionDetailsUi
 import com.vodovoz.app.design_system.model.toUi
-import com.vodovoz.app.design_system.model.withUpdatedCart
-import com.vodovoz.app.design_system.model.withUpdatedFavorites
-import com.vodovoz.app.design_system.model.withUpdatedLoading
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
-import com.vodovoz.app.ui.paging.PagingDataListener
-import com.vodovoz.app.ui.paging.copy
+import com.vodovoz.app.ui.mvi.Event
+import com.vodovoz.app.ui.paging.PagingProductsMviViewModel
+import com.vodovoz.app.ui.paging.PagingState
 import com.vodovoz.app.ui.paging.emptyCombinedLoadStates
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class PromotionDetailsViewModel @Inject constructor(
     savedState: SavedStateHandle,
-    private val accountManager: AccountManager,
     private val cartManager: CartManager,
     private val likeManager: LikeManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
-) : PagingContractViewModel<PromotionDetailsViewModel.PromotionDetailFlowState, PromotionDetailsViewModel.PromotionDetailEvent>(
-    PromotionDetailFlowState()
+) : PagingProductsMviViewModel<PromotionDetailsViewModel.PromotionDetailsState, PromotionDetailsViewModel.PromotionDetailEvent>(
+    state = PromotionDetailsState(),
+    blockedProductsFlow = cartManager.blockedProductsState,
+    favoritesFlow = likeManager.observeLikes(),
+    cartFlow = cartManager.observeCarts()
 ) {
 
-    private var promotionId = savedState.get<Long>("promotionId")?.toInt() ?: kotlin.run {
-        navigateBack()
-        -1
-    }
-
-    private val pagingProductsListener = PagingDataListener<ProductUi>(
-        onUpdateItems = { itemSnapshotList ->
-            uiStateListener.updateData { s ->
-                val pagedProducts = itemSnapshotList.mapNotNull { product -> product }
-                s.copy(products = pagedProducts)
-            }
-        }
-    )
-
+    private var promotionId = savedState.get<Long>("promotionId")?.toInt() ?: -1
 
     init {
         fetchPromotionDetails()
-        listenProductsLoadStates()
     }
-
-    suspend fun listenProductLoadings() =
-        uiStateListener.map { it.data.products }
-            .distinctUntilChanged()
-            .combine(cartManager.blockedProductsState) { _, blockedProducts ->
-                blockedProducts
-            }.collectLatest { blockedProducts ->
-                uiStateListener.updateData { s ->
-                    s.copy(
-                        products = s.products.withUpdatedLoading(blockedProducts)
-                    )
-                }
-            }
-
-    suspend fun listenFavorites() = uiStateListener.map { it.data.products }
-        .distinctUntilChanged()
-        .combine(likeManager.observeLikes()) { _, favorites ->
-            favorites
-        }.collectLatest { favorites ->
-            uiStateListener.updateData { s ->
-                s.copy(
-                    products = s.products.withUpdatedFavorites(favorites)
-                )
-            }
-        }
-
-    suspend fun listenCart() = uiStateListener.map { it.data.products }
-        .distinctUntilChanged()
-        .combine(cartManager.observeCarts()) { _, cart ->
-            cart
-        }.collectLatest { cart ->
-            uiStateListener.updateData { s ->
-                s.copy(
-                    products = s.products.withUpdatedCart(cart)
-                )
-            }
-        }
-
-
-    private fun listenProductsLoadStates() = viewModelScope.launch {
-        pagingProductsListener.collectLoadState { combinedLoadStates ->
-            val refreshState = when {
-                combinedLoadStates.refresh is LoadState.Loading && stateSnapshot.products.isNotEmpty() -> {
-                    stateSnapshot.productsLoadStates.refresh
-                }
-
-                else -> combinedLoadStates.refresh
-            }
-
-            uiStateListener.updateData { s ->
-                s.copy(
-                    productsLoadStates = combinedLoadStates.copy(
-                        refresh = refreshState
-                    )
-                )
-            }
-        }
-
-    }
-
 
     fun decrementProductToCart(product: ProductUi) = viewModelScope.launch {
         cartManager.change(product.id, product.cartQuantity - 1)
@@ -132,12 +51,12 @@ class PromotionDetailsViewModel @Inject constructor(
     }
 
     fun navigateToProductAnalogs(product: ProductUi) = viewModelScope.launch {
-        eventListener.emit(PromotionDetailEvent.GoToProductAnalogs(product.id))
+        sendEvent(PromotionDetailEvent.GoToProductAnalogs(product.id))
     }
 
 
     fun fetchPromotionDetails() {
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(uiState = UiState.Loading)
         }
         vodovozServiceRepository.getPromotionDetails(promotionId)
@@ -145,7 +64,7 @@ class PromotionDetailsViewModel @Inject constructor(
                 promotionDetailsResult.onSuccess { titleAndPromotionDetails ->
 
 
-                    uiStateListener.updateData { s ->
+                    _state.update { s ->
                         s.copy(
                             promotionDetails = titleAndPromotionDetails.second.toUi(),
                             productsTitle = titleAndPromotionDetails.first.title,
@@ -158,11 +77,11 @@ class PromotionDetailsViewModel @Inject constructor(
                             val pg = pagingData.map { productModel ->
                                 productModel.toUi()
                             }
-                            pagingProductsListener.collectPagingData(pg)
+                            collectPagingData(pg)
                         }.launchIn(viewModelScope)
 
                 }.onFailure {
-                    uiStateListener.updateData { s ->
+                    _state.update { s ->
                         s.copy(uiState = UiState.Error)
                     }
                 }
@@ -170,35 +89,36 @@ class PromotionDetailsViewModel @Inject constructor(
     }
 
     fun navigateBack() = viewModelScope.launch {
-        eventListener.emit(PromotionDetailEvent.GoBack)
+        sendEvent(PromotionDetailEvent.GoBack)
     }
 
     fun navigateToWebView(url: String) = viewModelScope.launch {
-        eventListener.emit(PromotionDetailEvent.OpenUrl(url))
+        sendEvent(PromotionDetailEvent.OpenUrl(url))
     }
 
     fun navigateToProductDetails(product: ProductUi) = viewModelScope.launch {
-        eventListener.emit(PromotionDetailEvent.GoToProductDetails(product.id))
+        sendEvent(PromotionDetailEvent.GoToProductDetails(product.id))
     }
 
     fun changeProductFavorite(product: ProductUi) = viewModelScope.launch {
         likeManager.changeFavorite(product.id, !product.isFavorite)
     }
 
-    fun notifyPagingProducts(index: Int) = viewModelScope.launch {
-        kotlin.runCatching {
-            pagingProductsListener[index]
-        }
-    }
-
-    data class PromotionDetailFlowState(
+    @Immutable
+    data class PromotionDetailsState(
         val promotionDetails: PromotionDetailsUi = PromotionDetailsUi.Empty,
         val productsTitle: String = "",
-        val products: List<ProductUi> = emptyList(),
-        val productsLoadStates: CombinedLoadStates = emptyCombinedLoadStates,
+        override val items: List<ProductUi> = emptyList(),
+        override val loadStates: CombinedLoadStates = emptyCombinedLoadStates,
         val uiState: UiState = UiState.Loading,
-    ) : State
+    ) : PagingState<ProductUi, PromotionDetailsState>() {
+        override fun copyPagingState(
+            items: List<ProductUi>,
+            loadStates: CombinedLoadStates,
+        ): PromotionDetailsState = copy(items = items, loadStates = loadStates)
+    }
 
+    @Stable
     sealed interface UiState {
         data object Loading : UiState
         data object Error : UiState

@@ -45,8 +45,8 @@ class PromotionDetailsFragment : Fragment() {
 
             setContent {
                 VodovozTheme {
-                    val pagingState by viewModel.observeUiState().collectAsStateWithLifecycle()
-                    val viewState by rememberUpdatedState(pagingState.data)
+                    val pagingState by viewModel.state.collectAsStateWithLifecycle()
+                    val viewState by rememberUpdatedState(pagingState)
                     val context = LocalContext.current
 
 
@@ -78,7 +78,7 @@ class PromotionDetailsFragment : Fragment() {
                     }
 
                     LifecycleEffect {
-                        viewModel.observeEvent().collect { event ->
+                        viewModel.events.collect { event ->
                             when (event) {
                                 PromotionDetailsViewModel.PromotionDetailEvent.GoBack -> {
                                     findNavController().popBackStack()

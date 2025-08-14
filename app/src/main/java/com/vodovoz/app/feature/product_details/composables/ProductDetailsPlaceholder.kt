@@ -23,73 +23,57 @@ import kotlin.random.Random
 @Composable
 fun ProductDetailsPlaceholder(modifier: Modifier = Modifier) {
     val shimmer = rememberShimmer(shimmerBounds = ShimmerBounds.View)
+
     Column(
         modifier = modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
-            .padding(horizontal = 16.dp)
-
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
         SkeletonBox(
-            shimmerState = shimmer, modifier = Modifier
-                .fillMaxWidth()
-                .height(250.dp)
-        )
-        Row(
+            shimmerState = shimmer,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 16.dp),
+                .height(280.dp)
+        )
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             repeat(3) {
                 SkeletonBox(
-                    shimmerState = shimmer, modifier = Modifier
-                        .width(Random.nextInt(70, 105).dp)
-                        .height(36.dp)
+                    shimmerState = shimmer,
+                    modifier = Modifier
+                        .width(Random.nextInt(70, 110).dp)
+                        .height(40.dp)
                 )
             }
         }
 
         SkeletonBox(
-            shimmerState = shimmer, modifier = Modifier
-                .padding(top = 16.dp)
+            shimmerState = shimmer,
+            modifier = Modifier
+                .fillMaxWidth(0.85f)
                 .height(36.dp)
-                .fillMaxWidth(0.9f)
         )
 
         SkeletonBox(
-            shimmerState = shimmer, modifier = Modifier
-                .padding(top = 16.dp)
-                .height(36.dp)
-                .fillMaxWidth(0.75f)
+            shimmerState = shimmer,
+            modifier = Modifier
+                .fillMaxWidth(0.65f)
+                .height(26.dp)
         )
 
         SkeletonBox(
-            shimmerState = shimmer, modifier = Modifier
-                .padding(top = 16.dp)
-                .height(36.dp)
-                .fillMaxWidth(0.55f)
+            shimmerState = shimmer,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(220.dp)
         )
-
-        SkeletonBox(
-            shimmerState = shimmer, modifier = Modifier
-                .padding(top = 16.dp)
-                .height(36.dp)
-                .fillMaxWidth(0.8f)
-        )
-
-
-        repeat(5){
-            SkeletonBox(
-                shimmerState = shimmer, modifier = Modifier
-                    .padding(top = 16.dp)
-                    .height(36.dp)
-                    .fillMaxWidth()
-            )
-        }
     }
 }
-
 @Preview(apiLevel = 34)
 @Composable
 private fun ProductDetailsPlaceholderPreview() {

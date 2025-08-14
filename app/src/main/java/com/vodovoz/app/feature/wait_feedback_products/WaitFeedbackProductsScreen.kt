@@ -52,7 +52,7 @@ fun WaitFeedbackProductsScreen(
 
             WaitFeedbackProductsUiState.Success -> {
                 WaitFeedbackProductsBody(
-                    products = viewState.products,
+                    products = viewState.items,
                     loadStates = viewState.loadStates,
                     onProductClick = { product ->
                         viewModel.navigateToProductDetails(product)
@@ -61,7 +61,7 @@ fun WaitFeedbackProductsScreen(
                         viewModel.navigateToWriteComment(product, rating)
                     },
                     onProductSee = { index ->
-                        viewModel.notifyPagingProducts(index)
+                        viewModel.notifyPaging(index)
                     }
                 )
             }

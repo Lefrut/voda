@@ -72,9 +72,9 @@ fun FavoriteScreen(
                         currentCategory = viewState.currentCategory,
                         currentSort = viewState.currentSort,
                         isGridView = viewState.isGridView,
-                        products = viewState.products,
+                        products = viewState.items,
                         lazyGridState = lazyGridState,
-                        productsLoadStates = viewState.productsLoadStates,
+                        productsLoadStates = viewState.loadStates,
                         onCategoriesListClick = {
                             viewModel.navigateToCategories()
                         },
@@ -94,7 +94,7 @@ fun FavoriteScreen(
                             viewModel.navigateToProductDetails(product)
                         },
                         onProductSee = { index ->
-                            viewModel.notifyPagingProducts(index)
+                            viewModel.notifyPaging(index)
                         },
                         onProductAnalogsClick = { product ->
                             viewModel.navigateToProductAnalogs(product)

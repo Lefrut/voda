@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.util.lerp
 import com.vodovoz.app.design_system.composables.button.ProductBottomFloatingButton
+import com.vodovoz.app.design_system.composables.placeholders.NetworkErrorPlaceholder
 import com.vodovoz.app.feature.product_details.composables.MultiProductBottomSheet
 import com.vodovoz.app.feature.product_details.composables.PresentBottomSheet
 import com.vodovoz.app.feature.product_details.composables.ProductDetailsBody
@@ -27,7 +28,7 @@ import com.vodovoz.app.feature.product_details.composables.ProductDetailsTopBar
 fun ProductDetailsScreen(
     viewState: ProductDetailsFlowViewModel.ProductDetailsState,
     viewModel: ProductDetailsFlowViewModel,
-    mediaPagerState: PagerState
+    mediaPagerState: PagerState,
 ) {
     val productDetails = viewState.productDetails
 
@@ -50,7 +51,8 @@ fun ProductDetailsScreen(
                     viewModel.share()
                 },
                 isFavoriteProduct = productDetails.isFavorite,
-                isLoading = viewState.uiState is ProductDetailsFlowViewModel.ProductDetailsUiState.Loading
+                loading = viewState.uiState is ProductDetailsFlowViewModel.ProductDetailsUiState.Loading,
+                showActionIcons = viewState.uiState is ProductDetailsFlowViewModel.ProductDetailsUiState.Success
             )
         },
         bottomBar = {
@@ -87,7 +89,15 @@ fun ProductDetailsScreen(
                 )
             }
 
-            else -> {
+            ProductDetailsFlowViewModel.ProductDetailsUiState.Error -> {
+                NetworkErrorPlaceholder { viewModel.fetchProductDetails() }
+            }
+
+            is ProductDetailsFlowViewModel.ProductDetailsUiState.ForAdults -> {
+
+            }
+
+            ProductDetailsFlowViewModel.ProductDetailsUiState.Success -> {
                 ProductDetailsBody(
                     modifier = Modifier
                         .padding(top = paddingValues.calculateTopPadding())
@@ -174,6 +184,7 @@ fun ProductDetailsScreen(
                         viewModel.navigateToWriteComment()
                     }
                 )
+
             }
         }
     }

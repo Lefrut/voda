@@ -3,10 +3,10 @@ package com.vodovoz.app.feature.bottom.services
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.viewModelScope
-import com.vodovoz.app.common.content.Event
-import com.vodovoz.app.common.content.PagingContractViewModel
-import com.vodovoz.app.common.content.State
-import com.vodovoz.app.common.content.updateData
+import com.vodovoz.app.ui.mvi.Event
+import com.vodovoz.app.ui.mvi.MviViewModel
+import com.vodovoz.app.ui.mvi.State
+import kotlinx.coroutines.flow.update
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.feature.bottom.services.model.ServiceUi
 import com.vodovoz.app.feature.bottom.services.model.mapToUi
@@ -20,7 +20,7 @@ import javax.inject.Inject
 @Stable
 class AboutServicesFlowViewModel @Inject constructor(
     private val vodovozServiceRepository: VodovozServiceRepository,
-) : PagingContractViewModel<AboutServicesFlowViewModel.AboutServicesState, AboutServicesFlowViewModel.AboutServicesEvents>(
+) : MviViewModel<AboutServicesFlowViewModel.AboutServicesState, AboutServicesFlowViewModel.AboutServicesEvents>(
     AboutServicesState()
 ) {
 
@@ -32,7 +32,7 @@ class AboutServicesFlowViewModel @Inject constructor(
     }
 
     fun fetchAboutServicesDetails() = viewModelScope.launch {
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(uiState = AboutServicesUiState.Loading)
         }
 
@@ -41,7 +41,7 @@ class AboutServicesFlowViewModel @Inject constructor(
 
         allServicesDetailsResult.onSuccess { allServicesDetails ->
 
-            uiStateListener.updateData { s ->
+            _state.update { s ->
                 s.copy(
                     title = allServicesDetails.title,
                     descriptionHtml = allServicesDetails.description,
@@ -51,7 +51,7 @@ class AboutServicesFlowViewModel @Inject constructor(
             }
 
         }.onFailure {
-            uiStateListener.updateData { s ->
+            _state.update { s ->
                 s.copy(uiState = AboutServicesUiState.Error)
             }
         }
@@ -59,11 +59,11 @@ class AboutServicesFlowViewModel @Inject constructor(
 
 
     fun navigateBack() = viewModelScope.launch {
-        eventListener.emit(AboutServicesEvents.GoBack)
+        sendEvent(AboutServicesEvents.GoBack)
     }
 
     fun navigateToServiceDetails(service: ServiceUi) = viewModelScope.launch {
-        eventListener.emit(AboutServicesEvents.GoToServiceDetails(service.id))
+        sendEvent(AboutServicesEvents.GoToServiceDetails(service.id))
     }
 
     sealed class AboutServicesEvents : Event {

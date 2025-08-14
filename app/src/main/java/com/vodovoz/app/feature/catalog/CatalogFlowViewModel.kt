@@ -2,10 +2,10 @@ package com.vodovoz.app.feature.catalog
 
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.viewModelScope
-import com.vodovoz.app.common.content.Event
-import com.vodovoz.app.common.content.PagingContractViewModel
-import com.vodovoz.app.common.content.State
-import com.vodovoz.app.common.content.updateData
+import com.vodovoz.app.ui.mvi.Event
+import com.vodovoz.app.ui.mvi.MviViewModel
+import com.vodovoz.app.ui.mvi.State
+import kotlinx.coroutines.flow.update
 import com.vodovoz.app.design_system.model.AboutAdvertisingUi
 import com.vodovoz.app.design_system.model.BannerUi
 import com.vodovoz.app.design_system.model.ParentCategoryUi
@@ -20,7 +20,7 @@ import javax.inject.Inject
 @HiltViewModel
 class CatalogFlowViewModel @Inject constructor(
     private val vodovozServiceRepository: VodovozServiceRepository,
-) : PagingContractViewModel<CatalogFlowViewModel.CatalogState, CatalogFlowViewModel.CatalogEvents>(
+) : MviViewModel<CatalogFlowViewModel.CatalogState, CatalogFlowViewModel.CatalogEvents>(
     CatalogState()
 ) {
 
@@ -30,13 +30,13 @@ class CatalogFlowViewModel @Inject constructor(
     }
 
     fun fetchCatalogDetails() = viewModelScope.launch {
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(uiState = CatalogUiState.Loading)
         }
         vodovozServiceRepository.getCatalogDetails().collect { catalogDetailsResult ->
             catalogDetailsResult.onSuccess { catalogDetails ->
                 val (banners, categories) = catalogDetails.toUi()
-                uiStateListener.updateData { s ->
+                _state.update { s ->
                     s.copy(
                         categories = categories,
                         banners = banners,
@@ -44,7 +44,7 @@ class CatalogFlowViewModel @Inject constructor(
                     )
                 }
             }.onFailure {
-                uiStateListener.updateData { s ->
+                _state.update { s ->
                     s.copy(uiState = CatalogUiState.Error)
                 }
             }
@@ -53,21 +53,21 @@ class CatalogFlowViewModel @Inject constructor(
 
 
     fun navigateToSearch() = viewModelScope.launch {
-        eventListener.emit(CatalogEvents.GoToSearch)
+        sendEvent(CatalogEvents.GoToSearch)
     }
 
     fun chooseCategory(catalogCategory: ParentCategoryUi) = viewModelScope.launch {
         if (catalogCategory.childCategories.isNotEmpty()) {
-            eventListener.emit(CatalogEvents.GoToSubCategories(catalogCategory))
+            sendEvent(CatalogEvents.GoToSubCategories(catalogCategory))
         } else if (catalogCategory.action != null) {
-            eventListener.emit(CatalogEvents.ActivateDataAllAction(catalogCategory.action))
+            sendEvent(CatalogEvents.ActivateDataAllAction(catalogCategory.action))
         } else {
-            eventListener.emit(CatalogEvents.GoToProductList(catalogCategory))
+            sendEvent(CatalogEvents.GoToProductList(catalogCategory))
         }
     }
 
     fun showAdvertisingBottomSheet(aboutAdvertisingUi: AboutAdvertisingUi) = viewModelScope.launch {
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(
                 currentAdvertising = aboutAdvertisingUi,
                 showAdvertisingBS = true
@@ -76,21 +76,21 @@ class CatalogFlowViewModel @Inject constructor(
     }
 
     fun closeAdvertisingBottomSheet() {
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(showAdvertisingBS = false)
         }
     }
 
     fun navigateToScanner() = viewModelScope.launch {
-        eventListener.emit(CatalogEvents.GoToScanner)
+        sendEvent(CatalogEvents.GoToScanner)
     }
 
     fun showSpeechRecognizer() = viewModelScope.launch {
-        eventListener.emit(CatalogEvents.ShowSpeechRecognizer)
+        sendEvent(CatalogEvents.ShowSpeechRecognizer)
     }
 
     fun activateBannerAction(banner: BannerUi) = viewModelScope.launch {
-        eventListener.emit(CatalogEvents.ActivateVodovozAction(banner.action))
+        sendEvent(CatalogEvents.ActivateVodovozAction(banner.action))
     }
 
     sealed class CatalogEvents : Event {

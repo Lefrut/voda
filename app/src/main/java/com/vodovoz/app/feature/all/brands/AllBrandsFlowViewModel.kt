@@ -5,10 +5,10 @@ import androidx.compose.runtime.Stable
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.map
-import com.vodovoz.app.common.content.Event
-import com.vodovoz.app.common.content.PagingContractViewModel
-import com.vodovoz.app.common.content.State
-import com.vodovoz.app.common.content.updateData
+import com.vodovoz.app.ui.mvi.Event
+import com.vodovoz.app.ui.mvi.MviViewModel
+import com.vodovoz.app.ui.mvi.State
+import kotlinx.coroutines.flow.update
 import com.vodovoz.app.design_system.model.BrandUi
 import com.vodovoz.app.design_system.model.toUi
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
@@ -30,7 +30,7 @@ import javax.inject.Inject
 @Stable
 class AllBrandsFlowViewModel @Inject constructor(
     private val vodovozServiceRepository: VodovozServiceRepository,
-) : PagingContractViewModel<AllBrandsFlowViewModel.AllBrandsState, AllBrandsFlowViewModel.AllBrandsEvents>(
+) : MviViewModel<AllBrandsFlowViewModel.AllBrandsState, AllBrandsFlowViewModel.AllBrandsEvents>(
     AllBrandsState()
 ) {
 
@@ -48,7 +48,7 @@ class AllBrandsFlowViewModel @Inject constructor(
 
         vodovozServiceRepository.getBrands(stateSnapshot.searchQuery).singleResult()
             .onSuccess { brandSectionModel ->
-                uiStateListener.updateData { s ->
+                _state.update { s ->
                     s.copy(
                         uiState = AllBrandsUiState.Success,
                         title = brandSectionModel.title,
@@ -62,13 +62,13 @@ class AllBrandsFlowViewModel @Inject constructor(
     }
 
     fun navigateBack() = viewModelScope.launch {
-        eventListener.emit(AllBrandsEvents.GoBack)
+        sendEvent(AllBrandsEvents.GoBack)
     }
 
 
     fun changeSearchMode(searchMode: Boolean) = viewModelScope.launch {
         if (!searchMode) searchQueriesStateFlow.value = ""
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(isSearchMode = searchMode)
         }
     }
@@ -76,7 +76,7 @@ class AllBrandsFlowViewModel @Inject constructor(
     @OptIn(FlowPreview::class)
     private val searchQueriesStateFlow = MutableStateFlow("").apply {
         drop(1).onEach { newSearchQuery ->
-            uiStateListener.updateData { s -> s.copy(searchQuery = newSearchQuery) }
+            _state.update { s -> s.copy(searchQuery = newSearchQuery) }
         }.debounce(200).onEach { _ ->
             fetchBrands()
         }.launchIn(viewModelScope)
@@ -87,7 +87,7 @@ class AllBrandsFlowViewModel @Inject constructor(
     }
 
     fun navigateToBrandProducts(brandId: Long) = viewModelScope.launch {
-        eventListener.emit(AllBrandsEvents.GoToBrandProducts(brandId))
+        sendEvent(AllBrandsEvents.GoToBrandProducts(brandId))
     }
 
     @Immutable

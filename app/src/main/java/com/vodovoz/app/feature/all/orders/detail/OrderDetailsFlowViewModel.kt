@@ -5,10 +5,10 @@ import androidx.compose.runtime.Stable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.vodovoz.app.common.cart.CartManager
-import com.vodovoz.app.common.content.Event
-import com.vodovoz.app.common.content.PagingContractViewModel
-import com.vodovoz.app.common.content.State
-import com.vodovoz.app.common.content.updateData
+import com.vodovoz.app.ui.mvi.Event
+import com.vodovoz.app.ui.mvi.MviViewModel
+import com.vodovoz.app.ui.mvi.State
+import kotlinx.coroutines.flow.update
 import com.vodovoz.app.common.like.LikeManager
 import com.vodovoz.app.design_system.model.ColorfulButtonUi
 import com.vodovoz.app.design_system.model.OrderProductUi
@@ -38,7 +38,7 @@ class OrderDetailsFlowViewModel @Inject constructor(
     private val cartManager: CartManager,
     private val likeManager: LikeManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
-) : PagingContractViewModel<OrderDetailsFlowViewModel.OrderDetailsState, OrderDetailsFlowViewModel.OrderDetailsEvent>(
+) : MviViewModel<OrderDetailsFlowViewModel.OrderDetailsState, OrderDetailsFlowViewModel.OrderDetailsEvent>(
     OrderDetailsState()
 ) {
 
@@ -50,26 +50,26 @@ class OrderDetailsFlowViewModel @Inject constructor(
 
     @OptIn(ExperimentalCoroutinesApi::class)
     suspend fun listenFavorites() =
-        uiStateListener.map { it.data.products }.combine(likeManager.observeLikes()) { _, p2 ->
+        _state.map { stateSnapshot.products }.combine(likeManager.observeLikes()) { _, p2 ->
             p2
         }.mapLatest { favorites ->
-            uiStateListener.updateData { s ->
+            _state.update { s ->
                 s.copy(products = s.products.withUpdatedFavorites(favorites))
             }
         }.collect()
 
 
     fun navigateBack() = viewModelScope.launch {
-        eventListener.emit(OrderDetailsEvent.GoBack)
+        sendEvent(OrderDetailsEvent.GoBack)
     }
 
     fun copyOrderId() = viewModelScope.launch {
-        eventListener.emit(OrderDetailsEvent.CopyText(orderId.toString()))
+        sendEvent(OrderDetailsEvent.CopyText(orderId.toString()))
     }
 
     fun fetchOrderDetails() = viewModelScope.launch {
         if (stateSnapshot.uiState !is OrderDetailsUiState.Body) {
-            uiStateListener.updateData { s ->
+            _state.update { s ->
                 s.copy(uiState = OrderDetailsUiState.Loading)
             }
         }
@@ -82,7 +82,7 @@ class OrderDetailsFlowViewModel @Inject constructor(
             val bottomButtons = orderDetails.bottomButtons.mapToUi()
             val questionButton = bottomButtons.find { it.id == QUESTION_BUTTON_ID }
 
-            uiStateListener.updateData { s ->
+            _state.update { s ->
                 s.copy(
                     topButtons = orderDetails.topButtons.mapToUi(),
                     bottomButtons = bottomButtons,
@@ -100,7 +100,7 @@ class OrderDetailsFlowViewModel @Inject constructor(
             }
 
         }.onFailure {
-            uiStateListener.updateData { s ->
+            _state.update { s ->
                 s.copy(uiState = OrderDetailsUiState.Error)
             }
         }
@@ -113,7 +113,7 @@ class OrderDetailsFlowViewModel @Inject constructor(
             }
 
             orderDetailsButton.id == "voditel" -> {
-                eventListener.emit(
+                sendEvent(
                     OrderDetailsEvent.GoToTraceOrder(
                         orderDetailsButton.driverId ?: return@launch,
                         orderId
@@ -128,14 +128,14 @@ class OrderDetailsFlowViewModel @Inject constructor(
                 } else {
                     OrderDetailsEvent.GoToWebView(url)
                 }
-                eventListener.emit(event)
+                sendEvent(event)
             }
 
             orderDetailsButton.id == "povtorit" -> {
                 vodovozServiceRepository.repeatOrder(orderId).singleResult()
                     .onSuccess {
                         cartManager.updateCartListState(true)
-                        eventListener.emit(OrderDetailsEvent.GoToCart)
+                        sendEvent(OrderDetailsEvent.GoToCart)
                     }
             }
         }
@@ -145,11 +145,11 @@ class OrderDetailsFlowViewModel @Inject constructor(
     fun activateBottomButton(button: ColorfulButtonUi) = viewModelScope.launch {
         when (button.id) {
             QUESTION_BUTTON_ID -> {
-                eventListener.emit(OrderDetailsEvent.GoToOrderQuestion(orderId))
+                sendEvent(OrderDetailsEvent.GoToOrderQuestion(orderId))
             }
 
             "otmena" -> {
-                eventListener.emit(OrderDetailsEvent.GoToCancelOrder(orderId))
+                sendEvent(OrderDetailsEvent.GoToCancelOrder(orderId))
             }
         }
     }
@@ -159,12 +159,12 @@ class OrderDetailsFlowViewModel @Inject constructor(
     }
 
     fun navigateToProductDetails(orderProduct: OrderProductUi) = viewModelScope.launch {
-        eventListener.emit(OrderDetailsEvent.GoToProductDetails(orderProduct.id))
+        sendEvent(OrderDetailsEvent.GoToProductDetails(orderProduct.id))
     }
 
     private fun showAboutOrderBottomSheet(aboutOrderBottomSheet: AboutOrderPopupWindowUi) =
         viewModelScope.launch {
-            uiStateListener.updateData { s ->
+            _state.update { s ->
                 s.copy(
                     showAboutOrderBS = true,
                     currentAboutOrderBS = aboutOrderBottomSheet
@@ -173,19 +173,19 @@ class OrderDetailsFlowViewModel @Inject constructor(
         }
 
     fun closeAboutOrderBottomSheet() = viewModelScope.launch {
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(showAboutOrderBS = false)
         }
     }
 
     fun refresh() = viewModelScope.launch {
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(showRefreshIndicator = true)
         }
 
         fetchOrderDetails().join()
 
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(showRefreshIndicator = false)
         }
 

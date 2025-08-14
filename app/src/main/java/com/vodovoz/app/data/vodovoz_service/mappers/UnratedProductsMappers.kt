@@ -13,7 +13,8 @@ fun UnratedProductsSectionDTO.toDomain(): UnratedProductsSectionModel {
         products = LISTRAZDEL?.mapNotNull { it.toDomain() }
             ?: throw EmptyResultException("Unrated products are empty"),
         productTitle = TITLETOVAR ?: "",
-        countProductsText = VSEGOTOVAR ?: ""
+        countProductsText = VSEGOTOVAR ?: "",
+        buttonText = KNOPKA?.NAME ?: ""
     )
 }
 

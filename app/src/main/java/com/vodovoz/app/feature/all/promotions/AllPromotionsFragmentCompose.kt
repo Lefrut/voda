@@ -36,8 +36,8 @@ class AllPromotionsFragment : Fragment() {
 
             setContent {
                 VodovozTheme {
-                    val pagingState by viewModel.observeUiState().collectAsStateWithLifecycle()
-                    val viewState by rememberUpdatedState(pagingState.data)
+                    val pagingState by viewModel.state.collectAsStateWithLifecycle()
+                    val viewState by rememberUpdatedState(pagingState)
 
                     val lazyListState = rememberLazyListState()
 
@@ -48,7 +48,7 @@ class AllPromotionsFragment : Fragment() {
                     )
 
                     LifecycleEffect {
-                        viewModel.observeEvent().collect { event ->
+                        viewModel.events.collect { event ->
                             val navController = findNavController()
                             when (event) {
                                 AllPromotionsFlowViewModel.AllPromotionsEvent.ScrollTop -> {

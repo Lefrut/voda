@@ -5,7 +5,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.painterResource
@@ -58,11 +57,10 @@ class QrCodeFragment : Fragment() {
 
             setContent {
                 VodovozTheme {
-                    val viewState by viewModel.observeUiState().collectAsStateWithLifecycle()
-                    val dataState by rememberUpdatedState(viewState.data)
+                    val viewState by viewModel.state.collectAsStateWithLifecycle()
 
 
-                    when (val uiState = dataState.uiState) {
+                    when (val uiState = viewState.uiState) {
                         is QrCodeViewModel.QrCodeUiState.EmptyResult -> {
                             EmptyResultPlaceholder(
                                 title = uiState.title,
@@ -80,7 +78,7 @@ class QrCodeFragment : Fragment() {
 
                         QrCodeViewModel.QrCodeUiState.Scanner -> {
                             ScannerScreen(
-                                viewState = dataState,
+                                viewState = viewState,
                                 viewModel = viewModel,
                             )
                         }
@@ -99,7 +97,7 @@ class QrCodeFragment : Fragment() {
     private fun observeEvents() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.observeEvent()
+                viewModel.events
                     .collect { qrCodeEvents ->
                         when (qrCodeEvents) {
                             is QrCodeViewModel.QrCodeEvents.Success -> {

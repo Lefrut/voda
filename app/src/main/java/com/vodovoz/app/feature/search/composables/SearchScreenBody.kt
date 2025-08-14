@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
@@ -109,7 +110,7 @@ fun SearchScreenBody(
 
         if (products.isNotEmpty()) {
             FixedGridFlowRow(
-                modifier = Modifier.padding(vertical = 16.dp),
+                modifier = Modifier.fillMaxSize().padding(vertical = 16.dp),
                 itemsInRow = 2,
                 horizontalSpacing = 8.dp,
                 verticalSpacing = 10.dp

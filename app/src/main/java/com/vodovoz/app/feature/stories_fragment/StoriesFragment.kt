@@ -77,8 +77,8 @@ class StoriesFragment : Fragment() {
                 )
 
                 VodovozTheme {
-                    val pagingState by viewModel.observeUiState().collectAsStateWithLifecycle()
-                    val viewState by rememberUpdatedState(pagingState.data)
+                    val pagingState by viewModel.state.collectAsStateWithLifecycle()
+                    val viewState by rememberUpdatedState(pagingState)
 
                     val pagerState =
                         if (viewState.uiState !is StoriesViewModel.StoriesUiState.Success) {
@@ -123,7 +123,7 @@ class StoriesFragment : Fragment() {
 
 
                     LifecycleEffect(pagerState) {
-                        viewModel.observeEvent().collect { event ->
+                        viewModel.events.collect { event ->
                             when (event) {
                                 is StoriesViewModel.StoriesEvents.ChangePagerIndex -> {
                                     launch { pagerState.animateScrollToPage(event.newStoryIndex) }

@@ -43,12 +43,14 @@ fun NotificationSettingsBody(
         verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
 
-        Text(
-            modifier = Modifier.padding(horizontal = 16.dp),
-            text = header,
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onBackground,
-        )
+        if(header.isNotBlank()){
+            Text(
+                modifier = Modifier.padding(horizontal = 16.dp),
+                text = header,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onBackground,
+            )
+        }
 
         sections.forEach { switchSection ->
             NotificationSectionColumn(

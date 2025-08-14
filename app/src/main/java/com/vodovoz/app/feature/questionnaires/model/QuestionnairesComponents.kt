@@ -1,17 +1,21 @@
 package com.vodovoz.app.feature.questionnaires.model
 
 import androidx.compose.runtime.Immutable
+import com.vodovoz.app.design_system.model.widgets.FieldUi
+import com.vodovoz.app.design_system.model.widgets.checkFields
+import com.vodovoz.app.design_system.model.widgets.getErrorText
+import com.vodovoz.app.design_system.model.widgets.toUi
+import com.vodovoz.app.design_system.model.widgets.vodovozValidators
 import com.vodovoz.app.domain.general.model.user.ConditionModel
 import com.vodovoz.app.domain.general.model.user.QuestionnairesItemModel
 import com.vodovoz.app.domain.general.model.user.toFieldModel
-import com.vodovoz.app.design_system.model.widgets.FieldUi
-import com.vodovoz.app.design_system.model.widgets.toUi
 
 @Immutable
 sealed class QuestionnaireComponentUi(
     open val id: String,
     open val error: Boolean,
-)
+) {
+}
 
 @Immutable
 data class FieldComponentUi(
@@ -127,4 +131,53 @@ fun QuestionnairesItemModel.toUi(): QuestionnaireComponentUi? {
 
         else -> null
     }
+}
+
+fun QuestionnaireComponentUi.errorIfInvalid(
+    getString: (Int) -> String,
+): QuestionnaireComponentUi {
+    val isInvalidAndErrorComponent = when (this) {
+        is CheckboxListUi -> {
+            options.none { it.isChecked } to copy(error = true)
+        }
+
+        is ConditionsCheckboxListUi -> {
+            options.any { !it.isChecked } to copy(error = true)
+        }
+
+        is FieldComponentUi -> {
+            !listOf(ui).checkFields(validators = vodovozValidators) to copy(
+                ui = ui.copy(
+                    isError = true,
+                    supportingText = ui.getErrorText {
+                        getString(it)
+                    }
+                )
+
+            )
+
+        }
+
+        is SwitchUi -> {
+            (selectedOption !in options) to copy(error = true)
+        }
+
+        is ToggleListUi -> {
+            options.none { it.isSelected } to copy(error = true)
+        }
+    }
+
+    return if (isInvalidAndErrorComponent.first) {
+        isInvalidAndErrorComponent.second
+    } else this
+}
+
+
+inline fun <reified T : QuestionnaireComponentUi> QuestionnaireComponentUi.ifSame(
+    id: String,
+    onSame: T.() -> QuestionnaireComponentUi,
+): QuestionnaireComponentUi {
+    return if (this is T && this.id == id) {
+        onSame()
+    } else this
 }

@@ -54,8 +54,8 @@ class PastPurchasesFragment : Fragment() {
 
             setContent {
                 VodovozTheme {
-                    val pagingState by viewModel.observeUiState().collectAsStateWithLifecycle()
-                    val viewState by rememberUpdatedState(pagingState.data)
+                    val pagingState by viewModel.state.collectAsStateWithLifecycle()
+                    val viewState by rememberUpdatedState(pagingState)
                     val lazyGridState = rememberLazyGridState()
 
                     PastPurchasesScreen(
@@ -85,7 +85,7 @@ class PastPurchasesFragment : Fragment() {
         }
     }
 
-    private suspend fun listenEvents(): Unit = viewModel.observeEvent().collect { event ->
+    private suspend fun listenEvents(): Unit = viewModel.events.collect { event ->
         when (event) {
             is PastPurchasesFlowViewModel.PastPurchasesEvents.GoToPreOrder -> {
                 findNavController().navigateToPreOrder(event.id)

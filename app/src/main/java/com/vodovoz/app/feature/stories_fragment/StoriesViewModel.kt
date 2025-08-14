@@ -4,10 +4,10 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import com.vodovoz.app.common.content.Event
-import com.vodovoz.app.common.content.PagingContractViewModel
-import com.vodovoz.app.common.content.State
-import com.vodovoz.app.common.content.updateData
+import com.vodovoz.app.ui.mvi.Event
+import com.vodovoz.app.ui.mvi.MviViewModel
+import com.vodovoz.app.ui.mvi.State
+import kotlinx.coroutines.flow.update
 import com.vodovoz.app.common.model.VodovozAction
 import com.vodovoz.app.design_system.model.StoryUi
 import com.vodovoz.app.domain.general.respository.UserPreferencesRepository
@@ -22,7 +22,7 @@ import javax.inject.Inject
 class StoriesViewModel @Inject constructor(
     savedState: SavedStateHandle,
     private val userPreferencesRepository: UserPreferencesRepository,
-) : PagingContractViewModel<StoriesViewModel.HistoriesSliderState, StoriesViewModel.StoriesEvents>(
+) : MviViewModel<StoriesViewModel.HistoriesSliderState, StoriesViewModel.StoriesEvents>(
     HistoriesSliderState()
 ) {
 
@@ -34,7 +34,7 @@ class StoriesViewModel @Inject constructor(
     }
 
     private fun fetchStories() = viewModelScope.launch {
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(uiState = StoriesUiState.Loading)
         }
 
@@ -44,7 +44,7 @@ class StoriesViewModel @Inject constructor(
             ) ?: 0
 
 
-            uiStateListener.updateData { s ->
+            _state.update { s ->
                 s.copy(
                     stories = stories,
                     currentStoryIndex = storyIndex,
@@ -67,29 +67,27 @@ class StoriesViewModel @Inject constructor(
             return System.nanoTime() / 1_000_000
         }
 
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(storyIsPlay = true)
         }
 
-        while (state.data.storyIsPlay) {
+        while (stateSnapshot.storyIsPlay) {
             val startTime = systemMilliseconds()
             delay(35L)
-            uiStateListener.updateData { s ->
+            _state.update { s ->
                 s.copy(
                     timePassed = s.timePassed + (systemMilliseconds() - startTime)
                 )
             }
 
-            val viewState = state.data
-
-            if (viewState.timePassed >= viewState.currentStoryPage.durationMillis) {
+            if (stateSnapshot.timePassed >= stateSnapshot.currentStoryPage.durationMillis) {
                 goNextStoryPage()
             }
         }
     }
 
     fun stopStory() = viewModelScope.launch {
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(storyIsPlay = false)
         }
     }
@@ -99,14 +97,14 @@ class StoriesViewModel @Inject constructor(
     }
 
     fun navigateBack() = viewModelScope.launch {
-        eventListener.emit(StoriesEvents.GoBack)
+        sendEvent(StoriesEvents.GoBack)
     }
 
     fun changeStoryIndex(currentStoryPage: Int) = viewModelScope.launch {
 
-        if (currentStoryPage == state.data.currentStoryIndex) return@launch
+        if (currentStoryPage == stateSnapshot.currentStoryIndex) return@launch
 
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(
                 currentStoryIndex = currentStoryPage,
                 currentPageIndex = 0,
@@ -127,16 +125,16 @@ class StoriesViewModel @Inject constructor(
 
         when {
             isFirstPage && isFirstStory -> {
-                eventListener.emit(StoriesEvents.GoBack)
+                sendEvent(StoriesEvents.GoBack)
             }
 
             isFirstPage -> {
                 val prevStoryIndex = stateSnapshot.currentStoryIndex - 1
-                eventListener.emit(StoriesEvents.ChangePagerIndex(prevStoryIndex))
+                sendEvent(StoriesEvents.ChangePagerIndex(prevStoryIndex))
             }
 
             else -> {
-                uiStateListener.updateData { state ->
+                _state.update { state ->
                     state.copy(
                         currentPageIndex = stateSnapshot.currentPageIndex - 1,
                         timePassed = 0L
@@ -154,20 +152,20 @@ class StoriesViewModel @Inject constructor(
 
         when {
             isLastPage && isLastStory -> {
-                uiStateListener.updateData { state ->
+                _state.update { state ->
                     state.copy(storyIsPlay = false)
                 }
-                eventListener.emit(StoriesEvents.GoBack)
+                sendEvent(StoriesEvents.GoBack)
             }
 
             isLastPage -> {
-                eventListener.emit(
+                sendEvent(
                     StoriesEvents.ChangePagerIndex(stateSnapshot.currentStoryIndex + 1)
                 )
             }
 
             else -> {
-                uiStateListener.updateData { state ->
+                _state.update { state ->
                     state.copy(currentPageIndex = nextPageIndex, timePassed = 0L)
                 }
             }
@@ -176,7 +174,7 @@ class StoriesViewModel @Inject constructor(
 
     fun activateButtonAction(action: VodovozAction) {
         viewModelScope.launch {
-            eventListener.emit(StoriesEvents.ActivateAction(action))
+            sendEvent(StoriesEvents.ActivateAction(action))
         }
     }
 

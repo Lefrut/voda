@@ -17,7 +17,7 @@ import org.junit.Test
 class FavoriteFlowViewModelTests : ViewModelTestBase<FavoriteFlowViewModel>() {
 
 
-    private val viewState get() = viewModel.observeUiState().value.data
+    private val viewState get() = viewModel.state.value
 
     override fun createViewModel(): FavoriteFlowViewModel {
         return spyk(
@@ -38,8 +38,8 @@ class FavoriteFlowViewModelTests : ViewModelTestBase<FavoriteFlowViewModel>() {
         )
 
         launch {
-            viewModel.observeUiState().map { pagingState ->
-                pagingState.data
+            viewModel.state.map { pagingState ->
+                pagingState
             }.test {
                 assertEquals(FavoriteFlowViewModel.FavoriteUiState.Loading, awaitItem().uiState)
                 val stateAfterSuccess = awaitItem()
@@ -58,8 +58,8 @@ class FavoriteFlowViewModelTests : ViewModelTestBase<FavoriteFlowViewModel>() {
         } returns flowOf(Result.failure(RuntimeException()))
 
         launch {
-            viewModel.observeUiState().map { pagingState ->
-                pagingState.data
+            viewModel.state.map { pagingState ->
+                pagingState
             }.test {
                 assertEquals(FavoriteFlowViewModel.FavoriteUiState.Loading, awaitItem().uiState)
                 val stateAfterError = awaitItem()

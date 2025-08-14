@@ -3,10 +3,10 @@ package com.vodovoz.app.feature.search.qrcode
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.viewModelScope
-import com.vodovoz.app.common.content.Event
-import com.vodovoz.app.common.content.PagingContractViewModel
-import com.vodovoz.app.common.content.State
-import com.vodovoz.app.common.content.updateData
+import com.vodovoz.app.ui.mvi.Event
+import com.vodovoz.app.ui.mvi.MviViewModel
+import com.vodovoz.app.ui.mvi.State
+import kotlinx.coroutines.flow.update
 import com.vodovoz.app.domain.general.model.EmptyResultException
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.util.extensions.singleResult
@@ -19,14 +19,14 @@ import javax.inject.Inject
 @Stable
 class QrCodeViewModel @Inject constructor(
     private val vodovozServiceRepository: VodovozServiceRepository,
-) : PagingContractViewModel<QrCodeViewModel.QrCodeState, QrCodeViewModel.QrCodeEvents>(QrCodeState()) {
+) : MviViewModel<QrCodeViewModel.QrCodeState, QrCodeViewModel.QrCodeEvents>(QrCodeState()) {
 
     private val mutex = Mutex()
 
     fun searchByBarCode(barCode: String) = viewModelScope.launch {
         if (!mutex.tryLock()) return@launch
 
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(barCode = barCode)
         }
 
@@ -34,22 +34,22 @@ class QrCodeViewModel @Inject constructor(
             vodovozServiceRepository.getBarCodeProducts(barCode).singleResult()
 
         barCodeProductsResult.onSuccess { products ->
-            uiStateListener.updateData { s ->
+            _state.update { s ->
                 s.copy(uiState = QrCodeUiState.Scanner)
             }
 
             val product = products.firstOrNull()
             if (products.size == 1 && product != null) {
-                eventListener.emit(QrCodeEvents.GoToProductDetails(product.id))
+                sendEvent(QrCodeEvents.GoToProductDetails(product.id))
             } else if (products.size > 1) {
-                eventListener.emit(QrCodeEvents.GoToSearchProducts(barCode))
+                sendEvent(QrCodeEvents.GoToSearchProducts(barCode))
             }
         }.onFailure { t ->
 
             if (t is EmptyResultException && t.placeholder != null) {
                 val errorModel = t.placeholder
 
-                uiStateListener.updateData { s ->
+                _state.update { s ->
                     s.copy(
                         uiState = QrCodeUiState.EmptyResult(
                             errorModel.headerHtml,
@@ -68,7 +68,7 @@ class QrCodeViewModel @Inject constructor(
     }
 
     fun switchFlashOn() = viewModelScope.launch {
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(
                 flashOn = !s.flashOn
             )
@@ -76,11 +76,11 @@ class QrCodeViewModel @Inject constructor(
     }
 
     fun navigateBack() = viewModelScope.launch {
-        eventListener.emit(QrCodeEvents.GoBack)
+        sendEvent(QrCodeEvents.GoBack)
     }
 
     fun setScannerState() = viewModelScope.launch {
-        uiStateListener.updateData { s ->
+        _state.update { s ->
             s.copy(uiState = QrCodeUiState.Scanner)
         }
     }
