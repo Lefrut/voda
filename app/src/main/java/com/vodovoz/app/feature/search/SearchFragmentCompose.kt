@@ -39,12 +39,6 @@ class SearchFragment : Fragment() {
     internal val viewModel: SearchFlowViewModel by viewModels()
 
     @Inject
-    lateinit var cartManager: CartManager
-
-    @Inject
-    lateinit var likeManager: LikeManager
-
-    @Inject
     lateinit var tabManager: TabManager
 
     @Inject
@@ -98,14 +92,6 @@ class SearchFragment : Fragment() {
 
                     LifecycleEffect {
                         listenEvents()
-                    }
-
-                    LifecycleEffect {
-                        viewModel.listenCart()
-                    }
-
-                    LifecycleEffect {
-                        viewModel.listenProductLoadings()
                     }
 
                     LifecycleEffect {

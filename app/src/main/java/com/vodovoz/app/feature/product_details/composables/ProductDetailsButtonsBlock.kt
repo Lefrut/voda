@@ -66,7 +66,7 @@ fun ProductDetailsButtonsBlock(
 
         val multiBuyButton = buttons.multiBuyButton
 
-        if (multiBuyButton != null && isAvailable) {
+        if (multiBuyButton != null) {
             VodovozButton(
                 text = multiBuyButton.name,
                 onClick = onMultiButtonClick,
@@ -81,7 +81,7 @@ fun ProductDetailsButtonsBlock(
 
         val presentButton = buttons.blockButton?.button
 
-        if (presentButton != null && isAvailable) {
+        if (presentButton != null) {
             VodovozButton(
                 text = presentButton.name,
                 onClick = onPresentButtonClick,
@@ -152,7 +152,7 @@ fun ProductDetailsButtonsBlock(
         }
 
         val presentBlock = buttons.blockDesignButton
-        if (presentBlock != null && isAvailable) {
+        if (presentBlock != null) {
 
             val blockInfo = presentBlock.block
             val blockInfoButton = blockInfo.button
@@ -161,7 +161,8 @@ fun ProductDetailsButtonsBlock(
                 modifier = Modifier.padding(top = 24.dp),
                 contentPadding = PaddingValues(16.dp),
                 borderColor = blockInfo.borderColor,
-                containerColor = blockInfo.background
+                containerColor = blockInfo.background,
+                onClick = if(blockInfoButton == null ) onPresentBlockButtonClick else ::println
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     AsyncImage(
@@ -179,15 +180,17 @@ fun ProductDetailsButtonsBlock(
                         style = MaterialTheme.typography.bodySmall
                     )
                 }
-                VodovozButtonSmall(
-                    modifier = Modifier.padding(top = 16.dp),
-                    text = blockInfoButton.name,
-                    onClick = onPresentBlockButtonClick,
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = blockInfoButton.backgroundColor,
-                        contentColor = blockInfoButton.textColor
+                if (blockInfoButton != null) {
+                    VodovozButtonSmall(
+                        modifier = Modifier.padding(top = 16.dp),
+                        text = blockInfoButton.name,
+                        onClick = onPresentBlockButtonClick,
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = blockInfoButton.backgroundColor,
+                            contentColor = blockInfoButton.textColor
+                        )
                     )
-                )
+                }
             }
         }
     }
@@ -228,13 +231,15 @@ private val productDetailsButtonsUi = ProductDetailsButtonsUi(
         data = BlockPromoDataUi(
             title = "Супер акция",
             description = "Скидка 20% на первую покупку!",
-            productQuantityText = "1 шт.",
-            product = PromoProductUi(
-                name = "Смартфон X",
-                image = "https://example.com/smartphone_x.png",
-                price = OldNewPriceUi(
-                    new = "25,990 ₽",
-                    old = "32,990 ₽"
+            products = listOf(
+                PromoProductUi(
+                    name = "Смартфон X",
+                    image = "https://example.com/smartphone_x.png",
+                    price = OldNewPriceUi(
+                        new = "25,990 ₽",
+                        old = "32,990 ₽"
+                    ),
+                    2
                 )
             )
         ),
@@ -262,13 +267,15 @@ private val productDetailsButtonsUi = ProductDetailsButtonsUi(
         data = BlockPromoDataUi(
             title = "Дизайн-предложение",
             description = "Уникальный дизайн для вашего устройства",
-            productQuantityText = "1 шт.",
-            product = PromoProductUi(
-                name = "Дизайнерский чехол",
-                image = "https://example.com/case.png",
-                price = OldNewPriceUi(
-                    new = "1,990 ₽",
-                    old = "2,490 ₽"
+            products = listOf(
+                PromoProductUi(
+                    name = "Дизайнерский чехол",
+                    image = "https://example.com/case.png",
+                    price = OldNewPriceUi(
+                        new = "1,990 ₽",
+                        old = "2,490 ₽"
+                    ),
+                    2
                 )
             )
         ),

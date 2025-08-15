@@ -250,7 +250,7 @@ private fun BLOK_KNOPKA_DTO.toDomain(): ButtonBlockModel? {
     return ButtonBlockModel(
         button = KNOPKA?.toDomain() ?: return null,
         data = DATA?.toDomain() ?: return null,
-        buyButton = KNOPKA_KUPIT?.toDomain() ?: return null
+        buyButton = KNOPKA_KUPIT?.toDomain()
     )
 }
 
@@ -261,20 +261,25 @@ private fun PRICE_DTO.toDomain(): OldNewPriceModel {
     )
 }
 
+@JvmName("mapToPromoProductList")
+private fun List<BLOCK_TOVAR_DTO>.mapToDomain(): List<PromoProductModel> {
+    return mapNotNull { it.toDomain() }
+}
+
 private fun BLOCK_TOVAR_DTO.toDomain(): PromoProductModel? {
     return PromoProductModel(
         name = NAME ?: "",
         price = PRICE?.toDomain() ?: return null,
-        image = KARTINKA?.toVodovozUrl() ?: ""
+        image = KARTINKA?.toVodovozUrl() ?: "",
+        quantity = KOLLTOVAR ?: 0
     )
 }
 
-private fun BLOCK_KNOPKA_DATA_DTO.toDomain(): BlockPromoDataModel? {
+private fun BLOCK_KNOPKA_DATA_DTO.toDomain(): BlockPromoDataModel {
     return BlockPromoDataModel(
         title = TITLE ?: "",
         description = OPISANIE ?: "",
-        product = TOVAR?.toDomain() ?: return null,
-        productQuantityText = KOLLTOVAR ?: ""
+        products = TOVAR?.mapToDomain() ?: emptyList(),
     )
 }
 
@@ -289,7 +294,6 @@ private fun BLOCK_KNOPKA_VALUE_DTO.toDomain(): ColorfulButtonModel {
 fun ProductDetailsDTO.toDomain(): ProductDetailsScreenModel {
 
     val moreButtons = TOVAR?.DOPKNOPKI
-    val moreProducts = BLOCTOVAR
 
     val commentsCount = COMMENTS?.COMMEN_COUNT ?: COMMENTS?.COMMENTS?.size ?: 0
 
@@ -337,7 +341,7 @@ private fun BLOK_KNOPKA_DIZAIN_DTO.toDomain(): ButtonDesignBlockModel? {
     return ButtonDesignBlockModel(
         block = BLOCK?.toDomain() ?: return null,
         data = DATA?.toDomain() ?: return null,
-        buyButton = KNOPKA_KUPIT?.toDomain() ?: return null
+        buyButton = KNOPKA_KUPIT?.toDomain()
     )
 }
 
@@ -345,7 +349,7 @@ private fun BLOCK_U_BLOCK_KNOPKA_DIZAIN_DTO.toDomain(): DesignBlockModel? {
     return DesignBlockModel(
         title = TITLE ?: "",
         image = KARTINKA?.toVodovozUrl() ?: "",
-        button = KNOPKA?.toDomain() ?: return null,
+        button = KNOPKA?.toDomain(),
         background = BACKGROUND ?: "",
         textColor = TEXTCOLOR ?: "",
         borderColor = BORDER_COLOR ?: ""

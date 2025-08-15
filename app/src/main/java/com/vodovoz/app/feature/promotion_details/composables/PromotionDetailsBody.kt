@@ -20,15 +20,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.fromHtml
 import androidx.compose.ui.unit.dp
 import androidx.paging.CombinedLoadStates
 import coil3.compose.AsyncImage
-
-import coil3.request.crossfade
 import com.valentinilk.shimmer.ShimmerBounds
 import com.valentinilk.shimmer.rememberShimmer
 import com.vodovoz.app.design_system.composables.chip.TimeLeftChip
@@ -72,9 +69,8 @@ fun PromotionDetailsBody(
                     contentDescription = null,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(150.dp)
                         .clip(MaterialTheme.shapes.large),
-                    contentScale = ContentScale.Crop
+                    contentScale = ContentScale.FillWidth
                 )
                 Row(
                     modifier = Modifier.padding(top = 8.dp),
@@ -96,7 +92,11 @@ fun PromotionDetailsBody(
                     text = AnnotatedString.fromHtml(
                         promotionDetails.description,
                         vodovozTextLinkStyle
-                    ) { linkAnnotation -> if(linkAnnotation is LinkAnnotation.Url) onHyperlinkClick(linkAnnotation.url) },
+                    ) { linkAnnotation ->
+                        if (linkAnnotation is LinkAnnotation.Url) onHyperlinkClick(
+                            linkAnnotation.url
+                        )
+                    },
                     color = MaterialTheme.colorScheme.onBackground,
                     style = MaterialTheme.typography.bodySmall
                 )

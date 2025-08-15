@@ -106,26 +106,26 @@ data class BuyButtonModel(
 data class ButtonBlockModel(
     val button: ColorfulButtonModel,
     val data: BlockPromoDataModel,
-    val buyButton: BuyButtonModel,
+    val buyButton: BuyButtonModel?,
 )
 
 data class ButtonDesignBlockModel(
     val block: DesignBlockModel,
     val data: BlockPromoDataModel,
-    val buyButton: BuyButtonModel,
+    val buyButton: BuyButtonModel?,
 )
 
 data class BlockPromoDataModel(
     val title: String,
     val description: String,
-    val productQuantityText: String,
-    val product: PromoProductModel,
+    val products: List<PromoProductModel>,
 )
 
 data class PromoProductModel(
     val name: String,
     val image: String,
     val price: OldNewPriceModel,
+    val quantity: Int
 )
 
 data class OldNewPriceModel(
@@ -139,7 +139,7 @@ data class DesignBlockModel(
     val background: String,
     val textColor: String,
     val borderColor: String,
-    val button: ColorfulButtonModel,
+    val button: ColorfulButtonModel?,
 )
 
 

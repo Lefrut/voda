@@ -7,10 +7,6 @@ import com.vodovoz.app.BuildConfig
 import com.vodovoz.app.R
 import com.vodovoz.app.common.account.AccountManager
 import com.vodovoz.app.common.cart.CartManager
-import com.vodovoz.app.ui.mvi.Event
-import com.vodovoz.app.ui.mvi.MviViewModel
-import com.vodovoz.app.ui.mvi.State
-import kotlinx.coroutines.flow.update
 import com.vodovoz.app.common.like.LikeManager
 import com.vodovoz.app.common.model.ButtonAction
 import com.vodovoz.app.common.model.DataAllAction
@@ -28,8 +24,10 @@ import com.vodovoz.app.design_system.model.StoryUi
 import com.vodovoz.app.design_system.model.mapToUi
 import com.vodovoz.app.design_system.model.toUi
 import com.vodovoz.app.design_system.model.withUpdatedCart
+import com.vodovoz.app.design_system.model.withUpdatedCartRecursive
 import com.vodovoz.app.design_system.model.withUpdatedFavorites
 import com.vodovoz.app.design_system.model.withUpdatedLoading
+import com.vodovoz.app.design_system.model.withUpdatedLoadingsRecursive
 import com.vodovoz.app.domain.general.model.promotion.toUi
 import com.vodovoz.app.domain.general.respository.UserPreferencesRepository
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
@@ -43,6 +41,9 @@ import com.vodovoz.app.feature.home.model.UnratedProductUi
 import com.vodovoz.app.feature.home.model.UnratedProductsSectionUi
 import com.vodovoz.app.feature.home.model.compareVersions
 import com.vodovoz.app.feature.home.model.toUi
+import com.vodovoz.app.ui.mvi.Event
+import com.vodovoz.app.ui.mvi.MviViewModel
+import com.vodovoz.app.ui.mvi.State
 import com.vodovoz.app.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
@@ -55,6 +56,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.math.roundToInt
@@ -92,10 +94,13 @@ class HomeFlowViewModel @Inject constructor(
             _state.update { s ->
 
                 val currentCategoryWithProducts =
-                    stateSnapshot.currentCategoryWithProducts.withUpdatedLoading(blockedProductsIds)
+                    stateSnapshot.currentCategoryWithProducts.withUpdatedLoadingsRecursive(
+                        blockedProductsIds
+                    ) as? CategoryWithProductsUi
 
                 s.copy(
-                    currentCategoryWithProducts = currentCategoryWithProducts,
+                    currentCategoryWithProducts = currentCategoryWithProducts
+                        ?: s.currentCategoryWithProducts,
                     sectionTop = s.sectionTop.withUpdatedLoading(blockedProductsIds),
                     sectionBottom = s.sectionBottom.withUpdatedLoading(blockedProductsIds),
                     sectionNewProducts = s.sectionNewProducts.withUpdatedLoading(blockedProductsIds),
@@ -118,10 +123,11 @@ class HomeFlowViewModel @Inject constructor(
         _state.update { s ->
 
             val currentCategoryWithProducts =
-                stateSnapshot.currentCategoryWithProducts.withUpdatedCart(cartMap)
+                stateSnapshot.currentCategoryWithProducts.withUpdatedCartRecursive(cartMap) as? CategoryWithProductsUi
 
             s.copy(
-                currentCategoryWithProducts = currentCategoryWithProducts,
+                currentCategoryWithProducts = currentCategoryWithProducts
+                    ?: s.currentCategoryWithProducts,
                 sectionTop = s.sectionTop.withUpdatedCart(cartMap),
                 sectionBottom = s.sectionBottom.withUpdatedCart(cartMap),
                 sectionNewProducts = s.sectionNewProducts.withUpdatedCart(cartMap),

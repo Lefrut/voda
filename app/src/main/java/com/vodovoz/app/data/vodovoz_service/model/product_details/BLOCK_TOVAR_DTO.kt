@@ -11,5 +11,7 @@ data class BLOCK_TOVAR_DTO(
     @Json(name = "NAME")
     val NAME: String?,
     @Json(name = "PRICE")
-    val PRICE: PRICE_DTO?
+    val PRICE: PRICE_DTO?,
+    @Json(name = "KOLLTOVAR")
+    val KOLLTOVAR: Int?
 )

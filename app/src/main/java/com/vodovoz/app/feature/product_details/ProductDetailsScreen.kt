@@ -218,7 +218,7 @@ fun ProductDetailsScreen(
             button = presentButton.buyButton,
             onDismissRequest = { viewModel.hidePresentBottomSheet() },
             onBuyButtonClick = {
-                viewModel.addProductWithGift(presentButton.buyButton)
+                viewModel.addProductWithGift(it)
             }
         )
     }
@@ -230,7 +230,7 @@ fun ProductDetailsScreen(
             button = presentBlock.buyButton,
             onDismissRequest = { viewModel.hidePresentBlockBottomSheet() },
             onBuyButtonClick = {
-                viewModel.addProductWithGift(presentBlock.buyButton)
+                viewModel.addProductWithGift(it)
             }
         )
     }

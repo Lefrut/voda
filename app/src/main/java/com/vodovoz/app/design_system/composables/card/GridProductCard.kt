@@ -61,9 +61,6 @@ fun GridProductCard(
     onIncrementToCart: (ProductUi) -> Unit,
     onDecrementToCart: (ProductUi) -> Unit,
 ) {
-    val percentLabels = product.percentLabels
-    val otherLabels = product.notPercentLabels
-
     VodovozOutlinedCard(
         modifier = modifier,
         contentPadding = PaddingValues(8.dp),
@@ -79,8 +76,8 @@ fun GridProductCard(
         ) {
             GridImageSection(
                 image = product.image,
-                percentLabels = percentLabels,
-                otherLabels = otherLabels,
+                percentLabels = product.percentLabels,
+                otherLabels = product.notPercentLabels,
                 isFavorite = product.isFavorite,
                 onLike = { onLike(product) }
             )
