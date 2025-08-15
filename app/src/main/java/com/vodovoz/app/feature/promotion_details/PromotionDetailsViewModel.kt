@@ -11,6 +11,7 @@ import com.vodovoz.app.common.like.LikeManager
 import com.vodovoz.app.design_system.model.ProductUi
 import com.vodovoz.app.design_system.model.PromotionDetailsUi
 import com.vodovoz.app.design_system.model.toUi
+import com.vodovoz.app.domain.general.respository.UserPreferencesRepository
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.ui.mvi.Event
 import com.vodovoz.app.ui.paging.PagingProductsMviViewModel
@@ -29,11 +30,13 @@ class PromotionDetailsViewModel @Inject constructor(
     private val cartManager: CartManager,
     private val likeManager: LikeManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
-) : PagingProductsMviViewModel<PromotionDetailsViewModel.PromotionDetailsState, PromotionDetailsViewModel.PromotionDetailEvent>(
+    userPreferencesRepository: UserPreferencesRepository,
+) : PagingProductsMviViewModel<ProductUi, PromotionDetailsViewModel.PromotionDetailsState, PromotionDetailsViewModel.PromotionDetailEvent>(
     state = PromotionDetailsState(),
     blockedProductsFlow = cartManager.blockedProductsState,
     favoritesFlow = likeManager.observeLikes(),
-    cartFlow = cartManager.observeCarts()
+    cartFlow = cartManager.observeCarts(),
+    canViewAdultProducts = userPreferencesRepository.canViewAdultProducts
 ) {
 
     private var promotionId = savedState.get<Long>("promotionId")?.toInt() ?: -1

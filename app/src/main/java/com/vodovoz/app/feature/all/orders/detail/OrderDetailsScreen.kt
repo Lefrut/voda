@@ -65,7 +65,7 @@ fun OrderDetailsScreen(
                 currentStatuses = viewState.currentStatuses,
                 topButtons = viewState.topButtons,
                 productsTitle = viewState.productsTitle,
-                products = viewState.products,
+                products = viewState.items,
                 bottomButtons = viewState.bottomButtons,
                 questionButton = viewState.questionButton,
                 orderSummary = viewState.orderSummary,

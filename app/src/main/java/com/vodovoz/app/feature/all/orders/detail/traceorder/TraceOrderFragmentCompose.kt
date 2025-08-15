@@ -29,7 +29,7 @@ import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.vodovoz.app.ui.mvi.collectAsState
 import androidx.navigation.fragment.findNavController
 import com.google.android.gms.location.LocationServices
 import com.vodovoz.app.core.android.handleLocationAvailability
@@ -125,8 +125,8 @@ class TraceOrderFragment : Fragment() {
 
                     val context = LocalContext.current
 
-                    val pagingState by viewModel.state.collectAsStateWithLifecycle()
-                    val viewState by rememberUpdatedState(newValue = pagingState)
+                    val viewState by viewModel.collectAsState()
+                    
 
                     val locationPermissionLauncher = rememberLauncherForActivityResult(
                         contract = ActivityResultContracts.RequestMultiplePermissions()

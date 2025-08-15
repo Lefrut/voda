@@ -21,7 +21,7 @@ import androidx.core.view.WindowCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.vodovoz.app.ui.mvi.collectAsState
 import androidx.navigation.fragment.findNavController
 import com.vodovoz.app.R
 import com.vodovoz.app.common.account.AccountManager
@@ -38,6 +38,7 @@ import com.vodovoz.app.feature.cart.CartFlowViewModel
 import com.vodovoz.app.feature.favorite.FavoriteFlowViewModel
 import com.vodovoz.app.feature.home.HomeFlowViewModel
 import com.vodovoz.app.feature.profile.ProfileFlowViewModel
+import com.vodovoz.app.ui.mvi.collectAsState
 import com.vodovoz.app.util.extensions.snack
 import dagger.hilt.android.AndroidEntryPoint
 import java.util.concurrent.Executor
@@ -122,8 +123,8 @@ class LoginFragment : Fragment() {
 
             setContent {
                 VodovozTheme {
-                    val pagingState by viewModel.state.collectAsStateWithLifecycle()
-                    val viewState by rememberUpdatedState(pagingState)
+                    val viewState by viewModel.collectAsState()
+                    
 
                     when (viewState.uiState) {
                         LoginFlowViewModel.LoginUiState.Error -> {

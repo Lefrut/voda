@@ -19,7 +19,7 @@ import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.compose.LifecycleStartEffect
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.vodovoz.app.ui.mvi.collectAsState
 import androidx.navigation.fragment.findNavController
 import com.vodovoz.app.common.cookie.CookieManager
 import com.vodovoz.app.common.tab.TabManager
@@ -77,8 +77,8 @@ class StoriesFragment : Fragment() {
                 )
 
                 VodovozTheme {
-                    val pagingState by viewModel.state.collectAsStateWithLifecycle()
-                    val viewState by rememberUpdatedState(pagingState)
+                    val viewState by viewModel.collectAsState()
+                    
 
                     val pagerState =
                         if (viewState.uiState !is StoriesViewModel.StoriesUiState.Success) {

@@ -1,23 +1,27 @@
 package com.vodovoz.app.feature.cart.model
 
 import androidx.compose.runtime.Immutable
+import com.vodovoz.app.design_system.model.ForAdultsUi
 import com.vodovoz.app.design_system.model.LabelUi
+import com.vodovoz.app.design_system.model.VodovozItemUi
 import com.vodovoz.app.design_system.model.toUi
 import com.vodovoz.app.domain.general.model.cart.CartItemModel
 
 @Immutable
 data class CartItemUi(
-    val id: Long,
-    val productId: Long,
+    val itemId: Long,
+    override val isFavorite: Boolean,
+    override val cartQuantity: Int,
+    override val cartLoading: Boolean,
+    override val forAdults: ForAdultsUi?,
+    override val id: Long,
     val productName: String,
-    val isFavorite: Boolean,
     val canBuy: Boolean,
     val discountPercentsText: String,
     val discountPrice: Float,
     val priceText: String,
     val currentPrice: Float,
     val basePrice: Float,
-    val quantity: Int,
     val depositText: String,
     val articleText: String,
     val image: String,
@@ -25,22 +29,20 @@ data class CartItemUi(
     val label: LabelUi?,
     val hasDiscount: Boolean,
     val restriction: ProductRestrictionUi,
-    val showcase: Boolean
-)
-
-
-@JvmName("withUpdatedFavoritesCartItem")
-fun List<CartItemUi>.withUpdatedFavorites(favorites: Map<Long, Boolean>): List<CartItemUi> {
-    return map { cartItem ->
-        cartItem.copy(isFavorite = favorites[cartItem.productId] ?: cartItem.isFavorite)
-    }
-}
-
-@JvmName("withUpdatedCartCartItem")
-fun List<CartItemUi>.withUpdatedCart(cart: Map<Long, Int>): List<CartItemUi> {
-    return map { cartItem ->
-        cartItem.copy(quantity = cart[cartItem.productId] ?: cartItem.quantity)
-    }
+    val showcase: Boolean,
+) : VodovozItemUi<CartItemUi>() {
+    override fun copyItem(
+        forAdults: ForAdultsUi?,
+        cartLoading: Boolean,
+        isFavorite: Boolean,
+        cartQuantity: Int,
+        items: List<VodovozItemUi<*>>
+    ): CartItemUi = copy(
+            cartQuantity = cartQuantity,
+            cartLoading = cartLoading,
+            isFavorite = isFavorite,
+            forAdults = forAdults
+        )
 }
 
 
@@ -50,8 +52,8 @@ fun List<CartItemModel>.mapToUi(): List<CartItemUi> {
 
 fun CartItemModel.toUi(): CartItemUi {
     return CartItemUi(
-        id = id,
-        productId = productId,
+        itemId = id,
+        id = productId,
         productName = productName,
         isFavorite = isFavorite,
         canBuy = canBuy,
@@ -60,7 +62,7 @@ fun CartItemModel.toUi(): CartItemUi {
         priceText = priceText,
         currentPrice = currentPrice,
         basePrice = basePrice,
-        quantity = quantity,
+        cartQuantity = quantity,
         depositText = depositText,
         articleText = articleText,
         image = image,
@@ -68,6 +70,8 @@ fun CartItemModel.toUi(): CartItemUi {
         label = label?.toUi(),
         hasDiscount = hasDiscount,
         restriction = ProductRestrictionUi.fromCode(restrictionsCode),
-        showcase = showcase
+        showcase = showcase,
+        cartLoading = false,
+        forAdults = forAdults?.toUi()
     )
 }

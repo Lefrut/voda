@@ -12,8 +12,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.systemBars
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
@@ -47,14 +45,15 @@ fun AboutProductScreen(
             )
         },
         bottomBar = {
+            val product = viewState.product
             ProductBottomFloatingButton(
-                isLoading = viewState.buttonIsLoading,
-                cartQuantity = viewState.cartQuantity,
+                isLoading = product.cartLoading,
+                cartQuantity = product.cartQuantity,
                 totalPrice = viewState.productTotalPrice,
-                oldPrice = viewState.productOldPrice,
-                price = viewState.productPrice,
+                oldPrice = product.oldPrice.toInt(),
+                price = product.price.toInt(),
                 giftText = viewState.presentHtml,
-                isAvailable = viewState.productAvailable,
+                isAvailable = product.isAvailable,
                 analogButton = viewState.analogButton,
                 contentPadding = PaddingValues(top = 10.dp, bottom = 16.dp),
                 onIncrementProduct = {

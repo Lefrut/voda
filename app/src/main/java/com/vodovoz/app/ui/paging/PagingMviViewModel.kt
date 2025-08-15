@@ -5,9 +5,7 @@ import androidx.paging.CombinedLoadStates
 import androidx.paging.PagingData
 import com.vodovoz.app.ui.mvi.MviViewModel
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
@@ -15,7 +13,7 @@ abstract class PagingMviViewModel<ITEM : Any, S : PagingState<ITEM, S>, E>(
     state: S,
 ) : ItemsMviViewModel<ITEM, S, E>(state) {
 
-    private val pagingDataListener = PagingDataListener<ITEM> { snapshotList ->
+    private val pagingDataListener = PagingDataListener { snapshotList ->
         updateState { it.withItems(snapshotList.mapNotNull { item -> item }) }
     }
 
@@ -25,7 +23,11 @@ abstract class PagingMviViewModel<ITEM : Any, S : PagingState<ITEM, S>, E>(
 
     private fun listenLoadStates() = viewModelScope.launch {
         pagingDataListener.collectLoadState { combinedLoadStates ->
-            updateState { it.withLoadStates(combinedLoadStates) }
+            updateState {
+                it.withLoadStates(
+                    combinedLoadStates.copy(refresh = combinedLoadStates.refresh)
+                )
+            }
         }
     }
 
@@ -44,22 +46,26 @@ abstract class PagingMviViewModel<ITEM : Any, S : PagingState<ITEM, S>, E>(
 
 }
 
-abstract class ItemsMviViewModel<ITEM : Any, S : ItemsState<ITEM, S>, E>(state: S) :
+
+abstract class ItemsMviViewModel<ITEM : Any, S : ItemsState<ITEM, S>, E> protected constructor(state: S) :
     MviViewModel<S, E>(state) {
 
-    protected suspend fun <T> collectItemsWith(
+
+    open suspend fun <T> collectItemsWith(
         source: Flow<T>,
-        updateItems: (List<ITEM>, T) -> List<ITEM>,
+        updateItems: suspend (List<ITEM>, T) -> List<ITEM>,
     ) {
         _state.map { s -> s.items }
-            .distinctUntilChanged()
-            .combine(source) { items, data -> updateItems(items, data) }
-            .collectLatest { updatedItems ->
+            .combine(source) { items, data ->
+                updateItems(items, data)
+            }
+            .collect { updatedItems ->
                 updateState { s -> s.withItems(updatedItems) }
             }
     }
 
 }
+
 
 abstract class ItemsState<ITEM : Any, STATE> {
 

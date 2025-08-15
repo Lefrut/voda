@@ -29,7 +29,7 @@ import androidx.compose.ui.platform.SoftwareKeyboardController
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.vodovoz.app.ui.mvi.collectAsState
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.navOptions
 import com.google.android.gms.location.LocationServices
@@ -110,8 +110,8 @@ class MapFragment : Fragment() {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
 
             setContent {
-                val pagingState by viewModel.state.collectAsStateWithLifecycle()
-                val viewState by rememberUpdatedState(pagingState)
+                val viewState by viewModel.collectAsState()
+                
                 val locationPermissionLauncher = rememberLauncherForActivityResult(
                     contract = ActivityResultContracts.RequestMultiplePermissions()
                 ) { result ->

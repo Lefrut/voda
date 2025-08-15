@@ -41,7 +41,7 @@ import com.vodovoz.app.design_system.model.ForAdultsUi
 import com.vodovoz.app.design_system.model.LabelUi
 import com.vodovoz.app.design_system.model.PricePerUnitText
 import com.vodovoz.app.design_system.model.ProductUi
-import com.vodovoz.app.design_system.model.notPercentLables
+import com.vodovoz.app.design_system.model.notPercentLabels
 import com.vodovoz.app.design_system.model.percentLabels
 import com.vodovoz.app.util.extensions.formatRating
 import com.vodovoz.app.util.formatPrice
@@ -58,7 +58,7 @@ fun LinearProductCard(
     onDecrementToCart: (ProductUi) -> Unit,
 ) {
     val percentLabels = product.percentLabels
-    val otherLabels = product.notPercentLables
+    val otherLabels = product.notPercentLabels
     val forAdults = product.forAdults
 
     VodovozOutlinedCard(
@@ -251,8 +251,8 @@ private fun LinearProductCardPreview() {
             isAvailable = true,
             pricePerUnit = null,
             unitOfMeasurement = null,
-            ForAdultsUi("eqweq", "dqwdqw", "dwqdwq", ColorfulButtonUi.Empty),
-            button = null
+            forAdults = ForAdultsUi("eqweq", "dqwdqw", "dwqdwq", ColorfulButtonUi.Empty),
+            button = null,
         )
 
 

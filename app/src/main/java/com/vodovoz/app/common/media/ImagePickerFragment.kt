@@ -49,7 +49,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.min
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.vodovoz.app.ui.mvi.collectAsState
 import androidx.navigation.fragment.findNavController
 import coil3.compose.rememberAsyncImagePainter
 import com.vodovoz.app.common.media.composables.PickerBottomPanel
@@ -58,6 +58,7 @@ import com.vodovoz.app.common.tab.TabManager
 import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.effects.LifecycleEffect
 import com.vodovoz.app.ui.insets.InsetsVisibilityState
+import com.vodovoz.app.ui.mvi.collectAsState
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -81,7 +82,7 @@ class ImagePickerFragment : Fragment() {
 
             setContent {
                 VodovozTheme {
-                    val viewState by viewModel.state.collectAsStateWithLifecycle()
+                    val viewState by viewModel.collectAsState()
 
                     val density = LocalDensity.current
                     var scale by rememberSaveable { mutableFloatStateOf(1f) }

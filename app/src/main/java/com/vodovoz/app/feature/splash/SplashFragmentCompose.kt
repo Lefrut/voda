@@ -12,7 +12,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.vodovoz.app.ui.mvi.collectAsState
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
@@ -86,7 +86,7 @@ class SplashFragment : Fragment() {
 
             setContent {
                 VodovozTheme {
-                    val viewState by splashViewModel.state.collectAsStateWithLifecycle()
+                    val viewState by splashViewModel.collectAsState()
                     val context = LocalContext.current
 
                     AppSplashScreen(

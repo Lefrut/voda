@@ -18,7 +18,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
@@ -28,9 +27,9 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 
-import coil3.request.crossfade
 import com.vodovoz.app.R
 import com.vodovoz.app.design_system.ExtendedTheme
+import com.vodovoz.app.design_system.composables.blur.VodovozBlur
 import com.vodovoz.app.design_system.composables.button.CartCounterButton
 import com.vodovoz.app.design_system.composables.chip.VodovozColorChipSmall
 import com.vodovoz.app.feature.cart.model.CartItemUi
@@ -53,7 +52,11 @@ fun CartItemCard(
 
     Row(
         modifier = modifier.clickable(
-            onClick = { if(cartItem.showcase) { onClick(cartItem) } },
+            onClick = {
+                if (cartItem.showcase) {
+                    onClick(cartItem)
+                }
+            },
             indication = null,
             interactionSource = null
         )
@@ -62,14 +65,16 @@ fun CartItemCard(
             modifier = Modifier.width(76.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            AsyncImage(
-                model = cartItem.image,
-                contentDescription = null,
-                modifier = Modifier
-                    .padding(bottom = 11.dp)
-                    .size(76.dp)
-                    .alpha(if (isAvailable) 1f else 0.5f)
-            )
+            VodovozBlur(showBlur = cartItem.forAdults != null) {
+                AsyncImage(
+                    model = cartItem.image,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .padding(bottom = 11.dp)
+                        .size(76.dp)
+                        .alpha(if (isAvailable) 1f else 0.5f)
+                )
+            }
 
             val label = cartItem.label
             if (label != null && isAvailable) {
@@ -180,7 +185,7 @@ fun CartItemCard(
                         && restriction != ProductRestrictionUi.FULL_RESTRICTION
                     ) {
                         CartCounterButton(
-                            cartQuantity = cartItem.quantity,
+                            cartQuantity = cartItem.cartQuantity,
                             catalogQuantity = cartItem.leftItems,
                             onPlusClick = {
                                 onIncrement(cartItem)

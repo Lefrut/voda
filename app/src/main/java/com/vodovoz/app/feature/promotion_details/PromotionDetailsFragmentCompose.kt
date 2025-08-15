@@ -5,13 +5,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.fragment.findNavController
 import com.vodovoz.app.common.cart.CartManager
 import com.vodovoz.app.common.like.LikeManager
@@ -20,6 +17,7 @@ import com.vodovoz.app.core.navigation.navigateToProductDetails
 import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.composables.placeholders.NetworkErrorPlaceholder
 import com.vodovoz.app.design_system.effects.LifecycleEffect
+import com.vodovoz.app.ui.mvi.collectAsState
 import com.vodovoz.app.util.extensions.openUrl
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -45,9 +43,7 @@ class PromotionDetailsFragment : Fragment() {
 
             setContent {
                 VodovozTheme {
-                    val pagingState by viewModel.state.collectAsStateWithLifecycle()
-                    val viewState by rememberUpdatedState(pagingState)
-                    val context = LocalContext.current
+                    val viewState by viewModel.collectAsState()
 
 
                     when (viewState.uiState) {
@@ -63,18 +59,6 @@ class PromotionDetailsFragment : Fragment() {
                                 viewState = viewState,
                             )
                         }
-                    }
-
-                    LifecycleEffect {
-                        viewModel.listenCart()
-                    }
-
-                    LifecycleEffect {
-                        viewModel.listenProductLoadings()
-                    }
-
-                    LifecycleEffect {
-                        viewModel.listenFavorites()
                     }
 
                     LifecycleEffect {

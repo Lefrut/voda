@@ -10,14 +10,13 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.fragment.findNavController
-import com.vodovoz.app.core.navigation.navigateToProductAnalogs
 import com.vodovoz.app.core.navigation.navigateToProductDetails
 import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.composables.bottom_sheet.SortOptionsBottomSheet
 import com.vodovoz.app.design_system.effects.LifecycleEffect
 import com.vodovoz.app.feature.product_analogs.model.ProductAnalogsEvent
+import com.vodovoz.app.ui.mvi.collectAsState
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -40,7 +39,7 @@ class ProductAnalogsFragment : Fragment() {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
 
             setContent {
-                val viewState by viewModel.state.collectAsStateWithLifecycle()
+                val viewState by viewModel.collectAsState()
 
                 VodovozTheme {
                     ProductAnalogsScreen(viewModel = viewModel, viewState = viewState)
@@ -55,19 +54,6 @@ class ProductAnalogsFragment : Fragment() {
                             }
                         )
                     }
-
-                    LifecycleEffect {
-                        viewModel.listenCart()
-                    }
-
-                    LifecycleEffect {
-                        viewModel.listenFavorites()
-                    }
-
-                    LifecycleEffect {
-                        viewModel.listenProductLoadings()
-                    }
-
                 }
 
                 LifecycleEffect {

@@ -7,8 +7,6 @@ import androidx.lifecycle.viewModelScope
 import com.vodovoz.app.common.about_product.AboutProductManager
 import com.vodovoz.app.common.account.AccountManager
 import com.vodovoz.app.common.cart.CartManager
-import com.vodovoz.app.ui.mvi.Event
-import com.vodovoz.app.ui.mvi.State
 import com.vodovoz.app.common.like.LikeManager
 import com.vodovoz.app.design_system.model.BrandCategoryItemUi
 import com.vodovoz.app.design_system.model.BuyButtonUi
@@ -21,29 +19,28 @@ import com.vodovoz.app.design_system.model.ProductDetailsTabUi
 import com.vodovoz.app.design_system.model.ProductDetailsUi
 import com.vodovoz.app.design_system.model.ProductMediaUi
 import com.vodovoz.app.design_system.model.ProductUi
-import com.vodovoz.app.design_system.model.SectionUi
+import com.vodovoz.app.design_system.model.VodovozSectionUi
 import com.vodovoz.app.design_system.model.mapToUi
 import com.vodovoz.app.design_system.model.toUi
-import com.vodovoz.app.design_system.model.withUpdatedCart
-import com.vodovoz.app.design_system.model.withUpdatedFavorites
-import com.vodovoz.app.design_system.model.withUpdatedLoading
+import com.vodovoz.app.design_system.model.toVodovozSectionUi
 import com.vodovoz.app.domain.general.respository.UserPreferencesRepository
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.feature.product_details.model.PresentInfoUi
 import com.vodovoz.app.feature.product_details.model.toUi
-import com.vodovoz.app.ui.mvi.MviViewModel
+import com.vodovoz.app.ui.mvi.Event
+import com.vodovoz.app.ui.paging.ItemsState
+import com.vodovoz.app.ui.paging.ProductsMviViewModel
 import com.vodovoz.app.util.calculateProductPrice
 import com.vodovoz.app.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import kotlin.math.roundToInt
 
 @HiltViewModel
 @Stable
@@ -55,8 +52,13 @@ class ProductDetailsFlowViewModel @Inject constructor(
     private val userPreferencesRepository: UserPreferencesRepository,
     private val accountManager: AccountManager,
     savedStateHandle: SavedStateHandle,
-) : MviViewModel<ProductDetailsFlowViewModel.ProductDetailsState, ProductDetailsFlowViewModel.ProductDetailsEvents>(ProductDetailsState()) {
-
+) : ProductsMviViewModel<VodovozSectionUi<ProductUi>, ProductDetailsFlowViewModel.ProductDetailsState, ProductDetailsFlowViewModel.ProductDetailsEvents>(
+    state = ProductDetailsState(),
+    blockedProductsFlow = cartManager.blockedProductsState,
+    favoritesFlow = likeManager.observeLikes(),
+    cartFlow = cartManager.observeCarts(),
+    canViewAdultProducts = userPreferencesRepository.canViewAdultProducts
+) {
 
     init {
         savedStateHandle.get<Long>("productId")?.let {
@@ -67,73 +69,23 @@ class ProductDetailsFlowViewModel @Inject constructor(
         fetchProductDetails()
     }
 
-
-
-    suspend fun listenLoadingsProduct() = _state.combine(
-        cartManager.blockedProductsState
-    ) { _, blockedProducts ->
-        blockedProducts
-    }.collectLatest { blockedProducts ->
-        _state.update { s ->
-            val productDetails = s.productDetails
-
-            s.copy(
-                buttonIsLoading = productDetails.id in blockedProducts,
-                moreProductSections = s.moreProductSections.map { section ->
-                    section.copy(items = section.items.withUpdatedLoading(blockedProducts))
-                },
-            )
-        }
-    }
-
-    suspend fun listenCart() = _state.combine(
-        cartManager.observeCarts()
-    ) { _, cartMap ->
-        cartMap
-    }.collectLatest { cartMap ->
-        _state.update { s ->
-            val productDetails = s.productDetails
-            val productCartQuantity = cartMap.getOrDefault(
-                productDetails.id,
-                0
-            )
-
-            s.copy(
-                productDetails = productDetails.copy(
-                    cartQuantity = productCartQuantity
-                ),
-                moreProductSections = s.moreProductSections.map { section ->
-                    section.copy(items = section.items.withUpdatedCart(cartMap))
-                },
-                totalPrice = calculateProductPrice(
-                    productCartQuantity,
-                    productDetails.prices
-                ).roundToInt()
-
-            )
-        }
-    }
-
-    suspend fun listenFavorites() = _state.combine(
-        likeManager.observeLikes()
-    ) { _, favorites ->
-        favorites
-    }.collectLatest { favoritesMap ->
-        _state.update { s ->
-            val productDetails = s.productDetails
-
-            s.copy(
-                productDetails = productDetails.copy(
-                    isFavorite = favoritesMap.getOrDefault(
-                        productDetails.id,
-                        productDetails.isFavorite
-                    )
-                ),
-                moreProductSections = s.moreProductSections.map { section ->
-                    section.copy(items = section.items.withUpdatedFavorites(favoritesMap))
-                },
-            )
-        }
+    suspend fun listenProductDetailsUpdates() {
+        combine(
+            flow = state.map { s -> s.productDetails },
+            flow2 = cartFlow,
+            flow3 = blockedProductsFlow,
+            flow4 = favoritesFlow
+        ) { details, cart, blocked, favorites ->
+            updateState { s ->
+                s.copy(
+                    productDetails = details.copy(
+                        isFavorite = favorites.getOrDefault(details.id, details.isFavorite),
+                        cartQuantity = cart.getOrDefault(details.id, 0)
+                    ),
+                    buttonIsLoading = details.id in blocked,
+                )
+            }
+        }.collect()
     }
 
     suspend fun listenCartUpdates() = cartManager.observeUpdateCartList().onEach { update ->
@@ -161,12 +113,8 @@ class ProductDetailsFlowViewModel @Inject constructor(
                         s.copy(
                             comments = productDetailsScreenModel.comments.mapToUi(),
                             productDetails = productDetailsScreenModel.details.toUi(),
-                            moreProductSections = moreProducts.map { section ->
-                                section.toUi { products ->
-                                    with(products.mapToUi()) {
-                                        dropLast(products.size % 2)
-                                    }
-                                }
+                            items = moreProducts.map { section ->
+                                section.toVodovozSectionUi()
                             },
                             buttons = productDetailsScreenModel.buttons.toUi(),
                             tabs = productDetailsScreenModel.tabs.map { it.toUi() },
@@ -504,26 +452,29 @@ class ProductDetailsFlowViewModel @Inject constructor(
 
     @Immutable
     data class ProductDetailsState(
+        override val items: List<VodovozSectionUi<ProductUi>> = emptyList(),
         val showDetailText: Boolean = false,
         val showAllProperties: Boolean = false,
         val buttonIsLoading: Boolean = false,
         val hideFloatingButton: Boolean = true,
-
         val productDetails: ProductDetailsUi = ProductDetailsUi.Empty,
         val comments: List<CommentUi> = emptyList(),
         val buttons: ProductDetailsButtonsUi = ProductDetailsButtonsUi.Empty,
         val tabs: List<ProductDetailsTabUi> = emptyList(),
-        val moreProductSections: List<SectionUi<ProductUi>> = emptyList(),
         val uiState: ProductDetailsUiState = ProductDetailsUiState.Loading,
         val totalPrice: Int = 0,
         val showMultiBottomSheet: Boolean = false,
         val showPresentBottomSheet: Boolean = false,
         val showPresentBlockBottomSheet: Boolean = false,
         val presentInfo: PresentInfoUi = PresentInfoUi.Empty,
-
         val multiProductQuantity: Int = 1,
         val multiProductTotalPrice: Int = productDetails.firstPrice.price.toInt(),
-    ) : State
+    ) : ItemsState<VodovozSectionUi<ProductUi>, ProductDetailsState>() {
+
+        override fun withItems(newItems: List<VodovozSectionUi<ProductUi>>): ProductDetailsState {
+            return copy(items = newItems)
+        }
+    }
 
     @Stable
     sealed class ProductDetailsUiState {

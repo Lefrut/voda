@@ -87,7 +87,7 @@ fun CartBody(
 
         itemsIndexed(
             items = cartItems,
-            key = { _, item -> item.id }
+            key = { _, item -> item.itemId }
         ) { i, cartItem ->
 
 

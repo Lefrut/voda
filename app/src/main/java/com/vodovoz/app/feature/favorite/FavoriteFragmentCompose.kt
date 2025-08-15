@@ -7,12 +7,10 @@ import android.view.ViewGroup
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.fragment.findNavController
 import com.vodovoz.app.R
 import com.vodovoz.app.common.cart.CartManager
@@ -26,6 +24,7 @@ import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.composables.placeholders.NetworkErrorPlaceholder
 import com.vodovoz.app.design_system.effects.LifecycleEffect
 import com.vodovoz.app.feature.home.model.CategoryUi
+import com.vodovoz.app.ui.mvi.collectAsState
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -63,8 +62,8 @@ class FavoriteFragment : Fragment() {
 
             setContent {
                 VodovozTheme {
-                    val pagingState by viewModel.state.collectAsStateWithLifecycle()
-                    val viewState by rememberUpdatedState(pagingState)
+                    val viewState by viewModel.collectAsState()
+                    
                     val lazyGridState = rememberLazyGridState()
 
                     when (viewState.uiState) {
@@ -83,19 +82,14 @@ class FavoriteFragment : Fragment() {
                         }
                     }
 
+                    LifecycleEffect {
+                        viewModel.listenFavorites()
+                    }
+
 
                     LifecycleEffect {
                         observeEvents(lazyGridState)
                     }
-
-                    LifecycleEffect {
-                        viewModel.listenCart()
-                    }
-
-                    LifecycleEffect {
-                        viewModel.listenProductLoadings()
-                    }
-
                 }
             }
         }

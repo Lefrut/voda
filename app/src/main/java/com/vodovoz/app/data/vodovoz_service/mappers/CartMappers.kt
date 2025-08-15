@@ -157,7 +157,8 @@ fun KORZINA_PRODUCT_DTO.toDomain(): CartItemModel? {
         label = PODROBNO.NALICHIE_MORE?.toDomain(),
         hasDiscount = DISCOUNTS_APPLY ?: false,
         restrictionsCode = PODROBNO.ZAPRET_FISHKAM ?: 0,
-        showcase = PODROBNO.URL == true
+        showcase = PODROBNO.URL == true,
+        forAdults = (TOVAR18 ?: PODROBNO.TOVAR18)?.toDomain()
     )
 }
 
