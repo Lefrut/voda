@@ -77,7 +77,7 @@ fun HomeTopProducts(
             verticalAlignment = Alignment.CenterVertically
         ) {
             items(
-                items = currentCategoryWithProducts.products,
+                items = currentCategoryWithProducts.items,
                 key = { it.id }
             ) { product ->
                 GridProductCard(

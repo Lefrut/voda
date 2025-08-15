@@ -23,31 +23,54 @@ import com.vodovoz.app.domain.general.model.product.SectionModel
 import com.vodovoz.app.domain.general.model.promotion.LabelModel
 import com.vodovoz.app.ui.graphics.fromHexOrUnspecified
 
+@JvmName("withUpdatedCartSectionProduct")
+fun SectionUi<ProductUi>.withUpdatedCart(cart: Map<Long, Int>): SectionUi<ProductUi> {
+    return copy(
+        items = items.withUpdatedCartRecursive(cart).mapNotNull { it as? ProductUi }
+    )
+}
+
+@JvmName("withUpdatedCartSectionCategory")
+fun SectionUi<CategoryWithProductsUi>.withUpdatedCart(cart: Map<Long, Int>): SectionUi<CategoryWithProductsUi> {
+    return copy(
+        items = items.withUpdatedCartRecursive(cart).mapNotNull { it as? CategoryWithProductsUi }
+    )
+}
+
+@JvmName("withUpdatedLoadingSectionProduct")
+fun SectionUi<ProductUi>.withUpdatedLoading(blockedProductsIds: Set<Long>): SectionUi<ProductUi> {
+    return copy(
+        items = items.withUpdatedLoadingsRecursive(blockedProductsIds)
+            .mapNotNull { it as? ProductUi })
+}
+
+@JvmName("withUpdatedLoadingSectionCategory")
+fun SectionUi<CategoryWithProductsUi>.withUpdatedLoading(blockedProductsIds: Set<Long>): SectionUi<CategoryWithProductsUi> {
+    return copy(
+        items = items.withUpdatedLoadingsRecursive(blockedProductsIds)
+            .mapNotNull { it as? CategoryWithProductsUi }
+    )
+}
 
 @JvmName("withUpdatedFavoritesSectionProduct")
 fun SectionUi<ProductUi>.withUpdatedFavorites(favorites: Map<Long, Boolean>): SectionUi<ProductUi> {
     return copy(
-        items = items.withUpdatedFavorites(favorites)
+        items = items.withUpdatedFavoritesRecursive(favorites).mapNotNull { it as? ProductUi }
     )
 }
 
 fun SectionUi<CategoryWithProductsUi>.withUpdatedFavorites(favorites: Map<Long, Boolean>): SectionUi<CategoryWithProductsUi> {
     return copy(
-        items = items.withUpdatedFavorites(favorites)
+        items = items.withUpdatedFavoritesRecursive(favorites)
+            .mapNotNull { it as? CategoryWithProductsUi }
     )
 }
 
-@JvmName("withUpdatedFavoritesCategoriesWithProducts")
-fun List<CategoryWithProductsUi>.withUpdatedFavorites(favorites: Map<Long, Boolean>): List<CategoryWithProductsUi> {
-    return map { categoryWithProductsUi ->
-        categoryWithProductsUi.withUpdatedFavorites(favorites)
-    }
-}
-
 fun CategoryWithProductsUi.withUpdatedFavorites(favorites: Map<Long, Boolean>): CategoryWithProductsUi {
-    return copy(products = products.withUpdatedFavorites(favorites))
+    return copy(
+        items = items.withUpdatedFavoritesRecursive(favorites).mapNotNull { it as? ProductUi }
+    )
 }
-
 
 fun <T : VodovozItemUi<T>> List<T>.withUpdatedFavorites(favorites: Map<Long, Boolean>): List<T> {
     return map { product ->
@@ -55,12 +78,6 @@ fun <T : VodovozItemUi<T>> List<T>.withUpdatedFavorites(favorites: Map<Long, Boo
     }
 }
 
-@JvmName("withUpdatedCartProductList")
-fun <T : VodovozItemUi<T>> List<T>.withUpdatedCart(cart: Map<Long, Int>): List<T> {
-    return map { product ->
-        product.copyItem(cartQuantity = cart[product.id] ?: 0)
-    }
-}
 
 fun List<VodovozItemUi<*>>.withUpdatedCartRecursive(
     cart: Map<Long, Int>,
@@ -86,71 +103,36 @@ fun VodovozItemUi<*>.withUpdatedFavoritesRecursive(
     return copyItem(isFavorite = favorites[id] ?: isFavorite, items = updatedItems)
 }
 
-@JvmName("withUpdatedLoadingProductList")
-fun <T : VodovozItemUi<T>> List<T>.withUpdatedLoading(blockedProductsIds: Set<Long>): List<T> {
-    return map { product ->
-        product.copyItem(cartLoading = product.id in blockedProductsIds)
-    }
+fun List<VodovozItemUi<*>>.withUpdatedLoadingsRecursive(
+    loadings: Set<Long>,
+): List<VodovozItemUi<*>> = map { it.withUpdatedLoadingsRecursive(loadings) }
+
+fun VodovozItemUi<*>.withUpdatedLoadingsRecursive(
+    loadings: Set<Long>,
+): VodovozItemUi<*> {
+    val updatedItems = items.withUpdatedLoadingsRecursive(loadings)
+    return copyItem(cartLoading = id in loadings, items = updatedItems)
 }
-
-
-@JvmName("withUpdatedCartSectionProduct")
-fun SectionUi<ProductUi>.withUpdatedCart(cart: Map<Long, Int>): SectionUi<ProductUi> {
-    return copy(
-        items = items.withUpdatedCart(cart)
-    )
-}
-
-@JvmName("withUpdatedCartSectionCategory")
-fun SectionUi<CategoryWithProductsUi>.withUpdatedCart(cart: Map<Long, Int>): SectionUi<CategoryWithProductsUi> {
-    return copy(
-        items = items.withUpdatedCart(cart)
-    )
-}
-
-@JvmName("withUpdatedCartCategoriesWithProducts")
-fun List<CategoryWithProductsUi>.withUpdatedCart(cart: Map<Long, Int>): List<CategoryWithProductsUi> {
-    return map { categoryWithProductsUi ->
-        categoryWithProductsUi.withUpdatedCart(cart)
-    }
-}
-
-@JvmName("withUpdatedCartCategoryWithProducts")
-fun CategoryWithProductsUi.withUpdatedCart(cart: Map<Long, Int>): CategoryWithProductsUi {
-    return copy(products = products.withUpdatedCart(cart))
-}
-
-
-@JvmName("withUpdatedLoadingCategoryWithProducts")
-fun CategoryWithProductsUi.withUpdatedLoading(blockedProductsIds: Set<Long>): CategoryWithProductsUi {
-    return copy(products = products.withUpdatedLoading(blockedProductsIds))
-}
-
-@JvmName("withUpdatedLoadingCategoriesWithProducts")
-fun List<CategoryWithProductsUi>.withUpdatedLoading(blockedProductsIds: Set<Long>): List<CategoryWithProductsUi> {
-    return map { it.withUpdatedLoading(blockedProductsIds) }
-}
-
-@JvmName("withUpdatedLoadingSectionProduct")
-fun SectionUi<ProductUi>.withUpdatedLoading(blockedProductsIds: Set<Long>): SectionUi<ProductUi> {
-    return copy(items = items.withUpdatedLoading(blockedProductsIds))
-}
-
-@JvmName("withUpdatedLoadingSectionCategory")
-fun SectionUi<CategoryWithProductsUi>.withUpdatedLoading(blockedProductsIds: Set<Long>): SectionUi<CategoryWithProductsUi> {
-    return copy(items = items.withUpdatedLoading(blockedProductsIds))
-}
-
 
 @Immutable
 data class CategoryWithProductsUi(
-    val id: Long,
+    override val id: Long,
     val name: String,
-    val products: List<ProductUi>,
-) {
+    override val items: List<ProductUi>,
+) : VodovozItemUi<CategoryWithProductsUi>() {
 
     companion object {
         val Empty = CategoryWithProductsUi(-1, "", emptyList())
+    }
+
+    override fun copyItem(
+        forAdults: ForAdultsUi?,
+        cartLoading: Boolean,
+        isFavorite: Boolean,
+        cartQuantity: Int,
+        items: List<VodovozItemUi<*>>,
+    ): CategoryWithProductsUi {
+        return copy(items = items.mapNotNull { it as? ProductUi })
     }
 
 }
@@ -160,7 +142,7 @@ fun CategoryWithProductsModel.toUi(): CategoryWithProductsUi {
     return CategoryWithProductsUi(
         id = id,
         name = name,
-        products = products.map { it.toUi() }
+        items = products.map { it.toUi() }
     )
 }
 
@@ -239,7 +221,7 @@ fun <E, E2> SectionModel<E>.toUi(
     )
 }
 
-fun SectionModel<ProductModel>.toVodovozSectionUi(): VodovozSectionUi<ProductUi>{
+fun SectionModel<ProductModel>.toVodovozSectionUi(): VodovozSectionUi<ProductUi> {
     return VodovozSectionUi(
         title = title,
         items = items.mapToUi(),

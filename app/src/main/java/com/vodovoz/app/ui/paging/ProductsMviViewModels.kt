@@ -5,6 +5,7 @@ import com.vodovoz.app.design_system.model.withUpdatedCart
 import com.vodovoz.app.design_system.model.withUpdatedCartRecursive
 import com.vodovoz.app.design_system.model.withUpdatedFavoritesRecursive
 import com.vodovoz.app.design_system.model.withUpdatedLoading
+import com.vodovoz.app.design_system.model.withUpdatedLoadingsRecursive
 import kotlinx.coroutines.flow.Flow
 
 abstract class PagingProductsMviViewModel<ITEM : VodovozItemUi<ITEM>, S : PagingState<ITEM, S>, E>(
@@ -44,10 +45,11 @@ interface VodovozItemsListeners<ITEM : VodovozItemUi<ITEM>> {
         }
     )
 
+    @Suppress("UNCHECKED_CAST")
     suspend fun listenProductLoadings() = collectItemsWith(
         source = blockedProductsFlow,
         updateItems = { items, blocked ->
-            items.withUpdatedLoading(blocked)
+            items.withUpdatedLoadingsRecursive(blocked).mapNotNull { it as? ITEM }
         }
     )
 

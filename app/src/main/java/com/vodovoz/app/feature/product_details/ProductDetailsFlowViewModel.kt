@@ -78,7 +78,7 @@ class ProductDetailsFlowViewModel @Inject constructor(
         ) { details, cart, blocked, favorites ->
             updateState { s ->
                 s.copy(
-                    productDetails = details.copy(
+                    productDetails = s.productDetails.copy(
                         isFavorite = favorites.getOrDefault(details.id, details.isFavorite),
                         cartQuantity = cart.getOrDefault(details.id, 0)
                     ),
@@ -462,7 +462,6 @@ class ProductDetailsFlowViewModel @Inject constructor(
         val buttons: ProductDetailsButtonsUi = ProductDetailsButtonsUi.Empty,
         val tabs: List<ProductDetailsTabUi> = emptyList(),
         val uiState: ProductDetailsUiState = ProductDetailsUiState.Loading,
-        val totalPrice: Int = 0,
         val showMultiBottomSheet: Boolean = false,
         val showPresentBottomSheet: Boolean = false,
         val showPresentBlockBottomSheet: Boolean = false,
@@ -474,6 +473,11 @@ class ProductDetailsFlowViewModel @Inject constructor(
         override fun withItems(newItems: List<VodovozSectionUi<ProductUi>>): ProductDetailsState {
             return copy(items = newItems)
         }
+
+        val totalPrice: Int = calculateProductPrice(
+            productDetails.cartQuantity,
+            productDetails.prices
+        ).toInt()
     }
 
     @Stable

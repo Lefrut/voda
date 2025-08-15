@@ -36,7 +36,7 @@ fun HomeBottomProducts(
         )
 
         val categoryWithProducts = sectionBottomProducts.items.firstOrNull() ?: return@Column
-        val products = categoryWithProducts.products
+        val products = categoryWithProducts.items
 
 
 

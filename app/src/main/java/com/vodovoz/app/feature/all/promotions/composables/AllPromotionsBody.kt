@@ -74,9 +74,12 @@ fun AllPromotionsBody(
 
             when {
                 promotions.isNotEmpty() -> {
-                    items(count = promotions.size) { i ->
+                    items(
+                        count = promotions.size,
+                        key = { i -> promotions.getOrNull(i)?.id ?: -i }
+                    ) { i ->
                         val promotion = promotions.getOrNull(i) ?: return@items
-                        SkeletonBox(shimmerState = shimmerState){
+                        SkeletonBox(shimmerState = shimmerState) {
                             PromotionCard(
                                 promotion = promotion,
                                 onClick = onPromotionClick,

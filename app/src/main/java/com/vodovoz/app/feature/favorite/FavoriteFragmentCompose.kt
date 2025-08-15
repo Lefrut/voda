@@ -83,11 +83,6 @@ class FavoriteFragment : Fragment() {
                     }
 
                     LifecycleEffect {
-                        viewModel.listenFavorites()
-                    }
-
-
-                    LifecycleEffect {
                         observeEvents(lazyGridState)
                     }
                 }

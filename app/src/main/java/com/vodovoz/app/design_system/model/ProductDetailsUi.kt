@@ -4,6 +4,7 @@ import android.os.Parcelable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.graphics.Color
+import com.vodovoz.app.domain.general.model.ContentBlockModel
 import com.vodovoz.app.domain.general.model.product.BlockPromoDataModel
 import com.vodovoz.app.domain.general.model.product.BrandCategoryBlockModel
 import com.vodovoz.app.domain.general.model.product.BrandCategoryItemDataModel
@@ -14,7 +15,6 @@ import com.vodovoz.app.domain.general.model.product.BuyButtonModel
 import com.vodovoz.app.domain.general.model.product.CharacteristicModel
 import com.vodovoz.app.domain.general.model.product.CharacteristicsBlockModel
 import com.vodovoz.app.domain.general.model.product.CommentModel
-import com.vodovoz.app.domain.general.model.ContentBlockModel
 import com.vodovoz.app.domain.general.model.product.DepositModel
 import com.vodovoz.app.domain.general.model.product.DesignBlockModel
 import com.vodovoz.app.domain.general.model.product.DocumentModel
@@ -171,14 +171,11 @@ fun ProductDetailsModel.toUi(): ProductDetailsUi {
     return ProductDetailsUi(
         id = id,
         name = name,
-
         blockBrandCategory = blockBrandCategory.toUi(),
         information = information?.toUi { description -> description },
-
         detailInfo = detailInfo.toUi { s -> s },
         characteristics = characteristics.toUi { value -> value.mapToUi() },
         documents = documents.toUi { value -> value.mapToUi() },
-
         detailPicture = detailPicture,
         mediaList = buildList {
             addAll(pictures.map { ProductMediaUi.Picture(it) })
@@ -198,14 +195,11 @@ fun ProductDetailsModel.toUi(): ProductDetailsUi {
         labels = labels.map { label -> label.toUi() },
         rating = rating,
         deposit = deposit?.toUi(),
-
         shareUrl = shareUrl,
         shareUrlText = shareUrlText,
-
         coefficient = coefficient,
         pricePerUnit = pricePerUnit,
         articleNumber = articleNumber,
-
         firstPrice = firstPrice.toUi(),
         prices = prices.map { price -> price.toUi() },
         commentsCount = commentsCount
@@ -297,7 +291,7 @@ fun ButtonBlockModel.toUi(): ButtonBlockUi {
     return ButtonBlockUi(
         button = button.toUi(),
         data = data.toUi(),
-        buyButton = buyButton.toUi()
+        buyButton = buyButton?.toUi()
     )
 }
 
@@ -305,7 +299,7 @@ fun ButtonDesignBlockModel.toUi(): ButtonDesignBlockUi {
     return ButtonDesignBlockUi(
         block = block.toUi(),
         data = data.toUi(),
-        buyButton = buyButton.toUi()
+        buyButton = buyButton?.toUi()
     )
 }
 
@@ -313,16 +307,21 @@ fun BlockPromoDataModel.toUi(): BlockPromoDataUi {
     return BlockPromoDataUi(
         title = title,
         description = description,
-        productQuantityText = productQuantityText,
-        product = product.toUi()
+        products = products.mapToUi()
     )
+}
+
+@JvmName("mapToPromoProductList")
+fun List<PromoProductModel>.mapToUi(): List<PromoProductUi> {
+    return map { it.toUi() }
 }
 
 fun PromoProductModel.toUi(): PromoProductUi {
     return PromoProductUi(
         name = name,
         image = image,
-        price = price.toUi()
+        price = price.toUi(),
+        quantity = quantity
     )
 }
 
@@ -340,7 +339,7 @@ fun DesignBlockModel.toUi(): DesignBlockUi {
         background = Color.fromHexOrUnspecified(background),
         textColor = Color.fromHexOrUnspecified(textColor),
         borderColor = Color.fromHexOrUnspecified(borderColor),
-        button = button.toUi()
+        button = button?.toUi()
     )
 }
 
@@ -348,22 +347,21 @@ fun DesignBlockModel.toUi(): DesignBlockUi {
 data class ButtonBlockUi(
     val button: ColorfulButtonUi,
     val data: BlockPromoDataUi,
-    val buyButton: BuyButtonUi,
+    val buyButton: BuyButtonUi?,
 )
 
 @Immutable
 data class ButtonDesignBlockUi(
     val block: DesignBlockUi,
     val data: BlockPromoDataUi,
-    val buyButton: BuyButtonUi,
+    val buyButton: BuyButtonUi?,
 )
 
 @Immutable
 data class BlockPromoDataUi(
     val title: String,
     val description: String,
-    val productQuantityText: String,
-    val product: PromoProductUi,
+    val products: List<PromoProductUi>,
 )
 
 @Immutable
@@ -371,6 +369,7 @@ data class PromoProductUi(
     val name: String,
     val image: String,
     val price: OldNewPriceUi,
+    val quantity: Int
 )
 
 @Immutable
@@ -386,7 +385,7 @@ data class DesignBlockUi(
     val background: Color,
     val textColor: Color,
     val borderColor: Color,
-    val button: ColorfulButtonUi,
+    val button: ColorfulButtonUi?,
 )
 
 

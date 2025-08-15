@@ -72,7 +72,7 @@ fun LinearProductCard(
                     .clip(MaterialTheme.shapes.small)
                     .width(144.dp)
                     .fillMaxHeight(),
-                showBlur = forAdults != null,
+                showBlur = product.forAdults != null,
                 text = forAdults?.textBlur ?: ""
             ) {
                 LinearImageSection(

@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetState
@@ -32,18 +33,18 @@ import com.vodovoz.app.design_system.composables.button.VodovozButton
 import com.vodovoz.app.design_system.composables.chip.VodovozColorChip
 import com.vodovoz.app.design_system.model.BlockPromoDataUi
 import com.vodovoz.app.design_system.model.BuyButtonUi
+import com.vodovoz.app.design_system.model.PromoProductUi
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PresentBottomSheet(
     state: SheetState = rememberModalBottomSheetState(true),
     data: BlockPromoDataUi,
-    button: BuyButtonUi,
+    button: BuyButtonUi?,
     onDismissRequest: () -> Unit,
-    onBuyButtonClick: () -> Unit,
+    onBuyButtonClick: (BuyButtonUi) -> Unit,
 ) {
 
-    val product = data.product
 
     ModalBottomSheet(
         sheetState = state,
@@ -73,76 +74,101 @@ fun PresentBottomSheet(
                 style = MaterialTheme.typography.bodyMedium
             )
 
-            Row(
-                modifier = Modifier
-                    .padding(vertical = 20.dp)
-                    .height(78.dp)
-                    .fillMaxWidth()
-            ) {
-                Box(modifier = Modifier.size(76.dp)) {
-                    AsyncImage(
-                        modifier = Modifier.matchParentSize(),
-                        model = product.image,
-                        contentDescription = null,
-                        contentScale = ContentScale.FillBounds,
-                        alignment = Alignment.Center
-                    )
-                    if (data.productQuantityText.isNotEmpty()) {
-                        VodovozColorChip(
-                            modifier = Modifier.align(Alignment.BottomEnd),
-                            color = MaterialTheme.colorScheme.secondary,
-                            text = data.productQuantityText
-                        )
-                    }
-                }
-                Column(modifier = Modifier.padding(start = 16.dp)) {
-                    Text(
-                        text = product.name,
-                        color = MaterialTheme.colorScheme.onBackground,
-                        style = MaterialTheme.typography.bodyMedium,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    Spacer(
-                        modifier = Modifier
-                            .wrapContentSize()
-                            .height(4.dp)
-                    )
-                    Row(verticalAlignment = Alignment.Bottom) {
 
-                        Text(
-                            text = product.price.new,
-                            color = MaterialTheme.colorScheme.onBackground,
-                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
+            Column(modifier = Modifier.padding(vertical = 20.dp)) {
+                data.products.forEachIndexed { index, product ->
+                    PromoProductCard(product = product)
+                    if (data.products.lastIndex != index) {
+                        HorizontalDivider(
+                            modifier = Modifier.padding(vertical = 16.dp),
+                            thickness = 1.dp,
+                            color = MaterialTheme.colorScheme.surfaceVariant
                         )
-                        val oldPrice = product.price.old
-                        if (oldPrice.isNotEmpty()) {
-                            Text(
-                                modifier = Modifier.padding(start = 2.dp),
-                                text = product.price.old,
-                                color = MaterialTheme.colorScheme.surfaceTint,
-                                style = MaterialTheme.typography.bodySmall.copy(
-                                    textDecoration = TextDecoration.LineThrough
-                                ),
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                        }
                     }
                 }
             }
 
-            VodovozButton(
-                modifier = Modifier.padding(bottom = 16.dp),
-                text = button.title,
-                onClick = onBuyButtonClick,
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = button.backgroundColor.takeOrElse { MaterialTheme.colorScheme.primary },
-                    contentColor = button.textColor.takeOrElse { MaterialTheme.colorScheme.background }
+
+
+            if (button != null) {
+                VodovozButton(
+                    modifier = Modifier,
+                    text = button.title,
+                    onClick = {
+                        onBuyButtonClick(button)
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = button.backgroundColor.takeOrElse { MaterialTheme.colorScheme.primary },
+                        contentColor = button.textColor.takeOrElse { MaterialTheme.colorScheme.background }
+                    )
                 )
-            )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
         }
     }
+}
+
+@Composable
+fun PromoProductCard(product: PromoProductUi) {
+    Row(
+        modifier = Modifier
+            .height(78.dp)
+            .fillMaxWidth()
+    ) {
+        Box(modifier = Modifier.size(76.dp)) {
+            AsyncImage(
+                modifier = Modifier.matchParentSize(),
+                model = product.image,
+                contentDescription = null,
+                contentScale = ContentScale.FillBounds,
+                alignment = Alignment.Center
+            )
+            if (product.quantity != 0) {
+                VodovozColorChip(
+                    modifier = Modifier.align(Alignment.BottomEnd),
+                    color = MaterialTheme.colorScheme.secondary,
+                    text = product.quantity.toString()
+                )
+            }
+        }
+        Column(modifier = Modifier.padding(start = 16.dp)) {
+            Text(
+                text = product.name,
+                color = MaterialTheme.colorScheme.onBackground,
+                style = MaterialTheme.typography.bodyMedium,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+            Spacer(
+                modifier = Modifier
+                    .wrapContentSize()
+                    .height(4.dp)
+            )
+            Row(verticalAlignment = Alignment.Bottom) {
+
+                Text(
+                    text = product.price.new,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                val oldPrice = product.price.old
+                if (oldPrice.isNotEmpty()) {
+                    Text(
+                        modifier = Modifier.padding(start = 2.dp),
+                        text = product.price.old,
+                        color = MaterialTheme.colorScheme.surfaceTint,
+                        style = MaterialTheme.typography.bodySmall.copy(
+                            textDecoration = TextDecoration.LineThrough
+                        ),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
+        }
+    }
+
 }

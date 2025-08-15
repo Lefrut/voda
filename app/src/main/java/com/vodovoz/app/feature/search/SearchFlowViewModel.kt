@@ -5,20 +5,17 @@ import androidx.compose.runtime.Stable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.vodovoz.app.common.cart.CartManager
-import com.vodovoz.app.ui.mvi.Event
-import com.vodovoz.app.ui.mvi.MviViewModel
-import com.vodovoz.app.ui.mvi.State
-import kotlinx.coroutines.flow.update
 import com.vodovoz.app.common.like.LikeManager
 import com.vodovoz.app.common.search.SearchManager
 import com.vodovoz.app.design_system.model.ProductUi
 import com.vodovoz.app.design_system.model.SectionUi
 import com.vodovoz.app.design_system.model.toUi
-import com.vodovoz.app.design_system.model.withUpdatedCart
-import com.vodovoz.app.design_system.model.withUpdatedFavorites
-import com.vodovoz.app.design_system.model.withUpdatedLoading
 import com.vodovoz.app.domain.general.model.EmptyResultException
+import com.vodovoz.app.domain.general.respository.UserPreferencesRepository
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
+import com.vodovoz.app.ui.mvi.Event
+import com.vodovoz.app.ui.paging.ItemsState
+import com.vodovoz.app.ui.paging.ProductsMviViewModel
 import com.vodovoz.app.util.extensions.debounceWithMax
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -26,10 +23,10 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.singleOrNull
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import javax.inject.Inject
@@ -41,9 +38,14 @@ class SearchFlowViewModel @Inject constructor(
     private val likeManager: LikeManager,
     private val searchManager: SearchManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
+    userPreferencesRepository: UserPreferencesRepository,
     savedStateHandle: SavedStateHandle,
-) : MviViewModel<SearchFlowViewModel.SearchState, SearchFlowViewModel.SearchEvents>(
-    SearchState()
+) : ProductsMviViewModel<ProductUi, SearchFlowViewModel.SearchState, SearchFlowViewModel.SearchEvents>(
+    state = SearchState(),
+    blockedProductsFlow = cartManager.blockedProductsState,
+    favoritesFlow = likeManager.observeLikes(),
+    cartFlow = cartManager.observeCarts(),
+    canViewAdultProducts = userPreferencesRepository.canViewAdultProducts
 ) {
 
     private val previousSearchQuery: String = savedStateHandle.get<String>("query") ?: ""
@@ -52,43 +54,6 @@ class SearchFlowViewModel @Inject constructor(
 
     init {
         handleQueries()
-        listenFavorites()
-    }
-
-    suspend fun listenCart() = _state.combine(cartManager.observeCarts()) { _, cart ->
-        cart
-    }.collectLatest { cart ->
-        _state.update { s ->
-            s.copy(sectionRecommendations = s.sectionRecommendations.withUpdatedCart(cart))
-        }
-    }
-
-    suspend fun listenProductLoadings() =
-        _state.combine(cartManager.blockedProductsState) { _, blockedProducts ->
-            blockedProducts
-        }.collectLatest { blockedProducts ->
-            _state.update { s ->
-                s.copy(
-                    sectionRecommendations = s.sectionRecommendations.withUpdatedLoading(
-                        blockedProducts
-                    )
-                )
-            }
-        }
-
-    private fun listenFavorites() = viewModelScope.launch {
-        _state.map { pagingState -> pagingState.sectionRecommendations.items }
-            .combine(likeManager.observeLikes()) { products, favorites ->
-                products to favorites
-            }.collectLatest { (products, favorites) ->
-                _state.update { s ->
-                    s.copy(
-                        sectionRecommendations = s.sectionRecommendations.copy(
-                            items = products.withUpdatedFavorites(favorites)
-                        )
-                    )
-                }
-            }
     }
 
     suspend fun listenSearchHistory() =
@@ -295,7 +260,19 @@ class SearchFlowViewModel @Inject constructor(
         val uiState: UiState = UiState.Loading,
         val sectionRecommendations: SectionUi<ProductUi> = SectionUi.empty(),
         val searchHistory: List<String> = emptyList(),
-    ) : State
+    ) : ItemsState<ProductUi, SearchState>() {
+
+        override val items: List<ProductUi>
+            get() = sectionRecommendations.items
+
+        override fun withItems(newItems: List<ProductUi>): SearchState {
+            return copy(
+                sectionRecommendations = sectionRecommendations.copy(
+                    items = newItems
+                )
+            )
+        }
+    }
 
     @Stable
     sealed interface UiState {
