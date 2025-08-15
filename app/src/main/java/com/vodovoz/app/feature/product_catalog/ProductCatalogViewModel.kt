@@ -23,9 +23,6 @@ import com.vodovoz.app.design_system.model.filters.toDomain
 import com.vodovoz.app.design_system.model.findParentOfOnlyLeaf
 import com.vodovoz.app.design_system.model.toCategory
 import com.vodovoz.app.design_system.model.toUi
-import com.vodovoz.app.design_system.model.withUpdatedCart
-import com.vodovoz.app.design_system.model.withUpdatedFavorites
-import com.vodovoz.app.design_system.model.withUpdatedLoading
 import com.vodovoz.app.domain.general.model.EmptyResultException
 import com.vodovoz.app.domain.general.model.FiltersModel
 import com.vodovoz.app.domain.general.model.product.ProductModel
@@ -40,7 +37,6 @@ import com.vodovoz.app.feature.product_catalog.ProductCatalogFragment.DataSource
 import com.vodovoz.app.feature.product_comments.model.SortUi
 import com.vodovoz.app.feature.product_comments.model.toDomain
 import com.vodovoz.app.ui.mvi.Event
-import com.vodovoz.app.ui.paging.PagingMviViewModel
 import com.vodovoz.app.ui.paging.PagingProductsMviViewModel
 import com.vodovoz.app.ui.paging.PagingState
 import com.vodovoz.app.ui.paging.copy
@@ -65,11 +61,12 @@ class ProductCatalogViewModel @Inject constructor(
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val resourcesProvider: ResourcesProvider,
     private val userPreferencesRepository: UserPreferencesRepository,
-) : PagingProductsMviViewModel<ProductCatalogViewModel.ProductCatalogState, ProductCatalogViewModel.ProductCatalogEvent>(
+) : PagingProductsMviViewModel<ProductUi, ProductCatalogViewModel.ProductCatalogState, ProductCatalogViewModel.ProductCatalogEvent>(
     state = ProductCatalogState(),
     blockedProductsFlow = cartManager.blockedProductsState,
     favoritesFlow = likeManager.observeLikes(),
-    cartFlow = cartManager.observeCarts()
+    cartFlow = cartManager.observeCarts(),
+    canViewAdultProducts = userPreferencesRepository.canViewAdultProducts
 ) {
 
     val dataSource = savedState.get<DataSource>("dataSource") ?: DataSource.Missing

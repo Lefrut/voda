@@ -9,7 +9,7 @@ import com.vodovoz.app.ui.graphics.fromHexOrUnspecified
 
 @Immutable
 data class OrderProductUi(
-    val id: Long,
+    override val id: Long,
     val name: String,
     val quantity: Int,
     val articleNumberText: String,
@@ -21,10 +21,19 @@ data class OrderProductUi(
     val pricePerUnit: Int?,
     val unitOfMeasurement: String?,
     val catalogQuantity: Int,
-    val isFavorite: Boolean,
+    override val isFavorite: Boolean,
     val present: OrderProductPresentUi?,
     val restrictions: ProductRestrictionUi,
-)
+) : VodovozItemUi<OrderProductUi>() {
+
+    override fun copyItem(
+        forAdults: ForAdultsUi?,
+        cartLoading: Boolean,
+        isFavorite: Boolean,
+        cartQuantity: Int,
+        items: List<VodovozItemUi<*>>
+    ): OrderProductUi = copy(isFavorite = isFavorite)
+}
 
 
 @Immutable

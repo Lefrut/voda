@@ -11,25 +11,21 @@ import com.vodovoz.app.common.like.LikeManager
 import com.vodovoz.app.design_system.model.ProductUi
 import com.vodovoz.app.design_system.model.VodovozPlaceholderUi
 import com.vodovoz.app.design_system.model.toUi
-import com.vodovoz.app.design_system.model.withUpdatedCart
-import com.vodovoz.app.design_system.model.withUpdatedFavorites
-import com.vodovoz.app.design_system.model.withUpdatedLoading
 import com.vodovoz.app.domain.general.model.EmptyResultException
 import com.vodovoz.app.domain.general.model.product.ProductsSectionUi
 import com.vodovoz.app.domain.general.model.product.toUi
+import com.vodovoz.app.domain.general.respository.UserPreferencesRepository
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.feature.home.model.CategoryUi
 import com.vodovoz.app.feature.product_comments.model.SortUi
 import com.vodovoz.app.feature.product_comments.model.toDomain
 import com.vodovoz.app.ui.mvi.Event
-import com.vodovoz.app.ui.paging.PagingMviViewModel
+import com.vodovoz.app.ui.paging.PagingProductsMviViewModel
 import com.vodovoz.app.ui.paging.PagingState
 import com.vodovoz.app.ui.paging.copy
 import com.vodovoz.app.ui.paging.emptyCombinedLoadStates
 import com.vodovoz.app.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -41,15 +37,14 @@ class FavoriteFlowViewModel @Inject constructor(
     private val cartManager: CartManager,
     private val likeManager: LikeManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
-) : PagingMviViewModel<ProductUi, FavoriteFlowViewModel.FavoriteState, FavoriteFlowViewModel.FavoriteEvents>(
-    FavoriteState()
+    userPreferencesRepository: UserPreferencesRepository,
+) : PagingProductsMviViewModel<ProductUi, FavoriteFlowViewModel.FavoriteState, FavoriteFlowViewModel.FavoriteEvents>(
+    state = FavoriteState(),
+    blockedProductsFlow = cartManager.blockedProductsState,
+    favoritesFlow = likeManager.observeLikes(),
+    cartFlow = cartManager.observeCarts(),
+    canViewAdultProducts = userPreferencesRepository.canViewAdultProducts
 ) {
-
-
-    init {
-        viewModelScope.launch { listenFavorites() }
-    }
-
     private fun hasFavoriteChanges(): Boolean {
         val oldLikes = stateSnapshot.lastSavedLikes
 
@@ -80,42 +75,6 @@ class FavoriteFlowViewModel @Inject constructor(
         if (hasFavoriteChanges()) {
             fetchFavoriteProducts().join()
         }
-    }
-
-    suspend fun listenCart() =
-        _state
-            .map { pagingState -> pagingState.items }
-            .combine(cartManager.observeCarts()) { _, cart ->
-                cart
-            }.collectLatest { cart ->
-                _state.update { s ->
-                    s.copy(
-                        items = s.items.withUpdatedCart(cart)
-                    )
-                }
-            }
-
-    suspend fun listenProductLoadings() =
-        _state.map { it.items }
-            .combine(cartManager.blockedProductsState) { _, blockedProducts ->
-                blockedProducts
-            }.collectLatest { blockedProducts ->
-                _state.update { s ->
-                    s.copy(
-                        items = s.items.withUpdatedLoading(blockedProducts)
-                    )
-                }
-            }
-
-    private suspend fun listenFavorites() {
-        _state.map { pagingState -> pagingState.items }
-            .combine(likeManager.observeLikes()) { products, favorites ->
-                products to favorites
-            }.collectLatest { (products, favorites) ->
-                _state.update { s ->
-                    s.copy(items = products.withUpdatedFavorites(favorites))
-                }
-            }
     }
 
     fun fetchFavoriteProducts() = viewModelScope.launch {

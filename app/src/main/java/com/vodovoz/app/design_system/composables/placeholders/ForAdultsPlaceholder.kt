@@ -29,28 +29,29 @@ fun ForAdultsPlaceholder(
         modifier = modifier
             .fillMaxSize()
             .systemBarsPadding()
-            .background(MaterialTheme.colorScheme.background)
-            .padding(horizontal = 16.dp),
+            .background(MaterialTheme.colorScheme.background),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         VodovozTopBar(onBack = onBackClick, title = forAdults.title)
-        Text(
-            modifier = Modifier.padding(top = 8.dp),
-            text = forAdults.description,
-            color = MaterialTheme.colorScheme.onBackground,
-            style = MaterialTheme.typography.bodyMedium.copy(letterSpacing = 0.sp)
-        )
-        Spacer(modifier = Modifier.weight(1f))
-        val button = forAdults.button
-
-        VodovozButton(
-            modifier = Modifier.padding(vertical = 24.dp),
-            text = button.name,
-            onClick = onApplyClick,
-            colors = ButtonDefaults.buttonColors(
-                contentColor = button.textColor,
-                containerColor = button.backgroundColor
+        Column(Modifier.padding(horizontal = 16.dp)) {
+            Text(
+                modifier = Modifier.padding(top = 8.dp),
+                text = forAdults.description,
+                color = MaterialTheme.colorScheme.onBackground,
+                style = MaterialTheme.typography.bodyMedium.copy(letterSpacing = 0.sp)
             )
-        )
+            Spacer(modifier = Modifier.weight(1f))
+            val button = forAdults.button
+
+            VodovozButton(
+                modifier = Modifier.padding(vertical = 24.dp),
+                text = button.name,
+                onClick = onApplyClick,
+                colors = ButtonDefaults.buttonColors(
+                    contentColor = button.textColor,
+                    containerColor = button.backgroundColor
+                )
+            )
+        }
     }
 }

@@ -10,7 +10,7 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.vodovoz.app.ui.mvi.collectAsState
 import androidx.navigation.fragment.findNavController
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.vodovoz.app.common.tab.TabManager
@@ -59,7 +59,7 @@ class DocumentViewerFragment : Fragment() {
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.Default)
             setContent {
-                val viewState by viewModel.state.collectAsStateWithLifecycle()
+                val viewState by viewModel.collectAsState()
 
 
                 AppearanceSystemBarsEffect(

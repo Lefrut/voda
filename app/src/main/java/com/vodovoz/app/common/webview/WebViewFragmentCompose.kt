@@ -9,7 +9,7 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.vodovoz.app.ui.mvi.collectAsState
 import androidx.navigation.fragment.findNavController
 import com.vodovoz.app.common.tab.TabManager
 import com.vodovoz.app.common.webview.model.WebViewEvents
@@ -32,7 +32,7 @@ class WebViewFragment : Fragment() {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
                 VodovozTheme {
-                    val viewState by viewModel.state.collectAsStateWithLifecycle()
+                    val viewState by viewModel.collectAsState()
 
                     WebViewScreen(
                         viewModel = viewModel,

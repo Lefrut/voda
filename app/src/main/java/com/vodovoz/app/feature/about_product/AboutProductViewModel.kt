@@ -8,24 +8,22 @@ import com.vodovoz.app.common.cart.CartManager
 import com.vodovoz.app.design_system.model.ColorfulButtonUi
 import com.vodovoz.app.design_system.model.DocumentUi
 import com.vodovoz.app.design_system.model.PriceUi
+import com.vodovoz.app.design_system.model.ProductUi
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.feature.about_product.model.AboutProductEvent
 import com.vodovoz.app.feature.about_product.model.AboutProductState
 import com.vodovoz.app.feature.product_details.model.toUi
-import com.vodovoz.app.ui.mvi.MviViewModel
-import com.vodovoz.app.util.calculateProductPrice
+import com.vodovoz.app.ui.paging.ProductsMviViewModel
 import com.vodovoz.app.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import kotlin.math.roundToInt
 
 @HiltViewModel
 @Stable
@@ -34,13 +32,19 @@ class AboutProductViewModel @Inject constructor(
     private val cartManager: CartManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
     savedStateHandle: SavedStateHandle,
-) : MviViewModel<AboutProductState, AboutProductEvent>(AboutProductState()) {
+) : ProductsMviViewModel<ProductUi, AboutProductState, AboutProductEvent>(
+    state = AboutProductState(),
+    blockedProductsFlow = cartManager.blockedProductsState,
+    cartFlow = cartManager.observeCarts(),
+    favoritesFlow = emptyFlow(),
+    canViewAdultProducts = emptyFlow()
+) {
 
     private val productId: Long =
-        savedStateHandle.get<Long>("productId") ?: navigateBack().run { -1L }
+        savedStateHandle.get<Long>("productId") ?: -1L
 
     private val productPrices: List<PriceUi> =
-        savedStateHandle.get<List<PriceUi>>("prices") ?: navigateBack().run { emptyList() }
+        savedStateHandle.get<List<PriceUi>>("prices") ?: emptyList()
 
     private val analogButton: ColorfulButtonUi? = savedStateHandle["analogButton"]
 
@@ -48,31 +52,27 @@ class AboutProductViewModel @Inject constructor(
 
 
     init {
-        initByArguments()
+        setupScreen()
         fetchAboutProductInfo()
     }
 
-    private fun initByArguments() = viewModelScope.launch {
+    private fun setupScreen() = viewModelScope.launch {
         val price = productPrices.firstOrNull()
-        price?.let {
-            _state.update { s ->
-                s.copy(
-                    productPrice = price.price.toInt(),
-                    productOldPrice = price.oldPrice.toInt(),
-                    analogButton = analogButton,
-                    productAvailable = isAvailable
-                )
-            }
-        }
-    }
-
-    suspend fun listenLoadingsProduct() = state.combine(
-        cartManager.blockedProductsState
-    ) { _, blockedProducts ->
-        blockedProducts
-    }.collectLatest { blockedProducts ->
         _state.update { s ->
-            s.copy(buttonIsLoading = productId in blockedProducts)
+            s.copy(
+                items = price?.let {
+                    listOf(
+                        ProductUi.Empty.copy(
+                            price = price.price,
+                            oldPrice = price.oldPrice,
+                            id = productId,
+                            isAvailable = isAvailable
+                        )
+                    )
+                } ?: emptyList(),
+                productPrices = productPrices,
+                analogButton = analogButton,
+            )
         }
     }
 
@@ -81,26 +81,6 @@ class AboutProductViewModel @Inject constructor(
         cartManager.observeUpdateCartList().filter { update -> update }.mapLatest {
             updatePresentHtml()
         }.collect()
-
-
-    suspend fun listenCart() = state.combine(
-        cartManager.observeCarts()
-    ) { _, cartMap ->
-        cartMap
-    }.collectLatest { cartMap ->
-        _state.update { s ->
-
-            val cartQuantity = cartMap.getOrDefault(productId, 0)
-
-            s.copy(
-                cartQuantity = cartQuantity,
-                productTotalPrice = calculateProductPrice(
-                    cartQuantity,
-                    productPrices
-                ).roundToInt()
-            )
-        }
-    }
 
 
     private fun fetchAboutProductInfo() = viewModelScope.launch {
@@ -143,11 +123,11 @@ class AboutProductViewModel @Inject constructor(
     }
 
     fun incrementProductToCart() = viewModelScope.launch {
-        cartManager.change(productId, stateSnapshot.cartQuantity + 1)
+        cartManager.change(productId, stateSnapshot.product.cartQuantity + 1)
     }
 
     fun decrementProductFromCart() = viewModelScope.launch {
-        cartManager.change(productId, stateSnapshot.cartQuantity - 1)
+        cartManager.change(productId, stateSnapshot.product.cartQuantity - 1)
     }
 
 

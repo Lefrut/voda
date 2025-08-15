@@ -32,6 +32,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.vodovoz.app.ui.mvi.collectAsState
 import androidx.navigation.navOptions
 import com.vodovoz.app.R
 import com.vodovoz.app.common.block_app_signal.BlockAppSignal

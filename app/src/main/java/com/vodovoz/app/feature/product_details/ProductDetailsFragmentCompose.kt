@@ -12,7 +12,6 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.fragment.findNavController
 import com.vodovoz.app.R
 import com.vodovoz.app.common.tab.TabManager
@@ -32,6 +31,7 @@ import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.composables.placeholders.ForAdultsPlaceholder
 import com.vodovoz.app.design_system.composables.snackbar.VodovozSnackBarVisuals
 import com.vodovoz.app.design_system.effects.LifecycleEffect
+import com.vodovoz.app.ui.mvi.collectAsState
 import com.vodovoz.app.ui.snackbar.snackBarHostState
 import com.vodovoz.app.util.extensions.copyText
 import com.vodovoz.app.util.extensions.shareText
@@ -59,7 +59,7 @@ class ProductDetailsFragment : Fragment() {
 
             setContent {
                 VodovozTheme {
-                    val viewState by viewModel.state.collectAsStateWithLifecycle()
+                    val viewState by viewModel.collectAsState()
                     val uiState = viewState.uiState
 
                     val mediaPagerState = when (uiState) {
@@ -100,10 +100,13 @@ class ProductDetailsFragment : Fragment() {
                         observeEvents(mediaPagerState)
                     }
 
-                    LifecycleEffect { viewModel.listenFavorites() }
-                    LifecycleEffect { viewModel.listenCart() }
-                    LifecycleEffect { viewModel.listenLoadingsProduct() }
-                    LifecycleEffect { viewModel.listenCartUpdates() }
+                    LifecycleEffect {
+                        viewModel.listenProductDetailsUpdates()
+                    }
+
+                    LifecycleEffect {
+                        viewModel.listenCartUpdates()
+                    }
                 }
             }
         }

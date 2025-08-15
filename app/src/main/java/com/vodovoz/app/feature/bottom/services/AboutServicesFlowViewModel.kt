@@ -79,6 +79,7 @@ class AboutServicesFlowViewModel @Inject constructor(
         val services: List<ServiceUi> = emptyList(),
     ) : State
 
+    @Stable
     sealed interface AboutServicesUiState {
         data object Loading : AboutServicesUiState
         data object Success : AboutServicesUiState

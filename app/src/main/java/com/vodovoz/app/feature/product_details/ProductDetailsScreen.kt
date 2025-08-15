@@ -93,9 +93,7 @@ fun ProductDetailsScreen(
                 NetworkErrorPlaceholder { viewModel.fetchProductDetails() }
             }
 
-            is ProductDetailsFlowViewModel.ProductDetailsUiState.ForAdults -> {
-
-            }
+            is ProductDetailsFlowViewModel.ProductDetailsUiState.ForAdults -> {}
 
             ProductDetailsFlowViewModel.ProductDetailsUiState.Success -> {
                 ProductDetailsBody(
@@ -109,7 +107,7 @@ fun ProductDetailsScreen(
                     quantityButtonIsLoading = viewState.buttonIsLoading,
                     productCartQuantity = productDetails.cartQuantity,
                     showAllProperties = viewState.showAllProperties,
-                    moreProductSections = viewState.moreProductSections,
+                    moreProductSections = viewState.items,
                     showDetailText = viewState.showDetailText,
                     buttons = viewState.buttons,
                     totalPrice = viewState.totalPrice,

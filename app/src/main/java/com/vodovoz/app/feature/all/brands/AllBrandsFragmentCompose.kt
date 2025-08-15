@@ -10,7 +10,7 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.vodovoz.app.ui.mvi.collectAsState
 import androidx.navigation.fragment.findNavController
 import com.vodovoz.app.common.tab.TabManager
 import com.vodovoz.app.core.navigation.navigateToBrandProductList
@@ -35,8 +35,7 @@ class AllBrandsFragment : Fragment() {
 
             setContent {
                 VodovozTheme {
-                    val pagingState by viewModel.state.collectAsStateWithLifecycle()
-                    val viewState by rememberUpdatedState(newValue = pagingState)
+                    val viewState by viewModel.collectAsState()
 
                     when (viewState.uiState) {
                         AllBrandsFlowViewModel.AllBrandsUiState.Loading -> {

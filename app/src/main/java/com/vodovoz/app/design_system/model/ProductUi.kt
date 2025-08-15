@@ -5,6 +5,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.Stable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
@@ -47,11 +48,51 @@ fun CategoryWithProductsUi.withUpdatedFavorites(favorites: Map<Long, Boolean>): 
     return copy(products = products.withUpdatedFavorites(favorites))
 }
 
-fun List<ProductUi>.withUpdatedFavorites(favorites: Map<Long, Boolean>): List<ProductUi> {
+
+fun <T : VodovozItemUi<T>> List<T>.withUpdatedFavorites(favorites: Map<Long, Boolean>): List<T> {
     return map { product ->
-        product.copy(isFavorite = favorites[product.id] ?: product.isFavorite)
+        product.copyItem(isFavorite = favorites[product.id] ?: product.isFavorite)
     }
 }
+
+@JvmName("withUpdatedCartProductList")
+fun <T : VodovozItemUi<T>> List<T>.withUpdatedCart(cart: Map<Long, Int>): List<T> {
+    return map { product ->
+        product.copyItem(cartQuantity = cart[product.id] ?: 0)
+    }
+}
+
+fun List<VodovozItemUi<*>>.withUpdatedCartRecursive(
+    cart: Map<Long, Int>,
+): List<VodovozItemUi<*>> {
+    return map { it.withUpdatedCartRecursive(cart) }
+}
+
+fun VodovozItemUi<*>.withUpdatedCartRecursive(
+    cart: Map<Long, Int>,
+): VodovozItemUi<*> {
+    val updatedItems = items.withUpdatedCartRecursive(cart)
+    return copyItem(cartQuantity = cart[id] ?: 0, items = updatedItems)
+}
+
+fun List<VodovozItemUi<*>>.withUpdatedFavoritesRecursive(
+    favorites: Map<Long, Boolean>,
+): List<VodovozItemUi<*>> = map { it.withUpdatedFavoritesRecursive(favorites) }
+
+fun VodovozItemUi<*>.withUpdatedFavoritesRecursive(
+    favorites: Map<Long, Boolean>,
+): VodovozItemUi<*> {
+    val updatedItems = items.withUpdatedFavoritesRecursive(favorites)
+    return copyItem(isFavorite = favorites[id] ?: isFavorite, items = updatedItems)
+}
+
+@JvmName("withUpdatedLoadingProductList")
+fun <T : VodovozItemUi<T>> List<T>.withUpdatedLoading(blockedProductsIds: Set<Long>): List<T> {
+    return map { product ->
+        product.copyItem(cartLoading = product.id in blockedProductsIds)
+    }
+}
+
 
 @JvmName("withUpdatedCartSectionProduct")
 fun SectionUi<ProductUi>.withUpdatedCart(cart: Map<Long, Int>): SectionUi<ProductUi> {
@@ -79,19 +120,6 @@ fun CategoryWithProductsUi.withUpdatedCart(cart: Map<Long, Int>): CategoryWithPr
     return copy(products = products.withUpdatedCart(cart))
 }
 
-@JvmName("withUpdatedCartProductList")
-fun List<ProductUi>.withUpdatedCart(cart: Map<Long, Int>): List<ProductUi> {
-    return map { product ->
-        product.copy(cartQuantity = cart[product.id] ?: 0)
-    }
-}
-
-@JvmName("withUpdatedLoadingProductList")
-fun List<ProductUi>.withUpdatedLoading(blockedProductsIds: Set<Long>): List<ProductUi> {
-    return map { product ->
-        product.copy(cartLoading = product.id in blockedProductsIds)
-    }
-}
 
 @JvmName("withUpdatedLoadingCategoryWithProducts")
 fun CategoryWithProductsUi.withUpdatedLoading(blockedProductsIds: Set<Long>): CategoryWithProductsUi {
@@ -154,18 +182,50 @@ fun ButtonModel.toUi(): ButtonUi {
 }
 
 @Immutable
+data class VodovozSectionUi<E : VodovozItemUi<E>>(
+    override val title: String,
+    override val items: List<E>,
+    override val button: ButtonUi?,
+    override val placeholder: VodovozPlaceholderUi?,
+) : SectionContentUi<E>, VodovozItemUi<VodovozSectionUi<E>>() {
+
+    override fun copyItem(
+        forAdults: ForAdultsUi?,
+        cartLoading: Boolean,
+        isFavorite: Boolean,
+        cartQuantity: Int,
+        items: List<VodovozItemUi<*>>,
+    ): VodovozSectionUi<E> {
+        return copy(
+            items = items.mapNotNull {
+                @Suppress("UNCHECKED_CAST")
+                it as? E
+            }
+        )
+    }
+}
+
+@Immutable
 data class SectionUi<E>(
-    val title: String,
-    val items: List<E>,
-    val button: ButtonUi? = null,
-    val placeholder: VodovozPlaceholderUi? = null,
-) {
+    override val title: String,
+    override val items: List<E>,
+    override val button: ButtonUi? = null,
+    override val placeholder: VodovozPlaceholderUi? = null,
+) : SectionContentUi<E> {
 
     companion object {
 
         fun <T> empty() = SectionUi("", emptyList<T>(), null)
     }
+}
 
+
+@Stable
+interface SectionContentUi<E> {
+    val title: String
+    val items: List<E>
+    val button: ButtonUi?
+    val placeholder: VodovozPlaceholderUi?
 }
 
 fun <E, E2> SectionModel<E>.toUi(
@@ -174,6 +234,15 @@ fun <E, E2> SectionModel<E>.toUi(
     return SectionUi(
         title = title,
         items = mapItems(items),
+        button = button?.toUi(),
+        placeholder = placeholder?.toUi()
+    )
+}
+
+fun SectionModel<ProductModel>.toVodovozSectionUi(): VodovozSectionUi<ProductUi>{
+    return VodovozSectionUi(
+        title = title,
+        items = items.mapToUi(),
         button = button?.toUi(),
         placeholder = placeholder?.toUi()
     )
@@ -189,24 +258,75 @@ fun SectionModel<ProductModel>.toUi(): SectionUi<ProductUi> {
 
 @Immutable
 data class ProductUi(
-    val id: Long,
-    val isFavorite: Boolean,
     val rating: Float,
     val price: Float,
     val oldPrice: Float,
     val name: String,
-    val cartQuantity: Int,
-    val cartLoading: Boolean,
     val image: String,
     val labels: List<LabelUi>,
     val isAvailable: Boolean,
     val pricePerUnit: Int?,
     val unitOfMeasurement: String?,
-    val forAdults: ForAdultsUi?,
     val button: ColorfulButtonUi?,
-) {
 
+    override val id: Long,
+    override val isFavorite: Boolean,
+    override val cartQuantity: Int,
+    override val cartLoading: Boolean,
+    override val forAdults: ForAdultsUi?,
+) : VodovozItemUi<ProductUi>() {
 
+    override fun copyItem(
+        forAdults: ForAdultsUi?,
+        cartLoading: Boolean,
+        isFavorite: Boolean,
+        cartQuantity: Int,
+        items: List<VodovozItemUi<*>>,
+    ): ProductUi = copy(
+        forAdults = forAdults,
+        cartQuantity = cartQuantity,
+        isFavorite = isFavorite,
+        cartLoading = cartLoading,
+    )
+
+    companion object {
+        val Empty = ProductUi(
+            rating = 0f,
+            price = 0f,
+            oldPrice = 0f,
+            name = "",
+            image = "",
+            labels = emptyList(),
+            isAvailable = false,
+            pricePerUnit = null,
+            unitOfMeasurement = null,
+            button = null,
+            id = -1L,
+            isFavorite = false,
+            cartQuantity = 0,
+            cartLoading = false,
+            forAdults = null
+        )
+    }
+}
+
+abstract class VodovozItemUi<T : VodovozItemUi<T>> {
+
+    open val id: Long = -1
+    open val forAdults: ForAdultsUi? = null
+    open val cartLoading: Boolean = false
+    open val isFavorite: Boolean = false
+    open val cartQuantity: Int = 0
+
+    open val items: List<VodovozItemUi<*>> = emptyList()
+
+    abstract fun copyItem(
+        forAdults: ForAdultsUi? = this.forAdults,
+        cartLoading: Boolean = this.cartLoading,
+        isFavorite: Boolean = this.isFavorite,
+        cartQuantity: Int = this.cartQuantity,
+        items: List<VodovozItemUi<*>> = this.items,
+    ): T
 }
 
 val ProductUi.percentLabels
@@ -214,7 +334,7 @@ val ProductUi.percentLabels
         labelEntity.name.any { s -> s == '%' }
     }
 
-val ProductUi.notPercentLables get() = labels - percentLabels.toSet()
+val ProductUi.notPercentLabels get() = labels - percentLabels.toSet()
 
 
 @Composable

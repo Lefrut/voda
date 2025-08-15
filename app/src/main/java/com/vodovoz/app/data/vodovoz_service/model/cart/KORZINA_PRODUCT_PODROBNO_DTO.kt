@@ -4,6 +4,7 @@ package com.vodovoz.app.data.vodovoz_service.model.cart
 import androidx.annotation.Keep
 import com.squareup.moshi.Json
 import com.vodovoz.app.data.vodovoz_service.model.NALICHIE_MORE_DTO
+import com.vodovoz.app.data.vodovoz_service.model.TOVAR_18_DTO
 
 @Keep
 data class KORZINA_PRODUCT_PODROBNO_DTO(
@@ -33,4 +34,6 @@ data class KORZINA_PRODUCT_PODROBNO_DTO(
     val NALICHIE_MORE: NALICHIE_MORE_DTO?,
     @Json(name = "URL")
     val URL: Boolean?,
+    @Json(name = "TOVAR18")
+    val TOVAR18: TOVAR_18_DTO?,
 )

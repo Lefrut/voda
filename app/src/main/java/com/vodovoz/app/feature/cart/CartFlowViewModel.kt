@@ -12,6 +12,7 @@ import com.vodovoz.app.design_system.model.order.OrderSummaryItemUi
 import com.vodovoz.app.design_system.model.order.mapToUi
 import com.vodovoz.app.design_system.model.toUi
 import com.vodovoz.app.domain.general.model.EmptyResultException
+import com.vodovoz.app.domain.general.respository.UserPreferencesRepository
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.feature.cart.model.CartButtonUi
 import com.vodovoz.app.feature.cart.model.CartItemUi
@@ -21,17 +22,12 @@ import com.vodovoz.app.feature.cart.model.CartPresentUi
 import com.vodovoz.app.feature.cart.model.CartPromoButtonUi
 import com.vodovoz.app.feature.cart.model.mapToUi
 import com.vodovoz.app.feature.cart.model.toUi
-import com.vodovoz.app.feature.cart.model.withUpdatedCart
-import com.vodovoz.app.feature.cart.model.withUpdatedFavorites
 import com.vodovoz.app.ui.mvi.Event
-import com.vodovoz.app.ui.paging.ItemsMviViewModel
 import com.vodovoz.app.ui.paging.ItemsState
+import com.vodovoz.app.ui.paging.ProductsMviViewModel
 import com.vodovoz.app.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -44,12 +40,16 @@ class CartFlowViewModel @Inject constructor(
     private val accountManager: AccountManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val tabManager: TabManager,
-) : ItemsMviViewModel<CartItemUi, CartFlowViewModel.CartState, CartFlowViewModel.CartEvents>(
-    CartState()
+    userPreferencesRepository: UserPreferencesRepository,
+) : ProductsMviViewModel<CartItemUi, CartFlowViewModel.CartState, CartFlowViewModel.CartEvents>(
+    state = CartState(),
+    blockedProductsFlow = cartManager.blockedProductsState,
+    favoritesFlow = likeManager.observeLikes(),
+    cartFlow = cartManager.observeCarts(),
+    canViewAdultProducts = userPreferencesRepository.canViewAdultProducts
 ) {
 
     init {
-        viewModelScope.launch { listenCart() }
         viewModelScope.launch { listenCartUpdates() }
     }
 
@@ -60,15 +60,6 @@ class CartFlowViewModel @Inject constructor(
             cartManager.updateCartListState(false)
         }
     }
-
-    suspend fun listenCart() = collectItemsWith(cartManager.observeCarts()) { items, cart ->
-        items.withUpdatedCart(cart)
-    }
-
-    suspend fun listenFavorites() =
-        collectItemsWith(likeManager.observeLikes()) { items, favorites ->
-            items.withUpdatedFavorites(favorites)
-        }
 
     fun fetchCartDetails() = viewModelScope.launch {
         if (stateSnapshot.uiState is CartUiState.Empty || stateSnapshot.uiState == CartUiState.Error) {
@@ -103,7 +94,7 @@ class CartFlowViewModel @Inject constructor(
             if (currentCartVersion >= cartManager.cartVersion) {
 
                 cartManager.syncCart(
-                    cartItems.associate { item -> item.productId to item.quantity }
+                    cartItems.associate { item -> item.id to item.cartQuantity }
                 )
 
                 setSensitiveButtonsAvailability(true)
@@ -162,17 +153,17 @@ class CartFlowViewModel @Inject constructor(
     }
 
     fun navigateToProductDetails(cartItem: CartItemUi) = viewModelScope.launch {
-        sendEvent(CartEvents.GoToProductDetails(cartItem.productId))
+        sendEvent(CartEvents.GoToProductDetails(cartItem.id))
     }
 
     fun incrementCartItem(cartItem: CartItemUi) = viewModelScope.launch {
         setSensitiveButtonsAvailability(false)
-        cartManager.change(cartItem.productId, cartItem.quantity + 1)
+        cartManager.change(cartItem.id, cartItem.cartQuantity + 1)
     }
 
     fun decrementCartItem(cartItem: CartItemUi) = viewModelScope.launch {
         setSensitiveButtonsAvailability(false)
-        cartManager.change(cartItem.productId, cartItem.quantity - 1)
+        cartManager.change(cartItem.id, cartItem.cartQuantity - 1)
     }
 
     private fun setSensitiveButtonsAvailability(buttonEnabled: Boolean) {
@@ -189,7 +180,7 @@ class CartFlowViewModel @Inject constructor(
     }
 
     fun changeFavorite(cartItem: CartItemUi) = viewModelScope.launch {
-        likeManager.changeFavorite(cartItem.productId, !cartItem.isFavorite)
+        likeManager.changeFavorite(cartItem.id, !cartItem.isFavorite)
     }
 
     fun navigateToCatalog() = viewModelScope.launch {
@@ -224,7 +215,7 @@ class CartFlowViewModel @Inject constructor(
             )
         }
 
-        vodovozServiceRepository.updateProductInCart(currentRemoveItem.productId, 0).singleResult()
+        vodovozServiceRepository.updateProductInCart(currentRemoveItem.id, 0).singleResult()
         fetchCartDetails().join()
 
         _state.update { s ->

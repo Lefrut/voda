@@ -11,7 +11,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.vodovoz.app.ui.mvi.collectAsState
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
@@ -57,7 +57,7 @@ class QrCodeFragment : Fragment() {
 
             setContent {
                 VodovozTheme {
-                    val viewState by viewModel.state.collectAsStateWithLifecycle()
+                    val viewState by viewModel.collectAsState()
 
 
                     when (val uiState = viewState.uiState) {

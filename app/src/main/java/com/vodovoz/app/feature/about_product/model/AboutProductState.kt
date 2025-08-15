@@ -5,7 +5,12 @@ import com.vodovoz.app.design_system.model.CharacteristicsBlockUi
 import com.vodovoz.app.design_system.model.ColorfulButtonUi
 import com.vodovoz.app.design_system.model.ContentBlockUi
 import com.vodovoz.app.design_system.model.DocumentUi
+import com.vodovoz.app.design_system.model.PriceUi
 import com.vodovoz.app.design_system.model.ProductDetailsTabUi
+import com.vodovoz.app.design_system.model.ProductUi
+import com.vodovoz.app.ui.paging.ItemsState
+import com.vodovoz.app.util.calculateProductPrice
+import kotlin.math.roundToInt
 
 @Immutable
 data class AboutProductState(
@@ -20,13 +25,20 @@ data class AboutProductState(
     val description: ContentBlockUi<String> = ContentBlockUi("", "", ""),
     val selectedTabIndex: Int = 0,
 
-    val buttonIsLoading: Boolean = true,
-    val cartQuantity: Int = 0,
-
-    val productTotalPrice: Int = 0,
-    val productPrice: Int = 0,
-    val productOldPrice: Int = 0,
-    val productAvailable: Boolean = true,
     val presentHtml: String = "",
     val analogButton: ColorfulButtonUi? = null,
-)
+    val productPrices: List<PriceUi> = emptyList(),
+    override val items: List<ProductUi> = emptyList(),
+) : ItemsState<ProductUi, AboutProductState>() {
+
+    override fun withItems(newItems: List<ProductUi>): AboutProductState = copy(items = newItems)
+
+    val product = items.firstOrNull() ?: ProductUi.Empty
+    val productTotalPrice: Int
+        get() {
+            return calculateProductPrice(
+                product.cartQuantity,
+                productPrices
+            ).roundToInt()
+        }
+}

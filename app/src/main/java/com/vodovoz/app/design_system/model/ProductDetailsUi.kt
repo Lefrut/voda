@@ -71,14 +71,11 @@ data class ProductDetailsButtonsUi(
 data class ProductDetailsUi(
     val id: Long,
     val name: String,
-
     val blockBrandCategory: BrandCategoryBlockUi,
     val information: ContentBlockUi<String>?,
-
     val detailInfo: ContentBlockUi<String>,
     val characteristics: ContentBlockUi<List<CharacteristicsBlockUi>>,
     val documents: ContentBlockUi<List<DocumentUi>>,
-
     val detailPicture: String,
     val mediaList: List<ProductMediaUi>,
     val sectionQueries: SectionUi<String>,
@@ -89,15 +86,11 @@ data class ProductDetailsUi(
     val labels: List<LabelUi>,
     val rating: Float,
     val deposit: DepositUi?,
-
-
     val shareUrl: String,
     val shareUrlText: String,
-
     val coefficient: Float,
     val pricePerUnit: String?,
     val articleNumber: String,
-
     val firstPrice: PriceUi,
     val prices: List<PriceUi>,
     val commentsCount: Int,

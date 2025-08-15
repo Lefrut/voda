@@ -1,8 +1,6 @@
 package com.vodovoz.app.core.network.interceptor
 
-import com.vodovoz.app.common.cache.HttpError
 import com.vodovoz.app.common.cache.HttpErrorCache
-import com.vodovoz.app.common.cache.VodovozHttpErrorCache
 import okhttp3.Interceptor
 import okhttp3.Response
 import okhttp3.ResponseBody.Companion.toResponseBody

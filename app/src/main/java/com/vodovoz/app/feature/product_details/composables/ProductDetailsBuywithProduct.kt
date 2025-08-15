@@ -14,12 +14,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.vodovoz.app.design_system.composables.card.GridProductCard
 import com.vodovoz.app.design_system.model.ProductUi
+import com.vodovoz.app.design_system.model.SectionContentUi
 import com.vodovoz.app.design_system.model.SectionUi
 
 @Composable
 fun ProductDetailsAccessoryProducts(
     modifier: Modifier = Modifier,
-    productSection: SectionUi<ProductUi>,
+    productSection: SectionContentUi<ProductUi>,
     onProductLike: (ProductUi) -> Unit,
     onProductClick: (ProductUi) -> Unit,
     onProductAnalogsClick: (ProductUi) -> Unit,

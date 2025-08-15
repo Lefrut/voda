@@ -1,6 +1,7 @@
 package com.vodovoz.app.domain.general.model.cart
 
 import com.vodovoz.app.domain.general.model.promotion.LabelModel
+import com.vodovoz.app.domain.general.model.user.ForAdultsModel
 
 data class CartItemModel(
     val id: Long,
@@ -21,5 +22,6 @@ data class CartItemModel(
     val label: LabelModel?,
     val hasDiscount: Boolean,
     val restrictionsCode: Int,
-    val showcase: Boolean
+    val showcase: Boolean,
+    val forAdults: ForAdultsModel?
 )

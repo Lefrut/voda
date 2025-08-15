@@ -11,7 +11,6 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.compose.LifecycleStartEffect
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.fragment.findNavController
 import com.vodovoz.app.R
 import com.vodovoz.app.common.tab.TabManager
@@ -19,6 +18,7 @@ import com.vodovoz.app.core.navigation.navigateToProductAnalogs
 import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.effects.LifecycleEffect
 import com.vodovoz.app.feature.about_product.model.AboutProductEvent
+import com.vodovoz.app.ui.mvi.collectAsState
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -39,7 +39,7 @@ class AboutProductFragment : Fragment() {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
 
             setContent {
-                val viewState by viewModel.state.collectAsStateWithLifecycle()
+                val viewState by viewModel.collectAsState()
 
                 VodovozTheme {
 
@@ -54,14 +54,6 @@ class AboutProductFragment : Fragment() {
                         viewModel = viewModel,
                         viewState = viewState
                     )
-
-                    LifecycleEffect {
-                        viewModel.listenCart()
-                    }
-
-                    LifecycleEffect {
-                        viewModel.listenLoadingsProduct()
-                    }
 
                     LifecycleEffect {
                         viewModel.listenCartUpdates()

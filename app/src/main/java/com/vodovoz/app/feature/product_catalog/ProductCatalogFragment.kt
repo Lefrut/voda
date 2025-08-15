@@ -10,13 +10,11 @@ import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.fragment.findNavController
 import com.vodovoz.app.core.navigation.ContentSearchNavigator
 import com.vodovoz.app.core.navigation.navigateToCategories
@@ -29,6 +27,7 @@ import com.vodovoz.app.design_system.composables.placeholders.ForAdultsPlacehold
 import com.vodovoz.app.design_system.effects.LifecycleEffect
 import com.vodovoz.app.design_system.model.filters.FiltersUi
 import com.vodovoz.app.feature.home.model.CategoryUi
+import com.vodovoz.app.ui.mvi.collectAsState
 import com.vodovoz.app.util.extensions.shareText
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.parcelize.Parcelize
@@ -77,8 +76,8 @@ class ProductCatalogFragment : Fragment() {
 
             setContent {
                 VodovozTheme {
-                    val pagingState by viewModel.state.collectAsStateWithLifecycle()
-                    val viewState by rememberUpdatedState(pagingState)
+                    val viewState by viewModel.collectAsState()
+                    
                     val lazyGridState = rememberLazyGridState()
                     val context = LocalContext.current
 

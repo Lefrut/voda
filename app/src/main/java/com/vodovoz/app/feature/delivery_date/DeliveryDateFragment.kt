@@ -10,7 +10,7 @@ import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.vodovoz.app.ui.mvi.collectAsState
 import androidx.navigation.fragment.findNavController
 import com.vodovoz.app.common.tab.TabManager
 import com.vodovoz.app.design_system.VodovozTheme
@@ -47,7 +47,7 @@ class DeliveryDateFragment : Fragment() {
 
             setContent {
                 VodovozTheme {
-                    val viewState by viewModel.state.collectAsStateWithLifecycle()
+                    val viewState by viewModel.collectAsState()
 
                     DeliveryDateScreen(
                         viewState = viewState,

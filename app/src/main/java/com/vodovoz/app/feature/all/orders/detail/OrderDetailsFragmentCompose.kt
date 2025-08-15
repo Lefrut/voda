@@ -3,12 +3,10 @@ package com.vodovoz.app.feature.all.orders.detail
 import android.os.Bundle
 import android.view.View
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.fragment.findNavController
 import com.vodovoz.app.R
 import com.vodovoz.app.common.tab.TabManager
@@ -24,6 +22,7 @@ import com.vodovoz.app.design_system.composables.placeholders.NetworkErrorPlaceh
 import com.vodovoz.app.design_system.composables.snackbar.VodovozSnackBarVisuals
 import com.vodovoz.app.design_system.effects.LifecycleEffect
 import com.vodovoz.app.feature.all.orders.detail.composables.AboutOrderBottomSheet
+import com.vodovoz.app.ui.mvi.collectAsState
 import com.vodovoz.app.ui.snackbar.snackBarHostState
 import com.vodovoz.app.util.extensions.copyText
 import com.vodovoz.app.util.extensions.openUrl
@@ -54,8 +53,8 @@ class OrderDetailsFragment : Fragment() {
 
             setContent {
                 VodovozTheme {
-                    val pagingState by viewModel.state.collectAsStateWithLifecycle()
-                    val viewState by rememberUpdatedState(newValue = pagingState)
+                    val viewState by viewModel.collectAsState()
+                    
 
                     when (viewState.uiState) {
                         OrderDetailsFlowViewModel.OrderDetailsUiState.Body -> {

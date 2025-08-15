@@ -13,6 +13,7 @@ import com.vodovoz.app.design_system.model.VodovozPlaceholderUi
 import com.vodovoz.app.design_system.model.mapToUi
 import com.vodovoz.app.design_system.model.toUi
 import com.vodovoz.app.domain.general.model.EmptyResultException
+import com.vodovoz.app.domain.general.respository.UserPreferencesRepository
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.feature.home.model.CategoryUi
 import com.vodovoz.app.feature.home.model.mapToUi
@@ -38,14 +39,14 @@ class PastPurchasesFlowViewModel @Inject constructor(
     private val cartManager: CartManager,
     private val likeManager: LikeManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
-) : PagingProductsMviViewModel<PastPurchasesFlowViewModel.PastPurchasesState, PastPurchasesFlowViewModel.PastPurchasesEvents>(
+    userPreferencesRepository: UserPreferencesRepository
+) : PagingProductsMviViewModel<ProductUi, PastPurchasesFlowViewModel.PastPurchasesState, PastPurchasesFlowViewModel.PastPurchasesEvents>(
     state = PastPurchasesState(),
     blockedProductsFlow = cartManager.blockedProductsState,
     favoritesFlow = likeManager.observeLikes(),
-    cartFlow = cartManager.observeCarts()
+    cartFlow = cartManager.observeCarts(),
+    canViewAdultProducts = userPreferencesRepository.canViewAdultProducts
 ) {
-
-
 
     init {
         viewModelScope.launch { delay(250) }.also {
@@ -156,7 +157,6 @@ class PastPurchasesFlowViewModel @Inject constructor(
                 } ?: sorting.firstOrNull() ?: SortUi.Empty
 
                 s.copy(
-                    items = pastPurchasesDetails.products.mapToUi(),
                     sorting = pastPurchasesDetails.sorting.mapToUi(),
                     categories = pastPurchasesDetails.categories.mapToUi(),
                     title = pastPurchasesDetails.title,
@@ -221,10 +221,12 @@ class PastPurchasesFlowViewModel @Inject constructor(
         val sorting: List<SortUi> = emptyList(),
         val uiState: PastPurchasesUiState = PastPurchasesUiState.Loading,
     ) : PagingState<ProductUi, PastPurchasesState>() {
+
         override fun copyPagingState(
             items: List<ProductUi>,
             loadStates: CombinedLoadStates,
         ): PastPurchasesState = copy(items = items, loadStates = loadStates)
+
     }
 
     @Stable

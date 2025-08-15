@@ -12,7 +12,7 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.vodovoz.app.ui.mvi.collectAsState
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.fragment.findNavController
 import com.vodovoz.app.R
@@ -59,10 +59,8 @@ class BuyCertificateFragment : Fragment() {
 
             setContent {
                 VodovozTheme {
-                    val pagingState by viewModel
-                        .state
-                        .collectAsStateWithLifecycle()
-                    val viewState by rememberUpdatedState(pagingState)
+                    val viewState by viewModel.collectAsState()
+                    
                     val snackbarHostState = remember { SnackbarHostState() }
 
                     when (val uiState = viewState.uiState) {

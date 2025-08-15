@@ -17,6 +17,7 @@ import com.vodovoz.app.design_system.model.ProductDetailsButtonsUi
 import com.vodovoz.app.design_system.model.ProductDetailsUi
 import com.vodovoz.app.design_system.model.ProductMediaUi
 import com.vodovoz.app.design_system.model.ProductUi
+import com.vodovoz.app.design_system.model.SectionContentUi
 import com.vodovoz.app.design_system.model.SectionUi
 
 @Suppress("NonSkippableComposable")
@@ -26,7 +27,7 @@ fun ProductDetailsBody(
     mediaPagerState: PagerState,
     productDetails: ProductDetailsUi,
     comments: List<CommentUi>,
-    moreProductSections: List<SectionUi<ProductUi>>,
+    moreProductSections: List<SectionContentUi<ProductUi>>,
     buttons: ProductDetailsButtonsUi,
     totalPrice: Int,
     productCartQuantity: Int,

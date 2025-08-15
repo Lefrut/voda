@@ -11,12 +11,14 @@ import com.vodovoz.app.design_system.model.toUi
 import com.vodovoz.app.design_system.model.withUpdatedCart
 import com.vodovoz.app.design_system.model.withUpdatedFavorites
 import com.vodovoz.app.design_system.model.withUpdatedLoading
+import com.vodovoz.app.domain.general.respository.UserPreferencesRepository
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.feature.bottom.services.detail.model.ServiceDetailsEvent
 import com.vodovoz.app.feature.bottom.services.detail.model.ServiceDetailsState
 import com.vodovoz.app.feature.bottom.services.detail.model.ServiceDetailsUiState
+import com.vodovoz.app.feature.bottom.services.detail.model.ServiceProductsUi
 import com.vodovoz.app.feature.bottom.services.detail.model.toUi
-import com.vodovoz.app.ui.mvi.MviViewModel
+import com.vodovoz.app.ui.paging.ProductsMviViewModel
 import com.vodovoz.app.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
@@ -32,56 +34,21 @@ class ServiceDetailsViewModel @Inject constructor(
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val cartManager: CartManager,
     private val favoriteManager: LikeManager,
+    userPreferencesRepository: UserPreferencesRepository,
     savedStateHandle: SavedStateHandle,
-) : MviViewModel<ServiceDetailsState, ServiceDetailsEvent>(ServiceDetailsState()) {
+) : ProductsMviViewModel<ServiceProductsUi, ServiceDetailsState, ServiceDetailsEvent>(
+    state = ServiceDetailsState(),
+    blockedProductsFlow = cartManager.blockedProductsState,
+    favoritesFlow = favoriteManager.observeLikes(),
+    cartFlow = cartManager.observeCarts(),
+    canViewAdultProducts = userPreferencesRepository.canViewAdultProducts
+) {
 
     private val serviceId: Int = savedStateHandle.get<Int>("serviceId") ?: navigateBack().run { -1 }
 
     init {
         viewModelScope.launch { delay(250) }.invokeOnCompletion {
             fetchServiceDetails()
-        }
-    }
-
-    suspend fun listenLoadings() {
-        cartManager.blockedProductsState.combine(state) { loadings, _ -> loadings }
-            .collectLatest { loadings ->
-                _state.update { s ->
-                    val productSection = s.productsSection
-                    s.copy(
-                        productsSection = productSection?.copy(
-                            products = productSection.products.withUpdatedLoading(loadings)
-                        )
-                    )
-                }
-            }
-    }
-
-
-    suspend fun listenFavorites() {
-        favoriteManager.observeLikes().combine(state) { favorites, _ -> favorites }
-            .collectLatest { favorites ->
-                _state.update { s ->
-                    val productSection = s.productsSection
-                    s.copy(
-                        productsSection = productSection?.copy(
-                            products = productSection.products.withUpdatedFavorites(favorites)
-                        )
-                    )
-                }
-            }
-    }
-
-    suspend fun listenCart() {
-        cartManager.observeCarts().combine(state) { cart, _ -> cart }.collectLatest { cart ->
-            _state.update { s ->
-                val productSection = s.productsSection
-                s.copy(
-                    productsSection = productSection?.copy(
-                        products = productSection.products.withUpdatedCart(cart)
-                    )
-                )
-            }
         }
     }
 
@@ -155,7 +122,9 @@ class ServiceDetailsViewModel @Inject constructor(
     }
 
     fun changeLoading(loading: Boolean) = viewModelScope.launch {
-        if(!loading){ delay(200) }
+        if (!loading) {
+            delay(200)
+        }
         _state.update { s ->
             s.copy(webViewIsLoading = loading)
         }

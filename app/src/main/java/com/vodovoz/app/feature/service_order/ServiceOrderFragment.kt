@@ -13,7 +13,7 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.vodovoz.app.ui.mvi.collectAsState
 import androidx.navigation.fragment.findNavController
 import com.vodovoz.app.common.tab.TabManager
 import com.vodovoz.app.design_system.VodovozTheme
@@ -56,8 +56,8 @@ class ServiceOrderFragment : Fragment() {
 
             setContent {
                 VodovozTheme {
-                    val pagingState by viewModel.state.collectAsStateWithLifecycle()
-                    val viewState by rememberUpdatedState(newValue = pagingState)
+                    val viewState by viewModel.collectAsState()
+                    
 
                     when (val uiState = viewState.uiState) {
                         is ServiceOrderViewModel.ServiceOrderUiState.Success -> {

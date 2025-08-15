@@ -6,24 +6,18 @@ import androidx.lifecycle.viewModelScope
 import com.vodovoz.app.common.cart.CartManager
 import com.vodovoz.app.common.like.LikeManager
 import com.vodovoz.app.design_system.model.ProductUi
-import com.vodovoz.app.design_system.model.withUpdatedCart
-import com.vodovoz.app.design_system.model.withUpdatedFavorites
-import com.vodovoz.app.design_system.model.withUpdatedLoading
 import com.vodovoz.app.domain.general.model.product.toUi
+import com.vodovoz.app.domain.general.respository.UserPreferencesRepository
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
-import com.vodovoz.app.feature.product_comments.model.SortUi
-import com.vodovoz.app.feature.product_comments.model.toDomain
 import com.vodovoz.app.feature.product_analogs.model.ProductAnalogsEvent
 import com.vodovoz.app.feature.product_analogs.model.ProductAnalogsState
 import com.vodovoz.app.feature.product_analogs.model.ProductAnalogsUiState
-import com.vodovoz.app.ui.mvi.MviViewModel
+import com.vodovoz.app.feature.product_comments.model.SortUi
+import com.vodovoz.app.feature.product_comments.model.toDomain
+import com.vodovoz.app.ui.paging.ProductsMviViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.take
@@ -38,56 +32,16 @@ class ProductAnalogsViewModel @Inject constructor(
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val cartManager: CartManager,
     private val favoritesManager: LikeManager,
-) : MviViewModel<ProductAnalogsState, ProductAnalogsEvent>(
-    ProductAnalogsState()
+    userPreferencesRepository: UserPreferencesRepository
+) : ProductsMviViewModel<ProductUi, ProductAnalogsState, ProductAnalogsEvent>(
+    state = ProductAnalogsState(),
+    blockedProductsFlow = cartManager.blockedProductsState,
+    favoritesFlow = favoritesManager.observeLikes(),
+    cartFlow = cartManager.observeCarts(),
+    canViewAdultProducts = userPreferencesRepository.canViewAdultProducts
 ) {
     private val productId = savedStateHandle.get<Long>("productId") ?: -1
 
-    suspend fun listenProductLoadings() =
-        state.map { it.productsSection.products }
-            .distinctUntilChanged()
-            .combine(cartManager.blockedProductsState) { _, blockedProducts ->
-                blockedProducts
-            }.collectLatest { blockedProducts ->
-                _state.update { s ->
-                    val productsSection = s.productsSection
-                    s.copy(
-                        productsSection = productsSection.copy(
-                            products = productsSection.products.withUpdatedLoading(blockedProducts)
-                        ),
-                    )
-                }
-            }
-
-    suspend fun listenFavorites() = state.map { it.productsSection.products }
-        .distinctUntilChanged()
-        .combine(favoritesManager.observeLikes()) { _, favorites ->
-            favorites
-        }.collectLatest { favorites ->
-            _state.update { s ->
-                val productsSection = s.productsSection
-                s.copy(
-                    productsSection = productsSection.copy(
-                        products = productsSection.products.withUpdatedFavorites(favorites)
-                    ),
-                )
-            }
-        }
-
-    suspend fun listenCart() = state.map { it.productsSection.products }
-        .distinctUntilChanged()
-        .combine(cartManager.observeCarts()) { _, cart ->
-            cart
-        }.collectLatest { cart ->
-            _state.update { s ->
-                val productsSection = s.productsSection
-                s.copy(
-                    productsSection = productsSection.copy(
-                        products = productsSection.products.withUpdatedCart(cart)
-                    ),
-                )
-            }
-        }
 
     fun fetchProductAnalogs() =
         vodovozServiceRepository.getProductAnalogs(productId, stateSnapshot.currentSort.toDomain())
@@ -102,7 +56,8 @@ class ProductAnalogsViewModel @Inject constructor(
                             productsSection = productsSectionUi,
                             currentSort = if (s.currentSort == SortUi.Empty) productsSectionUi.sorting.firstOrNull()
                                 ?: SortUi.Empty.copy(name = productsSectionUi.sortingTitle) else s.currentSort,
-                            uiState = ProductAnalogsUiState.Success
+                            uiState = ProductAnalogsUiState.Success,
+                            items = productsSectionUi.products
                         )
                     }
                 }.onFailure {

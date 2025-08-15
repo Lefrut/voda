@@ -27,7 +27,7 @@ import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.vodovoz.app.ui.mvi.collectAsState
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
@@ -134,8 +134,7 @@ class HomeFragment : Fragment() {
             setContent {
 
                 VodovozTheme {
-                    val pagingState by viewModel.state.collectAsStateWithLifecycle()
-                    val viewState by rememberUpdatedState(pagingState)
+                    val viewState by viewModel.collectAsState()
                     val topProductLazyListState = rememberLazyListState()
                     val pullRefreshState = rememberPullToRefreshState()
                     val snackbarHostState = remember { SnackbarHostState() }

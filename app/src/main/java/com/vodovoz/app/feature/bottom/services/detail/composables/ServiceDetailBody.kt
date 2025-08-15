@@ -118,7 +118,7 @@ fun ServiceDetailBody(
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                     maxItemsInEachRow = 2
                 ) {
-                    productsSection.products.forEach { product ->
+                    productsSection.items.forEach { product ->
                         GridProductCard(
                             modifier = Modifier.weight(1f),
                             product = product,
@@ -129,7 +129,7 @@ fun ServiceDetailBody(
                             onDecrementToCart = onDecrementProductToCart
                         )
                     }
-                    if (productsSection.products.size % 2 == 1) {
+                    if (productsSection.items.size % 2 == 1) {
                         Spacer(modifier = Modifier.weight(1f))
                     }
                 }

@@ -22,7 +22,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.vodovoz.app.ui.mvi.collectAsState
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
@@ -73,7 +73,7 @@ class BlockAppFragment : Fragment() {
         return ComposeView(requireContext()).apply {
             setContent {
                 VodovozTheme {
-                    val blockAppState by blockAppViewModel.state.collectAsStateWithLifecycle()
+                    val blockAppState by blockAppViewModel.collectAsState()
 
                     Column(
                         modifier = Modifier
