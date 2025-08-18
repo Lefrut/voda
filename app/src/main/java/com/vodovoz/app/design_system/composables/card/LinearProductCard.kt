@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.IntrinsicSize
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -44,8 +43,7 @@ import com.vodovoz.app.design_system.model.ProductUi
 import com.vodovoz.app.design_system.model.notPercentLabels
 import com.vodovoz.app.design_system.model.percentLabels
 import com.vodovoz.app.util.extensions.formatRating
-import com.vodovoz.app.util.formatPrice
-import kotlin.math.roundToInt
+import com.vodovoz.app.util.formatRoundedPrice
 
 @Composable
 fun LinearProductCard(
@@ -61,11 +59,7 @@ fun LinearProductCard(
     val otherLabels = product.notPercentLabels
     val forAdults = product.forAdults
 
-    VodovozOutlinedCard(
-        modifier = modifier,
-        contentPadding = PaddingValues(8.dp),
-        onClick = { onClick(product) }
-    ) {
+    VodovozProductCard(modifier = modifier, product = product, onClick = onClick) {
         Row(modifier = Modifier.height(IntrinsicSize.Max)) {
             VodovozBlur(
                 modifier = Modifier
@@ -108,7 +102,7 @@ fun LinearProductCard(
                             modifier = Modifier.alignByBaseline(),
                             text = stringResource(
                                 R.string.price,
-                                product.price.roundToInt().formatPrice()
+                                product.price.formatRoundedPrice()
                             ),
                             color = MaterialTheme.colorScheme.onBackground,
                             style = MaterialTheme.typography.labelLarge.copy(
@@ -121,7 +115,7 @@ fun LinearProductCard(
                             Text(
                                 text = stringResource(
                                     R.string.price,
-                                    product.oldPrice.roundToInt().formatPrice()
+                                    product.oldPrice.formatRoundedPrice()
                                 ),
                                 color = MaterialTheme.colorScheme.surfaceTint,
                                 style = ExtendedTheme.typography.labelExtraSmallVariant.copy(
@@ -129,7 +123,7 @@ fun LinearProductCard(
                                 ),
                                 modifier = Modifier
                                     .alignByBaseline()
-                                    .padding(start = 8.dp)
+                                    .padding(start = 4.dp)
                                     .weight(1f, false),
                                 maxLines = 1,
                             )
@@ -164,9 +158,11 @@ fun LinearProductCard(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 product.Button(
-                    isLoading = product.cartLoading,
                     onAnalogsClick = onAnalogsClick,
-                    onIncrementToCart = onIncrementToCart,
+                    onIncrementToCart = { product ->
+                        if (forAdults == null) onIncrementToCart(product)
+                        else onClick(product)
+                    },
                     onDecrementToCart = onDecrementToCart
                 )
             }

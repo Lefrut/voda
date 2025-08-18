@@ -101,53 +101,62 @@ fun HomeBody(
         VodovozHorizontalDivider(modifier = Modifier.padding(top = 4.dp))
 
         key("PopularCategories") {
-            HomePopularCategories(
-                modifier = Modifier.padding(top = 4.dp),
-                onPopularCategoryClick = onPopularCategoryClick,
-                sectionPopularCategories = sectionPopularCategories
-            )
+            if(sectionPopularCategories.items.isNotEmpty()){
+                HomePopularCategories(
+                    modifier = Modifier.padding(top = 4.dp),
+                    onPopularCategoryClick = onPopularCategoryClick,
+                    sectionPopularCategories = sectionPopularCategories
+                )
+            }
         }
 
         key("HomeTopProducts") {
-            HomeTopProducts(
-                modifier = Modifier.padding(top = 32.dp),
-                lazyListState = topProductsLazyListState,
-                onShowAllClick = onShowAllClick,
-                currentCategoryWithProducts = currentCategoryWithProducts,
-                sectionCategoriesWithProducts = sectionTop,
-                onCategorySelect = onCategorySelect,
-                onProductClick = onProductCardClick,
-                onProductLike = onProductLike,
-                onIncrementToCart = onIncrementProductToCart,
-                onDecrementToCart = onDecrementProductToCart,
-                onProductAnalogsClick = onProductAnalogsClick
-            )
+            if(sectionTop.items.isNotEmpty()){
+                HomeTopProducts(
+                    modifier = Modifier.padding(top = 32.dp),
+                    lazyListState = topProductsLazyListState,
+                    onShowAllClick = onShowAllClick,
+                    currentCategoryWithProducts = currentCategoryWithProducts,
+                    sectionCategoriesWithProducts = sectionTop,
+                    onCategorySelect = onCategorySelect,
+                    onProductClick = onProductCardClick,
+                    onProductLike = onProductLike,
+                    onIncrementToCart = onIncrementProductToCart,
+                    onDecrementToCart = onDecrementProductToCart,
+                    onProductAnalogsClick = onProductAnalogsClick
+                )
+            }
         }
 
         key("HurryBuyUpProducts") {
-            HomeProductsRow(
-                modifier = Modifier.padding(top = 32.dp),
-                sectionProducts = sectionHurryUpBuyProducts,
-                onProductClick = onProductCardClick,
-                onShowAllClick = onShowAllClick,
-                onProductLike = onProductLike,
-                onDecrementToCart = onDecrementProductToCart,
-                onIncrementToCart = onIncrementProductToCart,
-                onAnalogsClick = onProductAnalogsClick
-            )
+            if(sectionHurryUpBuyProducts.items.isNotEmpty()){
+                HomeProductsRow(
+                    modifier = Modifier.padding(top = 32.dp),
+                    sectionProducts = sectionHurryUpBuyProducts,
+                    onProductClick = onProductCardClick,
+                    onShowAllClick = onShowAllClick,
+                    onProductLike = onProductLike,
+                    onDecrementToCart = onDecrementProductToCart,
+                    onIncrementToCart = onIncrementProductToCart,
+                    onAnalogsClick = onProductAnalogsClick
+                )
+
+            }
         }
 
         key("NewProducts") {
-            HomeProductsRow(
-                modifier = Modifier.padding(top = 32.dp),
-                sectionProducts = sectionNewProducts,
-                onProductClick = onProductCardClick,
-                onProductLike = onProductLike,
-                onShowAllClick = onShowAllClick,
-                onDecrementToCart = onDecrementProductToCart,
-                onIncrementToCart = onIncrementProductToCart,
-                onAnalogsClick = onProductAnalogsClick
-            )
+            if(sectionNewProducts.items.isNotEmpty()){
+                HomeProductsRow(
+                    modifier = Modifier.padding(top = 32.dp),
+                    sectionProducts = sectionNewProducts,
+                    onProductClick = onProductCardClick,
+                    onProductLike = onProductLike,
+                    onShowAllClick = onShowAllClick,
+                    onDecrementToCart = onDecrementProductToCart,
+                    onIncrementToCart = onIncrementProductToCart,
+                    onAnalogsClick = onProductAnalogsClick
+                )
+            }
         }
 
         key("HomePromotions") {
@@ -164,16 +173,18 @@ fun HomeBody(
 
 
         key("HomeBottomProducts") {
-            HomeBottomProducts(
-                modifier = Modifier.padding(top = 32.dp),
-                sectionBottomProducts = sectionBottomProducts,
-                onProductClick = onProductCardClick,
-                onProductLike = onProductLike,
-                onShowAllClick = onShowAllClick,
-                onDecrementToCart = onDecrementProductToCart,
-                onIncrementToCart = onIncrementProductToCart,
-                onProductAnalogsClick = onProductAnalogsClick
-            )
+            if(sectionBottomProducts.items.isNotEmpty()){
+                HomeBottomProducts(
+                    modifier = Modifier.padding(top = 32.dp),
+                    sectionBottomProducts = sectionBottomProducts,
+                    onProductClick = onProductCardClick,
+                    onProductLike = onProductLike,
+                    onShowAllClick = onShowAllClick,
+                    onDecrementToCart = onDecrementProductToCart,
+                    onIncrementToCart = onIncrementProductToCart,
+                    onProductAnalogsClick = onProductAnalogsClick
+                )
+            }
         }
 
         key("ViewedProducts") {

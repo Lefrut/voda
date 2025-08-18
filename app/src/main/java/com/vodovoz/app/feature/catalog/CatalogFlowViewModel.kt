@@ -23,8 +23,6 @@ class CatalogFlowViewModel @Inject constructor(
 ) : MviViewModel<CatalogFlowViewModel.CatalogState, CatalogFlowViewModel.CatalogEvents>(
     CatalogState()
 ) {
-
-
     fun refresh() {
         fetchCatalogDetails()
     }

@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -14,7 +15,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
-import coil3.compose.AsyncImage
 import coil3.compose.rememberAsyncImagePainter
 import com.vodovoz.app.design_system.composables.chip.TimeLeftChip
 import com.vodovoz.app.design_system.composables.chip.VodovozColorChip
@@ -33,6 +33,7 @@ fun PromotionCard(
     Box(
         modifier = modifier
             .fillMaxWidth()
+            .heightIn(150.dp)
             .clip(MaterialTheme.shapes.large)
             .clickable {
                 onClick(promotion)

@@ -20,6 +20,7 @@ import com.yandex.mapkit.MapKitFactory
 import com.yandex.metrica.YandexMetrica
 import com.yandex.metrica.YandexMetricaConfig
 import dagger.hilt.android.HiltAndroidApp
+import leakcanary.LeakCanary
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -37,6 +38,7 @@ class VodovozApplication() : Application(), Configuration.Provider, SingletonIma
 
     override fun onCreate() {
         super.onCreate()
+
         AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags("ru"))
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
         //initYandexMetrica() //todo релиз

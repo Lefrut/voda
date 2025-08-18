@@ -624,10 +624,12 @@ class ProductCatalogViewModel @Inject constructor(
         val showEmptyCategory: Boolean = false,
         val showShare: Boolean = false,
     ) : PagingState<ProductUi, ProductCatalogState>() {
+
         override fun copyPagingState(
             items: List<ProductUi>,
             loadStates: CombinedLoadStates,
         ): ProductCatalogState = copy(items = items, loadStates = loadStates)
+
     }
 
     @Stable

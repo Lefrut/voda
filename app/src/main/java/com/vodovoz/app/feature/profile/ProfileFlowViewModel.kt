@@ -4,10 +4,6 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.viewModelScope
 import com.vodovoz.app.R
-import com.vodovoz.app.ui.mvi.Event
-import com.vodovoz.app.ui.mvi.MviViewModel
-import com.vodovoz.app.ui.mvi.State
-import kotlinx.coroutines.flow.update
 import com.vodovoz.app.common.model.VodovozAction
 import com.vodovoz.app.common.resources.ResourcesProvider
 import com.vodovoz.app.design_system.model.AboutAdvertisingUi
@@ -28,10 +24,13 @@ import com.vodovoz.app.feature.profile.model.UserInfoBlockUi
 import com.vodovoz.app.feature.profile.model.mapToUi
 import com.vodovoz.app.feature.profile.model.toUi
 import com.vodovoz.app.feature.sitestate.SiteStateManager
+import com.vodovoz.app.ui.mvi.Event
+import com.vodovoz.app.ui.mvi.MviViewModel
+import com.vodovoz.app.ui.mvi.State
 import com.vodovoz.app.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -44,12 +43,6 @@ class ProfileFlowViewModel @Inject constructor(
 ) : MviViewModel<ProfileFlowViewModel.ProfileState, ProfileFlowViewModel.ProfileEvents>(
     ProfileState()
 ) {
-
-    init {
-        viewModelScope.launch { delay(150) }.invokeOnCompletion {
-            fetchProfileDetails()
-        }
-    }
 
     fun fetchProfileDetails() = viewModelScope.launch {
         _state.update { s ->

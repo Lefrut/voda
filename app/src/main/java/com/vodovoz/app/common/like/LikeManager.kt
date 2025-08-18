@@ -30,7 +30,6 @@ class LikeManager @Inject constructor(
     private fun getLikeVersion(productId: Long) = likesVersions.getOrDefault(productId, 0)
 
     private val likesStateListener = MutableSharedFlow<Map<Long, Boolean>>(1)
-
     private val likes = ConcurrentHashMap<Long, Boolean>()
     private val likesVersions = ConcurrentHashMap<Long, Int>()
     private val likesCategories = ConcurrentHashMap<Long, Int?>()
@@ -98,7 +97,7 @@ class LikeManager @Inject constructor(
         val currentVersion = getLikeVersion(productId) + 1
         likesVersions[productId] = currentVersion
         likes[productId] = newValue
-        likesStateListener.emit(likes)
+        likesStateListener.emit(likes.toMap())
         return currentVersion
     }
 

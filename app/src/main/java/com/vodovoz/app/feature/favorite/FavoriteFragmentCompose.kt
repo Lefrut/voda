@@ -69,7 +69,9 @@ class FavoriteFragment : Fragment() {
                     when (viewState.uiState) {
                         FavoriteFlowViewModel.FavoriteUiState.Error -> {
                             NetworkErrorPlaceholder(
-                                onTryAgainClick = { viewModel.fetchFavoriteProducts() }
+                                onTryAgainClick = {
+                                    viewModel.fetchFavoriteProducts()
+                                }
                             )
                         }
 

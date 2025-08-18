@@ -3,6 +3,7 @@ import com.vodovoz.app.common.account.AccountManager
 import com.vodovoz.app.common.cart.CartManager
 import com.vodovoz.app.common.datastore.DataStorePrefs
 import com.vodovoz.app.common.like.LikeManager
+import com.vodovoz.app.domain.general.respository.UserPreferencesRepository
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
@@ -24,6 +25,7 @@ abstract class ViewModelTestBase<T : ViewModel> {
     protected lateinit var vodovozServiceRepository: VodovozServiceRepository
     protected lateinit var accountManager: AccountManager
     protected lateinit var dataStorePrefs: DataStorePrefs
+    protected lateinit var userPreferencesRepository: UserPreferencesRepository
 
     @Before
     open fun setUpBase() {
@@ -34,6 +36,7 @@ abstract class ViewModelTestBase<T : ViewModel> {
         dataStorePrefs = mockk(relaxed = true)
         cartManager = mockk(relaxed = true)
         likeManager = mockk(relaxed = true)
+        userPreferencesRepository = mockk(relaxed = true)
 
         viewModel = createViewModel()
     }

@@ -19,7 +19,6 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
@@ -27,7 +26,6 @@ import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
-import com.vodovoz.app.ui.mvi.collectAsState
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
@@ -64,6 +62,7 @@ import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.composables.snackbar.VodovozSnackbarHost
 import com.vodovoz.app.design_system.effects.LifecycleEffect
 import com.vodovoz.app.feature.sitestate.SiteStateManager
+import com.vodovoz.app.ui.mvi.collectAsState
 import com.vodovoz.app.util.extensions.debugLog
 import com.vodovoz.app.util.extensions.isVpnActive
 import dagger.hilt.android.AndroidEntryPoint
@@ -174,7 +173,7 @@ class HomeFragment : Fragment() {
                     }
 
                     LifecycleEffect {
-                        viewModel.listenFavorites(this)
+                        viewModel.listenFavorites(this).join()
                     }
 
                     LifecycleEffect {
@@ -183,6 +182,10 @@ class HomeFragment : Fragment() {
 
                     LifecycleEffect {
                         viewModel.listenStories()
+                    }
+
+                    LifecycleEffect {
+                        viewModel.listenCanView()
                     }
 
                 }

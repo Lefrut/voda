@@ -17,6 +17,7 @@ import com.vodovoz.app.ui.paging.ProductsMviViewModel
 import com.vodovoz.app.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filter
@@ -36,8 +37,8 @@ class AboutProductViewModel @Inject constructor(
     state = AboutProductState(),
     blockedProductsFlow = cartManager.blockedProductsState,
     cartFlow = cartManager.observeCarts(),
-    favoritesFlow = emptyFlow(),
-    canViewAdultProducts = emptyFlow()
+    favoritesFlow = MutableStateFlow(emptyMap()),
+    canViewAdultProducts = MutableStateFlow(false)
 ) {
 
     private val productId: Long =

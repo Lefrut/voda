@@ -1,5 +1,6 @@
 package com.vodovoz.app.feature.product_details.composables
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -30,10 +31,9 @@ import com.vodovoz.app.R
 import com.vodovoz.app.design_system.composables.bottom_sheet.InfoBottomSheet
 import com.vodovoz.app.design_system.model.DepositUi
 import com.vodovoz.app.design_system.model.PriceUi
-import com.vodovoz.app.util.formatPrice
+import com.vodovoz.app.util.formatRoundedPrice
 import kotlin.math.roundToInt
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProductDetailsPriceInfo(
     modifier: Modifier = Modifier,
@@ -50,16 +50,16 @@ fun ProductDetailsPriceInfo(
     Column(
         modifier = modifier.padding(horizontal = 16.dp)
     ) {
-        Row(verticalAlignment = Alignment.Bottom) {
+        Row(verticalAlignment = Alignment.Bottom, modifier = Modifier) {
             Text(
-                text = stringResource(R.string.price, price.formatPrice()),
+                text = stringResource(R.string.price, price.formatRoundedPrice()),
                 color = MaterialTheme.colorScheme.onBackground,
                 style = MaterialTheme.typography.titleLarge,
             )
 
             if (oldPrice > price) {
                 Text(
-                    text = stringResource(R.string.price, oldPrice.formatPrice()),
+                    text = stringResource(R.string.price, oldPrice.formatRoundedPrice()),
                     color = MaterialTheme.colorScheme.surfaceTint,
                     style = MaterialTheme.typography.labelLarge.copy(
                         textDecoration = TextDecoration.LineThrough,

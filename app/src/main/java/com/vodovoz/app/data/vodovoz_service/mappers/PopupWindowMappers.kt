@@ -34,6 +34,6 @@ fun APP_UPDATE_INFO_DTO.toDomain(): AppUpdateInfoModel {
         playMarketUrl = SILKA_ANDROID ?: "",
         androidVersion = VERSIYA_ANDROID.toString(),
         picture = KARTINKA?.toVodovozUrl() ?: "",
-        colorfulButton = HARAKTERISTIK?.KNOPKA?.toDomain()!!
+        colorfulButton = HARAKTERISTIK?.KNOPKA?.toDomain()
     )
 }

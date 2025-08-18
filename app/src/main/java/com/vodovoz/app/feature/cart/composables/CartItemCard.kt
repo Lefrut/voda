@@ -26,7 +26,6 @@ import androidx.compose.ui.text.fromHtml
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
-
 import com.vodovoz.app.R
 import com.vodovoz.app.design_system.ExtendedTheme
 import com.vodovoz.app.design_system.composables.blur.VodovozBlur
@@ -34,6 +33,7 @@ import com.vodovoz.app.design_system.composables.button.CartCounterButton
 import com.vodovoz.app.design_system.composables.chip.VodovozColorChipSmall
 import com.vodovoz.app.feature.cart.model.CartItemUi
 import com.vodovoz.app.feature.cart.model.ProductRestrictionUi
+import com.vodovoz.app.util.formatRoundedPrice
 
 @Composable
 fun CartItemCard(
@@ -161,7 +161,10 @@ fun CartItemCard(
                             style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
                         )
                         if (cartItem.hasDiscount) {
-                            val discountText = stringResource(R.string.price, cartItem.basePrice)
+                            val discountText = stringResource(
+                                R.string.price,
+                                cartItem.basePrice.formatRoundedPrice()
+                            )
                             Text(
                                 modifier = Modifier
                                     .padding(start = 4.dp)

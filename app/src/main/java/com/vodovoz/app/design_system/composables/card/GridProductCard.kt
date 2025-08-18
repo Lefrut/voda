@@ -47,9 +47,27 @@ import com.vodovoz.app.design_system.model.ProductUi
 import com.vodovoz.app.design_system.model.notPercentLabels
 import com.vodovoz.app.design_system.model.percentLabels
 import com.vodovoz.app.util.extensions.formatRating
-import com.vodovoz.app.util.formatPrice
-import kotlin.math.roundToInt
+import com.vodovoz.app.util.formatRoundedPrice
 
+@Composable
+fun VodovozProductCard(
+    modifier: Modifier = Modifier,
+    product: ProductUi,
+    onClick: (ProductUi) -> Unit,
+    content: @Composable () -> Unit,
+) {
+    VodovozOutlinedCard(
+        modifier = modifier.then(
+            if (product.forAdults != null) Modifier.pointerInput(Unit) {
+                detectTapGestures { onClick(product) }
+            }
+            else Modifier
+        ),
+        contentPadding = PaddingValues(8.dp),
+        onClick = { onClick(product) },
+        content = content
+    )
+}
 
 @Composable
 fun GridProductCard(
@@ -61,11 +79,7 @@ fun GridProductCard(
     onIncrementToCart: (ProductUi) -> Unit,
     onDecrementToCart: (ProductUi) -> Unit,
 ) {
-    VodovozOutlinedCard(
-        modifier = modifier,
-        contentPadding = PaddingValues(8.dp),
-        onClick = { onClick(product) }
-    ) {
+    VodovozProductCard(modifier = modifier, product = product, onClick = onClick) {
 
         val forAdults = product.forAdults
 
@@ -110,9 +124,11 @@ fun GridProductCard(
             Spacer(modifier = Modifier.height(8.dp))
 
             product.Button(
-                isLoading = product.cartLoading,
                 onAnalogsClick = onAnalogsClick,
-                onIncrementToCart = onIncrementToCart,
+                onIncrementToCart = { product ->
+                    if (forAdults == null) onIncrementToCart(product)
+                    else onClick(product)
+                },
                 onDecrementToCart = onDecrementToCart
             )
         }
@@ -180,10 +196,9 @@ fun PriceAndRating(modifier: Modifier = Modifier, product: ProductUi) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         Row(verticalAlignment = Alignment.Bottom, modifier = Modifier.weight(1f)) {
-
             Text(
                 modifier = Modifier.alignByBaseline(),
-                text = stringResource(R.string.price, product.price.roundToInt().formatPrice()),
+                text = stringResource(R.string.price, product.price.formatRoundedPrice()),
                 color = MaterialTheme.colorScheme.onBackground,
                 style = MaterialTheme.typography.labelLarge.copy(
                     fontWeight = FontWeight.SemiBold
@@ -195,7 +210,7 @@ fun PriceAndRating(modifier: Modifier = Modifier, product: ProductUi) {
                 Text(
                     text = stringResource(
                         R.string.price,
-                        product.oldPrice.roundToInt().formatPrice()
+                        product.oldPrice.formatRoundedPrice()
                     ),
                     color = MaterialTheme.colorScheme.surfaceTint,
                     style = ExtendedTheme.typography.labelExtraSmallVariant.copy(
@@ -203,16 +218,12 @@ fun PriceAndRating(modifier: Modifier = Modifier, product: ProductUi) {
                     ),
                     modifier = Modifier
                         .alignByBaseline()
-                        .padding(start = 8.dp)
+                        .padding(start = 4.dp)
                         .weight(1f, false),
                     maxLines = 1,
                 )
             }
         }
-
-
-        Spacer(modifier = Modifier.weight(1f))
-
 
         Icon(
             painter = painterResource(id = R.drawable.ic_star_active_v2),

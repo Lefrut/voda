@@ -84,11 +84,6 @@ class OrderDetailsFragment : Fragment() {
                     }
 
                     LifecycleEffect {
-                        viewModel.listenFavorites()
-                    }
-
-
-                    LifecycleEffect {
                         viewModel.events.collectLatest { event ->
                             when (event) {
                                 is OrderDetailsFlowViewModel.OrderDetailsEvent.CopyText -> {

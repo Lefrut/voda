@@ -23,10 +23,9 @@ import com.vodovoz.app.design_system.model.SpecialPromotionUi
 import com.vodovoz.app.design_system.model.StoryUi
 import com.vodovoz.app.design_system.model.mapToUi
 import com.vodovoz.app.design_system.model.toUi
-import com.vodovoz.app.design_system.model.withUpdatedCart
+import com.vodovoz.app.design_system.model.withCanViewForAdults
 import com.vodovoz.app.design_system.model.withUpdatedCartRecursive
-import com.vodovoz.app.design_system.model.withUpdatedFavorites
-import com.vodovoz.app.design_system.model.withUpdatedLoading
+import com.vodovoz.app.design_system.model.withUpdatedFavoritesRecursive
 import com.vodovoz.app.design_system.model.withUpdatedLoadingsRecursive
 import com.vodovoz.app.domain.general.model.promotion.toUi
 import com.vodovoz.app.domain.general.respository.UserPreferencesRepository
@@ -44,19 +43,24 @@ import com.vodovoz.app.feature.home.model.toUi
 import com.vodovoz.app.ui.mvi.Event
 import com.vodovoz.app.ui.mvi.MviViewModel
 import com.vodovoz.app.ui.mvi.State
+import com.vodovoz.app.util.extensions.debugLog
 import com.vodovoz.app.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.shareIn
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.withIndex
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.math.roundToInt
@@ -72,10 +76,44 @@ class HomeFlowViewModel @Inject constructor(
     private val userPreferencesRepository: UserPreferencesRepository,
 ) : MviViewModel<HomeFlowViewModel.HomeState, HomeFlowViewModel.HomeEvents>(HomeState()) {
 
-    suspend fun listenStories() = _state.map { stateSnapshot.stories }
+    suspend fun listenCanView(): Unit =
+        userPreferencesRepository.canViewAdultProducts.combine(
+            state.map { s -> s.uiState }
+        ) { canView, _ -> canView }
+            .shareIn(viewModelScope, SharingStarted.Lazily, 1).collect { canView ->
+                updateState { s ->
+                    val currentCategoryWithProducts = listOf(
+                        stateSnapshot.currentCategoryWithProducts
+                    ).withCanViewForAdults(canView).firstOrNull()
+
+                    s.copy(
+                        currentCategoryWithProducts = currentCategoryWithProducts
+                            ?: s.currentCategoryWithProducts,
+                        sectionTop = s.sectionTop.withItems {
+                            withCanViewForAdults(canView)
+                        },
+                        sectionBottom = s.sectionBottom.withItems {
+                            withCanViewForAdults(canView)
+                        },
+                        sectionNewProducts = s.sectionNewProducts.withItems {
+                            withCanViewForAdults(canView)
+                        },
+                        sectionHurryUpBuyProducts = s.sectionHurryUpBuyProducts.withItems {
+                            withCanViewForAdults(canView)
+                        },
+                        sectionViewedProducts = s.sectionViewedProducts.withItems {
+                            withCanViewForAdults(canView)
+                        }
+                    )
+                }
+
+            }
+
+    suspend fun listenStories(): Unit = _state.map { stateSnapshot.stories }
+        .distinctUntilChanged()
         .combine(userPreferencesRepository.viewedStoryIds) { _, p2 ->
             p2
-        }.collectLatest { storyIds ->
+        }.shareIn(viewModelScope, SharingStarted.Lazily, 1).collect { storyIds ->
             _state.update { s ->
                 s.copy(
                     stories = s.stories.map { story ->
@@ -85,99 +123,128 @@ class HomeFlowViewModel @Inject constructor(
             }
         }
 
-    suspend fun listenLoadingProducts() =
-        _state.map { pagingState -> pagingState.uiState }.combine(
+    suspend fun listenLoadingProducts(): Unit =
+        _state.map { pagingState -> pagingState.uiState }.distinctUntilChanged().combine(
             cartManager.blockedProductsState
         ) { _, productIds ->
             productIds
-        }.collectLatest { blockedProductsIds ->
+        }.stateIn(viewModelScope, SharingStarted.Lazily, emptySet())
+            .collect { blockedProductsIds ->
+                updateState { s ->
+
+                    val currentCategoryWithProducts = listOf(
+                        stateSnapshot.currentCategoryWithProducts
+                    ).withUpdatedLoadingsRecursive(blockedProductsIds).firstOrNull()
+
+                    s.copy(
+                        currentCategoryWithProducts = currentCategoryWithProducts
+                            ?: s.currentCategoryWithProducts,
+                        sectionTop = s.sectionTop.withItems {
+                            withUpdatedLoadingsRecursive(
+                                blockedProductsIds
+                            )
+                        },
+                        sectionBottom = s.sectionBottom.withItems {
+                            withUpdatedLoadingsRecursive(
+                                blockedProductsIds
+                            )
+                        },
+                        sectionNewProducts = s.sectionNewProducts.withItems {
+                            withUpdatedLoadingsRecursive(
+                                blockedProductsIds
+                            )
+                        },
+                        sectionHurryUpBuyProducts = s.sectionHurryUpBuyProducts.withItems {
+                            withUpdatedLoadingsRecursive(
+                                blockedProductsIds
+                            )
+                        },
+                        sectionViewedProducts = s.sectionViewedProducts.withItems {
+                            withUpdatedLoadingsRecursive(blockedProductsIds)
+                        }
+                    )
+                }
+            }
+
+    suspend fun listenCart(): Unit =
+        _state.map { stateSnapshot.uiState }.distinctUntilChanged().combine(
+            cartManager.observeCarts()
+        ) { _, cartMap ->
+            cartMap
+        }.collect { cartMap ->
             _state.update { s ->
 
                 val currentCategoryWithProducts =
-                    stateSnapshot.currentCategoryWithProducts.withUpdatedLoadingsRecursive(
-                        blockedProductsIds
-                    ) as? CategoryWithProductsUi
+                    stateSnapshot.currentCategoryWithProducts.withUpdatedCartRecursive(cartMap) as? CategoryWithProductsUi
 
                 s.copy(
                     currentCategoryWithProducts = currentCategoryWithProducts
                         ?: s.currentCategoryWithProducts,
-                    sectionTop = s.sectionTop.withUpdatedLoading(blockedProductsIds),
-                    sectionBottom = s.sectionBottom.withUpdatedLoading(blockedProductsIds),
-                    sectionNewProducts = s.sectionNewProducts.withUpdatedLoading(blockedProductsIds),
-                    sectionHurryUpBuyProducts = s.sectionHurryUpBuyProducts.withUpdatedLoading(
-                        blockedProductsIds
-                    ),
-                    sectionViewedProducts = s.sectionViewedProducts.withUpdatedLoading(
-                        blockedProductsIds
-                    )
+                    sectionTop = s.sectionTop.withItems { withUpdatedCartRecursive(cartMap) },
+                    sectionBottom = s.sectionBottom.withItems { withUpdatedCartRecursive(cartMap) },
+                    sectionNewProducts = s.sectionNewProducts.withItems {
+                        withUpdatedCartRecursive(cartMap)
+                    },
+                    sectionHurryUpBuyProducts = s.sectionHurryUpBuyProducts.withItems {
+                        withUpdatedCartRecursive(cartMap)
+                    },
+                    sectionViewedProducts = s.sectionViewedProducts.withItems {
+                        withUpdatedCartRecursive(cartMap)
+                    },
                 )
             }
         }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    suspend fun listenCart() = _state.map { stateSnapshot.uiState }.combine(
-        cartManager.observeCarts()
-    ) { _, cartMap ->
-        cartMap
-    }.mapLatest { cartMap ->
-        _state.update { s ->
-
-            val currentCategoryWithProducts =
-                stateSnapshot.currentCategoryWithProducts.withUpdatedCartRecursive(cartMap) as? CategoryWithProductsUi
-
-            s.copy(
-                currentCategoryWithProducts = currentCategoryWithProducts
-                    ?: s.currentCategoryWithProducts,
-                sectionTop = s.sectionTop.withUpdatedCart(cartMap),
-                sectionBottom = s.sectionBottom.withUpdatedCart(cartMap),
-                sectionNewProducts = s.sectionNewProducts.withUpdatedCart(cartMap),
-                sectionHurryUpBuyProducts = s.sectionHurryUpBuyProducts.withUpdatedCart(cartMap),
-                sectionViewedProducts = s.sectionViewedProducts.withUpdatedCart(cartMap),
-            )
-        }
-    }.collect()
-
 
     suspend fun listenFavorites(mainScope: CoroutineScope) = mainScope.launch {
-        _state.map { pagingState -> pagingState.uiState }
+        _state.map { it.uiState }.distinctUntilChanged()
             .combine(likeManager.observeLikes()) { uiState, favorites ->
                 uiState to favorites
-            }.collectLatest { (uiState, favorites) ->
+            }.stateIn(viewModelScope).collect { (uiState, favorites) ->
 
-                if (uiState != HomeUiState.Success) return@collectLatest
+                if (uiState != HomeUiState.Success) return@collect
 
                 val sectionTopDeferred =
                     async(Dispatchers.Default) {
-                        stateSnapshot.sectionTop.withUpdatedFavorites(
-                            favorites
-                        )
+                        stateSnapshot.sectionTop.withItems {
+                            withUpdatedFavoritesRecursive(favorites)
+                        }
                     }
                 val sectionBottomDeferred =
                     async(Dispatchers.Default) {
-                        stateSnapshot.sectionBottom.withUpdatedFavorites(
-                            favorites
-                        )
+                        stateSnapshot.sectionBottom.withItems {
+                            withUpdatedFavoritesRecursive(favorites)
+                        }
                     }
                 val sectionViewedProductsDeferred =
                     async(Dispatchers.Default) {
-                        stateSnapshot.sectionViewedProducts.withUpdatedFavorites(favorites)
+                        stateSnapshot.sectionViewedProducts.withItems {
+                            withUpdatedFavoritesRecursive(favorites)
+                        }
                     }
                 val sectionNewProductsDeferred =
                     async(Dispatchers.Default) {
-                        stateSnapshot.sectionNewProducts.withUpdatedFavorites(favorites)
+                        stateSnapshot.sectionNewProducts.withItems {
+                            withUpdatedFavoritesRecursive(favorites)
+                        }
                     }
                 val sectionHurryUpBuyProducts =
-                    stateSnapshot.sectionHurryUpBuyProducts.withUpdatedFavorites(favorites)
+                    stateSnapshot.sectionHurryUpBuyProducts.withItems {
+                        withUpdatedFavoritesRecursive(favorites)
+                    }
 
 
-                val currentCategoryWithProducts =
-                    stateSnapshot.currentCategoryWithProducts.withUpdatedFavorites(favorites)
+                val currentCategoryWithProducts = listOf(
+                    stateSnapshot.currentCategoryWithProducts
+                ).withUpdatedFavoritesRecursive(favorites).firstOrNull()
+                    ?: stateSnapshot.currentCategoryWithProducts
 
                 val sectionTop = sectionTopDeferred.await()
                 val sectionBottom = sectionBottomDeferred.await()
                 val sectionViewedProducts = sectionViewedProductsDeferred.await()
                 val sectionNewProducts = sectionNewProductsDeferred.await()
 
+                debugLog { "listenFavorites: HomeViewModel" }
 
                 _state.update { s ->
                     s.copy(
@@ -216,7 +283,7 @@ class HomeFlowViewModel @Inject constructor(
         val orderMenu = orderMenuDeferred.await().getOrNull()
         val sectionsTopAndBottom = sectionsTopAndBottomDeferred.await().getOrNull()
 
-        if (banners != null && stories != null && sectionPopularCategories != null && orderMenu != null && sectionsTopAndBottom != null) {
+        if (banners != null && sectionPopularCategories != null && orderMenu != null && sectionsTopAndBottom != null) {
             val topSection = sectionsTopAndBottom.topSection.toUi(
                 mapItems = { items -> items.map { it.toUi() } }
             )
@@ -230,7 +297,7 @@ class HomeFlowViewModel @Inject constructor(
                         ?: CategoryWithProductsUi.Empty,
                     orderWithMenu = orderMenu.toUi(),
                     banners = banners.mapToUi(),
-                    stories = stories.mapToUi(),
+                    stories = stories?.mapToUi() ?: emptyList(),
                     uiState = HomeUiState.Success,
                 )
             }
@@ -306,12 +373,22 @@ class HomeFlowViewModel @Inject constructor(
     }
 
 
-    fun fetchHomeDetails() = viewModelScope.launch {
-        _state.update { s -> s.copy(uiState = HomeUiState.Loading) }
-        fetchPrimaryDetails()
-        fetchSecondaryDetails()
-        fetchOptionalDetails()
-    }
+    fun fetchHomeDetails(
+        onFirstImportantResult: suspend () -> Unit = {},
+    ) = flow {
+        _state.update { s ->
+            s.copy(uiState = HomeUiState.Loading)
+        }
+        emit(fetchPrimaryDetails())
+        emit(fetchSecondaryDetails())
+        emit(fetchOptionalDetails())
+        return@flow
+    }.withIndex().onEach { indexedValue ->
+        if (indexedValue.index == 0) {
+            onFirstImportantResult()
+        }
+    }.launchIn(viewModelScope)
+
 
     fun refresh() = viewModelScope.launch {
         if (stateSnapshot.uiState is HomeUiState.Loading) return@launch
@@ -323,11 +400,12 @@ class HomeFlowViewModel @Inject constructor(
             )
         }
 
-        fetchHomeDetails().join()
-
-        _state.update { s ->
-            s.copy(showRefreshIndicator = false)
+        fetchHomeDetails {
+            _state.update { s ->
+                s.copy(showRefreshIndicator = false)
+            }
         }
+
     }
 
 

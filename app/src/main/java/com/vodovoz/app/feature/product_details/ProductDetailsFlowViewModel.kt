@@ -33,10 +33,10 @@ import com.vodovoz.app.ui.paging.ProductsMviViewModel
 import com.vodovoz.app.util.calculateProductPrice
 import com.vodovoz.app.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -69,23 +69,46 @@ class ProductDetailsFlowViewModel @Inject constructor(
         fetchProductDetails()
     }
 
-    suspend fun listenProductDetailsUpdates() {
-        combine(
-            flow = state.map { s -> s.productDetails },
-            flow2 = cartFlow,
-            flow3 = blockedProductsFlow,
-            flow4 = favoritesFlow
-        ) { details, cart, blocked, favorites ->
-            updateState { s ->
-                s.copy(
-                    productDetails = s.productDetails.copy(
-                        isFavorite = favorites.getOrDefault(details.id, details.isFavorite),
-                        cartQuantity = cart.getOrDefault(details.id, 0)
-                    ),
-                    buttonIsLoading = details.id in blocked,
-                )
+    fun listenProductDetailsUpdates(scope: CoroutineScope) {
+        cartManager.observeCarts()
+            .onEach { cart ->
+                updateState { s ->
+                    s.copy(
+                        productDetails = s.productDetails.copy(
+                            cartQuantity = cart.getOrDefault(
+                                s.productDetails.id,
+                                s.productDetails.cartQuantity
+                            )
+                        )
+                    )
+                }
             }
-        }.collect()
+            .launchIn(scope)
+
+        cartManager.blockedProductsState
+            .onEach { blocked ->
+                updateState { s ->
+                    s.copy(
+                        buttonIsLoading = s.productDetails.id in blocked
+                    )
+                }
+            }
+            .launchIn(scope)
+
+        likeManager.observeLikes()
+            .onEach { likes ->
+                updateState { s ->
+                    s.copy(
+                        productDetails = s.productDetails.copy(
+                            isFavorite = likes.getOrDefault(
+                                s.productDetails.id,
+                                s.productDetails.isFavorite
+                            )
+                        )
+                    )
+                }
+            }
+            .launchIn(scope)
     }
 
     suspend fun listenCartUpdates() = cartManager.observeUpdateCartList().onEach { update ->
