@@ -1,5 +1,6 @@
 package com.vodovoz.app.feature.promotion_details.composables
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -8,6 +9,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
@@ -25,7 +27,7 @@ import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.fromHtml
 import androidx.compose.ui.unit.dp
 import androidx.paging.CombinedLoadStates
-import coil3.compose.AsyncImage
+import coil3.compose.rememberAsyncImagePainter
 import com.valentinilk.shimmer.ShimmerBounds
 import com.valentinilk.shimmer.rememberShimmer
 import com.vodovoz.app.design_system.composables.chip.TimeLeftChip
@@ -54,6 +56,7 @@ fun PromotionDetailsBody(
 
     val lazyGridState = rememberLazyGridState()
     val shimmerState = rememberShimmer(shimmerBounds = ShimmerBounds.View)
+    val asyncImagePainter = rememberAsyncImagePainter(promotionDetails.picture)
 
     LazyVerticalGrid(
         modifier = modifier.fillMaxSize(),
@@ -64,11 +67,14 @@ fun PromotionDetailsBody(
     ) {
         item(span = { GridItemSpan(2) }) {
             Column(modifier = Modifier.padding(horizontal = 16.dp)) {
-                AsyncImage(
-                    model = promotionDetails.picture,
+
+
+                Image(
+                    painter = asyncImagePainter,
                     contentDescription = null,
                     modifier = Modifier
                         .fillMaxWidth()
+                        .heightIn(150.dp)
                         .clip(MaterialTheme.shapes.large),
                     contentScale = ContentScale.FillWidth
                 )

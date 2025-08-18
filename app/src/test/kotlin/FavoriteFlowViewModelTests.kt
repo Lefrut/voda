@@ -24,7 +24,8 @@ class FavoriteFlowViewModelTests : ViewModelTestBase<FavoriteFlowViewModel>() {
             FavoriteFlowViewModel(
                 cartManager,
                 likeManager,
-                vodovozServiceRepository
+                vodovozServiceRepository,
+                userPreferencesRepository
             )
         )
     }

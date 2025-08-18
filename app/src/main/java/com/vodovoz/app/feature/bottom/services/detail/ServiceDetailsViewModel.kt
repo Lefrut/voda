@@ -8,9 +8,6 @@ import com.vodovoz.app.common.like.LikeManager
 import com.vodovoz.app.design_system.model.ColorfulButtonUi
 import com.vodovoz.app.design_system.model.ProductUi
 import com.vodovoz.app.design_system.model.toUi
-import com.vodovoz.app.design_system.model.withUpdatedCart
-import com.vodovoz.app.design_system.model.withUpdatedFavorites
-import com.vodovoz.app.design_system.model.withUpdatedLoading
 import com.vodovoz.app.domain.general.respository.UserPreferencesRepository
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.feature.bottom.services.detail.model.ServiceDetailsEvent
@@ -22,8 +19,6 @@ import com.vodovoz.app.ui.paging.ProductsMviViewModel
 import com.vodovoz.app.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject

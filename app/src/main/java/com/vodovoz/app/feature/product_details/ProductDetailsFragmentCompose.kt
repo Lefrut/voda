@@ -101,7 +101,7 @@ class ProductDetailsFragment : Fragment() {
                     }
 
                     LifecycleEffect {
-                        viewModel.listenProductDetailsUpdates()
+                        viewModel.listenProductDetailsUpdates(this)
                     }
 
                     LifecycleEffect {

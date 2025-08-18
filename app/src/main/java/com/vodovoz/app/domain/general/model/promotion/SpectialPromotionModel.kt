@@ -15,7 +15,7 @@ data class AppUpdateInfoModel(
     val playMarketUrl: String,
     val androidVersion: String,
     val picture: String,
-    val colorfulButton: ColorfulButtonModel,
+    val colorfulButton: ColorfulButtonModel?,
 )
 
 

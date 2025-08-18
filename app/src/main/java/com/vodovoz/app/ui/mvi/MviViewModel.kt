@@ -43,6 +43,7 @@ interface Event
 interface State
 
 @Composable
+@Stable
 fun <STATE, EVENT> MviViewModel<STATE, EVENT>.collectAsState(
     lifecycleState: Lifecycle.State = Lifecycle.State.STARTED,
 ): State<STATE> {
@@ -50,7 +51,10 @@ fun <STATE, EVENT> MviViewModel<STATE, EVENT>.collectAsState(
 }
 
 @Composable
-fun <T, ITEM, S, E> T.collectAsState(): State<S>
+@Stable
+fun <T, ITEM, S, E> T.collectAsState(
+    lifecycleState: Lifecycle.State = Lifecycle.State.STARTED,
+): State<S>
         where T : ItemsMviViewModel<ITEM, S, E>,
               T : VodovozItemsListeners<ITEM>,
               S : ItemsState<ITEM, S> {
@@ -58,5 +62,5 @@ fun <T, ITEM, S, E> T.collectAsState(): State<S>
     LifecycleEffect { listenProductLoadings() }
     LifecycleEffect { listenFavorites() }
     LifecycleEffect { listenCart() }
-    return (this as MviViewModel<S, E>).collectAsState()
+    return (this as MviViewModel<S, E>).collectAsState(lifecycleState)
 }

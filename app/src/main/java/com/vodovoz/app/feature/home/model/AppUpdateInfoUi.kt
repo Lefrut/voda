@@ -13,13 +13,13 @@ data class AppUpdateInfoUi(
     val playMarketUrl: String,
     val androidVersion: String,
     val picture: String,
-    val colorfulButton: ColorfulButtonUi,
+    val colorfulButton: ColorfulButtonUi?,
 )
 
 
 fun AppUpdateInfoModel.toUi(): AppUpdateInfoUi {
     return AppUpdateInfoUi(
-        id, title, text, playMarketUrl, androidVersion, picture, colorfulButton.toUi()
+        id, title, text, playMarketUrl, androidVersion, picture, colorfulButton?.toUi()
     )
 }
 

@@ -4,9 +4,13 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.CombinedLoadStates
 import androidx.paging.PagingData
 import com.vodovoz.app.ui.mvi.MviViewModel
+import com.vodovoz.app.util.extensions.debugLog
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.launch
 
 abstract class PagingMviViewModel<ITEM : Any, S : PagingState<ITEM, S>, E>(
@@ -55,12 +59,13 @@ abstract class ItemsMviViewModel<ITEM : Any, S : ItemsState<ITEM, S>, E> protect
         source: Flow<T>,
         updateItems: suspend (List<ITEM>, T) -> List<ITEM>,
     ) {
-        _state.map { s -> s.items }
-            .combine(source) { items, data ->
-                updateItems(items, data)
-            }
-            .collect { updatedItems ->
-                updateState { s -> s.withItems(updatedItems) }
+        state.map { it.items }.distinctUntilChanged().combine(source) { _, data ->
+            data
+        }.shareIn(viewModelScope, SharingStarted.Eagerly, 1)
+            .collect { data ->
+                debugLog { "collectItemsWith, data - $data" }
+                val result = updateItems(stateSnapshot.items, data)
+                updateState { it.withItems(result) }
             }
     }
 

@@ -19,7 +19,6 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withTimeout
 import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.atomic.AtomicLong
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -35,11 +34,13 @@ class CartManager @Inject constructor(
 
     private val updateCartListListener = MutableStateFlow(false)
     fun observeUpdateCartList() = updateCartListListener.asStateFlow()
-    fun updateCartListState(update: Boolean) { updateCartListListener.value = update }
+    fun updateCartListState(update: Boolean) {
+        updateCartListListener.value = update
+    }
 
     private val cart = ConcurrentHashMap<Long, Int>()
     private var firstCart: Map<Long, Int>? = null
-    private val cartSharedFlow = MutableSharedFlow<Map<Long, Int>>(replay = 1)
+    private val cartSharedFlow = MutableSharedFlow<Map<Long, Int>>(1)
     private val _blockedProductsState = MutableStateFlow(emptySet<Long>())
     val blockedProductsState = _blockedProductsState.asStateFlow()
     var cartVersion = 0
@@ -113,7 +114,7 @@ class CartManager @Inject constructor(
     private suspend fun setCart(cart: Map<Long, Int>) {
         this.cart.clear()
         this.cart.putAll(cart)
-        cartSharedFlow.emit(this.cart)
+        cartSharedFlow.emit(this.cart.toMap())
     }
 
     private suspend fun plusCart(cart: Map<Long, Int>) {
@@ -121,7 +122,9 @@ class CartManager @Inject constructor(
             val existing = this.cart[id] ?: 0
             this.cart[id] = existing + count
         }
-        cartSharedFlow.emit(this.cart)
+
+        cartSharedFlow.emit(cart.toMap())
+        cartSharedFlow.emit(this.cart.toMap())
     }
 
     private suspend fun setCartItem(id: Long, count: Int) {
@@ -242,7 +245,8 @@ class CartManager @Inject constructor(
             try {
                 @Suppress("UNCHECKED_CAST")
                 return (formatter as CartFormatter<T>).format(cart)
-            } catch (_: ClassCastException) {  }
+            } catch (_: ClassCastException) {
+            }
         }
         return ""
     }

@@ -22,96 +22,91 @@ import com.vodovoz.app.domain.general.model.product.ProductModel
 import com.vodovoz.app.domain.general.model.product.SectionModel
 import com.vodovoz.app.domain.general.model.promotion.LabelModel
 import com.vodovoz.app.ui.graphics.fromHexOrUnspecified
+import com.vodovoz.app.util.extensions.debugLog
 
-@JvmName("withUpdatedCartSectionProduct")
-fun SectionUi<ProductUi>.withUpdatedCart(cart: Map<Long, Int>): SectionUi<ProductUi> {
-    return copy(
-        items = items.withUpdatedCartRecursive(cart).mapNotNull { it as? ProductUi }
-    )
-}
 
-@JvmName("withUpdatedCartSectionCategory")
-fun SectionUi<CategoryWithProductsUi>.withUpdatedCart(cart: Map<Long, Int>): SectionUi<CategoryWithProductsUi> {
-    return copy(
-        items = items.withUpdatedCartRecursive(cart).mapNotNull { it as? CategoryWithProductsUi }
-    )
-}
-
-@JvmName("withUpdatedLoadingSectionProduct")
-fun SectionUi<ProductUi>.withUpdatedLoading(blockedProductsIds: Set<Long>): SectionUi<ProductUi> {
-    return copy(
-        items = items.withUpdatedLoadingsRecursive(blockedProductsIds)
-            .mapNotNull { it as? ProductUi })
-}
-
-@JvmName("withUpdatedLoadingSectionCategory")
-fun SectionUi<CategoryWithProductsUi>.withUpdatedLoading(blockedProductsIds: Set<Long>): SectionUi<CategoryWithProductsUi> {
-    return copy(
-        items = items.withUpdatedLoadingsRecursive(blockedProductsIds)
-            .mapNotNull { it as? CategoryWithProductsUi }
-    )
-}
-
-@JvmName("withUpdatedFavoritesSectionProduct")
-fun SectionUi<ProductUi>.withUpdatedFavorites(favorites: Map<Long, Boolean>): SectionUi<ProductUi> {
-    return copy(
-        items = items.withUpdatedFavoritesRecursive(favorites).mapNotNull { it as? ProductUi }
-    )
-}
-
-fun SectionUi<CategoryWithProductsUi>.withUpdatedFavorites(favorites: Map<Long, Boolean>): SectionUi<CategoryWithProductsUi> {
-    return copy(
-        items = items.withUpdatedFavoritesRecursive(favorites)
-            .mapNotNull { it as? CategoryWithProductsUi }
-    )
-}
-
-fun CategoryWithProductsUi.withUpdatedFavorites(favorites: Map<Long, Boolean>): CategoryWithProductsUi {
-    return copy(
-        items = items.withUpdatedFavoritesRecursive(favorites).mapNotNull { it as? ProductUi }
-    )
-}
-
-fun <T : VodovozItemUi<T>> List<T>.withUpdatedFavorites(favorites: Map<Long, Boolean>): List<T> {
-    return map { product ->
-        product.copyItem(isFavorite = favorites[product.id] ?: product.isFavorite)
+fun <T : VodovozItemUi<T>> Iterable<T>.withCanViewForAdults(canView: Boolean): List<T> {
+    if (!canView) return toList()
+    return map { vodovozItem ->
+        vodovozItem.copyItem(
+            forAdults = null,
+            items = vodovozItem.items.map { item ->
+                item.withCanViewForAdults()
+            }
+        )
     }
 }
 
-
-fun List<VodovozItemUi<*>>.withUpdatedCartRecursive(
-    cart: Map<Long, Int>,
-): List<VodovozItemUi<*>> {
-    return map { it.withUpdatedCartRecursive(cart) }
+fun VodovozItemUi<*>.withCanViewForAdults(): VodovozItemUi<*> {
+    val updatedItems = items.map { it.withCanViewForAdults() }
+    return copyItem(forAdults = null, items = updatedItems)
 }
+
+
+fun <T : VodovozItemUi<T>> Iterable<T>.withUpdatedCartRecursive(
+    cart: Map<Long, Int>,
+): List<T> =
+    map { vodovozItem ->
+        vodovozItem.copyItem(
+            cartQuantity = cart.getOrDefault(vodovozItem.id, 0),
+            items = vodovozItem.items.map { item ->
+                item.withUpdatedCartRecursive(cart)
+            }
+        )
+    }
 
 fun VodovozItemUi<*>.withUpdatedCartRecursive(
     cart: Map<Long, Int>,
 ): VodovozItemUi<*> {
-    val updatedItems = items.withUpdatedCartRecursive(cart)
-    return copyItem(cartQuantity = cart[id] ?: 0, items = updatedItems)
+    val updatedItems = items.map { it.withUpdatedCartRecursive(cart) }
+    return copyItem(
+        cartQuantity = cart[id] ?: 0,
+        items = updatedItems
+    )
 }
 
-fun List<VodovozItemUi<*>>.withUpdatedFavoritesRecursive(
+fun <T : VodovozItemUi<T>> Iterable<T>.withUpdatedFavoritesRecursive(
     favorites: Map<Long, Boolean>,
-): List<VodovozItemUi<*>> = map { it.withUpdatedFavoritesRecursive(favorites) }
+): List<T> = map { vodovozItem ->
+        vodovozItem.copyItem(
+            isFavorite = favorites[vodovozItem.id] ?: vodovozItem.isFavorite,
+            items = vodovozItem.items.map { child ->
+                child.withUpdatedFavoritesRecursive(favorites)
+            }
+        )
+    }
+
 
 fun VodovozItemUi<*>.withUpdatedFavoritesRecursive(
     favorites: Map<Long, Boolean>,
 ): VodovozItemUi<*> {
-    val updatedItems = items.withUpdatedFavoritesRecursive(favorites)
-    return copyItem(isFavorite = favorites[id] ?: isFavorite, items = updatedItems)
+    return copyItem(
+        isFavorite = favorites[id] ?: isFavorite,
+        items = items.map { it.withUpdatedFavoritesRecursive(favorites) }
+    )
 }
 
-fun List<VodovozItemUi<*>>.withUpdatedLoadingsRecursive(
+fun <T : VodovozItemUi<T>> Iterable<T>.withUpdatedLoadingsRecursive(
     loadings: Set<Long>,
-): List<VodovozItemUi<*>> = map { it.withUpdatedLoadingsRecursive(loadings) }
+): List<T> =
+    map { vodovozItem ->
+        vodovozItem.copyItem(
+            cartLoading = vodovozItem.id in loadings,
+            items = vodovozItem.items.map { child ->
+                child.withUpdatedLoadingsRecursive(loadings)
+            }
+        )
+    }
 
-fun VodovozItemUi<*>.withUpdatedLoadingsRecursive(
+private fun VodovozItemUi<*>.withUpdatedLoadingsRecursive(
     loadings: Set<Long>,
 ): VodovozItemUi<*> {
-    val updatedItems = items.withUpdatedLoadingsRecursive(loadings)
-    return copyItem(cartLoading = id in loadings, items = updatedItems)
+    return copyItem(
+        cartLoading = id in loadings,
+        items = items.map { child ->
+            child.withUpdatedLoadingsRecursive(loadings)
+        }
+    )
 }
 
 @Immutable
@@ -198,6 +193,10 @@ data class SectionUi<E>(
     companion object {
 
         fun <T> empty() = SectionUi("", emptyList<T>(), null)
+    }
+
+    fun withItems(block: List<E>.() -> List<E>): SectionUi<E> {
+        return copy(items = block(items))
     }
 }
 
@@ -348,7 +347,6 @@ fun ProductUi.PricePerUnitText(modifier: Modifier = Modifier) {
 @Composable
 fun ProductUi.Button(
     modifier: Modifier = Modifier,
-    isLoading: Boolean,
     onAnalogsClick: (ProductUi) -> Unit,
     onIncrementToCart: (ProductUi) -> Unit,
     onDecrementToCart: (ProductUi) -> Unit,
@@ -370,7 +368,7 @@ fun ProductUi.Button(
 
             cartQuantity > 0 -> {
                 QuantityButtonSmall(
-                    isLoading = isLoading,
+                    isLoading = cartLoading,
                     quantity = cartQuantity,
                     onPlus = { onIncrementToCart(product) },
                     onMinus = { onDecrementToCart(product) }

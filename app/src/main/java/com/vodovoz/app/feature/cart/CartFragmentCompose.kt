@@ -118,10 +118,6 @@ class CartFragment : Fragment() {
                     }
 
                     LifecycleEffect {
-                        viewModel.listenFavorites()
-                    }
-
-                    LifecycleEffect {
                         observeEvents()
                     }
 

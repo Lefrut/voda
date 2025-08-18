@@ -50,6 +50,7 @@ class CartFlowViewModel @Inject constructor(
 ) {
 
     init {
+        fetchCartDetails()
         viewModelScope.launch { listenCartUpdates() }
     }
 

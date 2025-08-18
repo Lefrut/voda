@@ -19,8 +19,6 @@ fun LifecycleEffect(
         val job = coroutineScope.launch {
             block()
         }
-        onStopOrDispose {
-            job.cancel()
-        }
+        onStopOrDispose { job.cancel() }
     }
 }

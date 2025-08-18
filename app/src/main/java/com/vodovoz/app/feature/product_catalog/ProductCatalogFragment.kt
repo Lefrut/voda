@@ -105,22 +105,6 @@ class ProductCatalogFragment : Fragment() {
                     }
 
                     LifecycleEffect {
-                        viewModel.listenCanViewAdultProducts()
-                    }
-
-                    LifecycleEffect {
-                        viewModel.listenCart()
-                    }
-
-                    LifecycleEffect {
-                        viewModel.listenFavorites()
-                    }
-
-                    LifecycleEffect {
-                        viewModel.listenProductLoadings()
-                    }
-
-                    LifecycleEffect {
                         viewModel.events.collect { event ->
                             when (event) {
                                 ProductCatalogViewModel.ProductCatalogEvent.GoBack -> {

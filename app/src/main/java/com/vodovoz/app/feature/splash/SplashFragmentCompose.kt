@@ -5,14 +5,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.IdRes
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import com.vodovoz.app.ui.mvi.collectAsState
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
@@ -28,16 +26,17 @@ import com.vodovoz.app.feature.home.HomeFlowViewModel
 import com.vodovoz.app.feature.profile.ProfileFlowViewModel
 import com.vodovoz.app.feature.sitestate.SiteStateManager
 import com.vodovoz.app.feature.splash.model.SplashEvent
-import com.vodovoz.app.feature.splash.model.SplashUiState
 import com.vodovoz.app.ui.base.MainActivityViewModel
 import com.vodovoz.app.ui.base.SplashFileViewModel
 import com.vodovoz.app.ui.base.model.AppState
 import com.vodovoz.app.ui.base.model.SplashFileState
+import com.vodovoz.app.ui.mvi.collectAsState
 import com.vodovoz.app.util.SplashFileConfig
 import com.vodovoz.app.util.extensions.debugLog
 import com.vodovoz.app.util.extensions.disableFullScreen
 import com.vodovoz.app.util.extensions.enableFullScreen
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -203,14 +202,19 @@ class SplashFragment : Fragment() {
     private fun fetchDataForScreens() = lifecycleScope.launch {
         splashViewModel.sendFirebaseToken()
         val syncFavoritesJob = splashViewModel.syncFavorites()
-        homeViewModel.fetchHomeDetails()
-        catalogViewModel.fetchCatalogDetails()
-        cartFlowViewModel.fetchCartDetails()
-        profileViewModel.fetchProfileDetails()
-        syncFavoritesJob.join()
-        favoriteViewModel.fetchFavoriteProducts()
 
-        delay(400)
+
+        launch {
+            homeViewModel.fetchHomeDetails {
+                syncFavoritesJob.join()
+                cancel()
+            }.join()
+        }.join()
+
+        favoriteViewModel.fetchFavoriteProducts()
+        catalogViewModel.fetchCatalogDetails()
+        profileViewModel.fetchProfileDetails()
+        cartFlowViewModel.fetchCartDetails()
     }
 
 
