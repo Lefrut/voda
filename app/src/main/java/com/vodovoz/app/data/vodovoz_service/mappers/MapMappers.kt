@@ -14,6 +14,7 @@ fun WhereMyOrderDetailsDTO.toDomain(): WhereOrderDetailsModel {
     return WhereOrderDetailsModel(
         title = TITLE ?: "",
         secondTitle = VODITEL?.TITLE ?: "",
+        description = OPISANIE ?: "",
         finishPoint = KLIENT?.TOCHKA?.toDomain(),
         driverPont = VODITEL?.TOCHKA?.toDomain(),
         buttons = VODITEL?.KNOPKI?.mapToDomain() ?: emptyList(),
@@ -28,7 +29,7 @@ fun List<IMAGE_AND_TEXT_DTO>.mapToDomain(): List<ImageAndTextModel> {
 
 fun IMAGE_AND_TEXT_DTO.toDomain(): ImageAndTextModel? {
     return ImageAndTextModel(
-        text = POLE ?: return null,
+        text = POLE ?: TEXT ?: return null,
         image = KARTINKA?.toVodovozUrl() ?: return null
     )
 }

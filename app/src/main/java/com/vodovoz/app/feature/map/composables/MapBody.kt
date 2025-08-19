@@ -55,6 +55,7 @@ import com.vodovoz.app.design_system.composables.bottom_sheet.VodovozDragHandle
 import com.vodovoz.app.design_system.composables.button.VodovozButton
 import com.vodovoz.app.design_system.composables.decoration.MapIconsColumn
 import com.vodovoz.app.design_system.composables.decoration.SkeletonBox
+import com.vodovoz.app.design_system.model.ImageButtonUi
 import com.vodovoz.app.design_system.model.MapPointUi
 import com.vodovoz.app.feature.home.composables.dropShadow
 import com.vodovoz.app.feature.map.MapFlowViewModel
@@ -72,11 +73,11 @@ private val Dp.Companion.Saver: Saver<Dp, Float>
     }
 
 @Suppress("NonSkippableComposable")
-@SuppressLint("UnusedBoxWithConstraintsScope")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MapBody(
     modifier: Modifier = Modifier,
+    deliveryButton: ImageButtonUi?,
     addressName: String,
     addressIsLoading: Boolean,
     addressIsError: Boolean,
@@ -92,6 +93,7 @@ fun MapBody(
     onGeoClick: () -> Unit,
     onCenterChanged: (MapPointUi?) -> Unit,
     onBottomSheetButtonClick: () -> Unit,
+    onDeliveryButtonClick: () -> Unit
 ) {
     val density = LocalDensity.current
 
@@ -131,11 +133,15 @@ fun MapBody(
             )
         }
 
-        DeliveryCard(
-            modifier = Modifier
-                .align(Alignment.TopCenter)
-                .padding(top = 8.dp)
-        )
+        deliveryButton?.let {
+            DeliveryInfoButton(
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .padding(top = 8.dp),
+                imageButton = deliveryButton,
+                onClick = onDeliveryButtonClick
+            )
+        }
 
         MapIconsColumn(
             modifier = Modifier.align(Alignment.TopEnd),

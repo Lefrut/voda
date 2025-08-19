@@ -72,8 +72,6 @@ class MapFragment : Fragment() {
     @Inject
     lateinit var tabManager: TabManager
 
-
-
     private val fusedLocationClient by lazy {
         LocationServices.getFusedLocationProviderClient(requireContext())
     }
@@ -290,8 +288,6 @@ class MapFragment : Fragment() {
                     )
                     navController.popBackStack()
                 }
-
-
             }
         }
 

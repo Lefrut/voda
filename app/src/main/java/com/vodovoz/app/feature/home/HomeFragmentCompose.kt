@@ -17,6 +17,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -53,6 +54,7 @@ import com.vodovoz.app.core.navigation.navigateToPromotions
 import com.vodovoz.app.core.navigation.navigateToSearch
 import com.vodovoz.app.core.navigation.navigateToServiceDetails
 import com.vodovoz.app.core.navigation.navigateToStories
+import com.vodovoz.app.core.navigation.navigateToTraceOrder
 import com.vodovoz.app.core.navigation.navigateToViewedProductList
 import com.vodovoz.app.core.navigation.navigateToWaterApp
 import com.vodovoz.app.core.navigation.navigateToWebView
@@ -165,8 +167,6 @@ class HomeFragment : Fragment() {
                             context
                         )
                     }
-
-
 
                     LifecycleEffect {
                         viewModel.listenCart()

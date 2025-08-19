@@ -18,6 +18,7 @@ class CookieHandlerInterceptor @Inject constructor(
         val builder = chain.request().newBuilder()
         cookieManager.fetchCookieSessionId()?.let { cookieSessionId ->
             builder.addHeader("Cookie", cookieSessionId)
+            debugLog { "Cookie added: $cookieSessionId" }
         }
 
         val originalResponse = try {

@@ -4,25 +4,24 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import com.vodovoz.app.ui.mvi.Event
-import com.vodovoz.app.ui.mvi.MviViewModel
-import com.vodovoz.app.ui.mvi.State
-import kotlinx.coroutines.flow.update
 import com.vodovoz.app.common.jivochat.JivoChatController
 import com.vodovoz.app.design_system.model.ImageAndTextUi
 import com.vodovoz.app.design_system.model.ImageButtonUi
 import com.vodovoz.app.design_system.model.MapPointUi
 import com.vodovoz.app.design_system.model.mapToUi
 import com.vodovoz.app.design_system.model.toUi
-import com.vodovoz.app.domain.general.respository.MapServiceRepository
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.feature.sitestate.SiteStateManager
+import com.vodovoz.app.ui.mvi.Event
+import com.vodovoz.app.ui.mvi.MviViewModel
+import com.vodovoz.app.ui.mvi.State
 import com.vodovoz.app.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -33,13 +32,12 @@ class TraceOrderViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val siteStateManager: SiteStateManager,
-    private val mapServiceRepository: MapServiceRepository,
 ) : MviViewModel<TraceOrderViewModel.TraceOrderState, TraceOrderViewModel.TraceOrderEvents>(
     TraceOrderState()
 ) {
 
-    private val orderId: Long = savedStateHandle["orderId"] ?: navigateBack().run { -1 }
-    private val driverId: String = savedStateHandle["driverId"] ?: navigateBack().run { "" }
+    private val orderId: Long = savedStateHandle["orderId"] ?: -1
+    private val driverId: String = savedStateHandle["driverId"] ?: ""
 
     init {
         viewModelScope.launch {
@@ -82,7 +80,12 @@ class TraceOrderViewModel @Inject constructor(
                     carPoint = whereOrderDetails.driverPont?.toUi() ?: s.carPoint,
                     finishPoint = whereOrderDetails.finishPoint?.toUi() ?: s.finishPoint,
                     title = whereOrderDetails.title.ifEmpty { s.title },
-                    bottomSheetTitle = whereOrderDetails.secondTitle.ifEmpty { s.bottomSheetTitle },
+                    bottomSheetTitle = whereOrderDetails.secondTitle.ifEmpty {
+                        s.bottomSheetTitle
+                    },
+                    bottomSheetDescription = whereOrderDetails.description.ifEmpty {
+                        s.bottomSheetDescription
+                    },
                     bottomSheetItems = whereOrderDetails.items.mapToUi()
                         .ifEmpty { s.bottomSheetItems },
                     bottomSheetButtons = whereOrderDetails.buttons.mapToUi()
@@ -173,6 +176,7 @@ class TraceOrderViewModel @Inject constructor(
         val uiState: TraceOrderUiState = TraceOrderUiState.NotLoading,
         val title: String = "",
         val bottomSheetTitle: String = "",
+        val bottomSheetDescription: String = "",
         val bottomSheetButtons: List<ImageButtonUi> = emptyList(),
         val bottomSheetItems: List<ImageAndTextUi> = emptyList(),
     ) : State

@@ -54,7 +54,7 @@ fun List<ITOG_ITEM_DTO>.mapToDomain(): List<OrderSummaryItemModel> {
 fun ITOG_ITEM_DTO.toDomain(): OrderSummaryItemModel? {
     return OrderSummaryItemModel(
         name = name ?: return null,
-        value = value ?: return null,
+        value = formattedValue ?: value ?: return null,
         color = color ?: ""
     )
 }

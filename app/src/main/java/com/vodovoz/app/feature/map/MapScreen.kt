@@ -18,6 +18,7 @@ import androidx.compose.ui.res.stringResource
 import com.vodovoz.app.R
 import com.vodovoz.app.design_system.composables.dialogs.VodovozDialog
 import com.vodovoz.app.feature.map.composables.MapBody
+import com.vodovoz.app.feature.map.composables.MapDeliveryBottomSheet
 import com.vodovoz.app.feature.map.composables.MapSearchList
 import com.vodovoz.app.feature.map.composables.MapTopBar
 import com.vodovoz.app.ui.yandex_map.YandexMapUi
@@ -44,7 +45,15 @@ fun MapScreen(
                 viewModel.navigateToLocationSettings()
             }
         )
+    }
 
+    if (viewState.showDeliveryBS && viewState.deliveryPopupWindow != null) {
+        MapDeliveryBottomSheet(
+            data = viewState.deliveryPopupWindow,
+            onDismissRequest = {
+                viewModel.closeDeliveryBottomSheet()
+            }
+        )
     }
 
     Column(
@@ -74,6 +83,7 @@ fun MapScreen(
                 addressIsLoading = viewState.addressIsLoading,
                 addressIsError = viewState.addressIsError,
                 screenType = viewState.screenType,
+                deliveryButton = viewState.deliveryButton,
                 yandexMap = yandexMap,
                 areas = viewState.areas,
                 buttonIsLoading = viewState.buttonIsLoading,
@@ -98,13 +108,16 @@ fun MapScreen(
                 },
                 onBottomSheetButtonClick = {
                     viewModel.navigateToAddAddress()
+                },
+                onDeliveryButtonClick = {
+                    viewModel.showDeliveryBottomSheet()
                 }
             )
 
             Column(modifier = Modifier.fillMaxSize()) {
                 AnimatedVisibility(
                     modifier = Modifier.fillMaxSize(),
-                    visible = viewState.mode == MapFlowViewModel.MapUiMode.Search && viewState.query.isNotBlank() && viewState.recommendedAddresses.isNotEmpty(),
+                    visible = viewState.mode is MapFlowViewModel.MapUiMode.Search && viewState.query.isNotBlank() && viewState.recommendedAddresses.isNotEmpty(),
                     enter = fadeIn(tween(150)),
                     exit = fadeOut(tween(120))
                 ) {

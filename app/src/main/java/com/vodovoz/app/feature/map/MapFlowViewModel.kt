@@ -4,22 +4,24 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import com.vodovoz.app.ui.mvi.Event
-import com.vodovoz.app.ui.mvi.MviViewModel
-import com.vodovoz.app.ui.mvi.State
-import kotlinx.coroutines.flow.update
+import com.vodovoz.app.design_system.model.ImageButtonUi
 import com.vodovoz.app.design_system.model.MapPointUi
 import com.vodovoz.app.design_system.model.contains
 import com.vodovoz.app.design_system.model.distanceKm
 import com.vodovoz.app.design_system.model.mapToUi
 import com.vodovoz.app.design_system.model.toDomain
+import com.vodovoz.app.design_system.model.toUi
 import com.vodovoz.app.domain.general.respository.MapServiceRepository
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.feature.map.model.MapAddressUi
 import com.vodovoz.app.feature.map.model.MapAreaUi
+import com.vodovoz.app.feature.map.model.MapPopupWindowUi
 import com.vodovoz.app.feature.map.model.findNearestPointTo
 import com.vodovoz.app.feature.map.model.mapToUi
 import com.vodovoz.app.feature.map.model.toUi
+import com.vodovoz.app.ui.mvi.Event
+import com.vodovoz.app.ui.mvi.MviViewModel
+import com.vodovoz.app.ui.mvi.State
 import com.vodovoz.app.util.extensions.debounceWithMax
 import com.vodovoz.app.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -31,6 +33,7 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.retryWhen
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -72,10 +75,14 @@ class MapFlowViewModel @Inject constructor(
             }
             .catch { fail -> emit(Result.failure(fail)) }
             .collect { mapAreasResult ->
-                mapAreasResult.onSuccess { mapAreas ->
+                mapAreasResult.onSuccess { mapZones ->
 
                     _state.update { s ->
-                        s.copy(areas = mapAreas.mapToUi())
+                        s.copy(
+                            areas = mapZones.areas.mapToUi(),
+                            deliveryButton = mapZones.imageButton?.toUi(),
+                            deliveryPopupWindow = mapZones.popupWindow?.toUi()
+                        )
                     }
 
                 }
@@ -118,7 +125,9 @@ class MapFlowViewModel @Inject constructor(
 
                 addressesInMoscowByQueryResult.onSuccess { addresses ->
                     _state.update { s ->
-                        s.copy(recommendedAddresses = addresses)
+                        s.copy(
+                            recommendedAddresses = addresses.ifEmpty { s.recommendedAddresses }
+                        )
                     }
                 }
             }.launchIn(viewModelScope)
@@ -138,7 +147,9 @@ class MapFlowViewModel @Inject constructor(
     }
 
     private suspend fun calculateDistanceFromMoscowToAddress(addressPoint: MapPointUi): Float? {
-        if(stateSnapshot.areas.isEmpty()){ delay(850L) }
+        if (stateSnapshot.areas.isEmpty()) {
+            delay(850L)
+        }
 
         val coreMapArea = stateSnapshot.areas.find { area ->
             area.id == CORE_AREA_ID && area.isMoscowRingRow
@@ -213,7 +224,8 @@ class MapFlowViewModel @Inject constructor(
 
             currentAddress?.let { mapAddress ->
 
-                val fromMoscowToPoint = calculateDistanceFromMoscowToAddress(mapAddress.point) ?: return@launch
+                val fromMoscowToPoint =
+                    calculateDistanceFromMoscowToAddress(mapAddress.point) ?: return@launch
                 changeAddress(currentAddress.copy(fromMoscowToPoint = fromMoscowToPoint))
                 sendEvent(MapFlowEvents.HideKeyboard)
                 sendEvent(MapFlowEvents.MoveToAddress(currentAddress.point))
@@ -310,9 +322,25 @@ class MapFlowViewModel @Inject constructor(
 
     }
 
+    fun showDeliveryBottomSheet() {
+        updateState { s ->
+            s.copy(showDeliveryBS = true)
+        }
+    }
+
+    fun closeDeliveryBottomSheet() {
+        updateState { s ->
+            s.copy(showDeliveryBS = false)
+        }
+    }
+
+
     @Immutable
     data class MapFlowState(
         val areas: List<MapAreaUi> = emptyList(),
+        val deliveryButton: ImageButtonUi? = null,
+        val deliveryPopupWindow: MapPopupWindowUi? = null,
+        val showDeliveryBS: Boolean = false,
         val query: String = "",
         val showSettingsDialog: Boolean = false,
         val currentMapAddress: MapAddressUi? = null,

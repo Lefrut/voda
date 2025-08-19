@@ -1,17 +1,25 @@
 package com.vodovoz.app.data.vodovoz_service.mappers
 
+import com.vodovoz.app.data.vodovoz_service.di.toVodovozUrl
 import com.vodovoz.app.data.vodovoz_service.model.address.ADDRESSES_SECTION_DTO
 import com.vodovoz.app.data.vodovoz_service.model.address.ADDRESS_ITEM_DTO
 import com.vodovoz.app.data.vodovoz_service.model.address.AddAddressDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.address.AddressesDTO
+import com.vodovoz.app.data.vodovoz_service.model.address.MAP_BUTTON_DTO
 import com.vodovoz.app.data.vodovoz_service.model.address.MapAreaDTO
+import com.vodovoz.app.data.vodovoz_service.model.address.MapPopupWindowDTO
+import com.vodovoz.app.data.vodovoz_service.model.address.MapZonesDTO
 import com.vodovoz.app.data.vodovoz_service.model.address.SWITCH_DTO
+import com.vodovoz.app.domain.general.model.ImageButtonModel
+import com.vodovoz.app.domain.general.model.MapPopupWindowModel
+import com.vodovoz.app.domain.general.model.MapZonesModel
 import com.vodovoz.app.domain.general.model.SwitchModel
 import com.vodovoz.app.domain.general.model.location.AddAddressDetailsModel
 import com.vodovoz.app.domain.general.model.location.AddressModel
 import com.vodovoz.app.domain.general.model.location.MapAreaModel
 import com.vodovoz.app.domain.general.model.location.MapPointModel
 import com.vodovoz.app.domain.general.model.product.SectionModel
+import kotlin.random.Random
 
 fun MapAreaDTO.toDomain(): MapAreaModel?{
     return MapAreaModel(
@@ -30,6 +38,32 @@ fun MapAreaDTO.toDomain(): MapAreaModel?{
 
 fun List<MapAreaDTO>.mapToDomain(): List<MapAreaModel>{
     return mapNotNull { it.toDomain() }.ifEmpty { throw IllegalArgumentException("MapAreas can't be empty") }
+}
+
+fun MapZonesDTO.toDomain(): MapZonesModel{
+    return MapZonesModel(
+        areas = ZONE?.mapToDomain() ?: emptyList(),
+        imageButton = KNOPKA?.toDomain(),
+        popupWindow = KNOPKA?.DATA?.toDomain()
+    )
+}
+
+fun MapPopupWindowDTO.toDomain(): MapPopupWindowModel{
+    return MapPopupWindowModel(
+        title = TITLE ?: "",
+        description = OPISANIE ?: "",
+        items = TOVAR?.mapToDomain() ?: emptyList()
+    )
+}
+
+fun MAP_BUTTON_DTO.toDomain(): ImageButtonModel{
+    return ImageButtonModel(
+        name = TEXT ?: "",
+        backgroundColor = BACKGROUND ?: "",
+        textColor = COLOR ?: "",
+        id = Random.nextInt().toString(),
+        image = KARTINKA?.toVodovozUrl() ?: ""
+    )
 }
 
 fun AddressesDTO.toDomain(): List<SectionModel<AddressModel>> {

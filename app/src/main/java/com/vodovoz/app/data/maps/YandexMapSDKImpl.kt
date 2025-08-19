@@ -35,7 +35,7 @@ typealias YandexSearchResponse = Response
 class YandexMapSDKImpl @Inject constructor() : YandexMapSDK {
 
     companion object {
-        private const val KILOMETERS = 0.8 /*80km*/
+        private const val KILOMETERS = 1.2 /*80km*/
 
         private val moscowCenter = Point(55.75, 37.62)
 
@@ -58,7 +58,7 @@ class YandexMapSDKImpl @Inject constructor() : YandexMapSDK {
     }
 
     private val suggestOptions = SuggestOptions().setSuggestTypes(
-        SuggestType.GEO.value or SuggestType.BIZ.value
+        SuggestType.GEO.value
     ).setSuggestWords(false)
 
     override suspend fun getSuggestsInMoscow(query: String): List<SuggestItem> =

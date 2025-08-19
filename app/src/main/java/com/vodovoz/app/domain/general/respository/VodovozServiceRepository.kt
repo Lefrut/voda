@@ -7,6 +7,7 @@ import com.vodovoz.app.domain.general.model.CatalogDetailsModel
 import com.vodovoz.app.domain.general.model.FieldModel
 import com.vodovoz.app.domain.general.model.FilterValueModel
 import com.vodovoz.app.domain.general.model.FiltersModel
+import com.vodovoz.app.domain.general.model.MapZonesModel
 import com.vodovoz.app.domain.general.model.OrderWithMenuModel
 import com.vodovoz.app.domain.general.model.ParentCategoryModel
 import com.vodovoz.app.domain.general.model.PopularCategoryModel
@@ -214,7 +215,7 @@ interface VodovozServiceRepository {
 
     fun getAddresses(): Flow<Result<List<SectionModel<AddressModel>>>>
 
-    fun getMapAreas(): Flow<Result<List<MapAreaModel>>>
+    fun getMapAreas(): Flow<Result<MapZonesModel>>
 
 
     fun getPastPurchasesDetails(
