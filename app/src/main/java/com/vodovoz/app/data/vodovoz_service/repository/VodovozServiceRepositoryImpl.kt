@@ -20,7 +20,6 @@ import com.vodovoz.app.data.vodovoz_service.VodovozService
 import com.vodovoz.app.data.vodovoz_service.mappers.executeRequest
 import com.vodovoz.app.data.vodovoz_service.mappers.mapToDomain
 import com.vodovoz.app.data.vodovoz_service.mappers.toDomain
-import com.vodovoz.app.data.vodovoz_service.model.AnalogsSectionDTO
 import com.vodovoz.app.data.vodovoz_service.model.BrandSectionDTO
 import com.vodovoz.app.data.vodovoz_service.model.ProductCommentsDTO
 import com.vodovoz.app.data.vodovoz_service.model.ProductsSectionDTO
@@ -39,6 +38,7 @@ import com.vodovoz.app.domain.general.model.EmptyResultException
 import com.vodovoz.app.domain.general.model.FieldModel
 import com.vodovoz.app.domain.general.model.FilterValueModel
 import com.vodovoz.app.domain.general.model.FiltersModel
+import com.vodovoz.app.domain.general.model.MapZonesModel
 import com.vodovoz.app.domain.general.model.OrderWithMenuModel
 import com.vodovoz.app.domain.general.model.ParentCategoryModel
 import com.vodovoz.app.domain.general.model.PopularCategoryModel
@@ -69,7 +69,6 @@ import com.vodovoz.app.domain.general.model.order.DeliveryDateDetailsModel
 import com.vodovoz.app.domain.general.model.order.FormModel
 import com.vodovoz.app.domain.general.model.order.OrderCallYouDetailsModel
 import com.vodovoz.app.domain.general.model.order.OrderDetailsModel
-import com.vodovoz.app.domain.general.model.order.OrderQuestionDetailsModel
 import com.vodovoz.app.domain.general.model.order.OrderingDetailsModel
 import com.vodovoz.app.domain.general.model.order.OrdersHistoryDetailsModel
 import com.vodovoz.app.domain.general.model.order.OrdersHistoryItemModel
@@ -805,12 +804,12 @@ class VodovozServiceRepositoryImpl @Inject constructor(
         )
     }
 
-    override fun getMapAreas(): Flow<Result<List<MapAreaModel>>> {
+    override fun getMapAreas(): Flow<Result<MapZonesModel>> {
         return executeRequest(
             request = {
                 vodovozService.getMapAreas()
             },
-            mapper = { it.data!!.mapToDomain() }
+            mapper = { it.data!!.toDomain() }
         )
     }
 
@@ -2081,7 +2080,10 @@ class VodovozServiceRepositoryImpl @Inject constructor(
             },
         )
 
-    override fun getAllPromotionsPaged(limit: Int, categoryId: Int): Flow<PagingData<PromotionModel>> {
+    override fun getAllPromotionsPaged(
+        limit: Int,
+        categoryId: Int,
+    ): Flow<PagingData<PromotionModel>> {
         return Pager(
             config = PagingConfig(pageSize = limit, initialLoadSize = limit),
             pagingSourceFactory = {

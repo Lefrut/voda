@@ -35,6 +35,7 @@ import com.vodovoz.app.data.vodovoz_service.model.WaitFeedbackProductsDTO
 import com.vodovoz.app.data.vodovoz_service.model.address.AddAddressDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.address.AddressesDTO
 import com.vodovoz.app.data.vodovoz_service.model.address.MapAreaDTO
+import com.vodovoz.app.data.vodovoz_service.model.address.MapZonesDTO
 import com.vodovoz.app.data.vodovoz_service.model.auth.AuthDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.auth.LoginByPhoneDTO
 import com.vodovoz.app.data.vodovoz_service.model.auth.RequestCodeDTO
@@ -300,7 +301,7 @@ interface VodovozService {
 
 
     @GET("profile/karta/index.php?action=tochkakarta")
-    suspend fun getMapAreas(): Response<VodovozResponseDTO<List<MapAreaDTO>>>
+    suspend fun getMapAreas(): Response<VodovozResponseDTO<MapZonesDTO>>
 
     /**
      * Brand requests

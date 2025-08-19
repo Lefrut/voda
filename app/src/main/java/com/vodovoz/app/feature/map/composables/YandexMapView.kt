@@ -55,8 +55,8 @@ fun YandexMapView(
             val polygon = Polygon(LinearRing(points), listOf())
 
             yandexMap.mapView.map.mapObjects.addPolygon(polygon).apply {
-                fillColor = area.color.copy(0.15f).toArgb()
-                strokeColor = area.color.copy(0.45f).toArgb()
+                fillColor = area.color.copy(0.4f).toArgb()
+                strokeColor = area.color.copy(0.7f).toArgb()
                 strokeWidth = 2f
                 isVisible = false
             }

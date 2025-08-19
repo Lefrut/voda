@@ -9,5 +9,7 @@ data class IMAGE_AND_TEXT_DTO(
     @Json(name = "KARTINKA")
     val KARTINKA: String?,
     @Json(name = "POLE")
-    val POLE: String?
+    val POLE: String?,
+    @Json(name = "TEXT")
+    val TEXT: String?
 )

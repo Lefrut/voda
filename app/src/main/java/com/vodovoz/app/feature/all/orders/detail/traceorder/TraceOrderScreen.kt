@@ -37,15 +37,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
-
-import coil3.request.crossfade
 import com.vodovoz.app.R
 import com.vodovoz.app.design_system.composables.bottom_sheet.VodovozDragHandle
 import com.vodovoz.app.design_system.composables.button.VodovozButtonDefaults
@@ -115,6 +112,7 @@ fun TraceOrderScreen(
                 },
                 state = anchoredDraggableState,
                 title = viewState.bottomSheetTitle,
+                description = viewState.bottomSheetDescription,
                 buttons = viewState.bottomSheetButtons,
                 items = viewState.bottomSheetItems,
                 onButtonClick = { imageButton ->
@@ -162,6 +160,7 @@ fun TraceOrderBottomSheet(
     modifier: Modifier = Modifier,
     state: AnchoredDraggableState<SheetValue>,
     title: String,
+    description: String,
     buttons: List<ImageButtonUi>,
     items: List<ImageAndTextUi>,
     onButtonClick: (ImageButtonUi) -> Unit,
@@ -170,7 +169,7 @@ fun TraceOrderBottomSheet(
 
     val partiallyExpandedDp = 262.dp
     val partiallyExpandedPx = with(density) { partiallyExpandedDp.toPx() }
-    val hiddenPx = with(density) { 100.dp.toPx() }
+    val hiddenPx = partiallyExpandedPx / 2
 
 
     LaunchedEffect(Unit) {
@@ -185,7 +184,7 @@ fun TraceOrderBottomSheet(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .heightIn(max = partiallyExpandedDp + (partiallyExpandedDp / 2))
+            .heightIn(max = partiallyExpandedDp + partiallyExpandedDp / 2)
             .offset {
                 val offsetY = runCatching {
                     state
@@ -228,9 +227,8 @@ fun TraceOrderBottomSheet(
             ),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        if (title.isNotEmpty() || buttons.isNotEmpty() || items.isNotEmpty()) {
+        if (title.isNotEmpty() || buttons.isNotEmpty() || items.isNotEmpty() || description.isNotEmpty()) {
             VodovozDragHandle()
-
             Spacer(Modifier.height(20.dp))
         }
 
@@ -243,6 +241,16 @@ fun TraceOrderBottomSheet(
                 text = title,
                 color = MaterialTheme.colorScheme.onBackground,
                 style = MaterialTheme.typography.headlineSmall
+            )
+        }
+        if (description.isNotEmpty()) {
+            Text(
+                modifier = Modifier
+                    .align(Alignment.Start)
+                    .padding(start = 16.dp, end = 16.dp, top = 8.dp),
+                text = description,
+                color = MaterialTheme.colorScheme.onBackground,
+                style = MaterialTheme.typography.bodySmall
             )
         }
 
@@ -259,7 +267,7 @@ fun TraceOrderBottomSheet(
 
         if (buttons.isNotEmpty()) {
             FlowRow(
-                modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 24.dp),
+                modifier = Modifier.padding(start = 16.dp, end = 16.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 maxItemsInEachRow = 2,
@@ -296,6 +304,8 @@ fun TraceOrderBottomSheet(
                 }
             }
         }
+
+        Spacer(modifier = Modifier.height(24.dp))
     }
 }
 
