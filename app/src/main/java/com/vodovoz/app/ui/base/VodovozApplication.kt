@@ -20,12 +20,11 @@ import com.yandex.mapkit.MapKitFactory
 import com.yandex.metrica.YandexMetrica
 import com.yandex.metrica.YandexMetricaConfig
 import dagger.hilt.android.HiltAndroidApp
-import leakcanary.LeakCanary
 import timber.log.Timber
 import javax.inject.Inject
 
 @HiltAndroidApp
-class VodovozApplication() : Application(), Configuration.Provider, SingletonImageLoader.Factory {
+class VodovozApplication : Application(), Configuration.Provider, SingletonImageLoader.Factory {
 
     @Inject
     lateinit var workerFactory: HiltWorkerFactory

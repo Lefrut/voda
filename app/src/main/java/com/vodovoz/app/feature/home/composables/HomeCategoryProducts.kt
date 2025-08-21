@@ -24,7 +24,7 @@ import com.vodovoz.app.common.model.ButtonAction
 import com.vodovoz.app.util.extensions.indexOfOrNull
 
 @Composable
-fun HomeTopProducts(
+fun HomeCategoryProducts(
     modifier: Modifier = Modifier,
     lazyListState: LazyListState,
     currentCategoryWithProducts: CategoryWithProductsUi,
@@ -48,23 +48,25 @@ fun HomeTopProducts(
             onShowAllClick = { onShowAllClick(it) }
         )
 
-        VodovozScrollableTabRow(
-            modifier = Modifier
-                .padding(top = 16.dp)
-                .fillMaxWidth(),
-            selectedTabIndex = items.indexOfOrNull(
-                currentCategoryWithProducts
-            ) ?: 0,
-            edgePadding = 16.dp,
-            spacing = 8.dp
-        ) {
-            items.forEach { sectionWithProducts ->
-                key(sectionWithProducts.id) {
-                    VodovozChip(
-                        text = sectionWithProducts.name,
-                        selected = currentCategoryWithProducts == sectionWithProducts,
-                        onSelect = { onCategorySelect(sectionWithProducts) }
-                    )
+        if(items.size > 1){
+            VodovozScrollableTabRow(
+                modifier = Modifier
+                    .padding(top = 16.dp)
+                    .fillMaxWidth(),
+                selectedTabIndex = items.indexOfOrNull(
+                    currentCategoryWithProducts
+                ) ?: 0,
+                edgePadding = 16.dp,
+                spacing = 8.dp
+            ) {
+                items.forEach { sectionWithProducts ->
+                    key(sectionWithProducts.id) {
+                        VodovozChip(
+                            text = sectionWithProducts.name,
+                            selected = currentCategoryWithProducts == sectionWithProducts,
+                            onSelect = { onCategorySelect(sectionWithProducts) }
+                        )
+                    }
                 }
             }
         }

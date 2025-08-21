@@ -29,7 +29,7 @@ fun ProductsSectionDTO.toDomain(): ProductsSectionModel {
     return ProductsSectionModel(
         title = TITLE ?: "",
         sortingTitle = SORTIROVKA?.NAMEGLAV ?: "",
-        productsQuantityText = TOVARVSEGO ?: COUNT ?: "",
+        productsQuantityText = TOVARVSEGO ?: COUNT?.toString() ?: "",
         sorting = sorting,
         products = products,
         categories = RAZDEL?.LISTRAZDEL?.mapNotNull { it?.toDomain() } ?: emptyList(),

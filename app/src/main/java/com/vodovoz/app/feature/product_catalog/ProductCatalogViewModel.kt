@@ -77,22 +77,6 @@ class ProductCatalogViewModel @Inject constructor(
         }
     }
 
-    suspend fun listenCanViewAdultProducts() {
-        _state.map { stateSnapshot.items }
-            .combine(userPreferencesRepository.canViewAdultProducts) { _, p2 ->
-                p2
-            }.collectLatest { canView ->
-                if (!canView) return@collectLatest
-
-                _state.update { s ->
-                    s.copy(
-                        items = s.items.map { product -> product.copy(forAdults = null) }
-                    )
-                }
-            }
-    }
-
-
     private fun setupScreen() = viewModelScope.launch {
         if (dataSource is DataSource.Category) {
             _state.update { s ->

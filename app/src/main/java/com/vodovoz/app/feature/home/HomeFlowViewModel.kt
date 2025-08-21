@@ -43,7 +43,6 @@ import com.vodovoz.app.feature.home.model.toUi
 import com.vodovoz.app.ui.mvi.Event
 import com.vodovoz.app.ui.mvi.MviViewModel
 import com.vodovoz.app.ui.mvi.State
-import com.vodovoz.app.util.extensions.debugLog
 import com.vodovoz.app.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
@@ -82,13 +81,19 @@ class HomeFlowViewModel @Inject constructor(
         ) { canView, _ -> canView }
             .shareIn(viewModelScope, SharingStarted.Lazily, 1).collect { canView ->
                 updateState { s ->
-                    val currentCategoryWithProducts = listOf(
-                        stateSnapshot.currentCategoryWithProducts
+                    val currentTopCategoryWithProducts = listOf(
+                        stateSnapshot.currentTopCategoryWithProducts
+                    ).withCanViewForAdults(canView).firstOrNull()
+
+                    val currentBottomCategoryWithProducts = listOf(
+                        stateSnapshot.currentBottomCategoryWithProducts
                     ).withCanViewForAdults(canView).firstOrNull()
 
                     s.copy(
-                        currentCategoryWithProducts = currentCategoryWithProducts
-                            ?: s.currentCategoryWithProducts,
+                        currentTopCategoryWithProducts = currentTopCategoryWithProducts
+                            ?: s.currentTopCategoryWithProducts,
+                        currentBottomCategoryWithProducts = currentBottomCategoryWithProducts
+                            ?: s.currentBottomCategoryWithProducts,
                         sectionTop = s.sectionTop.withItems {
                             withCanViewForAdults(canView)
                         },
@@ -114,7 +119,7 @@ class HomeFlowViewModel @Inject constructor(
         .combine(userPreferencesRepository.viewedStoryIds) { _, p2 ->
             p2
         }.shareIn(viewModelScope, SharingStarted.Lazily, 1).collect { storyIds ->
-            _state.update { s ->
+            updateState { s ->
                 s.copy(
                     stories = s.stories.map { story ->
                         if (storyIds.contains(story.id)) story.copy(viewed = true) else story
@@ -132,13 +137,19 @@ class HomeFlowViewModel @Inject constructor(
             .collect { blockedProductsIds ->
                 updateState { s ->
 
-                    val currentCategoryWithProducts = listOf(
-                        stateSnapshot.currentCategoryWithProducts
+                    val currentTopCategoryWithProducts = listOf(
+                        stateSnapshot.currentTopCategoryWithProducts
+                    ).withUpdatedLoadingsRecursive(blockedProductsIds).firstOrNull()
+
+                    val currentBottomCategoryWithProducts = listOf(
+                        stateSnapshot.currentBottomCategoryWithProducts
                     ).withUpdatedLoadingsRecursive(blockedProductsIds).firstOrNull()
 
                     s.copy(
-                        currentCategoryWithProducts = currentCategoryWithProducts
-                            ?: s.currentCategoryWithProducts,
+                        currentTopCategoryWithProducts = currentTopCategoryWithProducts
+                            ?: s.currentTopCategoryWithProducts,
+                        currentBottomCategoryWithProducts = currentBottomCategoryWithProducts
+                            ?: s.currentBottomCategoryWithProducts,
                         sectionTop = s.sectionTop.withItems {
                             withUpdatedLoadingsRecursive(
                                 blockedProductsIds
@@ -172,14 +183,24 @@ class HomeFlowViewModel @Inject constructor(
         ) { _, cartMap ->
             cartMap
         }.collect { cartMap ->
-            _state.update { s ->
+            updateState { s ->
 
-                val currentCategoryWithProducts =
-                    stateSnapshot.currentCategoryWithProducts.withUpdatedCartRecursive(cartMap) as? CategoryWithProductsUi
+                val currentTopCategoryWithProducts =
+                    listOf(stateSnapshot.currentTopCategoryWithProducts).withUpdatedCartRecursive(
+                        cartMap
+                    ).firstOrNull()
+
+                val currentBottomCategoryWithProducts =
+                    listOf(stateSnapshot.currentBottomCategoryWithProducts).withUpdatedCartRecursive(
+                        cartMap
+                    ).firstOrNull()
+
 
                 s.copy(
-                    currentCategoryWithProducts = currentCategoryWithProducts
-                        ?: s.currentCategoryWithProducts,
+                    currentTopCategoryWithProducts = currentTopCategoryWithProducts
+                        ?: s.currentTopCategoryWithProducts,
+                    currentBottomCategoryWithProducts = currentBottomCategoryWithProducts
+                        ?: s.currentBottomCategoryWithProducts,
                     sectionTop = s.sectionTop.withItems { withUpdatedCartRecursive(cartMap) },
                     sectionBottom = s.sectionBottom.withItems { withUpdatedCartRecursive(cartMap) },
                     sectionNewProducts = s.sectionNewProducts.withItems {
@@ -234,26 +255,31 @@ class HomeFlowViewModel @Inject constructor(
                     }
 
 
-                val currentCategoryWithProducts = listOf(
-                    stateSnapshot.currentCategoryWithProducts
+                val currentTopCategoryWithProducts = listOf(
+                    stateSnapshot.currentTopCategoryWithProducts
                 ).withUpdatedFavoritesRecursive(favorites).firstOrNull()
-                    ?: stateSnapshot.currentCategoryWithProducts
+                    ?: stateSnapshot.currentTopCategoryWithProducts
+
+                val currentBottomCategoryWithProducts = listOf(
+                    stateSnapshot.currentBottomCategoryWithProducts
+                ).withUpdatedFavoritesRecursive(favorites).firstOrNull()
+                    ?: stateSnapshot.currentBottomCategoryWithProducts
 
                 val sectionTop = sectionTopDeferred.await()
                 val sectionBottom = sectionBottomDeferred.await()
                 val sectionViewedProducts = sectionViewedProductsDeferred.await()
                 val sectionNewProducts = sectionNewProductsDeferred.await()
 
-                debugLog { "listenFavorites: HomeViewModel" }
-
-                _state.update { s ->
+                updateState { s ->
                     s.copy(
                         sectionTop = sectionTop,
                         sectionBottom = sectionBottom,
                         sectionViewedProducts = sectionViewedProducts,
                         sectionNewProducts = sectionNewProducts,
                         sectionHurryUpBuyProducts = sectionHurryUpBuyProducts,
-                        currentCategoryWithProducts = currentCategoryWithProducts
+                        currentTopCategoryWithProducts = currentTopCategoryWithProducts,
+                        currentBottomCategoryWithProducts = currentBottomCategoryWithProducts
+
                     )
                 }
 
@@ -263,9 +289,6 @@ class HomeFlowViewModel @Inject constructor(
     private suspend fun fetchPrimaryDetails(): Boolean {
         val bannersDeferred = viewModelScope.async {
             vodovozServiceRepository.getBanners().singleResult()
-        }
-        val storiesDeferred = viewModelScope.async {
-            vodovozServiceRepository.getStories().singleResult()
         }
         val sectionPopularCategoriesDeferred = viewModelScope.async {
             vodovozServiceRepository.getPopularCategories().singleResult()
@@ -278,7 +301,6 @@ class HomeFlowViewModel @Inject constructor(
         }
 
         val banners = bannersDeferred.await().getOrNull()
-        val stories = storiesDeferred.await().getOrNull()
         val sectionPopularCategories = sectionPopularCategoriesDeferred.await().getOrNull()
         val orderMenu = orderMenuDeferred.await().getOrNull()
         val sectionsTopAndBottom = sectionsTopAndBottomDeferred.await().getOrNull()
@@ -287,17 +309,23 @@ class HomeFlowViewModel @Inject constructor(
             val topSection = sectionsTopAndBottom.topSection.toUi(
                 mapItems = { items -> items.map { it.toUi() } }
             )
+            val bottomSection = sectionsTopAndBottom.bottomSection.toUi(
+                mapItems = { items -> items.map { it.toUi() } }
+            )
 
             _state.update { s ->
                 s.copy(
-                    sectionPopularCategories = sectionPopularCategories.toUi { items -> items.map { it.toUi() } },
+                    sectionPopularCategories = sectionPopularCategories.toUi { items ->
+                        items.map { it.toUi() }
+                    },
                     sectionTop = topSection,
-                    sectionBottom = sectionsTopAndBottom.bottomSection.toUi { items -> items.map { it -> it.toUi() } },
-                    currentCategoryWithProducts = topSection.items.firstOrNull()
+                    sectionBottom = bottomSection,
+                    currentTopCategoryWithProducts = topSection.items.firstOrNull()
+                        ?: CategoryWithProductsUi.Empty,
+                    currentBottomCategoryWithProducts = bottomSection.items.firstOrNull()
                         ?: CategoryWithProductsUi.Empty,
                     orderWithMenu = orderMenu.toUi(),
                     banners = banners.mapToUi(),
-                    stories = stories?.mapToUi() ?: emptyList(),
                     uiState = HomeUiState.Success,
                 )
             }
@@ -309,25 +337,36 @@ class HomeFlowViewModel @Inject constructor(
     }
 
     private suspend fun fetchSecondaryDetails(): Boolean {
-        val sectionPromotionsDeferred =
-            viewModelScope.async { vodovozServiceRepository.getPromotions().singleResult() }
-        val sectionHurryUpBuyProductsDeferred =
-            viewModelScope.async { vodovozServiceRepository.getHurryUpBuyProducts().singleResult() }
-        val sectionNewProductsDeferred =
-            viewModelScope.async { vodovozServiceRepository.getNewProducts().singleResult() }
+        val promotionJob =
+            viewModelScope.launch {
+                vodovozServiceRepository.getPromotions().singleResult().onSuccess {
+                    updateState { s -> s.copy(sectionPromotions = it.toUi()) }
+                }
+            }
 
-        sectionPromotionsDeferred.await().onSuccess { value ->
-            _state.update { s -> s.copy(sectionPromotions = value.toUi()) }
-        }.onFailure { return false }
+        val hurryUpBuyProductsJob = viewModelScope.launch {
+            vodovozServiceRepository.getHurryUpBuyProducts().singleResult().onSuccess {
+                updateState { s -> s.copy(sectionHurryUpBuyProducts = it.toUi()) }
+            }
+        }
 
-        sectionHurryUpBuyProductsDeferred.await().onSuccess { value ->
-            _state.update { s -> s.copy(sectionHurryUpBuyProducts = value.toUi()) }
-        }.onFailure { return false }
+        val newProductsJob = viewModelScope.launch {
+            vodovozServiceRepository.getNewProducts().singleResult().onSuccess { it ->
+                updateState { s -> s.copy(sectionNewProducts = it.toUi()) }
+            }
+        }
+        val storiesJob = viewModelScope.launch {
+            vodovozServiceRepository.getStories().singleResult().onSuccess {
+                updateState { s ->
+                    s.copy(stories = it.mapToUi())
+                }
+            }
+        }
 
-
-        sectionNewProductsDeferred.await().onSuccess { value ->
-            _state.update { s -> s.copy(sectionNewProducts = value.toUi()) }
-        }.onFailure { return false }
+        promotionJob.join()
+        hurryUpBuyProductsJob.join()
+        newProductsJob.join()
+        storiesJob.join()
 
         return true
     }
@@ -418,7 +457,7 @@ class HomeFlowViewModel @Inject constructor(
     fun selectCategory(categoryWithProductsUi: CategoryWithProductsUi) = viewModelScope.launch {
         _state.update { s ->
             s.copy(
-                currentCategoryWithProducts = categoryWithProductsUi
+                currentTopCategoryWithProducts = categoryWithProductsUi
             )
         }
         sendEvent(HomeEvents.ScrollTopProductsToStart)
@@ -691,8 +730,9 @@ class HomeFlowViewModel @Inject constructor(
         val sectionNewProducts: SectionUi<ProductUi> = SectionUi.empty(),
         val sectionHurryUpBuyProducts: SectionUi<ProductUi> = SectionUi.empty(),
         val sectionTop: SectionUi<CategoryWithProductsUi> = SectionUi.empty(),
-        val currentCategoryWithProducts: CategoryWithProductsUi = CategoryWithProductsUi.Empty,
+        val currentTopCategoryWithProducts: CategoryWithProductsUi = CategoryWithProductsUi.Empty,
         val sectionBottom: SectionUi<CategoryWithProductsUi> = SectionUi.empty(),
+        val currentBottomCategoryWithProducts: CategoryWithProductsUi = CategoryWithProductsUi.Empty,
         val sectionViewedProducts: SectionUi<ProductUi> = SectionUi.empty(),
         val sectionUnratedProducts: UnratedProductsSectionUi = UnratedProductsSectionUi.Empty,
         val specialPromotion: SpecialPromotionUi = SpecialPromotionUi.Empty,

@@ -124,7 +124,7 @@ class CartFragment : Fragment() {
                     LaunchedEffect(viewState.showPromotionCodeBottomSheet) {
                         if (viewState.showPromotionCodeBottomSheet) tabManager.changeTabVisibility(false)
                         else {
-                            delay(100)
+                            delay(135)
                             tabManager.changeTabVisibility(true)
                         }
                     }

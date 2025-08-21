@@ -47,8 +47,8 @@ class DetailMediaFragment : Fragment() {
 
     override fun onStop() {
         super.onStop()
-        insetsVisibilityState.insertSystemBarInsets(false)
-        insetsVisibilityState.insertSystemBarInsets(true)
+        insetsVisibilityState.consumeSystemBarInsets(false)
+        insetsVisibilityState.consumeSystemBarInsets(true)
         tabManager.changeTabVisibility(true)
     }
 
@@ -103,7 +103,7 @@ class DetailMediaFragment : Fragment() {
                                 DetailMediaEvent.MakeLandscape -> {
                                     val activity = requireActivity()
                                     activity.enableFullScreen()
-                                    insetsVisibilityState.insertSystemBarInsets(false)
+                                    insetsVisibilityState.consumeSystemBarInsets(false)
                                     activity.requestedOrientation =
                                         ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
                                 }
@@ -111,7 +111,7 @@ class DetailMediaFragment : Fragment() {
                                 DetailMediaEvent.MakePortrait -> {
                                     val activity = requireActivity()
                                     activity.disableFullScreen()
-                                    insetsVisibilityState.insertSystemBarInsets(true)
+                                    insetsVisibilityState.consumeSystemBarInsets(true)
                                     activity.requestedOrientation =
                                         ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
                                 }

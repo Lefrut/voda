@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.vodovoz.app.design_system.composables.bottom_sheet.InfoBottomSheet
 import com.vodovoz.app.design_system.composables.decoration.AdvertisingChip
+import com.vodovoz.app.design_system.composables.pull_to_refresh.VodovozPullToRefreshBox
 import com.vodovoz.app.feature.all.promotions.composables.AdvertisingInfoBottomSheet
 import com.vodovoz.app.feature.home.composables.AutoScrollImagePager
 import com.vodovoz.app.feature.home.composables.rememberAutoScrollPagerState
@@ -40,23 +41,10 @@ import com.vodovoz.app.feature.profile.composables.SupportingBottomSheet
 fun ProfileScreen(
     viewModel: ProfileFlowViewModel,
     viewState: ProfileFlowViewModel.ProfileState,
-    pullRefreshState: PullToRefreshState,
 ) {
-
-    PullToRefreshBox(
-        modifier = Modifier.fillMaxSize(),
+    VodovozPullToRefreshBox(
         isRefreshing = viewState.showRefreshIndicator,
         onRefresh = { viewModel.refresh() },
-        state = pullRefreshState,
-        indicator = {
-            Indicator(
-                modifier = Modifier.align(Alignment.TopCenter),
-                isRefreshing = viewState.showRefreshIndicator,
-                state = pullRefreshState,
-                containerColor = MaterialTheme.colorScheme.background,
-                color = MaterialTheme.colorScheme.primary
-            )
-        }
     ) {
         Column(
             modifier = Modifier

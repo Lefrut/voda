@@ -5,11 +5,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.core.view.ViewCompat
-import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -37,12 +35,12 @@ class ServiceOrderFragment : Fragment() {
     override fun onStart() {
         super.onStart()
         tabManager.changeTabVisibility(false)
-        insetsState.insertSystemBarInsets(false)
+        insetsState.consumeSystemBarInsets(false)
     }
 
     override fun onStop() {
         super.onStop()
-        insetsState.insertSystemBarInsets(true)
+        insetsState.consumeSystemBarInsets(true)
         tabManager.changeTabVisibility(true)
     }
 
@@ -100,7 +98,7 @@ class ServiceOrderFragment : Fragment() {
 
         ViewCompat.setOnApplyWindowInsetsListener(view) { _, insets ->
             val imeVisible = insets.isVisible(WindowInsetsCompat.Type.ime())
-            insetsState.insertNavigationBarInsets(!imeVisible)
+            insetsState.consumeNavigationBarInsets(!imeVisible)
             return@setOnApplyWindowInsetsListener insets
         }
     }

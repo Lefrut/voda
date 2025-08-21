@@ -9,9 +9,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.pulltorefresh.PullToRefreshBox
-import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.Indicator
-import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -23,6 +20,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.vodovoz.app.R
 import com.vodovoz.app.design_system.composables.dialogs.VodovozDialog
+import com.vodovoz.app.design_system.composables.placeholders.LoadingPlaceholder
+import com.vodovoz.app.design_system.composables.placeholders.NetworkErrorPlaceholder
+import com.vodovoz.app.design_system.composables.placeholders.VodovozPlaceholder
+import com.vodovoz.app.design_system.composables.pull_to_refresh.VodovozPullToRefreshBox
 import com.vodovoz.app.feature.cart.composables.CartBody
 import com.vodovoz.app.feature.cart.composables.CartTopBar
 import com.vodovoz.app.feature.cart.composables.PromotionCodeBottomSheet
@@ -30,68 +31,76 @@ import com.vodovoz.app.feature.cart.composables.PromotionCodeBottomSheet
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CartScreen(viewModel: CartFlowViewModel, viewState: CartFlowViewModel.CartState) {
-    val pullRefreshState = rememberPullToRefreshState()
-
-    PullToRefreshBox(
-        isRefreshing = viewState.showRefreshIndicator,
-        onRefresh = { viewModel.refresh() },
-        state = pullRefreshState,
-        indicator = {
-            Indicator(
-                modifier = Modifier.align(Alignment.TopCenter),
-                isRefreshing = viewState.showRefreshIndicator,
-                state = pullRefreshState,
-                containerColor = MaterialTheme.colorScheme.background,
-                color = MaterialTheme.colorScheme.primary
-            )
-
-        }
-    ) {
-        Column(modifier = Modifier.fillMaxSize()) {
-            CartTopBar(
-                title = viewState.title,
-                onShareClick = { }
-            )
-            CartBody(
-                blockOrderButton = viewState.blockOrderButton || viewState.showRefreshIndicator,
-                cartItems = viewState.items,
-                cartPresent = viewState.present,
-                countCartItemsText = viewState.countText,
-                bottlesButton = viewState.bottlesButton,
-                presentButton = viewState.presentButton,
-                promotionCodeButton = viewState.promotionalCodeButton,
-                cartOrderSummary = viewState.orderSummary,
-                onClearCartClick = {
-                    viewModel.showClearCartDialog()
-                },
-                onDecrementCartItem = { cartItem ->
-                    viewModel.decrementCartItem(cartItem)
-                },
-                onLikeCartItem = { cartItem ->
-                    viewModel.changeFavorite(cartItem)
-                },
-                onIncrementCartItem = { cartItem ->
-                    viewModel.incrementCartItem(cartItem)
-                },
-                onRemoveCartItem = { cartItem ->
-                    viewModel.showTrashDialog(cartItem)
-                },
-                onCartItemClick = { cartItem ->
-                    viewModel.navigateToProductDetails(cartItem)
-                },
-                onPresentButtonClick = {
-                    viewModel.navigateToGifts()
-                },
-                onBottlesButtonClick = {
-                    viewModel.navigateToAllBottles()
-                },
-                onPromotionCodeButtonClick = {
-                    viewModel.showPromotionCodeBottomSheet()
-                },
-                onOrderClick = {
-                    viewModel.navigateToOrder()
+    Column(modifier = Modifier.fillMaxSize()) {
+        CartTopBar(
+            title = viewState.title.ifEmpty {
+                viewState.uiState.placeholderOrNull?.title ?: ""
+            },
+            onShareClick = { }
+        )
+        when (val uiState = viewState.uiState) {
+            CartFlowViewModel.CartUiState.Cart -> {
+                VodovozPullToRefreshBox(
+                    isRefreshing = viewState.showRefreshIndicator,
+                    onRefresh = { viewModel.refresh() },
+                ) {
+                    CartBody(
+                        blockOrderButton = viewState.blockOrderButton || viewState.showRefreshIndicator,
+                        cartItems = viewState.items,
+                        cartPresent = viewState.present,
+                        countCartItemsText = viewState.countText,
+                        bottlesButton = viewState.bottlesButton,
+                        presentButton = viewState.presentButton,
+                        promotionCodeButton = viewState.promotionalCodeButton,
+                        cartOrderSummary = viewState.orderSummary,
+                        onClearCartClick = {
+                            viewModel.showClearCartDialog()
+                        },
+                        onDecrementCartItem = { cartItem ->
+                            viewModel.decrementCartItem(cartItem)
+                        },
+                        onLikeCartItem = { cartItem ->
+                            viewModel.changeFavorite(cartItem)
+                        },
+                        onIncrementCartItem = { cartItem ->
+                            viewModel.incrementCartItem(cartItem)
+                        },
+                        onRemoveCartItem = { cartItem ->
+                            viewModel.showTrashDialog(cartItem)
+                        },
+                        onCartItemClick = { cartItem ->
+                            viewModel.navigateToProductDetails(cartItem)
+                        },
+                        onPresentButtonClick = {
+                            viewModel.navigateToGifts()
+                        },
+                        onBottlesButtonClick = {
+                            viewModel.navigateToAllBottles()
+                        },
+                        onPromotionCodeButtonClick = {
+                            viewModel.showPromotionCodeBottomSheet()
+                        },
+                        onOrderClick = {
+                            viewModel.navigateToOrder()
+                        }
+                    )
                 }
-            )
+            }
+
+            is CartFlowViewModel.CartUiState.Empty -> {
+                VodovozPlaceholder(
+                    data = uiState.placeholder,
+                    onButtonClick = { viewModel.navigateToCatalog() }
+                )
+            }
+
+            CartFlowViewModel.CartUiState.Error -> {
+                NetworkErrorPlaceholder { viewModel.fetchCartDetails() }
+            }
+
+            CartFlowViewModel.CartUiState.Loading -> {
+                LoadingPlaceholder()
+            }
         }
     }
 

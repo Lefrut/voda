@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import com.vodovoz.app.design_system.composables.bottom_sheet.SortOptionsBottomSheet
 import com.vodovoz.app.design_system.composables.placeholders.LoadingPlaceholder
 import com.vodovoz.app.design_system.composables.placeholders.VodovozPlaceholder
+import com.vodovoz.app.design_system.composables.pull_to_refresh.VodovozPullToRefreshBox
 import com.vodovoz.app.feature.favorite.composables.FavoriteBody
 import com.vodovoz.app.feature.favorite.composables.FavoriteTopBar
 
@@ -37,23 +38,10 @@ fun FavoriteScreen(
 
         val categories = viewState.productsSection.categories
 
-
-        val pullRefreshState = rememberPullToRefreshState()
-
-        PullToRefreshBox(
-            state = pullRefreshState,
+        VodovozPullToRefreshBox(
             isRefreshing = viewState.showRefreshIndicator,
             onRefresh = {
                 viewModel.refresh()
-            },
-            indicator = {
-                Indicator(
-                    modifier = Modifier.align(Alignment.TopCenter),
-                    state = pullRefreshState,
-                    containerColor = MaterialTheme.colorScheme.background,
-                    color = MaterialTheme.colorScheme.primary,
-                    isRefreshing = viewState.showRefreshIndicator
-                )
             }
         ) {
 

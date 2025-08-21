@@ -763,13 +763,13 @@ interface VodovozService {
         @Query("ascdesc") order: String = "",
     ): Response<VodovozResponseDTO<ProductsSectionDTO>>
 
-    @GET("glavnaya/super_top.php?action=topglav")
+        @GET("glavnaya/super_top_new.php?action=topglav")
     suspend fun getSuperTop(): Response<VodovozResponseDTO<SuperTopAndBottomSectionsDTO>>
 
-    @GET("glavnaya/super_top.php?action=details")
+    @GET("glavnaya/super_top_new.php?action=details")
     suspend fun getAllSuperTop(
         @Query("id") id: Long,
-        @Query("nav") page: Int = 1,
+        @Query("nav") page: Int? = 1,
         @Query("sect") categoryId: Int? = null,
         @Query("sort") sort: String = "",
         @Query("ascdesc") order: String = "",

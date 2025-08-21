@@ -6,7 +6,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.core.view.ViewCompat
@@ -16,8 +15,6 @@ import androidx.fragment.app.viewModels
 import com.vodovoz.app.ui.mvi.collectAsState
 import androidx.navigation.fragment.findNavController
 import com.vodovoz.app.R
-import com.vodovoz.app.common.cart.CartManager
-import com.vodovoz.app.common.like.LikeManager
 import com.vodovoz.app.common.tab.TabManager
 import com.vodovoz.app.core.navigation.navigateToProductAnalogs
 import com.vodovoz.app.core.navigation.navigateToPreOrder
@@ -58,13 +55,13 @@ class SearchFragment : Fragment() {
 
     override fun onStart() {
         super.onStart()
-        insetsVisibilityState.insertSystemBarInsets(true)
+        insetsVisibilityState.consumeSystemBarInsets(true)
     }
 
     override fun onStop() {
         super.onStop()
         tabManager.changeTabVisibility(true)
-        insetsVisibilityState.insertSystemBarInsets(true)
+        insetsVisibilityState.consumeSystemBarInsets(true)
     }
 
     override fun onCreateView(

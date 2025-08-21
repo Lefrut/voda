@@ -50,7 +50,6 @@ class CartFlowViewModel @Inject constructor(
 ) {
 
     init {
-        fetchCartDetails()
         viewModelScope.launch { listenCartUpdates() }
     }
 
@@ -347,6 +346,10 @@ class CartFlowViewModel @Inject constructor(
         data object Cart : CartUiState
         data class Empty(val placeholder: VodovozPlaceholderUi) : CartUiState
         data object Error : CartUiState
+
+        val placeholderOrNull: VodovozPlaceholderUi? get() {
+            return (this as? Empty)?.placeholder
+        }
     }
 
 

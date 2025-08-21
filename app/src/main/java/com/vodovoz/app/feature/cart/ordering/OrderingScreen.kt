@@ -6,15 +6,12 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.pulltorefresh.PullToRefreshBox
-import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.Indicator
-import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import com.vodovoz.app.design_system.composables.placeholders.LoadingPlaceholder
 import com.vodovoz.app.design_system.composables.placeholders.NetworkErrorPlaceholder
+import com.vodovoz.app.design_system.composables.pull_to_refresh.VodovozPullToRefreshBox
 import com.vodovoz.app.design_system.composables.top_bar.VodovozTopBar
 import com.vodovoz.app.feature.cart.ordering.composables.OrderingBody
 import com.vodovoz.app.util.extensions.deviceInfo
@@ -26,7 +23,6 @@ fun OrderingScreen(
     viewState: OrderingFlowViewModel.OrderingState,
     scrollState: ScrollState,
 ) {
-    val pullRefreshState = rememberPullToRefreshState()
     val context = LocalContext.current
 
     Column(
@@ -40,20 +36,8 @@ fun OrderingScreen(
                 viewModel.navigateBack()
             }
         )
-        PullToRefreshBox(
-            modifier = Modifier
-                .fillMaxSize(),
-            state = pullRefreshState,
+        VodovozPullToRefreshBox(
             isRefreshing = viewState.showRefreshIndicator,
-            indicator = {
-                Indicator(
-                    modifier = Modifier.align(Alignment.TopCenter),
-                    isRefreshing = viewState.showRefreshIndicator,
-                    state = pullRefreshState,
-                    containerColor = MaterialTheme.colorScheme.background,
-                    color = MaterialTheme.colorScheme.primary
-                )
-            },
             onRefresh = {
                 viewModel.refreshRecipient()
             }

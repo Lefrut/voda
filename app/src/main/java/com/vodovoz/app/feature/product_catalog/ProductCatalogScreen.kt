@@ -4,18 +4,15 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.pulltorefresh.PullToRefreshBox
-import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.Indicator
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import coil3.compose.rememberAsyncImagePainter
 import com.vodovoz.app.design_system.composables.bottom_sheet.SortOptionsBottomSheet
 import com.vodovoz.app.design_system.composables.placeholders.EmptyResultPlaceholder
 import com.vodovoz.app.design_system.composables.placeholders.LoadingPlaceholder
 import com.vodovoz.app.design_system.composables.placeholders.NetworkErrorPlaceholder
+import com.vodovoz.app.design_system.composables.pull_to_refresh.VodovozPullToRefreshBox
 import com.vodovoz.app.design_system.composables.top_bar.VodovozSearchTopBar
 import com.vodovoz.app.feature.product_catalog.composables.CategoriesBottomSheet
 import com.vodovoz.app.feature.product_catalog.composables.ProductCatalogBody
@@ -29,7 +26,6 @@ fun ProductCatalogScreen(
     lazyGridState: LazyGridState,
 ) {
     val productsSection = viewState.productsSection
-    val pullRefreshState = rememberPullToRefreshState()
 
     Column(
         modifier = Modifier.fillMaxSize()
@@ -54,22 +50,10 @@ fun ProductCatalogScreen(
         )
 
 
-        PullToRefreshBox(
-            modifier = Modifier.fillMaxSize(),
-            state = pullRefreshState,
+        VodovozPullToRefreshBox(
             isRefreshing = viewState.showRefreshIndicator,
-            onRefresh = { viewModel.refresh() },
-            indicator = {
-                Indicator(
-                    modifier = Modifier.align(Alignment.TopCenter),
-                    state = pullRefreshState,
-                    containerColor = MaterialTheme.colorScheme.background,
-                    color = MaterialTheme.colorScheme.primary,
-                    isRefreshing = viewState.showRefreshIndicator
-                )
-            }
+            onRefresh = { viewModel.refresh() }
         ) {
-
             when (val uiState = viewState.uiState) {
                 ProductCatalogViewModel.ProductCatalogUiState.Error -> {
                     NetworkErrorPlaceholder { viewModel.refresh() }

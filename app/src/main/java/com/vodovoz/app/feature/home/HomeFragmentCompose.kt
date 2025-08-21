@@ -14,9 +14,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -36,6 +34,7 @@ import com.vodovoz.app.common.cookie.CookieManager
 import com.vodovoz.app.common.tab.TabManager
 import com.vodovoz.app.core.navigation.ContentSearchNavigator
 import com.vodovoz.app.core.navigation.activate
+import com.vodovoz.app.core.navigation.findRootNavController
 import com.vodovoz.app.core.navigation.navigateToAboutApp
 import com.vodovoz.app.core.navigation.navigateToAllBrands
 import com.vodovoz.app.core.navigation.navigateToAllServices
@@ -54,7 +53,6 @@ import com.vodovoz.app.core.navigation.navigateToPromotions
 import com.vodovoz.app.core.navigation.navigateToSearch
 import com.vodovoz.app.core.navigation.navigateToServiceDetails
 import com.vodovoz.app.core.navigation.navigateToStories
-import com.vodovoz.app.core.navigation.navigateToTraceOrder
 import com.vodovoz.app.core.navigation.navigateToViewedProductList
 import com.vodovoz.app.core.navigation.navigateToWaterApp
 import com.vodovoz.app.core.navigation.navigateToWebView
@@ -122,22 +120,20 @@ class HomeFragment : Fragment() {
 
     }
 
-    @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View {
 
+
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
 
             setContent {
-
                 VodovozTheme {
                     val viewState by viewModel.collectAsState()
                     val topProductLazyListState = rememberLazyListState()
-                    val pullRefreshState = rememberPullToRefreshState()
                     val snackbarHostState = remember { SnackbarHostState() }
 
                     BackHandler {
@@ -147,7 +143,6 @@ class HomeFragment : Fragment() {
                     HomeScreen(
                         viewState = viewState,
                         viewModel = viewModel,
-                        pullRefreshState = pullRefreshState,
                         topProductsLazyListState = topProductLazyListState,
                     )
 

@@ -12,7 +12,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
@@ -63,10 +62,10 @@ class StoriesFragment : Fragment() {
                     tabManager.changeTabVisibility(false)
                     coroutineScope.launch {
                         delay(100)
-                        insetsVisibilityState.insertSystemBarInsets(false)
+                        insetsVisibilityState.consumeSystemBarInsets(false)
                     }
                     onStopOrDispose {
-                        insetsVisibilityState.insertSystemBarInsets(true)
+                        insetsVisibilityState.consumeSystemBarInsets(true)
                         tabManager.changeTabVisibility(true)
                     }
                 }

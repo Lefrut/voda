@@ -21,7 +21,6 @@ fun <T> Flow<T>.debounceWithMax(
         count++
 
         if (count >= maxCount) {
-            debugLog { "debounce with max: $count" }
             debounceJob?.cancel()
             send(lastValue!!)
             count = 0

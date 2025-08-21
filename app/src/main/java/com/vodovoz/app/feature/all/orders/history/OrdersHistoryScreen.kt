@@ -15,6 +15,7 @@ import androidx.paging.LoadState
 import com.vodovoz.app.design_system.composables.placeholders.LoadingPlaceholder
 import com.vodovoz.app.design_system.composables.placeholders.NetworkErrorPlaceholder
 import com.vodovoz.app.design_system.composables.placeholders.VodovozPlaceholder
+import com.vodovoz.app.design_system.composables.pull_to_refresh.VodovozPullToRefreshBox
 import com.vodovoz.app.design_system.composables.top_bar.HybridSearchTopBar
 import com.vodovoz.app.feature.all.orders.history.composables.OrdersHistoryBody
 
@@ -26,7 +27,6 @@ fun OrdersHistoryScreen(
 ) {
 
     val uiState = viewState.uiState
-    val pullRefreshState = rememberPullToRefreshState()
 
     Column(
         modifier = Modifier
@@ -64,20 +64,9 @@ fun OrdersHistoryScreen(
             }
 
             OrdersHistoryViewModel.AllOrdersUiState.Body -> {
-                PullToRefreshBox(
-                    modifier = Modifier.fillMaxSize(),
-                    state = pullRefreshState,
+                VodovozPullToRefreshBox(
                     isRefreshing = viewState.showRefreshIndicator,
                     onRefresh = { viewModel.refresh() },
-                    indicator = {
-                        Indicator(
-                            modifier = Modifier.align(Alignment.TopCenter),
-                            state = pullRefreshState,
-                            containerColor = MaterialTheme.colorScheme.background,
-                            color = MaterialTheme.colorScheme.primary,
-                            isRefreshing = viewState.showRefreshIndicator
-                        )
-                    }
                 ) {
                     OrdersHistoryBody(
                         items = viewState.items,

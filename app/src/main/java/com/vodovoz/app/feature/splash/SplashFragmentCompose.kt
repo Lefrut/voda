@@ -37,6 +37,7 @@ import com.vodovoz.app.util.extensions.disableFullScreen
 import com.vodovoz.app.util.extensions.enableFullScreen
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -203,15 +204,14 @@ class SplashFragment : Fragment() {
         splashViewModel.sendFirebaseToken()
         val syncFavoritesJob = splashViewModel.syncFavorites()
 
-
-        launch {
+        val importantJob = launch {
             homeViewModel.fetchHomeDetails {
                 syncFavoritesJob.join()
+                favoriteViewModel.fetchFavoriteProducts()
                 cancel()
             }.join()
-        }.join()
-
-        favoriteViewModel.fetchFavoriteProducts()
+        }
+        importantJob.join()
         catalogViewModel.fetchCatalogDetails()
         profileViewModel.fetchProfileDetails()
         cartFlowViewModel.fetchCartDetails()
