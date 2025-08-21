@@ -35,7 +35,6 @@ class ContentProviderImpl @Inject constructor(
         return contentResolver.openInputStream(uri)?.readBytes()
     }
 
-
 }
 
 interface ResourcesProvider {

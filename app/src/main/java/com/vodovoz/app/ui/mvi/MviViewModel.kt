@@ -1,5 +1,6 @@
 package com.vodovoz.app.ui.mvi
 
+import android.annotation.SuppressLint
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.State
@@ -10,6 +11,7 @@ import com.vodovoz.app.design_system.effects.LifecycleEffect
 import com.vodovoz.app.ui.paging.ItemsMviViewModel
 import com.vodovoz.app.ui.paging.ItemsState
 import com.vodovoz.app.ui.paging.VodovozItemsListeners
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -50,6 +52,7 @@ fun <STATE, EVENT> MviViewModel<STATE, EVENT>.collectAsState(
     return state.collectAsStateWithLifecycle(minActiveState = lifecycleState)
 }
 
+
 @Composable
 @Stable
 fun <T, ITEM, S, E> T.collectAsState(
@@ -64,3 +67,4 @@ fun <T, ITEM, S, E> T.collectAsState(
     LifecycleEffect { listenCart() }
     return (this as MviViewModel<S, E>).collectAsState(lifecycleState)
 }
+

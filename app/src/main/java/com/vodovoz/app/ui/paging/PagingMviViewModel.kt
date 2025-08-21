@@ -46,8 +46,6 @@ abstract class PagingMviViewModel<ITEM : Any, S : PagingState<ITEM, S>, E>(
     suspend fun Flow<PagingData<ITEM>>.collectPagingData() = collect { pagingData ->
         pagingDataListener.collectPagingData(pagingData)
     }
-
-
 }
 
 

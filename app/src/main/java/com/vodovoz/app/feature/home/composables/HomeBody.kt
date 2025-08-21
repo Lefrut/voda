@@ -40,7 +40,8 @@ fun HomeBody(
     sectionViewedProducts: SectionUi<ProductUi>,
     sectionHurryUpBuyProducts: SectionUi<ProductUi>,
     orderWithMenu: OrderWithMenuUi,
-    currentCategoryWithProducts: CategoryWithProductsUi,
+    currentTopCategoryWithProducts: CategoryWithProductsUi,
+    currentBottomCategoryWithProducts: CategoryWithProductsUi,
     sectionTop: SectionUi<CategoryWithProductsUi>,
     sectionBottomProducts: SectionUi<CategoryWithProductsUi>,
     onStoryClick: (StoryUi) -> Unit,
@@ -112,11 +113,11 @@ fun HomeBody(
 
         key("HomeTopProducts") {
             if(sectionTop.items.isNotEmpty()){
-                HomeTopProducts(
+                HomeCategoryProducts(
                     modifier = Modifier.padding(top = 32.dp),
                     lazyListState = topProductsLazyListState,
                     onShowAllClick = onShowAllClick,
-                    currentCategoryWithProducts = currentCategoryWithProducts,
+                    currentCategoryWithProducts = currentTopCategoryWithProducts,
                     sectionCategoriesWithProducts = sectionTop,
                     onCategorySelect = onCategorySelect,
                     onProductClick = onProductCardClick,
@@ -174,14 +175,17 @@ fun HomeBody(
 
         key("HomeBottomProducts") {
             if(sectionBottomProducts.items.isNotEmpty()){
-                HomeBottomProducts(
+                HomeCategoryProducts(
                     modifier = Modifier.padding(top = 32.dp),
-                    sectionBottomProducts = sectionBottomProducts,
+                    lazyListState = topProductsLazyListState,
+                    onShowAllClick = onShowAllClick,
+                    currentCategoryWithProducts = currentBottomCategoryWithProducts,
+                    sectionCategoriesWithProducts = sectionTop,
+                    onCategorySelect = onCategorySelect,
                     onProductClick = onProductCardClick,
                     onProductLike = onProductLike,
-                    onShowAllClick = onShowAllClick,
-                    onDecrementToCart = onDecrementProductToCart,
                     onIncrementToCart = onIncrementProductToCart,
+                    onDecrementToCart = onDecrementProductToCart,
                     onProductAnalogsClick = onProductAnalogsClick
                 )
             }

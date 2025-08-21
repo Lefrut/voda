@@ -25,7 +25,6 @@ object SplashFileConfig {
 
         withContext(Dispatchers.IO){
             withTimeout(5000L) {
-
                 val url = URL(link)
                 url.openStream().use { input ->
                     file.outputStream().use { output ->

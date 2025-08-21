@@ -21,6 +21,7 @@ import com.vodovoz.app.design_system.composables.dialogs.VodovozDialog
 import com.vodovoz.app.design_system.composables.placeholders.LoadingPlaceholder
 import com.vodovoz.app.design_system.composables.placeholders.NetworkErrorPlaceholder
 import com.vodovoz.app.design_system.composables.placeholders.VodovozPlaceholder
+import com.vodovoz.app.design_system.composables.pull_to_refresh.VodovozPullToRefreshBox
 import com.vodovoz.app.design_system.composables.top_bar.VodovozTopBar
 import com.vodovoz.app.feature.addresses.composables.AddressesBody
 import com.vodovoz.app.feature.addresses.model.AddressScreenTypeUi
@@ -32,7 +33,6 @@ fun AddressesScreen(
     viewState: AddressesFlowViewModel.AddressesState,
 ) {
     val uiState = viewState.uiState
-    val pullRefreshState = rememberPullToRefreshState()
 
     Scaffold(
         topBar = {
@@ -98,21 +98,9 @@ fun AddressesScreen(
             }
 
             AddressesFlowViewModel.AddressesUiState.Success -> {
-                PullToRefreshBox(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues),
-                    state = pullRefreshState,
+                VodovozPullToRefreshBox(
+                    modifier = Modifier.padding(paddingValues),
                     isRefreshing = viewState.showRefreshIndicator,
-                    indicator = {
-                        Indicator(
-                            modifier = Modifier.align(Alignment.TopCenter),
-                            isRefreshing = viewState.showRefreshIndicator,
-                            state = pullRefreshState,
-                            containerColor = MaterialTheme.colorScheme.background,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                    },
                     onRefresh = {
                         viewModel.refresh()
                     }

@@ -8,10 +8,13 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.LineHeightStyle
+import androidx.navigation.findNavController
 import com.vodovoz.app.R
 import com.vodovoz.app.common.model.ButtonAction
+import com.vodovoz.app.core.navigation.navigateToPreOrder
 import com.vodovoz.app.design_system.ExtendedTheme
 import com.vodovoz.app.design_system.composables.button.QuantityButtonSmall
 import com.vodovoz.app.design_system.composables.button.VodovozButtonDefaults
@@ -22,7 +25,6 @@ import com.vodovoz.app.domain.general.model.product.ProductModel
 import com.vodovoz.app.domain.general.model.product.SectionModel
 import com.vodovoz.app.domain.general.model.promotion.LabelModel
 import com.vodovoz.app.ui.graphics.fromHexOrUnspecified
-import com.vodovoz.app.util.extensions.debugLog
 
 
 fun <T : VodovozItemUi<T>> Iterable<T>.withCanViewForAdults(canView: Boolean): List<T> {
@@ -68,13 +70,13 @@ fun VodovozItemUi<*>.withUpdatedCartRecursive(
 fun <T : VodovozItemUi<T>> Iterable<T>.withUpdatedFavoritesRecursive(
     favorites: Map<Long, Boolean>,
 ): List<T> = map { vodovozItem ->
-        vodovozItem.copyItem(
-            isFavorite = favorites[vodovozItem.id] ?: vodovozItem.isFavorite,
-            items = vodovozItem.items.map { child ->
-                child.withUpdatedFavoritesRecursive(favorites)
-            }
-        )
-    }
+    vodovozItem.copyItem(
+        isFavorite = favorites[vodovozItem.id] ?: vodovozItem.isFavorite,
+        items = vodovozItem.items.map { child ->
+            child.withUpdatedFavoritesRecursive(favorites)
+        }
+    )
+}
 
 
 fun VodovozItemUi<*>.withUpdatedFavoritesRecursive(
@@ -291,7 +293,7 @@ data class ProductUi(
     }
 }
 
-abstract class VodovozItemUi<T : VodovozItemUi<T>> {
+abstract class VodovozItemUi<out T : VodovozItemUi<T>> {
 
     open val id: Long = -1
     open val forAdults: ForAdultsUi? = null
@@ -350,15 +352,24 @@ fun ProductUi.Button(
     onAnalogsClick: (ProductUi) -> Unit,
     onIncrementToCart: (ProductUi) -> Unit,
     onDecrementToCart: (ProductUi) -> Unit,
-) {
+
+    ) {
     val product = this@Button
+    val currentView = LocalView.current
+
+    //todo - you can delete this lambda and upgrade by clean architecture! XD
+    val onAnalogsOrPreOrderClick = { it: ProductUi ->
+        if (it.button?.id == "predzakaz") currentView.findNavController().navigateToPreOrder(it.id)
+        else onAnalogsClick(it)
+    }
+
 
     Box(modifier = modifier) {
         when {
             button != null -> {
                 VodovozButtonSmall(
                     text = button.name,
-                    onClick = { onAnalogsClick(product) },
+                    onClick = { onAnalogsOrPreOrderClick(product) },
                     colors = VodovozButtonDefaults.colors(
                         contentColor = button.textColor,
                         containerColor = button.backgroundColor

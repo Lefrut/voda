@@ -12,6 +12,7 @@ import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import com.vodovoz.app.design_system.composables.pull_to_refresh.VodovozPullToRefreshBox
 import com.vodovoz.app.feature.all.orders.detail.composables.OrderDetailsBody
 import com.vodovoz.app.feature.all.orders.detail.composables.OrderDetailsTopBar
 
@@ -21,9 +22,6 @@ fun OrderDetailsScreen(
     viewModel: OrderDetailsFlowViewModel,
     viewState: OrderDetailsFlowViewModel.OrderDetailsState,
 ) {
-
-    val pullRefreshState = rememberPullToRefreshState()
-
     Scaffold(
         topBar = {
             OrderDetailsTopBar(
@@ -39,22 +37,9 @@ fun OrderDetailsScreen(
         },
         contentWindowInsets = WindowInsets(0, 0, 0, 0)
     ) { padding ->
-
-        PullToRefreshBox(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding),
-            state = pullRefreshState,
+        VodovozPullToRefreshBox(
+            modifier = Modifier.padding(padding),
             isRefreshing = viewState.showRefreshIndicator,
-            indicator = {
-                Indicator(
-                    modifier = Modifier.align(Alignment.TopCenter),
-                    isRefreshing = viewState.showRefreshIndicator,
-                    state = pullRefreshState,
-                    containerColor = MaterialTheme.colorScheme.background,
-                    color = MaterialTheme.colorScheme.primary
-                )
-            },
             onRefresh = {
                 viewModel.refresh()
             }

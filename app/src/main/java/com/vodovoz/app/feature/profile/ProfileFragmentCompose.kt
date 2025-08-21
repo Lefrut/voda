@@ -7,12 +7,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBarsPadding
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
@@ -76,11 +73,10 @@ class ProfileFragment : Fragment() {
         super.onStart()
         lifecycleScope.launch {
             delay(300)
-            insertVisibilityState.insertSystemBarInsets(true)
+            insertVisibilityState.consumeSystemBarInsets(true)
         }
     }
 
-    @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreateView(
         inflater: android.view.LayoutInflater,
         container: android.view.ViewGroup?,
@@ -93,8 +89,6 @@ class ProfileFragment : Fragment() {
                 VodovozTheme {
                     val viewState by viewModel.collectAsState()
                     
-                    val pullToRefreshState = rememberPullToRefreshState()
-
                     when (val uiState = viewState.uiState) {
                         ProfileFlowViewModel.ProfileUiState.Loading -> {
                             LoadingPlaceholder()
@@ -104,7 +98,6 @@ class ProfileFragment : Fragment() {
                             ProfileScreen(
                                 viewModel = viewModel,
                                 viewState = viewState,
-                                pullRefreshState = pullToRefreshState
                             )
                         }
 

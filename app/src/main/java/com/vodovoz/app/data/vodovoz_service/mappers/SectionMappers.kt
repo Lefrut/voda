@@ -13,10 +13,10 @@ import com.vodovoz.app.domain.general.model.product.ProductModel
 import com.vodovoz.app.domain.general.model.product.SectionModel
 import com.vodovoz.app.domain.general.model.product.TopAndBottomSectionsModel
 
-fun SuperTopAndBottomSectionsDTO.toDomain(): TopAndBottomSectionsModel? {
+fun SuperTopAndBottomSectionsDTO.toDomain(): TopAndBottomSectionsModel {
     return TopAndBottomSectionsModel(
-        topSection = RAZDEL_VERH?.toDomain() ?: return null,
-        bottomSection = RAZDEL_NIZ?.toDomain() ?: return null
+        topSection = RAZDEL_VERH?.toDomain() ?: SectionModel.empty(),
+        bottomSection = RAZDEL_NIZ?.toDomain() ?: SectionModel.empty()
     )
 }
 

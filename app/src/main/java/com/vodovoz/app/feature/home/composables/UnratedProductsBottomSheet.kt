@@ -5,7 +5,7 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.VectorConverter
 import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.tween
@@ -158,14 +158,14 @@ fun UnratedProductsBottomSheet(
             }
         }
 
-        val animatedAlpha = remember {
-            Animatable(0f, Float.VectorConverter)
+        val animatedOffsetY = remember {
+            Animatable(layoutHeight * 1.25f, Float.VectorConverter)
         }
 
         LaunchedEffect(Unit) {
-            animatedAlpha.animateTo(
-                targetValue = 1f,
-                animationSpec = tween(400, 0, LinearEasing)
+            animatedOffsetY.animateTo(
+                0f,
+                tween(250, 0, LinearOutSlowInEasing)
             )
         }
 
@@ -176,7 +176,7 @@ fun UnratedProductsBottomSheet(
         Column(
             modifier = Modifier
                 .graphicsLayer {
-                    alpha = animatedAlpha.value
+                    translationY = animatedOffsetY.value
                 }
                 .fillMaxWidth()
                 .height(columnHeight)

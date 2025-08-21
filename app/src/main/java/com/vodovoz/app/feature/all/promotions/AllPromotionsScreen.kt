@@ -65,7 +65,6 @@ fun AllPromotionsScreen(
                     },
                     onPromotionSee = { index ->
                         viewModel.notifyPaging(index)
-
                     }
                 )
             }

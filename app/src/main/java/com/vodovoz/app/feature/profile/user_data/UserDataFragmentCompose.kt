@@ -7,7 +7,6 @@ import android.view.ViewGroup
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
@@ -48,7 +47,7 @@ class UserDataFragment : Fragment() {
     internal lateinit var insetsVisibilityState: InsetsVisibilityState
 
     override fun onStart() {
-        insetsVisibilityState.insertSystemBarInsets(true)
+        insetsVisibilityState.consumeSystemBarInsets(true)
         super.onStart()
     }
 

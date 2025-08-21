@@ -87,8 +87,6 @@ class MainActivity : AppCompatActivity(), BlockAppSignalProvider, HttpErrorCache
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        binding.fcvMainContainer.setSplashScreen()
-
         processIntent(intent)
     }
 
@@ -124,20 +122,4 @@ class MainActivity : AppCompatActivity(), BlockAppSignalProvider, HttpErrorCache
         val path = appLinkData?.lastPathSegment
         siteStateManager.saveDeepLinkPath(path)
     }
-
-    private fun FragmentContainerView.setSplashScreen() {
-        val navHostFragment = supportFragmentManager
-            .findFragmentById(id) as? NavHostFragment
-        val navController = navHostFragment?.navController
-        navController?.setGraph(R.navigation.nav_graph)
-        navController?.navigate(
-            resId = R.id.splashFragment,
-            args = null,
-            navOptions = navOptions {
-                launchSingleTop = true
-            }
-        )
-    }
-
-
 }

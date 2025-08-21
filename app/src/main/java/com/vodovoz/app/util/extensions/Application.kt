@@ -29,6 +29,7 @@ import androidx.core.text.HtmlCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import androidx.core.view.doOnAttach
 import androidx.fragment.app.Fragment
 import com.google.android.material.snackbar.Snackbar
 import java.io.ByteArrayOutputStream
@@ -37,6 +38,14 @@ import java.util.Calendar
 import java.util.Locale
 import kotlin.properties.ReadOnlyProperty
 
+
+fun View.doWhenAttached(action: (View) -> Unit) {
+    if (isAttachedToWindow) {
+        action(this)
+    } else {
+        doOnAttach { view -> action(view) }
+    }
+}
 
 fun Context.isInternetAvailable(): Boolean? {
     val cm = getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager

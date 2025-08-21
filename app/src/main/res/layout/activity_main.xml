@@ -8,4 +8,5 @@
     android:background="@color/white"
     app:defaultNavHost="true"
     android:fitsSystemWindows="true"
+    app:navGraph="@navigation/nav_graph"
     />

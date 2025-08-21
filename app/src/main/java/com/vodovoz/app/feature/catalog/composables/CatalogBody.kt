@@ -124,8 +124,7 @@ private fun CatalogCard(
             model = image,
             contentDescription = null,
             modifier = Modifier.matchParentSize(),
-            contentScale = ContentScale.Crop,
-            alignment = Alignment.BottomEnd
+            contentScale = ContentScale.FillBounds,
         )
         Text(
             modifier = Modifier

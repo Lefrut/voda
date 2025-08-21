@@ -2237,8 +2237,9 @@ class VodovozServiceRepositoryImpl @Inject constructor(
     ): Flow<Result<ProductsSectionModel>> = executeRequest(
         request = {
             vodovozService.getAllSuperTop(
-                buttonId.toLong(),
-                categoryId = categoryId.takeIf { it > -1 })
+                id = buttonId.toLong(),
+                categoryId = categoryId.takeIf { it > -1 }
+            )
         },
         mapper = { superTopResponse ->
             superTopResponse.data!!.toDomain()

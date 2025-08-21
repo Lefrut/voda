@@ -1,6 +1,5 @@
 package com.vodovoz.app.data.vodovoz_service.mappers
 
-import android.util.Log
 import androidx.annotation.Keep
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
@@ -87,11 +86,15 @@ inline fun <reified T, R> executeRequest(
             }
         }.onFailure {
             debugLog { it.message + it.stackTraceToString() }
-            val onFailResult = onFail(Response.error(errorCode, stringBody.jsonToResponseBody()))
-            emit(onFailResult)
+            emit(onFail(Response.error(errorCode, stringBody.jsonToResponseBody())))
         }
     }.catchResult().take(1).onEach { result ->
-        result.onFailure { t -> debugLog { t.stackTraceToString() } }
+        debugLog {
+            result.onFailure { t ->
+                return@debugLog t.stackTraceToString()
+            }
+        }
+
     }.flowOn(Dispatchers.IO)
 }
 

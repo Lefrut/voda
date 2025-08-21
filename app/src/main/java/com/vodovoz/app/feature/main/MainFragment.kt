@@ -24,12 +24,11 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsCompat.CONSUMED
 import androidx.core.view.WindowInsetsCompat.Type
 import androidx.core.view.WindowInsetsCompat.Type.InsetsType
-import androidx.core.view.doOnAttach
 import androidx.core.view.isVisible
-import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.Navigation
@@ -45,11 +44,19 @@ import com.vodovoz.app.core.navigation.setupWithNavController
 import com.vodovoz.app.databinding.FragmentMainBinding
 import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.composables.snackbar.VodovozSnackbarHost
+import com.vodovoz.app.ui.insets.InsetsPadding
 import com.vodovoz.app.ui.insets.InsetsVisibilityState
 import com.vodovoz.app.ui.insets.ime.handleImeInsetIfNeeded
 import com.vodovoz.app.ui.insets.ime.removeImeHandling
+import com.vodovoz.app.ui.insets.plus
+import com.vodovoz.app.ui.insets.toInsetsPadding
+import com.vodovoz.app.ui.insets.updatePadding
 import com.vodovoz.app.ui.snackbar.SnackbarHostStateOwner
+import com.vodovoz.app.util.extensions.doWhenAttached
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -60,7 +67,6 @@ class MainFragment : Fragment(), SnackbarHostStateOwner {
     private val locationPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) {}
-
 
     private val notificationPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -94,6 +100,10 @@ class MainFragment : Fragment(), SnackbarHostStateOwner {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        requestMainPermissionIfNeeded()
+    }
+
+    private fun requestMainPermissionIfNeeded(){
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && !requireContext().notificationPermissionGranted) {
             notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
         } else if (!requireContext().locationPermissionGranted) {
@@ -106,15 +116,12 @@ class MainFragment : Fragment(), SnackbarHostStateOwner {
 
         checkForUpdate()
 
-
         observeTabState()
         observeCartState()
         observeTabVisibility()
 
-        binding.root.doOnAttach {
-            setOnApplyWindowInsets()
-            binding.root.requestApplyInsets()
-        }
+        listenInsetsStates()
+        setOnApplyWindowInsets()
 
         binding.snackbarHost.setContent {
             VodovozTheme {
@@ -125,28 +132,19 @@ class MainFragment : Fragment(), SnackbarHostStateOwner {
                 )
             }
         }
-
-        listenImeHandling()
-        listenNavigationBarInsets()
-        listenStatusBarInsets()
     }
 
     private fun setOnApplyWindowInsets() {
         ViewCompat.setOnApplyWindowInsetsListener(
-            binding.root
+            binding.fgvContainer
         ) { _, applyInsets ->
             return@setOnApplyWindowInsetsListener WindowInsetsCompat.Builder(
                 applyInsets
             ).apply {
-
-                if (insetsVisibilityState.navigationBarInsets.value) {
-                    consumeWindowInsets(Type.navigationBars())
-                }
-                if (insetsVisibilityState.statusBarInsets.value) {
-                    consumeWindowInsets(Type.statusBars())
-                }
-                if (insetsVisibilityState.handleIme.value) {
-                    consumeWindowInsets(Type.ime())
+                insetsVisibilityState.insets.map { flow ->
+                    flow.value
+                }.forEach { insetState ->
+                    if (insetState.consume) consumeWindowInsets(insetState.type)
                 }
             }.build()
         }
@@ -219,46 +217,31 @@ class MainFragment : Fragment(), SnackbarHostStateOwner {
         }
     }
 
-    private fun listenImeHandling() = viewLifecycleOwner.lifecycleScope.launch {
-        repeatOnLifecycle(Lifecycle.State.STARTED) {
-            insetsVisibilityState.handleIme.collect { handleIme ->
-                if (handleIme) {
-                    binding.root.handleImeInsetIfNeeded()
-                } else {
-                    binding.root.removeImeHandling()
+    private fun listenInsetsStates() = combine(
+        insetsVisibilityState.insets
+    ) { insetsStates -> insetsStates.toList() }.flowWithLifecycle(lifecycle)
+        .onEach { insetsStates ->
+            binding.root.doWhenAttached {
+                var accInsetsPadding = InsetsPadding(0, 0, 0, 0)
+
+                for (insetState in insetsStates) {
+                    if (insetState.type == Type.ime()) {
+                        if (insetState.consume) binding.root.handleImeInsetIfNeeded()
+                        else binding.root.removeImeHandling()
+                        continue
+                    }
+
+                    val insets = ViewCompat.getRootWindowInsets(binding.root)
+                    insets?.getInsetsIgnoringVisibility(insetState.type)?.toInsetsPadding()
+                        ?.let { insetsPadding ->
+                            accInsetsPadding += insetsPadding
+                        }
                 }
-            }
-        }
-    }
 
-    private fun listenNavigationBarInsets() = viewLifecycleOwner.lifecycleScope.launch {
-        repeatOnLifecycle(Lifecycle.State.STARTED) {
-            insetsVisibilityState.navigationBarInsets.collect { insertInsets ->
-                val insets = ViewCompat.getRootWindowInsets(binding.root)
-                val bottomPadding = if (insertInsets) insets?.getInsetsIgnoringVisibility(
-                    Type.navigationBars()
-                )?.bottom ?: 0 else 0
-
+                binding.root.updatePadding(accInsetsPadding)
                 binding.root.requestApplyInsets()
-                binding.root.updatePadding(bottom = if (insertInsets) bottomPadding else 0)
             }
-        }
-    }
-
-    private fun listenStatusBarInsets() = viewLifecycleOwner.lifecycleScope.launch {
-        repeatOnLifecycle(Lifecycle.State.STARTED) {
-            insetsVisibilityState.statusBarInsets.collect { insertInsets ->
-                val insets = ViewCompat.getRootWindowInsets(binding.root)
-                val topPadding = if (insertInsets) insets?.getInsetsIgnoringVisibility(
-                    Type.statusBars()
-                )?.top ?: 0 else 0
-
-                binding.root.requestApplyInsets()
-                binding.root.updatePadding(top = if (insertInsets) topPadding else 0)
-            }
-        }
-
-    }
+        }.launchIn(viewLifecycleOwner.lifecycleScope)
 
 
     @SuppressLint("UseKtx")

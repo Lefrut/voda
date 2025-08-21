@@ -18,8 +18,6 @@ import androidx.compose.animation.scaleIn
 import androidx.compose.animation.togetherWith
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.ViewCompositionStrategy
@@ -93,14 +91,14 @@ class WaterAppFragment : Fragment() {
 
         tabManager.changeTabVisibility(false)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            insertVisibilityState.insertSystemBarInsets(false)
+            insertVisibilityState.consumeSystemBarInsets(false)
         }
     }
 
     override fun onStop() {
         super.onStop()
         waterAppHelper.saveWaterAppRateData()
-        insertVisibilityState.insertSystemBarInsets(true)
+        insertVisibilityState.consumeSystemBarInsets(true)
         tabManager.changeTabVisibility(true)
     }
 

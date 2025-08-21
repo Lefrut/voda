@@ -2,6 +2,7 @@ package com.vodovoz.app.data.vodovoz_service.model
 
 import androidx.annotation.Keep
 import com.squareup.moshi.Json
+import com.squareup.moshi.JsonClass
 
 @Keep
 data class AnalogsSectionDTO(
@@ -16,27 +17,28 @@ data class AnalogsSectionDTO(
 )
 
 @Keep
+@JsonClass(generateAdapter = true)
 data class ProductsSectionDTO(
-    @Json(name = "COUNT")
-    val COUNT: String? = null,
-    @Json(name = "TOVAR18")
-    val TOVAR18: TOVAR_18_DTO? = null,
-    @Json(name = "TOVARVSEGO")
-    val TOVARVSEGO: String? = null,
-    @Json(name = "STRANIC")
-    val STRANIC: Int? = null,
     @Json(name = "TITLE")
-    val TITLE: String? = null,
+    val TITLE: String?,
+    @Json(name = "COUNT")
+    val COUNT: String?,
+    @Json(name = "TOVAR18")
+    val TOVAR18: TOVAR_18_DTO?,
+    @Json(name = "TOVARVSEGO")
+    val TOVARVSEGO: String?,
+    @Json(name = "STRANIC")
+    val STRANIC: Int?,
     @Json(name = "SORTIROVKA")
-    val SORTIROVKA: SORTIROVKA_DTO? = null,
+    val SORTIROVKA: SORTIROVKA_DTO?,
     @Json(name = "RAZDEL")
-    val RAZDEL: CategoriesDTO? = null,
+    val RAZDEL: CategoriesDTO?,
     @Json(name = "DATA")
     val DATA: List<TOVAR_DATA_DTO>?,
     @Json(name = "TOVAR")
-    val TOVAR: List<TOVAR_DATA_DTO>? = null,
+    val TOVAR: List<TOVAR_DATA_DTO>?,
     @Json(name = "SHARE")
-    val SHARE: PODELITCA_DTO? = null,
+    val SHARE: PODELITCA_DTO?,
 )
 
 @Keep
