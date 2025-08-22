@@ -5,7 +5,7 @@ import com.vodovoz.app.common.model.boolean
 import com.vodovoz.app.common.model.from
 import com.vodovoz.app.data.vodovoz_service.model.FIELD_DTO
 import com.vodovoz.app.data.vodovoz_service.model.FormDTO
-import com.vodovoz.app.domain.general.model.FieldModel
+import com.vodovoz.app.domain.general.model.widgets.FieldModel
 import com.vodovoz.app.domain.general.model.order.FormModel
 
 fun FormDTO.toDomain(): FormModel {

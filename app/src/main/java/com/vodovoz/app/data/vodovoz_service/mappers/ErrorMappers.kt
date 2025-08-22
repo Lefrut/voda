@@ -6,7 +6,7 @@ import com.vodovoz.app.common.model.from
 import com.vodovoz.app.data.vodovoz_service.di.toVodovozUrl
 import com.vodovoz.app.data.vodovoz_service.model.VodovozButtonDTO
 import com.vodovoz.app.data.vodovoz_service.model.VodovozPlaceholderDTO
-import com.vodovoz.app.domain.general.model.VodovozPlaceholderModel
+import com.vodovoz.app.domain.general.model.exceptions.VodovozPlaceholderModel
 import com.vodovoz.app.domain.general.model.promotion.ColorfulButtonModel
 
 

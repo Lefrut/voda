@@ -21,7 +21,7 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.vodovoz.app.R
-import com.vodovoz.app.design_system.composables.bottomLine
+import com.vodovoz.app.design_system.modifiers.bottomLine
 import com.vodovoz.app.feature.cart.ordering.model.OrderingMenuItemUi
 
 @Suppress("NonSkippableComposable")

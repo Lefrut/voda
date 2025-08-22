@@ -2,7 +2,7 @@ package com.vodovoz.app.design_system.model.filters
 
 import android.os.Parcelable
 import androidx.compose.runtime.Immutable
-import com.vodovoz.app.domain.general.model.FilterModel
+import com.vodovoz.app.domain.general.model.product.FilterModel
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 

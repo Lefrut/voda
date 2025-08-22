@@ -18,11 +18,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.vodovoz.app.R
-import com.vodovoz.app.design_system.composables.bottomLine
 import com.vodovoz.app.design_system.composables.button.VodovozButton
 import com.vodovoz.app.design_system.composables.decoration.OrderSummaryColumn
 import com.vodovoz.app.design_system.composables.decoration.VodovozSwipeToDismiss
 import com.vodovoz.app.design_system.model.order.OrderSummaryItemUi
+import com.vodovoz.app.design_system.modifiers.bottomLine
 import com.vodovoz.app.feature.cart.model.CartButtonUi
 import com.vodovoz.app.feature.cart.model.CartItemUi
 import com.vodovoz.app.feature.cart.model.CartPresentUi

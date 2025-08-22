@@ -22,7 +22,7 @@ import com.vodovoz.app.design_system.model.widgets.checkFields
 import com.vodovoz.app.design_system.model.widgets.getErrorText
 import com.vodovoz.app.design_system.model.widgets.updateCheckbox
 import com.vodovoz.app.design_system.model.widgets.updateFieldAndResetError
-import com.vodovoz.app.domain.general.model.ValidationException
+import com.vodovoz.app.domain.general.model.exceptions.ValidationException
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.feature.auth.model.AuthDetailsUi
 import com.vodovoz.app.feature.auth.model.AuthState

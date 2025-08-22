@@ -21,7 +21,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.vodovoz.app.R
-import com.vodovoz.app.design_system.composables.bottomLine
 import com.vodovoz.app.design_system.composables.button.VodovozRadioButton
 import com.vodovoz.app.design_system.composables.chip.VodovozChip
 import com.vodovoz.app.design_system.composables.placeholders.LoadingPlaceholder
@@ -30,6 +29,7 @@ import com.vodovoz.app.design_system.composables.tab_row.VodovozScrollableTabRow
 import com.vodovoz.app.design_system.composables.tab_row.VodovozTab
 import com.vodovoz.app.design_system.composables.tab_row.VodovozTabRow
 import com.vodovoz.app.design_system.model.SectionUi
+import com.vodovoz.app.design_system.modifiers.bottomLine
 import com.vodovoz.app.feature.delivery_date.model.DeliveryDateOptionUi
 import com.vodovoz.app.feature.delivery_date.model.DeliveryTimeIntervalUi
 import com.vodovoz.app.util.extensions.indexOfOrNull

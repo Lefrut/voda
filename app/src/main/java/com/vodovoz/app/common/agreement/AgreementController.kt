@@ -2,7 +2,6 @@ package com.vodovoz.app.common.agreement
 
 object AgreementController {
 
-    private val linkRegex = """<a\s+(?:[^>]*?\s+)?href=["']([^"']+)["']""".toRegex()
     private var agreementText: String = ""
     private val titles: ArrayList<String> = ArrayList()
 
@@ -21,12 +20,5 @@ object AgreementController {
 
     fun getText(): String  {
         return agreementText
-    }
-
-
-    fun extractLinks(): List<String> {
-        return linkRegex.findAll(agreementText)
-            .map { it.groupValues[1] }
-            .toList()
     }
 }

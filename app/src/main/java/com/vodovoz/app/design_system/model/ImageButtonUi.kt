@@ -2,7 +2,7 @@ package com.vodovoz.app.design_system.model
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
-import com.vodovoz.app.domain.general.model.ImageButtonModel
+import com.vodovoz.app.domain.general.model.widgets.ImageButtonModel
 import com.vodovoz.app.ui.graphics.fromHexOrUnspecified
 
 @Immutable

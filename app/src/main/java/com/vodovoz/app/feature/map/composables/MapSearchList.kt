@@ -16,7 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
-import com.vodovoz.app.design_system.composables.bottomLine
+import com.vodovoz.app.design_system.modifiers.bottomLine
 import com.vodovoz.app.feature.map.model.MapAddressUi
 
 @Suppress("NonSkippableComposable")

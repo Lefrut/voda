@@ -1,7 +1,7 @@
 package com.vodovoz.app.feature.buy_certificate.model
 
 import androidx.compose.runtime.Immutable
-import com.vodovoz.app.domain.general.model.certificate.BuyCertificateCodesModel
+import com.vodovoz.app.domain.general.model.product.BuyCertificateCodesModel
 
 @Immutable
 data class BuyCertificateCodesUi(

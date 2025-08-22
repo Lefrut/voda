@@ -1,6 +1,6 @@
 package com.vodovoz.app.domain.general.model.user
 
-import com.vodovoz.app.domain.general.model.FieldModel
+import com.vodovoz.app.domain.general.model.widgets.FieldModel
 
 data class UserDataModel(
     val title: String,

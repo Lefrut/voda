@@ -10,16 +10,16 @@ import com.vodovoz.app.data.vodovoz_service.model.certificate.BuyCertificateDeta
 import com.vodovoz.app.data.vodovoz_service.model.certificate.FAQ_DTO
 import com.vodovoz.app.data.vodovoz_service.model.certificate.FAQ_ITEM_DTO
 import com.vodovoz.app.data.vodovoz_service.model.certificate.SERTIFICAT_VID_DTO
-import com.vodovoz.app.domain.general.model.certificate.CertificateActivationDetailsModel
+import com.vodovoz.app.domain.general.model.product.CertificateActivationDetailsModel
 import com.vodovoz.app.domain.general.model.promotion.ColorfulButtonModel
-import com.vodovoz.app.domain.general.model.FieldModel
-import com.vodovoz.app.domain.general.model.certificate.BuyCertificateCodesModel
-import com.vodovoz.app.domain.general.model.certificate.BuyCertificateDetailsModel
-import com.vodovoz.app.domain.general.model.certificate.BuyCertificateTabModel
-import com.vodovoz.app.domain.general.model.certificate.CertificateModel
-import com.vodovoz.app.domain.general.model.certificate.FAQItemModel
-import com.vodovoz.app.domain.general.model.certificate.FAQModel
-import com.vodovoz.app.domain.general.model.certificate.PaymentTypeModel
+import com.vodovoz.app.domain.general.model.widgets.FieldModel
+import com.vodovoz.app.domain.general.model.product.BuyCertificateCodesModel
+import com.vodovoz.app.domain.general.model.product.BuyCertificateDetailsModel
+import com.vodovoz.app.domain.general.model.product.BuyCertificateTabModel
+import com.vodovoz.app.domain.general.model.product.CertificateModel
+import com.vodovoz.app.domain.general.model.product.FAQItemModel
+import com.vodovoz.app.domain.general.model.product.FAQModel
+import com.vodovoz.app.domain.general.model.product.PaymentTypeModel
 
 fun CertificateActivationDetailsDTO.toDomain(): CertificateActivationDetailsModel {
     return CertificateActivationDetailsModel(

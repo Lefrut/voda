@@ -3,7 +3,7 @@ package com.vodovoz.app.data.vodovoz_service.mappers
 import com.vodovoz.app.data.vodovoz_service.di.toVodovozUrl
 import com.vodovoz.app.data.vodovoz_service.model.POPULAR_CATEGORY_DTO
 import com.vodovoz.app.data.vodovoz_service.model.PopularCategoriesDTO
-import com.vodovoz.app.domain.general.model.PopularCategoryModel
+import com.vodovoz.app.domain.general.model.product.PopularCategoryModel
 import com.vodovoz.app.domain.general.model.product.SectionModel
 
 fun PopularCategoriesDTO.toDomain(): SectionModel<PopularCategoryModel> {

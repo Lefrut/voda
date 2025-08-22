@@ -18,12 +18,12 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import com.vodovoz.app.design_system.composables.button.VodovozButtonsColumn
 import com.vodovoz.app.design_system.composables.core.VodovozWidget
-import com.vodovoz.app.design_system.composables.detectTap
 import com.vodovoz.app.design_system.composables.text_fields.VodovozTextField
 import com.vodovoz.app.design_system.model.ColorfulButtonUi
 import com.vodovoz.app.design_system.model.widgets.FieldUi
 import com.vodovoz.app.design_system.model.widgets.SwitchUi
 import com.vodovoz.app.design_system.model.widgets.WidgetUi
+import com.vodovoz.app.design_system.modifiers.detectTap
 
 @Suppress("NonSkippableComposable")
 @Composable

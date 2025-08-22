@@ -28,8 +28,8 @@ import com.vodovoz.app.data.vodovoz_service.model.product_details.TAGS_DTO
 import com.vodovoz.app.data.vodovoz_service.model.product_details.TOVAR_DETAIL_DTO
 import com.vodovoz.app.data.vodovoz_service.model.product_details.TOVAR_DETAIL_TEXT_DTO
 import com.vodovoz.app.data.vodovoz_service.model.product_details.ZALOG_DTO
-import com.vodovoz.app.domain.general.model.ContentBlockModel
-import com.vodovoz.app.domain.general.model.PresentInfoModel
+import com.vodovoz.app.domain.general.model.widgets.ContentBlockModel
+import com.vodovoz.app.domain.general.model.promotion.PresentInfoModel
 import com.vodovoz.app.domain.general.model.product.BlockPromoDataModel
 import com.vodovoz.app.domain.general.model.product.BrandCategoryBlockModel
 import com.vodovoz.app.domain.general.model.product.BrandCategoryItemDataModel

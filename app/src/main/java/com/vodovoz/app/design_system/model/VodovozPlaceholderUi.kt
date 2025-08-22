@@ -1,7 +1,7 @@
 package com.vodovoz.app.design_system.model
 
 import androidx.compose.runtime.Immutable
-import com.vodovoz.app.domain.general.model.VodovozPlaceholderModel
+import com.vodovoz.app.domain.general.model.exceptions.VodovozPlaceholderModel
 
 @Immutable
 data class VodovozPlaceholderUi(

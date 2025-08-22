@@ -1,6 +1,6 @@
 package com.vodovoz.app.domain.general.model.order
 
-import com.vodovoz.app.domain.general.model.CheckBoxModel
+import com.vodovoz.app.domain.general.model.widgets.CheckBoxModel
 import com.vodovoz.app.domain.general.model.promotion.ColorfulButtonModel
 import com.vodovoz.app.domain.general.model.product.SectionModel
 

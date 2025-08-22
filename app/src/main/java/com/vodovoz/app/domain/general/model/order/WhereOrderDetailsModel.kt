@@ -1,7 +1,7 @@
 package com.vodovoz.app.domain.general.model.order
 
-import com.vodovoz.app.domain.general.model.ImageAndTextModel
-import com.vodovoz.app.domain.general.model.ImageButtonModel
+import com.vodovoz.app.domain.general.model.widgets.ImageAndTextModel
+import com.vodovoz.app.domain.general.model.widgets.ImageButtonModel
 import com.vodovoz.app.domain.general.model.location.MapPointModel
 
 data class WhereOrderDetailsModel(

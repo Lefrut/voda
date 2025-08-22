@@ -22,29 +22,29 @@ import com.vodovoz.app.data.vodovoz_service.model.order.ORDER_DETAILS_TOVAR_DTO
 import com.vodovoz.app.data.vodovoz_service.model.order.ORDER_PRODUCT_PODAROK_DTO
 import com.vodovoz.app.data.vodovoz_service.model.order.ORDER_STATUS_DTO
 import com.vodovoz.app.data.vodovoz_service.model.order.OrderDetailsDTO
-import com.vodovoz.app.data.vodovoz_service.model.order_history.FILTER_STATYS_DTO
-import com.vodovoz.app.data.vodovoz_service.model.order_history.ORDERS_HISTORY_ITEM_DTO
-import com.vodovoz.app.data.vodovoz_service.model.order_history.ORDERS_HISTORY_KNOPKA_DTO
-import com.vodovoz.app.data.vodovoz_service.model.order_history.ORDERS_HISTORY_PRODUCT_DTO
-import com.vodovoz.app.data.vodovoz_service.model.order_history.OrdersHistoryDetailsDTO
-import com.vodovoz.app.data.vodovoz_service.model.ordering.CallYouItemDTO
-import com.vodovoz.app.data.vodovoz_service.model.ordering.ORDER_OPLATA_DTO
-import com.vodovoz.app.data.vodovoz_service.model.ordering.ORDER_OPLATA_ITEM_DTO
-import com.vodovoz.app.data.vodovoz_service.model.ordering.ORDER_POLYSHATEL_DTO
-import com.vodovoz.app.data.vodovoz_service.model.ordering.ORDER_POLYSHATEL_ITEM_DTO
-import com.vodovoz.app.data.vodovoz_service.model.ordering.ORDER_PREDYP_DTO
-import com.vodovoz.app.data.vodovoz_service.model.ordering.ORDER_PREDYP_ITEM_DTO
-import com.vodovoz.app.data.vodovoz_service.model.ordering.OrderCallYouDetailsDTO
-import com.vodovoz.app.data.vodovoz_service.model.ordering.OrderingDetailsDTO
-import com.vodovoz.app.data.vodovoz_service.model.ordering.RecipientDTO
-import com.vodovoz.app.data.vodovoz_service.model.ordering.RecipientDetailsDTO
+import com.vodovoz.app.data.vodovoz_service.model.order.FILTER_STATYS_DTO
+import com.vodovoz.app.data.vodovoz_service.model.order.ORDERS_HISTORY_ITEM_DTO
+import com.vodovoz.app.data.vodovoz_service.model.order.ORDERS_HISTORY_KNOPKA_DTO
+import com.vodovoz.app.data.vodovoz_service.model.order.ORDERS_HISTORY_PRODUCT_DTO
+import com.vodovoz.app.data.vodovoz_service.model.order.OrdersHistoryDetailsDTO
+import com.vodovoz.app.data.vodovoz_service.model.order.CallYouItemDTO
+import com.vodovoz.app.data.vodovoz_service.model.order.ORDER_OPLATA_DTO
+import com.vodovoz.app.data.vodovoz_service.model.order.ORDER_OPLATA_ITEM_DTO
+import com.vodovoz.app.data.vodovoz_service.model.order.ORDER_POLYSHATEL_DTO
+import com.vodovoz.app.data.vodovoz_service.model.order.ORDER_POLYSHATEL_ITEM_DTO
+import com.vodovoz.app.data.vodovoz_service.model.order.ORDER_PREDYP_DTO
+import com.vodovoz.app.data.vodovoz_service.model.order.ORDER_PREDYP_ITEM_DTO
+import com.vodovoz.app.data.vodovoz_service.model.order.OrderCallYouDetailsDTO
+import com.vodovoz.app.data.vodovoz_service.model.order.OrderingDetailsDTO
+import com.vodovoz.app.data.vodovoz_service.model.order.RecipientDTO
+import com.vodovoz.app.data.vodovoz_service.model.order.RecipientDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.payment_method.PaymentMethodDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.payment_method.PaymentMethodItemDTO
 import com.vodovoz.app.data.vodovoz_service.model.payment_method.PaymentMethodSectionDTO
-import com.vodovoz.app.domain.general.model.PaymentInfoModel
-import com.vodovoz.app.domain.general.model.VodovozPlaceholderModel
+import com.vodovoz.app.domain.general.model.order.CertificatePaymentInfoModel
+import com.vodovoz.app.domain.general.model.exceptions.VodovozPlaceholderModel
 import com.vodovoz.app.domain.general.model.cart.BottomCartModel
-import com.vodovoz.app.domain.general.model.certificate.BuyCertificateModel
+import com.vodovoz.app.domain.general.model.product.BuyCertificateModel
 import com.vodovoz.app.domain.general.model.order.AboutOrderItemModel
 import com.vodovoz.app.domain.general.model.order.AboutOrderPopupWindowModel
 import com.vodovoz.app.domain.general.model.order.CallYouItemModel
@@ -315,8 +315,8 @@ fun OrderPlaceholderDTO.toDomain(): BuyCertificateModel {
     )
 }
 
-fun OPLATA_DTO.toDomain(): PaymentInfoModel {
-    return PaymentInfoModel(
+fun OPLATA_DTO.toDomain(): CertificatePaymentInfoModel {
+    return CertificatePaymentInfoModel(
         id = ID ?: throw IllegalArgumentException("Payment ID cannot be null"),
         name = NAME ?: "",
         browser = VodovozBoolean.True equalsTo BRAYZER,

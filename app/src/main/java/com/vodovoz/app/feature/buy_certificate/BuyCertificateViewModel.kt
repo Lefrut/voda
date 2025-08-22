@@ -20,14 +20,14 @@ import com.vodovoz.app.design_system.model.widgets.getErrorText
 import com.vodovoz.app.design_system.model.widgets.mapToDomain
 import com.vodovoz.app.design_system.model.widgets.updateFieldAndResetError
 import com.vodovoz.app.design_system.model.widgets.vodovozValidators
-import com.vodovoz.app.domain.general.model.toQueries
+import com.vodovoz.app.domain.general.model.widgets.toQueries
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.feature.buy_certificate.model.BuyCertificateCodesUi
 import com.vodovoz.app.feature.buy_certificate.model.BuyCertificateErrorsUi
 import com.vodovoz.app.feature.buy_certificate.model.BuyCertificateTabUi
 import com.vodovoz.app.feature.buy_certificate.model.CertificateUi
 import com.vodovoz.app.feature.buy_certificate.model.FAQUi
-import com.vodovoz.app.feature.buy_certificate.model.PaymentInfoUi
+import com.vodovoz.app.feature.buy_certificate.model.CertificatePaymentInfoUi
 import com.vodovoz.app.feature.buy_certificate.model.mapToUi
 import com.vodovoz.app.feature.buy_certificate.model.toUi
 import com.vodovoz.app.util.extensions.singleResult
@@ -234,7 +234,7 @@ class BuyCertificateViewModel @Inject constructor(
         val currentPaymentType: PaymentTypeUi = PaymentTypeUi.Empty,
         val errors: BuyCertificateErrorsUi = BuyCertificateErrorsUi.Empty,
         val faq: FAQUi? = null,
-        val paymentInfo: PaymentInfoUi? = null,
+        val paymentInfo: CertificatePaymentInfoUi? = null,
     ) : State
 
     sealed interface BuyCertificateEvents : Event {

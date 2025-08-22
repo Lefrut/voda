@@ -4,7 +4,7 @@ import android.os.Parcelable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.graphics.Color
-import com.vodovoz.app.domain.general.model.ContentBlockModel
+import com.vodovoz.app.domain.general.model.widgets.ContentBlockModel
 import com.vodovoz.app.domain.general.model.product.BlockPromoDataModel
 import com.vodovoz.app.domain.general.model.product.BrandCategoryBlockModel
 import com.vodovoz.app.domain.general.model.product.BrandCategoryItemDataModel

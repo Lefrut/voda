@@ -4,7 +4,7 @@ import androidx.compose.runtime.Immutable
 import com.vodovoz.app.common.model.VodovozBoolean
 import com.vodovoz.app.common.model.from
 import com.vodovoz.app.common.model.toBoolean
-import com.vodovoz.app.domain.general.model.SwitchModel
+import com.vodovoz.app.domain.general.model.widgets.SwitchModel
 
 @Immutable
 data class SwitchUi(

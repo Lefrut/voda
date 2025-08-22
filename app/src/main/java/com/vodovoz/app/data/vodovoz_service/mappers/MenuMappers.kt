@@ -4,10 +4,10 @@ import com.vodovoz.app.data.vodovoz_service.di.toVodovozUrl
 import com.vodovoz.app.data.vodovoz_service.model.MENU_DTO
 import com.vodovoz.app.data.vodovoz_service.model.OrderMenuDTO
 import com.vodovoz.app.data.vodovoz_service.model.ZAKAZ_DTO
-import com.vodovoz.app.domain.general.model.HomeOrderModel
-import com.vodovoz.app.domain.general.model.MenuItemModel
-import com.vodovoz.app.domain.general.model.MenuItemTypeModel
-import com.vodovoz.app.domain.general.model.OrderWithMenuModel
+import com.vodovoz.app.domain.general.model.order.HomeOrderModel
+import com.vodovoz.app.domain.general.model.order.OrderWithMenuModel
+import com.vodovoz.app.domain.general.model.widgets.MenuItemModel
+import com.vodovoz.app.domain.general.model.widgets.MenuItemTypeModel
 
 fun OrderMenuDTO.toDomain(): OrderWithMenuModel {
     return OrderWithMenuModel(

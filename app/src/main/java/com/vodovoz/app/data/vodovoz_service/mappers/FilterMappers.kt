@@ -5,9 +5,9 @@ import com.vodovoz.app.data.vodovoz_service.model.filters.FilterDTO
 import com.vodovoz.app.data.vodovoz_service.model.filters.FilterValueDTO
 import com.vodovoz.app.data.vodovoz_service.model.filters.FilterValuesDTO
 import com.vodovoz.app.data.vodovoz_service.model.filters.FiltersDTO
-import com.vodovoz.app.domain.general.model.FilterModel
-import com.vodovoz.app.domain.general.model.FilterValueModel
-import com.vodovoz.app.domain.general.model.FiltersModel
+import com.vodovoz.app.domain.general.model.product.FilterModel
+import com.vodovoz.app.domain.general.model.product.FilterValueModel
+import com.vodovoz.app.domain.general.model.product.FiltersModel
 import com.vodovoz.app.util.smartParseFloat
 import kotlin.math.max
 import kotlin.math.min

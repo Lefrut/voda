@@ -1,5 +1,6 @@
 package com.vodovoz.app.common.di
 
+import android.app.Application
 import com.vodovoz.app.common.block_app_signal.BlockAppSignal
 import com.vodovoz.app.common.block_app_signal.BlockAppSignalImpl
 import com.vodovoz.app.common.cache.HttpErrorCache
@@ -7,6 +8,8 @@ import com.vodovoz.app.common.cache.HttpErrorCacheMappers
 import com.vodovoz.app.common.cache.VodovozHttpError
 import com.vodovoz.app.common.cache.VodovozHttpErrorCache
 import com.vodovoz.app.common.cache.VodovozHttpErrorCacheMappers
+import com.vodovoz.app.common.datastore.DataStorePrefs
+import com.vodovoz.app.common.datastore.DataStorePrefsImpl
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -51,6 +54,14 @@ abstract class CommonModule {
         impl: VodovozHttpErrorCacheMappers,
     ): HttpErrorCacheMappers<VodovozHttpError>
 
+    @Singleton
+    @Binds
+    abstract fun bindDataStorePrefs(
+        impl: DataStorePrefsImpl
+    ): DataStorePrefs
+
+
+
     companion object {
         @Provides
         @IoDispatcher
@@ -66,6 +77,7 @@ abstract class CommonModule {
         @MainDispatcher
         @Singleton
         fun provideMainDispatcher(): CoroutineDispatcher = Dispatchers.Main
+
     }
 
 }

@@ -31,9 +31,9 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.vodovoz.app.R
-import com.vodovoz.app.design_system.composables.bottomLine
 import com.vodovoz.app.design_system.model.widgets.FieldTypeUi
 import com.vodovoz.app.design_system.model.widgets.FieldUi
+import com.vodovoz.app.design_system.modifiers.bottomLine
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

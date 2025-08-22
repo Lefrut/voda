@@ -8,7 +8,6 @@ import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
@@ -96,7 +95,7 @@ class OrderingFragment : Fragment() {
                             VodovozLongPlaceholder(
                                 data = uiState.placeholder,
                                 onCloseClick = {
-                                    viewModel.navigateBackWithRefresh()
+                                    viewModel.navigateToHomeWithRefresh()
                                 },
                                 onButtonClick = {
                                     viewModel.activatePayButton(uiState.placeholder.button)
@@ -232,6 +231,10 @@ class OrderingFragment : Fragment() {
                 is OrderingFlowViewModel.OrderingEvents.OpenUrl -> {
                     context?.openUrl(event.url)
                     findNavController().popBackStack()
+                }
+
+                OrderingFlowViewModel.OrderingEvents.GoToHome -> {
+                    tabManager.selectTab(R.id.graph_home)
                 }
             }
         }

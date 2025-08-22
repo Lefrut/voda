@@ -27,11 +27,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.vodovoz.app.R
-import com.vodovoz.app.design_system.composables.bottomLine
 import com.vodovoz.app.design_system.composables.button.VodovozRadioButton
 import com.vodovoz.app.design_system.composables.decoration.VodovozHorizontalDivider
 import com.vodovoz.app.design_system.composables.decoration.VodovozSwipeToDismiss
 import com.vodovoz.app.design_system.model.SectionUi
+import com.vodovoz.app.design_system.modifiers.bottomLine
 import com.vodovoz.app.feature.addresses.model.AddressScreenTypeUi
 import com.vodovoz.app.feature.addresses.model.AddressUi
 

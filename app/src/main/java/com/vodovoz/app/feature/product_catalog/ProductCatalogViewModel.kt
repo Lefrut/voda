@@ -23,8 +23,8 @@ import com.vodovoz.app.design_system.model.filters.toDomain
 import com.vodovoz.app.design_system.model.findParentOfOnlyLeaf
 import com.vodovoz.app.design_system.model.toCategory
 import com.vodovoz.app.design_system.model.toUi
-import com.vodovoz.app.domain.general.model.EmptyResultException
-import com.vodovoz.app.domain.general.model.FiltersModel
+import com.vodovoz.app.domain.general.model.exceptions.EmptyResultException
+import com.vodovoz.app.domain.general.model.product.FiltersModel
 import com.vodovoz.app.domain.general.model.product.ProductModel
 import com.vodovoz.app.domain.general.model.product.ProductsSectionModel
 import com.vodovoz.app.domain.general.model.product.ProductsSectionUi
@@ -44,8 +44,6 @@ import com.vodovoz.app.ui.paging.emptyCombinedLoadStates
 import com.vodovoz.app.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update

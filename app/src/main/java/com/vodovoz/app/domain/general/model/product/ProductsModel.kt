@@ -1,7 +1,5 @@
 package com.vodovoz.app.domain.general.model.product
 
-import com.vodovoz.app.domain.general.model.CategoryModel
-import com.vodovoz.app.domain.general.model.SortModel
 import com.vodovoz.app.domain.general.model.user.ForAdultsModel
 
 data class ProductsSectionModel(

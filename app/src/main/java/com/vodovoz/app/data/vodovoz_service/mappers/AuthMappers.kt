@@ -10,7 +10,7 @@ import com.vodovoz.app.data.vodovoz_service.model.auth.KNOPKA_AUTH_DTO
 import com.vodovoz.app.data.vodovoz_service.model.auth.LoginByPhoneDTO
 import com.vodovoz.app.data.vodovoz_service.model.auth.RequestCodeDTO
 import com.vodovoz.app.data.vodovoz_service.model.auth.UserAuthInfoDTO
-import com.vodovoz.app.domain.general.model.CheckBoxModel
+import com.vodovoz.app.domain.general.model.widgets.CheckBoxModel
 import com.vodovoz.app.domain.general.model.promotion.ColorfulButtonModel
 import com.vodovoz.app.domain.general.model.user.AuthDetailsModel
 import com.vodovoz.app.domain.general.model.user.RequestCodeModel

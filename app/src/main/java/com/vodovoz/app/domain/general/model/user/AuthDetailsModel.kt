@@ -1,8 +1,8 @@
 package com.vodovoz.app.domain.general.model.user
 
-import com.vodovoz.app.domain.general.model.CheckBoxModel
+import com.vodovoz.app.domain.general.model.widgets.CheckBoxModel
 import com.vodovoz.app.domain.general.model.promotion.ColorfulButtonModel
-import com.vodovoz.app.domain.general.model.FieldModel
+import com.vodovoz.app.domain.general.model.widgets.FieldModel
 
 data class AuthDetailsModel(
     val title: String,

@@ -6,7 +6,7 @@ import com.squareup.moshi.Types
 import com.vodovoz.app.core.network.retrofit.messageWithCode
 import com.vodovoz.app.data.vodovoz_service.mappers.executeRequest
 import com.vodovoz.app.data.vodovoz_service.model.VodovozResponseDTO
-import com.vodovoz.app.domain.general.model.RequestException
+import com.vodovoz.app.domain.general.model.exceptions.RequestException
 import com.vodovoz.app.util.extensions.debugLog
 import kotlinx.coroutines.flow.singleOrNull
 import okhttp3.ResponseBody

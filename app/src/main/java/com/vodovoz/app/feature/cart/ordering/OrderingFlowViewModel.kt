@@ -116,9 +116,9 @@ class OrderingFlowViewModel @Inject constructor(
         sendEvent(OrderingEvents.GoBack)
     }
 
-    fun navigateBackWithRefresh() = viewModelScope.launch {
+    fun navigateToHomeWithRefresh() = viewModelScope.launch {
         sendEvent(OrderingEvents.RefreshCart)
-        sendEvent(OrderingEvents.GoBack)
+        sendEvent(OrderingEvents.GoToHome)
     }
 
     private fun changeOrderingSection(
@@ -592,7 +592,7 @@ class OrderingFlowViewModel @Inject constructor(
 
     fun activatePayButton(button: ColorfulButtonUi?) = viewModelScope.launch {
         if (button?.url == null) {
-            navigateBackWithRefresh()
+            navigateToHomeWithRefresh()
             return@launch
         }
 
@@ -630,6 +630,7 @@ class OrderingFlowViewModel @Inject constructor(
 
     sealed class OrderingEvents : Event {
         data object GoBack : OrderingEvents()
+        data object GoToHome : OrderingEvents()
         data class GoToAddresses(val addressId: Long?) : OrderingEvents()
         data object ScrollToTop : OrderingEvents()
         data object RefreshCart : OrderingEvents()

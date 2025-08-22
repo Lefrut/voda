@@ -28,7 +28,6 @@ import com.vodovoz.app.design_system.composables.button.VodovozButton
 import com.vodovoz.app.design_system.composables.button.VodovozButtonDefaults
 import com.vodovoz.app.design_system.composables.button.VodovozButtonSmall
 import com.vodovoz.app.design_system.composables.card.VodovozOutlinedCard
-import com.vodovoz.app.design_system.composables.isElementVisible
 import com.vodovoz.app.design_system.model.BlockPromoDataUi
 import com.vodovoz.app.design_system.model.ButtonBlockUi
 import com.vodovoz.app.design_system.model.ButtonDesignBlockUi
@@ -38,6 +37,7 @@ import com.vodovoz.app.design_system.model.DesignBlockUi
 import com.vodovoz.app.design_system.model.OldNewPriceUi
 import com.vodovoz.app.design_system.model.ProductDetailsButtonsUi
 import com.vodovoz.app.design_system.model.PromoProductUi
+import com.vodovoz.app.design_system.modifiers.isElementVisible
 
 @Composable
 fun ProductDetailsButtonsBlock(

@@ -19,7 +19,7 @@ import com.vodovoz.app.design_system.ExtendedTheme
 import com.vodovoz.app.design_system.composables.button.QuantityButtonSmall
 import com.vodovoz.app.design_system.composables.button.VodovozButtonDefaults
 import com.vodovoz.app.design_system.composables.button.VodovozButtonSmall
-import com.vodovoz.app.domain.general.model.PopularCategoryModel
+import com.vodovoz.app.domain.general.model.product.PopularCategoryModel
 import com.vodovoz.app.domain.general.model.product.ButtonModel
 import com.vodovoz.app.domain.general.model.product.CategoryWithProductsModel
 import com.vodovoz.app.domain.general.model.product.ProductModel

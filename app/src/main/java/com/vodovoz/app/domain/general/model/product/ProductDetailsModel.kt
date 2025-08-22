@@ -1,7 +1,7 @@
 package com.vodovoz.app.domain.general.model.product
 
 import com.vodovoz.app.domain.general.model.promotion.ColorfulButtonModel
-import com.vodovoz.app.domain.general.model.ContentBlockModel
+import com.vodovoz.app.domain.general.model.widgets.ContentBlockModel
 import com.vodovoz.app.domain.general.model.user.ForAdultsModel
 import com.vodovoz.app.domain.general.model.promotion.LabelModel
 

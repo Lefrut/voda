@@ -1,7 +1,7 @@
 package com.vodovoz.app.domain.general.model.product
 
 import com.vodovoz.app.common.model.ButtonAction
-import com.vodovoz.app.domain.general.model.VodovozPlaceholderModel
+import com.vodovoz.app.domain.general.model.exceptions.VodovozPlaceholderModel
 
 data class TopAndBottomSectionsModel(
     val topSection: SectionModel<CategoryWithProductsModel>,

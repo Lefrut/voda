@@ -2,7 +2,7 @@ package com.vodovoz.app.feature.buy_certificate.model
 
 import android.os.Parcelable
 import androidx.compose.runtime.Immutable
-import com.vodovoz.app.domain.general.model.certificate.FAQModel
+import com.vodovoz.app.domain.general.model.product.FAQModel
 import kotlinx.parcelize.Parcelize
 
 @Immutable

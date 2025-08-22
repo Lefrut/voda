@@ -17,9 +17,8 @@ class BlockAppSignalImpl @Inject constructor(
         const val SIGNAL_KEY = "block_app"
     }
 
-
     override suspend fun getSignalFlow(): Flow<BlockAppSignal.Type> {
-        return dataStorePrefs.getStringFlow(SIGNAL_KEY).distinctUntilChanged().mapNotNull { name ->
+        return dataStorePrefs.getStringFlow(SIGNAL_KEY).mapNotNull { name ->
             kotlin.runCatching {
                 BlockAppSignal.Type.valueOf(name ?: BlockAppSignal.Type.None.name)
             }.getOrElse { BlockAppSignal.Type.None }

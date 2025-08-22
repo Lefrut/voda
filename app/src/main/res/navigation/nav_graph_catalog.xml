@@ -257,7 +257,7 @@
 
     <dialog
         android:id="@+id/speechDialogFragment"
-        android:name="com.vodovoz.app.common.speech_recognizer.SpeechDialogFragment"
+        android:name="com.vodovoz.app.ui.dialog.SpeechDialogFragment"
         android:label="SpeechDialogFragment"/>
 
     <fragment

@@ -18,7 +18,7 @@ import com.vodovoz.app.design_system.model.widgets.checkFields
 import com.vodovoz.app.design_system.model.widgets.updateCheckbox
 import com.vodovoz.app.design_system.model.widgets.updateField
 import com.vodovoz.app.design_system.model.widgets.updateFieldAndResetError
-import com.vodovoz.app.domain.general.model.TooManyRequestsException
+import com.vodovoz.app.domain.general.model.exceptions.TooManyRequestsException
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.feature.auth.model.AuthDetailsUi
 import com.vodovoz.app.feature.auth.model.AuthState

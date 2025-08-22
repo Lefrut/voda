@@ -1,7 +1,7 @@
 package com.vodovoz.app.feature.product_details.model
 
 import androidx.compose.runtime.Immutable
-import com.vodovoz.app.domain.general.model.PresentInfoModel
+import com.vodovoz.app.domain.general.model.promotion.PresentInfoModel
 
 @Immutable
 data class PresentInfoUi(

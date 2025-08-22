@@ -15,7 +15,7 @@ import com.vodovoz.app.design_system.model.widgets.mapToDomain
 import com.vodovoz.app.design_system.model.widgets.updateCheckbox
 import com.vodovoz.app.design_system.model.widgets.updateField
 import com.vodovoz.app.design_system.model.widgets.updateFieldAndResetError
-import com.vodovoz.app.domain.general.model.RequestException
+import com.vodovoz.app.domain.general.model.exceptions.RequestException
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.feature.auth.model.agreementIsCheckedWhenAvailable
 import com.vodovoz.app.feature.auth.model.toUi
