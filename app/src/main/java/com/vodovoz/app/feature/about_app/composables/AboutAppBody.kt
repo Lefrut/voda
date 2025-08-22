@@ -1,8 +1,8 @@
 package com.vodovoz.app.feature.about_app.composables
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -17,6 +18,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.layout.ContentScale
@@ -30,7 +32,8 @@ import com.vodovoz.app.feature.about_app.model.AboutAppOption
 fun AboutAppBody(
     modifier: Modifier = Modifier,
     version: String,
-    onOptionClick: (AboutAppOption) -> Unit
+    onOptionClick: (AboutAppOption) -> Unit,
+    onLogoLongClick: () -> Unit,
 ) {
     Column(
         modifier = modifier
@@ -43,7 +46,13 @@ fun AboutAppBody(
         Image(
             painter = painterResource(R.drawable.pic_app),
             contentDescription = null,
-            modifier = Modifier.size(100.dp),
+            modifier = Modifier
+                .size(100.dp)
+                .clip(RoundedCornerShape(20.dp))
+                .combinedClickable(
+                    onLongClick = onLogoLongClick,
+                    onClick = {}
+                ),
             contentScale = ContentScale.Crop
         )
         Text(
@@ -65,7 +74,7 @@ fun AboutAppBody(
 fun AboutAppOptionItem(
     modifier: Modifier = Modifier,
     option: AboutAppOption,
-    onClick: (AboutAppOption) -> Unit
+    onClick: (AboutAppOption) -> Unit,
 ) {
     val borderColor = MaterialTheme.colorScheme.surfaceVariant
     Row(

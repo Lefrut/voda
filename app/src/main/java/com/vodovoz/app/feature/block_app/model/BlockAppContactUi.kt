@@ -1,7 +1,7 @@
 package com.vodovoz.app.feature.block_app.model
 
 import androidx.compose.runtime.Immutable
-import com.vodovoz.app.common.model.VodovozSiteStateContact
+import com.vodovoz.app.common.model.BlockSiteContact
 
 @Immutable
 data class BlockAppContactUi(
@@ -10,7 +10,7 @@ data class BlockAppContactUi(
     val urlType: String,
 )
 
-fun VodovozSiteStateContact.toUi(): BlockAppContactUi {
+fun BlockSiteContact.toUi(): BlockAppContactUi {
     return BlockAppContactUi(
         url  = url,
         urlType = urlType,
@@ -18,6 +18,6 @@ fun VodovozSiteStateContact.toUi(): BlockAppContactUi {
     )
 }
 
-fun List<VodovozSiteStateContact>.mapToUi(): List<BlockAppContactUi>{
+fun List<BlockSiteContact>.mapToUi(): List<BlockAppContactUi>{
     return map { it.toUi() }
 }

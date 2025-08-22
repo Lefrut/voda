@@ -11,5 +11,5 @@ data class BuyCertificateDetailsModel(
     val button: ColorfulButtonModel,
     val paymentTitle: String,
     val paymentTypes: List<PaymentTypeModel>,
-    val faq: FAQModel,
+    val faq: FAQModel?,
 )

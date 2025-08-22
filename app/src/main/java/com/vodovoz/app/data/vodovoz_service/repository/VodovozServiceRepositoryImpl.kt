@@ -9,7 +9,7 @@ import com.squareup.moshi.Types
 import com.vodovoz.app.common.account.AccountManager
 import com.vodovoz.app.common.cookie.CookieManager
 import com.vodovoz.app.common.model.VodovozBoolean
-import com.vodovoz.app.common.model.VodovozSiteState
+import com.vodovoz.app.common.model.AppConfig
 import com.vodovoz.app.common.model.from
 import com.vodovoz.app.core.network.retrofit.messageWithCode
 import com.vodovoz.app.core.network.retrofit.prepareImageParts
@@ -29,7 +29,7 @@ import com.vodovoz.app.data.vodovoz_service.model.VodovozErrorResponseDTO
 import com.vodovoz.app.data.vodovoz_service.model.VodovozPlaceholderDTO
 import com.vodovoz.app.data.vodovoz_service.model.VodovozResponseDTO
 import com.vodovoz.app.data.vodovoz_service.model.WaitFeedbackProductsDTO
-import com.vodovoz.app.data.vodovoz_service.model.order_details.OrderDetailsDTO
+import com.vodovoz.app.data.vodovoz_service.model.order.OrderDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.order_history.OrdersHistoryDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.paging.VodovozPagingSource
 import com.vodovoz.app.design_system.model.widgets.FieldUi
@@ -63,7 +63,6 @@ import com.vodovoz.app.domain.general.model.format
 import com.vodovoz.app.domain.general.model.location.AddAddressDetailsModel
 import com.vodovoz.app.domain.general.model.location.AddressModel
 import com.vodovoz.app.domain.general.model.location.MapAddressModel
-import com.vodovoz.app.domain.general.model.location.MapAreaModel
 import com.vodovoz.app.domain.general.model.order.CancelOrderDetailsModel
 import com.vodovoz.app.domain.general.model.order.DeliveryDateDetailsModel
 import com.vodovoz.app.domain.general.model.order.FormModel
@@ -1651,7 +1650,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
         )
     }
 
-    override fun getSiteState(): Flow<Result<VodovozSiteState>> {
+    override fun getSiteState(): Flow<Result<AppConfig>> {
         return executeRequest(
             request = {
                 vodovozService.getSiteState()
@@ -1663,7 +1662,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
             onFail = onFail@{ response ->
                 val code = response.code()
                 return@onFail when (code) {
-                    402, 403 -> Result.success(VodovozSiteState.Blocked)
+                    402, 403 -> Result.success(AppConfig.Blocked)
                     else -> Result.failure(RequestException(response.messageWithCode()))
                 }
             }

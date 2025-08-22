@@ -67,7 +67,7 @@ class BuyCertificateViewModel @Inject constructor(
                     tabs = tabs,
                     button = buyCertificateDetails.button.toUi(),
                     paymentTitle = buyCertificateDetails.paymentTitle,
-                    faq = buyCertificateDetails.faq.toUi(),
+                    faq = buyCertificateDetails.faq?.toUi(),
                     paymentTypes = paymentTypes,
                     codes = buyCertificateDetails.codes.toUi(),
                     currentTab = tabs.firstOrNull() ?: s.currentTab,
@@ -233,7 +233,7 @@ class BuyCertificateViewModel @Inject constructor(
         val paymentTypes: List<PaymentTypeUi> = emptyList(),
         val currentPaymentType: PaymentTypeUi = PaymentTypeUi.Empty,
         val errors: BuyCertificateErrorsUi = BuyCertificateErrorsUi.Empty,
-        val faq: FAQUi = FAQUi.Empty,
+        val faq: FAQUi? = null,
         val paymentInfo: PaymentInfoUi? = null,
     ) : State
 

@@ -13,32 +13,46 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.ViewCompositionStrategy
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
-import com.vodovoz.app.ui.mvi.collectAsState
-import androidx.navigation.fragment.findNavController
-import com.vodovoz.app.common.tab.TabManager
-import com.vodovoz.app.design_system.VodovozTheme
-import com.vodovoz.app.design_system.effects.LifecycleEffect
-import com.vodovoz.app.feature.about_app.model.AboutAppEvent
-import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
 import androidx.core.net.toUri
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import com.vodovoz.app.BuildConfig
 import com.vodovoz.app.R
+import com.vodovoz.app.common.tab.TabManager
 import com.vodovoz.app.core.navigation.navigateToWebView
-import com.vodovoz.app.util.extensions.fromHtml
+import com.vodovoz.app.design_system.VodovozTheme
+import com.vodovoz.app.design_system.effects.LifecycleEffect
+import com.vodovoz.app.feature.about_app.composables.DeveloperBottomSheet
+import com.vodovoz.app.feature.about_app.model.AboutAppEvent
+import com.vodovoz.app.feature.cart.CartFlowViewModel
+import com.vodovoz.app.feature.catalog.CatalogFlowViewModel
+import com.vodovoz.app.feature.favorite.FavoriteFlowViewModel
+import com.vodovoz.app.feature.home.HomeFlowViewModel
+import com.vodovoz.app.feature.profile.ProfileFlowViewModel
+import com.vodovoz.app.ui.mvi.collectAsState
 import com.vodovoz.app.util.extensions.isTablet
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class AboutAppFragment : Fragment() {
 
+    @Inject
+    lateinit var tabManager: TabManager
+
     private val viewModel: AboutAppViewModel by viewModels()
+    private val homeViewModel: HomeFlowViewModel by activityViewModels()
+    private val cartFlowViewModel: CartFlowViewModel by activityViewModels()
+    private val favoriteViewModel: FavoriteFlowViewModel by activityViewModels()
+    private val catalogFlowViewModel: CatalogFlowViewModel by activityViewModels()
+    private val profileViewModel: ProfileFlowViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
@@ -52,6 +66,17 @@ class AboutAppFragment : Fragment() {
                         viewModel = viewModel,
                         viewState = viewState
                     )
+
+                    if (viewState.showDeveloperBS) {
+                        DeveloperBottomSheet(
+                            onDismissClick = {
+                                viewModel.hideDeveloperBottomSheet()
+                            },
+                            onModeClick = { appMode ->
+                                viewModel.changeMode(appMode)
+                            }
+                        )
+                    }
 
                     LifecycleEffect {
                         viewModel.events.collect { event ->
@@ -74,6 +99,15 @@ class AboutAppFragment : Fragment() {
 
                                 is AboutAppEvent.WriteToDevelopers -> {
                                     context.writeToDevelopers(event.userId)
+                                }
+
+                                AboutAppEvent.RefreshApp -> {
+                                    homeViewModel.refresh()
+                                    cartFlowViewModel.refresh()
+                                    favoriteViewModel.refresh()
+                                    catalogFlowViewModel.refresh()
+                                    profileViewModel.refresh()
+                                    tabManager.selectTab(R.id.graph_home)
                                 }
                             }
                         }
@@ -134,12 +168,7 @@ class AboutAppFragment : Fragment() {
             data = "mailto:".toUri()
             putExtra(Intent.EXTRA_EMAIL, arrayOf("android@vodovoz.ru"))
             putExtra(Intent.EXTRA_SUBJECT, getString(R.string.email_subject))
-            putExtra(Intent.EXTRA_TEXT, (StringBuilder()
-                .append("<br><br><br><br><font size=\"2\">${deviceInfo}</font>")
-                .append("<br>Версия приложения: ${BuildConfig.VERSION_NAME}")
-                .append("<br>User id:" + viewModel.fetchUserId())
-                .toString()).fromHtml()
-            )
+            putExtra(Intent.EXTRA_TEXT, emailBody)
         }
 
         try {

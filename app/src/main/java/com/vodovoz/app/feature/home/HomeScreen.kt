@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -21,6 +20,7 @@ import com.vodovoz.app.R
 import com.vodovoz.app.design_system.composables.dialogs.VodovozDialog
 import com.vodovoz.app.design_system.composables.placeholders.NetworkErrorPlaceholder
 import com.vodovoz.app.design_system.composables.pull_to_refresh.VodovozPullToRefreshBox
+import com.vodovoz.app.design_system.composables.scaffold.VodovozScaffold
 import com.vodovoz.app.feature.all.promotions.composables.AdvertisingInfoBottomSheet
 import com.vodovoz.app.feature.home.composables.AppUpdateBottomSheet
 import com.vodovoz.app.feature.home.composables.HomeBody
@@ -55,7 +55,7 @@ fun HomeScreen(
         }
     }
 
-    Scaffold(
+    VodovozScaffold(
         topBar = {
             HomeTopBar(
                 onFocus = {

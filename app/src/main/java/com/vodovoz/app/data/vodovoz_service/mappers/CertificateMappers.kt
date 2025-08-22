@@ -75,7 +75,7 @@ fun BuyCertificateDetailsDTO.toDomain(): BuyCertificateDetailsModel {
         paymentTitle = OPLATA.NAME ?: "",
         paymentTypes = OPLATA.DATA?.mapToDomain()
             ?: throw IllegalArgumentException("Payment types data (OPLATA.DATA) is missing"),
-        faq = FAQ?.toDomain() ?: throw IllegalArgumentException("FAQ data is missing"),
+        faq = FAQ?.toDomain(),
     )
 }
 

@@ -2,13 +2,14 @@ package com.vodovoz.app.feature.about_app
 
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.viewModelScope
-import com.vodovoz.app.R
 import com.vodovoz.app.common.account.AccountManager
-import com.vodovoz.app.common.agreement.AgreementController
-import com.vodovoz.app.common.resources.ResourcesProvider
+import com.vodovoz.app.common.model.GlobalAppLinks
+import com.vodovoz.app.core.network.interceptor.BaseUrlInterceptor
+import com.vodovoz.app.feature.about_app.composables.AppMode
 import com.vodovoz.app.feature.about_app.model.AboutAppEvent
 import com.vodovoz.app.feature.about_app.model.AboutAppOption
 import com.vodovoz.app.feature.about_app.model.AboutAppState
+import com.vodovoz.app.feature.sitestate.SiteStateManager
 import com.vodovoz.app.ui.mvi.MviViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -18,7 +19,8 @@ import javax.inject.Inject
 @Stable
 class AboutAppViewModel @Inject constructor(
     private val accountManager: AccountManager,
-    private val resourcesProvider: ResourcesProvider
+    private val siteStateManager: SiteStateManager,
+    private val baseUrlInterceptor: BaseUrlInterceptor,
 ) : MviViewModel<AboutAppState, AboutAppEvent>(AboutAppState()) {
 
     fun fetchUserId() = accountManager.fetchAccountId()
@@ -42,21 +44,45 @@ class AboutAppViewModel @Inject constructor(
             }
 
             AboutAppOption.PrivacyPolicy -> {
-                val links = AgreementController.extractLinks()
-                val link = links.getOrElse(0) { "" }
-                val title =
-                    AgreementController.getTitle(0) ?: resourcesProvider.getString(R.string.space)
-                sendEvent(AboutAppEvent.GoToWebView(link, title))
-
+                with(GlobalAppLinks.policy) {
+                    sendEvent(AboutAppEvent.GoToWebView(url, title))
+                }
             }
 
             AboutAppOption.TermsOfUse -> {
-                val links = AgreementController.extractLinks()
-                val link = links.getOrElse(1) { "" }
-                val title =
-                    AgreementController.getTitle(1) ?: resourcesProvider.getString(R.string.space)
-                sendEvent(AboutAppEvent.GoToWebView(link, title))
+                with(GlobalAppLinks.termsOfUse) {
+                    sendEvent(AboutAppEvent.GoToWebView(url, title))
+                }
             }
         }
+    }
+
+    fun showDeveloperBS() = viewModelScope.launch {
+        updateState { s ->
+            s.copy(showDeveloperBS = true)
+        }
+    }
+
+    fun hideDeveloperBottomSheet() = viewModelScope.launch {
+        updateState { s ->
+            s.copy(showDeveloperBS = false)
+        }
+    }
+
+    fun changeMode(appMode: AppMode) = viewModelScope.launch {
+        val testUrl = siteStateManager.siteStateSnapshot.testUrl
+        when (appMode) {
+            AppMode.Test -> {
+                baseUrlInterceptor.updateBaseUrl(testUrl)
+            }
+
+            AppMode.Prod -> {
+                baseUrlInterceptor.clear()
+            }
+        }
+        updateState { s ->
+            s.copy(showDeveloperBS = false)
+        }
+        sendEvent(AboutAppEvent.RefreshApp)
     }
 }

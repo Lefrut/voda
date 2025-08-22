@@ -103,7 +103,7 @@ class MainFragment : Fragment(), SnackbarHostStateOwner {
         requestMainPermissionIfNeeded()
     }
 
-    private fun requestMainPermissionIfNeeded(){
+    private fun requestMainPermissionIfNeeded() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && !requireContext().notificationPermissionGranted) {
             notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
         } else if (!requireContext().locationPermissionGranted) {
@@ -144,7 +144,9 @@ class MainFragment : Fragment(), SnackbarHostStateOwner {
                 insetsVisibilityState.insets.map { flow ->
                     flow.value
                 }.forEach { insetState ->
-                    if (insetState.consume) consumeWindowInsets(insetState.type)
+                    if (insetState.consume) {
+                        consumeWindowInsets(insetState.type)
+                    }
                 }
             }.build()
         }
@@ -233,6 +235,7 @@ class MainFragment : Fragment(), SnackbarHostStateOwner {
 
                     val insets = ViewCompat.getRootWindowInsets(binding.root)
                     insets?.getInsetsIgnoringVisibility(insetState.type)?.toInsetsPadding()
+                        ?.takeIf { insetState.consume }
                         ?.let { insetsPadding ->
                             accInsetsPadding += insetsPadding
                         }

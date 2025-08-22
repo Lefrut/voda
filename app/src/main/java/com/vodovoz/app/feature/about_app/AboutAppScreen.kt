@@ -36,6 +36,9 @@ fun AboutAppScreen(viewModel: AboutAppViewModel, viewState: AboutAppState) {
             version = viewState.version,
             onOptionClick = { aboutAppOption ->
                 viewModel.activateOption(aboutAppOption)
+            },
+            onLogoLongClick = {
+                viewModel.showDeveloperBS()
             }
         )
     }

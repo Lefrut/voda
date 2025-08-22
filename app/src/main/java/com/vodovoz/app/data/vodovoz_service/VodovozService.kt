@@ -34,7 +34,6 @@ import com.vodovoz.app.data.vodovoz_service.model.VodovozResponseDTO
 import com.vodovoz.app.data.vodovoz_service.model.WaitFeedbackProductsDTO
 import com.vodovoz.app.data.vodovoz_service.model.address.AddAddressDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.address.AddressesDTO
-import com.vodovoz.app.data.vodovoz_service.model.address.MapAreaDTO
 import com.vodovoz.app.data.vodovoz_service.model.address.MapZonesDTO
 import com.vodovoz.app.data.vodovoz_service.model.auth.AuthDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.auth.LoginByPhoneDTO
@@ -47,8 +46,8 @@ import com.vodovoz.app.data.vodovoz_service.model.certificate.BuyCertificateDeta
 import com.vodovoz.app.data.vodovoz_service.model.delivery_date.DeliveryDateDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.filters.FiltersDTO
 import com.vodovoz.app.data.vodovoz_service.model.notification_settings.NotificationSettingsDetailsDTO
-import com.vodovoz.app.data.vodovoz_service.model.order_details.OrderDetailsDTO
-import com.vodovoz.app.data.vodovoz_service.model.order_details.WhereMyOrderDetailsDTO
+import com.vodovoz.app.data.vodovoz_service.model.order.OrderDetailsDTO
+import com.vodovoz.app.data.vodovoz_service.model.order.WhereMyOrderDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.order_history.OrdersHistoryDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.ordering.OrderCallYouDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.ordering.OrderingDetailsDTO
@@ -763,7 +762,8 @@ interface VodovozService {
         @Query("ascdesc") order: String = "",
     ): Response<VodovozResponseDTO<ProductsSectionDTO>>
 
-        @GET("glavnaya/super_top_new.php?action=topglav")
+    //todo - super_top_new.php
+    @GET("glavnaya/super_top.php?action=topglav")
     suspend fun getSuperTop(): Response<VodovozResponseDTO<SuperTopAndBottomSectionsDTO>>
 
     @GET("glavnaya/super_top_new.php?action=details")

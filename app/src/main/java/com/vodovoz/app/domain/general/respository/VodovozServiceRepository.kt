@@ -1,7 +1,7 @@
 package com.vodovoz.app.domain.general.respository
 
 import androidx.paging.PagingData
-import com.vodovoz.app.common.model.VodovozSiteState
+import com.vodovoz.app.common.model.AppConfig
 import com.vodovoz.app.design_system.model.widgets.FieldUi
 import com.vodovoz.app.domain.general.model.CatalogDetailsModel
 import com.vodovoz.app.domain.general.model.FieldModel
@@ -26,12 +26,10 @@ import com.vodovoz.app.domain.general.model.certificate.CertificateActivationDet
 import com.vodovoz.app.domain.general.model.location.AddAddressDetailsModel
 import com.vodovoz.app.domain.general.model.location.AddressModel
 import com.vodovoz.app.domain.general.model.location.MapAddressModel
-import com.vodovoz.app.domain.general.model.location.MapAreaModel
 import com.vodovoz.app.domain.general.model.order.CancelOrderDetailsModel
 import com.vodovoz.app.domain.general.model.order.DeliveryDateDetailsModel
 import com.vodovoz.app.domain.general.model.order.OrderCallYouDetailsModel
 import com.vodovoz.app.domain.general.model.order.OrderDetailsModel
-import com.vodovoz.app.domain.general.model.order.OrderQuestionDetailsModel
 import com.vodovoz.app.domain.general.model.order.OrderingDetailsModel
 import com.vodovoz.app.domain.general.model.order.OrdersHistoryDetailsModel
 import com.vodovoz.app.domain.general.model.order.OrdersHistoryItemModel
@@ -356,7 +354,7 @@ interface VodovozServiceRepository {
 
     fun getMiniSearchRecommendations(query: String): Flow<Result<SearchRecommendationsModel>>
 
-    fun getSiteState(): Flow<Result<VodovozSiteState>>
+    fun getSiteState(): Flow<Result<AppConfig>>
 
     fun getPreorderFields(productId: Long): Flow<Result<FormModel>>
 

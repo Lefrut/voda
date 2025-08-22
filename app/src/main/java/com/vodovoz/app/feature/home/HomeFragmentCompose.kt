@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -31,10 +30,10 @@ import androidx.navigation.fragment.findNavController
 import com.vodovoz.app.R
 import com.vodovoz.app.common.account.AccountManager
 import com.vodovoz.app.common.cookie.CookieManager
+import com.vodovoz.app.common.model.GlobalAppLinks
 import com.vodovoz.app.common.tab.TabManager
 import com.vodovoz.app.core.navigation.ContentSearchNavigator
 import com.vodovoz.app.core.navigation.activate
-import com.vodovoz.app.core.navigation.findRootNavController
 import com.vodovoz.app.core.navigation.navigateToAboutApp
 import com.vodovoz.app.core.navigation.navigateToAllBrands
 import com.vodovoz.app.core.navigation.navigateToAllServices
@@ -367,10 +366,13 @@ class HomeFragment : Fragment() {
                         }
 
                         "dostavka" -> {
-                            findNavController().navigateToWebView(
-                                VodovozWebConfig.ABOUT_DELIVERY_URL,
-                                getString(R.string.about_delivery)
-                            )
+                            with(GlobalAppLinks.aboutDelivery) {
+                                findNavController().navigateToWebView(
+                                    url = url,
+                                    title = title
+                                )
+                            }
+
                         }
 
                         "service" -> {
@@ -510,11 +512,11 @@ class HomeFragment : Fragment() {
                     }
 
                     "dostavka" -> {
-                        findNavController().navigateToWebView(
-                            VodovozWebConfig.ABOUT_DELIVERY_URL,
-                            requireContext().getString(R.string.about_delivery)
-                        )
-
+                        with(GlobalAppLinks.aboutDelivery) {
+                            findNavController().navigateToWebView(
+                                url, title
+                            )
+                        }
                     }
 
                     "service" -> {

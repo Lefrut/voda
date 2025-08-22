@@ -51,18 +51,6 @@ class QuestionnairesFlowFragment : Fragment() {
 
     @Inject
     lateinit var tabManager: TabManager
-    private val homeViewModel: HomeFlowViewModel by activityViewModels()
-    private val cartFlowViewModel: CartFlowViewModel by activityViewModels()
-    private val favoriteViewModel: FavoriteFlowViewModel by activityViewModels()
-    private val catalogFlowViewModel: CatalogFlowViewModel by activityViewModels()
-    private val profileViewModel: ProfileFlowViewModel by activityViewModels()
-
-    @Inject
-    lateinit var baseUrlInterceptor: BaseUrlInterceptor
-
-    @Inject
-    lateinit var siteStateManager: SiteStateManager
-
 
     override fun onStart() {
         super.onStart()
@@ -183,65 +171,6 @@ class QuestionnairesFlowFragment : Fragment() {
                     }
                 }
             }
-        }
-    }
-
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        setBackDoor()
-    }
-
-    private var threeFingerTouchCount = 0
-
-    @SuppressLint("ClickableViewAccessibility")
-    private fun setBackDoor() {
-        view?.setOnTouchListener { _, event ->
-            val handled = true
-            val action = event.action and MotionEvent.ACTION_MASK
-            val count = event.pointerCount
-            if (action == MotionEvent.ACTION_POINTER_DOWN && count == 3 && (++threeFingerTouchCount) == 3) {
-                threeFingerTouchCount = 0
-                MaterialAlertDialogBuilder(requireContext())
-                    .setMessage("Выберете текущий путь к серверу")
-                    .setNegativeButton("Рабочий") { dialog, _ ->
-                        dialog.dismiss()
-                        loadHomeFragmentWithNewServerURL(null)
-                    }
-                    .setPositiveButton("Тестовый") { dialog, _ ->
-                        dialog.dismiss()
-                        lifecycleScope.launch {
-                            siteStateManager.requestSiteState()
-                            siteStateManager.siteStateFlow.collect { state ->
-                                if (state != null) {
-                                    val newLink = "${state.testUrl}/"
-                                    loadHomeFragmentWithNewServerURL(newLink)
-                                }
-                            }
-                        }
-                    }.show()
-            }
-            return@setOnTouchListener handled
-        }
-    }
-
-    private fun loadHomeFragmentWithNewServerURL(serverUrl: String?) {
-        VodovozWebConfig.VODOVOZ_URL = serverUrl ?: ""
-
-        if (serverUrl == null) {
-            baseUrlInterceptor.clear()
-        } else {
-            baseUrlInterceptor.updateBaseUrl(serverUrl)
-        }
-
-        lifecycleScope.launch {
-            delay(1000)
-            homeViewModel.refresh()
-            cartFlowViewModel.refresh()
-            favoriteViewModel.refresh()
-            catalogFlowViewModel.refresh()
-            profileViewModel.refresh()
-            tabManager.selectTab(R.id.graph_home)
         }
     }
 }

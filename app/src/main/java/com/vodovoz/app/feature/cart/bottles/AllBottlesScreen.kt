@@ -15,6 +15,7 @@ import androidx.compose.ui.util.lerp
 import com.vodovoz.app.R
 import com.vodovoz.app.design_system.composables.button.VodovozButton
 import com.vodovoz.app.design_system.composables.floating.BottomFloatingContainer
+import com.vodovoz.app.design_system.composables.scaffold.VodovozScaffold
 import com.vodovoz.app.design_system.composables.top_bar.HybridSearchTopBar
 import com.vodovoz.app.feature.cart.bottles.composables.AllBottlesBody
 
@@ -30,7 +31,7 @@ fun AllBottlesScreen(
     )
 
 
-    Scaffold(
+    VodovozScaffold(
         topBar = {
             HybridSearchTopBar(
                 title = stringResource(R.string.bottles_brand),

@@ -1,7 +1,7 @@
 package com.vodovoz.app.feature.block_app
 
 import androidx.lifecycle.viewModelScope
-import com.vodovoz.app.common.model.VodovozSiteStateData
+import com.vodovoz.app.common.model.BlockSiteInfo
 import com.vodovoz.app.feature.block_app.model.BlockAppContactUi
 import com.vodovoz.app.feature.block_app.model.BlockAppEvent
 import com.vodovoz.app.feature.block_app.model.BlockAppState
@@ -35,7 +35,7 @@ class BlockAppViewModel @Inject constructor(
             updateStateBySiteState(data)
         }
 
-    private fun updateStateBySiteState(data: VodovozSiteStateData) {
+    private fun updateStateBySiteState(data: BlockSiteInfo) {
         _state.update { s ->
             s.copy(
                 title = data.title,

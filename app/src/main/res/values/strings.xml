@@ -307,5 +307,7 @@
     <string name="refereal_code_copied">Реферальный код скопирован</string>
     <string name="unknown_error">Неизвестная ошибка</string>
     <string name="middle_dot">·</string>
+    <string name="test">Тестовый</string>
+    <string name="prod">Продакшн</string>
 
 </resources>

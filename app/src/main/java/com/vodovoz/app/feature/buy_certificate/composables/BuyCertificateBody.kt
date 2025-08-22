@@ -32,7 +32,7 @@ fun BuyCertificateBody(
     paymentTypes: List<PaymentTypeUi>,
     currentPaymentType: PaymentTypeUi,
     button: ColorfulButtonUi,
-    faq: FAQUi,
+    faq: FAQUi?,
     errors: BuyCertificateErrorsUi,
     onCertificateClick: (CertificateUi) -> Unit,
     onTabClick: (BuyCertificateTabUi) -> Unit,
@@ -87,11 +87,13 @@ fun BuyCertificateBody(
 
         VodovozHorizontalDivider()
 
-        FAQButton(
-            faq = faq,
-            onFAQClick = onFAQButtonClick,
-            modifier = Modifier.padding(top = 2.dp)
-        )
+        faq?.let {
+            FAQButton(
+                faq = faq,
+                onFAQClick = onFAQButtonClick,
+                modifier = Modifier.padding(top = 2.dp)
+            )
+        }
 
         VodovozButtonsColumn(
             modifier = Modifier.padding(

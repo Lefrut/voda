@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -44,6 +45,7 @@ import com.vodovoz.app.core.network.VodovozWebConfig
 import com.vodovoz.app.design_system.composables.button.VodovozButtonsColumn
 import com.vodovoz.app.design_system.composables.card.GridProductCard
 import com.vodovoz.app.design_system.composables.placeholders.LoadingPlaceholder
+import com.vodovoz.app.design_system.composables.scaffold.VodovozScaffold
 import com.vodovoz.app.design_system.model.ColorfulButtonUi
 import com.vodovoz.app.design_system.model.ProductUi
 import com.vodovoz.app.feature.bottom.services.detail.model.ServiceProductsUi
@@ -68,7 +70,7 @@ fun ServiceDetailBody(
     onLoadingChange: (Boolean) -> Unit,
     onBackClick: () -> Unit
 ) {
-    Scaffold(
+    VodovozScaffold(
         modifier = modifier,
         bottomBar = {
             button?.let {
@@ -78,7 +80,8 @@ fun ServiceDetailBody(
                     onButtonClick = onButtonClick
                 )
             }
-        }
+        },
+        contentWindowInsets = WindowInsets(0.dp)
     ) { paddingValues ->
         Column(
             modifier = Modifier
