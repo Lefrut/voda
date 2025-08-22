@@ -19,11 +19,14 @@ import com.vodovoz.app.design_system.ExtendedTheme
 import com.vodovoz.app.design_system.composables.button.QuantityButtonSmall
 import com.vodovoz.app.design_system.composables.button.VodovozButtonDefaults
 import com.vodovoz.app.design_system.composables.button.VodovozButtonSmall
+import com.vodovoz.app.domain.general.model.PopularCategoryModel
 import com.vodovoz.app.domain.general.model.product.ButtonModel
 import com.vodovoz.app.domain.general.model.product.CategoryWithProductsModel
 import com.vodovoz.app.domain.general.model.product.ProductModel
 import com.vodovoz.app.domain.general.model.product.SectionModel
 import com.vodovoz.app.domain.general.model.promotion.LabelModel
+import com.vodovoz.app.feature.home.model.PopularCategoryUi
+import com.vodovoz.app.feature.home.model.toUi
 import com.vodovoz.app.ui.graphics.fromHexOrUnspecified
 
 
@@ -182,6 +185,14 @@ data class VodovozSectionUi<E : VodovozItemUi<E>>(
             }
         )
     }
+
+    fun withItems(block: List<E>.() -> List<E>): VodovozSectionUi<E> {
+        return copy(items = block(items))
+    }
+
+    companion object {
+        fun <E : VodovozItemUi<E>> empty() = VodovozSectionUi("", emptyList<E>(), null, null)
+    }
 }
 
 @Immutable
@@ -209,6 +220,7 @@ interface SectionContentUi<E> {
     val items: List<E>
     val button: ButtonUi?
     val placeholder: VodovozPlaceholderUi?
+
 }
 
 fun <E, E2> SectionModel<E>.toUi(
@@ -220,6 +232,26 @@ fun <E, E2> SectionModel<E>.toUi(
         button = button?.toUi(),
         placeholder = placeholder?.toUi()
     )
+}
+
+inline fun <E, E2 : VodovozItemUi<E2>> SectionModel<E>.mapToVodovozUi(
+    crossinline map: (E) -> E2,
+): VodovozSectionUi<E2> =
+    VodovozSectionUi(
+        title = title,
+        items = items.map(map),
+        button = button?.toUi(),
+        placeholder = placeholder?.toUi()
+    )
+
+@JvmName("toPopularCategoryUi")
+fun SectionModel<PopularCategoryModel>.toUi(): SectionUi<PopularCategoryUi> {
+    return toUi { list -> list.map { it.toUi() } }
+}
+
+fun SectionModel<CategoryWithProductsModel>.toUi(): VodovozSectionUi<CategoryWithProductsUi> {
+    return mapToVodovozUi { it.toUi() }
+
 }
 
 fun SectionModel<ProductModel>.toVodovozSectionUi(): VodovozSectionUi<ProductUi> {

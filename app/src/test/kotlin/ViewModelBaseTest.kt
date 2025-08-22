@@ -3,6 +3,7 @@ import com.vodovoz.app.common.account.AccountManager
 import com.vodovoz.app.common.cart.CartManager
 import com.vodovoz.app.common.datastore.DataStorePrefs
 import com.vodovoz.app.common.like.LikeManager
+import com.vodovoz.app.common.resources.ResourcesProvider
 import com.vodovoz.app.domain.general.respository.UserPreferencesRepository
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import io.mockk.mockk
@@ -26,6 +27,7 @@ abstract class ViewModelTestBase<T : ViewModel> {
     protected lateinit var accountManager: AccountManager
     protected lateinit var dataStorePrefs: DataStorePrefs
     protected lateinit var userPreferencesRepository: UserPreferencesRepository
+    protected lateinit var resourcesProvider: ResourcesProvider
 
     @Before
     open fun setUpBase() {
@@ -37,6 +39,7 @@ abstract class ViewModelTestBase<T : ViewModel> {
         cartManager = mockk(relaxed = true)
         likeManager = mockk(relaxed = true)
         userPreferencesRepository = mockk(relaxed = true)
+        resourcesProvider = mockk(relaxed = true)
 
         viewModel = createViewModel()
     }

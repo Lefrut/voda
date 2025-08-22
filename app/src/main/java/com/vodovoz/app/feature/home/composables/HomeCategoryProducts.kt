@@ -9,33 +9,35 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.vodovoz.app.common.model.ButtonAction
 import com.vodovoz.app.design_system.composables.card.GridProductCard
 import com.vodovoz.app.design_system.composables.chip.VodovozChip
 import com.vodovoz.app.design_system.composables.tab_row.VodovozScrollableTabRow
 import com.vodovoz.app.design_system.model.CategoryWithProductsUi
 import com.vodovoz.app.design_system.model.ProductUi
-import com.vodovoz.app.design_system.model.SectionUi
-import com.vodovoz.app.common.model.ButtonAction
+import com.vodovoz.app.design_system.model.SectionContentUi
 import com.vodovoz.app.util.extensions.indexOfOrNull
 
 @Composable
 fun HomeCategoryProducts(
     modifier: Modifier = Modifier,
-    lazyListState: LazyListState,
-    currentCategoryWithProducts: CategoryWithProductsUi,
-    sectionCategoriesWithProducts: SectionUi<CategoryWithProductsUi>,
+    lazyListState: LazyListState = rememberLazyListState(),
+    categoryWithProductsId: Long,
+    sectionCategoriesWithProducts: SectionContentUi<CategoryWithProductsUi>,
     onShowAllClick: (ButtonAction) -> Unit,
     onCategorySelect: (CategoryWithProductsUi) -> Unit,
     onProductClick: (ProductUi) -> Unit,
     onProductLike: (ProductUi) -> Unit,
     onIncrementToCart: (ProductUi) -> Unit,
     onDecrementToCart: (ProductUi) -> Unit,
-    onProductAnalogsClick: (ProductUi) -> Unit
+    onProductAnalogsClick: (ProductUi) -> Unit,
 ) {
 
     val button = sectionCategoriesWithProducts.button
@@ -48,14 +50,14 @@ fun HomeCategoryProducts(
             onShowAllClick = { onShowAllClick(it) }
         )
 
-        if(items.size > 1){
+        val currentCategoryWithProducts = items.find { it.id == categoryWithProductsId }
+
+        if (items.size > 1) {
             VodovozScrollableTabRow(
                 modifier = Modifier
                     .padding(top = 16.dp)
                     .fillMaxWidth(),
-                selectedTabIndex = items.indexOfOrNull(
-                    currentCategoryWithProducts
-                ) ?: 0,
+                selectedTabIndex = items.indexOfOrNull(currentCategoryWithProducts) ?: 0,
                 edgePadding = 16.dp,
                 spacing = 8.dp
             ) {
@@ -63,13 +65,15 @@ fun HomeCategoryProducts(
                     key(sectionWithProducts.id) {
                         VodovozChip(
                             text = sectionWithProducts.name,
-                            selected = currentCategoryWithProducts == sectionWithProducts,
+                            selected = categoryWithProductsId == sectionWithProducts.id,
                             onSelect = { onCategorySelect(sectionWithProducts) }
                         )
                     }
                 }
             }
         }
+
+        LaunchedEffect(categoryWithProductsId) { lazyListState.animateScrollToItem(0) }
 
         LazyRow(
             state = lazyListState,
@@ -79,7 +83,7 @@ fun HomeCategoryProducts(
             verticalAlignment = Alignment.CenterVertically
         ) {
             items(
-                items = currentCategoryWithProducts.items,
+                items = currentCategoryWithProducts?.items ?: emptyList(),
                 key = { it.id }
             ) { product ->
                 GridProductCard(

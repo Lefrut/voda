@@ -34,7 +34,6 @@ import com.vodovoz.app.feature.home.composables.UnratedProductsBottomSheet
 fun HomeScreen(
     viewState: HomeFlowViewModel.HomeState,
     viewModel: HomeFlowViewModel,
-    topProductsLazyListState: LazyListState,
 ) {
     val showedUnratedProducts by rememberUpdatedState(
         newValue = viewState.showedUnratedProducts
@@ -95,23 +94,11 @@ fun HomeScreen(
                 HomeFlowViewModel.HomeUiState.Success, is HomeFlowViewModel.HomeUiState.AppNeedUpdate -> {
                     HomeBody(
                         modifier = Modifier.nestedScroll(homeNestedScrollConnection),
-                        topProductsLazyListState = topProductsLazyListState,
-                        banners = viewState.banners,
-                        stories = viewState.stories,
-                        sectionPromotions = viewState.sectionPromotions,
-                        orderWithMenu = viewState.orderWithMenu,
-                        sectionPopularCategories = viewState.sectionPopularCategories,
-                        sectionNewProducts = viewState.sectionNewProducts,
-                        sectionHurryUpBuyProducts = viewState.sectionHurryUpBuyProducts,
-                        sectionTop = viewState.sectionTop,
-                        sectionBottomProducts = viewState.sectionBottom,
-                        sectionViewedProducts = viewState.sectionViewedProducts,
-                        currentBottomCategoryWithProducts = viewState.currentBottomCategoryWithProducts,
-                        currentTopCategoryWithProducts = viewState.currentTopCategoryWithProducts,
-                        onCategorySelect = { categoryWithProductsUi ->
-                            viewModel.selectCategory(categoryWithProductsUi)
+                        items = viewState.screenItems,
+                        onCategorySelect = { item ,categoryWithProductsId ->
+                            viewModel.selectCategory(item, categoryWithProductsId)
                         },
-                        onMenuItemClick = { menuItem ->
+                        onOrderMenuItemClick = { menuItem ->
                             viewModel.navigateByMenuItem(menuItem)
                         },
                         onOrderClick = { homeOrder ->
@@ -134,9 +121,6 @@ fun HomeScreen(
                         },
                         onShowAllClick = { action ->
                             viewModel.handleButtonAction(action)
-                        },
-                        onAllViewedProductsClick = {
-                            viewModel.navigateToViewedProducts()
                         },
                         onAboutAdvertisingClick = { aboutAdvertisingUi ->
                             viewModel.showAdvertisingBottomSheet(aboutAdvertisingUi)

@@ -132,7 +132,6 @@ class HomeFragment : Fragment() {
             setContent {
                 VodovozTheme {
                     val viewState by viewModel.collectAsState()
-                    val topProductLazyListState = rememberLazyListState()
                     val snackbarHostState = remember { SnackbarHostState() }
 
                     BackHandler {
@@ -142,7 +141,6 @@ class HomeFragment : Fragment() {
                     HomeScreen(
                         viewState = viewState,
                         viewModel = viewModel,
-                        topProductsLazyListState = topProductLazyListState,
                     )
 
 
@@ -153,33 +151,16 @@ class HomeFragment : Fragment() {
                         VodovozSnackbarHost(hostState = snackbarHostState)
                     }
 
-                    LifecycleEffect(topProductLazyListState, snackbarHostState) {
+                    LifecycleEffect(snackbarHostState) {
                         listenEvents(
-                            this,
-                            topProductLazyListState,
-                            snackbarHostState,
-                            context
+                            mainCoroutineScope = this,
+                            snackbarHostState = snackbarHostState,
+                            context = context
                         )
                     }
 
                     LifecycleEffect {
-                        viewModel.listenCart()
-                    }
-
-                    LifecycleEffect {
-                        viewModel.listenFavorites(this).join()
-                    }
-
-                    LifecycleEffect {
-                        viewModel.listenLoadingProducts()
-                    }
-
-                    LifecycleEffect {
                         viewModel.listenStories()
-                    }
-
-                    LifecycleEffect {
-                        viewModel.listenCanView()
                     }
 
                 }
@@ -189,7 +170,6 @@ class HomeFragment : Fragment() {
 
     private suspend fun listenEvents(
         mainCoroutineScope: CoroutineScope,
-        topProductLazyListState: LazyListState,
         snackbarHostState: SnackbarHostState,
         context: Context,
     ): Unit =
@@ -230,10 +210,6 @@ class HomeFragment : Fragment() {
 
                 HomeFlowViewModel.HomeEvents.GoToSearch -> {
                     findNavController().navigateToSearch()
-                }
-
-                HomeFlowViewModel.HomeEvents.ScrollTopProductsToStart -> {
-                    topProductLazyListState.animateScrollToItem(0)
                 }
 
                 is HomeFlowViewModel.HomeEvents.GoToCategoryProductList -> {
