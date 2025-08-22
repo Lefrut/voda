@@ -4,12 +4,11 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.viewModelScope
 import androidx.paging.CombinedLoadStates
-import androidx.paging.LoadState
 import androidx.paging.map
 import com.vodovoz.app.common.cart.CartManager
 import com.vodovoz.app.design_system.model.VodovozPlaceholderUi
 import com.vodovoz.app.design_system.model.toUi
-import com.vodovoz.app.domain.general.model.EmptyResultException
+import com.vodovoz.app.domain.general.model.exceptions.EmptyResultException
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.feature.all.orders.history.model.OrderFilterUi
 import com.vodovoz.app.feature.all.orders.history.model.OrdersHistoryItemUi

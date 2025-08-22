@@ -4,8 +4,8 @@ import com.vodovoz.app.data.vodovoz_service.di.toVodovozUrl
 import com.vodovoz.app.data.vodovoz_service.model.user_data.FOTO_DTO
 import com.vodovoz.app.data.vodovoz_service.model.user_data.POLE_DTO
 import com.vodovoz.app.data.vodovoz_service.model.user_data.UserDataDTO
-import com.vodovoz.app.domain.general.model.FieldModel
-import com.vodovoz.app.domain.general.model.FieldOptionModel
+import com.vodovoz.app.domain.general.model.widgets.FieldModel
+import com.vodovoz.app.domain.general.model.widgets.FieldOptionModel
 import com.vodovoz.app.domain.general.model.user.UserDataModel
 import com.vodovoz.app.domain.general.model.user.UserDataPhotoModel
 

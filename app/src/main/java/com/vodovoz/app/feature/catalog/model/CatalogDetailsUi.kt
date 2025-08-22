@@ -5,7 +5,7 @@ import com.vodovoz.app.design_system.model.BannerUi
 import com.vodovoz.app.design_system.model.ParentCategoryUi
 import com.vodovoz.app.design_system.model.mapToUi
 import com.vodovoz.app.design_system.model.toUi
-import com.vodovoz.app.domain.general.model.CatalogDetailsModel
+import com.vodovoz.app.domain.general.model.product.CatalogDetailsModel
 
 @Immutable
 data class CatalogDetailsUi(

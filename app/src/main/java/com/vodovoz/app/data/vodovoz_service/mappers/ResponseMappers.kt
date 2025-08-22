@@ -7,7 +7,7 @@ import com.vodovoz.app.core.network.converters.LocalDateTimeJsonAdapter
 import com.vodovoz.app.core.network.retrofit.messageWithCode
 import com.vodovoz.app.core.network.retrofit.stringBody
 import com.vodovoz.app.core.network.retrofit.stringErrorBody
-import com.vodovoz.app.domain.general.model.RequestException
+import com.vodovoz.app.domain.general.model.exceptions.RequestException
 import com.vodovoz.app.util.extensions.catchResult
 import com.vodovoz.app.util.extensions.debugLog
 import com.vodovoz.app.util.extensions.decodeUnicodeEscapes

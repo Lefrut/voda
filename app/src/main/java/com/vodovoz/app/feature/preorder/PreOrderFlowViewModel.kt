@@ -13,7 +13,7 @@ import com.vodovoz.app.design_system.model.widgets.checkFields
 import com.vodovoz.app.design_system.model.widgets.getErrorText
 import com.vodovoz.app.design_system.model.widgets.toDomain
 import com.vodovoz.app.design_system.model.widgets.vodovozValidators
-import com.vodovoz.app.domain.general.model.ValidationException
+import com.vodovoz.app.domain.general.model.exceptions.ValidationException
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.feature.preorder.model.FormUi
 import com.vodovoz.app.feature.preorder.model.toUi

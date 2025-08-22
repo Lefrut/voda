@@ -16,7 +16,7 @@ import com.vodovoz.app.design_system.model.widgets.checkFields
 import com.vodovoz.app.design_system.model.widgets.mapToDomain
 import com.vodovoz.app.design_system.model.widgets.mapToUi
 import com.vodovoz.app.design_system.model.widgets.updateFieldAndResetError
-import com.vodovoz.app.domain.general.model.UserNotLoginException
+import com.vodovoz.app.domain.general.model.exceptions.UserNotLoginException
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel

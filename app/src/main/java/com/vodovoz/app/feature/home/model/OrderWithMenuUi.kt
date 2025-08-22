@@ -2,10 +2,10 @@ package com.vodovoz.app.feature.home.model
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
-import com.vodovoz.app.domain.general.model.HomeOrderModel
-import com.vodovoz.app.domain.general.model.MenuItemModel
-import com.vodovoz.app.domain.general.model.MenuItemTypeModel
-import com.vodovoz.app.domain.general.model.OrderWithMenuModel
+import com.vodovoz.app.domain.general.model.order.HomeOrderModel
+import com.vodovoz.app.domain.general.model.order.OrderWithMenuModel
+import com.vodovoz.app.domain.general.model.widgets.MenuItemModel
+import com.vodovoz.app.domain.general.model.widgets.MenuItemTypeModel
 import com.vodovoz.app.ui.graphics.fromHexOrNull
 
 @Immutable

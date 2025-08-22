@@ -2,8 +2,8 @@ package com.vodovoz.app.ui.base
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.vodovoz.app.domain.general.model.UserBlockedException
-import com.vodovoz.app.domain.general.model.UserNotLoginException
+import com.vodovoz.app.domain.general.model.exceptions.UserBlockedException
+import com.vodovoz.app.domain.general.model.exceptions.UserNotLoginException
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.feature.sitestate.SiteStateManager
 import com.vodovoz.app.ui.base.model.AppState

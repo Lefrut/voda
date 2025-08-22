@@ -4,7 +4,7 @@ import android.os.Parcelable
 import androidx.compose.runtime.Immutable
 import com.vodovoz.app.common.model.VodovozBoolean
 import com.vodovoz.app.common.model.from
-import com.vodovoz.app.domain.general.model.CheckBoxModel
+import com.vodovoz.app.domain.general.model.widgets.CheckBoxModel
 import kotlinx.parcelize.Parcelize
 
 @Immutable

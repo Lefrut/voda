@@ -1,7 +1,7 @@
 package com.vodovoz.app.data.vodovoz_service.mappers
 
 import com.vodovoz.app.data.vodovoz_service.model.CATEGORY_NODE_DTO
-import com.vodovoz.app.domain.general.model.ParentCategoryModel
+import com.vodovoz.app.domain.general.model.product.ParentCategoryModel
 
 
 fun List<CATEGORY_NODE_DTO>.mapToDomain(): List<ParentCategoryModel>{

@@ -13,7 +13,7 @@ import com.vodovoz.app.design_system.model.ColorfulButtonUi
 import com.vodovoz.app.design_system.model.VodovozPlaceholderUi
 import com.vodovoz.app.design_system.model.mapToUi
 import com.vodovoz.app.design_system.model.toUi
-import com.vodovoz.app.domain.general.model.RequestException
+import com.vodovoz.app.domain.general.model.exceptions.RequestException
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.feature.questionnaires.model.CheckOption
 import com.vodovoz.app.feature.questionnaires.model.CheckboxListUi

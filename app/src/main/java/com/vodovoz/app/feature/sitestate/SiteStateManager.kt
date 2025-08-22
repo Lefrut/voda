@@ -52,11 +52,11 @@ class SiteStateManager @Inject constructor(
             _siteStateFlow.update { null }
         }
 
-        return siteStateSnapshot
+        return siteStateResult.getOrNull()
     }
 
 
-    fun smsEnabled(): Boolean = siteStateSnapshot?.isSmsEnabled == true
+    fun smsEnabled(): Boolean = siteStateSnapshot.isSmsEnabled
 
     fun saveDeepLinkPath(path: String?) {
         if (path == null) return

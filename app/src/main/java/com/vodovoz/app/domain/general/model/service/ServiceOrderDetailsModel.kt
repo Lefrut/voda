@@ -1,7 +1,7 @@
 package com.vodovoz.app.domain.general.model.service
 
 import com.vodovoz.app.domain.general.model.promotion.ColorfulButtonModel
-import com.vodovoz.app.domain.general.model.FieldModel
+import com.vodovoz.app.domain.general.model.widgets.FieldModel
 
 data class ServiceOrderDetailsModel(
     val title: String,

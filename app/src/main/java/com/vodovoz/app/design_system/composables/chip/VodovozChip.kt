@@ -32,7 +32,7 @@ import androidx.compose.ui.unit.dp
 import com.vodovoz.app.R
 import com.vodovoz.app.design_system.ExtendedTheme
 import com.vodovoz.app.design_system.VodovozTheme
-import com.vodovoz.app.design_system.composables.vodovozSurface
+import com.vodovoz.app.design_system.modifiers.vodovozSurface
 
 @Composable
 fun VodovozChip(

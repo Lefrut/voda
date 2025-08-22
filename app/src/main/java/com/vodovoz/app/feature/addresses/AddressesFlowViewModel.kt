@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.update
 import com.vodovoz.app.design_system.model.SectionUi
 import com.vodovoz.app.design_system.model.VodovozPlaceholderUi
 import com.vodovoz.app.design_system.model.toUi
-import com.vodovoz.app.domain.general.model.EmptyResultException
+import com.vodovoz.app.domain.general.model.exceptions.EmptyResultException
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.feature.addresses.model.AddressScreenTypeUi
 import com.vodovoz.app.feature.addresses.model.AddressUi

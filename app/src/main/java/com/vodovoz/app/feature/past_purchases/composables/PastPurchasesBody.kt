@@ -24,7 +24,7 @@ import com.vodovoz.app.design_system.composables.list.linearOrGridProducts
 import com.vodovoz.app.design_system.composables.placeholders.VodovozPlaceholder
 import com.vodovoz.app.design_system.model.ProductUi
 import com.vodovoz.app.design_system.model.toUi
-import com.vodovoz.app.domain.general.model.EmptyResultException
+import com.vodovoz.app.domain.general.model.exceptions.EmptyResultException
 import com.vodovoz.app.feature.home.model.CategoryUi
 import com.vodovoz.app.feature.product_comments.model.SortUi
 

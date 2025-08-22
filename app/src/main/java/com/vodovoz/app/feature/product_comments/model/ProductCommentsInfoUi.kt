@@ -1,8 +1,8 @@
 package com.vodovoz.app.feature.product_comments.model
 
 import androidx.compose.runtime.Immutable
-import com.vodovoz.app.domain.general.model.ProductCommentsInfoModel
-import com.vodovoz.app.domain.general.model.SortModel
+import com.vodovoz.app.domain.general.model.product.ProductCommentsInfoModel
+import com.vodovoz.app.domain.general.model.product.SortModel
 
 
 @Immutable

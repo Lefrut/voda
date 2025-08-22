@@ -10,10 +10,10 @@ import com.vodovoz.app.data.vodovoz_service.model.address.MapAreaDTO
 import com.vodovoz.app.data.vodovoz_service.model.address.MapPopupWindowDTO
 import com.vodovoz.app.data.vodovoz_service.model.address.MapZonesDTO
 import com.vodovoz.app.data.vodovoz_service.model.address.SWITCH_DTO
-import com.vodovoz.app.domain.general.model.ImageButtonModel
-import com.vodovoz.app.domain.general.model.MapPopupWindowModel
-import com.vodovoz.app.domain.general.model.MapZonesModel
-import com.vodovoz.app.domain.general.model.SwitchModel
+import com.vodovoz.app.domain.general.model.widgets.ImageButtonModel
+import com.vodovoz.app.domain.general.model.location.MapPopupWindowModel
+import com.vodovoz.app.domain.general.model.location.MapZonesModel
+import com.vodovoz.app.domain.general.model.widgets.SwitchModel
 import com.vodovoz.app.domain.general.model.location.AddAddressDetailsModel
 import com.vodovoz.app.domain.general.model.location.AddressModel
 import com.vodovoz.app.domain.general.model.location.MapAreaModel
@@ -40,7 +40,7 @@ fun List<MapAreaDTO>.mapToDomain(): List<MapAreaModel>{
     return mapNotNull { it.toDomain() }.ifEmpty { throw IllegalArgumentException("MapAreas can't be empty") }
 }
 
-fun MapZonesDTO.toDomain(): MapZonesModel{
+fun MapZonesDTO.toDomain(): MapZonesModel {
     return MapZonesModel(
         areas = ZONE?.mapToDomain() ?: emptyList(),
         imageButton = KNOPKA?.toDomain(),
@@ -48,7 +48,7 @@ fun MapZonesDTO.toDomain(): MapZonesModel{
     )
 }
 
-fun MapPopupWindowDTO.toDomain(): MapPopupWindowModel{
+fun MapPopupWindowDTO.toDomain(): MapPopupWindowModel {
     return MapPopupWindowModel(
         title = TITLE ?: "",
         description = OPISANIE ?: "",
@@ -56,7 +56,7 @@ fun MapPopupWindowDTO.toDomain(): MapPopupWindowModel{
     )
 }
 
-fun MAP_BUTTON_DTO.toDomain(): ImageButtonModel{
+fun MAP_BUTTON_DTO.toDomain(): ImageButtonModel {
     return ImageButtonModel(
         name = TEXT ?: "",
         backgroundColor = BACKGROUND ?: "",

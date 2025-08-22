@@ -11,7 +11,7 @@ import com.vodovoz.app.design_system.model.BannerUi
 import com.vodovoz.app.design_system.model.VodovozPlaceholderUi
 import com.vodovoz.app.design_system.model.mapToUi
 import com.vodovoz.app.design_system.model.toUi
-import com.vodovoz.app.domain.general.model.UserNotLoginException
+import com.vodovoz.app.domain.general.model.exceptions.UserNotLoginException
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.feature.profile.model.BonusesPopupWindowUi
 import com.vodovoz.app.feature.profile.model.ProfileCardUi

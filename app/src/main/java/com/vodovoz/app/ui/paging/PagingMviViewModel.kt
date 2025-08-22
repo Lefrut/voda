@@ -27,8 +27,8 @@ abstract class PagingMviViewModel<ITEM : Any, S : PagingState<ITEM, S>, E>(
 
     private fun listenLoadStates() = viewModelScope.launch {
         pagingDataListener.collectLoadState { combinedLoadStates ->
-            updateState {
-                it.withLoadStates(
+            updateState { s ->
+                s.withLoadStates(
                     combinedLoadStates.copy(refresh = combinedLoadStates.refresh)
                 )
             }

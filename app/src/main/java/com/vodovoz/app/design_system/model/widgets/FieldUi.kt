@@ -3,8 +3,8 @@ package com.vodovoz.app.design_system.model.widgets
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.text.input.KeyboardType
 import com.vodovoz.app.R
-import com.vodovoz.app.domain.general.model.FieldModel
-import com.vodovoz.app.domain.general.model.FieldOptionModel
+import com.vodovoz.app.domain.general.model.widgets.FieldModel
+import com.vodovoz.app.domain.general.model.widgets.FieldOptionModel
 import com.vodovoz.app.util.ValidationUtils
 import com.vodovoz.app.util.ValidationUtils.PASSWORD_LENGTH
 import com.vodovoz.app.util.isValidRussianPhoneNumber

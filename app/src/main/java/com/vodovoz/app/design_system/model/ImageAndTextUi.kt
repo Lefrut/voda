@@ -1,7 +1,7 @@
 package com.vodovoz.app.design_system.model
 
 import androidx.compose.runtime.Immutable
-import com.vodovoz.app.domain.general.model.ImageAndTextModel
+import com.vodovoz.app.domain.general.model.widgets.ImageAndTextModel
 
 @Immutable
 data class ImageAndTextUi(

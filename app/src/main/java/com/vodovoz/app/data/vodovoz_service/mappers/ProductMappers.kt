@@ -9,7 +9,7 @@ import com.vodovoz.app.data.vodovoz_service.model.PODELITCA_DTO
 import com.vodovoz.app.data.vodovoz_service.model.ProductsSectionDTO
 import com.vodovoz.app.data.vodovoz_service.model.TOVAR_18_DTO
 import com.vodovoz.app.data.vodovoz_service.model.TOVAR_DATA_DTO
-import com.vodovoz.app.domain.general.model.CategoryModel
+import com.vodovoz.app.domain.general.model.product.CategoryModel
 import com.vodovoz.app.domain.general.model.product.PriceModel
 import com.vodovoz.app.domain.general.model.product.ProductModel
 import com.vodovoz.app.domain.general.model.product.ProductsSectionModel

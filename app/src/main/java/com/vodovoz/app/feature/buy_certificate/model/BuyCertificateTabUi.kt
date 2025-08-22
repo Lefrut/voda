@@ -1,7 +1,7 @@
 package com.vodovoz.app.feature.buy_certificate.model
 
 import androidx.compose.runtime.Immutable
-import com.vodovoz.app.domain.general.model.certificate.BuyCertificateTabModel
+import com.vodovoz.app.domain.general.model.product.BuyCertificateTabModel
 import com.vodovoz.app.design_system.model.widgets.FieldUi
 import com.vodovoz.app.design_system.model.widgets.mapToUi
 

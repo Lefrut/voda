@@ -3,7 +3,6 @@ package com.vodovoz.app.feature.auth.login_by_email
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.viewModelScope
 import com.vodovoz.app.R
-import com.vodovoz.app.common.account.AccountManager
 import com.vodovoz.app.common.account.LoginManager
 import com.vodovoz.app.common.agreement.AgreementController
 import com.vodovoz.app.common.resources.ResourcesProvider
@@ -20,7 +19,7 @@ import com.vodovoz.app.design_system.model.widgets.checkFields
 import com.vodovoz.app.design_system.model.widgets.updateCheckbox
 import com.vodovoz.app.design_system.model.widgets.updateField
 import com.vodovoz.app.design_system.model.widgets.updateFieldAndResetError
-import com.vodovoz.app.domain.general.model.ValidationException
+import com.vodovoz.app.domain.general.model.exceptions.ValidationException
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.feature.auth.login.composables.LoginByEmailUiState
 import com.vodovoz.app.feature.auth.login.model.LoginByEmailEvent

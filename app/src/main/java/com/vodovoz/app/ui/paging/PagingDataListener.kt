@@ -29,9 +29,9 @@ class PagingDataListener<T : Any>(
         pagingDataPresenter.collectFrom(pagingData)
     }
 
-    suspend fun collectLoadState(onUpdate: suspend (CombinedLoadStates) -> Unit) {
+    suspend fun collectLoadState(block: suspend (CombinedLoadStates) -> Unit) {
         pagingDataPresenter.loadStateFlow.filterNotNull().collect { combinedLoadStates ->
-            onUpdate(combinedLoadStates)
+            block(combinedLoadStates)
         }
     }
 

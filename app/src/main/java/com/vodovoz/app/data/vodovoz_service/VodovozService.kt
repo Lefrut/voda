@@ -48,11 +48,11 @@ import com.vodovoz.app.data.vodovoz_service.model.filters.FiltersDTO
 import com.vodovoz.app.data.vodovoz_service.model.notification_settings.NotificationSettingsDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.order.OrderDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.order.WhereMyOrderDetailsDTO
-import com.vodovoz.app.data.vodovoz_service.model.order_history.OrdersHistoryDetailsDTO
-import com.vodovoz.app.data.vodovoz_service.model.ordering.OrderCallYouDetailsDTO
-import com.vodovoz.app.data.vodovoz_service.model.ordering.OrderingDetailsDTO
-import com.vodovoz.app.data.vodovoz_service.model.ordering.RecipientDTO
-import com.vodovoz.app.data.vodovoz_service.model.ordering.RecipientDetailsDTO
+import com.vodovoz.app.data.vodovoz_service.model.order.OrdersHistoryDetailsDTO
+import com.vodovoz.app.data.vodovoz_service.model.order.OrderCallYouDetailsDTO
+import com.vodovoz.app.data.vodovoz_service.model.order.OrderingDetailsDTO
+import com.vodovoz.app.data.vodovoz_service.model.order.RecipientDTO
+import com.vodovoz.app.data.vodovoz_service.model.order.RecipientDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.payment_method.PaymentMethodDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.product_details.ProductDetailsDTO
 import com.vodovoz.app.data.vodovoz_service.model.profile.BonusesPopupWindowDTO

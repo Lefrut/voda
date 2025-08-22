@@ -3,7 +3,7 @@ package com.vodovoz.app.design_system.model.widgets
 import com.vodovoz.app.common.model.VodovozBoolean
 import com.vodovoz.app.common.model.equalsTo
 import com.vodovoz.app.design_system.model.SectionUi
-import com.vodovoz.app.domain.general.model.FieldModel
+import com.vodovoz.app.domain.general.model.widgets.FieldModel
 import com.vodovoz.app.domain.general.model.product.SectionModel
 import com.vodovoz.app.domain.general.model.user.NotificationSectionItemModel
 

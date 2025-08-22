@@ -1,7 +1,7 @@
 package com.vodovoz.app.design_system.model
 
 import androidx.compose.runtime.Immutable
-import com.vodovoz.app.domain.general.model.brand.BrandModel
+import com.vodovoz.app.domain.general.model.promotion.BrandModel
 
 @Immutable
 data class BrandUi(
