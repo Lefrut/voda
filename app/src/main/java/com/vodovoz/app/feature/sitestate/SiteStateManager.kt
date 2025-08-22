@@ -2,8 +2,8 @@ package com.vodovoz.app.feature.sitestate
 
 import com.vodovoz.app.common.agreement.AgreementController
 import com.vodovoz.app.common.jivochat.JivoChatController
-import com.vodovoz.app.common.model.VodovozSiteState
-import com.vodovoz.app.common.model.VodovozSiteStateData
+import com.vodovoz.app.common.model.AppConfig
+import com.vodovoz.app.common.model.GlobalAppLinks
 import com.vodovoz.app.data.parser.common.safeString
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.util.extensions.debugLog
@@ -19,10 +19,10 @@ import javax.inject.Singleton
 class SiteStateManager @Inject constructor(
     private val vodovozServiceRepository: VodovozServiceRepository,
 ) {
-    private val _siteStateFlow = MutableStateFlow<VodovozSiteState?>(null)
+    private val _siteStateFlow = MutableStateFlow<AppConfig?>(null)
     val siteStateFlow = _siteStateFlow.asStateFlow()
 
-    val siteStateSnapshot get() = siteStateFlow.value
+    val siteStateSnapshot get() = siteStateFlow.value ?: AppConfig.Empty
 
     private val deepLinkPathListener = MutableStateFlow<String?>(null)
     fun observeDeepLinkPath() = deepLinkPathListener.asStateFlow()
@@ -30,10 +30,11 @@ class SiteStateManager @Inject constructor(
     private val pushListener = MutableStateFlow<PushData?>(null)
     fun observePush() = pushListener.asStateFlow()
 
-    suspend fun requestSiteState(): VodovozSiteState? {
+    suspend fun requestSiteState(): AppConfig? {
         val siteStateResult = vodovozServiceRepository.getSiteState().singleResult()
 
         siteStateResult.onSuccess { siteState ->
+            GlobalAppLinks = siteState.appLinks
             val siteAgreement = siteState.agreement
             val jivoChat = siteState.jivoChat
 

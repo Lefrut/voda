@@ -31,8 +31,7 @@ fun CATEGORY_WITH_PRODUCTS_DTO.toDomain(): CategoryWithProductsModel? {
 fun CATEGORY_RAZDEL.toDomain(): SectionModel<CategoryWithProductsModel> {
     val categoriesWithProducts = DATA?.mapNotNull { it.toDomain() } ?: emptyList()
     return SectionModel(
-        title = NAMERAZDEL ?: categoriesWithProducts.firstOrNull { it.name.isNotEmpty() }?.name
-        ?: "",
+        title = NAMERAZDEL ?: categoriesWithProducts.firstOrNull { it.name.isNotEmpty() }?.name ?: "",
         button = KNOPKA?.toDomain(),
         items = categoriesWithProducts
     )

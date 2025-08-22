@@ -10,9 +10,9 @@ import com.vodovoz.app.common.cart.CartManager
 import com.vodovoz.app.common.like.LikeManager
 import com.vodovoz.app.common.model.ButtonAction
 import com.vodovoz.app.common.model.DataAllAction
+import com.vodovoz.app.common.model.GlobalAppLinks
 import com.vodovoz.app.common.model.VodovozAction
 import com.vodovoz.app.common.resources.ResourcesProvider
-import com.vodovoz.app.core.network.VodovozWebConfig
 import com.vodovoz.app.design_system.model.AboutAdvertisingUi
 import com.vodovoz.app.design_system.model.BannerUi
 import com.vodovoz.app.design_system.model.CategoryWithProductsUi
@@ -27,6 +27,8 @@ import com.vodovoz.app.design_system.model.withCanViewForAdults
 import com.vodovoz.app.design_system.model.withUpdatedCartRecursive
 import com.vodovoz.app.design_system.model.withUpdatedFavoritesRecursive
 import com.vodovoz.app.design_system.model.withUpdatedLoadingsRecursive
+import com.vodovoz.app.domain.general.model.product.SectionModel
+import com.vodovoz.app.domain.general.model.product.TopAndBottomSectionsModel
 import com.vodovoz.app.domain.general.model.promotion.toUi
 import com.vodovoz.app.domain.general.respository.UserPreferencesRepository
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
@@ -303,9 +305,12 @@ class HomeFlowViewModel @Inject constructor(
         val banners = bannersDeferred.await().getOrNull()
         val sectionPopularCategories = sectionPopularCategoriesDeferred.await().getOrNull()
         val orderMenu = orderMenuDeferred.await().getOrNull()
-        val sectionsTopAndBottom = sectionsTopAndBottomDeferred.await().getOrNull()
+        val sectionsTopAndBottom =
+            sectionsTopAndBottomDeferred.await().getOrNull() ?: TopAndBottomSectionsModel(
+                SectionModel.empty(), SectionModel.empty()
+            )
 
-        if (banners != null && sectionPopularCategories != null && orderMenu != null && sectionsTopAndBottom != null) {
+        if (banners != null || orderMenu != null || sectionPopularCategories != null) {
             val topSection = sectionsTopAndBottom.topSection.toUi(
                 mapItems = { items -> items.map { it.toUi() } }
             )
@@ -315,17 +320,17 @@ class HomeFlowViewModel @Inject constructor(
 
             _state.update { s ->
                 s.copy(
-                    sectionPopularCategories = sectionPopularCategories.toUi { items ->
+                    sectionPopularCategories = sectionPopularCategories?.toUi { items ->
                         items.map { it.toUi() }
-                    },
+                    } ?: s.sectionPopularCategories,
                     sectionTop = topSection,
                     sectionBottom = bottomSection,
                     currentTopCategoryWithProducts = topSection.items.firstOrNull()
                         ?: CategoryWithProductsUi.Empty,
                     currentBottomCategoryWithProducts = bottomSection.items.firstOrNull()
                         ?: CategoryWithProductsUi.Empty,
-                    orderWithMenu = orderMenu.toUi(),
-                    banners = banners.mapToUi(),
+                    orderWithMenu = orderMenu?.toUi() ?: s.orderWithMenu,
+                    banners = banners?.mapToUi() ?: s.banners,
                     uiState = HomeUiState.Success,
                 )
             }
@@ -578,13 +583,13 @@ class HomeFlowViewModel @Inject constructor(
     fun navigateByMenuItem(menuItem: MenuItemUi) = viewModelScope.launch {
         val event = when (menuItem.type) {
             MenuItemTypeUi.History -> HomeEvents.GoToOrdersHistory
-            MenuItemTypeUi.Payment -> HomeEvents.GoToWebView(
-                VodovozWebConfig.ABOUT_PAYMENT_URL, menuItem.title
-            )
+            MenuItemTypeUi.Payment -> with(GlobalAppLinks.aboutPayment) {
+                HomeEvents.GoToWebView(url, title)
+            }
 
-            MenuItemTypeUi.Delivery -> HomeEvents.GoToWebView(
-                VodovozWebConfig.ABOUT_DELIVERY_URL, menuItem.title
-            )
+            MenuItemTypeUi.Delivery -> with(GlobalAppLinks.aboutDelivery) {
+                HomeEvents.GoToWebView(url, title)
+            }
 
             MenuItemTypeUi.None -> {
                 return@launch

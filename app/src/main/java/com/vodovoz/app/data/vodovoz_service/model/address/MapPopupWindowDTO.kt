@@ -3,7 +3,7 @@ package com.vodovoz.app.data.vodovoz_service.model.address
 
 import com.squareup.moshi.Json
 import androidx.annotation.Keep
-import com.vodovoz.app.data.vodovoz_service.model.order_details.IMAGE_AND_TEXT_DTO
+import com.vodovoz.app.data.vodovoz_service.model.order.IMAGE_AND_TEXT_DTO
 
 @Keep
 data class MapPopupWindowDTO(

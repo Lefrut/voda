@@ -9,6 +9,7 @@ import com.vodovoz.app.data.vodovoz_service.mappers.executeRequest
 import com.vodovoz.app.domain.general.model.location.MapAddressModel
 import com.vodovoz.app.domain.general.model.location.MapPointModel
 import com.vodovoz.app.domain.general.respository.MapServiceRepository
+import com.vodovoz.app.feature.sitestate.SiteStateManager
 import com.vodovoz.app.util.extensions.catchResult
 import com.yandex.mapkit.search.Address
 import com.yandex.mapkit.search.ToponymObjectMetadata
@@ -21,12 +22,16 @@ import javax.inject.Singleton
 class MapServiceRepositoryImpl @Inject constructor(
     private val mapApi: YandexMapAPI,
     private val mapSDK: YandexMapSDK,
+    private val siteStateManager: SiteStateManager,
 ) : MapServiceRepository {
 
     override fun getAddressByGeo(lat: Double, lon: Double): Flow<Result<MapAddressModel>> {
         return executeRequest(
             request = {
-                mapApi.getAddressByGeo(geocode = "$lon, $lat")
+                mapApi.getAddressByGeo(
+                    geocode = "$lon, $lat",
+                    apiKey = siteStateManager.siteStateSnapshot.geocoderKey
+                )
             },
             mapper = { yandexGeoResponseDTO ->
                 yandexGeoResponseDTO.toDomain()

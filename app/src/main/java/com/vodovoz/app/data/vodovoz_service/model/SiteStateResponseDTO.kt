@@ -29,5 +29,45 @@ data class SiteStateResponseDTO(
     @Json(name = "TESTSAITSSILKA")
     val TESTSAITSSILKA: String?,
     @Json(name = "CALL")
-    val CALL: String?
+    val CALL: String?,
+    @Json(name = "DANNYESSILKI")
+    val DANNYESSILKI: AppLinksDTO?,
+    @Json(name = "IDMAPKIT")
+    val IDMAPKIT: MapKeysDTO?,
+)
+
+@Keep
+data class MapKeysDTO(
+    @Json(name = "ANDROID")
+    val ANDROID: MapKeysValueDTO?,
+)
+
+@Keep
+data class MapKeysValueDTO(
+    @Json(name = "GEOKODER")
+    val GEOKODER: String?,
+    @Json(name = "MAPKIT")
+    val MAPKIT: String?,
+)
+
+@Keep
+data class AppLinksDTO(
+    @Json(name = "POLITIKA")
+    val politika: AppLinkDTO,
+    @Json(name = "OFERTA")
+    val oferta: AppLinkDTO,
+    @Json(name = "PERDANNIE")
+    val perdannie: AppLinkDTO,
+    @Json(name = "DOSTAVAK")
+    val dostavka: AppLinkDTO,
+    @Json(name = "OPLATA")
+    val oplata: AppLinkDTO,
+)
+
+@Keep
+data class AppLinkDTO(
+    @Json(name = "NAME")
+    val name: String,
+    @Json(name = "URL")
+    val url: String,
 )

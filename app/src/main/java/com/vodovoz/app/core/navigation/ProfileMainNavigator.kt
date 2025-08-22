@@ -2,8 +2,7 @@ package com.vodovoz.app.core.navigation
 
 import android.content.Context
 import androidx.navigation.NavController
-import com.vodovoz.app.R
-import com.vodovoz.app.core.network.VodovozWebConfig
+import com.vodovoz.app.common.model.GlobalAppLinks
 import com.vodovoz.app.feature.addresses.model.AddressScreenTypeUi
 
 data object ProfileMainNavigator {
@@ -35,17 +34,26 @@ data object ProfileMainNavigator {
             }
 
             ABOUT_DELIVERY_ROUTE -> {
+//                navController.navigateToWebView(
+//                    VodovozWebConfig.ABOUT_DELIVERY_URL,
+//                    context.getString(R.string.about_delivery)
+//                )
+                val aboutDeliveryLink = GlobalAppLinks.aboutDelivery
                 navController.navigateToWebView(
-                    VodovozWebConfig.ABOUT_DELIVERY_URL,
-                    context.getString(R.string.about_delivery)
+                    aboutDeliveryLink.url,
+                    aboutDeliveryLink.title
                 )
-
             }
 
             ABOUT_PAYMENT_ROUTE -> {
+//                navController.navigateToWebView(
+//                    VodovozWebConfig.ABOUT_PAYMENT_URL,
+//                    context.getString(R.string.about_pay)
+//                )
+                val aboutPaymentLink = GlobalAppLinks.aboutPayment
                 navController.navigateToWebView(
-                    VodovozWebConfig.ABOUT_PAYMENT_URL,
-                    context.getString(R.string.about_pay)
+                    aboutPaymentLink.url,
+                    aboutPaymentLink.title
                 )
             }
 

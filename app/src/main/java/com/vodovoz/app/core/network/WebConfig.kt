@@ -17,7 +17,7 @@ data object VodovozWebConfig {
     private const val VODOVOZ_PROTOCOL = "https://"
 
     //todo - change to prod. url "m.vodovoz.ru/"
-    private const val VODOVOZ_DOMAIN = "vodovoz.net/"
+    private const val VODOVOZ_DOMAIN = "m.vodovoz.ru/"
 
     var VODOVOZ_URL = "$VODOVOZ_PROTOCOL$VODOVOZ_DOMAIN"
     const val VODOVOZ_PATH = "newmobile_new/"
@@ -26,6 +26,7 @@ data object VodovozWebConfig {
 
     val ABOUT_PAYMENT_URL = "${VODOVOZ_INFO_URL}oplata.php"
     val ABOUT_DELIVERY_URL = "${VODOVOZ_INFO_URL}dosytavka.php"
+    //todo - replace to GlobalAppLinks
     val ABOUT_SHOP_URL = "${VODOVOZ_INFO_URL}omagazine.php"
 
     fun toFullUrl(path: String): String {

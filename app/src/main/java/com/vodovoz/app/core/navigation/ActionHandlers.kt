@@ -6,11 +6,12 @@ import android.net.Uri
 import android.webkit.CookieManager
 import androidx.navigation.NavController
 import com.vodovoz.app.R
-import com.vodovoz.app.common.tab.TabManager
-import com.vodovoz.app.core.network.VodovozWebConfig
 import com.vodovoz.app.common.model.ButtonAction
 import com.vodovoz.app.common.model.DataAllAction
+import com.vodovoz.app.common.model.GlobalAppLinks
 import com.vodovoz.app.common.model.VodovozAction
+import com.vodovoz.app.common.tab.TabManager
+import com.vodovoz.app.core.network.VodovozWebConfig
 
 fun DataAllAction.activate(
     navController: NavController,
@@ -38,7 +39,9 @@ fun DataAllAction.activate(
         }
 
         DataAllAction.Delivery -> {
-            navController.navigateToWebView(VodovozWebConfig.ABOUT_DELIVERY_URL, " ")
+            with(GlobalAppLinks.aboutDelivery) {
+                navController.navigateToWebView(url, title)
+            }
         }
 
         DataAllAction.Profile -> {

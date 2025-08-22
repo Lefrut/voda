@@ -1,4 +1,4 @@
-package com.vodovoz.app.data.vodovoz_service.model.order_details
+package com.vodovoz.app.data.vodovoz_service.model.order
 
 
 import androidx.annotation.Keep

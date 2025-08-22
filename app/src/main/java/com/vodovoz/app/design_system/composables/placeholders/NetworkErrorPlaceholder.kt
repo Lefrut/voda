@@ -1,7 +1,9 @@
 package com.vodovoz.app.design_system.composables.placeholders
 
+import android.os.Parcelable
 import androidx.activity.compose.LocalActivity
 import androidx.annotation.DrawableRes
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.fadeIn
@@ -16,8 +18,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.currentCompositeKeyHash
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.Saver
@@ -25,6 +29,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSavedStateRegistryOwner
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -32,7 +37,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.vodovoz.app.ui.mvi.collectAsState
 import androidx.navigation.navOptions
 import com.vodovoz.app.R
 import com.vodovoz.app.common.block_app_signal.BlockAppSignal
@@ -46,6 +50,7 @@ import com.vodovoz.app.ui.base.blockAppSignal
 import com.vodovoz.app.ui.base.httpErrorCache
 import com.vodovoz.app.util.extensions.isInternetAvailable
 import kotlinx.coroutines.flow.map
+import kotlinx.parcelize.Parcelize
 
 @Stable
 sealed class PlaceholderType {
@@ -57,10 +62,11 @@ sealed class PlaceholderType {
 }
 
 @Immutable
+@Parcelize
 data class VodovozHttpErrorUi(
     val title: String,
     val message: String,
-) {
+) : Parcelable {
 
     companion object {
         val Unspecified = VodovozHttpErrorUi("Unspecified", "")
@@ -99,9 +105,10 @@ private fun rememberHttpError(): VodovozHttpErrorUi {
         (httpError as? VodovozHttpError)?.toUi()
     }.collectAsStateWithLifecycle(VodovozHttpErrorUi.Unspecified)
 
+
     val httpError: VodovozHttpErrorUi = rememberSaveable(
         httpErrorState != VodovozHttpErrorUi.Unspecified,
-        saver = VodovozHttpErrorUi.Saver
+        VodovozHttpErrorUi.Saver,
     ) { httpErrorState ?: VodovozHttpErrorUi.Empty }
 
     return httpError
@@ -150,9 +157,7 @@ fun NetworkErrorPlaceholder(
             rememberAutoPlaceholderType()
         }
 
-        is ErrorPlaceholderMode.Fixed -> {
-            mode.type
-        }
+        is ErrorPlaceholderMode.Fixed -> { mode.type }
     }
 
     LifecycleEffect {

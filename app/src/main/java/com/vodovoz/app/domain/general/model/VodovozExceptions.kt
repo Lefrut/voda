@@ -11,13 +11,6 @@ open class RequestException(
     message, cause
 )
 
-class WebsiteErrorException(
-    message: String = "",
-    cause: Throwable? = null,
-) : RequestException(
-    message, cause
-)
-
 class ValidationException(
     message: String = "",
     cause: Throwable? = null,
