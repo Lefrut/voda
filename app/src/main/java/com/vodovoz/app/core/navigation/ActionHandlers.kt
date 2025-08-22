@@ -161,7 +161,8 @@ fun VodovozAction.activate(
 
         is VodovozAction.Unknown -> {
             /**
-             * You can create activator or do something here
+             * You can create activator
+             * @see createActivator
              * */
         }
     }

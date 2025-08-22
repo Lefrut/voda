@@ -15,12 +15,13 @@ import com.vodovoz.app.design_system.composables.card.GridProductCard
 import com.vodovoz.app.design_system.model.ProductUi
 import com.vodovoz.app.design_system.model.SectionUi
 import com.vodovoz.app.common.model.ButtonAction
+import com.vodovoz.app.design_system.model.SectionContentUi
 
 
 @Composable
 fun HomeProductsRow(
     modifier: Modifier = Modifier,
-    sectionProducts: SectionUi<ProductUi>,
+    sectionProducts: SectionContentUi<ProductUi>,
     onShowAllClick: (ButtonAction) -> Unit,
     onProductClick: (ProductUi) -> Unit,
     onProductLike: (ProductUi) -> Unit,
