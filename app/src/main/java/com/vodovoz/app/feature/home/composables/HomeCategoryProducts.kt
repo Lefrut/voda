@@ -73,7 +73,6 @@ fun HomeCategoryProducts(
             }
         }
 
-        LaunchedEffect(categoryWithProductsId) { lazyListState.animateScrollToItem(0) }
 
         LazyRow(
             state = lazyListState,
@@ -98,6 +97,7 @@ fun HomeCategoryProducts(
             }
         }
 
+        LaunchedEffect(categoryWithProductsId) { lazyListState.animateScrollToItem(0) }
 
     }
 }

@@ -17,6 +17,8 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.navOptions
 import com.vodovoz.app.R
 import com.vodovoz.app.common.account.AccountManager
+import com.vodovoz.app.common.constants.AppKeys
+import com.vodovoz.app.common.model.GlobalAppLinks
 import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.effects.LifecycleEffect
 import com.vodovoz.app.feature.cart.CartFlowViewModel
@@ -35,6 +37,7 @@ import com.vodovoz.app.util.SplashFileConfig
 import com.vodovoz.app.util.extensions.debugLog
 import com.vodovoz.app.util.extensions.disableFullScreen
 import com.vodovoz.app.util.extensions.enableFullScreen
+import com.yandex.mapkit.MapKitFactory
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.cancelAndJoin
@@ -152,9 +155,9 @@ class SplashFragment : Fragment() {
             when (appState) {
                 AppState.App -> {
                     fetchDataForScreens().join()
-                    navController.navigateToScreen(
-                        R.id.mainFragment,
-                    )
+                    MapKitFactory.setApiKey(siteStateManager.siteStateSnapshot.mapkitKey)
+                    MapKitFactory.initialize(requireActivity())
+                    navController.navigateToScreen(R.id.mainFragment)
                 }
 
                 AppState.Blocked -> {
@@ -206,8 +209,10 @@ class SplashFragment : Fragment() {
 
         val importantJob = launch {
             homeViewModel.fetchHomeDetails {
-                syncFavoritesJob.join()
-                favoriteViewModel.fetchFavoriteProducts()
+                if(it == 0){
+                    syncFavoritesJob.join()
+                    favoriteViewModel.fetchFavoriteProducts()
+                }
                 cancel()
             }.join()
         }
@@ -221,8 +226,7 @@ class SplashFragment : Fragment() {
     private fun handlePushData() = lifecycleScope.launch {
         debugLog { "splash args $arguments" }
 
-        arguments
-            ?.getString("push")
+        arguments?.getString("push")
             ?.also { debugLog { "splash push extra: $it" } }
             ?.takeIf { arg -> arg.isNotBlank() }
             ?.let { extra ->

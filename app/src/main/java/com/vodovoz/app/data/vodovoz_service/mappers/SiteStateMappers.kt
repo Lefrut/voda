@@ -39,7 +39,9 @@ fun SiteStateResponseDTO.toDomain(): AppConfig {
         takePhotos = COMMENTFILES ?: false,
         callPhoneNumber = CALL ?: "",
         data = DATA?.toDomain(),
-        mapkitKey = mapKeysAndroid?.MAPKIT ?: AppKeys.MAPKIT_API_KEY,
+        mapkitKey = mapKeysAndroid?.MAPKIT?.ifBlank {
+            AppKeys.MAPKIT_API_KEY
+        } ?: AppKeys.MAPKIT_API_KEY,
         geocoderKey = mapKeysAndroid?.GEOKODER ?: AppKeys.GEOCODER,
         appLinks = DANNYESSILKI?.toDomain() ?: AppLinks.Empty
     )

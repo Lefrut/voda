@@ -3,7 +3,6 @@ package com.vodovoz.app.feature.home
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -94,7 +93,7 @@ fun HomeScreen(
                 HomeFlowViewModel.HomeUiState.Success, is HomeFlowViewModel.HomeUiState.AppNeedUpdate -> {
                     HomeBody(
                         modifier = Modifier.nestedScroll(homeNestedScrollConnection),
-                        items = viewState.screenItems,
+                        items = viewState.items,
                         onCategorySelect = { item ,categoryWithProductsId ->
                             viewModel.selectCategory(item, categoryWithProductsId)
                         },

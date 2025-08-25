@@ -14,9 +14,9 @@ class SearchManager @Inject constructor(
         private const val SEARCH_HISTORY = "SEARCH_HISTORY"
     }
 
-    fun fetchSearchHistoryFlow() =
+    fun searchHistoryFlow() =
         dataStorePrefs.getStringFlow(SEARCH_HISTORY).map { queries ->
-            parseSearchHistoryStr(queries ?: "")
+            Formatters.parse(queries ?: "")
         }
 
     fun clearSearchHistory() {
@@ -24,31 +24,39 @@ class SearchManager @Inject constructor(
     }
 
     fun addQueryToHistory(query: String) {
-        if (query.isNotEmpty()) {
-            val queryList = fetchSearchHistory()
-            val cont = queryList.find { it == query }
-            if (cont == null) {
-                dataStorePrefs.putString(SEARCH_HISTORY, buildSearchHistoryStr(listOf(query) + queryList))
-            }
+        if (query.isEmpty()) return
+
+        val queryList = fetchSearchHistory()
+        val cont = queryList.find { it == query }
+        if (cont == null) {
+            dataStorePrefs.putString(
+                SEARCH_HISTORY,
+                Formatters.format(listOf(query) + queryList)
+            )
         }
     }
 
-    fun removeQueryFromHistory(query: String){
+    fun removeQueryFromHistory(query: String) {
         val queryList = fetchSearchHistory().toMutableList().apply { remove(query) }
-        dataStorePrefs.putString(SEARCH_HISTORY, buildSearchHistoryStr(queryList))
+        dataStorePrefs.putString(SEARCH_HISTORY, Formatters.format(queryList))
     }
 
-    fun fetchSearchHistory() =
-        parseSearchHistoryStr(dataStorePrefs.getString(SEARCH_HISTORY) ?: "")
+    private fun fetchSearchHistory() =
+        Formatters.parse(dataStorePrefs.getString(SEARCH_HISTORY) ?: "")
 
-    private fun parseSearchHistoryStr(searchHistoryStr: String): List<String> {
-        val queryList = searchHistoryStr.split(",").toMutableList()
-        return queryList.filter { it.isNotEmpty() }
-    }
 
-    private fun buildSearchHistoryStr(queryList: List<String>) = StringBuilder().apply {
-        queryList.forEach { query ->
-            append(query).append(",")
+    private data object Formatters {
+
+        fun format(queries: List<String>): String {
+            return StringBuilder().apply {
+                queries.forEach { query -> append(query).append(",") }
+            }.toString()
         }
-    }.toString()
+
+        fun parse(queries: String): List<String> {
+            val queryList = queries.split(",").toMutableList()
+            return queryList.filter { it.isNotEmpty() }
+        }
+
+    }
 }

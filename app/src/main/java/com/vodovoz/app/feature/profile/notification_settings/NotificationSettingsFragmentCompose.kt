@@ -25,19 +25,6 @@ class NotificationSettingsFragment : Fragment() {
 
     private val viewModel: NotificationSettingsViewModel by viewModels()
 
-    @Inject
-    lateinit var tabManager: TabManager
-
-    override fun onStart() {
-        super.onStart()
-        tabManager.changeTabVisibility(false)
-    }
-
-    override fun onStop() {
-        super.onStop()
-        tabManager.changeTabVisibility(true)
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,

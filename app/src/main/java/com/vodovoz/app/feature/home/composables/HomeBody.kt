@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.rememberOverscrollEffect
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -29,7 +28,7 @@ import com.vodovoz.app.feature.home.model.PopularCategoryUi
 @Composable
 fun HomeBody(
     modifier: Modifier = Modifier,
-    items: List<HomeListItem>,
+    items: List<HomeListItem<*>>,
     onStoryClick: (StoryUi) -> Unit,
     onCategorySelect: (HomeListItem.Products.CategoryWithProductsSection, Long) -> Unit,
     onPopularCategoryClick: (PopularCategoryUi) -> Unit,
@@ -58,10 +57,9 @@ fun HomeBody(
             key(item.position) {
                 when (item) {
                     is HomeListItem.Banner -> {
-                        val banners = item.value
-                        if (banners.isNotEmpty()) {
+                        if (item.value.isNotEmpty()) {
                             HomeBanners(
-                                banners = banners,
+                                banners = item.value,
                                 onAdvertisingClick = onAboutAdvertisingClick,
                                 onBannerClick = onBannerClick
                             )
@@ -92,7 +90,7 @@ fun HomeBody(
                     }
 
                     is HomeListItem.Products.CategoryWithProductsSection -> {
-                        val categorySection = item.item
+                        val categorySection = item.value
 
                         if(categorySection.items.isNotEmpty()){
                             HomeCategoryProducts(
@@ -113,7 +111,7 @@ fun HomeBody(
                     }
 
                     is HomeListItem.Products.Section -> {
-                        val productsSection = item.item
+                        val productsSection = item.value
 
                         if (productsSection.items.isNotEmpty()) {
                             HomeProductsRow(
