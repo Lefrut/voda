@@ -7,7 +7,7 @@ import com.vodovoz.app.feature.addresses.model.AddressScreenTypeUi
 
 data object ProfileMainNavigator {
 
-    fun navigate(id: String, navController: NavController, context: Context) {
+    fun navigate(id: String, navController: NavController) {
         when (id) {
             CHANGE_PASSWORD_ROUTE -> {
                 navController.navigateToChangePassword()
@@ -34,10 +34,7 @@ data object ProfileMainNavigator {
             }
 
             ABOUT_DELIVERY_ROUTE -> {
-//                navController.navigateToWebView(
-//                    VodovozWebConfig.ABOUT_DELIVERY_URL,
-//                    context.getString(R.string.about_delivery)
-//                )
+
                 val aboutDeliveryLink = GlobalAppLinks.aboutDelivery
                 navController.navigateToWebView(
                     aboutDeliveryLink.url,
@@ -46,10 +43,6 @@ data object ProfileMainNavigator {
             }
 
             ABOUT_PAYMENT_ROUTE -> {
-//                navController.navigateToWebView(
-//                    VodovozWebConfig.ABOUT_PAYMENT_URL,
-//                    context.getString(R.string.about_pay)
-//                )
                 val aboutPaymentLink = GlobalAppLinks.aboutPayment
                 navController.navigateToWebView(
                     aboutPaymentLink.url,

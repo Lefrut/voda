@@ -15,13 +15,11 @@ import com.vodovoz.app.common.model.VodovozAction
 import com.vodovoz.app.common.resources.ResourcesProvider
 import com.vodovoz.app.design_system.model.AboutAdvertisingUi
 import com.vodovoz.app.design_system.model.BannerUi
-import com.vodovoz.app.design_system.model.CategoryWithProductsUi
 import com.vodovoz.app.design_system.model.ProductUi
 import com.vodovoz.app.design_system.model.PromotionUi
 import com.vodovoz.app.design_system.model.SpecialPromotionUi
 import com.vodovoz.app.design_system.model.StoryUi
 import com.vodovoz.app.design_system.model.VodovozItemUi
-import com.vodovoz.app.design_system.model.VodovozSectionUi
 import com.vodovoz.app.design_system.model.mapToUi
 import com.vodovoz.app.design_system.model.toUi
 import com.vodovoz.app.design_system.model.toVodovozSectionUi
@@ -39,9 +37,10 @@ import com.vodovoz.app.feature.home.model.PopularCategoryUi
 import com.vodovoz.app.feature.home.model.UnratedProductUi
 import com.vodovoz.app.feature.home.model.UnratedProductsSectionUi
 import com.vodovoz.app.feature.home.model.compareVersions
+import com.vodovoz.app.feature.home.model.getOrNull
+import com.vodovoz.app.feature.home.model.getValueOrNull
 import com.vodovoz.app.feature.home.model.toUi
 import com.vodovoz.app.ui.mvi.Event
-import com.vodovoz.app.ui.mvi.MviViewModel
 import com.vodovoz.app.ui.paging.ItemsState
 import com.vodovoz.app.ui.paging.ProductsMviViewModel
 import com.vodovoz.app.util.extensions.singleResult
@@ -74,7 +73,7 @@ class HomeFlowViewModel @Inject constructor(
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val resourcesProvider: ResourcesProvider,
     private val userPreferencesRepository: UserPreferencesRepository,
-) : ProductsMviViewModel<VodovozItemUi<*>,HomeFlowViewModel.HomeState, HomeFlowViewModel.HomeEvents>(
+) : ProductsMviViewModel<HomeListItem<*>, HomeFlowViewModel.HomeState, HomeFlowViewModel.HomeEvents>(
     state = HomeState(),
     blockedProductsFlow = cartManager.blockedProductsState,
     favoritesFlow = likeManager.observeLikes(),
@@ -83,16 +82,23 @@ class HomeFlowViewModel @Inject constructor(
 ) {
 
 
-    suspend fun listenStories(): Unit = _state.map { stateSnapshot.stories }
-        .distinctUntilChanged()
-        .combine(userPreferencesRepository.viewedStoryIds) { _, p2 ->
-            p2
-        }.shareIn(viewModelScope, SharingStarted.Lazily, 1).collect { storyIds ->
+    suspend fun listenStories(): Unit = _state.map {
+        stateSnapshot.items.getValueOrNull<List<StoryUi>, HomeListItem.Stories>()
+            ?: emptyList()
+    }.distinctUntilChanged()
+        .combine(userPreferencesRepository.viewedStoryIds) { stories, storiesIds ->
+            stories.map { story ->
+                if (storiesIds.contains(story.id)) story.copy(viewed = true) else story
+            }.sortedBy { it.viewed }
+        }.shareIn(viewModelScope, SharingStarted.Lazily, 1).collect { updatedStories ->
             updateState { s ->
                 s.copy(
-                    stories = s.stories.map { story ->
-                        if (storyIds.contains(story.id)) story.copy(viewed = true) else story
-                    }.sortedBy { it.viewed }
+                    items = buildList {
+                        addAll(s.items)
+                        val storyItem = HomeListItem.Stories(updatedStories)
+                        removeIf { item -> item is HomeListItem.Stories }
+                        add(storyItem)
+                    },
                 )
             }
         }
@@ -126,9 +132,8 @@ class HomeFlowViewModel @Inject constructor(
 
             _state.update { s ->
                 s.copy(
-                    banners = banners?.mapToUi() ?: s.banners,
                     uiState = HomeUiState.Success,
-                    screenItems = buildList {
+                    items = buildList {
                         banners?.let {
                             add(HomeListItem.Banner(banners.mapToUi()))
                         }
@@ -151,7 +156,7 @@ class HomeFlowViewModel @Inject constructor(
         return true
     }
 
-    private fun <T, Ui : HomeListItem> fetchSectionThenUpdateItems(
+    private fun <T, Ui : HomeListItem<*>> fetchSectionThenUpdateItems(
         request: suspend () -> Flow<Result<T>>,
         map: (T) -> Ui,
     ): Job = viewModelScope.launch {
@@ -161,7 +166,7 @@ class HomeFlowViewModel @Inject constructor(
             .onSuccess { ui ->
                 updateState { s ->
                     s.copy(
-                        screenItems = s.screenItems + ui
+                        items = s.items + ui
                     )
                 }
             }
@@ -231,7 +236,7 @@ class HomeFlowViewModel @Inject constructor(
 
 
     fun fetchHomeDetails(
-        onFirstImportantResult: suspend () -> Unit = {},
+        onEachIndexed: suspend (Int) -> Unit = {},
     ) = flow {
         _state.update { s ->
             s.copy(uiState = HomeUiState.Loading)
@@ -241,9 +246,7 @@ class HomeFlowViewModel @Inject constructor(
         emit(fetchOptionalDetails())
         return@flow
     }.withIndex().onEach { indexedValue ->
-        if (indexedValue.index == 0) {
-            onFirstImportantResult()
-        }
+        onEachIndexed(indexedValue.index)
     }.launchIn(viewModelScope)
 
 
@@ -278,7 +281,7 @@ class HomeFlowViewModel @Inject constructor(
     ) = viewModelScope.launch {
         updateState { s ->
             s.copy(
-                screenItems = s.screenItems.map { homeItem ->
+                items = s.items.map { homeItem ->
                     if (homeItem.position == item.position && homeItem is HomeListItem.Products.CategoryWithProductsSection) {
                         homeItem.copy(currentCategoryId = id)
                     } else homeItem
@@ -296,10 +299,12 @@ class HomeFlowViewModel @Inject constructor(
     }
 
     fun navigateToStories(startStory: StoryUi) = viewModelScope.launch {
+        val storiesItem = stateSnapshot.items.getOrNull<HomeListItem.Stories>()
+
         sendEvent(
             HomeEvents.GoToStories(
                 storyId = startStory.id,
-                stories = stateSnapshot.stories
+                stories = storiesItem?.value ?: return@launch
             )
         )
     }
@@ -545,8 +550,6 @@ class HomeFlowViewModel @Inject constructor(
 
     @Immutable
     data class HomeState(
-        val banners: List<BannerUi> = emptyList(),
-        val stories: List<StoryUi> = emptyList(),
         val sectionUnratedProducts: UnratedProductsSectionUi = UnratedProductsSectionUi.Empty,
         val specialPromotion: SpecialPromotionUi = SpecialPromotionUi.Empty,
         val currentAdvertising: AboutAdvertisingUi = AboutAdvertisingUi.Empty,
@@ -558,40 +561,17 @@ class HomeFlowViewModel @Inject constructor(
         val showExitDialog: Boolean = false,
         val showedVpnWarning: Boolean = false,
         val showedUnratedProducts: Boolean = false,
-        val screenItems: List<HomeListItem> = emptyList(),
-    ) : ItemsState<VodovozItemUi<*>, HomeState>() {
+        override val items: List<HomeListItem<*>> = emptyList(),
+    ) : ItemsState<HomeListItem<*>, HomeState>() {
 
-        override val items: List<VodovozItemUi<*>>
-            get() = screenItems.mapNotNull {
-                (it as? HomeListItem.Products<*>)?.item
-            }
+        val stories
+            get() = items.getValueOrNull<List<StoryUi>, HomeListItem.Stories>() ?: emptyList()
 
-        override fun withItems(newItems: List<VodovozItemUi<*>>): HomeState {
-            var index = 0
-            val updatedScreenItems = screenItems.map { screenItem ->
-                when (screenItem) {
-                    is HomeListItem.Products.CategoryWithProductsSection -> {
-                        val newItem = newItems.getOrNull(index++) ?: return@map screenItem
-                        @Suppress("UNCHECKED_CAST")
-                        screenItem.copy(
-                            item = (newItem as? VodovozSectionUi<CategoryWithProductsUi>) ?: screenItem.item
-                        )
-                    }
-
-
-                    is HomeListItem.Products.Section -> {
-                        val newItem = newItems.getOrNull(index++) ?: return@map screenItem
-                        @Suppress("UNCHECKED_CAST")
-                        screenItem.copy(
-                            item = (newItem as? VodovozSectionUi<ProductUi>) ?: screenItem.item
-                        )
-                    }
-
-                    else -> screenItem
-                }
-            }
-            return copy(screenItems = updatedScreenItems)
+        override fun withItems(newItems: List<HomeListItem<*>>): HomeState {
+            return copy(items = newItems)
         }
+
+
     }
 
 }

@@ -153,7 +153,6 @@ class ProfileFragment : Fragment() {
                             ProfileMainNavigator.navigate(
                                 id = events.itemId,
                                 navController = findNavController(),
-                                context = requireContext()
                             )
                         }
 

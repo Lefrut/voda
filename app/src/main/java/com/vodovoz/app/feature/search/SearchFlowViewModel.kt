@@ -57,7 +57,7 @@ class SearchFlowViewModel @Inject constructor(
     }
 
     suspend fun listenSearchHistory() =
-        _state.combine(searchManager.fetchSearchHistoryFlow()) { _, searchHistory ->
+        _state.combine(searchManager.searchHistoryFlow()) { _, searchHistory ->
             searchHistory
         }.collectLatest { searchHistory ->
             _state.update { s ->
