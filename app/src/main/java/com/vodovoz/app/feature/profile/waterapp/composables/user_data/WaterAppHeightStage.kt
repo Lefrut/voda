@@ -19,8 +19,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.vodovoz.app.R
-import com.vodovoz.app.feature.profile.waterapp.WaterAppHelper
 import com.vodovoz.app.feature.profile.waterapp.composables.VodovozWheelPickerVertical
+import com.vodovoz.app.feature.profile.waterapp.model.WaterAppUiState
 import com.vodovoz.app.util.extensions.indexOfOrNull
 
 @Composable
@@ -69,7 +69,7 @@ fun WaterAppHeightStage(
             Spacer(Modifier.weight(0.32f))
 
 
-            val heights = WaterAppHelper.heights.reversed()
+            val heights = WaterAppUiState.UserData.heights.reversed()
 
             VodovozWheelPickerVertical(
                 modifier = Modifier,

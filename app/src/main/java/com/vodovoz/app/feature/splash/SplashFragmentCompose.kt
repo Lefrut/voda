@@ -17,8 +17,6 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.navOptions
 import com.vodovoz.app.R
 import com.vodovoz.app.common.account.AccountManager
-import com.vodovoz.app.common.constants.AppKeys
-import com.vodovoz.app.common.model.GlobalAppLinks
 import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.effects.LifecycleEffect
 import com.vodovoz.app.feature.cart.CartFlowViewModel
@@ -29,18 +27,16 @@ import com.vodovoz.app.feature.profile.ProfileFlowViewModel
 import com.vodovoz.app.feature.sitestate.SiteStateManager
 import com.vodovoz.app.feature.splash.model.SplashEvent
 import com.vodovoz.app.ui.base.MainActivityViewModel
-import com.vodovoz.app.ui.base.SplashFileViewModel
 import com.vodovoz.app.ui.base.model.AppState
 import com.vodovoz.app.ui.base.model.SplashFileState
 import com.vodovoz.app.ui.mvi.collectAsState
-import com.vodovoz.app.util.SplashFileConfig
+import com.vodovoz.app.util.VodovozSplashFile
 import com.vodovoz.app.util.extensions.debugLog
 import com.vodovoz.app.util.extensions.disableFullScreen
 import com.vodovoz.app.util.extensions.enableFullScreen
 import com.yandex.mapkit.MapKitFactory
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -54,7 +50,6 @@ class SplashFragment : Fragment() {
 
     private val activityViewModel: MainActivityViewModel by activityViewModels()
     private val splashViewModel: SplashViewModel by activityViewModels()
-    private val splashFileViewModel: SplashFileViewModel by activityViewModels()
     private val homeViewModel: HomeFlowViewModel by activityViewModels()
     private val catalogViewModel: CatalogFlowViewModel by activityViewModels()
     private val cartFlowViewModel: CartFlowViewModel by activityViewModels()
@@ -64,7 +59,6 @@ class SplashFragment : Fragment() {
 
     @Inject
     lateinit var accountManager: AccountManager
-
     @Inject
     lateinit var siteStateManager: SiteStateManager
 
@@ -98,7 +92,7 @@ class SplashFragment : Fragment() {
                     )
 
                     LifecycleEffect {
-                        splashFileViewModel.fileState.collectLatest { fileState ->
+                        activityViewModel.fileState.collectLatest { fileState ->
                             when (fileState) {
                                 SplashFileState.Error -> {
                                     splashViewModel.hideAndroidSplash()
@@ -106,7 +100,7 @@ class SplashFragment : Fragment() {
 
                                 SplashFileState.Success -> {
                                     splashViewModel.changeToAnimation(
-                                        SplashFileConfig.getSplashFile(context)
+                                        VodovozSplashFile.getSplashFile(context)
                                     )
                                 }
 
@@ -209,10 +203,9 @@ class SplashFragment : Fragment() {
 
         val importantJob = launch {
             homeViewModel.fetchHomeDetails {
-                if(it == 0){
-                    syncFavoritesJob.join()
-                    favoriteViewModel.fetchFavoriteProducts()
-                }
+                if (it != 0) return@fetchHomeDetails
+                syncFavoritesJob.join()
+                favoriteViewModel.fetchFavoriteProducts()
                 cancel()
             }.join()
         }

@@ -34,6 +34,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PageSize
 import androidx.compose.foundation.pager.rememberPagerState
@@ -41,6 +42,7 @@ import androidx.compose.foundation.rememberOverscrollEffect
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -339,8 +341,7 @@ fun UpdatedProductsExpanded(
         HorizontalPager(
             modifier = Modifier
                 .padding(top = 16.dp)
-                .fillMaxWidth()
-                .weight(1f),
+                .fillMaxWidth(),
             state = pagerState,
             pageSize = PageSize.Fill,
             beyondViewportPageCount = 2,
@@ -352,11 +353,13 @@ fun UpdatedProductsExpanded(
             val product = products.getOrNull(page)
             if (product != null) {
                 Column(
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier.fillMaxWidth(),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     AsyncImage(
-                        modifier = Modifier.size(300.dp),
+                        modifier = Modifier
+                            .size(300.dp, 300.dp)
+                        ,
                         model = product.detailPicture,
                         contentDescription = null,
                         contentScale = ContentScale.Inside,
@@ -377,33 +380,31 @@ fun UpdatedProductsExpanded(
                         mutableFloatStateOf(0f)
                     }
 
-                    Box(
+                    RatingBar(
+                        value = rating,
                         modifier = Modifier
-                            .padding(top = 16.dp)
+                            .padding(top = 24.dp)
                             .background(
                                 MaterialTheme.colorScheme.surface,
                                 MaterialTheme.shapes.small
-                            ),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        RatingBar(
-                            value = rating,
-                            modifier = Modifier.padding(vertical = 24.dp, horizontal = 36.dp),
-                            painterEmpty = painterResource(id = R.drawable.ic_star_inactive),
-                            painterFilled = painterResource(id = R.drawable.ic_star_active),
-                            size = 36.dp,
-                            spaceBetween = 8.dp,
-                            onValueChange = { newRating ->
-                                rating = newRating
-                            },
-                            onRatingChanged = { newRating ->
-                                onProductRatingChanged(product, newRating)
-                            }
-                        )
-                    }
+                            )
+                            .padding(vertical = 16.dp, horizontal = 24.dp),
+                        painterEmpty = painterResource(id = R.drawable.ic_star_inactive),
+                        painterFilled = painterResource(id = R.drawable.ic_star_active),
+                        size = 36.dp,
+                        spaceBetween = 8.dp,
+                        onValueChange = { newRating ->
+                            rating = newRating
+                        },
+                        onRatingChanged = { newRating ->
+                            onProductRatingChanged(product, newRating)
+                        }
+                    )
                 }
             }
         }
+
+        Spacer(modifier = Modifier.weight(1f))
 
         if (pagerState.pageCount > 1) {
             PagerWormIndicator(
@@ -418,7 +419,8 @@ fun UpdatedProductsExpanded(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 12.dp), contentAlignment = Alignment.Center
+                .padding(start = 16.dp, end = 16.dp, bottom = 12.dp, top = 4.dp),
+            contentAlignment = Alignment.Center
         ) {
             Text(
                 text = buttonText,

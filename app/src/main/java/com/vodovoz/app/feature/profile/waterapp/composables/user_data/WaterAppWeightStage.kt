@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.sp
 import com.vodovoz.app.R
 import com.vodovoz.app.feature.profile.waterapp.WaterAppHelper
 import com.vodovoz.app.feature.profile.waterapp.composables.VodovozWheelPicker
+import com.vodovoz.app.feature.profile.waterapp.model.WaterAppUiState
 import com.vodovoz.app.util.extensions.indexOfOrNull
 import kotlin.math.roundToInt
 
@@ -54,8 +55,9 @@ fun WaterAppWeightStage(
         Spacer(modifier = Modifier.weight(0.71f))
 
         val weights = remember {
-            WaterAppHelper.weights
+            WaterAppUiState.UserData.weights
         }
+
         val initialIndex = remember(weights) {
             weights.indexOfOrNull(weight) ?: 0
         }

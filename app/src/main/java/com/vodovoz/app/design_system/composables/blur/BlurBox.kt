@@ -11,28 +11,15 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.skydoves.cloudy.cloudy
 import com.vodovoz.app.R
-import dev.chrisbanes.haze.HazeStyle
-import dev.chrisbanes.haze.HazeTint
-import dev.chrisbanes.haze.hazeEffect
 
-
-private val blurStyle: HazeStyle
-    @Composable
-    get() {
-        return HazeStyle(
-            blurRadius = 14.dp,
-            tint = null,
-            noiseFactor = 0f,
-        )
-    }
 
 @Composable
 fun BlurBox(
@@ -42,7 +29,7 @@ fun BlurBox(
 ) {
     Box(
         modifier = modifier.then(
-            if (showBlur) Modifier.hazeEffect(blurStyle)
+            if (showBlur) Modifier.cloudy(72)
             else Modifier
         ),
         content = content

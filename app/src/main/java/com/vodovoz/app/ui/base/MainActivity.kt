@@ -10,23 +10,17 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import androidx.fragment.app.FragmentContainerView
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.fragment.NavHostFragment
-import androidx.navigation.navOptions
 import com.google.firebase.messaging.RemoteMessage
 import com.vodovoz.app.R
 import com.vodovoz.app.common.block_app_signal.BlockAppSignal
 import com.vodovoz.app.common.block_app_signal.BlockAppSignalProvider
-import com.vodovoz.app.common.cache.HttpError
 import com.vodovoz.app.common.cache.HttpErrorCache
-import com.vodovoz.app.common.cache.HttpErrorCacheMappers
 import com.vodovoz.app.common.cache.HttpErrorCacheProvider
 import com.vodovoz.app.common.cache.emptyHttpErrorCache
-import com.vodovoz.app.databinding.ActivityMainBinding
 import com.vodovoz.app.feature.sitestate.SiteStateManager
-import com.vodovoz.app.util.extensions.debugLog
-import com.vodovoz.app.util.extensions.setSystemBarColors
+import com.vodovoz.app.ui.base.model.SplashFileState
+import com.vodovoz.app.util.VodovozSplashFile
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import org.json.JSONObject
@@ -40,9 +34,10 @@ val Activity?.httpErrorCache: HttpErrorCache
     get() = ((this as? HttpErrorCacheProvider)?.httpErrorCache) ?: emptyHttpErrorCache
 
 @AndroidEntryPoint
-class MainActivity : AppCompatActivity(), BlockAppSignalProvider, HttpErrorCacheProvider {
-
-    private lateinit var binding: ActivityMainBinding
+class MainActivity :
+    AppCompatActivity(),
+    BlockAppSignalProvider,
+    HttpErrorCacheProvider {
 
     @Inject
     lateinit var blockAppSignalInject: BlockAppSignal
@@ -56,49 +51,44 @@ class MainActivity : AppCompatActivity(), BlockAppSignalProvider, HttpErrorCache
     lateinit var siteStateManager: SiteStateManager
 
     private val viewModel: MainActivityViewModel by viewModels()
-    private val splashFileViewModel: SplashFileViewModel by viewModels()
-
-    override fun onStart() {
-        super.onStart()
-
-        window.setSystemBarColors(
-            statusColor = Color.TRANSPARENT,
-            navigationColor = Color.TRANSPARENT,
-            lightNavigationBarIcons = false,
-            lightStatusBarIcons = false
-        )
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         installSplashScreen().setKeepOnScreenCondition {
             viewModel.androidSplash.value
         }
+        setupUi()
+        viewModel.checkAppState()
+        downloadSplashFile()
+        handleIntent(intent)
+    }
 
+    private fun setupUi() {
         enableEdgeToEdge(
             SystemBarStyle.light(Color.TRANSPARENT, Color.TRANSPARENT),
             SystemBarStyle.light(Color.TRANSPARENT, Color.TRANSPARENT)
         )
-
         supportActionBar?.hide()
-        splashFileViewModel.downloadSplashFile()
-        viewModel.checkAppState()
+        setContentView(R.layout.activity_main)
+    }
 
-        binding = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(binding.root)
-
-        processIntent(intent)
+    private fun downloadSplashFile() = lifecycleScope.launch {
+        viewModel.setFileState(SplashFileState.Loading)
+        VodovozSplashFile.downloadSplashFile(applicationContext).onSuccess {
+            viewModel.setFileState(SplashFileState.Success)
+        }.onFailure {
+            viewModel.setFileState(SplashFileState.Error)
+        }
     }
 
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
-        debugLog { "onNewIntent: $intent" }
-        processIntent(intent)
+        handleIntent(intent)
     }
 
-    private fun processIntent(intent: Intent) {
-        handleIntent(intent)
+    private fun handleIntent(intent: Intent) {
+        handleDeepLinkIntent(intent)
         handlePushIntent(intent)
     }
 
@@ -117,7 +107,7 @@ class MainActivity : AppCompatActivity(), BlockAppSignalProvider, HttpErrorCache
 
     }
 
-    private fun handleIntent(intent: Intent) = lifecycleScope.launch {
+    private fun handleDeepLinkIntent(intent: Intent) = lifecycleScope.launch {
         val appLinkData: Uri? = intent.data
         val path = appLinkData?.lastPathSegment
         siteStateManager.saveDeepLinkPath(path)

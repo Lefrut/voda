@@ -1,5 +1,6 @@
 package com.vodovoz.app.feature.profile.waterapp
 
+import android.telephony.AvailableNetworkInfo.Builder
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.viewModelScope
@@ -70,9 +71,7 @@ class WaterAppViewModel @Inject constructor(
                             .mapToReminderIntervalUi()
                             .map { option ->
                                 if (option.minutes == uiNotificationData.time.toLongOrNull()) {
-                                    option.copy(
-                                        selected = true
-                                    )
+                                    option.copy(selected = true)
                                 } else option
                             }
                     )
@@ -198,8 +197,6 @@ class WaterAppViewModel @Inject constructor(
     }
 
     fun changeWaterLevel(progress: Float) = viewModelScope.launch {
-
-
         val rateData = stateSnapshot.rateData
         val currentLevel = (progress * rateData.rate).toInt()
         waterAppHelper.setWaterLevel(currentLevel)
