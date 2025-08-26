@@ -1,7 +1,7 @@
 package com.vodovoz.app.design_system.composables.placeholders
 
+import android.app.Activity
 import android.os.Parcelable
-import androidx.activity.compose.LocalActivity
 import androidx.annotation.DrawableRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.AnimatedVisibility
@@ -98,7 +98,7 @@ sealed interface ErrorPlaceholderMode {
 
 @Composable
 private fun rememberHttpError(): VodovozHttpErrorUi {
-    val activity = LocalActivity.current
+    val activity = LocalContext.current as? Activity
 
     val httpErrorCache = remember { activity.httpErrorCache }
     val httpErrorState by httpErrorCache.lastHttpError.map { httpError ->
@@ -149,7 +149,7 @@ fun NetworkErrorPlaceholder(
     mode: ErrorPlaceholderMode = ErrorPlaceholderMode.Automatic,
     onTryAgainClick: () -> Unit,
 ) {
-    val activity = LocalActivity.current
+    val activity = LocalContext.current as? Activity
     val view = LocalView.current
 
     val placeholderType = when (mode) {

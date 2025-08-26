@@ -7,7 +7,7 @@ import kotlinx.coroutines.withTimeout
 import java.io.File
 import java.net.URL
 
-object SplashFileConfig {
+object VodovozSplashFile {
 
     private const val FILE_NAME = "splash.json"
     private const val FILE_LINK = "https://vodovoz.ru/images/zastavka/zastavkamobil.json"
@@ -20,6 +20,7 @@ object SplashFileConfig {
         context: Context,
         link: String = FILE_LINK,
     ): Result<Unit> = runCatching {
+
         val file = getSplashFile(context)
         if (file.exists()) return@runCatching Unit
 

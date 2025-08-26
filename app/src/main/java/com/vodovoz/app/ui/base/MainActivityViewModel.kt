@@ -7,6 +7,7 @@ import com.vodovoz.app.domain.general.model.exceptions.UserNotLoginException
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.feature.sitestate.SiteStateManager
 import com.vodovoz.app.ui.base.model.AppState
+import com.vodovoz.app.ui.base.model.SplashFileState
 import com.vodovoz.app.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
@@ -27,6 +28,9 @@ class MainActivityViewModel @Inject constructor(
 
     private val _androidSplash = MutableStateFlow(true)
     val androidSplash = _androidSplash.asStateFlow()
+
+    private val _fileState = MutableStateFlow<SplashFileState>(SplashFileState.Loading)
+    val fileState = _fileState.asStateFlow()
 
     fun checkAppState() = viewModelScope.launch {
         _appState.update { AppState.Loading }
@@ -71,5 +75,9 @@ class MainActivityViewModel @Inject constructor(
 
     fun finishAndroidSplash() = viewModelScope.launch {
         _androidSplash.update { false }
+    }
+
+    fun setFileState(state: SplashFileState) {
+        _fileState.update { state }
     }
 }
