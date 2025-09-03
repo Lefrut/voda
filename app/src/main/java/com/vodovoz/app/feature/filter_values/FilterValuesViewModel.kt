@@ -36,7 +36,7 @@ class FilterValuesViewModel @Inject constructor(
 
 
     private fun fetchFilterValues() = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(uiState = ConcreteFilterUiState.Loading)
         }
         val filterValuesResult =
@@ -44,7 +44,7 @@ class FilterValuesViewModel @Inject constructor(
 
         filterValuesResult.onSuccess { filterValues ->
 
-            _state.update { s ->
+            updateState { s ->
                 s.copy(
                     filter = filter.copy(
                         values = filterValues.mapToUi().map { value ->
@@ -61,7 +61,7 @@ class FilterValuesViewModel @Inject constructor(
     }
 
     fun selectFilterValue(filterValue: FilterValueUi) = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             val filter = s.filter
             s.copy(
                 filter = filter.copy(
@@ -94,13 +94,13 @@ class FilterValuesViewModel @Inject constructor(
     }
 
     fun changeSearchQuery(newSearchQuery: String) = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(searchQuery = newSearchQuery)
         }
     }
 
     fun changeSearchMode(searchMode: Boolean) = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(
                 isSearchMode = searchMode,
                 searchQuery = ""

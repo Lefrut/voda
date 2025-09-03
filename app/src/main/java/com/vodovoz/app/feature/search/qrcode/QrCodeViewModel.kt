@@ -26,7 +26,7 @@ class QrCodeViewModel @Inject constructor(
     fun searchByBarCode(barCode: String) = viewModelScope.launch {
         if (!mutex.tryLock()) return@launch
 
-        _state.update { s ->
+        updateState { s ->
             s.copy(barCode = barCode)
         }
 
@@ -34,7 +34,7 @@ class QrCodeViewModel @Inject constructor(
             vodovozServiceRepository.getBarCodeProducts(barCode).singleResult()
 
         barCodeProductsResult.onSuccess { products ->
-            _state.update { s ->
+            updateState { s ->
                 s.copy(uiState = QrCodeUiState.Scanner)
             }
 
@@ -49,7 +49,7 @@ class QrCodeViewModel @Inject constructor(
             if (t is EmptyResultException && t.placeholder != null) {
                 val errorModel = t.placeholder
 
-                _state.update { s ->
+                updateState { s ->
                     s.copy(
                         uiState = QrCodeUiState.EmptyResult(
                             errorModel.headerHtml,
@@ -68,7 +68,7 @@ class QrCodeViewModel @Inject constructor(
     }
 
     fun switchFlashOn() = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(
                 flashOn = !s.flashOn
             )
@@ -80,7 +80,7 @@ class QrCodeViewModel @Inject constructor(
     }
 
     fun setScannerState() = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(uiState = QrCodeUiState.Scanner)
         }
     }

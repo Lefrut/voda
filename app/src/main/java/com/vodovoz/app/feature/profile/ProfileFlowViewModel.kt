@@ -45,7 +45,7 @@ class ProfileFlowViewModel @Inject constructor(
 ) {
 
     fun fetchProfileDetails() = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(uiState = if (stateSnapshot.uiState != ProfileUiState.Profile) ProfileUiState.Loading else s.uiState)
         }
 
@@ -55,7 +55,7 @@ class ProfileFlowViewModel @Inject constructor(
         val bonusesPopupWindow = bonusesPopupWindowDeferred.await().getOrNull()?.toUi()
 
         profileDetailsResult.onSuccess { profileDetails ->
-            _state.update { s ->
+            updateState { s ->
                 s.copy(
                     uiState = ProfileUiState.Profile,
                     banners = profileDetails.banners.mapToUi(),
@@ -77,7 +77,7 @@ class ProfileFlowViewModel @Inject constructor(
                 else -> ProfileUiState.Error
             }
 
-            _state.update { s ->
+            updateState { s ->
                 s.copy(uiState = uiState)
             }
         }
@@ -85,12 +85,12 @@ class ProfileFlowViewModel @Inject constructor(
 
 
     fun refresh() = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(showRefreshIndicator = true)
         }
         fetchProfileDetails().join()
 
-        _state.update { s ->
+        updateState { s ->
             s.copy(showRefreshIndicator = false)
         }
     }
@@ -111,7 +111,7 @@ class ProfileFlowViewModel @Inject constructor(
         val popupWindow = menuItem.popupWindow
 
         if (popupWindow != null) {
-            _state.update { s ->
+            updateState { s ->
                 s.copy(
                     showSupportingBS = true,
                     currentSupportingBSData = popupWindow
@@ -123,7 +123,7 @@ class ProfileFlowViewModel @Inject constructor(
     }
 
     fun showAdvertisingBottomSheet(advertising: AboutAdvertisingUi) = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(
                 currentAdvertising = advertising,
                 showAdvertisingBS = true
@@ -132,7 +132,7 @@ class ProfileFlowViewModel @Inject constructor(
     }
 
     fun closeAdvertisingBottomSheet() = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(
                 showAdvertisingBS = false
             )
@@ -144,7 +144,7 @@ class ProfileFlowViewModel @Inject constructor(
     }
 
     fun closeSupportingBottomSheet() {
-        _state.update { s ->
+        updateState { s ->
             s.copy(showSupportingBS = false)
         }
     }
@@ -171,7 +171,7 @@ class ProfileFlowViewModel @Inject constructor(
             }
 
             "bonus" -> {
-                _state.update { s ->
+                updateState { s ->
                     s.copy(showBonusesBS = true)
                 }
             }
@@ -181,7 +181,7 @@ class ProfileFlowViewModel @Inject constructor(
     }
 
     private fun showTextBottomSheet(data: ProfilePopupWindowUi) = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(
                 showTextBS = true,
                 currentTextBSData = data
@@ -190,7 +190,7 @@ class ProfileFlowViewModel @Inject constructor(
     }
 
     fun closeTextBottomSheet() = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(showTextBS = false)
         }
     }
@@ -212,7 +212,7 @@ class ProfileFlowViewModel @Inject constructor(
     }
 
     fun hideBonusesBottomSheet() = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(showBonusesBS = false)
         }
     }
@@ -237,7 +237,7 @@ class ProfileFlowViewModel @Inject constructor(
         }
 
     fun changeBonusesSubscribe(subscribe: Boolean) = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(
                 currentBonusesBSData = s.currentBonusesBSData?.copy(warmAboutExpiration = subscribe)
             )

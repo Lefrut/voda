@@ -63,7 +63,7 @@ class CartFlowViewModel @Inject constructor(
 
     fun fetchCartDetails() = viewModelScope.launch {
         if (stateSnapshot.uiState is CartUiState.Empty || stateSnapshot.uiState == CartUiState.Error) {
-            _state.update { s -> s.copy(uiState = CartUiState.Loading) }
+            updateState { s -> s.copy(uiState = CartUiState.Loading) }
         }
 
         val currentCartVersion = cartManager.cartVersion
@@ -75,7 +75,7 @@ class CartFlowViewModel @Inject constructor(
             val cartItems = cartDetails.items.mapToUi()
             val promoButton = cartDetails.promotionalCodeButton?.toUi()
 
-            _state.update { s ->
+            updateState { s ->
                 s.copy(
                     title = cartDetails.title,
                     countText = cartDetails.countText,
@@ -114,31 +114,31 @@ class CartFlowViewModel @Inject constructor(
                     CartUiState.Error
                 }
             }
-            _state.update { s ->
+            updateState { s ->
                 s.copy(uiState = uiState)
             }
         }
     }
 
     fun refresh() = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(showRefreshIndicator = true)
         }
         fetchCartDetails().join()
-        _state.update { s ->
+        updateState { s ->
             s.copy(showRefreshIndicator = false)
         }
     }
 
 
     fun showClearCartDialog() = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(showClearCartDialog = true)
         }
     }
 
     fun clearCart() = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(blockCart = true, showClearCartDialog = false)
         }
         val clearCartResult = vodovozServiceRepository.clearCart().singleResult()
@@ -147,7 +147,7 @@ class CartFlowViewModel @Inject constructor(
             cartManager.clearCart()
         }
 
-        _state.update { s ->
+        updateState { s ->
             s.copy(blockCart = false)
         }
     }
@@ -167,7 +167,7 @@ class CartFlowViewModel @Inject constructor(
     }
 
     private fun setSensitiveButtonsAvailability(buttonEnabled: Boolean) {
-        _state.update { s ->
+        updateState { s ->
             s.copy(
                 present = s.present?.copy(
                     button = s.present.button?.copy(enabled = buttonEnabled)
@@ -188,11 +188,11 @@ class CartFlowViewModel @Inject constructor(
     }
 
     fun closeClearCartDialog() = viewModelScope.launch {
-        _state.update { s -> s.copy(showClearCartDialog = false) }
+        updateState { s -> s.copy(showClearCartDialog = false) }
     }
 
     fun showTrashDialog(cartItem: CartItemUi) = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(
                 showRemoveItemDialog = true,
                 currentRemoveItem = cartItem
@@ -201,13 +201,13 @@ class CartFlowViewModel @Inject constructor(
     }
 
     fun closeTrashDialog() = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(showRemoveItemDialog = false)
         }
     }
 
     fun removeCartItem(currentRemoveItem: CartItemUi) = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(
                 blockCart = true,
                 showRemoveItemDialog = false,
@@ -218,7 +218,7 @@ class CartFlowViewModel @Inject constructor(
         vodovozServiceRepository.updateProductInCart(currentRemoveItem.id, 0).singleResult()
         fetchCartDetails().join()
 
-        _state.update { s ->
+        updateState { s ->
             s.copy(
                 blockCart = false
             )
@@ -226,13 +226,13 @@ class CartFlowViewModel @Inject constructor(
     }
 
     fun showPromotionCodeBottomSheet() = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(showPromotionCodeBottomSheet = true)
         }
     }
 
     fun changePromoCode(newValue: String) = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
 
             val promoButton = s.promotionalCodeButton
             s.copy(
@@ -247,13 +247,13 @@ class CartFlowViewModel @Inject constructor(
     }
 
     fun closePromoCodeBottomSheet() = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(showPromotionCodeBottomSheet = false, promoCode = "")
         }
     }
 
     fun applyPromoCode() = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             val promoButton = s.promotionalCodeButton
             s.copy(
                 promotionalCodeButton = promoButton?.copy(
@@ -268,7 +268,7 @@ class CartFlowViewModel @Inject constructor(
             return@launch
         }
 
-        _state.update { s ->
+        updateState { s ->
             s.copy(
                 showPromotionCodeBottomSheet = false,
                 promoCode = correctCoupon,
@@ -295,12 +295,12 @@ class CartFlowViewModel @Inject constructor(
     }
 
     fun addGiftToCart(presentItem: CartPresentItemUi) = viewModelScope.launch {
-        _state.update { s -> s.copy(blockCart = true) }
+        updateState { s -> s.copy(blockCart = true) }
 
         vodovozServiceRepository.addProductToCart(presentItem.id, 1).singleResult()
         fetchCartDetails().join()
 
-        _state.update { s -> s.copy(blockCart = false) }
+        updateState { s -> s.copy(blockCart = false) }
 
     }
 

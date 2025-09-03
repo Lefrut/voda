@@ -59,7 +59,7 @@ class PromotionDetailsViewModel @Inject constructor(
 
 
     fun fetchPromotionDetails() {
-        _state.update { s ->
+        updateState { s ->
             s.copy(uiState = UiState.Loading)
         }
         vodovozServiceRepository.getPromotionDetails(promotionId)
@@ -67,7 +67,7 @@ class PromotionDetailsViewModel @Inject constructor(
                 promotionDetailsResult.onSuccess { titleAndPromotionDetails ->
 
 
-                    _state.update { s ->
+                    updateState { s ->
                         s.copy(
                             promotionDetails = titleAndPromotionDetails.second.toUi(),
                             productsTitle = titleAndPromotionDetails.first.title,
@@ -84,7 +84,7 @@ class PromotionDetailsViewModel @Inject constructor(
                         }.launchIn(viewModelScope)
 
                 }.onFailure {
-                    _state.update { s ->
+                    updateState { s ->
                         s.copy(uiState = UiState.Error)
                     }
                 }

@@ -28,13 +28,13 @@ class CatalogFlowViewModel @Inject constructor(
     }
 
     fun fetchCatalogDetails() = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(uiState = CatalogUiState.Loading)
         }
         vodovozServiceRepository.getCatalogDetails().collect { catalogDetailsResult ->
             catalogDetailsResult.onSuccess { catalogDetails ->
                 val (banners, categories) = catalogDetails.toUi()
-                _state.update { s ->
+                updateState { s ->
                     s.copy(
                         categories = categories,
                         banners = banners,
@@ -42,7 +42,7 @@ class CatalogFlowViewModel @Inject constructor(
                     )
                 }
             }.onFailure {
-                _state.update { s ->
+                updateState { s ->
                     s.copy(uiState = CatalogUiState.Error)
                 }
             }
@@ -65,7 +65,7 @@ class CatalogFlowViewModel @Inject constructor(
     }
 
     fun showAdvertisingBottomSheet(aboutAdvertisingUi: AboutAdvertisingUi) = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(
                 currentAdvertising = aboutAdvertisingUi,
                 showAdvertisingBS = true
@@ -74,7 +74,7 @@ class CatalogFlowViewModel @Inject constructor(
     }
 
     fun closeAdvertisingBottomSheet() {
-        _state.update { s ->
+        updateState { s ->
             s.copy(showAdvertisingBS = false)
         }
     }

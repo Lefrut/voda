@@ -60,8 +60,9 @@ inline fun <reified T, R> executeRequest(
 
         onResponse(response)
 
-        val stringBody =
-            response.stringBody().ifEmpty { response.stringErrorBody() }.decodeUnicodeEscapes()
+        val stringBody = response.stringBody().ifEmpty {
+            response.stringErrorBody()
+        }.decodeUnicodeEscapes()
 
         val bodyResult = kotlin.runCatching {
             val adapter = moshiWithJsonAdapter.adapter<T>(type).lenient()
@@ -70,24 +71,32 @@ inline fun <reified T, R> executeRequest(
         val body = bodyResult.getOrNull()
         val responseCode = response.code()
         val errorCode = responseCode.takeIf { code -> code !in 200..299 } ?: 520
+        val failResult = {
+            onFail(Response.error(errorCode, stringBody.jsonToResponseBody()))
+        }
+        var finalResult: Result<R> = Result.failure(
+            IllegalArgumentException("final result not initialized")
+        )
 
         bodyResult.onSuccess {
             if (body != null && responseCode == 200) {
                 val mapResult = kotlin.runCatching { mapper(body) }
 
                 mapResult.onSuccess {
-                    emit(mapResult)
+                    finalResult = mapResult
                 }.onFailure {
                     debugLog { it.message + it.stackTraceToString() }
-                    emit(onFail(Response.error(errorCode, stringBody.jsonToResponseBody())))
+                    finalResult = failResult()
                 }
             } else {
-                emit(onFail(Response.error(errorCode, stringBody.jsonToResponseBody())))
+                finalResult = failResult()
             }
         }.onFailure {
             debugLog { it.message + it.stackTraceToString() }
-            emit(onFail(Response.error(errorCode, stringBody.jsonToResponseBody())))
+            finalResult = failResult()
         }
+
+        emit(finalResult)
     }.catchResult().take(1).onEach { result ->
         debugLog {
             result.onFailure { t ->

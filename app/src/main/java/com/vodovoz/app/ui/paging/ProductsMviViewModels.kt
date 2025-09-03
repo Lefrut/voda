@@ -65,6 +65,3 @@ internal interface VodovozItemsListeners<ITEM : VodovozItemUi<ITEM>> {
         }
     )
 }
-
-
-

@@ -22,4 +22,13 @@ data class AppUpdateInfoModel(
 data class PopupWindowInfoModel(
     val specialPromotion: SpecialPromotionModel?,
     val appUpdateInfo: AppUpdateInfoModel,
-)
+) {
+
+    companion object {
+        val Empty = PopupWindowInfoModel(
+            SpecialPromotionModel(-1, "", "", "", null),
+            AppUpdateInfoModel(-1, "", "", "", "0.0.0", "", null)
+        )
+
+    }
+}

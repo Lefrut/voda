@@ -17,7 +17,7 @@ import javax.inject.Inject
 class DocumentViewerViewModel @Inject constructor() : MviViewModel<DocumentViewerState, DocumentViewerEvent>(DocumentViewerState()) {
 
     fun setDocument(document: DocumentUi) {
-        _state.update { s ->
+        updateState { s ->
             s.copy(
                 currentDocument = document
             )
@@ -25,7 +25,7 @@ class DocumentViewerViewModel @Inject constructor() : MviViewModel<DocumentViewe
     }
 
     fun setUiState(uiState: DocumentViewerUiState.Success) = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(uiState = uiState)
         }
     }

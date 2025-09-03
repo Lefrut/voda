@@ -40,7 +40,7 @@ class CancelOrderViewModel @Inject constructor(
     }
 
     fun fetchCancelOrderDetails() = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(uiState = CancelOrderUiState.Loading)
         }
 
@@ -50,7 +50,7 @@ class CancelOrderViewModel @Inject constructor(
         cancelOrderDetailsResult.onSuccess { cancelOrderDetails ->
             val checkboxes = cancelOrderDetails.checkboxesNames
 
-            _state.update { s ->
+            updateState { s ->
                 s.copy(
                     uiState = CancelOrderUiState.Body,
                     title = cancelOrderDetails.title,
@@ -65,7 +65,7 @@ class CancelOrderViewModel @Inject constructor(
             }
 
         }.onFailure {
-            _state.update { s ->
+            updateState { s ->
                 s.copy(uiState = CancelOrderUiState.Error)
             }
             navigateBack()
@@ -73,7 +73,7 @@ class CancelOrderViewModel @Inject constructor(
     }
 
     fun changeCurrentCheckbox(name: String) = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(currentCheckboxName = name)
         }
     }
@@ -83,13 +83,13 @@ class CancelOrderViewModel @Inject constructor(
         val newField = listOf(field).updateFieldAndResetError(field, updatedField).firstOrNull()
             ?: return@launch
 
-        _state.update { s ->
+        updateState { s ->
             s.copy(commentField = newField)
         }
     }
 
     fun cancelOrder(btn: ColorfulButtonUi) = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(button = s.button.copy(loading = true))
         }
 
@@ -106,7 +106,7 @@ class CancelOrderViewModel @Inject constructor(
             sendEvent(CancelOrderEvent.GoBack)
         }
 
-        _state.update { s ->
+        updateState { s ->
             s.copy(button = s.button.copy(loading = false))
         }
 

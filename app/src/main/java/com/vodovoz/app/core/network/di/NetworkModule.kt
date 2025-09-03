@@ -104,7 +104,7 @@ abstract class NetworkModule {
         @Singleton
         fun provideMoshi(): Moshi {
             return Moshi.Builder()
-                .add(LocalDateTime::class.java, LocalDateTimeJsonAdapter().nullSafe())
+                .add(LocalDateTime::class.java, LocalDateTimeJsonAdapter().lenient().nullSafe())
                 .add(KotlinJsonAdapterFactory())
                 .build()
         }

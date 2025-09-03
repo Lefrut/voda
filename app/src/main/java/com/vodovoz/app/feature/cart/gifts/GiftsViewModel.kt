@@ -36,7 +36,7 @@ class GiftsViewModel @Inject constructor(
             return@launch
         }
 
-        _state.update { s ->
+        updateState { s ->
             s.copy(
                 button = giftDetails.button,
                 gifts = giftDetails.items,
@@ -55,7 +55,7 @@ class GiftsViewModel @Inject constructor(
     }
 
     fun selectGift(presentItem: CartPresentItemUi) = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(currentGift = presentItem)
         }
     }

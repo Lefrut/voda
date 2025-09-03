@@ -32,7 +32,7 @@ class AboutServicesFlowViewModel @Inject constructor(
     }
 
     fun fetchAboutServicesDetails() = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(uiState = AboutServicesUiState.Loading)
         }
 
@@ -41,7 +41,7 @@ class AboutServicesFlowViewModel @Inject constructor(
 
         allServicesDetailsResult.onSuccess { allServicesDetails ->
 
-            _state.update { s ->
+            updateState { s ->
                 s.copy(
                     title = allServicesDetails.title,
                     descriptionHtml = allServicesDetails.description,
@@ -51,7 +51,7 @@ class AboutServicesFlowViewModel @Inject constructor(
             }
 
         }.onFailure {
-            _state.update { s ->
+            updateState { s ->
                 s.copy(uiState = AboutServicesUiState.Error)
             }
         }

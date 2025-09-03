@@ -25,7 +25,7 @@ class FAQViewModel @Inject constructor(savedStateHandle: SavedStateHandle) :
     }
 
     private fun initFAQ(faq: FAQUi) = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(
                 name = faq.name,
                 items = faq.items
@@ -38,7 +38,7 @@ class FAQViewModel @Inject constructor(savedStateHandle: SavedStateHandle) :
     }
 
     fun changeExpand(faqItem: FAQItemUi) = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(
                 items = s.items.map {
                     if (faqItem.name == it.name) it.copy(expanded = !it.expanded) else it

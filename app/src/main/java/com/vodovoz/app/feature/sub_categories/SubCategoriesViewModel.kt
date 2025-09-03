@@ -21,7 +21,7 @@ class SubCategoriesViewModel(
     }
 
     private fun setInitialCatalogCategory() {
-        _state.update { s ->
+        updateState { s ->
             s.copy(catalogCategory = catalogCategoryArg)
         }
     }
@@ -56,7 +56,7 @@ class SubCategoriesViewModel(
     }
 
     fun changeSearchQuery(query: String) = viewModelScope.launch {
-        _state.update { s -> s.copy(searchQuery = query) }
+        updateState { s -> s.copy(searchQuery = query) }
     }
 
 

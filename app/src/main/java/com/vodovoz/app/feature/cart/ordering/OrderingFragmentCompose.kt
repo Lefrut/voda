@@ -13,7 +13,6 @@ import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
-import com.vodovoz.app.ui.mvi.collectAsState
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.navOptions
 import com.vodovoz.app.R
@@ -37,6 +36,7 @@ import com.vodovoz.app.feature.delivery_date.model.DeliveryTimeIntervalUi
 import com.vodovoz.app.feature.order_call_you.model.CallYouItemUi
 import com.vodovoz.app.feature.payment_method.model.PaymentMethodItemNav
 import com.vodovoz.app.feature.payment_method.model.toUi
+import com.vodovoz.app.ui.mvi.collectAsState
 import com.vodovoz.app.util.extensions.openUrl
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.onSubscription
@@ -76,7 +76,7 @@ class OrderingFragment : Fragment() {
             setContent {
                 VodovozTheme {
                     val viewState by viewModel.collectAsState()
-                    
+
                     val scrollState = rememberScrollState()
 
                     when (val uiState = viewState.uiState) {

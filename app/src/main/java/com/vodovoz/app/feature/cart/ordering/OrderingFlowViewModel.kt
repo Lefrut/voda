@@ -5,10 +5,6 @@ import androidx.compose.runtime.Stable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.vodovoz.app.R
-import com.vodovoz.app.ui.mvi.Event
-import com.vodovoz.app.ui.mvi.MviViewModel
-import com.vodovoz.app.ui.mvi.State
-import kotlinx.coroutines.flow.update
 import com.vodovoz.app.common.model.VodovozBoolean
 import com.vodovoz.app.common.model.boolean
 import com.vodovoz.app.common.model.from
@@ -32,11 +28,15 @@ import com.vodovoz.app.feature.delivery_date.model.DeliveryDateOptionUi
 import com.vodovoz.app.feature.delivery_date.model.DeliveryTimeIntervalUi
 import com.vodovoz.app.feature.order_call_you.model.CallYouItemUi
 import com.vodovoz.app.feature.payment_method.model.PaymentMethodItemUi
+import com.vodovoz.app.ui.mvi.Event
+import com.vodovoz.app.ui.mvi.MviViewModel
+import com.vodovoz.app.ui.mvi.State
 import com.vodovoz.app.util.extensions.singleResult
 import com.vodovoz.app.util.formatters.VodovozDateFormatters
 import com.vodovoz.app.util.toIntRoundOrNull
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import javax.inject.Inject
@@ -68,7 +68,7 @@ class OrderingFlowViewModel @Inject constructor(
         val orderingDetailsResult = vodovozServiceRepository.getOrderingDetails().singleResult()
 
         orderingDetailsResult.onSuccess { orderingDetails ->
-            _state.update { s ->
+            updateState { s ->
 
                 val notifySection = orderingDetails.notifySection.toUi { items ->
                     items.mapToUi()
@@ -83,7 +83,7 @@ class OrderingFlowViewModel @Inject constructor(
                     recipientSection = orderingDetails.recipientSection.toUi { items ->
                         items.mapToUi().map { menuItemUi ->
                             if (menuItemUi.id == CALL_YOU_MENU_ID && menuItemUi.defaultValue != null) {
-                                _state.update { s ->
+                                updateState { s ->
                                     s.copy(
                                         ordering = s.ordering.copy(
                                             callYouId = menuItemUi.defaultValue
@@ -104,7 +104,7 @@ class OrderingFlowViewModel @Inject constructor(
                 )
             }
         }.onFailure {
-            _state.update { s ->
+            updateState { s ->
                 s.copy(
                     uiState = OrderingUiState.Error
                 )
@@ -124,7 +124,6 @@ class OrderingFlowViewModel @Inject constructor(
     private fun changeOrderingSection(
         clearErrors: Boolean = true,
         section: SectionUi<OrderingMenuItemUi>,
-        @Suppress("SameParameterValue")
         menuItemIds: List<String>,
         map: (OrderingMenuItemUi) -> OrderingMenuItemUi,
     ): SectionUi<OrderingMenuItemUi> {
@@ -138,7 +137,7 @@ class OrderingFlowViewModel @Inject constructor(
         ids: List<String>,
         map: (OrderingMenuItemUi) -> OrderingMenuItemUi,
     ) {
-        _state.update { state ->
+        updateState { state ->
             state.copy(
                 recipientSection = changeOrderingSection(
                     section = state.recipientSection,
@@ -207,15 +206,15 @@ class OrderingFlowViewModel @Inject constructor(
     }
 
     fun selectNotifyItem(notifyItem: OrderNotifyItemUi) = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(selectedNotifyItem = notifyItem)
         }
     }
 
     fun changeComment(field: FieldUi, updatedField: FieldUi) = viewModelScope.launch {
-        _state.update { s ->
-            if (s.comment == null) return@update s
-            s.copy(
+        updateState { s ->
+            if (s.comment == null) s
+            else s.copy(
                 comment = s.comment.copy(
                     value = updatedField.value
                 )
@@ -298,7 +297,7 @@ class OrderingFlowViewModel @Inject constructor(
             && ordering.timeInterval != null && ordering.recipientPhone != null
             && ordering.paymentId != null && ordering.callYouId != null
         ) {
-            _state.update { s ->
+            updateState { s ->
                 s.copy(button = s.button.copy(loading = true))
             }
 
@@ -315,12 +314,12 @@ class OrderingFlowViewModel @Inject constructor(
                 notifyDriverId = stateSnapshot.selectedNotifyItem.value,
                 params = earlierDelivery?.let { mapOf(earlierDelivery) }
             ).singleResult().onSuccess { placeholder ->
-                _state.update { s ->
+                updateState { s ->
                     s.copy(uiState = OrderingUiState.Success(placeholder.toUi()))
                 }
             }
 
-            _state.update { s ->
+            updateState { s ->
                 s.copy(button = s.button.copy(loading = false))
             }
 
@@ -344,7 +343,7 @@ class OrderingFlowViewModel @Inject constructor(
             if (ordering.callYouId == null) add(CALL_YOU_MENU_ID)
         }
 
-        _state.update { s ->
+        updateState { s ->
             s.copy(
                 recipientSection = changeOrderingSection(
                     section = s.recipientSection,
@@ -376,7 +375,7 @@ class OrderingFlowViewModel @Inject constructor(
     }
 
     fun refreshRecipient() = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(showRefreshIndicator = true)
         }
 
@@ -384,7 +383,7 @@ class OrderingFlowViewModel @Inject constructor(
 
         delay(350)
 
-        _state.update { s ->
+        updateState { s ->
             s.copy(showRefreshIndicator = false)
         }
 
@@ -396,7 +395,7 @@ class OrderingFlowViewModel @Inject constructor(
 
         recipientResult.onSuccess { recipientModel ->
 
-            _state.update { s ->
+            updateState { s ->
                 val updatedOrdering = s.ordering.copy(
                     recipientPhone = recipientModel.phone.takeIf { it.isNotBlank() },
                     recipientName = recipientModel.fio.takeIf { it.isNotBlank() }
@@ -427,7 +426,7 @@ class OrderingFlowViewModel @Inject constructor(
     }
 
     fun setAddress(address: AddressUi) = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(
                 ordering = OrderingUi.Empty.copy(addressId = address.id),
                 recipientSection = changeOrderingSection(
@@ -449,7 +448,7 @@ class OrderingFlowViewModel @Inject constructor(
         val orderingDetailsResult = vodovozServiceRepository.getOrderingDetails().singleResult()
 
         orderingDetailsResult.onSuccess { orderingDetails ->
-            _state.update { s ->
+            updateState { s ->
                 val recipientSection = s.recipientSection
 
                 s.copy(
@@ -475,66 +474,68 @@ class OrderingFlowViewModel @Inject constructor(
         refreshRecipient()
     }
 
-    fun setDeliveryDateTime(timeInterval: DeliveryTimeIntervalUi, date: DeliveryDateOptionUi) =
-        viewModelScope.launch {
-            _state.update { s ->
+    fun setDeliveryDateTime(
+        timeInterval: DeliveryTimeIntervalUi,
+        date: DeliveryDateOptionUi,
+    ) = viewModelScope.launch {
+        updateState { s ->
+            s.copy(
+                ordering = s.ordering.copy(
+                    timeInterval = timeInterval.value,
+                    date = date.value,
+                    paymentBalance = false,
+                    paymentChange = null,
+                    paymentId = null
+                ),
+                recipientSection = changeOrderingSection(
+                    clearErrors = false,
+                    section = s.recipientSection,
+                    menuItemIds = listOf(DELIVERY_TIME_MENU_ID),
+                    map = { itemUi ->
+                        itemUi.copy(
+                            error = false,
+                            name = resourcesProvider.getString(
+                                R.string.date_time_inteval,
+                                date.value,
+                                timeInterval.name
+                            ),
+                            description = resourcesProvider.getString(R.string.delivery)
+                        )
+                    }
+                ),
+                showRefreshIndicator = true
+            )
+        }
+
+        val ordering = stateSnapshot.ordering
+
+        vodovozServiceRepository.getOrderingDetails(
+            addressId = ordering.addressId,
+            date = ordering.date,
+            timeInterval = ordering.timeInterval
+        ).singleResult().onSuccess { orderingDetails ->
+            updateState { s ->
                 s.copy(
-                    ordering = s.ordering.copy(
-                        timeInterval = timeInterval.value,
-                        date = date.value,
-                        paymentBalance = false,
-                        paymentChange = null,
-                        paymentId = null
-                    ),
-                    recipientSection = changeOrderingSection(
-                        clearErrors = false,
-                        section = s.recipientSection,
-                        menuItemIds = listOf(DELIVERY_TIME_MENU_ID),
-                        map = { itemUi ->
-                            itemUi.copy(
-                                error = false,
-                                name = resourcesProvider.getString(
-                                    R.string.date_time_inteval,
-                                    date.value,
-                                    timeInterval.name
-                                ),
-                                description = resourcesProvider.getString(R.string.delivery)
-                            )
+                    paymentSection = s.paymentSection.copy(
+                        items = s.paymentSection.items.map { menuItem ->
+                            if (menuItem.id == PAYMENT_MENU_ID) {
+                                orderingDetails.paymentSection.items.mapToUi()
+                                    .find { it.id == PAYMENT_MENU_ID } ?: menuItem
+                            } else menuItem
                         }
                     ),
-                    showRefreshIndicator = true
+                    totals = orderingDetails.totals.mapToUi()
                 )
-            }
-
-            val ordering = stateSnapshot.ordering
-
-            vodovozServiceRepository.getOrderingDetails(
-                addressId = ordering.addressId,
-                date = ordering.date,
-                timeInterval = ordering.timeInterval
-            ).singleResult().onSuccess { orderingDetails ->
-                _state.update { s ->
-                    s.copy(
-                        paymentSection = s.paymentSection.copy(
-                            items = s.paymentSection.items.map { menuItem ->
-                                if (menuItem.id == PAYMENT_MENU_ID) {
-                                    orderingDetails.paymentSection.items.mapToUi()
-                                        .find { it.id == PAYMENT_MENU_ID } ?: menuItem
-                                } else menuItem
-                            }
-                        ),
-                        totals = orderingDetails.totals.mapToUi()
-                    )
-                }
-            }
-
-            _state.update { s ->
-                s.copy(showRefreshIndicator = false)
             }
         }
 
+        updateState { s ->
+            s.copy(showRefreshIndicator = false)
+        }
+    }
+
     fun setCallYou(callYouItem: CallYouItemUi) = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(
                 ordering = s.ordering.copy(
                     callYouId = callYouItem.value
@@ -555,7 +556,7 @@ class OrderingFlowViewModel @Inject constructor(
     }
 
     fun setPaymentBalance(paymentBalance: PaymentMethodItemUi) {
-        _state.update { s ->
+        updateState { s ->
             s.copy(
                 ordering = s.ordering.copy(paymentBalance = paymentBalance.value)
             )
@@ -563,7 +564,7 @@ class OrderingFlowViewModel @Inject constructor(
     }
 
     fun setPaymentMethod(paymentMethod: PaymentMethodItemUi) {
-        _state.update { s ->
+        updateState { s ->
             s.copy(
                 ordering = s.ordering.copy(
                     paymentId = paymentMethod.id,
@@ -606,7 +607,7 @@ class OrderingFlowViewModel @Inject constructor(
     }
 
     fun setEarlierDelivery(checkbox: CheckboxUi) = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(
                 ordering = s.ordering.copy(earlierDelivery = checkbox.id to checkbox.value())
             )
@@ -639,7 +640,7 @@ class OrderingFlowViewModel @Inject constructor(
             val addressId: Long,
             val date: String?,
             val timeInterval: String?,
-            val earlierDelivery: Boolean
+            val earlierDelivery: Boolean,
         ) : OrderingEvents()
 
         data class GoToPaymentMethod(

@@ -6,6 +6,7 @@ import com.vodovoz.app.common.like.LikeManager
 import com.vodovoz.app.common.resources.ResourcesProvider
 import com.vodovoz.app.domain.general.respository.UserPreferencesRepository
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
+import com.vodovoz.app.ui.mvi.MviViewModel
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -15,10 +16,8 @@ import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Before
 
-@OptIn(ExperimentalCoroutinesApi::class)
-abstract class ViewModelTestBase<T : ViewModel> {
+abstract class ViewModelTestBase<T : ViewModel>: CoroutineTestBase() {
 
-    protected val dispatcher = StandardTestDispatcher()
 
     protected lateinit var viewModel: T
     protected lateinit var cartManager: CartManager
@@ -29,9 +28,10 @@ abstract class ViewModelTestBase<T : ViewModel> {
     protected lateinit var userPreferencesRepository: UserPreferencesRepository
     protected lateinit var resourcesProvider: ResourcesProvider
 
+
     @Before
-    open fun setUpBase() {
-        Dispatchers.setMain(dispatcher)
+    override fun setUpBase() {
+        super.setUpBase()
 
         vodovozServiceRepository = mockk(relaxed = true)
         accountManager = mockk(relaxed = true)
@@ -42,11 +42,6 @@ abstract class ViewModelTestBase<T : ViewModel> {
         resourcesProvider = mockk(relaxed = true)
 
         viewModel = createViewModel()
-    }
-
-    @After
-    open fun tearDownBase() {
-        Dispatchers.resetMain()
     }
 
     protected abstract fun createViewModel(): T

@@ -36,7 +36,7 @@ class WaitFeedbackProductsViewModel @Inject constructor(
 
     fun fetchWaitFeedbackProductsDetails() = viewModelScope.launch {
         if (stateSnapshot.uiState !is WaitFeedbackProductsUiState.Success) {
-            _state.update { s ->
+            updateState { s ->
                 s.copy(uiState = WaitFeedbackProductsUiState.Loading)
             }
         }
@@ -45,7 +45,7 @@ class WaitFeedbackProductsViewModel @Inject constructor(
             vodovozServiceRepository.getWaitFeedbackProductsTitle().singleResult()
 
         waitFeedbackProductsResult.onSuccess { title ->
-            _state.update { s ->
+            updateState { s ->
                 s.copy(
                     title = title,
                     uiState = WaitFeedbackProductsUiState.Success
@@ -65,7 +65,7 @@ class WaitFeedbackProductsViewModel @Inject constructor(
             }
 
             if (stateSnapshot.uiState !is WaitFeedbackProductsUiState.Success) {
-                _state.update { s ->
+                updateState { s ->
                     s.copy(uiState = uiState)
                 }
             }
@@ -98,7 +98,7 @@ class WaitFeedbackProductsViewModel @Inject constructor(
         }
 
     fun removeProduct(productId: Long) = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             val products = s.items
             s.copy(
                 items = products - products.filter { product ->

@@ -28,7 +28,7 @@ class DetailMediaViewModel @Inject constructor(
     }
 
     fun setMediaByIndex(index: Int) = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(
                 currentMedia = s.mediaList.getOrElse(index){ s.currentMedia }
             )
@@ -36,12 +36,12 @@ class DetailMediaViewModel @Inject constructor(
     }
 
     fun makePortrait() = viewModelScope.launch {
-        _state.update{ s -> s.copy(portraitOrientation = true) }
+        updateState{ s -> s.copy(portraitOrientation = true) }
         sendEvent(DetailMediaEvent.MakePortrait)
     }
 
     fun makeLandscape() = viewModelScope.launch {
-        _state.update{ s -> s.copy(portraitOrientation = false) }
+        updateState{ s -> s.copy(portraitOrientation = false) }
         sendEvent(DetailMediaEvent.MakeLandscape)
     }
 

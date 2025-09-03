@@ -79,7 +79,7 @@ class PastPurchasesFlowViewModel @Inject constructor(
     }
 
     fun hideSortBottomSheet() {
-        _state.update { s ->
+        updateState { s ->
             s.copy(showSortBottomSheet = false)
         }
     }
@@ -87,7 +87,7 @@ class PastPurchasesFlowViewModel @Inject constructor(
     fun selectSort(sort: SortUi) = viewModelScope.launch {
         if (stateSnapshot.currentSort == sort) return@launch
 
-        _state.update { s ->
+        updateState { s ->
             s.copy(
                 currentSort = sort,
                 showSortBottomSheet = false,
@@ -100,19 +100,19 @@ class PastPurchasesFlowViewModel @Inject constructor(
     }
 
     fun showSortBottomSheet() = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(showSortBottomSheet = true)
         }
     }
 
     fun switchLayout() = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(isGridView = !s.isGridView)
         }
     }
 
     fun selectCategory(category: CategoryUi) = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(
                 currentCategory = if (category == s.currentCategory) CategoryUi.Empty else category,
                 loadStates = s.loadStates.copy(
@@ -148,7 +148,7 @@ class PastPurchasesFlowViewModel @Inject constructor(
         pastPurchasesDetailsResult.onSuccess { pastPurchasesDetails ->
 
 
-            _state.update { s ->
+            updateState { s ->
 
                 val sorting = pastPurchasesDetails.sorting.mapToUi()
                 val sort = s.currentSort.takeIf { sort ->
@@ -183,7 +183,7 @@ class PastPurchasesFlowViewModel @Inject constructor(
             }
 
             if (stateSnapshot.uiState !is PastPurchasesUiState.Success) {
-                _state.update { s ->
+                updateState { s ->
                     val title = (uiState as? PastPurchasesUiState.Empty)?.placeholder?.title
                     s.copy(
                         title = title ?: s.title,

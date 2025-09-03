@@ -58,8 +58,8 @@ class MainActivity :
             viewModel.androidSplash.value
         }
         setupUi()
-        viewModel.checkAppState()
         downloadSplashFile()
+        viewModel.checkAppState()
         handleIntent(intent)
     }
 
@@ -113,3 +113,4 @@ class MainActivity :
         siteStateManager.saveDeepLinkPath(path)
     }
 }
+

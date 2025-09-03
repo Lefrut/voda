@@ -41,7 +41,7 @@ class DeliveryDateViewModel @Inject constructor(
 
     init {
         if (deliveryDate != null && timeInterval != null) {
-            _state.update { s ->
+            updateState { s ->
                 s.copy(
                     showCalendarDialog = false,
                     selectedDateOption = DeliveryDateOptionUi.Empty.copy(value = deliveryDate),
@@ -72,7 +72,7 @@ class DeliveryDateViewModel @Inject constructor(
                 timeSection.toUi { deliveryTime -> deliveryTime.mapToUi() }
             }
 
-            _state.update { s ->
+            updateState { s ->
                 val timeSectionBySelectedTimeInterval = timeSections.find { section ->
                     section.items.find { it.value == s.selectedTimeInterval.value } != null
                 }
@@ -106,14 +106,14 @@ class DeliveryDateViewModel @Inject constructor(
 
 
         }.onFailure {
-            _state.update { s ->
+            updateState { s ->
                 s.copy(uiState = DeliveryDateUiState.Error)
             }
         }
     }
 
     fun selectDateOption(dateOption: DeliveryDateOptionUi) {
-        _state.update { s ->
+        updateState { s ->
             s.copy(
                 selectedDateOption = dateOption,
                 uiState = DeliveryDateUiState.BodyLoading
@@ -125,7 +125,7 @@ class DeliveryDateViewModel @Inject constructor(
     fun selectTimeSection(timeSection: SectionUi<DeliveryTimeIntervalUi>) {
 
 
-        _state.update { s ->
+        updateState { s ->
             s.copy(
                 selectedTimeSection = timeSection,
                 selectedTimeInterval = DeliveryTimeIntervalUi.Empty,
@@ -135,7 +135,7 @@ class DeliveryDateViewModel @Inject constructor(
     }
 
     fun selectDeliveryTimeInterval(deliveryTimeInterval: DeliveryTimeIntervalUi) {
-        _state.update { s ->
+        updateState { s ->
             s.copy(
                 selectedTimeInterval = deliveryTimeInterval,
                 button = s.button.copy(
@@ -160,13 +160,13 @@ class DeliveryDateViewModel @Inject constructor(
     }
 
     fun showCalendarDialog() {
-        _state.update { s ->
+        updateState { s ->
             s.copy(showCalendarDialog = true)
         }
     }
 
     fun hideCalendarDialog() {
-        _state.update { s ->
+        updateState { s ->
             s.copy(showCalendarDialog = false)
         }
         if (stateSnapshot.uiState == DeliveryDateUiState.Loading) {
@@ -178,13 +178,13 @@ class DeliveryDateViewModel @Inject constructor(
         val formattedDate = date.format(VodovozDateFormatters.DMY)
 
         if (formattedDate == stateSnapshot.selectedDateOption.value) {
-            _state.update { s ->
+            updateState { s ->
                 s.copy(showCalendarDialog = false)
             }
             return
         }
 
-        _state.update { s ->
+        updateState { s ->
             s.copy(
                 selectedDateOption = s.options.find { it.value == formattedDate }
                     ?: s.selectedDateOption.copy(
@@ -204,7 +204,7 @@ class DeliveryDateViewModel @Inject constructor(
     }
 
     fun changeCheckbox(newEarlierCheckbox: CheckboxUi) {
-        _state.update { s -> s.copy(earlierCheckbox = newEarlierCheckbox) }
+        updateState { s -> s.copy(earlierCheckbox = newEarlierCheckbox) }
     }
 
 }

@@ -48,7 +48,7 @@ class ServiceDetailsViewModel @Inject constructor(
     }
 
     fun fetchServiceDetails() = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(uiState = ServiceDetailsUiState.Loading)
         }
 
@@ -58,7 +58,7 @@ class ServiceDetailsViewModel @Inject constructor(
 
         serviceDetailsResult.onSuccess { serviceDetails ->
 
-            _state.update { s ->
+            updateState { s ->
                 s.copy(
                     uiState = ServiceDetailsUiState.Success,
                     title = serviceDetails.name,
@@ -70,7 +70,7 @@ class ServiceDetailsViewModel @Inject constructor(
             }
 
         }.onFailure {
-            _state.update { s ->
+            updateState { s ->
                 s.copy(uiState = ServiceDetailsUiState.Error)
             }
         }
@@ -120,7 +120,7 @@ class ServiceDetailsViewModel @Inject constructor(
         if (!loading) {
             delay(200)
         }
-        _state.update { s ->
+        updateState { s ->
             s.copy(webViewIsLoading = loading)
         }
     }

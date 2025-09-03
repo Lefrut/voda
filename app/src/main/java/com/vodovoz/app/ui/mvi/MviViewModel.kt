@@ -1,6 +1,6 @@
 package com.vodovoz.app.ui.mvi
 
-import android.annotation.SuppressLint
+import androidx.annotation.VisibleForTesting
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.State
@@ -11,7 +11,6 @@ import com.vodovoz.app.design_system.effects.LifecycleEffect
 import com.vodovoz.app.ui.paging.ItemsMviViewModel
 import com.vodovoz.app.ui.paging.ItemsState
 import com.vodovoz.app.ui.paging.VodovozItemsListeners
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -20,7 +19,8 @@ import kotlinx.coroutines.flow.update
 
 abstract class MviViewModel<STATE, EVENT>(state: STATE) : ViewModel() {
 
-    protected val _state = MutableStateFlow(state)
+
+    private val _state = MutableStateFlow(state)
 
     @Stable
     val state = _state.asStateFlow()
@@ -29,7 +29,7 @@ abstract class MviViewModel<STATE, EVENT>(state: STATE) : ViewModel() {
         _state.update(function)
     }
 
-    val stateSnapshot get() = _state.value
+    val stateSnapshot get() = state.value
 
     private val _events = MutableSharedFlow<EVENT>(0)
 
@@ -37,6 +37,11 @@ abstract class MviViewModel<STATE, EVENT>(state: STATE) : ViewModel() {
     val events = _events.asSharedFlow()
 
     protected suspend fun sendEvent(event: EVENT) = _events.emit(event)
+
+    @VisibleForTesting
+    internal fun setState(state: STATE) {
+        _state.update { state }
+    }
 
 }
 

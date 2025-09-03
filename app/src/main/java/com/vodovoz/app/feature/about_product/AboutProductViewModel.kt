@@ -59,7 +59,7 @@ class AboutProductViewModel @Inject constructor(
 
     private fun setupScreen() = viewModelScope.launch {
         val price = productPrices.firstOrNull()
-        _state.update { s ->
+        updateState { s ->
             s.copy(
                 items = price?.let {
                     listOf(
@@ -85,7 +85,7 @@ class AboutProductViewModel @Inject constructor(
 
 
     private fun fetchAboutProductInfo() = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(
                 tabs = aboutProductManager.tabs,
                 characteristics = aboutProductManager.characteristicsBlock,
@@ -99,14 +99,14 @@ class AboutProductViewModel @Inject constructor(
     private fun updatePresentHtml() = viewModelScope.launch {
         val result = vodovozServiceRepository.getPresentInfo().singleResult()
         result.onSuccess { presentInfo ->
-            _state.update { s ->
+            updateState { s ->
                 s.copy(presentHtml = presentInfo.toUi().html)
             }
         }
     }
 
     fun selectTab(i: Int) = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(selectedTabIndex = i)
         }
     }

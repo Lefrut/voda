@@ -64,7 +64,7 @@ class RecoverPasswordViewModel @Inject constructor(
     }
 
     fun fetchRecoverPasswordDetails() = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(uiState = RecoverPasswordUiState.Loading)
         }
 
@@ -77,7 +77,7 @@ class RecoverPasswordViewModel @Inject constructor(
 
         recoverPasswordDetailsResult.onSuccess { recoverPasswordDetails ->
             val authDetails = recoverPasswordDetails.toUi(agreementText)
-            _state.update { s ->
+            updateState { s ->
                 s.copy(
                     uiState = RecoverPasswordUiState.Body,
                     authDetails = authDetails.copy(
@@ -88,7 +88,7 @@ class RecoverPasswordViewModel @Inject constructor(
                 )
             }
         }.onFailure {
-            _state.update { s ->
+            updateState { s ->
                 s.copy(uiState = RecoverPasswordUiState.Error)
             }
         }
@@ -96,7 +96,7 @@ class RecoverPasswordViewModel @Inject constructor(
 
     private fun recoverPassword() = viewModelScope.launch {
 
-        _state.update { s ->
+        updateState { s ->
             s.copy(
                 authDetails = s.authDetails.copy(
                     buttons = s.buttons.updateButton(RECOVER_PASSWORD_BUTTON) {
@@ -124,8 +124,8 @@ class RecoverPasswordViewModel @Inject constructor(
             }
 
 
-            _state.update { s ->
-                val field = s.fields.lastOrNull() ?: return@update s
+            updateState { s ->
+                val field = s.fields.lastOrNull() ?: return@updateState s
 
                 s.copy(
                     authDetails = s.authDetails.copy(
@@ -143,7 +143,7 @@ class RecoverPasswordViewModel @Inject constructor(
 
 
         }.onSuccess { placeholder ->
-            _state.update { s ->
+            updateState { s ->
                 s.copy(
                     uiState = RecoverPasswordUiState.Success(placeholder.toUi()),
                     authDetails = s.authDetails.copy(
@@ -159,7 +159,7 @@ class RecoverPasswordViewModel @Inject constructor(
     }
 
     fun changeField(field: FieldUi, updatedField: FieldUi) = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             val updatedFields = s.fields.updateFieldAndResetError(field, updatedField)
 
             s.copy(
@@ -182,7 +182,7 @@ class RecoverPasswordViewModel @Inject constructor(
 
     fun changeCheckbox(checkboxUi: CheckboxUi, updatedCheckbox: CheckboxUi) =
         viewModelScope.launch {
-            _state.update { s ->
+            updateState { s ->
                 val updatedCheckboxes = s.checkboxes.updateCheckbox(
                     checkboxUi, updatedCheckbox
                 )

@@ -102,11 +102,11 @@ class AboutAppFragment : Fragment() {
                                 }
 
                                 AboutAppEvent.RefreshApp -> {
-                                    homeViewModel.refresh()
-                                    cartFlowViewModel.refresh()
-                                    favoriteViewModel.refresh()
-                                    catalogFlowViewModel.refresh()
-                                    profileViewModel.refresh()
+                                    homeViewModel.fetchHomeDetails()
+                                    cartFlowViewModel.fetchCartDetails()
+                                    favoriteViewModel.fetchFavoriteProducts()
+                                    catalogFlowViewModel.fetchCatalogDetails()
+                                    profileViewModel.fetchProfileDetails()
                                     tabManager.selectTab(R.id.graph_home)
                                 }
                             }

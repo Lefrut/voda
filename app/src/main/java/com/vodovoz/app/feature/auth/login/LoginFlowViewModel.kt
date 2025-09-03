@@ -52,7 +52,7 @@ class LoginFlowViewModel @Inject constructor(
     }
 
     fun fetchLoginDetails() = viewModelScope.launch {
-        _state.update { s -> s.copy(uiState = LoginUiState.Loading) }
+        updateState { s -> s.copy(uiState = LoginUiState.Loading) }
 
         val loginDetailsDeferred =
             async { vodovozServiceRepository.getLoginDetails().singleResult() }
@@ -61,7 +61,7 @@ class LoginFlowViewModel @Inject constructor(
         loginDetailsResult.onSuccess { loginDetails ->
             val authDetails = loginDetails.toUi(AgreementController.getText())
 
-            _state.update { s ->
+            updateState { s ->
                 s.copy(
                     authDetails = authDetails.copy(
                         buttons = authDetails.buttons.updateButton(AUTH_BUTTON) { button ->
@@ -72,7 +72,7 @@ class LoginFlowViewModel @Inject constructor(
                 )
             }
         }.onFailure {
-            _state.update { s ->
+            updateState { s ->
                 s.copy(uiState = LoginUiState.Error)
             }
         }
@@ -84,7 +84,7 @@ class LoginFlowViewModel @Inject constructor(
 
         val phoneField = fields.firstOrNull() ?: return@launch
 
-        _state.update { s ->
+        updateState { s ->
             s.copy(
                 authDetails = s.authDetails.copy(
                     buttons = buttons.updateButton(AUTH_BUTTON) { btn ->
@@ -98,7 +98,7 @@ class LoginFlowViewModel @Inject constructor(
             sms.isNotBlank()
         } ?: kotlin.run {
             val lastField = fields.lastOrNull()
-            _state.update { s ->
+            updateState { s ->
                 s.copy(
                     authDetails = s.authDetails.copy(
                         buttons = buttons.updateButton(AUTH_BUTTON) { btn ->
@@ -129,7 +129,7 @@ class LoginFlowViewModel @Inject constructor(
             }
         ).singleResult()
 
-        _state.update { s ->
+        updateState { s ->
             s.copy(
                 authDetails = s.authDetails.copy(
                     buttons = buttons.updateButton(AUTH_BUTTON) { btn ->
@@ -151,7 +151,7 @@ class LoginFlowViewModel @Inject constructor(
                 }
 
                 else -> {
-                    _state.update { s ->
+                    updateState { s ->
                         s.copy(
                             authDetails = s.authDetails.copy(
                                 fields = updateFieldsErrorText(
@@ -175,7 +175,7 @@ class LoginFlowViewModel @Inject constructor(
     fun changeField(field: FieldUi, updatedField: FieldUi) = viewModelScope.launch {
 
 
-        _state.update { s ->
+        updateState { s ->
 
             val updatedFields = s.fields.updateFieldAndResetError(field, updatedField)
 
@@ -194,7 +194,7 @@ class LoginFlowViewModel @Inject constructor(
 
         }
 
-        _state.update { s ->
+        updateState { s ->
             s.copy(
                 authDetails = s.authDetails.copy(
                     fields = updateFieldsErrorText("")
@@ -225,7 +225,7 @@ class LoginFlowViewModel @Inject constructor(
     }
 
     fun activateButton(button: ColorfulButtonUi) = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(
                 authDetails = s.authDetails.copy(
                     fields = updateFieldsErrorText("")
@@ -249,7 +249,7 @@ class LoginFlowViewModel @Inject constructor(
     }
 
     fun changeCheckbox(checkbox: CheckboxUi, updatedCheckbox: CheckboxUi) {
-        _state.update { s ->
+        updateState { s ->
             val authDetails = s.authDetails
             val updatedCheckboxes = authDetails.checkboxes.updateCheckbox(
                 checkbox, updatedCheckbox
@@ -287,6 +287,7 @@ class LoginFlowViewModel @Inject constructor(
         override val authDetails: AuthDetailsUi = AuthDetailsUi.Empty,
     ) : AuthState(authDetails)
 
+    @Stable
     sealed interface LoginUiState {
         data object Success : LoginUiState
         data object Loading : LoginUiState

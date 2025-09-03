@@ -47,12 +47,11 @@ class AddAddressViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val resourcesProvider: ResourcesProvider,
-    private val mapServiceRepository: MapServiceRepository,
 ) : MviViewModel<AddAddressState, AddAddressEvent>(AddAddressState()) {
 
 
     private val addressId = savedStateHandle.get<Long>("addressId")?.also { id ->
-        _state.update { s -> s.copy(addressId = id) }
+        updateState { s -> s.copy(addressId = id) }
     }
 
     private val addressType = savedStateHandle.get<Int>("addressType")
@@ -70,7 +69,7 @@ class AddAddressViewModel @Inject constructor(
 
     init {
         savedStateHandle.get<MapAddressUi>("mapAddress")?.let { mapAddress ->
-            _state.update { s -> s.copy(mapAddress = mapAddress) }
+            updateState { s -> s.copy(mapAddress = mapAddress) }
         }
         fetchAddressDetails()
     }
@@ -84,13 +83,13 @@ class AddAddressViewModel @Inject constructor(
     }
 
     fun showRemoveAddressDialog() {
-        _state.update { s ->
+        updateState { s ->
             s.copy(showRemoveAddressDialog = true)
         }
     }
 
     fun hideRemoveAddressDialog() {
-        _state.update { s ->
+        updateState { s ->
             s.copy(showRemoveAddressDialog = false)
         }
     }
@@ -99,7 +98,7 @@ class AddAddressViewModel @Inject constructor(
         if (addressId == null) return@launch
 
         vodovozServiceRepository.removeAddress(addressId.toInt()).singleResult()
-        _state.update { s ->
+        updateState { s ->
             s.copy(showRemoveAddressDialog = false)
         }
         navigateBack()
@@ -127,7 +126,7 @@ class AddAddressViewModel @Inject constructor(
             ),
         ) { fields, isValid ->
             if (!isValid) {
-                _state.update { s ->
+                updateState { s ->
                     s.copy(gridFields = fields, button = s.button.copy(enabled = false))
                 }
                 return@launch
@@ -136,7 +135,7 @@ class AddAddressViewModel @Inject constructor(
 
         val params = getWidgetIdsAndValues()
 
-        _state.update { s ->
+        updateState { s ->
             s.copy(
                 button = s.button.copy(
                     loading = true,
@@ -160,7 +159,7 @@ class AddAddressViewModel @Inject constructor(
             )
         }
 
-        _state.update { s -> s.copy(button = s.button.copy(loading = false)) }
+        updateState { s -> s.copy(button = s.button.copy(loading = false)) }
     }
 
 
@@ -175,7 +174,7 @@ class AddAddressViewModel @Inject constructor(
             ),
         ) { fields, isValid ->
             if (!isValid) {
-                _state.update { s ->
+                updateState { s ->
                     s.copy(gridFields = fields, button = s.button.copy(enabled = false))
                 }
                 return@launch
@@ -186,7 +185,7 @@ class AddAddressViewModel @Inject constructor(
 
         val mapAddress = stateSnapshot.mapAddress ?: return@launch
 
-        _state.update { s ->
+        updateState { s ->
             s.copy(button = s.button.copy(loading = true))
         }
 
@@ -206,7 +205,7 @@ class AddAddressViewModel @Inject constructor(
             )
         }
 
-        _state.update { s ->
+        updateState { s ->
             s.copy(
                 button = s.button.copy(
                     loading = false,
@@ -284,7 +283,7 @@ class AddAddressViewModel @Inject constructor(
             updatedWidget = updatedWidget
         ).filterIsInstance<FieldUi>()
 
-        _state.update { s ->
+        updateState { s ->
             s.copy(
                 linearFields = updatedLinearFields,
                 linearSwitches = updatedSwitches,
@@ -297,7 +296,7 @@ class AddAddressViewModel @Inject constructor(
     }
 
     fun fetchAddressDetails() = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(uiState = AddAddressUiState.Loading)
         }
 
@@ -308,7 +307,7 @@ class AddAddressViewModel @Inject constructor(
 
             delay(200L)
 
-            _state.update { s ->
+            updateState { s ->
 
                 val addressField = addAddressDetails.addressField.toUi()
                 val linearSwitches = addAddressDetails.linearSwitches.mapToUi().filter { switch ->
@@ -328,7 +327,7 @@ class AddAddressViewModel @Inject constructor(
 
 
         }.onFailure {
-            _state.update { s ->
+            updateState { s ->
                 s.copy(uiState = AddAddressUiState.Error)
             }
         }
@@ -361,7 +360,7 @@ class AddAddressViewModel @Inject constructor(
     }
 
     fun changeMapAddress(mapAddress: MapAddressUi) = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(
                 mapAddress = mapAddress,
                 addressField = s.addressField.copy(

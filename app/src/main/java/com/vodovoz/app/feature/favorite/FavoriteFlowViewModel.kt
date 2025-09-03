@@ -54,7 +54,7 @@ class FavoriteFlowViewModel @Inject constructor(
 
         val likesIds = (newLikes.keys + oldLikes.keys).toSet()
 
-        _state.update { s ->
+        updateState { s ->
             s.copy(lastSavedLikes = newLikes)
         }
 
@@ -79,7 +79,7 @@ class FavoriteFlowViewModel @Inject constructor(
 
     fun fetchFavoriteProducts() = viewModelScope.launch {
         if (stateSnapshot.uiState != FavoriteUiState.Success) {
-            _state.update { s ->
+            updateState { s ->
                 s.copy(uiState = FavoriteUiState.Loading)
             }
         }
@@ -93,7 +93,7 @@ class FavoriteFlowViewModel @Inject constructor(
 
 
         favoriteProductsResult.onSuccess { productsSectionUi ->
-            _state.update { s ->
+            updateState { s ->
                 val currentSort = s.currentSort.takeIf { value ->
                     value != SortUi.Empty
                 } ?: productsSectionUi.sorting.firstOrNull() ?: SortUi.Empty
@@ -130,7 +130,7 @@ class FavoriteFlowViewModel @Inject constructor(
                 else -> FavoriteUiState.Error
             }
 
-            _state.update { s ->
+            updateState { s ->
                 val productsSection = s.productsSection
                 val title =
                     (uiState as? FavoriteUiState.Empty)?.placeholder?.title ?: productsSection.title
@@ -146,7 +146,7 @@ class FavoriteFlowViewModel @Inject constructor(
 
     fun refresh() = viewModelScope.launch {
         if (stateSnapshot.uiState !is FavoriteUiState.Loading) {
-            _state.update { s ->
+            updateState { s ->
                 s.copy(showRefreshIndicator = true)
             }
             fetchFavoriteProducts()
@@ -163,23 +163,23 @@ class FavoriteFlowViewModel @Inject constructor(
     }
 
     fun showSortBottomSheet() = viewModelScope.launch {
-        _state.update { s -> s.copy(showSortBottomSheet = true) }
+        updateState { s -> s.copy(showSortBottomSheet = true) }
     }
 
     fun hideSortBottomSheet() = viewModelScope.launch {
-        _state.update { s -> s.copy(showSortBottomSheet = false) }
+        updateState { s -> s.copy(showSortBottomSheet = false) }
     }
 
 
     fun switchLayout() = viewModelScope.launch {
-        _state.update { s -> s.copy(isGridView = !s.isGridView) }
+        updateState { s -> s.copy(isGridView = !s.isGridView) }
     }
 
     fun selectCategory(category: CategoryUi) = viewModelScope.launch {
         val newCategory = if (category == stateSnapshot.currentCategory) CategoryUi.Empty
         else category
 
-        _state.update { s ->
+        updateState { s ->
             s.copy(
                 currentCategory = newCategory,
                 loadStates = s.loadStates.copy(refresh = LoadState.Loading)
@@ -193,7 +193,7 @@ class FavoriteFlowViewModel @Inject constructor(
 
     fun selectSort(sort: SortUi) = viewModelScope.launch {
         if (sort == stateSnapshot.currentSort) return@launch
-        _state.update { s -> s.copy(currentSort = sort, showSortBottomSheet = false) }
+        updateState { s -> s.copy(currentSort = sort, showSortBottomSheet = false) }
         fetchFavoriteProducts().join()
     }
 

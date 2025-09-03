@@ -75,7 +75,7 @@ class AllPromotionsFlowViewModel @Inject constructor(
     }
 
     fun fetchPromotions() = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(uiState = UiState.Loading)
         }
 
@@ -92,7 +92,7 @@ class AllPromotionsFlowViewModel @Inject constructor(
 
 
         if (sectionPromotions == null) {
-            _state.update { s ->
+            updateState { s ->
                 s.copy(uiState = UiState.Error)
             }
             return@launch
@@ -107,7 +107,7 @@ class AllPromotionsFlowViewModel @Inject constructor(
                 stateSnapshot.currentCategory
             }
 
-        _state.update { s ->
+        updateState { s ->
             val title = sectionPromotions.title
 
             s.copy(
@@ -128,14 +128,14 @@ class AllPromotionsFlowViewModel @Inject constructor(
         if (category == stateSnapshot.currentCategory) return@launch
 
         sendEvent(AllPromotionsEvent.ScrollTop)
-        _state.update { s ->
+        updateState { s ->
             s.copy(currentCategory = category)
         }
         fetchPromotions()
     }
 
     fun closeAdvertisingBottomSheet() = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(
                 showAdvertisingBottomSheet = false
             )
@@ -144,7 +144,7 @@ class AllPromotionsFlowViewModel @Inject constructor(
 
     fun showAdvertisingBottomSheet(promotionUi: PromotionUi) = viewModelScope.launch {
         promotionUi.aboutAdvertisingUi?.let {
-            _state.update { s ->
+            updateState { s ->
                 s.copy(
                     currentAdvertising = promotionUi.aboutAdvertisingUi,
                     showAdvertisingBottomSheet = true
