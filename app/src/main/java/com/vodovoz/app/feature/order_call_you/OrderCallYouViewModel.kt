@@ -38,7 +38,7 @@ class OrderCallYouViewModel @Inject constructor(
     }
 
     fun fetchOrderCallYouDetails() = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(uiState = OrderCallYouUiState.Loading)
         }
 
@@ -52,7 +52,7 @@ class OrderCallYouViewModel @Inject constructor(
                 it.value == callYouId
             }
 
-            _state.update { s ->
+            updateState { s ->
                 s.copy(
                     uiState = OrderCallYouUiState.CallYou,
                     title = callYouDetails.title,
@@ -64,7 +64,7 @@ class OrderCallYouViewModel @Inject constructor(
                 )
             }
         }.onFailure {
-            _state.update { s ->
+            updateState { s ->
                 s.copy(
                     uiState = OrderCallYouUiState.Error
                 )
@@ -78,7 +78,7 @@ class OrderCallYouViewModel @Inject constructor(
     }
 
     fun selectCallYouItem(item: CallYouItemUi) = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(currentItem = item, button = s.button.copy(enabled = true))
         }
     }

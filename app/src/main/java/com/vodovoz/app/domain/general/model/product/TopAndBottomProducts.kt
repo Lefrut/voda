@@ -6,7 +6,11 @@ import com.vodovoz.app.domain.general.model.exceptions.VodovozPlaceholderModel
 data class TopAndBottomSectionsModel(
     val topSection: SectionModel<CategoryWithProductsModel>,
     val bottomSection: SectionModel<CategoryWithProductsModel>,
-)
+){
+    companion object{
+        val Empty = TopAndBottomSectionsModel(SectionModel.empty(), SectionModel.empty())
+    }
+}
 
 
 data class SectionModel<E>(

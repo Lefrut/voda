@@ -77,7 +77,7 @@ class ProductCatalogViewModel @Inject constructor(
 
     private fun setupScreen() = viewModelScope.launch {
         if (dataSource is DataSource.Category) {
-            _state.update { s ->
+            updateState { s ->
                 val currentCategory = CategoryUi(id = dataSource.categoryId.toInt(), name = "")
                 s.copy(
                     currentCategory = currentCategory,
@@ -86,7 +86,7 @@ class ProductCatalogViewModel @Inject constructor(
                 )
             }
         } else {
-            _state.update { s ->
+            updateState { s ->
                 s.copy(
                     showEmptyCategory = true,
                     showFilters = false
@@ -98,7 +98,7 @@ class ProductCatalogViewModel @Inject constructor(
 
     private fun fetchProductListData() = viewModelScope.launch {
         if (stateSnapshot.productsSection == ProductsSectionUi.Empty) {
-            _state.update { s ->
+            updateState { s ->
                 s.copy(uiState = ProductCatalogUiState.Loading)
             }
         }
@@ -283,19 +283,19 @@ class ProductCatalogViewModel @Inject constructor(
 
     fun refresh() = viewModelScope.launch {
         if (stateSnapshot.uiState is ProductCatalogUiState.Loading) return@launch
-        _state.update { s ->
+        updateState { s ->
             s.copy(showRefreshIndicator = true)
         }
 
         fetchProductListData().join()
 
-        _state.update { s ->
+        updateState { s ->
             s.copy(showRefreshIndicator = false)
         }
     }
 
     fun showSortBottomSheet() = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(
                 showSortBottomSheet = true
             )
@@ -303,7 +303,7 @@ class ProductCatalogViewModel @Inject constructor(
     }
 
     fun hideSortBottomSheet() = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(
                 showSortBottomSheet = false
             )
@@ -330,7 +330,7 @@ class ProductCatalogViewModel @Inject constructor(
 
             categoriesTreeJob.join()
 
-            _state.update { state ->
+            updateState { state ->
 
                 val categoryTreeList: List<CategoryUi> = buildList {
                     addAll(stateSnapshot.categoryTree.allCategories()
@@ -381,11 +381,11 @@ class ProductCatalogViewModel @Inject constructor(
 
 
             if (uiState is ProductCatalogUiState.Empty && stateSnapshot.productsSection == ProductsSectionUi.Empty) {
-                _state.update { s ->
+                updateState { s ->
                     s.copy(uiState = uiState)
                 }
             } else if (stateSnapshot.productsSection != ProductsSectionUi.Empty) {
-                _state.update { s ->
+                updateState { s ->
                     s.copy(
                         loadStates = s.loadStates.copy(
                             refresh = LoadState.Error(t)
@@ -397,7 +397,7 @@ class ProductCatalogViewModel @Inject constructor(
                     )
                 }
             } else {
-                _state.update { s ->
+                updateState { s ->
                     s.copy(uiState = uiState)
                 }
             }
@@ -405,7 +405,7 @@ class ProductCatalogViewModel @Inject constructor(
     }
 
     fun selectSort(sort: SortUi) = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(
                 currentSort = sort,
                 showSortBottomSheet = false,
@@ -417,7 +417,7 @@ class ProductCatalogViewModel @Inject constructor(
     }
 
     fun switchLayout() = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(isGridView = !s.isGridView)
         }
     }
@@ -447,13 +447,13 @@ class ProductCatalogViewModel @Inject constructor(
                     .getOrNull()?.map { it.toUi() } ?: backendCategories
             } else backendCategories
 
-            _state.update { s ->
+            updateState { s ->
 
                 s.copy(categoryTree = childrenCategoriesOfParent)
             }
         }.onFailure {
             if (stateSnapshot.categoryTree.isEmpty()) {
-                _state.update { s ->
+                updateState { s ->
                     s.copy(showCategoriesBottomSheet = false)
                 }
             }
@@ -461,7 +461,7 @@ class ProductCatalogViewModel @Inject constructor(
     }
 
     fun selectBottomSheetCategory(category: ParentCategoryUi) = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(currentBottomSheetCategory = category)
         }
 
@@ -474,7 +474,7 @@ class ProductCatalogViewModel @Inject constructor(
             else if (category == stateSnapshot.currentCategory) return@launch
             else category
 
-        _state.update { s ->
+        updateState { s ->
             s.copy(
                 currentCategory = newCategory,
                 loadStates = s.loadStates.copy(refresh = LoadState.Loading),
@@ -516,7 +516,7 @@ class ProductCatalogViewModel @Inject constructor(
     }
 
     fun changeFilters(filters: FiltersUi) = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(
                 currentFilters = filters,
                 loadStates = s.loadStates.copy(refresh = LoadState.Loading),
@@ -537,7 +537,7 @@ class ProductCatalogViewModel @Inject constructor(
     }
 
     fun showCategoriesBottomSheet() = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(
                 showCategoriesBottomSheet = true,
                 currentBottomSheetCategory = s.currentCategory.toParentCategory()
@@ -546,7 +546,7 @@ class ProductCatalogViewModel @Inject constructor(
     }
 
     fun hideCategoriesBottomSheet() = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(
                 showCategoriesBottomSheet = false
             )
@@ -579,7 +579,7 @@ class ProductCatalogViewModel @Inject constructor(
     }
 
     fun setCanViewAdultProducts() = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(uiState = ProductCatalogUiState.Body)
         }
         userPreferencesRepository.setCanViewAdultProducts(true)

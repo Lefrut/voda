@@ -55,7 +55,7 @@ class PaymentMethodViewModel @Inject constructor(
                 section.toUi { items -> items.mapToUi() }
             }
 
-            _state.update { s ->
+            updateState { s ->
                 s.copy(
                     title = paymentDetails.title,
                     button = paymentDetails.button.toUi().copy(enabled = false),
@@ -74,7 +74,7 @@ class PaymentMethodViewModel @Inject constructor(
                 changePaymentMethodItem(paymentMethodItemUi).join()
             }
             if (balance != null) {
-                _state.update { s ->
+                updateState { s ->
                     s.copy(
                         paymentSections = s.paymentSections.map { section ->
                             section.copy(
@@ -95,7 +95,7 @@ class PaymentMethodViewModel @Inject constructor(
 
 
         }.onFailure {
-            _state.update { s ->
+            updateState { s ->
                 s.copy(uiState = PaymentMethodUiState.Error)
             }
         }
@@ -114,7 +114,7 @@ class PaymentMethodViewModel @Inject constructor(
     }
 
     fun changePaymentMethodItem(paymentMethod: PaymentMethodItemUi) = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             val sections = s.paymentSections.map { section ->
                 section.copy(
                     title = section.title,
@@ -141,9 +141,7 @@ class PaymentMethodViewModel @Inject constructor(
     }
 
     fun changeField(item: PaymentMethodItemUi, field: FieldUi, updatedField: FieldUi) {
-
-
-        _state.update { s ->
+        updateState { s ->
             s.copy(
                 paymentSections = s.paymentSections.map { section ->
                     section.copy(

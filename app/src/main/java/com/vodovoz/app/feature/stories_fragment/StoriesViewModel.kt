@@ -34,7 +34,7 @@ class StoriesViewModel @Inject constructor(
     }
 
     private fun fetchStories() = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(uiState = StoriesUiState.Loading)
         }
 
@@ -44,7 +44,7 @@ class StoriesViewModel @Inject constructor(
             ) ?: 0
 
 
-            _state.update { s ->
+            updateState { s ->
                 s.copy(
                     stories = stories,
                     currentStoryIndex = storyIndex,
@@ -67,14 +67,14 @@ class StoriesViewModel @Inject constructor(
             return System.nanoTime() / 1_000_000
         }
 
-        _state.update { s ->
+        updateState { s ->
             s.copy(storyIsPlay = true)
         }
 
         while (stateSnapshot.storyIsPlay) {
             val startTime = systemMilliseconds()
             delay(35L)
-            _state.update { s ->
+            updateState { s ->
                 s.copy(
                     timePassed = s.timePassed + (systemMilliseconds() - startTime)
                 )
@@ -87,7 +87,7 @@ class StoriesViewModel @Inject constructor(
     }
 
     fun stopStory() = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(storyIsPlay = false)
         }
     }
@@ -104,7 +104,7 @@ class StoriesViewModel @Inject constructor(
 
         if (currentStoryPage == stateSnapshot.currentStoryIndex) return@launch
 
-        _state.update { s ->
+        updateState { s ->
             s.copy(
                 currentStoryIndex = currentStoryPage,
                 currentPageIndex = 0,
@@ -134,7 +134,7 @@ class StoriesViewModel @Inject constructor(
             }
 
             else -> {
-                _state.update { state ->
+                updateState { state ->
                     state.copy(
                         currentPageIndex = stateSnapshot.currentPageIndex - 1,
                         timePassed = 0L
@@ -152,7 +152,7 @@ class StoriesViewModel @Inject constructor(
 
         when {
             isLastPage && isLastStory -> {
-                _state.update { state ->
+                updateState { state ->
                     state.copy(storyIsPlay = false)
                 }
                 sendEvent(StoriesEvents.GoBack)
@@ -165,7 +165,7 @@ class StoriesViewModel @Inject constructor(
             }
 
             else -> {
-                _state.update { state ->
+                updateState { state ->
                     state.copy(currentPageIndex = nextPageIndex, timePassed = 0L)
                 }
             }

@@ -26,11 +26,11 @@ class WebViewViewModel @Inject constructor(
     }
 
     private fun setInitialData(title: String, url: String) = viewModelScope.launch {
-        _state.update { s -> s.copy(title = title, url = url, showTopBar = title.isNotEmpty()) }
+        updateState { s -> s.copy(title = title, url = url, showTopBar = title.isNotEmpty()) }
     }
 
     fun setUiState(uiState: WebViewUiState) = viewModelScope.launch {
-        _state.update { s -> s.copy(uiState = uiState) }
+        updateState { s -> s.copy(uiState = uiState) }
     }
 
     fun navigateBack() = viewModelScope.launch {

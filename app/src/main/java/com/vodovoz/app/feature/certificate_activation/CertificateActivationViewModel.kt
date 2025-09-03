@@ -28,7 +28,7 @@ class CertificateActivationViewModel @Inject constructor(
     }
 
     fun fetchCertificateActivationDetails() = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(uiState = CertificateActivationUiState.Loading)
         }
 
@@ -36,7 +36,7 @@ class CertificateActivationViewModel @Inject constructor(
             vodovozServiceRepository.getCertificateActivationDetails().singleResult()
 
         certificateActivationDetailsResult.onSuccess { certificateActivationDetails ->
-            _state.update { s ->
+            updateState { s ->
                 s.copy(
                     uiState = CertificateActivationUiState.Details,
                     title = certificateActivationDetails.title,
@@ -48,7 +48,7 @@ class CertificateActivationViewModel @Inject constructor(
             }
         }.onFailure {
 
-            _state.update { s ->
+            updateState { s ->
                 s.copy(
                     uiState = CertificateActivationUiState.Details,
                 )
@@ -62,18 +62,18 @@ class CertificateActivationViewModel @Inject constructor(
     }
 
     fun activateCertificate() = viewModelScope.launch {
-        _state.update { s -> s.copy(activationButtonIsLoading = true) }
+        updateState { s -> s.copy(activationButtonIsLoading = true) }
         val activateCertificateResult = vodovozServiceRepository.activateCertificate(stateSnapshot.field).singleResult()
 
         activateCertificateResult.onSuccess { message ->
-            _state.update { s ->
+            updateState { s ->
                 s.copy(
                     uiState = CertificateActivationUiState.CertificateActivated(message),
                     activationButtonIsLoading = false
                 )
             }
         }.onFailure { fail ->
-            _state.update { s ->
+            updateState { s ->
                 s.copy(
                     field = s.field.copy(
                         isError = true,
@@ -89,7 +89,7 @@ class CertificateActivationViewModel @Inject constructor(
         val validators = listOf(KeyboardTypeValidator)
         val updatedField = field.copy(value = newValue, isError = false, supportingText = "")
 
-        _state.update { s ->
+        updateState { s ->
             s.copy(
                 field = updatedField,
                 activationButtonEnabled = newValue.isNotBlank() && validators.any { fieldValidator ->

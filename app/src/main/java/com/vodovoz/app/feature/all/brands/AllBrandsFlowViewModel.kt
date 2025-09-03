@@ -48,7 +48,7 @@ class AllBrandsFlowViewModel @Inject constructor(
 
         vodovozServiceRepository.getBrands(stateSnapshot.searchQuery).singleResult()
             .onSuccess { brandSectionModel ->
-                _state.update { s ->
+                updateState { s ->
                     s.copy(
                         uiState = AllBrandsUiState.Success,
                         title = brandSectionModel.title,
@@ -68,7 +68,7 @@ class AllBrandsFlowViewModel @Inject constructor(
 
     fun changeSearchMode(searchMode: Boolean) = viewModelScope.launch {
         if (!searchMode) searchQueriesStateFlow.value = ""
-        _state.update { s ->
+        updateState { s ->
             s.copy(isSearchMode = searchMode)
         }
     }
@@ -76,7 +76,7 @@ class AllBrandsFlowViewModel @Inject constructor(
     @OptIn(FlowPreview::class)
     private val searchQueriesStateFlow = MutableStateFlow("").apply {
         drop(1).onEach { newSearchQuery ->
-            _state.update { s -> s.copy(searchQuery = newSearchQuery) }
+            updateState { s -> s.copy(searchQuery = newSearchQuery) }
         }.debounce(200).onEach { _ ->
             fetchBrands()
         }.launchIn(viewModelScope)

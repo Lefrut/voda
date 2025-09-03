@@ -42,14 +42,14 @@ class ChangePasswordViewModel @Inject constructor(
 
 
     private fun fetchChangePasswordDetails() = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(uiState = ChangePasswordUiState.Loading)
         }
         val changePasswordDetailsResult =
             vodovozServiceRepository.getChangePasswordDetails().singleResult()
 
         changePasswordDetailsResult.onSuccess { model ->
-            _state.update { s ->
+            updateState { s ->
                 s.copy(
                     fields = model.fields.map { field -> field.toUi() },
                     title = model.title,
@@ -62,7 +62,7 @@ class ChangePasswordViewModel @Inject constructor(
     }
 
     fun changeField(field: FieldUi, updatedField: FieldUi) = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             val updatedFields = s.fields.updateFieldAndResetError(field, updatedField)
             s.copy(
                 fields = updatedFields,
@@ -76,14 +76,14 @@ class ChangePasswordViewModel @Inject constructor(
         val fields = stateSnapshot.fields.mapToDomain()
         val passwordField = fields.firstOrNull() ?: return@launch
 
-        _state.update { s ->
+        updateState { s ->
             s.copy(buttonLoading = true)
         }
 
         val updatePasswordResult =
             vodovozServiceRepository.updatePassword(passwordField.value).singleResult()
         updatePasswordResult.onSuccess {
-            _state.update { s ->
+            updateState { s ->
                 s.copy(uiState = ChangePasswordUiState.Placeholder(it.toUi()))
             }
         }.onFailure { t ->
@@ -104,6 +104,6 @@ class ChangePasswordViewModel @Inject constructor(
                 ChangePasswordEvent.ShowSnackbar(message)
             )
         }
-        _state.update { s -> s.copy(buttonLoading = false, buttonEnabled = false) }
+        updateState { s -> s.copy(buttonLoading = false, buttonEnabled = false) }
     }
 }

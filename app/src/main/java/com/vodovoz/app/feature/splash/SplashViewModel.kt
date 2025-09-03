@@ -33,11 +33,11 @@ class SplashViewModel @Inject constructor(
     }
 
     fun setErrorUiState() = viewModelScope.launch {
-        _state.update { s -> s.copy(uiState = SplashUiState.Error) }
+        updateState { s -> s.copy(uiState = SplashUiState.Error) }
     }
 
     fun refreshApp(showAnimation: Boolean) = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(uiState = if (showAnimation) SplashUiState.Animation else SplashUiState.Placeholder)
         }
         sendEvent(SplashEvent.RefreshApp)
@@ -45,7 +45,7 @@ class SplashViewModel @Inject constructor(
 
     fun changeToAnimation(splashFile: File) = viewModelScope.launch {
 
-        _state.update { s ->
+        updateState { s ->
             s.copy(
                 filePath = splashFile.absolutePath,
                 uiState = if (s.uiState is SplashUiState.Error) SplashUiState.Error else SplashUiState.Animation

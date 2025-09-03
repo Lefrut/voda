@@ -62,7 +62,7 @@ class ProductDetailsFlowViewModel @Inject constructor(
 
     init {
         savedStateHandle.get<Long>("productId")?.let {
-            _state.update { s ->
+            updateState { s ->
                 s.copy(productDetails = s.productDetails.copy(id = it))
             }
         }
@@ -114,7 +114,7 @@ class ProductDetailsFlowViewModel @Inject constructor(
     suspend fun listenCartUpdates() = cartManager.observeUpdateCartList().onEach { update ->
         if (update) {
             vodovozServiceRepository.getPresentInfo().singleResult().onSuccess { presentInfo ->
-                _state.update { s ->
+                updateState { s ->
                     s.copy(presentInfo = presentInfo.toUi())
                 }
             }
@@ -132,7 +132,7 @@ class ProductDetailsFlowViewModel @Inject constructor(
                     val canViewAdultProducts = userPreferencesRepository.getCanViewAdultProducts()
                     val forAdults = productDetailsScreenModel.details.forAdultsModel?.toUi()
 
-                    _state.update { s ->
+                    updateState { s ->
                         s.copy(
                             comments = productDetailsScreenModel.comments.mapToUi(),
                             productDetails = productDetailsScreenModel.details.toUi(),
@@ -149,7 +149,7 @@ class ProductDetailsFlowViewModel @Inject constructor(
                     }
 
                 }.onFailure {
-                    _state.update { s ->
+                    updateState { s ->
                         s.copy(uiState = ProductDetailsUiState.Error)
                     }
                 }
@@ -166,7 +166,7 @@ class ProductDetailsFlowViewModel @Inject constructor(
     }
 
     fun showOrHideDetailText() = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(
                 showDetailText = !s.showDetailText
             )
@@ -174,13 +174,13 @@ class ProductDetailsFlowViewModel @Inject constructor(
     }
 
     fun showAllOrHideProperties() = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(showAllProperties = !s.showAllProperties)
         }
     }
 
     fun changeFloatingButton(isVisible: Boolean) = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(
                 hideFloatingButton = isVisible
             )
@@ -188,7 +188,7 @@ class ProductDetailsFlowViewModel @Inject constructor(
     }
 
     fun hideMultiBottomSheet() = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(
                 showMultiBottomSheet = false
             )
@@ -196,7 +196,7 @@ class ProductDetailsFlowViewModel @Inject constructor(
     }
 
     fun showMultiBottomSheet() = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             val cartQuantity = s.productDetails.cartQuantity
             s.copy(
                 showMultiBottomSheet = true,
@@ -210,7 +210,7 @@ class ProductDetailsFlowViewModel @Inject constructor(
     }
 
     fun showPresentBottomSheet() = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(
                 showPresentBottomSheet = true
             )
@@ -218,7 +218,7 @@ class ProductDetailsFlowViewModel @Inject constructor(
     }
 
     fun hidePresentBottomSheet() = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(
                 showPresentBottomSheet = false
             )
@@ -226,7 +226,7 @@ class ProductDetailsFlowViewModel @Inject constructor(
     }
 
     fun hidePresentBlockBottomSheet() = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(
                 showPresentBlockBottomSheet = false
             )
@@ -234,7 +234,7 @@ class ProductDetailsFlowViewModel @Inject constructor(
     }
 
     fun showPresentBlockBottomSheet() = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(
                 showPresentBlockBottomSheet = true
             )
@@ -242,7 +242,7 @@ class ProductDetailsFlowViewModel @Inject constructor(
     }
 
     fun navigateToAboutProduct() = viewModelScope.launch {
-        val viewState = _state.value
+        val viewState = stateSnapshot
         val productDetails = stateSnapshot.productDetails
 
         aboutProductManager.updateInfo(
@@ -295,7 +295,7 @@ class ProductDetailsFlowViewModel @Inject constructor(
     }
 
     fun changeFavorite() = viewModelScope.launch {
-        val productDetails = _state.value.productDetails
+        val productDetails = stateSnapshot.productDetails
         likeManager.changeFavorite(productDetails.id, !productDetails.isFavorite)
     }
 
@@ -309,15 +309,15 @@ class ProductDetailsFlowViewModel @Inject constructor(
     }
 
     fun share() = viewModelScope.launch {
-        sendEvent(ProductDetailsEvents.Share(_state.value.productDetails.shareUrlText))
+        sendEvent(ProductDetailsEvents.Share(stateSnapshot.productDetails.shareUrlText))
     }
 
     fun copyArticleNumber() = viewModelScope.launch {
-        sendEvent(ProductDetailsEvents.Copy(_state.value.productDetails.articleNumber))
+        sendEvent(ProductDetailsEvents.Copy(stateSnapshot.productDetails.articleNumber))
     }
 
     fun navigateToDetailMedia(media: ProductMediaUi) = viewModelScope.launch {
-        val productDetails = _state.value.productDetails
+        val productDetails = stateSnapshot.productDetails
         val mediaList = productDetails.mediaList
 
         sendEvent(
@@ -343,7 +343,7 @@ class ProductDetailsFlowViewModel @Inject constructor(
 
     fun addProductWithGift(buyButton: BuyButtonUi) = viewModelScope.launch {
         cartManager.add(listOf(buyButton.productId, buyButton.moreProductId))
-        _state.update { s ->
+        updateState { s ->
             s.copy(
                 showPresentBottomSheet = false,
                 showPresentBlockBottomSheet = false
@@ -352,7 +352,7 @@ class ProductDetailsFlowViewModel @Inject constructor(
     }
 
     fun navigateToWriteComment() = viewModelScope.launch {
-        val productDetails = _state.value.productDetails
+        val productDetails = stateSnapshot.productDetails
 
         if (accountManager.fetchAccountId() == null) {
             sendEvent(ProductDetailsEvents.GoToProfile)
@@ -370,16 +370,16 @@ class ProductDetailsFlowViewModel @Inject constructor(
     }
 
     fun saveMultiProductChoice() = viewModelScope.launch {
-        val state = _state.value
+        val state = stateSnapshot
         val productDetails = state.productDetails
         cartManager.change(productDetails.id, state.multiProductQuantity)
-        _state.update { s ->
+        updateState { s ->
             s.copy(showMultiBottomSheet = false)
         }
     }
 
     fun changeMultiProductQuantity(newMultiProductQuantity: Int) = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(
                 multiProductQuantity = newMultiProductQuantity,
                 multiProductTotalPrice = calculateProductPrice(
@@ -391,7 +391,7 @@ class ProductDetailsFlowViewModel @Inject constructor(
     }
 
     fun decrementMultiProduct() = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             val newMultiProductQuantity = (s.multiProductQuantity - 1).coerceAtLeast(1)
             s.copy(
                 multiProductQuantity = newMultiProductQuantity,
@@ -404,7 +404,7 @@ class ProductDetailsFlowViewModel @Inject constructor(
     }
 
     fun incrementMultiProduct() = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             val newMultiProductQuantity = s.multiProductQuantity + 1
 
             s.copy(
@@ -418,7 +418,7 @@ class ProductDetailsFlowViewModel @Inject constructor(
     }
 
     fun setCanViewAdultProducts() = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(uiState = ProductDetailsUiState.Success)
         }
         userPreferencesRepository.setCanViewAdultProducts(true)

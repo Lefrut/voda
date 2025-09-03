@@ -44,7 +44,7 @@ class NotificationSettingsViewModel @Inject constructor(
 
     fun fetchNotificationSettingsDetails() = viewModelScope.launch {
         if (stateSnapshot.uiState !is NotSettingsUiState.Success) {
-            _state.update { s ->
+            updateState { s ->
                 s.copy(uiState = NotSettingsUiState.Loading)
             }
         }
@@ -54,7 +54,7 @@ class NotificationSettingsViewModel @Inject constructor(
 
         notificationSettingDetailsResult.onSuccess { notificationSettingDetails ->
 
-            _state.update { s ->
+            updateState { s ->
                 s.copy(
                     title = notificationSettingDetails.title,
                     uiState = NotSettingsUiState.Success,
@@ -67,7 +67,7 @@ class NotificationSettingsViewModel @Inject constructor(
 
         }.onFailure {
             if (stateSnapshot.uiState !is NotSettingsUiState.Success) {
-                _state.update { s ->
+                updateState { s ->
                     s.copy(uiState = NotSettingsUiState.Error)
                 }
             }
@@ -92,7 +92,7 @@ class NotificationSettingsViewModel @Inject constructor(
 
         val updatedWidgets = widgetUpdater.updateWidget(currentSection.items, widget, updatedWidget)
 
-        _state.update { s ->
+        updateState { s ->
             s.copy(
                 sections = s.sections.map { section ->
                     if (section == currentSection) section.copy(items = updatedWidgets)
@@ -105,7 +105,7 @@ class NotificationSettingsViewModel @Inject constructor(
     fun saveNotificationSettings() {
         viewModelScope.launch {
 
-            _state.update { s ->
+            updateState { s ->
                 s.copy(button = s.button.copy(loading = true))
             }
 
@@ -119,7 +119,7 @@ class NotificationSettingsViewModel @Inject constructor(
                         resourcesProvider.getString(R.string.notification_settings_validation_error)
                     )
                 )
-                _state.update { s ->
+                updateState { s ->
                     s.copy(button = s.button.copy(loading = false))
                 }
             }
@@ -149,7 +149,7 @@ class NotificationSettingsViewModel @Inject constructor(
                 fetchNotificationSettingsDetails()
             }
 
-            _state.update { s ->
+            updateState { s ->
                 s.copy(button = s.button.copy(loading = false))
             }
         }

@@ -45,8 +45,8 @@ class ProductCommentsFlowViewModel @Inject constructor(
 
     private fun listenUserLoginStatus() = viewModelScope.launch {
         accountManager.observeAccountId().collectLatest { id ->
-            if (id == null) _state.update { s -> s.copy(showWriteComment = false) }
-            else _state.update { s -> s.copy(showWriteComment = true) }
+            if (id == null) updateState { s -> s.copy(showWriteComment = false) }
+            else updateState { s -> s.copy(showWriteComment = true) }
         }
     }
 
@@ -56,7 +56,7 @@ class ProductCommentsFlowViewModel @Inject constructor(
         val productCommentsInfo = productCommentsInfoResult?.getOrNull()
 
         if (productCommentsInfo != null) {
-            _state.update { s ->
+            updateState { s ->
                 val uiInfo = productCommentsInfo.toUi()
                 val currentSort = uiInfo.sorting.firstOrNull() ?: SortUi.Empty
                 s.copy(
@@ -79,7 +79,7 @@ class ProductCommentsFlowViewModel @Inject constructor(
 
     fun selectSort(sort: SortUi) = viewModelScope.launch {
         sendEvent(ProductCommentsEvents.ScrollToTop)
-        _state.update { d ->
+        updateState { d ->
             d.copy(
                 currentSort = sort,
                 pagedComments = vodovozServiceRepository.getProductCommentsPaged(
@@ -108,13 +108,13 @@ class ProductCommentsFlowViewModel @Inject constructor(
     }
 
     fun setFullScreenImage(image: String) = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(fullScreenImage = image)
         }
     }
 
     fun resetFullScreenImage() = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(fullScreenImage = null)
         }
     }

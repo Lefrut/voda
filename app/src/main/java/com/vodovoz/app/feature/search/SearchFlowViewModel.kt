@@ -57,10 +57,10 @@ class SearchFlowViewModel @Inject constructor(
     }
 
     suspend fun listenSearchHistory() =
-        _state.combine(searchManager.searchHistoryFlow()) { _, searchHistory ->
+        state.combine(searchManager.searchHistoryFlow()) { _, searchHistory ->
             searchHistory
         }.collectLatest { searchHistory ->
-            _state.update { s ->
+            updateState { s ->
                 s.copy(
                     searchHistory = searchHistory.filter { query ->
                         query.contains(s.query)
@@ -72,7 +72,7 @@ class SearchFlowViewModel @Inject constructor(
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun handleQueries() =
         querySharedFlow.onStart {
-            _state.update { s ->
+            updateState { s ->
                 s.copy(
                     uiState = UiState.Loading,
                     query = previousSearchQuery
@@ -82,7 +82,7 @@ class SearchFlowViewModel @Inject constructor(
         }.debounceWithMax(200L, 5).mapLatest { query ->
             fun checkAvailableData() {
                 if (stateSnapshot.matchingQueries.isEmpty() && stateSnapshot.sectionRecommendations.items.isEmpty()) {
-                    _state.update { s ->
+                    updateState { s ->
                         s.copy(uiState = UiState.Error)
                     }
                 }
@@ -109,7 +109,7 @@ class SearchFlowViewModel @Inject constructor(
             val section = miniSearchRecommendations.section.toUi()
 
 
-            _state.update { s ->
+            updateState { s ->
                 s.copy(
                     matchingQueries = queries,
                     sectionRecommendations = section,
@@ -132,7 +132,7 @@ class SearchFlowViewModel @Inject constructor(
             }
 
             if (uiState is UiState.Empty || (uiState is UiState.Error && stateSnapshot.sectionRecommendations.items.isEmpty())) {
-                _state.update { s ->
+                updateState { s ->
                     s.copy(uiState = uiState)
                 }
             }
@@ -146,7 +146,7 @@ class SearchFlowViewModel @Inject constructor(
             val queries = searchRecommendations.queries
             val section = searchRecommendations.section.toUi()
 
-            _state.update { s ->
+            updateState { s ->
                 s.copy(
                     matchingQueries = queries,
                     sectionRecommendations = section,
@@ -156,7 +156,7 @@ class SearchFlowViewModel @Inject constructor(
         }.onFailure {
             val currentQuery = stateSnapshot.query
             if (stateSnapshot.matchingQueries.isEmpty() && stateSnapshot.sectionRecommendations.items.isEmpty() && currentQuery.isBlank()) {
-                _state.update { s ->
+                updateState { s ->
                     s.copy(uiState = UiState.Error)
                 }
             }
@@ -165,7 +165,7 @@ class SearchFlowViewModel @Inject constructor(
     }
 
     fun retrySearchQuery() = viewModelScope.launch {
-        _state.update { s -> s.copy(uiState = UiState.Loading) }
+        updateState { s -> s.copy(uiState = UiState.Loading) }
         val query = stateSnapshot.query
         if (query.isBlank()) {
             searchByEmptyQuery()
@@ -192,7 +192,7 @@ class SearchFlowViewModel @Inject constructor(
         val currentQuery = stateSnapshot.query
         if (query == currentQuery) return@launch
 
-        _state.update { s ->
+        updateState { s ->
             s.copy(query = query)
         }
         querySharedFlow.emit(query)

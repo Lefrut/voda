@@ -30,7 +30,7 @@ class CategoriesViewModel @Inject constructor(
 
 
     private fun setInitialCategories() = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(
                 currentCategory = categoryArg,
                 categories = categoriesArg.toList(),
@@ -41,7 +41,7 @@ class CategoriesViewModel @Inject constructor(
 
 
     fun selectCategory(category: CategoryUi) = viewModelScope.launch {
-        _state.update { s -> s.copy(currentCategory = category, showApplyButton = true) }
+        updateState { s -> s.copy(currentCategory = category, showApplyButton = true) }
     }
 
     fun navigateBackWithArgs() = viewModelScope.launch {

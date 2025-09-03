@@ -19,7 +19,6 @@ import com.vodovoz.app.design_system.model.ProductUi
 import com.vodovoz.app.design_system.model.PromotionUi
 import com.vodovoz.app.design_system.model.SpecialPromotionUi
 import com.vodovoz.app.design_system.model.StoryUi
-import com.vodovoz.app.design_system.model.VodovozItemUi
 import com.vodovoz.app.design_system.model.mapToUi
 import com.vodovoz.app.design_system.model.toUi
 import com.vodovoz.app.design_system.model.toVodovozSectionUi
@@ -43,10 +42,11 @@ import com.vodovoz.app.feature.home.model.toUi
 import com.vodovoz.app.ui.mvi.Event
 import com.vodovoz.app.ui.paging.ItemsState
 import com.vodovoz.app.ui.paging.ProductsMviViewModel
+import com.vodovoz.app.util.extensions.awaitResultOrNull
+import com.vodovoz.app.util.extensions.deferredResult
 import com.vodovoz.app.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
@@ -82,7 +82,7 @@ class HomeFlowViewModel @Inject constructor(
 ) {
 
 
-    suspend fun listenStories(): Unit = _state.map {
+    suspend fun listenStories(): Unit = state.map {
         stateSnapshot.items.getValueOrNull<List<StoryUi>, HomeListItem.Stories>()
             ?: emptyList()
     }.distinctUntilChanged()
@@ -104,33 +104,21 @@ class HomeFlowViewModel @Inject constructor(
         }
 
     private suspend fun fetchPrimaryDetails(): Boolean {
-        val bannersDeferred = viewModelScope.async {
-            vodovozServiceRepository.getBanners().singleResult()
-        }
-        val sectionPopularCategoriesDeferred = viewModelScope.async {
-            vodovozServiceRepository.getPopularCategories().singleResult()
-        }
-        val orderMenuDeferred = viewModelScope.async {
-            vodovozServiceRepository.getOrderMenu().singleResult()
-        }
-        val sectionsTopAndBottomDeferred = viewModelScope.async {
-            vodovozServiceRepository.getSuperTop().singleResult()
-        }
+        val bannersDeferred = vodovozServiceRepository.getBanners().deferredResult()
+        val sectionPopularCategoriesDeferred =
+            vodovozServiceRepository.getPopularCategories().deferredResult()
+        val orderMenuDeferred = vodovozServiceRepository.getOrderMenu().deferredResult()
+        val sectionsTopAndBottomDeferred = vodovozServiceRepository.getSuperTop().deferredResult()
 
-        val banners = bannersDeferred.await().getOrNull()
-        val sectionPopularCategories = sectionPopularCategoriesDeferred.await().getOrNull()
-        val orderMenu = orderMenuDeferred.await().getOrNull()
-        val sectionsTopAndBottom =
-            sectionsTopAndBottomDeferred.await().getOrNull() ?: TopAndBottomSectionsModel(
-                SectionModel.empty(),
-                SectionModel.empty()
-            )
+        val banners = bannersDeferred.awaitResultOrNull()
+        val sectionPopularCategories = sectionPopularCategoriesDeferred.awaitResultOrNull()
+        val orderMenu = orderMenuDeferred.awaitResultOrNull()
+        val sectionsTopAndBottom = sectionsTopAndBottomDeferred.awaitResultOrNull() ?: TopAndBottomSectionsModel.Empty
+        val topSection = sectionsTopAndBottom.topSection.toUi()
+        val bottomSection = sectionsTopAndBottom.bottomSection.toUi()
 
         if (banners != null || orderMenu != null || sectionPopularCategories != null) {
-            val topSection = sectionsTopAndBottom.topSection.toUi()
-            val bottomSection = sectionsTopAndBottom.bottomSection.toUi()
-
-            _state.update { s ->
+            updateState { s ->
                 s.copy(
                     uiState = HomeUiState.Success,
                     items = buildList {
@@ -150,7 +138,7 @@ class HomeFlowViewModel @Inject constructor(
                 )
             }
         } else {
-            _state.update { s -> s.copy(uiState = HomeUiState.NetworkError) }
+            updateState { s -> s.copy(uiState = HomeUiState.NetworkError) }
             return false
         }
         return true
@@ -173,77 +161,41 @@ class HomeFlowViewModel @Inject constructor(
     }
 
     private suspend fun fetchSecondaryDetails(): Boolean {
-        val promotionJob = fetchSectionThenUpdateItems(
-            request = { vodovozServiceRepository.getPromotions() },
-            map = { HomeListItem.Promotions(it.toUi()) },
-        )
-
-        val hurryUpBuyProductsJob = fetchSectionThenUpdateItems(
-            request = { vodovozServiceRepository.getHurryUpBuyProducts() },
-            map = { HomeListItem.Products.hurryBuyUp(it.toVodovozSectionUi()) },
-        )
-
-        val newProductsJob = fetchSectionThenUpdateItems(
-            request = { vodovozServiceRepository.getNewProducts() },
-            map = { HomeListItem.Products.newProducts(it.toVodovozSectionUi()) },
-        )
-
-        val storiesJob = fetchSectionThenUpdateItems(
-            request = { vodovozServiceRepository.getStories() },
-            map = { HomeListItem.Stories(it.mapToUi()) },
-        )
-
-        joinAll(promotionJob, hurryUpBuyProductsJob, newProductsJob, storiesJob)
-        return true
-    }
-
-    private suspend fun fetchOptionalDetails(): Boolean {
-
-        fetchSectionThenUpdateItems(
-            { vodovozServiceRepository.getViewedProducts() },
-            { HomeListItem.Products.viewedProducts(it.toVodovozSectionUi()) }
-        )
-
-        val popupWindowsInfoDeferred = viewModelScope.async {
-            vodovozServiceRepository.getPopupWindowInfo().singleResult()
-        }
-
-        val unratedProductsSectionDeferred = viewModelScope.async {
-            vodovozServiceRepository.getUnratedProductsDetails().singleResult()
-        }
-
-        val popupWindowInfoModel = popupWindowsInfoDeferred.await().getOrNull()
-        val specialPromotion =
-            popupWindowInfoModel?.specialPromotion?.toUi()
-        val sectionUnratedProducts = unratedProductsSectionDeferred.await().getOrNull()
-
-        val updateAppWindow: AppUpdateInfoUi? =
-            popupWindowInfoModel?.appUpdateInfo?.toUi()?.takeIf { appUpdateInfo ->
-                compareVersions(BuildConfig.VERSION_NAME, appUpdateInfo.androidVersion) == -1
-            }
-
-        _state.update { s ->
-            s.copy(
-                specialPromotion = specialPromotion ?: s.specialPromotion,
-                showSpecialPromotionBS = specialPromotion != null && s.specialPromotion == SpecialPromotionUi.Empty && updateAppWindow == null,
-                sectionUnratedProducts = sectionUnratedProducts?.toUi() ?: s.sectionUnratedProducts,
-                uiState = if (updateAppWindow != null) HomeUiState.AppNeedUpdate(updateAppWindow) else s.uiState,
+        val jobs = listOf(
+            fetchSectionThenUpdateItems(
+                request = { vodovozServiceRepository.getPromotions() },
+                map = { HomeListItem.Promotions(it.toUi()) },
+            ),
+            fetchSectionThenUpdateItems(
+                request = { vodovozServiceRepository.getHurryUpBuyProducts() },
+                map = { HomeListItem.Products.hurryBuyUp(it.toVodovozSectionUi()) },
+            ),
+            fetchSectionThenUpdateItems(
+                request = { vodovozServiceRepository.getNewProducts() },
+                map = { HomeListItem.Products.newProducts(it.toVodovozSectionUi()) },
+            ),
+            fetchSectionThenUpdateItems(
+                request = { vodovozServiceRepository.getStories() },
+                map = { HomeListItem.Stories(it.mapToUi()) },
+            ),
+            fetchSectionThenUpdateItems(
+                { vodovozServiceRepository.getViewedProducts() },
+                { HomeListItem.Products.viewedProducts(it.toVodovozSectionUi()) }
             )
-        }
+
+        )
+
+        joinAll(*jobs.toTypedArray())
 
         return true
     }
-
 
     fun fetchHomeDetails(
         onEachIndexed: suspend (Int) -> Unit = {},
     ) = flow {
-        _state.update { s ->
-            s.copy(uiState = HomeUiState.Loading)
-        }
         emit(fetchPrimaryDetails())
+        emit(fetchBottomSheets())
         emit(fetchSecondaryDetails())
-        emit(fetchOptionalDetails())
         return@flow
     }.withIndex().onEach { indexedValue ->
         onEachIndexed(indexedValue.index)
@@ -253,26 +205,26 @@ class HomeFlowViewModel @Inject constructor(
     fun refresh() = viewModelScope.launch {
         if (stateSnapshot.uiState is HomeUiState.Loading) return@launch
 
-        _state.update { s ->
+        updateState { s ->
             s.copy(
                 showRefreshIndicator = true,
                 sectionUnratedProducts = UnratedProductsSectionUi.Empty
             )
         }
 
-        fetchHomeDetails {
-            _state.update { s ->
-                s.copy(showRefreshIndicator = false)
+        fetchHomeDetails { index ->
+            if (index == 0) {
+                updateState { s ->
+                    s.copy(showRefreshIndicator = false)
+                }
             }
-        }
+        }.join()
 
     }
 
 
-    fun goToProfile() {
-        viewModelScope.launch {
-            sendEvent(HomeEvents.GoToProfile)
-        }
+    fun goToProfile() = viewModelScope.launch {
+        sendEvent(HomeEvents.GoToProfile)
     }
 
     fun selectCategory(
@@ -291,7 +243,7 @@ class HomeFlowViewModel @Inject constructor(
     }
 
     fun closeSpecialPromotionBottomSheet() = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(
                 showSpecialPromotionBS = false
             )
@@ -330,7 +282,7 @@ class HomeFlowViewModel @Inject constructor(
     }
 
     fun closeUnratedProductsBottomSheet() = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(showUnratedProductsBS = false, showedUnratedProducts = true)
         }
     }
@@ -351,7 +303,7 @@ class HomeFlowViewModel @Inject constructor(
                     rating.roundToInt()
                 )
             )
-            _state.update { s ->
+            updateState { s ->
                 val sectionUnratedProducts = s.sectionUnratedProducts
                 val haveProducts = sectionUnratedProducts.products.isNotEmpty()
 
@@ -371,7 +323,7 @@ class HomeFlowViewModel @Inject constructor(
     }
 
     fun showAdvertisingBottomSheet(aboutAdvertisingUi: AboutAdvertisingUi) = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(
                 currentAdvertising = aboutAdvertisingUi,
                 showAdvertisingBS = true
@@ -380,7 +332,7 @@ class HomeFlowViewModel @Inject constructor(
     }
 
     fun closeAdvertisingBottomSheet() {
-        _state.update { s ->
+        updateState { s ->
             s.copy(showAdvertisingBS = false)
         }
     }
@@ -394,7 +346,7 @@ class HomeFlowViewModel @Inject constructor(
     }
 
     fun activateSpecialPromotionAction(action: VodovozAction) = viewModelScope.launch {
-        _state.update { s -> s.copy(showSpecialPromotionBS = false) }
+        updateState { s -> s.copy(showSpecialPromotionBS = false) }
         delay(100L)
         sendEvent(HomeEvents.ActivateVodovozAction(action))
     }
@@ -440,13 +392,13 @@ class HomeFlowViewModel @Inject constructor(
 
     fun showVpnWaring() = viewModelScope.launch {
         sendEvent(HomeEvents.ShowSnackbar(resourcesProvider.getString(R.string.vpn_warning)))
-        _state.update { s ->
+        updateState { s ->
             s.copy(showedVpnWarning = true)
         }
     }
 
     fun showUnratedProducts() = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(
                 showUnratedProductsBS = s.sectionUnratedProducts.products.isNotEmpty(),
             )
@@ -454,25 +406,25 @@ class HomeFlowViewModel @Inject constructor(
     }
 
     fun showExitDialog() = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(showExitDialog = true)
         }
     }
 
     fun hideExitDialog() = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(showExitDialog = false)
         }
     }
 
 
     fun closeApplication() = viewModelScope.launch {
-        _state.update { s -> s.copy(showExitDialog = false) }
+        updateState { s -> s.copy(showExitDialog = false) }
         sendEvent(HomeEvents.CloseApp)
     }
 
     fun noRateProduct(product: UnratedProductUi) = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             val sectionUnratedProducts = s.sectionUnratedProducts.copy(
                 products = s.sectionUnratedProducts.products - product
             )
@@ -486,12 +438,8 @@ class HomeFlowViewModel @Inject constructor(
         vodovozServiceRepository.removeUnratedProduct(productId = product.id).singleResult()
     }
 
-    fun navigateToViewedProducts() = viewModelScope.launch {
-        sendEvent(HomeEvents.GoToViewedProductList)
-    }
-
     fun removeUnratedProduct(productId: Long) = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             val products = s.sectionUnratedProducts.products
             s.copy(
                 sectionUnratedProducts = s.sectionUnratedProducts.copy(
@@ -503,6 +451,28 @@ class HomeFlowViewModel @Inject constructor(
 
     fun openGooglePlay(appUpdateInfo: AppUpdateInfoUi) = viewModelScope.launch {
         sendEvent(HomeEvents.OpenGooglePlay(appUpdateInfo.playMarketUrl))
+    }
+
+    private suspend fun fetchBottomSheets() {
+        val popupWindowInfoModel = vodovozServiceRepository.getPopupWindowInfo(
+        ).singleResult().getOrNull()
+
+        val specialPromotion = popupWindowInfoModel?.specialPromotion?.toUi()
+
+        val updateAppWindow: AppUpdateInfoUi? = popupWindowInfoModel
+            ?.appUpdateInfo
+            ?.toUi()
+            ?.takeIf { appUpdateInfo ->
+                compareVersions(BuildConfig.VERSION_NAME, appUpdateInfo.androidVersion) == -1
+            }
+
+        updateState { s ->
+            s.copy(
+                specialPromotion = specialPromotion ?: s.specialPromotion,
+                showSpecialPromotionBS = specialPromotion != null && s.specialPromotion == SpecialPromotionUi.Empty && updateAppWindow == null,
+                uiState = if (updateAppWindow != null) HomeUiState.AppNeedUpdate(updateAppWindow) else s.uiState,
+            )
+        }
     }
 
     @Stable

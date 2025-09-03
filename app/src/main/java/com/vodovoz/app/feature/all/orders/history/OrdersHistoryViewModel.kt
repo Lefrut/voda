@@ -59,7 +59,7 @@ class OrdersHistoryViewModel @Inject constructor(
 
     fun fetchOrdersHistoryDetails() = viewModelScope.launch {
         if (stateSnapshot.uiState !is AllOrdersUiState.Body) {
-            _state.update { s ->
+            updateState { s ->
                 s.copy(uiState = AllOrdersUiState.Loading)
             }
         }
@@ -70,7 +70,7 @@ class OrdersHistoryViewModel @Inject constructor(
         ordersHistoryDetailsResult.onSuccess { ordersHistoryDetails ->
 
 
-            _state.update { s ->
+            updateState { s ->
                 s.copy(
                     title = ordersHistoryDetails.title,
                     filters = ordersHistoryDetails.filters.mapToUi(),
@@ -99,7 +99,7 @@ class OrdersHistoryViewModel @Inject constructor(
 
             if (uiState is AllOrdersUiState.Body) return@onFailure
 
-            _state.update { s ->
+            updateState { s ->
                 s.copy(uiState = uiState)
             }
 
@@ -107,7 +107,7 @@ class OrdersHistoryViewModel @Inject constructor(
     }
 
     fun changeMode(searchMode: Boolean) = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(
                 searchMode = searchMode,
                 searchQuery = ""
@@ -125,7 +125,7 @@ class OrdersHistoryViewModel @Inject constructor(
 
 
     fun changeSearchQuery(query: String) = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(searchQuery = query)
         }
         querySharedFlow.emit(query)
@@ -138,7 +138,7 @@ class OrdersHistoryViewModel @Inject constructor(
     fun selectAllFilters() = viewModelScope.launch {
         if (stateSnapshot.currentFilters.isEmpty()) return@launch
 
-        _state.update { s ->
+        updateState { s ->
             s.copy(currentFilters = emptyList())
         }
 
@@ -146,7 +146,7 @@ class OrdersHistoryViewModel @Inject constructor(
     }
 
     fun selectFilter(filter: OrderFilterUi) = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             val currentFilters = s.currentFilters
             s.copy(
                 currentFilters = if (currentFilters.contains(filter)) currentFilters.minus(filter)
@@ -192,13 +192,13 @@ class OrdersHistoryViewModel @Inject constructor(
     }
 
     fun refresh() = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(showRefreshIndicator = true)
         }
 
         fetchOrdersHistoryDetails().join()
 
-        _state.update { s ->
+        updateState { s ->
             s.copy(showRefreshIndicator = false)
         }
     }

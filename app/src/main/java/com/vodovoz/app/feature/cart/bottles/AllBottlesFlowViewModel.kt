@@ -35,22 +35,22 @@ class AllBottlesFlowViewModel @Inject constructor(
     }
 
     private fun listenBottlesChanges() = viewModelScope.launch {
-        _state.map { pagingState -> pagingState.bottles }.collectLatest {
-            _state.update { s ->
+        state.map { pagingState -> pagingState.bottles }.collectLatest {
+            updateState { s ->
                 s.copy(hideButton = !s.bottles.any { bottle -> bottle.cartQuantity > 0 } || s.isSingleBottleMode)
             }
         }
     }
 
     fun fetchAllBottlesDetails() = viewModelScope.launch(Dispatchers.IO) {
-        _state.update { s ->
+        updateState { s ->
             s.copy(uiState = BottlesUiState.Loading)
         }
 
         val allBottlesResult = vodovozServiceRepository.getAllBottles().singleResult()
 
         allBottlesResult.onSuccess { allBottlesDetails ->
-            _state.update { s ->
+            updateState { s ->
                 s.copy(
                     description = allBottlesDetails.description,
                     isSingleBottleMode = allBottlesDetails.isSingleBottleMode,
@@ -59,20 +59,20 @@ class AllBottlesFlowViewModel @Inject constructor(
                 )
             }
         }.onFailure {
-            _state.update { s ->
+            updateState { s ->
                 s.copy(uiState = BottlesUiState.Error)
             }
         }
     }
 
     fun changeSearchMode(searchMode: Boolean) = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(isSearchMode = searchMode, searchQuery = "")
         }
     }
 
     fun changeSearchQuery(newQuery: String) = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(searchQuery = newQuery)
         }
     }
@@ -82,7 +82,7 @@ class AllBottlesFlowViewModel @Inject constructor(
     }
 
     fun addBottle(bottle: BottleUi) = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(
                 bottles = s.bottles.map { b -> if (b.id == bottle.id) b.copy(cartQuantity = 1) else b }
             )
@@ -97,7 +97,7 @@ class AllBottlesFlowViewModel @Inject constructor(
     fun incrementBottle(bottle: BottleUi) = viewModelScope.launch {
         if (stateSnapshot.isSingleBottleMode) return@launch
 
-        _state.update { s ->
+        updateState { s ->
             s.copy(bottles = s.bottles.map { if (it.id == bottle.id) it.copy(cartQuantity = it.cartQuantity + 1) else it })
         }
 
@@ -106,7 +106,7 @@ class AllBottlesFlowViewModel @Inject constructor(
     fun decrementBottle(bottle: BottleUi) = viewModelScope.launch {
         if (bottle.cartQuantity <= 0 || stateSnapshot.isSingleBottleMode) return@launch
 
-        _state.update { s ->
+        updateState { s ->
             s.copy(
                 bottles = s.bottles.map {
                     if (it.id == bottle.id) it.copy(cartQuantity = it.cartQuantity - 1)
@@ -118,11 +118,11 @@ class AllBottlesFlowViewModel @Inject constructor(
 
     fun addBottlesToCart() = viewModelScope.launch {
         if (stateSnapshot.isSingleBottleMode) {
-            _state.update { s ->
+            updateState { s ->
                 s.copy(uiState = BottlesUiState.Loading)
             }
         } else {
-            _state.update { s ->
+            updateState { s ->
                 s.copy(
                     buttonIsLoading = true
                 )
@@ -142,12 +142,12 @@ class AllBottlesFlowViewModel @Inject constructor(
             cartManager.updateCartListState(true)
             cartManager.observeUpdateCartList().collectLatest { hasUpdates ->
                 if (!hasUpdates) {
-                    _state.update { s -> s.copy(buttonIsLoading = false) }
+                    updateState { s -> s.copy(buttonIsLoading = false) }
                     sendEvent(BottlesEvent.GoBack)
                 }
             }
         }.onFailure {
-            _state.update { s ->
+            updateState { s ->
                 s.copy(buttonIsLoading = false)
             }
             if (stateSnapshot.isSingleBottleMode) {

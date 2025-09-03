@@ -51,7 +51,7 @@ class AddressesFlowViewModel @Inject constructor(
             } ?: addressSections.firstOrNull()?.items?.firstOrNull() ?: AddressUi.Empty
 
 
-            _state.update { s ->
+            updateState { s ->
                 s.copy(
                     addressSections = addressSections,
                     selectedAddress = selectedAddress,
@@ -63,7 +63,7 @@ class AddressesFlowViewModel @Inject constructor(
                 AddressesUiState.Empty(t.placeholder.toUi())
             } else AddressesUiState.Error
 
-            _state.update { s ->
+            updateState { s ->
                 s.copy(
                     uiState = if (s.uiState != AddressesUiState.Success || uiState is AddressesUiState.Empty) {
                         uiState
@@ -93,13 +93,13 @@ class AddressesFlowViewModel @Inject constructor(
     }
 
     fun selectAddress(address: AddressUi) = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(selectedAddress = address)
         }
     }
 
     fun showRemoveAddressDialog(address: AddressUi) = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(
                 currentRemoveAddress = address,
                 showRemoveAddressDialog = true
@@ -108,7 +108,7 @@ class AddressesFlowViewModel @Inject constructor(
     }
 
     fun hideRemoveAddressDialog() = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(
                 currentRemoveAddress = null,
                 showRemoveAddressDialog = false
@@ -117,7 +117,7 @@ class AddressesFlowViewModel @Inject constructor(
     }
 
     fun removeAddress(currentRemoveAddress: AddressUi) = viewModelScope.launch {
-        _state.update { state ->
+        updateState { state ->
             state.copy(
                 addressSections = state.addressSections.map { section ->
                     section.copy(items = section.items.filter { it.id != currentRemoveAddress.id })
@@ -131,13 +131,13 @@ class AddressesFlowViewModel @Inject constructor(
     }
 
     fun refresh() = viewModelScope.launch{
-        _state.update {
+        updateState {
             it.copy(showRefreshIndicator = true)
         }
 
         fetchAddresses().join()
 
-        _state.update {
+        updateState {
             it.copy(showRefreshIndicator = false)
         }
     }

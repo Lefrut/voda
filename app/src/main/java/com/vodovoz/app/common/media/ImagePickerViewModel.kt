@@ -17,7 +17,7 @@ class ImagePickerViewModel @Inject constructor(
 ) : MviViewModel<ImagePickerState, ImagePickerEvent>(ImagePickerState()) {
 
     fun setImageUri(uri: String) = viewModelScope.launch {
-        _state.update { s -> s.copy(imageUri = uri) }
+        updateState { s -> s.copy(imageUri = uri) }
     }
 
     fun navigateBack() = viewModelScope.launch {

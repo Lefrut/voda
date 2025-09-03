@@ -59,7 +59,7 @@ class OrderDetailsFlowViewModel @Inject constructor(
 
     fun fetchOrderDetails() = viewModelScope.launch {
         if (stateSnapshot.uiState !is OrderDetailsUiState.Body) {
-            _state.update { s ->
+            updateState { s ->
                 s.copy(uiState = OrderDetailsUiState.Loading)
             }
         }
@@ -72,7 +72,7 @@ class OrderDetailsFlowViewModel @Inject constructor(
             val bottomButtons = orderDetails.bottomButtons.mapToUi()
             val questionButton = bottomButtons.find { it.id == QUESTION_BUTTON_ID }
 
-            _state.update { s ->
+            updateState { s ->
                 s.copy(
                     topButtons = orderDetails.topButtons.mapToUi(),
                     bottomButtons = bottomButtons,
@@ -90,7 +90,7 @@ class OrderDetailsFlowViewModel @Inject constructor(
             }
 
         }.onFailure {
-            _state.update { s ->
+            updateState { s ->
                 s.copy(uiState = OrderDetailsUiState.Error)
             }
         }
@@ -154,7 +154,7 @@ class OrderDetailsFlowViewModel @Inject constructor(
 
     private fun showAboutOrderBottomSheet(aboutOrderBottomSheet: AboutOrderPopupWindowUi) =
         viewModelScope.launch {
-            _state.update { s ->
+            updateState { s ->
                 s.copy(
                     showAboutOrderBS = true,
                     currentAboutOrderBS = aboutOrderBottomSheet
@@ -163,19 +163,19 @@ class OrderDetailsFlowViewModel @Inject constructor(
         }
 
     fun closeAboutOrderBottomSheet() = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(showAboutOrderBS = false)
         }
     }
 
     fun refresh() = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(showRefreshIndicator = true)
         }
 
         fetchOrderDetails().join()
 
-        _state.update { s ->
+        updateState { s ->
             s.copy(showRefreshIndicator = false)
         }
 

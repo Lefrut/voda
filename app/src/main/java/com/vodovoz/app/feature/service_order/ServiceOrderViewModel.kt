@@ -50,7 +50,7 @@ class ServiceOrderViewModel @Inject constructor(
     }
 
     private fun fetchServiceOrderDetails() = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(uiState = ServiceOrderUiState.Loading)
         }
 
@@ -59,7 +59,7 @@ class ServiceOrderViewModel @Inject constructor(
         ).singleResult()
 
         serviceOrderDetailsResult.onSuccess { serviceOrderDetails ->
-            _state.update { s ->
+            updateState { s ->
                 s.copy(
                     title = serviceOrderDetails.title,
                     subtitle = serviceOrderDetails.subtitle,
@@ -78,7 +78,7 @@ class ServiceOrderViewModel @Inject constructor(
     }
 
     fun doOrderService() = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(button = s.button.copy(loading = true))
         }
 
@@ -99,7 +99,7 @@ class ServiceOrderViewModel @Inject constructor(
 
             if (isValid) return@checkFields
 
-            _state.update { s ->
+            updateState { s ->
                 s.copy(
                     fields = updatedFields,
                     button = s.button.copy(
@@ -115,11 +115,11 @@ class ServiceOrderViewModel @Inject constructor(
 
         vodovozServiceRepository.orderService(serviceType, stateSnapshot.fields.mapToDomain())
             .singleResult().onSuccess { placeholder ->
-                _state.update { s ->
+                updateState { s ->
                     s.copy(uiState = ServiceOrderUiState.Success(placeholder.toUi()))
                 }
             }.onFailure { t ->
-                _state.update { s ->
+                updateState { s ->
                     s.copy(
                         button = s.button.copy(
                             loading = false,
@@ -131,7 +131,7 @@ class ServiceOrderViewModel @Inject constructor(
     }
 
     fun changeField(field: FieldUi, updatedField: FieldUi) = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             val updatedFields = s.fields.updateField(
                 field,
                 updatedField

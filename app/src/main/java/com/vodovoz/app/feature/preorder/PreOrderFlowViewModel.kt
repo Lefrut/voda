@@ -38,17 +38,17 @@ class PreOrderFlowViewModel @Inject constructor(
 
     fun fetchPreOrderData() = viewModelScope.launch {
         vodovozServiceRepository.getPreorderFields(productId)
-            .onStart { _state.update { s -> s.copy(uiState = UiState.Loading) } }
+            .onStart { updateState { s -> s.copy(uiState = UiState.Loading) } }
             .onEach { preOrderSectionResult ->
                 preOrderSectionResult.onSuccess { preOrderSectionModel ->
-                    _state.update { s ->
+                    updateState { s ->
                         s.copy(
                             uiState = UiState.Success,
                             sectionPreOrder = preOrderSectionModel.toUi(),
                         )
                     }
                 }.onFailure {
-                    _state.update { s ->
+                    updateState { s ->
                         s.copy(uiState = UiState.Error)
                     }
                 }
@@ -94,7 +94,7 @@ class PreOrderFlowViewModel @Inject constructor(
                 f.getErrorText { id -> resourcesProvider.getString(id) }
             }
         ) { updatedFields, _ ->
-            _state.update { s ->
+            updateState { s ->
                 s.copy(
                     sectionPreOrder = s.sectionPreOrder.copy(
                         fields = updatedFields
@@ -106,7 +106,7 @@ class PreOrderFlowViewModel @Inject constructor(
 
 
     fun changeFieldValue(field: FieldUi, newValue: String) = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             val sectionPreOrder = s.sectionPreOrder
             val fields = sectionPreOrder.fields
             val fieldIndex = fields.indexOfFirst { field.id == it.id }

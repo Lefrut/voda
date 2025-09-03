@@ -51,13 +51,13 @@ class UserDataFlowViewModel @Inject constructor(
     }
 
     fun fetchUserData() = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(uiState = UserDataUiState.Loading)
         }
         val userDataResult = vodovozServiceRepository.getUserData().singleResult()
 
         userDataResult.onSuccess { userData ->
-            _state.update { s ->
+            updateState { s ->
                 val photoModel = userData.photo
                 s.copy(
                     title = userData.title,
@@ -75,7 +75,7 @@ class UserDataFlowViewModel @Inject constructor(
             if (t is UserNotLoginException && t.placeholder != null) {
                 sendEvent(UserDataEvents.RefreshAllAndGoBack)
             } else {
-                _state.update { s ->
+                updateState { s ->
                     s.copy(uiState = UserDataUiState.Error)
                 }
             }
@@ -91,7 +91,7 @@ class UserDataFlowViewModel @Inject constructor(
         val updateUserAvatarResult =
             vodovozServiceRepository.updateUserAvatar(imageFile).singleResult()
         updateUserAvatarResult.onSuccess { message ->
-            _state.update { s ->
+            updateState { s ->
                 s.copy(photo = imageFile.path)
             }
             sendEvent(UserDataEvents.UpdateProfile)
@@ -103,7 +103,7 @@ class UserDataFlowViewModel @Inject constructor(
     }
 
     fun updateUserData() = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(buttonLoading = true)
         }
 
@@ -119,7 +119,7 @@ class UserDataFlowViewModel @Inject constructor(
             )
         }
 
-        _state.update { s ->
+        updateState { s ->
             s.copy(
                 buttonEnabled = false,
                 buttonLoading = false
@@ -128,7 +128,7 @@ class UserDataFlowViewModel @Inject constructor(
     }
 
     fun logout() = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(
                 showLogoutDialog = false,
                 uiState = UserDataUiState.Loading
@@ -137,7 +137,7 @@ class UserDataFlowViewModel @Inject constructor(
         logoutManager.logout().singleResult().onSuccess {
             sendEvent(UserDataEvents.RefreshAllAndGoBack)
         }.onFailure {
-            _state.update { s ->
+            updateState { s ->
                 s.copy(showLogoutDialog = false, uiState = UserDataUiState.Success)
             }
             sendEvent(
@@ -147,7 +147,7 @@ class UserDataFlowViewModel @Inject constructor(
     }
 
     fun deleteAccount() = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(
                 showDeleteAccountDialog = false,
                 uiState = UserDataUiState.Loading
@@ -169,7 +169,7 @@ class UserDataFlowViewModel @Inject constructor(
 
 
 
-        _state.update { s ->
+        updateState { s ->
             s.copy(uiState = UserDataUiState.Success)
         }
 
@@ -181,26 +181,26 @@ class UserDataFlowViewModel @Inject constructor(
 
 
     fun showDeleteAccountDialog() = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(showDeleteAccountDialog = true)
         }
     }
 
     fun showLogoutDialog() = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(showLogoutDialog = true)
         }
     }
 
     fun closeLogoutDialog() = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(showLogoutDialog = false)
         }
 
     }
 
     fun closeDeleteAccountDialog() = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(showDeleteAccountDialog = false)
         }
     }
@@ -208,20 +208,20 @@ class UserDataFlowViewModel @Inject constructor(
     fun checkBirthdayField(field: FieldUi) = viewModelScope.launch {
         if (field.id != "data") return@launch
 
-        _state.update { s ->
+        updateState { s ->
             s.copy(showDatePicker = true)
         }
     }
 
     fun closeDatePicker() = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(showDatePicker = false)
         }
     }
 
     fun changeDate(date: LocalDate) = viewModelScope.launch {
         val dateField = stateSnapshot.fields.firstOrNull { it.id == "data" } ?: return@launch
-        _state.update { s ->
+        updateState { s ->
             val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
             val formattedDate = date.format(formatter)
             val updatedFields = s.fields.updateFieldAndResetError(
@@ -241,7 +241,7 @@ class UserDataFlowViewModel @Inject constructor(
         val updatedFields = stateSnapshot.fields.updateFieldAndResetError(field, updatedField)
 
         updatedFields.checkFields(false) { fields, _ ->
-            _state.update { s ->
+            updateState { s ->
                 s.copy(
                     fields = fields,
                     buttonEnabled = fields.checkFields()

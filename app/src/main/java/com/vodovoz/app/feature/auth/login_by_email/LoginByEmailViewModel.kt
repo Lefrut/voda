@@ -40,7 +40,6 @@ import javax.inject.Inject
 @Stable
 class LoginByEmailViewModel @Inject constructor(
     private val vodovozServiceRepository: VodovozServiceRepository,
-    private val siteStateManager: SiteStateManager,
     private val resourcesProvider: ResourcesProvider,
     private val loginManager: LoginManager,
 ) : MviViewModel<LoginByEmailState, LoginByEmailEvent>(LoginByEmailState()) {
@@ -60,7 +59,7 @@ class LoginByEmailViewModel @Inject constructor(
     }
 
     private fun loginByEmail() = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(
                 authDetails = s.authDetails.copy(
                     buttons = s.buttons.updateButton(LOGIN_BY_EMAIL_BUTTON) { btn ->
@@ -85,7 +84,7 @@ class LoginByEmailViewModel @Inject constructor(
                 userAuthInfo.token
             )
 
-            _state.update { s ->
+            updateState { s ->
                 s.copy(
                     authDetails = s.authDetails.copy(
                         buttons = s.buttons.updateButton(LOGIN_BY_EMAIL_BUTTON) { btn ->
@@ -111,7 +110,7 @@ class LoginByEmailViewModel @Inject constructor(
             }
 
 
-            _state.update { s ->
+            updateState { s ->
 
                 val lastField = s.fields.lastOrNull()
 
@@ -136,7 +135,7 @@ class LoginByEmailViewModel @Inject constructor(
     }
 
     fun fetchLoginByEmailDetails() = viewModelScope.launch {
-        _state.update { s -> s.copy(uiState = LoginByEmailUiState.Loading) }
+        updateState { s -> s.copy(uiState = LoginByEmailUiState.Loading) }
 
         val loginByEmailResult = vodovozServiceRepository.getLoginByEmailDetails().singleResult()
 
@@ -146,7 +145,7 @@ class LoginByEmailViewModel @Inject constructor(
                 colorfulButtonModel.toUi()
             }.updateButton(LOGIN_BY_EMAIL_BUTTON) { it.copy(enabled = false) }
 
-            _state.update { s ->
+            updateState { s ->
                 s.copy(
                     authDetails = loginDetails.toUi(AgreementController.getText()).copy(
                         buttons = buttons
@@ -155,14 +154,14 @@ class LoginByEmailViewModel @Inject constructor(
                 )
             }
         }.onFailure {
-            _state.update { s ->
+            updateState { s ->
                 s.copy(uiState = LoginByEmailUiState.Error)
             }
         }
     }
 
     fun changeField(field: FieldUi, updatedField: FieldUi) = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             val updatedFields = s.fields.updateFieldAndResetError(field, updatedField)
 
             s.copy(
@@ -215,7 +214,7 @@ class LoginByEmailViewModel @Inject constructor(
 
 
     fun changeCheckbox(checkbox: CheckboxUi, updatedCheckbox: CheckboxUi) {
-        _state.update { s ->
+        updateState { s ->
             val authDetails = s.authDetails
             val updatedCheckboxes = authDetails.checkboxes.updateCheckbox(
                 checkbox, updatedCheckbox

@@ -1,5 +1,6 @@
 package com.vodovoz.app.design_system.composables.card
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -33,6 +34,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import coil3.compose.rememberAsyncImagePainter
 import com.vodovoz.app.R
 import com.vodovoz.app.design_system.ExtendedTheme
 import com.vodovoz.app.design_system.VodovozTheme
@@ -145,6 +147,7 @@ private fun GridImageSection(
     isFavorite: Boolean,
     onLike: () -> Unit,
 ) {
+
     Box(modifier = modifier) {
         AsyncImage(
             model = image,

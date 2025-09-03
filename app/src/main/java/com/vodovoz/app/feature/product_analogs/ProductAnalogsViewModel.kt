@@ -46,12 +46,12 @@ class ProductAnalogsViewModel @Inject constructor(
     fun fetchProductAnalogs() =
         vodovozServiceRepository.getProductAnalogs(productId, stateSnapshot.currentSort.toDomain())
             .onStart {
-                _state.update { s -> s.copy(uiState = ProductAnalogsUiState.Loading) }
+                updateState { s -> s.copy(uiState = ProductAnalogsUiState.Loading) }
             }.onEach { result ->
                 delay(100)
                 result.onSuccess { productsSectionModel ->
                     val productsSectionUi = productsSectionModel.toUi()
-                    _state.update { s ->
+                    updateState { s ->
                         s.copy(
                             productsSection = productsSectionUi,
                             currentSort = if (s.currentSort == SortUi.Empty) productsSectionUi.sorting.firstOrNull()
@@ -61,7 +61,7 @@ class ProductAnalogsViewModel @Inject constructor(
                         )
                     }
                 }.onFailure {
-                    _state.update { s ->
+                    updateState { s ->
                         s.copy(
                             uiState = ProductAnalogsUiState.Error
                         )
@@ -70,7 +70,7 @@ class ProductAnalogsViewModel @Inject constructor(
             }.take(1).launchIn(viewModelScope)
 
     fun showSortOptionsBottomSheet() = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(
                 showSortOptionsBottomSheet = true
             )
@@ -78,7 +78,7 @@ class ProductAnalogsViewModel @Inject constructor(
     }
 
     fun closeSortOptionsBottomSheet() = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(
                 showSortOptionsBottomSheet = false
             )
@@ -87,7 +87,7 @@ class ProductAnalogsViewModel @Inject constructor(
 
     fun selectSort(sort: SortUi) = viewModelScope.launch {
         if (sort == stateSnapshot.currentSort) return@launch
-        _state.update { s ->
+        updateState { s ->
             s.copy(
                 currentSort = sort,
             )
@@ -101,7 +101,7 @@ class ProductAnalogsViewModel @Inject constructor(
     }
 
     fun switchLayout() = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(isGridView = !s.isGridView)
         }
     }

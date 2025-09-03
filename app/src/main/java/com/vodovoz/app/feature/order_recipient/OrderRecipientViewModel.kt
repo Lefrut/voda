@@ -44,7 +44,7 @@ class OrderRecipientViewModel @Inject constructor(
 
 
     fun fetchOrderRecipientDetails() = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(uiState = OrderRecipientUiState.Loading)
         }
 
@@ -52,7 +52,7 @@ class OrderRecipientViewModel @Inject constructor(
             vodovozServiceRepository.getOrderRecipientDetails(addressId).singleResult()
 
         recipientDetailsResult.onSuccess { recipientDetails ->
-            _state.update { s ->
+            updateState { s ->
                 s.copy(
                     uiState = OrderRecipientUiState.Recipient,
                     title = recipientDetails.title,
@@ -61,7 +61,7 @@ class OrderRecipientViewModel @Inject constructor(
                 )
             }
         }.onFailure {
-            _state.update { s ->
+            updateState { s ->
                 s.copy(
                     uiState = OrderRecipientUiState.Error
                 )
@@ -78,7 +78,7 @@ class OrderRecipientViewModel @Inject constructor(
             putErrors = false,
             validators = listOf(PhoneNumberValidator)
         ) { updatedFields, isValid ->
-            _state.update { s ->
+            updateState { s ->
                 s.copy(
                     fields = updatedFields.updateField(
                         field = field,
@@ -106,7 +106,7 @@ class OrderRecipientViewModel @Inject constructor(
             }
         ) { fields, isValid ->
 
-            _state.update { s ->
+            updateState { s ->
                 s.copy(
                     button = s.button.copy(enabled = false),
                     fields = fields
@@ -118,7 +118,7 @@ class OrderRecipientViewModel @Inject constructor(
             }
         }
 
-        _state.update { s ->
+        updateState { s ->
             s.copy(button = s.button.copy(loading = true))
         }
 
@@ -130,7 +130,7 @@ class OrderRecipientViewModel @Inject constructor(
         sendEvent(OrderRecipientEvent.GoBackToOrdering)
 
 
-        _state.update { s ->
+        updateState { s ->
             s.copy(button = s.button.copy(loading = false))
         }
 

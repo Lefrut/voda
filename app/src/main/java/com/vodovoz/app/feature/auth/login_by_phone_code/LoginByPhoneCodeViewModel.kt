@@ -45,7 +45,7 @@ class LoginByPhoneCodeViewModel @Inject constructor(
 
     fun changeCode(code: String) = viewModelScope.launch {
         val newCode = code.filter { c -> c.isDigit() }.take(smsCodeCount)
-        _state.update { s ->
+        updateState { s ->
             s.copy(code = newCode)
         }
 
@@ -61,7 +61,7 @@ class LoginByPhoneCodeViewModel @Inject constructor(
     }
 
     fun requestCode() = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(requestCodeLoading = true)
         }
 
@@ -71,7 +71,7 @@ class LoginByPhoneCodeViewModel @Inject constructor(
             .requestPhoneCode(smsUrl, stateSnapshot.phone)
             .singleResult()
 
-        _state.update { s ->
+        updateState { s ->
             s.copy(requestCodeLoading = false)
         }
 
@@ -82,7 +82,7 @@ class LoginByPhoneCodeViewModel @Inject constructor(
     }
 
     private fun loadingByPhone(code: String) = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(blockScreen = true)
         }
 
@@ -100,13 +100,13 @@ class LoginByPhoneCodeViewModel @Inject constructor(
                 userAuthInfo.token
             )
 
-            _state.update { s ->
+            updateState { s ->
                 s.copy(blockScreen = false)
             }
 
             sendEvent(LoginByPhoneCodeEvent.RefreshProfile)
         }.onFailure {
-            _state.update { s ->
+            updateState { s ->
                 s.copy(
                     code = "",
                     blockScreen = false
@@ -119,7 +119,7 @@ class LoginByPhoneCodeViewModel @Inject constructor(
 
     private fun startWaiting(timerDurationSeconds: Long) =
         viewModelScope.launch(Dispatchers.Default) {
-            _state.update { s ->
+            updateState { s ->
                 s.copy(canRequestCode = false)
             }
 
@@ -136,12 +136,12 @@ class LoginByPhoneCodeViewModel @Inject constructor(
 
 
                 val time = LocalTime.ofSecondOfDay(remainingSeconds)
-                _state.update { s ->
+                updateState { s ->
                     s.copy(waitSecondsText = time.format(formatter))
                 }
 
                 if (remainingMillis <= 0L) {
-                    _state.update { s ->
+                    updateState { s ->
                         s.copy(canRequestCode = true)
                     }
                     break

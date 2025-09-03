@@ -71,7 +71,7 @@ class WriteCommentViewModel @Inject constructor(
 
 
     init {
-        _state.update { s ->
+        updateState { s ->
             s.copy(
                 productImage = productImage,
                 rating = rating,
@@ -86,7 +86,7 @@ class WriteCommentViewModel @Inject constructor(
 
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun listenTakePhotos() = siteStateManager.siteStateFlow.mapLatest { siteState ->
-        _state.update { s ->
+        updateState { s ->
             s.copy(takePhotos = siteState?.takePhotos ?: false)
         }
     }.launchIn(viewModelScope)
@@ -96,7 +96,7 @@ class WriteCommentViewModel @Inject constructor(
     }
 
     fun changeRating(rating: Float) = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(rating = rating.roundToInt())
         }
     }
@@ -109,14 +109,15 @@ class WriteCommentViewModel @Inject constructor(
                 field.getErrorText { resId -> resourcesProvider.getString(resId) }
             }
         ) { updatedFields, _ ->
-            _state.update { s ->
-                s.copy(field = updatedFields.firstOrNull() ?: return@launch)
+            val updateField = updatedFields.firstOrNull() ?: return@launch
+            updateState { s ->
+                s.copy(field = updateField)
             }
         }
 
         if (!isValid || stateSnapshot.rating == 0) return@launch
 
-        _state.update { s ->
+        updateState { s ->
             s.copy(buttonIsLoading = true)
         }
 
@@ -134,7 +135,7 @@ class WriteCommentViewModel @Inject constructor(
             imageBytesArray = imageBytesArray
         ).singleResult().onSuccess { placeholder ->
             sendEvent(WriteCommentEvent.SetRatedProductResult(productId))
-            _state.update { s ->
+            updateState { s ->
                 s.copy(
                     uiState = WriteCommentUiState.Success(
                         placeholder.toUi()
@@ -149,14 +150,14 @@ class WriteCommentViewModel @Inject constructor(
             )
         }
 
-        _state.update { s ->
+        updateState { s ->
             s.copy(buttonIsLoading = false)
         }
 
     }
 
     fun changeComment(field: FieldUi) = viewModelScope.launch {
-        _state.update { s -> s.copy(field = field.resetError()) }
+        updateState { s -> s.copy(field = field.resetError()) }
     }
 
     fun openImagePicker() = viewModelScope.launch {
@@ -164,7 +165,7 @@ class WriteCommentViewModel @Inject constructor(
     }
 
     fun addUri(uri: List<@JvmSuppressWildcards Uri>) = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             val imagesSet = uri.map { it.toString() }.toSet() + s.imagesUri.reversed()
             s.copy(
                 imagesUri = imagesSet.take(5)
@@ -173,7 +174,7 @@ class WriteCommentViewModel @Inject constructor(
     }
 
     fun removeImage(image: String) = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(
                 imagesUri = s.imagesUri - image
             )

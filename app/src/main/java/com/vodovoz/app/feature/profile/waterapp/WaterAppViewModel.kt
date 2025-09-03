@@ -41,20 +41,20 @@ class WaterAppViewModel @Inject constructor(
         } ?: (null to null)
 
         if (userStarted == true) {
-            _state.update { s ->
+            updateState { s ->
                 s.copy(uiState = if (firstShow == true) WaterAppUiState.Main else WaterAppUiState.Settings)
             }
         }
 
         launch {
             waterAppHelper.observeWaterAppUserData().collectLatest { userData ->
-                _state.update { s -> s.copy(userData = userData ?: s.userData) }
+                updateState { s -> s.copy(userData = userData ?: s.userData) }
             }
         }
 
         launch {
             waterAppHelper.observeWaterAppRateData().collectLatest {
-                _state.update { s ->
+                updateState { s ->
                     val rateData = it ?: s.rateData
                     s.copy(rateData = rateData)
                 }
@@ -63,7 +63,7 @@ class WaterAppViewModel @Inject constructor(
 
         launch {
             waterAppHelper.observeWaterAppNotificationData().collectLatest { notificationData ->
-                _state.update { s ->
+                updateState { s ->
                     val uiNotificationData = notificationData ?: s.notificationData
                     s.copy(
                         notificationData = uiNotificationData,
@@ -85,7 +85,7 @@ class WaterAppViewModel @Inject constructor(
     }
 
     fun goToUserFields() = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(uiState = WaterAppUiState.UserData.Gender)
         }
     }
@@ -99,7 +99,7 @@ class WaterAppViewModel @Inject constructor(
             is WaterAppUiState.UserData -> currentUiState.previous() ?: WaterAppUiState.Welcome
             else -> currentUiState
         }
-        _state.update { s ->
+        updateState { s ->
             s.copy(
                 uiState = if (stateSnapshot.notificationData.started) WaterAppUiState.Settings
                 else prevUiState
@@ -125,7 +125,7 @@ class WaterAppViewModel @Inject constructor(
 
 
 
-        _state.update { s ->
+        updateState { s ->
             s.copy(
                 uiState = if (stateSnapshot.notificationData.firstShow) {
                     WaterAppUiState.Settings
@@ -159,7 +159,7 @@ class WaterAppViewModel @Inject constructor(
         waterAppHelper.saveUserData()
         waterAppHelper.calculateAndSaveRate()
 
-        _state.update { s -> s.copy(uiState = WaterAppUiState.Main) }
+        updateState { s -> s.copy(uiState = WaterAppUiState.Main) }
 
 
     }
@@ -169,13 +169,13 @@ class WaterAppViewModel @Inject constructor(
         waterAppHelper.fetchWaterAppUserData()
         waterAppHelper.fetchWaterAppNotificationData()
 
-        _state.update { s ->
+        updateState { s ->
             s.copy(uiState = WaterAppUiState.Main)
         }
     }
 
     fun goToSettings() = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(uiState = WaterAppUiState.Settings)
         }
     }
@@ -214,12 +214,12 @@ class WaterAppViewModel @Inject constructor(
     private fun checkGoalCompleted() = viewModelScope.launch {
         delay(2000L)
         if (waterAppHelper.observeWaterAppRateData().value?.canFill == false) {
-            _state.update { s -> s.copy(uiState = WaterAppUiState.GoalCompleted) }
+            updateState { s -> s.copy(uiState = WaterAppUiState.GoalCompleted) }
         }
     }
 
     fun goToUserDataStage(stage: WaterAppUiState.UserData) = viewModelScope.launch {
-        _state.update { s -> s.copy(uiState = stage) }
+        updateState { s -> s.copy(uiState = stage) }
     }
 
     fun addChangeWaterStep() = viewModelScope.launch {
@@ -232,7 +232,7 @@ class WaterAppViewModel @Inject constructor(
             else -> currentValue
         } ?: 250
 
-        _state.update { state ->
+        updateState { state ->
             state.copy(changeWaterStep = nextStep)
         }
     }
@@ -247,22 +247,22 @@ class WaterAppViewModel @Inject constructor(
             else -> currentValue
         } ?: 250
 
-        _state.update { it.copy(changeWaterStep = prevStep) }
+        updateState { it.copy(changeWaterStep = prevStep) }
     }
     fun showNotificationSettingsDialog() = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(showNotificationSettingsDialog = true)
         }
     }
 
     fun closeNotificationSettingsDialog() = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(showNotificationSettingsDialog = false)
         }
     }
 
     fun openNotificationSettings() = viewModelScope.launch {
-        _state.update { s -> s.copy(showNotificationSettingsDialog = false) }
+        updateState { s -> s.copy(showNotificationSettingsDialog = false) }
         sendEvent(WaterAppEvents.OpenNotificationSettings)
     }
 
@@ -278,7 +278,6 @@ class WaterAppViewModel @Inject constructor(
         val showNotificationSettingsDialog: Boolean = false,
     ) : State
 
-    @Immutable
     sealed class WaterAppEvents : Event {
         data class SwitchNotifications(val haveNotifications: Boolean) : WaterAppEvents()
 

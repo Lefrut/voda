@@ -53,13 +53,13 @@ class RegFlowViewModel @Inject constructor(
     }
 
     private fun fetchRegisterDetails() = viewModelScope.launch {
-        _state.update { s -> s.copy(uiState = RegUiState.Loading) }
+        updateState { s -> s.copy(uiState = RegUiState.Loading) }
 
         val registerFieldsResult =
             vodovozServiceRepository.getRegisterDetails().singleResult()
 
         registerFieldsResult.onSuccess { registerDetails ->
-            _state.update { s ->
+            updateState { s ->
                 s.copy(
                     uiState = RegUiState.Success,
                     authDetails = registerDetails.toUi(AgreementController.getText()).copy(
@@ -72,7 +72,7 @@ class RegFlowViewModel @Inject constructor(
                 )
             }
         }.onFailure {
-            _state.update { s -> s.copy(uiState = RegUiState.Error) }
+            updateState { s -> s.copy(uiState = RegUiState.Error) }
         }
     }
 
@@ -81,7 +81,7 @@ class RegFlowViewModel @Inject constructor(
             putErrors = true,
             getSupportingText = { field -> field.getErrorText { id -> resourceProvider.getString(id) } }
         ) { updatedFields, _ ->
-            _state.update { s ->
+            updateState { s ->
                 s.copy(
                     authDetails = s.authDetails.copy(
                         fields = updatedFields,
@@ -97,7 +97,7 @@ class RegFlowViewModel @Inject constructor(
 
 
 
-        _state.update { s ->
+        updateState { s ->
             s.copy(
                 authDetails = s.authDetails.copy(
                     buttons = s.buttons.updateButton(REGISTER_BUTTON) { btn ->
@@ -130,7 +130,7 @@ class RegFlowViewModel @Inject constructor(
                 AccountManager.UserSettings(email, password)
             )
 
-            _state.update { s ->
+            updateState { s ->
                 s.copy(
                     authDetails = s.authDetails.copy(
                         buttons = s.buttons.updateButton(REGISTER_BUTTON) { btn ->
@@ -150,7 +150,7 @@ class RegFlowViewModel @Inject constructor(
                 else -> failMessage
             }
 
-            _state.update { s ->
+            updateState { s ->
                 s.copy(
                     authDetails = s.authDetails.copy(
                         buttons = s.buttons.updateButton(REGISTER_BUTTON) { btn ->
@@ -179,7 +179,7 @@ class RegFlowViewModel @Inject constructor(
         updatedFields.checkFields(
             validators = listOf(PhoneNumberValidator, EmptyTextValidator)
         ) { fields, isValid ->
-            _state.update { s ->
+            updateState { s ->
                 s.copy(
                     authDetails = s.authDetails.copy(
                         fields = fields,
@@ -218,7 +218,7 @@ class RegFlowViewModel @Inject constructor(
     }
 
     fun changeCheckbox(checkbox: CheckboxUi, updatedCheckbox: CheckboxUi) {
-        _state.update { s ->
+        updateState { s ->
             val authDetails = s.authDetails
             val updatedCheckboxes = authDetails.checkboxes.updateCheckbox(
                 checkbox, updatedCheckbox

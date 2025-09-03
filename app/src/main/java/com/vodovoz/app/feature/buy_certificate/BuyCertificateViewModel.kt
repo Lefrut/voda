@@ -52,7 +52,7 @@ class BuyCertificateViewModel @Inject constructor(
             vodovozServiceRepository.getBuyCertificateDetails().singleResult()
 
         buyCertificateDetailsResult.onSuccess { buyCertificateDetails ->
-            _state.update { s ->
+            updateState { s ->
 
                 val tabs = buyCertificateDetails.tabs.mapToUi()
                 val paymentTypes = buyCertificateDetails.paymentTypes.mapToUi()
@@ -75,14 +75,14 @@ class BuyCertificateViewModel @Inject constructor(
                 )
             }
         }.onFailure {
-            _state.update { s ->
+            updateState { s ->
                 s.copy(uiState = BuyCertificateUiState.Error)
             }
         }
     }
 
     fun selectCertificate(certificate: CertificateUi) = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(
                 currentCertificate = certificate,
                 errors = s.errors.copy(certificate = false)
@@ -99,13 +99,13 @@ class BuyCertificateViewModel @Inject constructor(
     }
 
     fun selectTab(tab: BuyCertificateTabUi) = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(currentTab = tab)
         }
     }
 
     fun changeField(field: FieldUi, updatedField: FieldUi) = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(
                 currentTab = s.currentTab.copy(
                     fields = s.currentTab.fields.updateFieldAndResetError(field, updatedField)
@@ -115,7 +115,7 @@ class BuyCertificateViewModel @Inject constructor(
     }
 
     fun selectPaymentType(paymentType: PaymentTypeUi) = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(
                 currentPaymentType = paymentType,
                 errors = s.errors.copy(payment = false)
@@ -150,7 +150,7 @@ class BuyCertificateViewModel @Inject constructor(
             val certificateError = stateSnapshot.currentCertificate == CertificateUi.Empty
             val paymentError = stateSnapshot.currentPaymentType == PaymentTypeUi.Empty
 
-            _state.update { s ->
+            updateState { s ->
                 s.copy(
                     errors = s.errors.copy(
                         certificate = certificateError,
@@ -165,7 +165,7 @@ class BuyCertificateViewModel @Inject constructor(
             if (!isValid || certificateError || paymentError) return@launch
         }
 
-        _state.update { s ->
+        updateState { s ->
             s.copy(button = s.button.copy(loading = true))
         }
 
@@ -186,7 +186,7 @@ class BuyCertificateViewModel @Inject constructor(
 
         buyCertificateResult.onSuccess { buyCertificate ->
             val paymentInfo = buyCertificate.payment.toUi()
-            _state.update { s ->
+            updateState { s ->
                 s.copy(
                     uiState = BuyCertificateUiState.Success(buyCertificate.placeholder.toUi()),
                     paymentInfo = paymentInfo,
@@ -196,7 +196,7 @@ class BuyCertificateViewModel @Inject constructor(
         }.onFailure {
             sendEvent(BuyCertificateEvents.ShowToast(resourcesProvider.getString(R.string.order_failed)))
 
-            _state.update { s ->
+            updateState { s ->
                 s.copy(button = s.button.copy(loading = false))
             }
         }

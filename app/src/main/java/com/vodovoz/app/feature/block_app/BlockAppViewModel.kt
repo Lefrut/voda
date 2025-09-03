@@ -22,7 +22,7 @@ class BlockAppViewModel @Inject constructor(
 ) : MviViewModel<BlockAppState, BlockAppEvent>(BlockAppState()) {
 
     init {
-        siteStateManager.siteStateSnapshot?.data?.let { data ->
+        siteStateManager.siteStateSnapshot.data?.let { data ->
             updateStateBySiteState(data)
         }
     }
@@ -36,7 +36,7 @@ class BlockAppViewModel @Inject constructor(
         }
 
     private fun updateStateBySiteState(data: BlockSiteInfo) {
-        _state.update { s ->
+        updateState { s ->
             s.copy(
                 title = data.title,
                 image = data.logo,
@@ -48,20 +48,20 @@ class BlockAppViewModel @Inject constructor(
     }
 
     fun showTime() {
-        _state.update { s ->
+        updateState { s ->
             s.copy(showTime = true)
         }
     }
 
     fun hideTime() {
-        _state.update { s ->
+        updateState { s ->
             s.copy(showTime = false)
         }
     }
 
     fun setTime(days: String, hours: String, minutes: String, seconds: String) =
         viewModelScope.launch {
-            _state.update { s ->
+            updateState { s ->
                 s.copy(days = days, hours = hours, minutes = minutes, seconds = seconds)
             }
         }
@@ -71,9 +71,11 @@ class BlockAppViewModel @Inject constructor(
             "phone" -> {
                 sendEvent(BlockAppEvent.DialPhoneNumber(contact.url))
             }
+
             "url" -> {
                 sendEvent(BlockAppEvent.OpenUrl(contact.url))
             }
+
             else -> {
                 sendEvent(BlockAppEvent.OpenUrl(contact.url))
             }

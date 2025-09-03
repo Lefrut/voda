@@ -49,7 +49,7 @@ class MapFlowViewModel @Inject constructor(
 ) {
 
     private val addressName = savedState.get<String>("addressName")?.apply {
-        _state.update { s -> s.copy(screenType = MapScreenTypeUi.Edit) }
+        updateState { s -> s.copy(screenType = MapScreenTypeUi.Edit) }
     }
 
     private val searchQueryFlow = MutableStateFlow(stateSnapshot.query)
@@ -78,7 +78,7 @@ class MapFlowViewModel @Inject constructor(
             .collect { mapAreasResult ->
                 mapAreasResult.onSuccess { mapZones ->
 
-                    _state.update { s ->
+                    updateState { s ->
                         s.copy(
                             areas = mapZones.areas.mapToUi(),
                             deliveryButton = mapZones.imageButton?.toUi(),
@@ -98,7 +98,7 @@ class MapFlowViewModel @Inject constructor(
 
             MapUiMode.Search -> {
                 sendEvent(MapFlowEvents.HideKeyboard)
-                _state.update { s ->
+                updateState { s ->
                     s.copy(mode = MapUiMode.OnlyMap)
                 }
             }
@@ -125,7 +125,7 @@ class MapFlowViewModel @Inject constructor(
 
 
                 addressesInMoscowByQueryResult.onSuccess { addresses ->
-                    _state.update { s ->
+                    updateState { s ->
                         s.copy(
                             recommendedAddresses = addresses.ifEmpty { s.recommendedAddresses }
                         )
@@ -137,7 +137,7 @@ class MapFlowViewModel @Inject constructor(
     fun changeQuery(query: String) {
         viewModelScope.launch {
             searchQueryFlow.emit(query)
-            _state.update { s ->
+            updateState { s ->
                 s.copy(query = query)
             }
         }
@@ -191,13 +191,13 @@ class MapFlowViewModel @Inject constructor(
     }
 
     fun showSettingDialog() = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(showSettingsDialog = true)
         }
     }
 
     fun closeSettingsDialog() = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(showSettingsDialog = false)
         }
     }
@@ -215,7 +215,7 @@ class MapFlowViewModel @Inject constructor(
     fun searchAddress(addressName: String) = viewModelScope.launch {
         if (addressName == stateSnapshot.currentMapAddress?.name || addressName.any { c -> c.isDigit() } || stateSnapshot.query == addressName) {
 
-            _state.update { s ->
+            updateState { s ->
                 s.copy(addressIsLoading = true)
             }
 
@@ -244,7 +244,7 @@ class MapFlowViewModel @Inject constructor(
         searchAddressJob?.cancel()
 
         searchAddressJob = launch job@{
-            _state.update { s ->
+            updateState { s ->
                 s.copy(addressIsLoading = true)
             }
 
@@ -272,7 +272,7 @@ class MapFlowViewModel @Inject constructor(
     }
 
     private fun changeAddress(address: MapAddressUi) {
-        _state.update { s ->
+        updateState { s ->
             s.copy(
                 currentMapAddress = address,
                 mode = MapUiMode.OnlyMap,
@@ -284,13 +284,13 @@ class MapFlowViewModel @Inject constructor(
     }
 
     fun changeToSearchMode() {
-        _state.update { s ->
+        updateState { s ->
             s.copy(mode = MapUiMode.Search)
         }
     }
 
     fun navigateToLocationSettings() = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(showSettingsDialog = false)
         }
         sendEvent(MapFlowEvents.GoToLocationSettings)
@@ -299,7 +299,7 @@ class MapFlowViewModel @Inject constructor(
     fun navigateToAddAddress() = viewModelScope.launch {
         if (stateSnapshot.addressIsLoading || stateSnapshot.addressIsError || stateSnapshot.buttonIsLoading) return@launch
 
-        _state.update { s ->
+        updateState { s ->
             s.copy(buttonIsLoading = true)
         }
 
@@ -317,7 +317,7 @@ class MapFlowViewModel @Inject constructor(
             }
         }
 
-        _state.update { s ->
+        updateState { s ->
             s.copy(buttonIsLoading = false)
         }
 

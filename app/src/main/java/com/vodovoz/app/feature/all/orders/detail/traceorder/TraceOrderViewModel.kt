@@ -74,7 +74,7 @@ class TraceOrderViewModel @Inject constructor(
                 .singleResult()
 
         whereOrderDetailsResult.onSuccess { whereOrderDetails ->
-            _state.update { s ->
+            updateState { s ->
                 s.copy(
                     uiState = TraceOrderUiState.NotLoading,
                     carPoint = whereOrderDetails.driverPont?.toUi() ?: s.carPoint,
@@ -108,7 +108,7 @@ class TraceOrderViewModel @Inject constructor(
     }
 
     fun showSettingDialog() = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(showSettingDialog = true)
         }
     }
@@ -118,13 +118,13 @@ class TraceOrderViewModel @Inject constructor(
     }
 
     fun closeSettingsDialog() = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(showSettingDialog = false)
         }
     }
 
     fun navigateToLocationSettings() = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(showSettingDialog = false)
         }
         sendEvent(TraceOrderEvents.GoToLocationSettings)

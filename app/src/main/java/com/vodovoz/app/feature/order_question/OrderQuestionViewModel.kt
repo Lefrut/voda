@@ -47,7 +47,7 @@ class OrderQuestionViewModel @Inject constructor(
     }
 
     fun changeField(field: FieldUi, updatedField: FieldUi) = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
 
             val updatedFields = s.fields.updateFieldAndResetError(field, updatedField)
             val buttonIsEnabled = updatedFields.checkFields(
@@ -73,7 +73,7 @@ class OrderQuestionViewModel @Inject constructor(
                 }
             }
         ) { fields, isValidFields ->
-            _state.update { s ->
+            updateState { s ->
                 s.copy(
                     fields = fields,
                     button = s.button.copy(
@@ -85,7 +85,7 @@ class OrderQuestionViewModel @Inject constructor(
 
         if (!isValidFields) return@launch
 
-        _state.update { s ->
+        updateState { s ->
             s.copy(button = s.button.copy(loading = true))
         }
 
@@ -94,7 +94,7 @@ class OrderQuestionViewModel @Inject constructor(
                 .singleResult()
 
         sendOrderQuestionResult.onSuccess { placeholderData ->
-            _state.update { s ->
+            updateState { s ->
                 s.copy(
                     uiState = OrderQuestionUiState.Success(placeholderData.toUi()),
                     button = s.button.copy(loading = false)
@@ -106,7 +106,7 @@ class OrderQuestionViewModel @Inject constructor(
                     resourcesProvider.getString(R.string.order_question_send_error)
                 )
             )
-            _state.update { s ->
+            updateState { s ->
                 s.copy(
                     button = s.button.copy(loading = false)
                 )
@@ -115,13 +115,13 @@ class OrderQuestionViewModel @Inject constructor(
     }
 
     fun fetchOrderQuestionDetails() = viewModelScope.launch {
-        _state.update { s -> s.copy(uiState = OrderQuestionUiState.Loading) }
+        updateState { s -> s.copy(uiState = OrderQuestionUiState.Loading) }
 
         val orderQuestionDetailsResult =
             vodovozServiceRepository.getOrderQuestionDetails(orderId).singleResult()
         orderQuestionDetailsResult.onSuccess { orderQuestionDetails ->
 
-            _state.update { s ->
+            updateState { s ->
                 s.copy(
                     title = orderQuestionDetails.title,
                     description = orderQuestionDetails.description,
@@ -132,7 +132,7 @@ class OrderQuestionViewModel @Inject constructor(
             }
 
         }.onFailure {
-            _state.update { s ->
+            updateState { s ->
                 s.copy(uiState = OrderQuestionUiState.Error)
             }
         }

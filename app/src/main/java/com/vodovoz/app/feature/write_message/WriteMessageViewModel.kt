@@ -38,12 +38,12 @@ class WriteMessageViewModel @Inject constructor(
     }
 
     fun fetchWriteMessageDetails() = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(uiState = WriteMessageUiState.Loading)
         }
 
         vodovozServiceRepository.getWriteMessageDetails().singleResult().onSuccess { form ->
-            _state.update { s ->
+            updateState { s ->
                 s.copy(
                     uiState = WriteMessageUiState.Body,
                     fields = form.fields.mapToUi(),
@@ -55,7 +55,7 @@ class WriteMessageViewModel @Inject constructor(
                 )
             }
         }.onFailure {
-            _state.update { s ->
+            updateState { s ->
                 s.copy(
                     uiState = WriteMessageUiState.Error,
                 )
@@ -65,7 +65,7 @@ class WriteMessageViewModel @Inject constructor(
     }
 
     fun changeField(field: FieldUi, updatedField: FieldUi) = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             val updatedFields = s.fields.updateFieldAndResetError(
                 field, updatedField
             )
@@ -94,7 +94,7 @@ class WriteMessageViewModel @Inject constructor(
             }
         ) { fields, isValid ->
             if (!isValid) {
-                _state.update { s ->
+                updateState { s ->
                     s.copy(
                         fields = fields
                     )
@@ -106,7 +106,7 @@ class WriteMessageViewModel @Inject constructor(
         vodovozServiceRepository.sendMessage(
             stateSnapshot.fields.associate { it.id to it.value() }
         ).singleResult().onSuccess { placeholder ->
-            _state.update { s ->
+            updateState { s ->
                 s.copy(
                     uiState = WriteMessageUiState.Success(placeholder.toUi()),
                     button = s.button.copy(loading = true)
@@ -118,7 +118,7 @@ class WriteMessageViewModel @Inject constructor(
                     resourcesProvider.getString(R.string.error_send_data)
                 )
             )
-            _state.update { s ->
+            updateState { s ->
                 s.copy(button = s.button.copy(loading = false, enabled = false))
             }
         }

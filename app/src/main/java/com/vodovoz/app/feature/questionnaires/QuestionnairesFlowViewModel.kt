@@ -51,7 +51,7 @@ class QuestionnairesFlowViewModel @Inject constructor(
 
 
     fun fetchWelcomeDetails() = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(
                 uiState = QuestionnairesUiState.Loading,
                 currentWho = null,
@@ -63,7 +63,7 @@ class QuestionnairesFlowViewModel @Inject constructor(
             vodovozServiceRepository.getQuestionnairesWelcomeDetails().singleResult()
 
         welcomeDetailsResult.onSuccess { welcomeDetails ->
-            _state.update { s ->
+            updateState { s ->
                 s.copy(
                     uiState = QuestionnairesUiState.Welcome(
                         title = welcomeDetails.title,
@@ -75,7 +75,7 @@ class QuestionnairesFlowViewModel @Inject constructor(
                 )
             }
         }.onFailure {
-            _state.update { s ->
+            updateState { s ->
                 s.copy(uiState = QuestionnairesUiState.Error)
             }
         }
@@ -84,7 +84,7 @@ class QuestionnairesFlowViewModel @Inject constructor(
     private fun fetchQuestionnairesDetails() = viewModelScope.launch {
         val currentWho = stateSnapshot.currentWho ?: return@launch
 
-        _state.update { s ->
+        updateState { s ->
             s.copy(uiState = QuestionnairesUiState.Loading)
         }
 
@@ -93,7 +93,7 @@ class QuestionnairesFlowViewModel @Inject constructor(
 
         questionnairesDetailsResult.onSuccess { questionnairesDetails ->
 
-            _state.update { s ->
+            updateState { s ->
                 s.copy(
                     button = questionnairesDetails.button.toUi(),
                     components = questionnairesDetails.items.mapNotNull { it.toUi() },
@@ -166,7 +166,7 @@ class QuestionnairesFlowViewModel @Inject constructor(
     fun checkBirthdayField(component: FieldComponentUi) = viewModelScope.launch {
         if (component.ui.id != "DR") return@launch
 
-        _state.update { s ->
+        updateState { s ->
             s.copy(
                 showDatePicker = true,
                 currentDateField = component
@@ -176,7 +176,7 @@ class QuestionnairesFlowViewModel @Inject constructor(
     }
 
     fun closeDatePicker() = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(showDatePicker = false)
         }
     }
@@ -184,7 +184,7 @@ class QuestionnairesFlowViewModel @Inject constructor(
     private fun mapThenUpdateComponents(
         onComponentChange: QuestionnaireComponentUi.() -> QuestionnaireComponentUi,
     ) {
-        _state.update { s ->
+        updateState { s ->
             s.copy(
                 components = stateSnapshot.components.map { component ->
                     onComponentChange(component)
@@ -207,20 +207,20 @@ class QuestionnairesFlowViewModel @Inject constructor(
     }
 
     private fun showCancelDialog() = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(showCancelDialog = true)
         }
     }
 
     fun closeCancelDialog() = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(showCancelDialog = false)
         }
     }
 
 
     fun activateWelcomeButton(btn: ColorfulButtonUi) = viewModelScope.launch {
-        _state.update { s ->
+        updateState { s ->
             s.copy(currentWho = btn.id)
         }
         fetchQuestionnairesDetails()
@@ -241,7 +241,7 @@ class QuestionnairesFlowViewModel @Inject constructor(
 
         val answers = components.toAnswerString()
 
-        _state.update { s ->
+        updateState { s ->
             s.copy(button = s.button.copy(loading = true))
         }
 
@@ -252,7 +252,7 @@ class QuestionnairesFlowViewModel @Inject constructor(
 
         sendQuestionnairesResult.onSuccess {
             val placeholder = it.toUi()
-            _state.update { s ->
+            updateState { s ->
                 s.copy(
                     uiState = QuestionnairesUiState.Success(placeholder),
                     button = s.button.copy(loading = false)
@@ -269,7 +269,7 @@ class QuestionnairesFlowViewModel @Inject constructor(
                 )
             }
 
-            _state.update { s ->
+            updateState { s ->
                 s.copy(button = s.button.copy(loading = false))
             }
 
@@ -320,7 +320,7 @@ class QuestionnairesFlowViewModel @Inject constructor(
             ui = currentDateField.ui.copy(value = value, isError = false)
         )
 
-        _state.update { s ->
+        updateState { s ->
             s.copy(
                 showDatePicker = false,
                 currentDateField = updatedCurrentDateField,
