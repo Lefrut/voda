@@ -1,5 +1,6 @@
 package com.vodovoz.app.feature.catalog
 
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.viewModelScope
 import com.vodovoz.app.ui.mvi.Event
@@ -103,6 +104,7 @@ class CatalogFlowViewModel @Inject constructor(
         data object ShowSpeechRecognizer : CatalogEvents()
     }
 
+    @Immutable
     data class CatalogState(
         val categories: List<ParentCategoryUi> = emptyList(),
         val banners: List<BannerUi> = emptyList(),

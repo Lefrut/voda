@@ -27,16 +27,21 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkObject
 import io.mockk.spyk
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
+import java.math.BigDecimal
+import java.math.RoundingMode
 import java.time.LocalTime
 import kotlin.reflect.KClass
 import kotlin.time.Duration
@@ -47,11 +52,6 @@ class WaterAppTests : CoroutineTestBase() {
 
 
     /*
-    * Локальное сохранение, удаление, получение:
-    *   параметры пользователя,
-    *   о уведомлениях, данные,
-    *   о выпитой воде сегодня,
-    *   сохранение стадии.
     * Расчет дозировки воды в зависимости от параметров.
     *
     * */
@@ -79,7 +79,8 @@ class WaterAppTests : CoroutineTestBase() {
         moshi = spyk(
             Moshi.Builder()
                 .add(LocalTimeAdapter())
-                .add(DurationAdapter())
+                .add(WaterApp.Stage::class.java, StageAdapter())
+                .add(Duration::class.java, DurationAdapter())
                 .add(KotlinJsonAdapterFactory())
                 .build()
         )
@@ -94,6 +95,181 @@ class WaterAppTests : CoroutineTestBase() {
         )
     }
 
+    @Test
+    fun `save stage`() = runTest {
+        val stage = WaterApp.Stage("1234512321")
+        coEvery { waterAppStorage.saveStage(any()) } returns Unit
+        assertEquals(
+            Result.success(stage.name),
+            waterAppRepository.saveStage(stage)
+        )
+    }
+
+    @Test
+    fun `clear stage`() = runTest {
+        coEvery { waterAppStorage.clearStage() } returns Unit
+
+        assertEquals(Result.success(Unit), waterAppRepository.clearStage())
+    }
+
+    @Test
+    fun `get stage flow`() = runTest {
+        val stage = WaterApp.Stage("zzzzzzzzz")
+
+        coEvery { waterAppStorage.stageFlow } returns flow {
+            emit(stage.name)
+        }
+
+        waterAppRepository.stageFlow.test {
+            assertEquals(stage.name, awaitItem().getOrThrow().name)
+
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+
+    @Test
+    fun stageAdapter_roundtrip_and_null() {
+        val adapter: JsonAdapter<WaterApp.Stage> = moshi.adapter(WaterApp.Stage::class.java)
+
+        // serialize
+        val json = adapter.toJson(WaterApp.Stage("MAIN"))
+        assertEquals("\"MAIN\"", json)
+
+        // deserialize
+        val obj = adapter.fromJson("\"ONBOARDING\"")
+        assertEquals(WaterApp.Stage("ONBOARDING"), obj)
+
+        // null cases
+        assertNull(adapter.fromJson("null"))
+        assertEquals("null", adapter.toJson(null))
+    }
+
+    @Test
+    fun durationAdapter_roundtrip_and_null() {
+        val adapter: JsonAdapter<Duration> = moshi.adapter(Duration::class.java)
+
+        val json = adapter.toJson(2500.milliseconds)
+        assertEquals("2500", json)
+
+        // deserialize
+        val obj = adapter.fromJson("1500")
+        assertEquals(1500.milliseconds, obj)
+
+        assertNull(adapter.fromJson("null"))
+        assertEquals("null", adapter.toJson(null))
+    }
+
+    @Test
+    fun calculateDailyGoal_variousInputs() = runTest {
+        with(WaterApp) {
+            assertEquals(
+                2750,
+                calculateDailyGoal(
+                    man.copy(
+                        weight = 70f,
+                        activityLevel = WaterApp.UserInfo.ActivityLevel.Low
+                    )
+                ).totalMl
+            )
+            assertEquals(
+                2775,
+                calculateDailyGoal(
+                    man.copy(
+                        weight = 65f,
+                        activityLevel = WaterApp.UserInfo.ActivityLevel.Medium
+                    )
+                ).totalMl
+            )
+
+            assertEquals(
+                4400,
+                calculateDailyGoal(
+                    man.copy(
+                        weight = 140f,
+                        activityLevel = WaterApp.UserInfo.ActivityLevel.High
+                    )
+                ).totalMl
+            )
+        }
+    }
+
+    @Test
+    fun `save daily goal`() = runTest {
+        val dailyGoal = WaterApp.DailyGoal.create(1850)
+        coEvery { waterAppStorage.saveDailyGoal(any()) } returns Unit
+
+        assertEquals(Result.success(dailyGoal), waterAppRepository.saveDailyGoal(dailyGoal))
+    }
+
+    @Test
+    fun `get daily goal flow`() = runTest {
+        val dailyGoal = spyk(WaterApp.DailyGoal.create(2550))
+
+        every { dailyGoal.plusMl(any()) } returnsMany listOf(
+            dailyGoal.copy(currentMl = 500),
+            dailyGoal.copy(currentMl = 800)
+        )
+
+        val dailyGoalAfterDrink = dailyGoal.plusMl(500)
+
+        coEvery {
+            waterAppStorage.dailyGoalFlow
+        } returns flow {
+            emit(moshi.toJson(dailyGoal))
+            emit(moshi.toJson(dailyGoalAfterDrink))
+            emit("12321321")
+        }
+        coEvery { waterAppRepository.clearDailyGoal() } returns Result.success(Unit)
+        coEvery { waterAppRepository.userInfoFlow } returns flow {
+            emit(Result.success(man))
+        }
+
+        mockkObject(WaterApp)
+        every { WaterApp.calculateDailyGoal(any()) } returns dailyGoal
+
+        waterAppRepository.dailyGoalFlow.test {
+            assertEquals(Result.success(dailyGoal), awaitItem())
+            assertEquals(Result.success(dailyGoalAfterDrink), awaitItem())
+            assertEquals(Result.success(dailyGoal), awaitItem())
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `clear daily goal`() = runTest {
+        coEvery { waterAppStorage.clearDailyGoal() } returns Unit
+
+        assertEquals(Result.success(Unit), waterAppRepository.clearDailyGoal())
+    }
+
+    @Test
+    fun `get daily goal`() = runTest {
+        val dailyGoal = WaterApp.DailyGoal.create(3000)
+
+        every {
+            waterAppRepository.dailyGoalFlow
+        } returns flow {
+            emit(Result.success(dailyGoal))
+        }
+
+        assertEquals(
+            Result.success(dailyGoal),
+            waterAppRepository.getDailyGoal()
+        )
+    }
+
+    @Test
+    fun `daily goal plus ml`() {
+        val dailyGoal = WaterApp.DailyGoal.create(3000)
+
+        assertEquals(dailyGoal.copy(currentMl = 250), dailyGoal.plusMl(250))
+        assertEquals(dailyGoal, dailyGoal.plusMl(0))
+        assertEquals(
+            dailyGoal.copy(currentMl = 3000, wasCompleted = true),
+            dailyGoal.plusMl(35000)
+        )
+    }
 
     @Test
     fun `get initial notification settings`() = runTest {
@@ -125,8 +301,9 @@ class WaterAppTests : CoroutineTestBase() {
         }
 
         assertEquals(
-            Result.failure<WaterApp.NotificationSettings>(storageIoException),
+            WaterAppRepository.UnknownException::class.java,
             waterAppRepository.saveNotificationSettings(notificationSettings)
+                .exceptionOrNull()?.javaClass
         )
     }
 
@@ -148,7 +325,7 @@ class WaterAppTests : CoroutineTestBase() {
             emit("")
             emit("123456")
             emit(settingsJson)
-            emit("invalid format")
+            throw storageIoException
         }
 
         coEvery {
@@ -171,11 +348,11 @@ class WaterAppTests : CoroutineTestBase() {
                 Result.success(notificationSettings),
                 awaitItem()
             )
-            assertEquals(
-                Result.failure<WaterApp.NotificationSettings>(storageIoException),
-                awaitItem()
-            )
 
+            assertEquals(
+                WaterAppRepository.UnknownException::class.java,
+                awaitItem().exceptionOrNull()?.javaClass
+            )
             cancelAndIgnoreRemainingEvents()
         }
     }
@@ -185,6 +362,16 @@ class WaterAppTests : CoroutineTestBase() {
         coEvery { waterAppStorage.saveUserInfo(any()) } returns Unit
 
         assertEquals(Result.success(girl), waterAppRepository.saveUserInfo(girl))
+    }
+
+    @Test
+    fun `get user info`() = runTest {
+        every { waterAppRepository.userInfoFlow } returnsMany listOf(
+            flow { emit(Result.success(man)) },
+            flow {}
+        )
+        assertEquals(Result.success(man), waterAppRepository.getUserInfo())
+        assertEquals(true, waterAppRepository.getUserInfo().isFailure)
     }
 
     @Test
@@ -243,15 +430,21 @@ class WaterAppTests : CoroutineTestBase() {
 
 
 interface WaterAppStorage {
+    val stageFlow: Flow<String>
     val userInfoFlow: Flow<String>
     val notificationSettingsFlow: Flow<String>
-    suspend fun getNotificationSetting(): String
-    suspend fun getUserInfo(): String
+    val dailyGoalFlow: Flow<String>
 
-    suspend fun clearNotificationSettings()
     suspend fun saveNotificationSettings(notificationSettings: String)
     suspend fun saveUserInfo(userInfo: String)
+    suspend fun saveDailyGoal(dailyGoal: String)
+    suspend fun saveStage(stage: String)
+
     suspend fun clearUserInfo()
+    suspend fun clearDailyGoal()
+    suspend fun clearNotificationSettings()
+    suspend fun clearStage()
+
 }
 
 private val Context.waterAppDataStore by preferencesDataStore(
@@ -265,30 +458,30 @@ class WaterAppStorageImpl(
     private val dataStore get() = context.waterAppDataStore
 
     private fun getDataFlow(key: String) = dataStore.data.map { it[key] ?: "" }
-    private suspend fun getData(key: String) = getDataFlow(key).first()
     private suspend fun editData(key: String, value: String) {
         dataStore.edit { mutablePreferences ->
             mutablePreferences[key] = value
         }
     }
 
+    override val stageFlow: Flow<String>
+        get() = getDataFlow(STAGE)
+
     override val userInfoFlow: Flow<String>
         get() = getDataFlow(USER_INFO_KEY)
 
     override val notificationSettingsFlow: Flow<String>
         get() = getDataFlow(NOTIFICATION_SETTINGS_KEY)
+    override val dailyGoalFlow: Flow<String>
+        get() = getDataFlow(DAILY_GOAL)
 
-
-    override suspend fun getNotificationSetting(): String {
-        return getData(NOTIFICATION_SETTINGS_KEY)
-    }
-
-    override suspend fun getUserInfo(): String {
-        return getData(USER_INFO_KEY)
-    }
 
     override suspend fun clearNotificationSettings() {
         editData(NOTIFICATION_SETTINGS_KEY, "")
+    }
+
+    override suspend fun clearStage() {
+        editData(STAGE, "")
     }
 
     override suspend fun saveNotificationSettings(notificationSettings: String) {
@@ -299,13 +492,27 @@ class WaterAppStorageImpl(
         editData(USER_INFO_KEY, userInfo)
     }
 
+    override suspend fun saveDailyGoal(dailyGoal: String) {
+        editData(DAILY_GOAL, dailyGoal)
+    }
+
+    override suspend fun saveStage(stage: String) {
+        editData(STAGE, stage)
+    }
+
     override suspend fun clearUserInfo() {
         editData(USER_INFO_KEY, "")
+    }
+
+    override suspend fun clearDailyGoal() {
+        editData(DAILY_GOAL, "")
     }
 
     companion object {
         private const val NOTIFICATION_SETTINGS_KEY = "NOTIFICATION_SETTINGS_KEY"
         private const val USER_INFO_KEY = "USER_INFO_KEY"
+        private const val DAILY_GOAL = "DAILY_GOAL"
+        private const val STAGE = "STAGE"
     }
 }
 
@@ -338,40 +545,89 @@ inline operator fun <reified T> MutablePreferences.set(keyName: String, value: T
 interface WaterAppRepository {
 
 
+    val stageFlow: Flow<Result<WaterApp.Stage>>
+    val dailyGoalFlow: Flow<Result<WaterApp.DailyGoal>>
     val userInfoFlow: Flow<Result<WaterApp.UserInfo>>
     val settingsFlow: Flow<Result<WaterApp.NotificationSettings>>
-    suspend fun clearNotificationSettings(): Result<Unit>
+
     suspend fun saveNotificationSettings(
         notificationSettings: WaterApp.NotificationSettings,
     ): Result<WaterApp.NotificationSettings>
 
-    suspend fun getNotificationSettings(): Result<WaterApp.NotificationSettings>
     suspend fun saveUserInfo(userInfo: WaterApp.UserInfo): Result<WaterApp.UserInfo>
+    suspend fun saveDailyGoal(dailyGoal: WaterApp.DailyGoal): Result<WaterApp.DailyGoal>
+
+    suspend fun clearNotificationSettings(): Result<Unit>
     suspend fun clearUserInfo(): Result<Unit>
+    suspend fun clearDailyGoal(): Result<Unit>
+
+    suspend fun getUserInfo(): Result<WaterApp.UserInfo>
+    suspend fun getNotificationSettings(): Result<WaterApp.NotificationSettings>
+    suspend fun getDailyGoal(): Result<WaterApp.DailyGoal>
+    suspend fun saveStage(stage: WaterApp.Stage): Result<WaterApp.Stage>
+    suspend fun clearStage(): Result<Unit>
+
+
+    sealed class Exception : RuntimeException()
+
+    class UnknownException(
+        override val cause: Throwable? = null,
+        override val message: String? = "FormatException",
+    ) : Exception()
+
+    class FormatException(
+        override val cause: Throwable? = null,
+        override val message: String? = "FormatException",
+    ) : Exception()
+
 
 }
 
-class WaterAppRepositoryImpl(
+fun Throwable.toUnknownException(): WaterAppRepository.UnknownException {
+    return WaterAppRepository.UnknownException(cause, message)
+}
+
+open class WaterAppRepositoryImpl(
     private val storage: WaterAppStorage,
-    private val moshi: Moshi,
+    protected val moshi: Moshi,
 ) : WaterAppRepository {
 
     override suspend fun getNotificationSettings(): Result<WaterApp.NotificationSettings> =
-        runCatching {  settingsFlow.first().getOrThrow() }
+        settingsFlow.firstResult()
+
+    override suspend fun getDailyGoal(): Result<WaterApp.DailyGoal> = dailyGoalFlow.firstResult()
+    override suspend fun getUserInfo(): Result<WaterApp.UserInfo> = userInfoFlow.firstResult()
+
 
     override val userInfoFlow: Flow<Result<WaterApp.UserInfo>>
-        get() = getOperation(
-            defaultValue = WaterApp.UserInfo.ManDefault,
-            block = storage::userInfoFlow,
-            onClear = ::clearUserInfo
+        get() = getFlowOperation(
+            defaultValue = { WaterApp.UserInfo.ManDefault },
+            flow = storage.userInfoFlow,
+            onFormatError = ::clearUserInfo
         )
 
 
     override val settingsFlow: Flow<Result<WaterApp.NotificationSettings>>
-        get() = getOperation(
-            defaultValue = WaterApp.NotificationSettings.Default,
-            block = storage::notificationSettingsFlow,
-            onClear = ::clearNotificationSettings
+        get() = getFlowOperation(
+            defaultValue = { WaterApp.NotificationSettings.Default },
+            flow = storage.notificationSettingsFlow,
+            onFormatError = ::clearNotificationSettings
+        )
+    override val stageFlow: Flow<Result<WaterApp.Stage>>
+        get() = getFlowOperation(
+            defaultValue = { WaterApp.Stage("") },
+            flow = storage.stageFlow,
+            onFormatError = ::clearStage
+        )
+
+    override val dailyGoalFlow: Flow<Result<WaterApp.DailyGoal>>
+        get() = getFlowOperation(
+            defaultValue = {
+                val currentInfo = userInfoFlow.firstResult().getOrThrow()
+                WaterApp.calculateDailyGoal(currentInfo)
+            },
+            flow = storage.dailyGoalFlow,
+            onFormatError = ::clearDailyGoal
         )
 
 
@@ -389,12 +645,39 @@ class WaterAppRepositoryImpl(
         block = storage::saveUserInfo
     )
 
-    override suspend fun clearUserInfo(): Result<Unit> = runCatching {
+    override suspend fun saveDailyGoal(
+        dailyGoal: WaterApp.DailyGoal,
+    ): Result<WaterApp.DailyGoal> = saveOperation(
+        data = dailyGoal,
+        block = storage::saveDailyGoal
+    )
+
+    override suspend fun saveStage(
+        stage: WaterApp.Stage,
+    ): Result<WaterApp.Stage> = saveOperation(
+        data = stage,
+        block = storage::saveStage
+    )
+
+
+    override suspend fun clearStage(): Result<Unit> = clearOperation {
+        storage.clearStage()
+    }
+
+    override suspend fun clearUserInfo(): Result<Unit> = clearOperation {
         storage.clearUserInfo()
     }
 
-    override suspend fun clearNotificationSettings(): Result<Unit> = runCatching {
+    override suspend fun clearDailyGoal(): Result<Unit> = clearOperation {
+        storage.clearDailyGoal()
+    }
+
+    override suspend fun clearNotificationSettings(): Result<Unit> = clearOperation {
         storage.clearNotificationSettings()
+    }
+
+    private suspend fun clearOperation(block: suspend () -> Unit) = kotlin.runCatching {
+        block()
     }
 
     private suspend inline fun <reified T : Any> saveOperation(
@@ -404,26 +687,78 @@ class WaterAppRepositoryImpl(
     ): Result<T> = runCatching {
         block(data.toJson())
         data
+    }.recoverCatching {
+        throw it.toUnknownException()
     }
 
-    private inline fun <reified R> getOperation(
-        defaultValue: R,
-        noinline block: () -> Flow<String>,
-        noinline fromJson: (String) -> R = { moshi.fromJson(it) },
-        noinline onClear: suspend () -> Result<*>,
-    ): Flow<Result<R>> = block().map { json ->
-        runCatching {
-            if (json.isBlank()) {
-                defaultValue
-            } else fromJson(json)
-        }.recoverCatching {
-            onClear().getOrThrow()
-            defaultValue
+
+    private inline fun <reified R> getFlowOperation(
+        noinline defaultValue: suspend () -> R,
+        flow: Flow<String>,
+        noinline onFormatError: suspend () -> Unit,
+    ): Flow<Result<R>> {
+        return flow.map { json ->
+            if (json.isBlank()) return@map runCatching {
+                defaultValue()
+            }
+            val data = fromJson<R>(json)
+            data.recoverCatching { t ->
+                if (t is WaterAppRepository.FormatException) {
+                    onFormatError()
+                    defaultValue()
+                } else throw t.toUnknownException()
+            }
+        }.catch { t ->
+            emit(
+                Result.failure(t.toUnknownException())
+            )
         }
+
     }
+
+    protected inline fun <reified R> fromJson(
+        data: String,
+        noinline fromJson: (String) -> R = {
+            moshi.fromJson(it)
+        },
+    ): Result<R> = runCatching {
+        fromJson(data)
+    }.recoverCatching {
+        Result.failure<R>(
+            WaterAppRepository.FormatException(
+                it.cause,
+                it.message
+            )
+        ).getOrThrow()
+    }
+
+
+}
+
+
+suspend inline fun <R> Flow<Result<R>>.firstResult(
+) = runCatching {
+    first().getOrThrow()
 }
 
 data object WaterApp {
+
+    fun calculateDailyGoal(userInfo: UserInfo): DailyGoal {
+        val weight = BigDecimal(userInfo.weight.toDouble())
+        val sport = BigDecimal(userInfo.activityLevel.sport.toDouble())
+
+        val base = BigDecimal("1.5")
+        val coef = BigDecimal("0.02")
+        val thousand = BigDecimal("1000")
+
+        val result = base
+            .add(weight.subtract(BigDecimal("20")).multiply(coef))
+            .add(sport)
+            .multiply(thousand)
+            .setScale(0, RoundingMode.HALF_UP)
+
+        return DailyGoal.create(result.intValueExact())
+    }
 
 
     @Keep
@@ -457,8 +792,8 @@ data object WaterApp {
         }
 
         @Keep
-        enum class ActivityLevel {
-            Low, Medium, High
+        enum class ActivityLevel(val sport: Float) {
+            Low(0.25f), Medium(0.375f), High(0.5f)
         }
 
         companion object {
@@ -468,27 +803,75 @@ data object WaterApp {
 
     }
 
+    @Keep
+    data class DailyGoal(
+        val totalMl: Int,
+        val currentMl: Int,
+        val wasCompleted: Boolean,
+    ) {
+
+        init {
+            require(totalMl > 0 && currentMl >= 0)
+        }
+
+        fun plusMl(ml: Int): DailyGoal {
+            val newCurrentMl = (currentMl + ml).coerceAtMost(totalMl)
+            return DailyGoal(totalMl, newCurrentMl, wasCompleted || newCurrentMl >= totalMl)
+        }
+
+        companion object {
+            fun create(totalMl: Int) = DailyGoal(
+                totalMl,
+                0,
+                false
+            )
+        }
+
+
+    }
+
+    @JvmInline
+    @Keep
+    value class Stage(val name: String)
+
 }
 
-class DurationAdapter : JsonAdapter<Duration>() {
+abstract class NullableAdapter<T> : JsonAdapter<T>() {
+
+    abstract fun parse(reader: JsonReader): T
+    abstract fun serialize(writer: JsonWriter, value: T)
 
     @FromJson
-    override fun fromJson(reader: JsonReader): Duration? {
+    final override fun fromJson(reader: JsonReader): T? {
         return if (reader.peek() == JsonReader.Token.NULL) {
             reader.nextNull<Unit>()
             null
-        } else {
-            reader.nextLong().milliseconds
-        }
+        } else parse(reader)
     }
 
     @ToJson
-    override fun toJson(writer: JsonWriter, value: Duration?) {
+    final override fun toJson(writer: JsonWriter, value: T?) {
         if (value == null) {
             writer.nullValue()
-        } else {
-            writer.value(value.inWholeMilliseconds)
-        }
+        } else serialize(writer, value)
+    }
+}
+
+class StageAdapter : NullableAdapter<WaterApp.Stage>() {
+    override fun parse(reader: JsonReader): WaterApp.Stage =
+        WaterApp.Stage(reader.nextString())
+
+    override fun serialize(writer: JsonWriter, value: WaterApp.Stage) {
+        writer.value(value.name)
+    }
+}
+
+class DurationAdapter : NullableAdapter<Duration>() {
+    override fun parse(reader: JsonReader): Duration =
+        reader.nextLong().milliseconds
+
+    override fun serialize(writer: JsonWriter, value: Duration) {
+        writer.value(value.inWholeMilliseconds)
     }
 }
 

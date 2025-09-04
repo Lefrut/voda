@@ -1,13 +1,11 @@
 package com.vodovoz.app.feature.profile.waterapp
 
-import android.telephony.AvailableNetworkInfo.Builder
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.viewModelScope
 import com.vodovoz.app.ui.mvi.Event
 import com.vodovoz.app.ui.mvi.MviViewModel
 import com.vodovoz.app.ui.mvi.State
-import kotlinx.coroutines.flow.update
 import com.vodovoz.app.feature.profile.waterapp.model.ReminderIntervalUi
 import com.vodovoz.app.feature.profile.waterapp.model.WaterAppActivityLevel
 import com.vodovoz.app.feature.profile.waterapp.model.WaterAppUiState
@@ -153,7 +151,7 @@ class WaterAppViewModel @Inject constructor(
     }
 
 
-    fun saveSettingsNotifications() = viewModelScope.launch {
+    fun saveNotificationSettings() = viewModelScope.launch {
         waterAppHelper.setNotificationFirstShow()
         waterAppHelper.saveWaterAppNotificationData()
         waterAppHelper.saveUserData()

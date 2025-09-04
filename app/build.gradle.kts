@@ -198,4 +198,7 @@ dependencies {
     implementation("com.google.android.play:app-update-ktx:2.1.0")
 
     implementation("com.github.TalbotGooday:Android-Oembed-Video:0.2.8")
+
+    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
+    implementation("androidx.navigation:navigation-compose:2.8.9")
 }
