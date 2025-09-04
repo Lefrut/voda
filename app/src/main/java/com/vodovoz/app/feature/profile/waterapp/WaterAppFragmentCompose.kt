@@ -196,7 +196,7 @@ class WaterAppFragment : Fragment() {
                                         viewModel.checkHaveNotifications()
                                     },
                                     onSettingsSaveClick = {
-                                        viewModel.saveSettingsNotifications()
+                                        viewModel.saveNotificationSettings()
                                     },
                                     onCloseClick = {
                                         viewModel.goToWaterApp()

@@ -4,6 +4,7 @@
     android:id="@+id/graph_profile"
     app:startDestination="@id/profileFragment">
 
+
     <fragment
         android:id="@+id/writeMessageFragment"
         android:name="com.vodovoz.app.feature.write_message.WriteMessageFragment"

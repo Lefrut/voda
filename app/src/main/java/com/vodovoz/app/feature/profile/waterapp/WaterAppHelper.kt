@@ -106,6 +106,7 @@ class WaterAppHelper @Inject constructor(
         val data = waterAppUserDataListener.value
         val json = userDataJsonAdapter.toJson(data)
 
+
         dataStorePrefs.putString(WATER_APP_USER_DATA, json)
     }
 
@@ -354,6 +355,7 @@ class WaterAppHelper @Inject constructor(
         val currentLevel: Int = 0,
         val lastSavedDate: Long = 0,
         val canFill: Boolean = true,
+        val wasCompleted: Boolean = false
     )
 
 }
