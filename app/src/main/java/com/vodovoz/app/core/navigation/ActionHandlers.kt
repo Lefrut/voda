@@ -13,12 +13,12 @@ import com.vodovoz.app.common.model.VodovozAction
 import com.vodovoz.app.common.tab.TabManager
 import com.vodovoz.app.core.network.VodovozWebConfig
 
-fun DataAllAction.activate(
+inline fun<reified T: DataAllAction> T.activate(
     navController: NavController,
     tabManager: TabManager,
     activators: List<DataAllActionActivator> = emptyList(),
 ) {
-    val currentActivator = activators.firstOrNull { it.action == this }
+    val currentActivator = activators.firstOrNull { (it.action as? T) != null }
 
     if (currentActivator != null) {
         currentActivator.activate()
@@ -101,14 +101,14 @@ fun ButtonAction.activate(
     }
 }
 
-fun VodovozAction.activate(
+inline fun <reified T : VodovozAction> T.activate(
     navController: NavController,
     context: Context,
     cookie: String,
     tabManager: TabManager,
     activators: List<VodovozActionActivator> = emptyList(),
 ) {
-    val currentActivator = activators.firstOrNull { it.action == this }
+    val currentActivator = activators.firstOrNull { (it.action as? T) != null }
 
     if (currentActivator != null) {
         currentActivator.activate()
@@ -168,7 +168,7 @@ fun VodovozAction.activate(
     }
 }
 
-open class Activator<out T>(
+open class Activator<out T : VodovozAction>(
     val action: T,
     private val activate: (T) -> Unit,
 ) {
@@ -180,12 +180,12 @@ open class Activator<out T>(
     }
 
     override fun hashCode(): Int {
-        return action?.hashCode() ?: 0
+        return action.hashCode()
     }
 
 }
 
-inline fun <reified T> createActivator(
+inline fun <reified T : VodovozAction> createActivator(
     action: T,
     noinline activate: (T) -> Unit,
 ): Activator<T> {

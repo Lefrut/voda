@@ -19,7 +19,6 @@ import kotlinx.coroutines.flow.update
 
 abstract class MviViewModel<STATE, EVENT>(state: STATE) : ViewModel() {
 
-
     private val _state = MutableStateFlow(state)
 
     @Stable

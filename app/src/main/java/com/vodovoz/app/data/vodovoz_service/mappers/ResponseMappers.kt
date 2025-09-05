@@ -3,7 +3,7 @@ package com.vodovoz.app.data.vodovoz_service.mappers
 import androidx.annotation.Keep
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
-import com.vodovoz.app.core.network.converters.LocalDateTimeJsonAdapter
+import com.vodovoz.app.common.moshi.adapter.LocalDateTimeJsonAdapter
 import com.vodovoz.app.core.network.retrofit.messageWithCode
 import com.vodovoz.app.core.network.retrofit.stringBody
 import com.vodovoz.app.core.network.retrofit.stringErrorBody
@@ -39,7 +39,10 @@ fun String.jsonToResponseBody(): ResponseBody {
 
 val moshiWithJsonAdapter: Moshi =
     Moshi.Builder()
-        .add(LocalDateTime::class.java, LocalDateTimeJsonAdapter().nullSafe())
+        .add(
+            LocalDateTime::class.java,
+            LocalDateTimeJsonAdapter().nullSafe()
+        )
         .add(KotlinJsonAdapterFactory())
         .build()
 

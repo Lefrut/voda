@@ -3,7 +3,7 @@ package com.vodovoz.app.core.network.di
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import com.vodovoz.app.BuildConfig
-import com.vodovoz.app.core.network.converters.LocalDateTimeJsonAdapter
+import com.vodovoz.app.common.moshi.adapter.LocalDateTimeJsonAdapter
 import com.vodovoz.app.core.network.interceptor.BaseUrlInterceptor
 import com.vodovoz.app.core.network.interceptor.BlockAppInterceptor
 import com.vodovoz.app.core.network.interceptor.CookieHandlerInterceptor
