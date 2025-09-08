@@ -5,4 +5,8 @@ import androidx.compose.runtime.Immutable
 @Immutable
 data class WaterStepUi(
     val ml: Int
-)
+){
+    companion object{
+        val Default250 = WaterStepUi(250)
+    }
+}

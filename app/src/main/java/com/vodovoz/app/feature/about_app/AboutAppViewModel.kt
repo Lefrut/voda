@@ -23,8 +23,6 @@ class AboutAppViewModel @Inject constructor(
     private val baseUrlInterceptor: BaseUrlInterceptor,
 ) : MviViewModel<AboutAppState, AboutAppEvent>(AboutAppState()) {
 
-    fun fetchUserId() = accountManager.fetchAccountId()
-
     fun navigateBack() = viewModelScope.launch {
         sendEvent(AboutAppEvent.GoBack)
     }
@@ -77,7 +75,7 @@ class AboutAppViewModel @Inject constructor(
             }
 
             AppMode.Prod -> {
-                baseUrlInterceptor.clear()
+                baseUrlInterceptor.updateBaseUrl("https://m.vodovoz.ru/")
             }
         }
         updateState { s ->

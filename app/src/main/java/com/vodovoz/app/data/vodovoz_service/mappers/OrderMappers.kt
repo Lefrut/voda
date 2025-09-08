@@ -365,7 +365,8 @@ fun OrderQuestionDetailsDTO.toDomain(): FormModel {
         description = INFORMIROVANIE ?: "",
         fields = LISTADATA?.mapToDomain() ?: emptyList(),
         button = KNOPKA?.toDomain()
-            ?: throw IllegalArgumentException("Order question details can't be null")
+            ?: throw IllegalArgumentException("Order question details can't be null"),
+        checkbox = null
     )
 }
 
@@ -439,7 +440,7 @@ fun ORDER_DETAILS_KNOPKA_DTO.toDomain(): OrderDetailsButtonModel {
         popupWindow = OKNO?.toDomain(),
         backgroundColor = COLOR_BACKGROUND ?: "",
         textColor = COLOR_TEXT ?: "",
-        url = URL?.toVodovozUrl() ?: "",
+        url = URL ?: "",
         browser = (BRAYZER == "Y").takeIf { useBrowser -> useBrowser },
         driverId = VODITEL,
         isSmall = KNOPKASTYLE == "low"

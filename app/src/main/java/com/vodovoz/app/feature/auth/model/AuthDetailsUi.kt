@@ -1,8 +1,9 @@
 package com.vodovoz.app.feature.auth.model
 
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
-import com.vodovoz.app.ui.mvi.State
+import com.vodovoz.app.common.model.GlobalAppExtraAgreement
 import com.vodovoz.app.design_system.model.ColorfulButtonUi
 import com.vodovoz.app.design_system.model.mapToUi
 import com.vodovoz.app.design_system.model.widgets.CheckboxUi
@@ -15,6 +16,7 @@ import com.vodovoz.app.design_system.model.widgets.PhoneNumberValidator
 import com.vodovoz.app.design_system.model.widgets.mapToUi
 import com.vodovoz.app.domain.general.model.user.AuthDetailsModel
 import com.vodovoz.app.feature.auth.model.AuthDetailsUi.Companion.AGREEMENT_CHECKBOX_ID
+import com.vodovoz.app.ui.mvi.State
 
 @Immutable
 data class AuthDetailsUi(
@@ -24,6 +26,12 @@ data class AuthDetailsUi(
     val buttons: List<ColorfulButtonUi>,
     val checkboxes: List<CheckboxUi>,
 ) {
+
+    val extraAgreementText: String
+        @Composable
+        get() = GlobalAppExtraAgreement.html
+
+
     companion object {
         val Empty = AuthDetailsUi(
             title = "",
@@ -67,7 +75,9 @@ fun AuthDetailsModel.toUi(agreement: String): AuthDetailsUi {
         name = agreement,
         id = AGREEMENT_CHECKBOX_ID,
         checked = agreementChecked ?: false,
-        isRequired = true
+        isRequired = true,
+        //todo - backed
+        urlTitles = emptyList()
     )
 
     return AuthDetailsUi(

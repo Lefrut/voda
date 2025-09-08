@@ -1669,11 +1669,11 @@ class VodovozServiceRepositoryImpl @Inject constructor(
         )
     }
 
-    override fun getPreorderFields(productId: Long): Flow<Result<FormModel>> {
+    override fun getPreorderDetails(productId: Long): Flow<Result<FormModel>> {
         return executeRequest(
             request = {
                 val userId = accountManager.fetchAccountId() ?: -1L
-                vodovozService.getPreOrderFields(userId, productId)
+                vodovozService.getPreOrderDetails(userId, productId)
             },
             mapper = {
                 it.data?.toDomain() ?: throw IllegalArgumentException("PreorderDTO can't be null")

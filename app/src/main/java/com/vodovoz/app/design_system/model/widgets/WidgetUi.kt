@@ -115,7 +115,7 @@ class SingleCheckboxGroupUpdater : WidgetUpdater {
 }
 
 
-class WidgetUpdaterHandler(
+class WidgetUpdaterKeeper(
     private val updaters: List<WidgetUpdater> = listOf(
         FieldWidgetUpdater(),
         SwitchWidgetUpdater(),

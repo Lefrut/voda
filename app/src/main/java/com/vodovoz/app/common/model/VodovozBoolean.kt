@@ -31,13 +31,9 @@ fun String.toVodovozBoolean(): VodovozBoolean? {
 
 fun VodovozBoolean.Companion.from(value: String?): VodovozBoolean {
     return when (value) {
-        True.value -> {
-            True
-        }
+        True.value -> { True }
 
-        else -> {
-            False
-        }
+        else -> { False }
     }
 }
 

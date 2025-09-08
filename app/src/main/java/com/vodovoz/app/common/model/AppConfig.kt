@@ -10,6 +10,7 @@ data class AppConfig(
     val jivoChat: JivoChat,
     val tracking: TrackingInfo,
     val agreement: Agreement,
+    val extraAgreement: Agreement,
     val data: BlockSiteInfo?,
     val callPhoneNumber: String,
     val geocoderKey: String,
@@ -26,7 +27,8 @@ data class AppConfig(
             takePhotos = false,
             jivoChat = JivoChat(false, ""),
             tracking = TrackingInfo(false, 30),
-            agreement = Agreement("", emptyList()),
+            agreement = Agreement.Empty,
+            extraAgreement = Agreement.Empty,
             callPhoneNumber = "",
             data = null,
             geocoderKey = "",
@@ -46,7 +48,11 @@ data class JivoChat(
 data class Agreement(
     val html: String,
     val titles: List<String>,
-)
+){
+    companion object{
+        val Empty = Agreement("", emptyList())
+    }
+}
 
 data class TrackingInfo(
     val trackingIsEnabled: Boolean,
@@ -70,6 +76,7 @@ data class BlockSiteContact(
 )
 
 var GlobalAppLinks: AppLinks = AppLinks.Empty
+var GlobalAppExtraAgreement: Agreement = Agreement.Empty
 
 data class AppLinks(
     val policy: AppLink,

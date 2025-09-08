@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.vodovoz.app.design_system.composables.checkbox.VodovozCheckbox
 import com.vodovoz.app.design_system.composables.checkbox.VodovozSingleCheckboxColumn
 import com.vodovoz.app.design_system.composables.radio_button.VodovozRadioButtonColumn
 import com.vodovoz.app.design_system.composables.swich.VodovozSwitch
@@ -20,7 +21,8 @@ import com.vodovoz.app.design_system.model.widgets.WidgetUi
 fun VodovozWidget(
     modifier: Modifier = Modifier,
     widget: WidgetUi,
-    onWidgetChange: (WidgetUi, WidgetUi) -> Unit,
+    onWidgetChange: (widget: WidgetUi, updatedWidget: WidgetUi) -> Unit,
+    onUrlClick: (url: String, title: String) -> Unit = { _, _ -> },
 ) {
     Box(modifier = modifier) {
         when (widget) {
@@ -48,7 +50,11 @@ fun VodovozWidget(
             }
 
             is CheckboxUi -> {
-                //todo
+                VodovozCheckbox(
+                    checkbox = widget,
+                    onCheckboxClick = onWidgetChange,
+                    onUrlClick = onUrlClick
+                )
             }
         }
     }

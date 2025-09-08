@@ -6,9 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.vodovoz.app.R
 import com.vodovoz.app.common.account.AccountManager
 import com.vodovoz.app.common.agreement.AgreementController
-import com.vodovoz.app.ui.mvi.Event
-import com.vodovoz.app.ui.mvi.MviViewModel
-import kotlinx.coroutines.flow.update
+import com.vodovoz.app.common.model.GlobalAppExtraAgreement
 import com.vodovoz.app.common.resources.ResourcesProvider
 import com.vodovoz.app.design_system.model.ColorfulButtonUi
 import com.vodovoz.app.design_system.model.updateButton
@@ -26,6 +24,9 @@ import com.vodovoz.app.feature.auth.model.agreementIsCheckedWhenAvailable
 import com.vodovoz.app.feature.auth.model.authValidators
 import com.vodovoz.app.feature.auth.model.toUi
 import com.vodovoz.app.feature.sitestate.SiteStateManager
+import com.vodovoz.app.ui.mvi.Event
+import com.vodovoz.app.ui.mvi.MviViewModel
+import com.vodovoz.app.util.extensions.extractLinksFromHtml
 import com.vodovoz.app.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
@@ -173,12 +174,8 @@ class LoginFlowViewModel @Inject constructor(
     }
 
     fun changeField(field: FieldUi, updatedField: FieldUi) = viewModelScope.launch {
-
-
         updateState { s ->
-
             val updatedFields = s.fields.updateFieldAndResetError(field, updatedField)
-
             s.copy(
                 authDetails = s.authDetails.copy(
                     fields = updatedFields,
@@ -188,10 +185,8 @@ class LoginFlowViewModel @Inject constructor(
                                     && s.checkboxes.agreementIsCheckedWhenAvailable()
                         )
                     }
-                ),
+                )
             )
-
-
         }
 
         updateState { s ->
@@ -205,7 +200,21 @@ class LoginFlowViewModel @Inject constructor(
     }
 
     fun openAgreementUrl(url: String, index: Int) = viewModelScope.launch {
-        val title = AgreementController.getTitle(index) ?: ""
+        val title = when {
+            AgreementController.getText().extractLinksFromHtml().contains(url) -> {
+                AgreementController.getTitle(index)
+            }
+
+            GlobalAppExtraAgreement.html.extractLinksFromHtml().contains(url) -> {
+                GlobalAppExtraAgreement.titles.getOrNull(index)
+            }
+
+            else -> {
+                null
+            }
+        } ?: resourcesProvider.getString(R.string.space)
+
+
         sendEvent(LoginEvents.GoToWebView(url, title))
     }
 

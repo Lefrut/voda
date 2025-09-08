@@ -35,7 +35,8 @@ fun SiteStateResponseDTO.toDomain(): AppConfig {
             trackingIsEnabled = false,
             time = 0
         ),
-        agreement = SOGLASHENIE?.toAgreementModel() ?: Agreement("", emptyList()),
+        agreement = SOGLASHENIE?.toAgreementModel() ?: Agreement.Empty,
+        extraAgreement = SOGLASHENIE_TEXT?.toAgreementModel() ?: Agreement.Empty,
         takePhotos = COMMENTFILES ?: false,
         callPhoneNumber = CALL ?: "",
         data = DATA?.toDomain(),
@@ -104,6 +105,6 @@ fun GENERATION_DTO.toTrackingConfig(): TrackingInfo {
 fun SOGLASHENIE_DTO.toAgreementModel(): Agreement {
     return Agreement(
         html = TEXT ?: "",
-        titles = ZAGOLOVOKi?.mapNotNull { it } ?: emptyList()
+        titles = ZAGOLOVOKi ?: ZAGOLOVOK ?: emptyList()
     )
 }

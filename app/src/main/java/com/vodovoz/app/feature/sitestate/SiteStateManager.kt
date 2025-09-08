@@ -3,6 +3,7 @@ package com.vodovoz.app.feature.sitestate
 import com.vodovoz.app.common.agreement.AgreementController
 import com.vodovoz.app.common.jivochat.JivoChatController
 import com.vodovoz.app.common.model.AppConfig
+import com.vodovoz.app.common.model.GlobalAppExtraAgreement
 import com.vodovoz.app.common.model.GlobalAppLinks
 import com.vodovoz.app.data.parser.common.safeString
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
@@ -35,6 +36,7 @@ class SiteStateManager @Inject constructor(
 
         siteStateResult.onSuccess { siteState ->
             GlobalAppLinks = siteState.appLinks
+            GlobalAppExtraAgreement = siteState.extraAgreement
             val siteAgreement = siteState.agreement
             val jivoChat = siteState.jivoChat
 

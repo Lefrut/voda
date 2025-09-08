@@ -20,24 +20,20 @@ import com.vodovoz.app.design_system.model.widgets.SwitchUi
 import com.vodovoz.app.design_system.model.widgets.SwitchWidgetUpdater
 import com.vodovoz.app.design_system.model.widgets.WidgetUi
 import com.vodovoz.app.design_system.model.widgets.WidgetUpdater
-import com.vodovoz.app.design_system.model.widgets.WidgetUpdaterHandler
+import com.vodovoz.app.design_system.model.widgets.WidgetUpdaterKeeper
 import com.vodovoz.app.design_system.model.widgets.checkFields
 import com.vodovoz.app.design_system.model.widgets.mapToUi
 import com.vodovoz.app.design_system.model.widgets.toUi
-import com.vodovoz.app.domain.general.respository.MapServiceRepository
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.feature.addresses.add.model.AddAddressEvent
 import com.vodovoz.app.feature.addresses.add.model.AddAddressState
 import com.vodovoz.app.feature.addresses.add.model.AddAddressUiState
 import com.vodovoz.app.feature.map.model.MapAddressUi
 import com.vodovoz.app.feature.map.model.toDomain
-import com.vodovoz.app.feature.map.model.toUi
 import com.vodovoz.app.ui.mvi.MviViewModel
 import com.vodovoz.app.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -104,18 +100,17 @@ class AddAddressViewModel @Inject constructor(
         navigateBack()
     }
 
-    private fun getWidgetIdsAndValues(): Map<String, String> {
-        return (stateSnapshot.linearSwitches.associate { w ->
+    private fun getWidgetIdsAndValues(): Map<String, String> = with(stateSnapshot) {
+        return (linearSwitches.associate { w ->
             w.id to VodovozBoolean.from(w.value()).boolean.toString()
-        } + stateSnapshot.linearFields.associate { w ->
+        } + linearFields.associate { w ->
             w.id to w.value()
-        } + stateSnapshot.gridFields.associate { w ->
+        } + gridFields.associate { w ->
             w.id to w.value()
-        } + with(stateSnapshot.addressField) { id to (stateSnapshot.mapAddress?.name ?: value()) })
+        } + with(addressField) { id to (mapAddress?.name ?: value()) })
     }
 
     fun addAddress() = viewModelScope.launch {
-
         val mapAddress = stateSnapshot.mapAddress ?: return@launch
 
         stateSnapshot.gridFields.checkFields(
@@ -248,7 +243,7 @@ class AddAddressViewModel @Inject constructor(
 
     }
 
-    private val widgetUpdaterHandler = WidgetUpdaterHandler(
+    private val widgetUpdaterKeeper = WidgetUpdaterKeeper(
         updaters = listOf(
             addressTypesSwitchUpdater,
             FieldWidgetUpdater(
@@ -265,19 +260,19 @@ class AddAddressViewModel @Inject constructor(
     )
 
     fun changeWidget(widget: WidgetUi, updatedWidget: WidgetUi) {
-        val updatedLinearFields = widgetUpdaterHandler.updateWidget(
+        val updatedLinearFields = widgetUpdaterKeeper.updateWidget(
             widgets = stateSnapshot.linearFields,
             widget = widget,
             updatedWidget = updatedWidget
         ).filterIsInstance<FieldUi>()
 
-        val updatedSwitches = widgetUpdaterHandler.updateWidget(
+        val updatedSwitches = widgetUpdaterKeeper.updateWidget(
             widgets = stateSnapshot.linearSwitches,
             widget = widget,
             updatedWidget = updatedWidget
         ).filterIsInstance<SwitchUi>()
 
-        val updatedGridFields = widgetUpdaterHandler.updateWidget(
+        val updatedGridFields = widgetUpdaterKeeper.updateWidget(
             widgets = stateSnapshot.gridFields,
             widget = widget,
             updatedWidget = updatedWidget

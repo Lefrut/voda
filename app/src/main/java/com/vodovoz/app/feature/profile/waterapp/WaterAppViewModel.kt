@@ -9,7 +9,6 @@ import com.vodovoz.app.feature.profile.waterapp.model.ReminderIntervalUi
 import com.vodovoz.app.feature.profile.waterapp.model.WaterAppActivityLevel
 import com.vodovoz.app.feature.profile.waterapp.model.WaterAppUiState
 import com.vodovoz.app.feature.profile.waterapp.model.WaterStepUi
-import com.vodovoz.app.feature.profile.waterapp.model.mapToReminderIntervalUi
 import com.vodovoz.app.feature.profile.waterapp.model.toStage
 import com.vodovoz.app.ui.mvi.Event
 import com.vodovoz.app.ui.mvi.MviViewModel
@@ -310,7 +309,7 @@ class WaterAppViewModel @Inject constructor(
             -1 -> currentWaterStep
             in 1..waterStepLevels.lastIndex -> waterStepLevels.getOrNull(newIndex(currentIndex))
             else -> currentWaterStep
-        } ?: WaterStepUi(250)
+        } ?: WaterStepUi.Default250
 
         updateState { s -> s.copy(changeWaterStep = newWaterStep) }
     }
@@ -341,7 +340,7 @@ class WaterAppViewModel @Inject constructor(
         val uiState: WaterAppUiState = WaterAppUiState.Loading,
         val completeSettings: Boolean = false,
         val reminderIntervals: List<ReminderIntervalUi> = WaterAppUiState.Settings.reminderIntervals,
-        val changeWaterStep: WaterStepUi = WaterStepUi(250),
+        val changeWaterStep: WaterStepUi = WaterStepUi.Default250,
         val showNotificationSettingsDialog: Boolean = false,
     ) : State
 

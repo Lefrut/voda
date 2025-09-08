@@ -13,12 +13,13 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import com.vodovoz.app.ui.mvi.collectAsState
 import androidx.navigation.fragment.findNavController
+import com.vodovoz.app.core.navigation.navigateToWebView
 import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.composables.placeholders.LoadingPlaceholder
 import com.vodovoz.app.design_system.composables.placeholders.NetworkErrorPlaceholder
 import com.vodovoz.app.design_system.effects.LifecycleEffect
+import com.vodovoz.app.ui.mvi.collectAsState
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.withTimeoutOrNull
 
@@ -84,6 +85,10 @@ class PreOrderFragment : Fragment() {
                                             duration = SnackbarDuration.Indefinite
                                         )
                                     }
+                                }
+
+                                is PreOrderFlowViewModel.PreOrderEvent.GoToWebView -> {
+                                    findNavController().navigateToWebView(event.url, event.title)
                                 }
                             }
                         }

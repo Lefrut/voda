@@ -31,14 +31,13 @@ class WaterAppHelper @Inject constructor(
     companion object {
         private const val TIME_FORMAT = "HH:mm"
         val timeFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern(TIME_FORMAT)
-        private const val WATER_WORK_MANAGER_TAG = "water_work_manager"
+        private const val WATER_WORK_MANAGER_TAG = "water"
     }
 
 
     fun runOrCancelWorkManager(
         notificationSettings: WaterApp.NotificationSettings,
     ) {
-
         val workManager = WorkManager.getInstance(context)
         workManager.cancelAllWorkByTag(WATER_WORK_MANAGER_TAG)
 
