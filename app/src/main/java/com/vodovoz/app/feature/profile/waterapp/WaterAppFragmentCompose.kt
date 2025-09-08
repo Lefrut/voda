@@ -10,12 +10,6 @@ import android.view.ViewGroup
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.togetherWith
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.ComposeView
@@ -25,12 +19,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import com.vodovoz.app.ui.mvi.collectAsState
 import androidx.navigation.fragment.findNavController
 import com.vodovoz.app.R
 import com.vodovoz.app.common.tab.TabManager
 import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.composables.dialogs.VodovozDialog
+import com.vodovoz.app.design_system.composables.placeholders.LoadingPlaceholder
 import com.vodovoz.app.design_system.effects.AppearanceSystemBarsEffect
 import com.vodovoz.app.design_system.effects.LifecycleEffect
 import com.vodovoz.app.feature.profile.waterapp.composables.WaterAppBottleScreen
@@ -39,8 +33,11 @@ import com.vodovoz.app.feature.profile.waterapp.composables.WaterAppGoalScreen
 import com.vodovoz.app.feature.profile.waterapp.composables.WaterAppSettingsScreen
 import com.vodovoz.app.feature.profile.waterapp.composables.WaterAppUserDataScreen
 import com.vodovoz.app.feature.profile.waterapp.composables.WaterAppWelcomeScreen
+import com.vodovoz.app.feature.profile.waterapp.composables.goalCompletedTransition
+import com.vodovoz.app.feature.profile.waterapp.composables.waterAppTransition
 import com.vodovoz.app.feature.profile.waterapp.model.WaterAppUiState
 import com.vodovoz.app.ui.insets.InsetsVisibilityState
+import com.vodovoz.app.ui.mvi.collectAsState
 import com.vodovoz.app.util.extensions.openAppNotificationSettings
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
@@ -79,12 +76,6 @@ class WaterAppFragment : Fragment() {
             activity?.shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS) == true
         else false
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        waterAppHelper.fetchWaterAppUserData()
-        waterAppHelper.fetchWaterAppNotificationData()
-        waterAppHelper.fetchWaterAppRateData()
-    }
 
     override fun onStart() {
         super.onStart()
@@ -97,7 +88,6 @@ class WaterAppFragment : Fragment() {
 
     override fun onStop() {
         super.onStop()
-        waterAppHelper.saveWaterAppRateData()
         insertVisibilityState.consumeSystemBarInsets(true)
         tabManager.changeTabVisibility(true)
     }
@@ -116,7 +106,7 @@ class WaterAppFragment : Fragment() {
 
                     val context = LocalContext.current
                     val viewState by viewModel.collectAsState()
-                    
+
                     val notificationPermissionLauncher = rememberLauncherForActivityResult(
                         contract = ActivityResultContracts.RequestPermission()
                     ) { isGranted ->
@@ -129,28 +119,22 @@ class WaterAppFragment : Fragment() {
                         targetState = viewState.uiState,
                         label = "Animated Water app screens",
                         transitionSpec = {
-                            if (targetState == WaterAppUiState.GoalCompleted) {
-                                fadeIn(
-                                    tween(300, 0, LinearEasing),
-                                    0.6f
-                                ) togetherWith fadeOut(tween(300, 0, LinearEasing), 0f)
-                            } else (fadeIn(animationSpec = tween(220, delayMillis = 90)) +
-                                    scaleIn(
-                                        initialScale = 0.92f,
-                                        animationSpec = tween(220, delayMillis = 90)
-                                    ))
-                                .togetherWith(fadeOut(animationSpec = tween(90)))
+                            if (targetState == WaterAppUiState.GoalCompleted){
+                                goalCompletedTransition()
+                            }
+                            else waterAppTransition()
                         },
                         contentKey = { targetState ->
-                            if (targetState is WaterAppUiState.UserData) {
-                                "UserData"
-                            } else targetState.toString()
+                            val key: Any = if (targetState is WaterAppUiState.UserData) {
+                                WaterAppUiState.UserData
+                            } else targetState
+                            key.toString()
                         }
                     ) { uiState ->
                         when (uiState) {
                             WaterAppUiState.GoalCompleted -> {
                                 WaterAppGoalCompletedScreen(
-                                    goal = viewState.rateData.rate,
+                                    goal = viewState.dailyGoal.totalMl,
                                     onCloseClick = {
                                         viewModel.navigateBack()
                                     }
@@ -159,8 +143,8 @@ class WaterAppFragment : Fragment() {
 
                             WaterAppUiState.Main -> {
                                 WaterAppBottleScreen(
-                                    maxLevel = viewState.rateData.rate,
-                                    currentLevel = viewState.rateData.currentLevel,
+                                    maxLevel = viewState.dailyGoal.totalMl,
+                                    currentLevel = viewState.dailyGoal.currentMl,
                                     changeWaterStep = viewState.changeWaterStep,
                                     onBackClick = {
                                         viewModel.navigateBack()
@@ -169,7 +153,7 @@ class WaterAppFragment : Fragment() {
                                         viewModel.goToSettings()
                                     },
                                     onProgressChanged = { progress ->
-                                        viewModel.changeWaterLevel(progress)
+                                        viewModel.setWaterLevel(progress)
                                     },
                                     onMinusClick = {
                                         viewModel.subtractChangeWaterStep()
@@ -185,10 +169,10 @@ class WaterAppFragment : Fragment() {
 
                             WaterAppUiState.Settings -> {
                                 WaterAppSettingsScreen(
-                                    haveNotifications = viewState.notificationData.switch,
                                     intervals = viewState.reminderIntervals,
-                                    userData = viewState.userData,
-                                    showParameters = viewState.notificationData.firstShow,
+                                    userInfo = viewState.userInfo,
+                                    notificationSettings = viewState.notificationSettings,
+                                    showParameters = viewState.completeSettings,
                                     onReminderIntervalClick = { reminderInterval ->
                                         viewModel.selectReminderInterval(reminderInterval)
                                     },
@@ -199,7 +183,7 @@ class WaterAppFragment : Fragment() {
                                         viewModel.saveNotificationSettings()
                                     },
                                     onCloseClick = {
-                                        viewModel.goToWaterApp()
+                                        viewModel.goToMainStage()
                                     },
                                     onEditUserData = { stage ->
                                         viewModel.goToUserDataStage(stage)
@@ -225,8 +209,9 @@ class WaterAppFragment : Fragment() {
                             is WaterAppUiState.UserData -> {
                                 WaterAppUserDataScreen(
                                     userDataStage = uiState,
-                                    userData = viewState.userData,
-                                    showParameters = viewState.notificationData.started && viewState.notificationData.firstShow,
+                                    userInfo = viewState.userInfo,
+                                    notificationSettings = viewState.notificationSettings,
+                                    hideTopBar = viewState.completeSettings,
                                     onGenderSelect = { isMan ->
                                         viewModel.selectGender(isMan)
                                     },
@@ -245,14 +230,14 @@ class WaterAppFragment : Fragment() {
                                     onActivityLevelSelect = { activityLevel ->
                                         viewModel.selectActivityLevel(activityLevel)
                                     },
-                                    onBackClick = {
-                                        viewModel.goToPreviousStage()
+                                    onBackClick = { userDataStage ->
+                                        viewModel.goToPreviousStage(userDataStage)
                                     },
                                     onCloseClick = {
                                         viewModel.navigateBack()
                                     },
-                                    onNextClick = {
-                                        viewModel.goToNextStage()
+                                    onNextClick = { userDataStage ->
+                                        viewModel.goToNextStage(userDataStage)
                                     },
                                 )
                             }
@@ -263,14 +248,14 @@ class WaterAppFragment : Fragment() {
                                         viewModel.navigateBack()
                                     },
                                     onStartClick = {
-                                        viewModel.goToUserFields()
+                                        viewModel.goToUserStage()
                                     }
                                 )
                             }
 
                             WaterAppUiState.WaterGoal -> {
                                 WaterAppGoalScreen(
-                                    goal = viewState.rateData.rate,
+                                    goal = viewState.dailyGoal.totalMl,
                                     onCloseClick = {
                                         viewModel.navigateBack()
                                     },
@@ -279,15 +264,24 @@ class WaterAppFragment : Fragment() {
                                     }
                                 )
                             }
+
+                            WaterAppUiState.Loading -> {
+                                LoadingPlaceholder()
+                            }
                         }
 
                     }
 
-                    LaunchedEffect(Unit) {
-                        if (!haveNotificationPermission()) {
-                            viewModel.changeHaveNotifications(false)
-                        }
+                    LifecycleEffect {
+                        viewModel.listenNotificationSettings()
                     }
+                    LifecycleEffect {
+                        viewModel.listenUserInfo()
+                    }
+                    LifecycleEffect {
+                        viewModel.listenDailyGoal()
+                    }
+
 
                     LifecycleEffect {
                         viewModel.events.collectLatest { event ->

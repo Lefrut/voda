@@ -2,10 +2,15 @@ package com.vodovoz.app.feature.profile.waterapp.model
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
+import com.vodovoz.app.common.water_app.WaterApp
+import com.vodovoz.app.feature.profile.waterapp.WaterAppHelper
+import java.time.LocalTime
 import java.util.Locale
 
 @Stable
 sealed interface WaterAppUiState {
+
+    data object Loading : WaterAppUiState
 
     data object Welcome : WaterAppUiState
 
@@ -35,15 +40,48 @@ sealed interface WaterAppUiState {
                     }
 
             val heights get() = (50..240).toList()
+
+            val times
+                get() = (0 until 1440 step 15).map { minutes ->
+                    try {
+                        val sleepTime = LocalTime.ofSecondOfDay(minutes.toLong() * 60)
+                        sleepTime.format(WaterAppHelper.timeFormatter)
+                    } catch (_: Throwable) {
+                        ""
+                    }
+                }
+
         }
     }
 
     data object WaterGoal : WaterAppUiState
 
-    data object Settings : WaterAppUiState
+    data object Settings : WaterAppUiState {
 
-    data object Main : WaterAppUiState
+        val reminderIntervals = listOf(
+            15L, 30L, 60L, 90L, 120L, 180L, 240L, 300L
+        ).mapToReminderIntervalUi()
+
+    }
+
+    data object Main : WaterAppUiState {
+
+        val waterSteps = listOf(
+            100, 250, 500, 750, 1000
+        ).map { WaterStepUi(it) }
+
+
+    }
 
     data object GoalCompleted : WaterAppUiState
 
+    companion object {
+        val checkpoints: List<WaterAppUiState> = listOf(Welcome, Settings, Main) + UserData.entries
+    }
+
+
+}
+
+fun WaterAppUiState.toStage(): WaterApp.Stage {
+    return WaterApp.Stage(toString())
 }

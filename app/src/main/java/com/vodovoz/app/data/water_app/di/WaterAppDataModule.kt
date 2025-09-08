@@ -3,6 +3,7 @@ package com.vodovoz.app.data.water_app.di
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import com.vodovoz.app.common.moshi.adapter.DurationAdapter
+import com.vodovoz.app.common.moshi.adapter.LocalDateJsonAdapter
 import com.vodovoz.app.common.moshi.adapter.LocalTimeJsonAdapter
 import com.vodovoz.app.common.water_app.WaterApp
 import com.vodovoz.app.data.water_app.datastore.WaterAppStorage
@@ -15,6 +16,7 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import java.time.LocalDate
 import javax.inject.Qualifier
 import javax.inject.Singleton
 import kotlin.time.Duration
@@ -43,6 +45,7 @@ abstract class WaterAppDataModule {
         fun provideMoshi(): Moshi {
             return Moshi.Builder()
                 .add(LocalTimeJsonAdapter())
+                .add(LocalDateJsonAdapter())
                 .add(WaterApp.Stage::class.java, StageAdapter())
                 .add(Duration::class.java, DurationAdapter())
                 .add(KotlinJsonAdapterFactory())

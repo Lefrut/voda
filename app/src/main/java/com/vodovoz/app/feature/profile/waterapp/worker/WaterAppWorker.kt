@@ -16,9 +16,11 @@ import androidx.work.WorkerParameters
 import com.vodovoz.app.R
 import com.vodovoz.app.common.notification.NotificationChannels
 import com.vodovoz.app.common.notification.NotificationConfig
+import com.vodovoz.app.domain.general.respository.WaterAppRepository
 import com.vodovoz.app.feature.profile.waterapp.WaterAppHelper
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
+import kotlinx.coroutines.runBlocking
 import java.time.LocalTime
 import java.time.temporal.ChronoField
 
@@ -26,24 +28,23 @@ import java.time.temporal.ChronoField
 class WaterAppWorker @AssistedInject constructor(
     @Assisted private val context: Context,
     @Assisted workerParams: WorkerParameters,
-    private val waterAppHelper: WaterAppHelper,
+    private val waterAppRepository: WaterAppRepository,
 ) : CoroutineWorker(context, workerParams) {
 
-    override suspend fun doWork(): Result {
+    override suspend fun doWork(): Result{
         val pendingIntent = NavDeepLinkBuilder(applicationContext)
             .setGraph(R.navigation.nav_graph_profile)
             .setDestination(R.id.waterAppFragment)
             .createPendingIntent()
 
         val iconColor = getColor(applicationContext, R.color.bluePrimary)
-        waterAppHelper.fetchWaterAppUserData()
 
-        val userData =
-            waterAppHelper.observeWaterAppUserData().value ?: return Result.success(Data.EMPTY)
+        val notificationSettings =
+            waterAppRepository.getNotificationSettings().getOrNull() ?: return Result.success(Data.EMPTY)
 
-        val currentMinutes = LocalTime.now().get(ChronoField.MINUTE_OF_DAY)
-        val wakeUpMinutes = userData.wakeUpTime.toIntOrNull() ?: 0
-        val sleepMinutes = userData.sleepTime.toIntOrNull() ?: 1000
+        val currentMinutes = LocalTime.now()
+        val wakeUpMinutes = notificationSettings.wakeUpTime
+        val sleepMinutes = notificationSettings.sleepTime
 
         if (currentMinutes !in wakeUpMinutes..sleepMinutes) {
             return Result.success(Data.EMPTY)

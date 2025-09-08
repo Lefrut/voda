@@ -11,6 +11,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -20,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import com.vodovoz.app.R
 import com.vodovoz.app.feature.profile.waterapp.WaterAppHelper
 import com.vodovoz.app.feature.profile.waterapp.composables.VodovozWheelPicker
+import com.vodovoz.app.feature.profile.waterapp.model.WaterAppUiState
 import com.vodovoz.app.util.extensions.indexOfOrNull
 
 @Composable
@@ -28,7 +30,7 @@ fun WaterAppTimeStage(
     time: String,
     isSleepTime: Boolean,
     onWakeUpTimeChange: (String) -> Unit,
-    onSleepTimeChange: (String) -> Unit
+    onSleepTimeChange: (String) -> Unit,
 ) {
     Column(modifier = modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
 
@@ -50,21 +52,24 @@ fun WaterAppTimeStage(
             style = MaterialTheme.typography.displayLarge
         )
 
+        val times = remember { WaterAppUiState.UserData.times }
+        val initialIndex = times.indexOfOrNull(time) ?: 0
+
         if (isSleepTime) {
             VodovozWheelPicker(
                 modifier = Modifier.padding(horizontal = 16.dp),
-                items = WaterAppHelper.times,
+                items = times,
                 markedNumber = 4,
-                initialIndex = WaterAppHelper.times.indexOfOrNull(time) ?: 0,
+                initialIndex = initialIndex,
                 onMiddleItemChange = onSleepTimeChange
             )
 
         } else {
             VodovozWheelPicker(
                 modifier = Modifier.padding(horizontal = 16.dp),
-                items = WaterAppHelper.times,
+                items = times,
                 markedNumber = 4,
-                initialIndex = WaterAppHelper.times.indexOfOrNull(time) ?: 0,
+                initialIndex = initialIndex,
                 onMiddleItemChange = onWakeUpTimeChange
             )
 

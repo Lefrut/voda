@@ -28,6 +28,13 @@ interface WaterAppRepository {
     suspend fun saveStage(stage: WaterApp.Stage): Result<WaterApp.Stage>
     suspend fun clearStage(): Result<Unit>
 
+    suspend fun clear() = kotlin.runCatching {
+        clearStage()
+        clearDailyGoal()
+        clearUserInfo()
+        clearNotificationSettings()
+    }
+
 
     sealed class Exception : RuntimeException()
 

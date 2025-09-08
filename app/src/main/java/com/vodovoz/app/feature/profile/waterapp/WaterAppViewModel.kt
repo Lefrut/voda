@@ -3,78 +3,118 @@ package com.vodovoz.app.feature.profile.waterapp
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.viewModelScope
-import com.vodovoz.app.ui.mvi.Event
-import com.vodovoz.app.ui.mvi.MviViewModel
-import com.vodovoz.app.ui.mvi.State
+import com.vodovoz.app.common.water_app.WaterApp
+import com.vodovoz.app.domain.general.respository.WaterAppRepository
 import com.vodovoz.app.feature.profile.waterapp.model.ReminderIntervalUi
 import com.vodovoz.app.feature.profile.waterapp.model.WaterAppActivityLevel
 import com.vodovoz.app.feature.profile.waterapp.model.WaterAppUiState
+import com.vodovoz.app.feature.profile.waterapp.model.WaterStepUi
 import com.vodovoz.app.feature.profile.waterapp.model.mapToReminderIntervalUi
+import com.vodovoz.app.feature.profile.waterapp.model.toStage
+import com.vodovoz.app.ui.mvi.Event
+import com.vodovoz.app.ui.mvi.MviViewModel
+import com.vodovoz.app.ui.mvi.State
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.take
+import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
+import java.time.LocalDate
+import java.time.LocalTime
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.minutes
 
 @HiltViewModel
 @Stable
 class WaterAppViewModel @Inject constructor(
+    private val waterAppRepository: WaterAppRepository,
     private val waterAppHelper: WaterAppHelper,
 ) : MviViewModel<WaterAppViewModel.WaterAppState, WaterAppViewModel.WaterAppEvents>(
     WaterAppState()
 ) {
 
-
     init {
-        setupScreen()
+        setInitialStage()
     }
 
-    private fun setupScreen() = viewModelScope.launch {
-        waterAppHelper.fetchWaterAppRateData()
-        waterAppHelper.fetchWaterAppUserData()
-        waterAppHelper.fetchWaterAppNotificationData()
+    @OptIn(FlowPreview::class)
+    private fun setInitialStage() =
+        waterAppRepository.stageFlow.debounce(200).take(1).onEach { stageResult ->
+            stageResult.onSuccess { stage ->
+                val currentUiState = WaterAppUiState.checkpoints.firstOrNull { waterAppUiState ->
+                    waterAppUiState.toString() == stage.name
+                } ?: WaterAppUiState.Welcome
 
-        val (userStarted, firstShow) = waterAppHelper.observeWaterAppNotificationData().value?.run {
-            started to firstShow
-        } ?: (null to null)
-
-        if (userStarted == true) {
-            updateState { s ->
-                s.copy(uiState = if (firstShow == true) WaterAppUiState.Main else WaterAppUiState.Settings)
-            }
-        }
-
-        launch {
-            waterAppHelper.observeWaterAppUserData().collectLatest { userData ->
-                updateState { s -> s.copy(userData = userData ?: s.userData) }
-            }
-        }
-
-        launch {
-            waterAppHelper.observeWaterAppRateData().collectLatest {
                 updateState { s ->
-                    val rateData = it ?: s.rateData
-                    s.copy(rateData = rateData)
-                }
-            }
-        }
-
-        launch {
-            waterAppHelper.observeWaterAppNotificationData().collectLatest { notificationData ->
-                updateState { s ->
-                    val uiNotificationData = notificationData ?: s.notificationData
                     s.copy(
-                        notificationData = uiNotificationData,
-                        reminderIntervals = WaterAppHelper.reminderIntervals
-                            .mapToReminderIntervalUi()
-                            .map { option ->
-                                if (option.minutes == uiNotificationData.time.toLongOrNull()) {
-                                    option.copy(selected = true)
-                                } else option
-                            }
+                        uiState = currentUiState,
+                        completeSettings = currentUiState is WaterAppUiState.Main || currentUiState is WaterAppUiState.Settings
                     )
                 }
+            }.onFailure {
+                updateState { s ->
+                    s.copy(uiState = WaterAppUiState.Welcome)
+                }
             }
+        }.launchIn(viewModelScope)
+
+
+    private inline fun updateUserInfo(
+        crossinline block: WaterApp.UserInfo.() -> WaterApp.UserInfo,
+    ) {
+        updateState { s ->
+            s.copy(userInfo = block(s.userInfo))
+        }
+    }
+
+
+    private inline fun updateNotificationSettings(
+        crossinline block: WaterApp.NotificationSettings.() -> WaterApp.NotificationSettings,
+    ) {
+        updateState { s ->
+            s.copy(notificationSettings = block(s.notificationSettings))
+        }
+    }
+
+    private inline fun updateDailyGoal(
+        crossinline block: WaterApp.DailyGoal.() -> WaterApp.DailyGoal,
+    ) {
+        updateState { s ->
+            s.copy(dailyGoal = block(s.dailyGoal))
+        }
+    }
+
+    suspend fun listenUserInfo(): Nothing = coroutineScope {
+        waterAppRepository.userInfoFlow.stateIn(this).collect {
+            updateUserInfo { it.getOrNull() ?: this }
+        }
+    }
+
+
+    suspend fun listenNotificationSettings(): Nothing = coroutineScope {
+        waterAppRepository.settingsFlow.stateIn(this).collect {
+            updateNotificationSettings { it.getOrNull() ?: this }
+        }
+    }
+
+    @OptIn(FlowPreview::class)
+    suspend fun listenDailyGoal(): Nothing = coroutineScope {
+        val currentDate = LocalDate.now()
+        waterAppRepository.dailyGoalFlow.debounce(300L).stateIn(this).collect { result ->
+            val updatedDailyGoal = result.getOrNull()
+            val dailyGoal = WaterApp.calculateDailyGoal(stateSnapshot.userInfo)
+
+            if (updatedDailyGoal?.date != currentDate) {
+                waterAppRepository.saveDailyGoal(dailyGoal)
+            }
+
+            updateDailyGoal { updatedDailyGoal ?: dailyGoal }
         }
     }
 
@@ -82,136 +122,170 @@ class WaterAppViewModel @Inject constructor(
         sendEvent(WaterAppEvents.GoBack)
     }
 
-    fun goToUserFields() = viewModelScope.launch {
+    fun goToUserStage() = viewModelScope.launch {
         updateState { s ->
             s.copy(uiState = WaterAppUiState.UserData.Gender)
         }
     }
 
     fun selectGender(man: Boolean) = viewModelScope.launch {
-        waterAppHelper.setGender(if (man) "man" else "gril")
+        updateUserInfo { copy(gender = WaterApp.Gender.from(man)) }
     }
 
-    fun goToPreviousStage() = viewModelScope.launch {
-        val prevUiState = when (val currentUiState = stateSnapshot.uiState) {
-            is WaterAppUiState.UserData -> currentUiState.previous() ?: WaterAppUiState.Welcome
-            else -> currentUiState
-        }
-        updateState { s ->
-            s.copy(
-                uiState = if (stateSnapshot.notificationData.started) WaterAppUiState.Settings
-                else prevUiState
-            )
-        }
-    }
-
-    fun goToNextStage() = viewModelScope.launch {
-        val nextUiState = when (val currentUiState = stateSnapshot.uiState) {
-            is WaterAppUiState.UserData -> currentUiState.next() ?: run {
-
-                waterAppHelper.saveUserData()
-                waterAppHelper.calculateAndSaveRate()
-                waterAppHelper.setStart(true)
-                waterAppHelper.saveWaterAppNotificationData()
-
-                WaterAppUiState.WaterGoal
-            }
-
-            else -> currentUiState
-        }
-
-
-
+    fun goToPreviousStage(userDataStage: WaterAppUiState.UserData) = viewModelScope.launch {
+        val prevUiState = userDataStage.previous() ?: WaterAppUiState.Welcome
 
         updateState { s ->
             s.copy(
-                uiState = if (stateSnapshot.notificationData.firstShow) {
+                uiState = if (stateSnapshot.completeSettings) {
                     WaterAppUiState.Settings
                 } else {
-                    nextUiState
+                    prevUiState
                 }
             )
         }
     }
 
+
+    fun goToNextStage(userDataStage: WaterAppUiState.UserData) = viewModelScope.launch {
+        val wasCompleteSettings = stateSnapshot.completeSettings
+        val userInfo = stateSnapshot.userInfo
+
+        val nextUiState = userDataStage.next() ?: run {
+            waterAppRepository.saveUserInfo(userInfo)
+            waterAppRepository.saveDailyGoal(WaterApp.calculateDailyGoal(userInfo))
+            waterAppRepository.saveStage(WaterApp.Stage(WaterAppUiState.Settings.toString()))
+
+            WaterAppUiState.WaterGoal
+        }
+
+
+        updateState { s ->
+            s.copy(
+                uiState = if (wasCompleteSettings) {
+                    WaterAppUiState.Settings
+                } else nextUiState
+            )
+        }
+    }
+
     fun selectActivityLevel(activityLevel: WaterAppActivityLevel) {
-        waterAppHelper.setSport(activityLevel.value.toString())
+        updateUserInfo {
+            copy(
+                activityLevel = WaterApp.ActivityLevel.entries.firstOrNull { level ->
+                    level.sport == activityLevel.value
+                } ?: WaterApp.ActivityLevel.Low
+            )
+        }
     }
 
     fun selectReminderInterval(reminderInterval: ReminderIntervalUi) = viewModelScope.launch {
-        waterAppHelper.setNotificationTime(reminderInterval.minutes.toString())
+        updateNotificationSettings {
+            copy(notificationsDelay = reminderInterval.minutes.minutes)
+        }
     }
 
     fun checkHaveNotifications() = viewModelScope.launch {
-        sendEvent(WaterAppEvents.SwitchNotifications(!stateSnapshot.notificationData.switch))
+        sendEvent(WaterAppEvents.SwitchNotifications(!stateSnapshot.notificationSettings.enableNotifications))
     }
 
     fun changeHaveNotifications(haveNotifications: Boolean) = viewModelScope.launch {
-        waterAppHelper.setNotificationSwitch(haveNotifications)
+        updateNotificationSettings {
+            copy(enableNotifications = haveNotifications)
+        }
     }
 
 
     fun saveNotificationSettings() = viewModelScope.launch {
-        waterAppHelper.setNotificationFirstShow()
-        waterAppHelper.saveWaterAppNotificationData()
-        waterAppHelper.saveUserData()
-        waterAppHelper.calculateAndSaveRate()
+        val mainUiState = WaterAppUiState.Main
+        val notificationSettings = stateSnapshot.notificationSettings
 
-        updateState { s -> s.copy(uiState = WaterAppUiState.Main) }
+        waterAppRepository.saveUserInfo(stateSnapshot.userInfo)
+        waterAppRepository.saveDailyGoal(
+            stateSnapshot.dailyGoal.copy(
+                totalMl = WaterApp.calculateWaterNorm(stateSnapshot.userInfo)
+            )
+        )
+        waterAppHelper.runOrCancelWorkManager(notificationSettings)
+
+        updateState { s -> s.copy(uiState = mainUiState, completeSettings = true) }
+
+        listOf(
+            launch { waterAppRepository.saveNotificationSettings(notificationSettings) },
+            launch { waterAppRepository.saveStage(mainUiState.toStage()) },
+        ).joinAll()
 
 
     }
 
-    fun goToWaterApp() = viewModelScope.launch {
-        waterAppHelper.setNotificationFirstShow()
-        waterAppHelper.fetchWaterAppUserData()
-        waterAppHelper.fetchWaterAppNotificationData()
+    fun goToMainStage() = viewModelScope.launch {
+        val mainUiState = WaterAppUiState.Main
+
+        updateState { s -> s.copy(uiState = mainUiState) }
+
+        val notificationSettings =
+            waterAppRepository.getNotificationSettings().getOrNull()
+        waterAppRepository.saveStage(mainUiState.toStage())
+
+        delay(250)
 
         updateState { s ->
-            s.copy(uiState = WaterAppUiState.Main)
+            s.copy(
+                completeSettings = true,
+                notificationSettings = notificationSettings ?: s.notificationSettings
+            )
         }
+
     }
 
     fun goToSettings() = viewModelScope.launch {
-        updateState { s ->
-            s.copy(uiState = WaterAppUiState.Settings)
-        }
+        updateState { s -> s.copy(uiState = WaterAppUiState.Settings) }
     }
 
     fun selectWeight(weight: Float) = viewModelScope.launch {
-        waterAppHelper.setWeight(weight.toString())
+        updateUserInfo { copy(weight = weight) }
     }
 
     fun selectHeight(height: Int) = viewModelScope.launch {
-        waterAppHelper.setHeight(height.toString())
+        updateUserInfo { copy(height = height.toFloat()) }
     }
 
     fun selectWakeUpTime(time: String) = viewModelScope.launch {
-        waterAppHelper.setWakeUpTime(WaterAppHelper.parseTime(time))
+        updateNotificationSettings {
+            copy(
+                wakeUpTime = LocalTime.parse(time, WaterAppHelper.timeFormatter)
+            )
+        }
     }
 
     fun selectSleepTime(time: String) = viewModelScope.launch {
-        waterAppHelper.setSleepTime(WaterAppHelper.parseTime(time))
+        updateNotificationSettings {
+            copy(
+                sleepTime = LocalTime.parse(time, WaterAppHelper.timeFormatter)
+            )
+        }
     }
 
-    fun changeWaterLevel(progress: Float) = viewModelScope.launch {
-        val rateData = stateSnapshot.rateData
-        val currentLevel = (progress * rateData.rate).toInt()
-        waterAppHelper.setWaterLevel(currentLevel)
-        checkGoalCompleted()
+    fun setWaterLevel(progress: Float) = viewModelScope.launch {
+        changeWaterInBottle {
+            val currentMl = (progress * totalMl).toInt()
+            withMl(currentMl)
+        }
     }
 
     fun addWater() = viewModelScope.launch {
-        if (!stateSnapshot.rateData.canFill) return@launch
-
-        waterAppHelper.tryToAddWater(stateSnapshot.changeWaterStep)
-
-        checkGoalCompleted()
+        changeWaterInBottle { plusMl(stateSnapshot.changeWaterStep.ml) }
     }
 
-    private fun checkGoalCompleted() = viewModelScope.launch {
-        delay(2000L)
-        if (waterAppHelper.observeWaterAppRateData().value?.canFill == false) {
+    private suspend fun changeWaterInBottle(block: WaterApp.DailyGoal.() -> WaterApp.DailyGoal) {
+        val dailyGoal = stateSnapshot.dailyGoal
+        val currentDailyGoal = block(dailyGoal)
+
+        updateDailyGoal { currentDailyGoal }
+        waterAppRepository.saveDailyGoal(currentDailyGoal)
+
+        if (!dailyGoal.wasCompleted && currentDailyGoal.currentMl == currentDailyGoal.totalMl) {
+            delay(2500L)
             updateState { s -> s.copy(uiState = WaterAppUiState.GoalCompleted) }
         }
     }
@@ -221,42 +295,36 @@ class WaterAppViewModel @Inject constructor(
     }
 
     fun addChangeWaterStep() = viewModelScope.launch {
-        val levels = WaterAppHelper.waterCupLevels
-        val currentValue = stateSnapshot.changeWaterStep
-
-        val nextStep = when (val currentIndex = levels.indexOf(currentValue)) {
-            -1 -> currentValue
-            in 0 until levels.lastIndex -> levels.getOrNull(currentIndex + 1)
-            else -> currentValue
-        } ?: 250
-
-        updateState { state ->
-            state.copy(changeWaterStep = nextStep)
-        }
+        updateWaterStep { index -> index + 1 }
     }
 
     fun subtractChangeWaterStep() = viewModelScope.launch {
-        val levels = WaterAppHelper.waterCupLevels
-        val currentValue = stateSnapshot.changeWaterStep
-
-        val prevStep = when (val currentIndex = levels.indexOf(currentValue)) {
-            -1 -> currentValue
-            in 1..levels.lastIndex -> levels.getOrNull(currentIndex - 1)
-            else -> currentValue
-        } ?: 250
-
-        updateState { it.copy(changeWaterStep = prevStep) }
+        updateWaterStep { index -> index - 1 }
     }
+
+    private fun updateWaterStep(newIndex: (index: Int) -> Int) {
+        val waterStepLevels = WaterAppUiState.Main.waterSteps
+        val currentWaterStep = stateSnapshot.changeWaterStep
+
+        val newWaterStep = when (val currentIndex = waterStepLevels.indexOf(currentWaterStep)) {
+            -1 -> currentWaterStep
+            in 1..waterStepLevels.lastIndex -> waterStepLevels.getOrNull(newIndex(currentIndex))
+            else -> currentWaterStep
+        } ?: WaterStepUi(250)
+
+        updateState { s -> s.copy(changeWaterStep = newWaterStep) }
+    }
+
     fun showNotificationSettingsDialog() = viewModelScope.launch {
-        updateState { s ->
-            s.copy(showNotificationSettingsDialog = true)
-        }
+        updateNotificationSettingsDialog(true)
     }
 
     fun closeNotificationSettingsDialog() = viewModelScope.launch {
-        updateState { s ->
-            s.copy(showNotificationSettingsDialog = false)
-        }
+        updateNotificationSettingsDialog(false)
+    }
+
+    private fun updateNotificationSettingsDialog(showDialog: Boolean) = updateState { s ->
+        s.copy(showNotificationSettingsDialog = showDialog)
     }
 
     fun openNotificationSettings() = viewModelScope.launch {
@@ -267,21 +335,20 @@ class WaterAppViewModel @Inject constructor(
 
     @Immutable
     data class WaterAppState(
-        val userData: WaterAppHelper.WaterAppUserData = WaterAppHelper.WaterAppUserData(),
-        val notificationData: WaterAppHelper.WaterAppNotificationData = WaterAppHelper.WaterAppNotificationData(),
-        val rateData: WaterAppHelper.WaterAppRateData = WaterAppHelper.WaterAppRateData(),
-        val uiState: WaterAppUiState = WaterAppUiState.Welcome,
-        val reminderIntervals: List<ReminderIntervalUi> = emptyList(),
-        val changeWaterStep: Int = 250,
+        val userInfo: WaterApp.UserInfo = WaterApp.UserInfo.ManDefault,
+        val dailyGoal: WaterApp.DailyGoal = WaterApp.DailyGoal.create(3500),
+        val notificationSettings: WaterApp.NotificationSettings = WaterApp.NotificationSettings.Default,
+        val uiState: WaterAppUiState = WaterAppUiState.Loading,
+        val completeSettings: Boolean = false,
+        val reminderIntervals: List<ReminderIntervalUi> = WaterAppUiState.Settings.reminderIntervals,
+        val changeWaterStep: WaterStepUi = WaterStepUi(250),
         val showNotificationSettingsDialog: Boolean = false,
     ) : State
 
     sealed class WaterAppEvents : Event {
         data class SwitchNotifications(val haveNotifications: Boolean) : WaterAppEvents()
-
         data object GoBack : WaterAppEvents()
         data object OpenNotificationSettings : WaterAppEvents()
-
     }
 
 

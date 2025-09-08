@@ -73,6 +73,7 @@ import androidx.compose.ui.unit.sp
 import com.vodovoz.app.R
 import com.vodovoz.app.design_system.robotoFontFamily
 import com.vodovoz.app.feature.profile.waterapp.WaterAppHelper
+import com.vodovoz.app.feature.profile.waterapp.model.WaterStepUi
 import com.vodovoz.app.ui.graphics.mergeToSinglePath
 import com.vodovoz.app.ui.graphics.toAndroidPaths
 
@@ -80,7 +81,7 @@ import com.vodovoz.app.ui.graphics.toAndroidPaths
 fun WaterAppBottleScreen(
     maxLevel: Int,
     currentLevel: Int,
-    changeWaterStep: Int,
+    changeWaterStep: WaterStepUi,
     onBackClick: () -> Unit,
     onSettingsClick: () -> Unit,
     onProgressChanged: (Float) -> Unit,
@@ -185,7 +186,7 @@ fun WaterAppBottleScreen(
             )
 
             Text(
-                text = stringResource(R.string.quantity_ml, changeWaterStep),
+                text = stringResource(R.string.quantity_ml, changeWaterStep.ml),
                 color = MaterialTheme.colorScheme.onBackground,
                 style = MaterialTheme.typography.bodyMedium.copy(letterSpacing = 0.15.sp)
             )
