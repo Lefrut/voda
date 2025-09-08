@@ -10,11 +10,11 @@ import com.vodovoz.app.data.vodovoz_service.model.auth.KNOPKA_AUTH_DTO
 import com.vodovoz.app.data.vodovoz_service.model.auth.LoginByPhoneDTO
 import com.vodovoz.app.data.vodovoz_service.model.auth.RequestCodeDTO
 import com.vodovoz.app.data.vodovoz_service.model.auth.UserAuthInfoDTO
-import com.vodovoz.app.domain.general.model.widgets.CheckBoxModel
 import com.vodovoz.app.domain.general.model.promotion.ColorfulButtonModel
 import com.vodovoz.app.domain.general.model.user.AuthDetailsModel
 import com.vodovoz.app.domain.general.model.user.RequestCodeModel
 import com.vodovoz.app.domain.general.model.user.UserAuthInfoModel
+import com.vodovoz.app.domain.general.model.widgets.CheckboxModel
 import java.time.Duration
 import java.time.LocalDateTime
 
@@ -33,16 +33,17 @@ fun AuthDetailsDTO.toDomain(): AuthDetailsModel {
     )
 }
 
-fun List<CHECKBOX_DTO>.mapToDomain(): List<CheckBoxModel> {
+fun List<CHECKBOX_DTO>.mapToDomain(): List<CheckboxModel> {
     return mapNotNull { it.toDomain() }
 }
 
-fun CHECKBOX_DTO.toDomain(): CheckBoxModel? {
-    return CheckBoxModel(
+fun CHECKBOX_DTO.toDomain(): CheckboxModel? {
+    return CheckboxModel(
         isRequired = VodovozBoolean.from(OBYAZATELNO).boolean,
-        name = NAME ?: "",
-        checked = VodovozBoolean.from(VALUE).boolean,
-        id = ID ?: return null
+        name = NAME ?: TEXT ?: "",
+        checked = (VALUE as? Boolean) ?: VodovozBoolean.from(VALUE.toString()).boolean,
+        id = ID ?: return null,
+        urlTitles = ZAGOLOVOKi ?: emptyList()
     )
 }
 

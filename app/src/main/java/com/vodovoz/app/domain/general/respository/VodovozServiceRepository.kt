@@ -356,7 +356,7 @@ interface VodovozServiceRepository {
 
     fun getSiteState(): Flow<Result<AppConfig>>
 
-    fun getPreorderFields(productId: Long): Flow<Result<FormModel>>
+    fun getPreorderDetails(productId: Long): Flow<Result<FormModel>>
 
     fun sendPreorder(productId: Long, fields: List<FieldModel>): Flow<Result<String>>
 

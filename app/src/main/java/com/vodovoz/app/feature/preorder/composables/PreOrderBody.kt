@@ -14,9 +14,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.vodovoz.app.design_system.composables.button.VodovozButtonsColumn
+import com.vodovoz.app.design_system.composables.checkbox.VodovozCheckbox
 import com.vodovoz.app.design_system.composables.snackbar.VodovozSnackbarHost
 import com.vodovoz.app.design_system.composables.text_fields.VodovozTextFieldsColumn
 import com.vodovoz.app.design_system.model.ColorfulButtonUi
+import com.vodovoz.app.design_system.model.widgets.CheckboxUi
 import com.vodovoz.app.design_system.model.widgets.FieldUi
 
 @Suppress("NonSkippableComposable")
@@ -26,9 +28,12 @@ fun PreOrderBody(
     description: String,
     colorfulButton: ColorfulButtonUi,
     fields: List<FieldUi>,
+    checkbox: CheckboxUi?,
     snackbarHostState: SnackbarHostState,
     onOrderSend: () -> Unit,
     onFieldValueChange: (FieldUi, String) -> Unit,
+    onCheckboxClick: (Boolean) -> Unit,
+    onUrlClick: (url: String, title: String) -> Unit,
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
@@ -37,7 +42,7 @@ fun PreOrderBody(
                 .verticalScroll(rememberScrollState())
                 .padding(top = 8.dp)
         ) {
-            if(description.isNotBlank()){
+            if (description.isNotBlank()) {
                 Text(
                     modifier = Modifier.padding(bottom = 24.dp),
                     text = description,
@@ -54,6 +59,17 @@ fun PreOrderBody(
                 },
                 onDone = {},
             )
+
+            checkbox?.let {
+                VodovozCheckbox(
+                    modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp),
+                    checkbox = checkbox,
+                    onCheckboxClick = { _, updatedCheckbox ->
+                        onCheckboxClick(updatedCheckbox.checked)
+                    },
+                    onUrlClick = onUrlClick
+                )
+            }
 
 
             VodovozButtonsColumn(

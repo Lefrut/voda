@@ -542,9 +542,9 @@ interface VodovozService {
      * PreOrder screen
      * */
     @GET("osnova/predzakaz.php?action=predzakaz")
-    suspend fun getPreOrderFields(
+    suspend fun getPreOrderDetails(
         @Query("userid") userId: Long,
-        @Query("tovar") productId: Long,
+        @Query("tovar") productId: Long?,
     ): Response<VodovozResponseDTO<FormDTO>>
 
     @GET("osnova/predzakaz.php?action=otpravka")

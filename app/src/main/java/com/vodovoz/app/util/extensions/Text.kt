@@ -4,7 +4,15 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
+import android.text.style.URLSpan
+import androidx.core.text.HtmlCompat
 import java.text.DecimalFormat
+
+
+fun String.extractLinksFromHtml(): List<String> {
+    val spanned = HtmlCompat.fromHtml(this, HtmlCompat.FROM_HTML_MODE_LEGACY)
+    return spanned.getSpans(0, spanned.length, URLSpan::class.java).map { it.url }
+}
 
 
 fun Context.copyText(text: String) {

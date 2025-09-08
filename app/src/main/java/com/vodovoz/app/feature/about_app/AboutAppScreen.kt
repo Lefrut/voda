@@ -37,7 +37,7 @@ fun AboutAppScreen(viewModel: AboutAppViewModel, viewState: AboutAppState) {
             onOptionClick = { aboutAppOption ->
                 viewModel.activateOption(aboutAppOption)
             },
-            onLogoLongClick = {
+            onTripleClick = {
                 viewModel.showDeveloperBS()
             }
         )

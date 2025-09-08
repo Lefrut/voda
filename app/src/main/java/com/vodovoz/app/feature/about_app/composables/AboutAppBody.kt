@@ -2,7 +2,9 @@ package com.vodovoz.app.feature.about_app.composables
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -21,6 +23,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -33,12 +37,28 @@ fun AboutAppBody(
     modifier: Modifier = Modifier,
     version: String,
     onOptionClick: (AboutAppOption) -> Unit,
-    onLogoLongClick: () -> Unit,
+    onTripleClick: () -> Unit,
 ) {
     Column(
         modifier = modifier
             .fillMaxSize()
-            .verticalScroll(rememberScrollState()),
+            .verticalScroll(rememberScrollState())
+            .pointerInput(Unit) {
+                awaitPointerEventScope {
+                    var pointersDown: Int
+
+                    while (true) {
+                        val event = awaitPointerEvent(PointerEventPass.Final)
+                        pointersDown = event.changes.count { it.pressed }
+
+                        if (pointersDown == 3) {
+                            onTripleClick()
+                        }
+
+                        event.changes.forEach { it.consume() }
+                    }
+                }
+            },
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Spacer(Modifier.weight(1f))
@@ -48,11 +68,7 @@ fun AboutAppBody(
             contentDescription = null,
             modifier = Modifier
                 .size(100.dp)
-                .clip(RoundedCornerShape(20.dp))
-                .combinedClickable(
-                    onLongClick = onLogoLongClick,
-                    onClick = {}
-                ),
+                .clip(RoundedCornerShape(20.dp)),
             contentScale = ContentScale.Crop
         )
         Text(

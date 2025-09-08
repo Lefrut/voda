@@ -17,23 +17,26 @@ fun PreOrderScreen(
     snackbarHostState: SnackbarHostState,
 ) {
 
-    val sectionPreOrder = viewState.sectionPreOrder
+    val form = viewState.form
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
-        ClosingTopBar(title = sectionPreOrder.title, onCloseClick = { viewModel.navigateBack() })
+        ClosingTopBar(title = form.title, onCloseClick = { viewModel.navigateBack() })
 
         PreOrderBody(
-            colorfulButton = sectionPreOrder.colorfulButton,
-            description = sectionPreOrder.description,
-            fields = sectionPreOrder.fields,
+            colorfulButton = form.colorfulButton,
+            description = form.description,
+            fields = form.fields,
+            checkbox = form.checkbox,
             snackbarHostState = snackbarHostState,
             onOrderSend = { viewModel.sendPreOrder() },
             onFieldValueChange = { field, newValue ->
                 viewModel.changeFieldValue(field, newValue)
-            }
+            },
+            onUrlClick = viewModel::navigateToWebView,
+            onCheckboxClick = viewModel::changeCheckbox
         )
 
     }

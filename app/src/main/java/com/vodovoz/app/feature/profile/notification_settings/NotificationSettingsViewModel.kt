@@ -7,7 +7,6 @@ import com.vodovoz.app.R
 import com.vodovoz.app.ui.mvi.Event
 import com.vodovoz.app.ui.mvi.MviViewModel
 import com.vodovoz.app.ui.mvi.State
-import kotlinx.coroutines.flow.update
 import com.vodovoz.app.common.model.VodovozBoolean
 import com.vodovoz.app.common.model.from
 import com.vodovoz.app.common.resources.ResourcesProvider
@@ -17,7 +16,7 @@ import com.vodovoz.app.design_system.model.toUi
 import com.vodovoz.app.design_system.model.widgets.FieldUi
 import com.vodovoz.app.design_system.model.widgets.SwitchUi
 import com.vodovoz.app.design_system.model.widgets.WidgetUi
-import com.vodovoz.app.design_system.model.widgets.WidgetUpdaterHandler
+import com.vodovoz.app.design_system.model.widgets.WidgetUpdaterKeeper
 import com.vodovoz.app.design_system.model.widgets.checkFields
 import com.vodovoz.app.design_system.model.widgets.toUi
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
@@ -79,7 +78,7 @@ class NotificationSettingsViewModel @Inject constructor(
     }
 
 
-    private val widgetUpdater = WidgetUpdaterHandler(
+    private val widgetUpdater = WidgetUpdaterKeeper(
         getString = { id -> resourcesProvider.getString(id) }
     )
 

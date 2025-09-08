@@ -14,7 +14,8 @@ fun FormDTO.toDomain(): FormModel {
         description = INFORMIROVANIE ?: "",
         fields = (POLYA ?: DANNYE)?.mapNotNull { it.toDomain() } ?: emptyList(),
         button = KNOPKA?.toDomain()
-            ?: throw IllegalArgumentException("Colorful button can't be null in PreOrder:$this")
+            ?: throw IllegalArgumentException("Colorful button can't be null in PreOrder:$this"),
+        checkbox = PODOFERTA?.toDomain()
     )
 }
 

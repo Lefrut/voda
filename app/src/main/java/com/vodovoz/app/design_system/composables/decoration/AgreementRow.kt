@@ -24,6 +24,7 @@ import androidx.compose.ui.text.fromHtml
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.vodovoz.app.design_system.VodovozTheme
+import com.vodovoz.app.design_system.composables.text.LinkedText
 import com.vodovoz.app.design_system.vodovozTextLinkStyle
 
 @Composable
@@ -47,38 +48,13 @@ fun AgreementRow(
         )
         Spacer(modifier = Modifier.width(16.dp))
 
-        val links = remember {
-            mutableStateOf(listOf<String>())
-        }
-
-        val agreement = AnnotatedString.fromHtml(
-            htmlString = htmlText,
-            linkStyles = vodovozTextLinkStyle,
-            linkInteractionListener = { link ->
-                val linkUrl = link as? LinkAnnotation.Url
-                linkUrl.toString()
-                linkUrl?.url?.runCatching {
-                    val url = linkUrl.url
-                    onUrlClick(linkUrl.url, links.value.indexOf(url))
-                }
-            }
-        )
-
-
-
-        Text(
+        LinkedText(
             modifier = Modifier
                 .fillMaxHeight()
                 .wrapContentSize(Alignment.CenterStart),
-            text = agreement,
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onBackground,
+            text = htmlText,
+            onUrlClick = onUrlClick
         )
-
-        LaunchedEffect(agreement) {
-            links.value = agreement.getLinkAnnotations(0, Int.MAX_VALUE)
-                .mapNotNull { (it.item as? LinkAnnotation.Url)?.url }
-        }
     }
 }
 

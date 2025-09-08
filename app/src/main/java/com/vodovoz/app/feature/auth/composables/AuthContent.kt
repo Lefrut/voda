@@ -20,8 +20,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.vodovoz.app.R
+import com.vodovoz.app.design_system.ExtendedTheme
 import com.vodovoz.app.design_system.composables.button.VodovozButtonsColumn
 import com.vodovoz.app.design_system.composables.decoration.AgreementRow
+import com.vodovoz.app.design_system.composables.text.LinkedText
 import com.vodovoz.app.design_system.composables.text_fields.VodovozTextFieldsColumn
 import com.vodovoz.app.design_system.composables.top_bar.VodovozTopBar
 import com.vodovoz.app.design_system.model.ColorfulButtonUi
@@ -108,6 +110,15 @@ fun AuthContent(
                         }
                     }
                 }
+            }
+
+            val extraAgreementText = authDetails.extraAgreementText
+            if (extraAgreementText.isNotEmpty()) {
+                LinkedText(
+                    modifier = Modifier.padding(top = 16.dp),
+                    text = extraAgreementText,
+                    onUrlClick = onHyperlinkClick,
+                )
             }
 
             VodovozButtonsColumn(

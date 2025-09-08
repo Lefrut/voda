@@ -3,6 +3,7 @@ package com.vodovoz.app.feature.preorder.model
 import androidx.compose.runtime.Immutable
 import com.vodovoz.app.design_system.model.ColorfulButtonUi
 import com.vodovoz.app.design_system.model.toUi
+import com.vodovoz.app.design_system.model.widgets.CheckboxUi
 import com.vodovoz.app.design_system.model.widgets.FieldUi
 import com.vodovoz.app.design_system.model.widgets.toUi
 import com.vodovoz.app.domain.general.model.order.FormModel
@@ -13,9 +14,10 @@ data class FormUi(
     val description: String,
     val fields: List<FieldUi>,
     val colorfulButton: ColorfulButtonUi,
+    val checkbox: CheckboxUi?
 ) {
     companion object {
-        val Empty = FormUi("", "", emptyList(), ColorfulButtonUi.Empty)
+        val Empty = FormUi("", "", emptyList(), ColorfulButtonUi.Empty, null)
     }
 }
 
@@ -24,7 +26,8 @@ fun FormModel.toUi(): FormUi {
         title = title,
         description = description,
         fields = fields.map { field -> field.toUi() },
-        colorfulButton = button.toUi()
+        colorfulButton = button.toUi(),
+        checkbox = checkbox?.toUi()
     )
 }
 

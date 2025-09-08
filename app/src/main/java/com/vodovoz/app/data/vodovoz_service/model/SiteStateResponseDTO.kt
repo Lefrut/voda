@@ -26,6 +26,8 @@ data class SiteStateResponseDTO(
     val SMSPOLE: Int?,
     @Json(name = "SOGLASHENIE")
     val SOGLASHENIE: SOGLASHENIE_DTO?,
+    @Json(name = "SOGLASHENIETEXT")
+    val SOGLASHENIE_TEXT: SOGLASHENIE_DTO?,
     @Json(name = "TESTSAITSSILKA")
     val TESTSAITSSILKA: String?,
     @Json(name = "CALL")
