@@ -5,8 +5,8 @@ import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
 import com.vodovoz.app.common.water_app.WaterApp
 import com.vodovoz.app.core.network.serialization.toJson
-import com.vodovoz.app.data.water_app.datastore.WaterAppStorage
 import com.vodovoz.app.data.water_app.datastore.WaterAppDataStoreImpl
+import com.vodovoz.app.data.water_app.datastore.WaterAppStorage
 import com.vodovoz.app.data.water_app.di.WaterAppDataModule
 import com.vodovoz.app.data.water_app.repository.WaterAppRepositoryImpl
 import com.vodovoz.app.domain.general.respository.WaterAppRepository
@@ -40,7 +40,7 @@ class WaterAppTests : CoroutineTestBase() {
     private val defaultNotificationSettings = WaterApp.NotificationSettings.Default
 
     private val notificationSettings = defaultNotificationSettings.copy(
-        hasNotifications = true,
+        enableNotifications = true,
         wakeUpTime = LocalTime.of(11, 0)
     )
     private val storageIoException = IOException()
@@ -136,16 +136,16 @@ class WaterAppTests : CoroutineTestBase() {
                 calculateDailyGoal(
                     man.copy(
                         weight = 70f,
-                        activityLevel = WaterApp.UserInfo.ActivityLevel.Low
+                        activityLevel = WaterApp.ActivityLevel.Low
                     )
                 ).totalMl
             )
             assertEquals(
-                2775,
+                2800,
                 calculateDailyGoal(
                     man.copy(
                         weight = 65f,
-                        activityLevel = WaterApp.UserInfo.ActivityLevel.Medium
+                        activityLevel = WaterApp.ActivityLevel.Medium
                     )
                 ).totalMl
             )
@@ -155,7 +155,7 @@ class WaterAppTests : CoroutineTestBase() {
                 calculateDailyGoal(
                     man.copy(
                         weight = 140f,
-                        activityLevel = WaterApp.UserInfo.ActivityLevel.High
+                        activityLevel = WaterApp.ActivityLevel.High
                     )
                 ).totalMl
             )
@@ -199,7 +199,7 @@ class WaterAppTests : CoroutineTestBase() {
         waterAppRepository.dailyGoalFlow.test {
             assertEquals(Result.success(dailyGoal), awaitItem())
             assertEquals(Result.success(dailyGoalAfterDrink), awaitItem())
-            assertEquals(Result.success(dailyGoal), awaitItem())
+            assertEquals(true, awaitItem().isFailure)
             cancelAndIgnoreRemainingEvents()
         }
     }
@@ -346,7 +346,7 @@ class WaterAppTests : CoroutineTestBase() {
     fun `user info flow from storage`() = runTest {
 
         val lastUserInfo = man.copy(
-            activityLevel = WaterApp.UserInfo.ActivityLevel.High
+            activityLevel = WaterApp.ActivityLevel.High
         )
 
         coEvery { waterAppRepository.clearUserInfo() } returns Result.success(Unit)

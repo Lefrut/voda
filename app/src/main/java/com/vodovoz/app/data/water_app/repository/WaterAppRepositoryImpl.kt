@@ -53,8 +53,9 @@ open class WaterAppRepositoryImpl @Inject constructor(
     override val dailyGoalFlow: Flow<Result<WaterApp.DailyGoal>>
         get() = getFlowOperation(
             defaultValue = {
-                val currentInfo = userInfoFlow.firstResult().getOrThrow()
-                WaterApp.calculateDailyGoal(currentInfo)
+                throw WaterAppRepository.UnknownException(
+                    message = "Daily is not in storage"
+                )
             },
             flow = storage.dailyGoalFlow,
             onFormatError = ::clearDailyGoal

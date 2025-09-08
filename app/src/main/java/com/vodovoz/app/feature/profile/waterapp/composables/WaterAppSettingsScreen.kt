@@ -46,6 +46,7 @@ import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.vodovoz.app.R
+import com.vodovoz.app.common.water_app.WaterApp
 import com.vodovoz.app.design_system.composables.button.VodovozButton
 import com.vodovoz.app.design_system.composables.swich.vodovozColors
 import com.vodovoz.app.design_system.composables.top_bar.ClosingTopBar
@@ -61,8 +62,8 @@ fun WaterAppSettingsScreen(
     modifier: Modifier = Modifier,
     onCloseClick: () -> Unit,
     intervals: List<ReminderIntervalUi>,
-    userData: WaterAppHelper.WaterAppUserData,
-    haveNotifications: Boolean,
+    userInfo: WaterApp.UserInfo,
+    notificationSettings: WaterApp.NotificationSettings,
     showParameters: Boolean,
     onReminderIntervalClick: (ReminderIntervalUi) -> Unit,
     onHaveNotificationsChange: () -> Unit,
@@ -122,7 +123,7 @@ fun WaterAppSettingsScreen(
                     modifier = Modifier
                         .padding(start = 16.dp)
                         .requiredHeight(32.dp),
-                    checked = haveNotifications,
+                    checked = notificationSettings.enableNotifications,
                     onCheckedChange = { onHaveNotificationsChange() },
                     colors = SwitchDefaults.vodovozColors()
                 )
@@ -130,7 +131,7 @@ fun WaterAppSettingsScreen(
 
 
 
-            AnimatedVisibility(haveNotifications) {
+            AnimatedVisibility(notificationSettings.enableNotifications) {
                 Column(modifier = Modifier) {
                     Text(
                         modifier = Modifier.padding(top = 32.dp, start = 16.dp, end = 16.dp),
@@ -167,7 +168,8 @@ fun WaterAppSettingsScreen(
                                             .width(cardWidth - 0.5.dp)
                                             .height(cardWidth * 0.85f),
                                         reminderIntervalUi = interval,
-                                        onReminderIntervalClick = onReminderIntervalClick
+                                        onReminderIntervalClick = onReminderIntervalClick,
+                                        selected = interval.minutes == notificationSettings.notificationsDelay.inWholeMinutes
                                     )
                                 }
                             }
@@ -195,7 +197,13 @@ fun WaterAppSettingsScreen(
 
                 parameters.forEachIndexed { index, param ->
                     ParameterItem(
-                        userData = userData,
+                        userInfo = userInfo,
+                        wakeUpTimeText = notificationSettings.wakeUpTime.format(
+                            WaterAppHelper.timeFormatter
+                        ),
+                        sleepTimeText = notificationSettings.sleepTime.format(
+                            WaterAppHelper.timeFormatter
+                        ),
                         uiState = param,
                         onEditClick = onEditUserData
                     )
@@ -216,7 +224,9 @@ fun WaterAppSettingsScreen(
 @Composable
 private fun ParameterItem(
     uiState: WaterAppUiState.UserData,
-    userData: WaterAppHelper.WaterAppUserData,
+    userInfo: WaterApp.UserInfo,
+    wakeUpTimeText: String,
+    sleepTimeText: String,
     onEditClick: (WaterAppUiState.UserData) -> Unit,
 ) {
     Row(
@@ -246,20 +256,18 @@ private fun ParameterItem(
             text = when (uiState) {
                 WaterAppUiState.UserData.Height -> stringResource(
                     R.string.quantity_cm,
-                    userData.height
+                    userInfo.height
                 )
 
                 WaterAppUiState.UserData.Weight -> stringResource(
                     R.string.quantity_kg,
-                    userData.weight
+                    userInfo.weight
                 )
 
-                WaterAppUiState.UserData.WakeUpTime -> userData.formatWakeUpTime()
-                WaterAppUiState.UserData.SleepTime -> userData.formatSleepTime()
+                WaterAppUiState.UserData.WakeUpTime -> wakeUpTimeText
+                WaterAppUiState.UserData.SleepTime -> sleepTimeText
 
-                else -> {
-                    ""
-                }
+                else -> ""
             },
             color = MaterialTheme.colorScheme.onBackground,
             style = MaterialTheme.typography.headlineSmall
@@ -284,17 +292,18 @@ private fun ReminderCard(
     modifier: Modifier = Modifier,
     reminderIntervalUi: ReminderIntervalUi,
     onReminderIntervalClick: (ReminderIntervalUi) -> Unit,
+    selected: Boolean,
 ) {
-    val showHours = WaterAppHelper.shouldDisplayIntervalAsHours(reminderIntervalUi.minutes)
-    val valueString = WaterAppHelper.formatReminderMinutes(reminderIntervalUi.minutes)
+    val showHours = reminderIntervalUi.shouldDisplayIntervalAsHours()
+    val valueString = reminderIntervalUi.format()
     val valueInt = valueString.toIntRoundOrNull()
 
-    val contentColor = if (!reminderIntervalUi.selected) {
+    val contentColor = if (!selected) {
         MaterialTheme.colorScheme.primary
     } else {
         MaterialTheme.colorScheme.background
     }
-    val containerColor = if (!reminderIntervalUi.selected) {
+    val containerColor = if (!selected) {
         MaterialTheme.colorScheme.primaryContainer
     } else {
         MaterialTheme.colorScheme.primary

@@ -5,8 +5,15 @@ import androidx.compose.runtime.Immutable
 @Immutable
 data class ReminderIntervalUi(
     val minutes: Long,
-    val selected: Boolean,
-)
+) {
+
+    fun shouldDisplayIntervalAsHours(): Boolean = minutes > 91
+
+    fun format(): String {
+        return if (!shouldDisplayIntervalAsHours()) minutes.toString()
+        else ((minutes / 60) + (minutes % 60).toFloat() / 60).toString()
+    }
+}
 
 
 fun List<Long>.mapToReminderIntervalUi(): List<ReminderIntervalUi> {
@@ -14,6 +21,6 @@ fun List<Long>.mapToReminderIntervalUi(): List<ReminderIntervalUi> {
 }
 
 fun Long.toReminderIntervalUi(): ReminderIntervalUi {
-    return ReminderIntervalUi(this, false)
+    return ReminderIntervalUi(this)
 }
 
