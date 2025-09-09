@@ -1,5 +1,6 @@
 package com.vodovoz.app.design_system.composables.card
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -28,10 +29,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import coil3.compose.AsyncImage
+import coil3.compose.AsyncImagePainter
 import com.vodovoz.app.R
 import com.vodovoz.app.design_system.ExtendedTheme
 import com.vodovoz.app.design_system.VodovozTheme
+import com.vodovoz.app.design_system.composables.blur.AsyncImageBlur
 import com.vodovoz.app.design_system.composables.blur.VodovozBlur
 import com.vodovoz.app.design_system.composables.chip.VodovozColorChipSmall
 import com.vodovoz.app.design_system.model.Button
@@ -61,21 +63,23 @@ fun LinearProductCard(
 
     VodovozProductCard(modifier = modifier, product = product, onClick = onClick) {
         Row(modifier = Modifier.height(IntrinsicSize.Max)) {
-            VodovozBlur(
+            AsyncImageBlur(
                 modifier = Modifier
                     .clip(MaterialTheme.shapes.small)
                     .width(144.dp)
                     .fillMaxHeight(),
+                model = product.image,
                 showBlur = product.forAdults != null,
                 text = forAdults?.textBlur ?: ""
-            ) {
+            ) { asyncImagePainter ->
                 LinearImageSection(
-                    image = product.image,
+                    imagePainter = asyncImagePainter,
                     percentLabels = percentLabels,
                     otherLabels = otherLabels,
                     isFavorite = product.isFavorite,
                     onLike = { onLike(product) }
                 )
+
             }
 
             Column(
@@ -174,7 +178,7 @@ fun LinearProductCard(
 @Composable
 private fun LinearImageSection(
     modifier: Modifier = Modifier,
-    image: String,
+    imagePainter: AsyncImagePainter,
     percentLabels: List<LabelUi>,
     otherLabels: List<LabelUi>,
     isFavorite: Boolean,
@@ -185,8 +189,8 @@ private fun LinearImageSection(
             .height(132.dp)
             .width(144.dp),
     ) {
-        AsyncImage(
-            model = image,
+        Image(
+            painter = imagePainter,
             contentDescription = null,
             modifier = Modifier.matchParentSize(),
             contentScale = ContentScale.Inside

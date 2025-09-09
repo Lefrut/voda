@@ -191,7 +191,7 @@ dependencies {
     implementation("mx.platacard:compose-pager-indicator:0.0.8")
     implementation("com.kizitonwose.calendar:compose:2.6.2")
     implementation("com.valentinilk.shimmer:compose-shimmer:1.0.5")
-    implementation("com.github.skydoves:cloudy:0.2.7")
+    implementation("dev.chrisbanes.haze:haze:1.6.10")
     implementation("com.github.a914-gowtham:compose-ratingbar:1.3.12")
 
     implementation("com.google.android.play:app-update:2.1.0")

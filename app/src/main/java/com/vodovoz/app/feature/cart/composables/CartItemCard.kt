@@ -1,5 +1,6 @@
 package com.vodovoz.app.feature.cart.composables
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -25,10 +26,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.fromHtml
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
-import coil3.compose.AsyncImage
 import com.vodovoz.app.R
 import com.vodovoz.app.design_system.ExtendedTheme
-import com.vodovoz.app.design_system.composables.blur.VodovozBlur
+import com.vodovoz.app.design_system.composables.blur.AsyncImageBlur
 import com.vodovoz.app.design_system.composables.button.CartCounterButton
 import com.vodovoz.app.design_system.composables.chip.VodovozColorChipSmall
 import com.vodovoz.app.feature.cart.model.CartItemUi
@@ -65,9 +65,15 @@ fun CartItemCard(
             modifier = Modifier.width(76.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            VodovozBlur(showBlur = cartItem.forAdults != null) {
-                AsyncImage(
-                    model = cartItem.image,
+            val forAdults = cartItem.forAdults
+
+            AsyncImageBlur(
+                model = cartItem.image,
+                showBlur = forAdults != null,
+                text = forAdults?.textBlur ?: ""
+            ) { asyncImagePainter ->
+                Image(
+                    painter = asyncImagePainter,
                     contentDescription = null,
                     modifier = Modifier
                         .padding(bottom = 11.dp)

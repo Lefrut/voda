@@ -5,7 +5,7 @@ import com.squareup.moshi.JsonWriter
 import com.vodovoz.app.common.moshi.adapter.NullableAdapter
 import com.vodovoz.app.common.water_app.WaterApp
 
-class StageAdapter : NullableAdapter<WaterApp.Stage>() {
+class WaterAppStageJsonAdapter : NullableAdapter<WaterApp.Stage>() {
     override fun parse(reader: JsonReader): WaterApp.Stage =
         WaterApp.Stage(reader.nextString())
 
