@@ -132,17 +132,12 @@ class PreOrderFlowViewModel @Inject constructor(
 
 
     fun changeFieldValue(field: FieldUi, newValue: String) = viewModelScope.launch {
-        updateState { s ->
-            val sectionPreOrder = s.form
-            val fields = sectionPreOrder.fields
+        updateForm {
             val fieldIndex = fields.indexOfFirst { field.id == it.id }
-
-            s.copy(
-                form = sectionPreOrder.copy(
-                    fields = fields.toMutableList()
-                        .apply { set(fieldIndex, field.copy(value = newValue)) }
-                        .map { it.copy(isError = false) }
-                )
+            copy(
+                fields = fields.toMutableList().apply {
+                    set(fieldIndex, field.copy(value = newValue))
+                }.map { it.copy(isError = false) }
             )
         }
     }

@@ -5,7 +5,7 @@ import com.squareup.moshi.JsonWriter
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 
-class DurationAdapter : NullableAdapter<Duration>() {
+class DurationJsonAdapter : NullableAdapter<Duration>() {
     override fun parse(reader: JsonReader): Duration =
         reader.nextLong().milliseconds
 

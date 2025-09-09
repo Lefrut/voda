@@ -146,14 +146,14 @@ class WaterAppViewModel @Inject constructor(
     }
 
 
-    fun goToNextStage(userDataStage: WaterAppUiState.UserData) = viewModelScope.launch {
+    fun goToNextStage(currentStage: WaterAppUiState.UserData) = viewModelScope.launch {
         val wasCompleteSettings = stateSnapshot.completeSettings
         val userInfo = stateSnapshot.userInfo
 
-        val nextUiState = userDataStage.next() ?: run {
+        val nextUiState = currentStage.next() ?: run {
             waterAppRepository.saveUserInfo(userInfo)
             waterAppRepository.saveDailyGoal(WaterApp.calculateDailyGoal(userInfo))
-            waterAppRepository.saveStage(WaterApp.Stage(WaterAppUiState.Settings.toString()))
+            waterAppRepository.saveStage(WaterAppUiState.Settings.toStage())
 
             WaterAppUiState.WaterGoal
         }
@@ -198,22 +198,25 @@ class WaterAppViewModel @Inject constructor(
     fun saveNotificationSettings() = viewModelScope.launch {
         val mainUiState = WaterAppUiState.Main
         val notificationSettings = stateSnapshot.notificationSettings
-
-        waterAppRepository.saveUserInfo(stateSnapshot.userInfo)
-        waterAppRepository.saveDailyGoal(
-            stateSnapshot.dailyGoal.copy(
-                totalMl = WaterApp.calculateWaterNorm(stateSnapshot.userInfo)
-            )
+        val updatedDailyGoal = stateSnapshot.dailyGoal.copy(
+            totalMl = WaterApp.calculateWaterNorm(stateSnapshot.userInfo)
         )
+
+        updateState { s ->
+            s.copy(
+                uiState = mainUiState,
+                completeSettings = true,
+                dailyGoal = updatedDailyGoal
+            )
+        }
+
         waterAppHelper.runOrCancelWorkManager(notificationSettings)
-
-        updateState { s -> s.copy(uiState = mainUiState, completeSettings = true) }
-
         listOf(
+            launch { waterAppRepository.saveUserInfo(stateSnapshot.userInfo) },
+            launch { waterAppRepository.saveDailyGoal(updatedDailyGoal) },
             launch { waterAppRepository.saveNotificationSettings(notificationSettings) },
             launch { waterAppRepository.saveStage(mainUiState.toStage()) },
         ).joinAll()
-
 
     }
 
