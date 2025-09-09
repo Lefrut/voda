@@ -135,7 +135,7 @@ fun VodovozTextField(
 }
 
 @Composable
-private fun VodovozTextField(
+fun BaseVodovozTextField(
     value: TextFieldValue,
     onValueChange: (TextFieldValue) -> Unit,
     modifier: Modifier = Modifier,
@@ -302,7 +302,7 @@ fun VodovozTextField(
 
     var lastTextValue by remember(value) { mutableStateOf(value) }
 
-    VodovozTextField(
+    BaseVodovozTextField(
         modifier = modifier,
         value = textFieldValue,
         onValueChange = onValueChange@{ newTextFieldValueState ->

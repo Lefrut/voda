@@ -28,7 +28,6 @@ import com.vodovoz.app.design_system.composables.swich.vodovozColors
 import com.vodovoz.app.design_system.composables.text_fields.VodovozTextField
 import com.vodovoz.app.design_system.model.SectionUi
 import com.vodovoz.app.design_system.model.widgets.FieldUi
-import com.vodovoz.app.design_system.model.widgets.WidgetUi
 import com.vodovoz.app.feature.payment_method.model.PaymentMethodItemUi
 
 @Suppress("NonSkippableComposable")

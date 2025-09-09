@@ -3,7 +3,6 @@ package com.vodovoz.app.feature.profile.notification_settings.composables
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -16,10 +15,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.fromHtml
 import androidx.compose.ui.unit.dp
-import com.vodovoz.app.design_system.composables.button.VodovozButtonsColumn
 import com.vodovoz.app.design_system.composables.swich.VodovozSwitch
 import com.vodovoz.app.design_system.composables.text_fields.VodovozTextField
-import com.vodovoz.app.design_system.model.ColorfulButtonUi
 import com.vodovoz.app.design_system.model.SectionUi
 import com.vodovoz.app.design_system.model.widgets.FieldUi
 import com.vodovoz.app.design_system.model.widgets.SwitchUi

@@ -6,19 +6,14 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.vodovoz.app.R
 import com.vodovoz.app.common.resources.ResourcesProvider
-import com.vodovoz.app.design_system.model.widgets.CheckboxUi
-import com.vodovoz.app.design_system.model.widgets.FieldUi
 import com.vodovoz.app.design_system.model.widgets.WidgetUi
-import com.vodovoz.app.design_system.model.widgets.checkFields
-import com.vodovoz.app.design_system.model.widgets.getErrorText
-import com.vodovoz.app.design_system.model.widgets.vodovozValidators
 import com.vodovoz.app.domain.general.model.exceptions.ValidationException
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.feature.preorder.model.FormUi
 import com.vodovoz.app.feature.preorder.model.toUi
 import com.vodovoz.app.ui.mvi.Event
-import com.vodovoz.app.ui.mvi.MviViewModel
-import com.vodovoz.app.ui.mvi.State
+import com.vodovoz.app.ui.mvi.FormMviViewModel
+import com.vodovoz.app.ui.mvi.FormState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.onEach
@@ -32,7 +27,7 @@ class PreOrderFlowViewModel @Inject constructor(
     savedState: SavedStateHandle,
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val resourcesProvider: ResourcesProvider,
-) : MviViewModel<PreOrderFlowViewModel.PreOrderState, PreOrderFlowViewModel.PreOrderEvent>(
+) : FormMviViewModel<PreOrderFlowViewModel.PreOrderState, PreOrderFlowViewModel.PreOrderEvent>(
     PreOrderState()
 ) {
 
@@ -58,11 +53,13 @@ class PreOrderFlowViewModel @Inject constructor(
     }
 
     fun sendPreOrder() = viewModelScope.launch {
-        if (!validateWidgets()) return@launch
+        if (!validateWidgets(resourcesProvider::getString)) return@launch
 
-        val queries = (stateSnapshot.form.fields + stateSnapshot.form.checkbox)
+        val form = stateSnapshot.form
+
+        val queries = (form.fields + form.checkbox)
             .filterIsInstance<WidgetUi>()
-            .associate { it.id to it.value() }
+            .associate { widget -> widget.id to widget.value() }
 
         vodovozServiceRepository.sendPreorder(productId, queries).take(1).collect { result ->
             result.onSuccess { message ->
@@ -85,62 +82,6 @@ class PreOrderFlowViewModel @Inject constructor(
         sendEvent(PreOrderEvent.HideKeyboard)
     }
 
-    private fun updateCheckbox(block: CheckboxUi.() -> CheckboxUi) {
-        updateState { s ->
-            val form = s.form
-            s.copy(
-                form = form.copy(
-                    checkbox = form.checkbox?.block()
-                )
-            )
-        }
-    }
-
-    private fun updateForm(block: FormUi.() -> FormUi) {
-        updateState { s ->
-            s.copy(
-                form = s.form.block()
-            )
-        }
-    }
-
-    private fun validateWidgets(): Boolean {
-
-        val form = stateSnapshot.form
-        val fields = form.fields
-
-
-        val isValidCheckbox = form.checkbox?.run {
-            !isRequired || checked
-        } ?: true
-
-        return fields.checkFields(
-            putErrors = true,
-            validators = vodovozValidators,
-            getSupportingText = { f ->
-                f.getErrorText { id -> resourcesProvider.getString(id) }
-            }
-        ) { updatedFields, _ ->
-            updateForm {
-                copy(
-                    fields = updatedFields,
-                    checkbox = checkbox?.copy(error = !isValidCheckbox)
-                )
-            }
-        } && isValidCheckbox
-    }
-
-
-    fun changeFieldValue(field: FieldUi, newValue: String) = viewModelScope.launch {
-        updateForm {
-            val fieldIndex = fields.indexOfFirst { field.id == it.id }
-            copy(
-                fields = fields.toMutableList().apply {
-                    set(fieldIndex, field.copy(value = newValue))
-                }.map { it.copy(isError = false) }
-            )
-        }
-    }
 
     fun navigateBack() = viewModelScope.launch {
         sendEvent(PreOrderEvent.GoBack)
@@ -150,15 +91,12 @@ class PreOrderFlowViewModel @Inject constructor(
         sendEvent(PreOrderEvent.GoToWebView(url, title))
     }
 
-    fun changeCheckbox(checked: Boolean) {
-        updateCheckbox { copy(checked = checked, error = false) }
-    }
 
     @Immutable
     data class PreOrderState(
-        val form: FormUi = FormUi.Empty,
+        override val form: FormUi = FormUi.Empty,
         val uiState: UiState = UiState.Loading,
-    ) : State
+    ) : FormState()
 
     sealed class PreOrderEvent : Event {
         data class ShowSnackbar(val message: String, val isVeryShort: Boolean = false) :
@@ -175,5 +113,9 @@ class PreOrderFlowViewModel @Inject constructor(
         data object Error : UiState
         data object Success : UiState
         data object Loading : UiState
+    }
+
+    override fun PreOrderState.withForm(form: FormUi): PreOrderState {
+        return copy(form = form)
     }
 }
