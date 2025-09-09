@@ -1681,11 +1681,11 @@ class VodovozServiceRepositoryImpl @Inject constructor(
         )
     }
 
-    override fun sendPreorder(productId: Long, fields: List<FieldModel>): Flow<Result<String>> {
+    override fun sendPreorder(productId: Long, queries: Map<String, String>): Flow<Result<String>> {
         return executeRequest(
             request = {
                 val userId = accountManager.fetchAccountId()
-                vodovozService.sendPreorder(userId, productId, fields.toQueries())
+                vodovozService.sendPreorder(userId, productId, queries)
             },
             mapper = { response -> response.message ?: "" },
             onFail = { response ->

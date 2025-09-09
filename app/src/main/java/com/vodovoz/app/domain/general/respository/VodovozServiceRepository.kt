@@ -3,52 +3,51 @@ package com.vodovoz.app.domain.general.respository
 import androidx.paging.PagingData
 import com.vodovoz.app.common.model.AppConfig
 import com.vodovoz.app.design_system.model.widgets.FieldUi
-import com.vodovoz.app.domain.general.model.product.CatalogDetailsModel
-import com.vodovoz.app.domain.general.model.widgets.FieldModel
-import com.vodovoz.app.domain.general.model.product.FilterValueModel
-import com.vodovoz.app.domain.general.model.product.FiltersModel
-import com.vodovoz.app.domain.general.model.location.MapZonesModel
-import com.vodovoz.app.domain.general.model.order.OrderWithMenuModel
-import com.vodovoz.app.domain.general.model.product.ParentCategoryModel
-import com.vodovoz.app.domain.general.model.product.PopularCategoryModel
-import com.vodovoz.app.domain.general.model.promotion.PresentInfoModel
-import com.vodovoz.app.domain.general.model.product.ProductCommentsInfoModel
-import com.vodovoz.app.domain.general.model.product.SearchRecommendationsModel
-import com.vodovoz.app.domain.general.model.product.SortModel
-import com.vodovoz.app.domain.general.model.exceptions.VodovozPlaceholderModel
-import com.vodovoz.app.domain.general.model.promotion.BrandModel
-import com.vodovoz.app.domain.general.model.promotion.BrandSectionModel
 import com.vodovoz.app.domain.general.model.cart.BottomCartModel
 import com.vodovoz.app.domain.general.model.cart.CartDetailsModel
-import com.vodovoz.app.domain.general.model.product.BuyCertificateDetailsModel
-import com.vodovoz.app.domain.general.model.product.BuyCertificateModel
-import com.vodovoz.app.domain.general.model.product.CertificateActivationDetailsModel
+import com.vodovoz.app.domain.general.model.exceptions.VodovozPlaceholderModel
 import com.vodovoz.app.domain.general.model.location.AddAddressDetailsModel
 import com.vodovoz.app.domain.general.model.location.AddressModel
 import com.vodovoz.app.domain.general.model.location.MapAddressModel
+import com.vodovoz.app.domain.general.model.location.MapZonesModel
 import com.vodovoz.app.domain.general.model.order.CancelOrderDetailsModel
 import com.vodovoz.app.domain.general.model.order.DeliveryDateDetailsModel
+import com.vodovoz.app.domain.general.model.order.FormModel
 import com.vodovoz.app.domain.general.model.order.OrderCallYouDetailsModel
 import com.vodovoz.app.domain.general.model.order.OrderDetailsModel
+import com.vodovoz.app.domain.general.model.order.OrderWithMenuModel
 import com.vodovoz.app.domain.general.model.order.OrderingDetailsModel
 import com.vodovoz.app.domain.general.model.order.OrdersHistoryDetailsModel
 import com.vodovoz.app.domain.general.model.order.OrdersHistoryItemModel
 import com.vodovoz.app.domain.general.model.order.PaymentMethodDetailsModel
-import com.vodovoz.app.domain.general.model.order.FormModel
 import com.vodovoz.app.domain.general.model.order.RecipientDetailsModel
 import com.vodovoz.app.domain.general.model.order.RecipientModel
 import com.vodovoz.app.domain.general.model.order.WhereOrderDetailsModel
 import com.vodovoz.app.domain.general.model.product.AllBottlesDetailsModel
+import com.vodovoz.app.domain.general.model.product.BuyCertificateDetailsModel
+import com.vodovoz.app.domain.general.model.product.BuyCertificateModel
+import com.vodovoz.app.domain.general.model.product.CatalogDetailsModel
+import com.vodovoz.app.domain.general.model.product.CertificateActivationDetailsModel
 import com.vodovoz.app.domain.general.model.product.CommentModel
+import com.vodovoz.app.domain.general.model.product.FilterValueModel
+import com.vodovoz.app.domain.general.model.product.FiltersModel
+import com.vodovoz.app.domain.general.model.product.ParentCategoryModel
+import com.vodovoz.app.domain.general.model.product.PopularCategoryModel
+import com.vodovoz.app.domain.general.model.product.ProductCommentsInfoModel
 import com.vodovoz.app.domain.general.model.product.ProductDetailsScreenModel
 import com.vodovoz.app.domain.general.model.product.ProductModel
 import com.vodovoz.app.domain.general.model.product.ProductsSectionModel
+import com.vodovoz.app.domain.general.model.product.SearchRecommendationsModel
 import com.vodovoz.app.domain.general.model.product.SectionModel
+import com.vodovoz.app.domain.general.model.product.SortModel
 import com.vodovoz.app.domain.general.model.product.TopAndBottomSectionsModel
 import com.vodovoz.app.domain.general.model.product.UnratedProductsSectionModel
 import com.vodovoz.app.domain.general.model.product.WaitFeedbackProductModel
 import com.vodovoz.app.domain.general.model.promotion.BannerModel
+import com.vodovoz.app.domain.general.model.promotion.BrandModel
+import com.vodovoz.app.domain.general.model.promotion.BrandSectionModel
 import com.vodovoz.app.domain.general.model.promotion.PopupWindowInfoModel
+import com.vodovoz.app.domain.general.model.promotion.PresentInfoModel
 import com.vodovoz.app.domain.general.model.promotion.ProductsTitle
 import com.vodovoz.app.domain.general.model.promotion.PromotionDetailsModel
 import com.vodovoz.app.domain.general.model.promotion.PromotionModel
@@ -67,6 +66,7 @@ import com.vodovoz.app.domain.general.model.user.QuestionnairesWelcomeDetailsMod
 import com.vodovoz.app.domain.general.model.user.RequestCodeModel
 import com.vodovoz.app.domain.general.model.user.UserAuthInfoModel
 import com.vodovoz.app.domain.general.model.user.UserDataModel
+import com.vodovoz.app.domain.general.model.widgets.FieldModel
 import kotlinx.coroutines.flow.Flow
 import java.io.File
 import java.time.LocalDate
@@ -131,7 +131,7 @@ interface VodovozServiceRepository {
         deviceInfo: String?,
         notifyDriverId: String? = null,
         message: String? = null,
-        params: Map<String, String>?
+        params: Map<String, String>?,
     ): Flow<Result<VodovozPlaceholderModel>>
 
     fun orderService(
@@ -261,7 +261,6 @@ interface VodovozServiceRepository {
     ): Flow<PagingData<PromotionModel>>
 
 
-
     fun getBannerProducts(
         bannerId: Long,
         blockId: Long,
@@ -320,7 +319,7 @@ interface VodovozServiceRepository {
     fun register(params: Map<String, String>): Flow<Result<UserAuthInfoModel>>
 
     fun loginByEmail(
-        params: Map<String, String>
+        params: Map<String, String>,
     ): Flow<Result<UserAuthInfoModel>>
 
     fun getCatalogDetails(): Flow<Result<CatalogDetailsModel>>
@@ -358,7 +357,10 @@ interface VodovozServiceRepository {
 
     fun getPreorderDetails(productId: Long): Flow<Result<FormModel>>
 
-    fun sendPreorder(productId: Long, fields: List<FieldModel>): Flow<Result<String>>
+    fun sendPreorder(
+        productId: Long,
+        queries: Map<String, String>,
+    ): Flow<Result<String>>
 
     fun getUnratedProductsDetails(): Flow<Result<UnratedProductsSectionModel>>
 
@@ -422,14 +424,14 @@ interface VodovozServiceRepository {
     ): Flow<Result<FormModel>>
 
     fun sendMessage(
-        params: Map<String, String>
+        params: Map<String, String>,
     ): Flow<Result<VodovozPlaceholderModel>>
 
     fun sendComment(
         productId: Long,
         rating: Int,
         message: String,
-        imageBytesArray: List<ByteArray>
+        imageBytesArray: List<ByteArray>,
     ): Flow<Result<VodovozPlaceholderModel>>
 
     fun getProductCommentsInfo(
@@ -480,7 +482,7 @@ interface VodovozServiceRepository {
     fun getNewProducts(): Flow<Result<SectionModel<ProductModel>>>
 
     fun getAllNewProducts(
-        categoryId: Int = -1
+        categoryId: Int = -1,
     ): Flow<Result<ProductsSectionModel>>
 
     fun getAllNewProductsPaged(
@@ -515,7 +517,7 @@ interface VodovozServiceRepository {
     fun getViewedProducts(): Flow<Result<SectionModel<ProductModel>>>
 
     fun getAllViewedProducts(
-        categoryId: Int
+        categoryId: Int,
     ): Flow<Result<ProductsSectionModel>>
 
     fun getAllViewedProductsPaged(

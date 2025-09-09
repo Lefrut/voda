@@ -8,9 +8,9 @@ import com.vodovoz.app.R
 import com.vodovoz.app.common.resources.ResourcesProvider
 import com.vodovoz.app.design_system.model.widgets.CheckboxUi
 import com.vodovoz.app.design_system.model.widgets.FieldUi
+import com.vodovoz.app.design_system.model.widgets.WidgetUi
 import com.vodovoz.app.design_system.model.widgets.checkFields
 import com.vodovoz.app.design_system.model.widgets.getErrorText
-import com.vodovoz.app.design_system.model.widgets.toDomain
 import com.vodovoz.app.design_system.model.widgets.vodovozValidators
 import com.vodovoz.app.domain.general.model.exceptions.ValidationException
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
@@ -60,9 +60,11 @@ class PreOrderFlowViewModel @Inject constructor(
     fun sendPreOrder() = viewModelScope.launch {
         if (!validateWidgets()) return@launch
 
-        val fields = stateSnapshot.form.fields.map { field -> field.toDomain() }
+        val queries = (stateSnapshot.form.fields + stateSnapshot.form.checkbox)
+            .filterIsInstance<WidgetUi>()
+            .associate { it.id to it.value() }
 
-        vodovozServiceRepository.sendPreorder(productId, fields).take(1).collect { result ->
+        vodovozServiceRepository.sendPreorder(productId, queries).take(1).collect { result ->
             result.onSuccess { message ->
                 sendEvent(PreOrderEvent.ShowSnackbar(message, true))
                 sendEvent(PreOrderEvent.GoBack)
