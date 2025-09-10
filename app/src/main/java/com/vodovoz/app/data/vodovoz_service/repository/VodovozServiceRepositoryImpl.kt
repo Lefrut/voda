@@ -93,7 +93,6 @@ import com.vodovoz.app.domain.general.model.promotion.PromotionsSectionModel
 import com.vodovoz.app.domain.general.model.promotion.StoryModel
 import com.vodovoz.app.domain.general.model.service.AllServicesDetailsModel
 import com.vodovoz.app.domain.general.model.service.ServiceDetailsModel
-import com.vodovoz.app.domain.general.model.service.ServiceOrderDetailsModel
 import com.vodovoz.app.domain.general.model.widgets.toQueries
 import com.vodovoz.app.domain.general.model.product.toSliderQueries
 import com.vodovoz.app.domain.general.model.user.AuthDetailsModel
@@ -365,14 +364,14 @@ class VodovozServiceRepositoryImpl @Inject constructor(
 
     override fun orderService(
         serviceType: String,
-        fields: List<FieldModel>,
+        queries: Map<String, String>,
     ): Flow<Result<VodovozPlaceholderModel>> {
         return executeRequest(
             request = {
                 vodovozService.orderService(
-                    accountManager.fetchAccountId(),
-                    serviceType,
-                    fields.toQueries()
+                    userId = accountManager.fetchAccountId(),
+                    serviceType = serviceType,
+                    queries = queries
                 )
             },
             mapper = {
@@ -381,7 +380,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
         )
     }
 
-    override fun getServiceOrderDetails(serviceType: String): Flow<Result<ServiceOrderDetailsModel>> {
+    override fun getServiceOrderDetails(serviceType: String): Flow<Result<FormModel>> {
         return executeRequest(
             request = {
                 vodovozService.getServiceOrderDetails(accountManager.fetchAccountId(), serviceType)

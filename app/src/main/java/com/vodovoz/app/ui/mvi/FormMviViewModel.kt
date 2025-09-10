@@ -1,5 +1,6 @@
 package com.vodovoz.app.ui.mvi
 
+import androidx.annotation.StringRes
 import androidx.lifecycle.viewModelScope
 import com.vodovoz.app.design_system.model.widgets.FieldUi
 import com.vodovoz.app.design_system.model.widgets.checkFields
@@ -12,7 +13,7 @@ abstract class FormMviViewModel<S : FormState, E>(
     state: S,
 ) : MviViewModel<S, E>(state) {
 
-    private fun updateForm(block: FormUi.() -> FormUi) {
+    protected fun updateForm(block: FormUi.() -> FormUi) {
         updateState { s -> s.withForm(form = s.form.block()) }
     }
 
@@ -40,7 +41,7 @@ abstract class FormMviViewModel<S : FormState, E>(
         }
     }
 
-    protected fun validateWidgets(getString: (Int ) -> String): Boolean {
+    protected fun validateWidgets(getString: (resId: Int) -> String): Boolean {
         val form = stateSnapshot.form
         val fields = form.fields
 

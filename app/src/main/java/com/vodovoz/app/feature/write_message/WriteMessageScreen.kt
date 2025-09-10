@@ -2,6 +2,7 @@ package com.vodovoz.app.feature.write_message
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
@@ -16,6 +17,7 @@ import com.vodovoz.app.design_system.composables.top_bar.VodovozTopBar
 import com.vodovoz.app.feature.write_message.composables.WriteMessageBody
 import com.vodovoz.app.feature.write_message.model.WriteMessageState
 import com.vodovoz.app.feature.write_message.model.WriteMessageUiState
+import com.vodovoz.app.ui.compose.VodovozForm
 
 @Composable
 fun WriteMessageScreen(
@@ -23,69 +25,39 @@ fun WriteMessageScreen(
     viewState: WriteMessageState,
     snackbarHostState: SnackbarHostState,
 ) {
-    val buttons = listOf(viewState.button)
 
-    Scaffold(
-        bottomBar = {
-            if (viewState.uiState is WriteMessageUiState.Body) {
-                VodovozButtonsColumn(
-                    modifier = Modifier.padding(
-                        horizontal = 16.dp,
-                        vertical = 24.dp
-                    ),
-                    buttons = buttons
-                ) {
-                    viewModel.sendMessage()
-                }
+    Box(modifier = Modifier.systemBarsPadding()) {
+        when (val uiState = viewState.uiState) {
+            WriteMessageUiState.Body -> {
+                VodovozForm(
+                    form = viewState.form,
+                    onCloseClick = viewModel::navigateBack,
+                    snackbarHostState = snackbarHostState,
+                    onFieldValueChange = viewModel::changeFieldValue,
+                    onCheckboxClick = viewModel::changeCheckbox,
+                    onUrlClick = viewModel::navigateToWebView,
+                    onButtonClick = viewModel::sendMessage
+                )
             }
-        },
-        topBar = {
-            VodovozTopBar(
-                title = viewState.title,
-                onBack = {
-                    viewModel.navigateBack()
-                }
-            )
-        },
-        snackbarHost = {
-            VodovozSnackbarHost(hostState = snackbarHostState)
-        }
-    ) { paddingValues ->
-        Box(modifier = Modifier.padding(paddingValues)) {
-            when (val uiState = viewState.uiState) {
-                WriteMessageUiState.Body -> {
-                    WriteMessageBody(
-                        fields = viewState.fields,
-                        description = viewState.description,
-                        onFieldChange = { field, updatedField ->
-                            viewModel.changeField(field, updatedField)
-                        },
-                    )
-                }
 
-                WriteMessageUiState.Error -> {
-                    NetworkErrorPlaceholder {
-                        viewModel.fetchWriteMessageDetails()
-                    }
-                }
+            WriteMessageUiState.Error -> {
+                NetworkErrorPlaceholder { viewModel.fetchWriteMessageDetails() }
+            }
 
-                WriteMessageUiState.Loading -> {
-                    LoadingPlaceholder()
-                }
+            WriteMessageUiState.Loading -> {
+                LoadingPlaceholder()
+            }
 
-                is WriteMessageUiState.Success -> {
-                    VodovozLongPlaceholder(
-                        data = uiState.placeholder,
-                        onButtonClick = {
-                            viewModel.navigateBack()
-                        },
-                        onCloseClick = {
-                            viewModel.navigateBack()
-                        }
-                    )
-                }
+            is WriteMessageUiState.Success -> {
+                VodovozLongPlaceholder(
+                    data = uiState.placeholder,
+                    onButtonClick = viewModel::navigateBack,
+                    onCloseClick = viewModel::navigateBack
+                )
+
             }
         }
+
     }
 }
 

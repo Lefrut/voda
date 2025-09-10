@@ -55,7 +55,6 @@ import com.vodovoz.app.domain.general.model.promotion.PromotionsSectionModel
 import com.vodovoz.app.domain.general.model.promotion.StoryModel
 import com.vodovoz.app.domain.general.model.service.AllServicesDetailsModel
 import com.vodovoz.app.domain.general.model.service.ServiceDetailsModel
-import com.vodovoz.app.domain.general.model.service.ServiceOrderDetailsModel
 import com.vodovoz.app.domain.general.model.user.AuthDetailsModel
 import com.vodovoz.app.domain.general.model.user.BonusesPopupWindowModel
 import com.vodovoz.app.domain.general.model.user.ChangePasswordDetailsModel
@@ -136,10 +135,11 @@ interface VodovozServiceRepository {
 
     fun orderService(
         serviceType: String,
-        fields: List<FieldModel>,
+        queries: Map<String, String>,
     ): Flow<Result<VodovozPlaceholderModel>>
 
-    fun getServiceOrderDetails(serviceType: String): Flow<Result<ServiceOrderDetailsModel>>
+    fun getServiceOrderDetails(serviceType: String): Flow<Result<FormModel>>
+
 
     fun removeFirebaseToken(token: String): Flow<Result<String>>
 

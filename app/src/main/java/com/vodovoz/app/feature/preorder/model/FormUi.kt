@@ -13,7 +13,7 @@ data class FormUi(
     val title: String,
     val description: String,
     val fields: List<FieldUi>,
-    val colorfulButton: ColorfulButtonUi,
+    val button: ColorfulButtonUi,
     val checkbox: CheckboxUi?
 ) {
     companion object {
@@ -26,7 +26,7 @@ fun FormModel.toUi(): FormUi {
         title = title,
         description = description,
         fields = fields.map { field -> field.toUi() },
-        colorfulButton = button.toUi(),
+        button = button.toUi(),
         checkbox = checkbox?.toUi()
     )
 }

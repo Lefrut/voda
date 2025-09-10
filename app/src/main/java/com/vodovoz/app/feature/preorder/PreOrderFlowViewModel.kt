@@ -108,6 +108,10 @@ class PreOrderFlowViewModel @Inject constructor(
         data object HideKeyboard : PreOrderEvent()
     }
 
+    override fun PreOrderState.withForm(form: FormUi): PreOrderState {
+        return copy(form = form)
+    }
+
     @Stable
     sealed interface UiState {
         data object Error : UiState
@@ -115,7 +119,5 @@ class PreOrderFlowViewModel @Inject constructor(
         data object Loading : UiState
     }
 
-    override fun PreOrderState.withForm(form: FormUi): PreOrderState {
-        return copy(form = form)
-    }
+
 }
