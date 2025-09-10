@@ -4,26 +4,19 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import com.vodovoz.app.ui.mvi.Event
-import com.vodovoz.app.ui.mvi.MviViewModel
-import com.vodovoz.app.ui.mvi.State
-import kotlinx.coroutines.flow.update
 import com.vodovoz.app.common.resources.ResourcesProvider
 import com.vodovoz.app.design_system.model.ColorfulButtonUi
 import com.vodovoz.app.design_system.model.VodovozPlaceholderUi
 import com.vodovoz.app.design_system.model.toUi
-import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
-import com.vodovoz.app.design_system.model.widgets.EmptyTextValidator
 import com.vodovoz.app.design_system.model.widgets.FieldUi
-import com.vodovoz.app.design_system.model.widgets.KeyboardTypeValidator
-import com.vodovoz.app.design_system.model.widgets.NameValidator
-import com.vodovoz.app.design_system.model.widgets.NoRequiredValidator
-import com.vodovoz.app.design_system.model.widgets.PhoneNumberValidator
-import com.vodovoz.app.design_system.model.widgets.checkFields
-import com.vodovoz.app.design_system.model.widgets.getErrorText
-import com.vodovoz.app.design_system.model.widgets.mapToDomain
+import com.vodovoz.app.design_system.model.widgets.WidgetUi
 import com.vodovoz.app.design_system.model.widgets.mapToUi
-import com.vodovoz.app.design_system.model.widgets.updateField
+import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
+import com.vodovoz.app.feature.preorder.model.FormUi
+import com.vodovoz.app.feature.preorder.model.toUi
+import com.vodovoz.app.ui.mvi.Event
+import com.vodovoz.app.ui.mvi.FormMviViewModel
+import com.vodovoz.app.ui.mvi.FormState
 import com.vodovoz.app.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
@@ -36,12 +29,12 @@ class ServiceOrderViewModel @Inject constructor(
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val resourceProvider: ResourcesProvider,
     savedStateHandle: SavedStateHandle,
-) : MviViewModel<ServiceOrderViewModel.ServiceOrderState, ServiceOrderViewModel.ServiceOrderEvent>(
+) : FormMviViewModel<ServiceOrderViewModel.ServiceOrderState, ServiceOrderViewModel.ServiceOrderEvent>(
     ServiceOrderState()
 ) {
 
 
-    private val serviceType = savedStateHandle.get<String>("serviceType") ?: navigateBack().run { "" }
+    private val serviceType = savedStateHandle.get<String>("serviceType") ?: ""
 
     init {
         viewModelScope.launch { delay(200L) }.invokeOnCompletion {
@@ -58,13 +51,11 @@ class ServiceOrderViewModel @Inject constructor(
             serviceType
         ).singleResult()
 
-        serviceOrderDetailsResult.onSuccess { serviceOrderDetails ->
+        serviceOrderDetailsResult.onSuccess { form ->
+
             updateState { s ->
                 s.copy(
-                    title = serviceOrderDetails.title,
-                    subtitle = serviceOrderDetails.subtitle,
-                    fields = serviceOrderDetails.fields.mapToUi(),
-                    button = serviceOrderDetails.button.toUi().copy(enabled = false),
+                    form = form.toUi(),
                     uiState = ServiceOrderUiState.Form
                 )
             }
@@ -78,88 +69,57 @@ class ServiceOrderViewModel @Inject constructor(
     }
 
     fun doOrderService() = viewModelScope.launch {
-        updateState { s ->
-            s.copy(button = s.button.copy(loading = true))
+        if (!validateWidgets(resourceProvider::getString)) return@launch
+
+
+        updateForm {
+            copy(button = button.copy(loading = true))
         }
 
-        stateSnapshot.fields.checkFields(
-            putErrors = true,
-            validators = listOf(
-                NoRequiredValidator,
-                PhoneNumberValidator,
-                NameValidator,
-                KeyboardTypeValidator
-            ),
-            getSupportingText = { field ->
-                field.getErrorText { resId ->
-                    resourceProvider.getString(resId)
-                }
-            }
-        ) { updatedFields, isValid ->
+        val form = stateSnapshot.form
 
-            if (isValid) return@checkFields
+        val queries = (form.fields + form.checkbox)
+            .filterIsInstance<WidgetUi>()
+            .associate { widget -> widget.id to widget.value() }
 
-            updateState { s ->
-                s.copy(
-                    fields = updatedFields,
-                    button = s.button.copy(
-                        enabled = false,
-                        loading = false
-                    )
-                )
-            }
-
-            return@launch
-
-        }
-
-        vodovozServiceRepository.orderService(serviceType, stateSnapshot.fields.mapToDomain())
+        vodovozServiceRepository.orderService(serviceType, queries)
             .singleResult().onSuccess { placeholder ->
                 updateState { s ->
                     s.copy(uiState = ServiceOrderUiState.Success(placeholder.toUi()))
                 }
-            }.onFailure { t ->
-                updateState { s ->
-                    s.copy(
-                        button = s.button.copy(
+            }.onFailure {
+                updateForm {
+                    copy(
+                        button = button.copy(
                             loading = false,
                             enabled = false
-                        ),
+                        )
                     )
                 }
             }
     }
 
-    fun changeField(field: FieldUi, updatedField: FieldUi) = viewModelScope.launch {
-        updateState { s ->
-            val updatedFields = s.fields.updateField(
-                field,
-                updatedField
-            )
-            s.copy(
-                fields = updatedFields,
-                button = s.button.copy(
-                    enabled = updatedFields.checkFields(
-                        validators = listOf(
-                            PhoneNumberValidator,
-                            EmptyTextValidator
-                        )
-                    )
-                )
-            )
-        }
+    override fun ServiceOrderState.withForm(form: FormUi): ServiceOrderState {
+        return copy(form = form)
     }
+
+    fun navigateToWebView(url: String, title: String) = viewModelScope.launch {
+        sendEvent(ServiceOrderEvent.GoToWebView(url, title))
+    }
+
 
     @Immutable
     data class ServiceOrderState(
-        val title: String = "",
-        val subtitle: String = "",
-        val fields: List<FieldUi> = emptyList(),
-        val button: ColorfulButtonUi = ColorfulButtonUi.Empty,
+        override val form: FormUi = FormUi.Empty,
         val uiState: ServiceOrderUiState = ServiceOrderUiState.Loading,
-    ) : State
+    ) : FormState()
 
     sealed interface ServiceOrderEvent : Event {
+        data class GoToWebView(
+            val url: String,
+            val title: String,
+        ) : ServiceOrderEvent
+
         data object GoBack : ServiceOrderEvent
     }
 
@@ -169,5 +129,6 @@ class ServiceOrderViewModel @Inject constructor(
         data object Form : ServiceOrderUiState
         data class Success(val placeholder: VodovozPlaceholderUi) : ServiceOrderUiState
     }
+
 
 }

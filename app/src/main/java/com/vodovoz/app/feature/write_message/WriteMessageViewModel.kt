@@ -4,22 +4,16 @@ import androidx.lifecycle.viewModelScope
 import com.vodovoz.app.R
 import com.vodovoz.app.common.resources.ResourcesProvider
 import com.vodovoz.app.design_system.model.toUi
-import com.vodovoz.app.design_system.model.widgets.EmptyTextValidator
-import com.vodovoz.app.design_system.model.widgets.FieldUi
-import com.vodovoz.app.design_system.model.widgets.NoRequiredValidator
-import com.vodovoz.app.design_system.model.widgets.checkFields
-import com.vodovoz.app.design_system.model.widgets.getErrorText
-import com.vodovoz.app.design_system.model.widgets.mapToUi
-import com.vodovoz.app.design_system.model.widgets.updateFieldAndResetError
-import com.vodovoz.app.design_system.model.widgets.vodovozValidators
+import com.vodovoz.app.design_system.model.widgets.WidgetUi
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
+import com.vodovoz.app.feature.preorder.model.FormUi
+import com.vodovoz.app.feature.preorder.model.toUi
 import com.vodovoz.app.feature.write_message.model.WriteMessageEvent
 import com.vodovoz.app.feature.write_message.model.WriteMessageState
 import com.vodovoz.app.feature.write_message.model.WriteMessageUiState
-import com.vodovoz.app.ui.mvi.MviViewModel
+import com.vodovoz.app.ui.mvi.FormMviViewModel
 import com.vodovoz.app.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -27,7 +21,7 @@ import javax.inject.Inject
 class WriteMessageViewModel @Inject constructor(
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val resourcesProvider: ResourcesProvider,
-) : MviViewModel<WriteMessageState, WriteMessageEvent>(WriteMessageState()) {
+) : FormMviViewModel<WriteMessageState, WriteMessageEvent>(WriteMessageState()) {
 
     init {
         fetchWriteMessageDetails()
@@ -46,70 +40,36 @@ class WriteMessageViewModel @Inject constructor(
             updateState { s ->
                 s.copy(
                     uiState = WriteMessageUiState.Body,
-                    fields = form.fields.mapToUi(),
-                    button = form.button.toUi().copy(
-                        enabled = false
-                    ),
-                    title = form.title,
-                    description = form.description
+                    form = form.toUi()
                 )
             }
         }.onFailure {
             updateState { s ->
-                s.copy(
-                    uiState = WriteMessageUiState.Error,
-                )
+                s.copy(uiState = WriteMessageUiState.Error)
             }
 
-        }
-    }
-
-    fun changeField(field: FieldUi, updatedField: FieldUi) = viewModelScope.launch {
-        updateState { s ->
-            val updatedFields = s.fields.updateFieldAndResetError(
-                field, updatedField
-            )
-            s.copy(
-                fields = updatedFields,
-                button = s.button.copy(
-                    enabled = updatedFields.checkFields(
-                        validators = listOf(
-                            NoRequiredValidator,
-                            EmptyTextValidator
-                        )
-                    )
-                )
-            )
         }
     }
 
     fun sendMessage() = viewModelScope.launch {
-        stateSnapshot.fields.checkFields(
-            putErrors = true,
-            validators = vodovozValidators,
-            getSupportingText = { field ->
-                field.getErrorText { resId ->
-                    resourcesProvider.getString(resId)
-                }
-            }
-        ) { fields, isValid ->
-            if (!isValid) {
-                updateState { s ->
-                    s.copy(
-                        fields = fields
-                    )
-                }
-                return@launch
-            }
-        }
+        if (!validateWidgets(resourcesProvider::getString)) return@launch
+
+        updateForm { copy(button = button.copy(loading = true)) }
+
+        val queries = with(stateSnapshot.form) {
+            fields + checkbox
+        }.filterIsInstance<WidgetUi>().associate { it.id to it.value() }
 
         vodovozServiceRepository.sendMessage(
-            stateSnapshot.fields.associate { it.id to it.value() }
+            queries
         ).singleResult().onSuccess { placeholder ->
             updateState { s ->
+                val form = s.form
                 s.copy(
                     uiState = WriteMessageUiState.Success(placeholder.toUi()),
-                    button = s.button.copy(loading = true)
+                    form = form.copy(
+                        button = form.button.copy(loading = false)
+                    )
                 )
             }
         }.onFailure {
@@ -118,10 +78,16 @@ class WriteMessageViewModel @Inject constructor(
                     resourcesProvider.getString(R.string.error_send_data)
                 )
             )
-            updateState { s ->
-                s.copy(button = s.button.copy(loading = false, enabled = false))
-            }
+            updateForm { copy(button = button.copy(loading = false)) }
         }
+    }
+
+    override fun WriteMessageState.withForm(form: FormUi): WriteMessageState {
+        return copy(form = form)
+    }
+
+    fun navigateToWebView(url: String, title: String) = viewModelScope.launch {
+        sendEvent(WriteMessageEvent.GoToWebView(url, title))
     }
 
 }

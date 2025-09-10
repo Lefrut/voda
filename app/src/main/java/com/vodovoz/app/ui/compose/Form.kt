@@ -94,7 +94,11 @@ private fun FormContent(
     ) {
         if (description.isNotBlank()) {
             Text(
-                modifier = Modifier.padding(bottom = 24.dp),
+                modifier = Modifier.padding(
+                    bottom = 24.dp,
+                    start = 16.dp,
+                    end = 16.dp
+                ),
                 text = description,
                 color = MaterialTheme.colorScheme.onBackground,
                 style = MaterialTheme.typography.bodySmall
@@ -127,7 +131,7 @@ private fun FormContent(
 
         VodovozButtonsColumn(
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 24.dp),
-            buttons = listOf(form.colorfulButton),
+            buttons = listOf(form.button),
             onButtonClick = { onButtonClick() }
         )
     }

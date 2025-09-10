@@ -11,13 +11,13 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import com.vodovoz.app.ui.mvi.collectAsState
 import androidx.navigation.fragment.findNavController
 import com.vodovoz.app.common.tab.TabManager
+import com.vodovoz.app.core.navigation.navigateToWebView
 import com.vodovoz.app.design_system.VodovozTheme
-import com.vodovoz.app.design_system.composables.placeholders.VodovozLongPlaceholder
 import com.vodovoz.app.design_system.effects.LifecycleEffect
 import com.vodovoz.app.ui.insets.InsetsVisibilityState
+import com.vodovoz.app.ui.mvi.collectAsState
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -55,35 +55,25 @@ class ServiceOrderFragment : Fragment() {
             setContent {
                 VodovozTheme {
                     val viewState by viewModel.collectAsState()
-                    
 
-                    when (val uiState = viewState.uiState) {
-                        is ServiceOrderViewModel.ServiceOrderUiState.Success -> {
-                            VodovozLongPlaceholder(
-                                data = uiState.placeholder,
-                                onButtonClick = {
-                                    viewModel.navigateBack()
-                                },
-                                onCloseClick = {
-                                    viewModel.navigateBack()
-                                }
-                            )
-                        }
 
-                        else -> {
-                            ServiceOrderScreen(
-                                viewModel = viewModel,
-                                viewState = viewState
-                            )
-                        }
 
-                    }
+                    ServiceOrderScreen(
+                        viewModel = viewModel,
+                        viewState = viewState
+                    )
+
 
                     LifecycleEffect {
                         viewModel.events.collect { event ->
+                            val navController = findNavController()
                             when (event) {
                                 ServiceOrderViewModel.ServiceOrderEvent.GoBack -> {
-                                    findNavController().popBackStack()
+                                    navController.popBackStack()
+                                }
+
+                                is ServiceOrderViewModel.ServiceOrderEvent.GoToWebView -> {
+                                    navController.navigateToWebView(event.url, event.title)
                                 }
                             }
                         }
