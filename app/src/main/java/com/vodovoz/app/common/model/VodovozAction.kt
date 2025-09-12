@@ -6,6 +6,60 @@ import kotlinx.parcelize.Parcelize
 
 sealed interface BaseVodovozAction
 
+
+sealed interface NewVodovozAction : BaseVodovozAction {
+    sealed interface Id : NewVodovozAction {
+        val id: Long
+
+        data class Product(override val id: Long) : Id
+        data class Products(override val id: Long) : Id
+        data class Category(override val id: Long) : Id
+        data class Brand(override val id: Long) : Id
+        data class AllProducts(override val id: Long) : Id
+    }
+
+    sealed interface Url : NewVodovozAction {
+        val url: String
+
+        data class Default(override val url: String) : Url
+        data class WithCookie(override val url: String) : Url
+    }
+
+    sealed interface Banner : NewVodovozAction {
+        val blockId: Long
+        val bannerId: Long
+
+        data class Products(
+            override val blockId: Long,
+            override val bannerId: Long,
+        ) : Banner
+
+        data class Promotions(
+            override val blockId: Long,
+            override val bannerId: Long,
+        ) : Banner
+    }
+
+    enum class NoData : NewVodovozAction {
+        AllServices,
+        AllDiscount,
+        AllNewProducts,
+        AllPromotions,
+        Delivery,
+        Profile,
+        WaterTracker,
+        BuyCertificate,
+        CoolerRental,
+        FreeCoolerRental,
+        CoolerRepair,
+        SanitaryMaintenance,
+    }
+
+    data class Unknown(val data: String) : NewVodovozAction
+
+}
+
+
 @Parcelize
 sealed interface VodovozAction : Parcelable, BaseVodovozAction {
     @Parcelize
@@ -58,5 +112,4 @@ enum class DataAllAction : VodovozAction, ButtonAction {
 sealed interface ButtonAction : BaseVodovozAction {
 
     data class Id(val id: Int) : ButtonAction
-
 }
