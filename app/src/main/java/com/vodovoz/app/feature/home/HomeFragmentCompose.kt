@@ -12,8 +12,6 @@ import androidx.activity.compose.BackHandler
 import androidx.annotation.Keep
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -66,8 +64,6 @@ import com.vodovoz.app.util.extensions.debugLog
 import com.vodovoz.app.util.extensions.isVpnActive
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onSubscription
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -112,7 +108,9 @@ class HomeFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        findNavController().currentBackStackEntry?.savedStateHandle?.remove<Long>("ratedProductId")
+        findNavController().currentBackStackEntry
+            ?.savedStateHandle
+            ?.remove<Long>("ratedProductId")
             ?.let { productId ->
                 viewModel.removeUnratedProduct(productId)
             }
@@ -185,8 +183,10 @@ class HomeFragment : Fragment() {
                 }
 
                 is HomeFlowViewModel.HomeEvents.GoToProfile -> {
-                    tabManager.setAuthRedirect(findNavController().graph.id)
-                    tabManager.selectTab(R.id.graph_profile)
+                    tabManager.apply {
+                        setAuthRedirect(findNavController().graph.id)
+                        selectTab(R.id.graph_profile)
+                    }
                 }
 
                 is HomeFlowViewModel.HomeEvents.GoToStories -> {
@@ -201,12 +201,6 @@ class HomeFragment : Fragment() {
                     findNavController().navigateToPromotionDetails(event.promotionId)
                 }
 
-                is HomeFlowViewModel.HomeEvents.ActivateButtonAction -> {
-                    event.action.activate(
-                        navController = findNavController(),
-                        tabManager = tabManager
-                    )
-                }
 
                 HomeFlowViewModel.HomeEvents.GoToSearch -> {
                     findNavController().navigateToSearch()
@@ -218,23 +212,6 @@ class HomeFragment : Fragment() {
 
                 HomeFlowViewModel.HomeEvents.ShowSpeechRecognizer -> {
                     searchNavigator.navigateToVoiceSearch()
-                }
-
-                is HomeFlowViewModel.HomeEvents.ActivateDataAllAction -> {
-                    event.action.activate(
-                        navController = findNavController(),
-                        tabManager = tabManager
-                    )
-                }
-
-                is HomeFlowViewModel.HomeEvents.ActivateVodovozAction -> {
-                    val cookie = cookieManager.fetchCookieSessionId() ?: ""
-                    event.action.activate(
-                        navController = findNavController(),
-                        context = requireActivity(),
-                        cookie = cookie,
-                        tabManager = tabManager
-                    )
                 }
 
                 HomeFlowViewModel.HomeEvents.GoToOrdersHistory -> {
@@ -294,8 +271,18 @@ class HomeFragment : Fragment() {
                         )
                     } catch (e: ActivityNotFoundException) {
                         startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(event.url)))
+                    } finally {
                     }
 
+                }
+
+                is HomeFlowViewModel.HomeEvents.ActivateAction -> {
+                    event.action.activate(
+                        navController = findNavController(),
+                        context = requireActivity(),
+                        cookie = cookieManager.fetchCookieSessionId() ?: "",
+                        tabManager = tabManager
+                    )
                 }
             }
         }
@@ -317,9 +304,10 @@ class HomeFragment : Fragment() {
     @Keep
     private fun observeDeepLinkFromSiteState() = lifecycleScope.launch {
         repeatOnLifecycle(Lifecycle.State.CREATED) {
-            delay(2000L)
-            siteStateManager.observeDeepLinkPath().mapNotNull { path -> path }
+            siteStateManager.observeDeepLinkPath()
                 .collect { path ->
+                    if (path == null) return@collect
+
                     debugLog { "DeepLinkPath: $path" }
                     when (path) {
                         "catalog" -> {
@@ -393,8 +381,8 @@ class HomeFragment : Fragment() {
     @Keep
     private fun observePushFromSiteState() = lifecycleScope.launch {
         repeatOnLifecycle(Lifecycle.State.CREATED) {
-            delay(2000L)
-            siteStateManager.observePush().mapNotNull { it }.collect { pushData ->
+            siteStateManager.observePush().collect { pushData ->
+                if (pushData == null) return@collect
                 debugLog { "PushFromSiteState: $pushData" }
 
                 when (pushData.path) {

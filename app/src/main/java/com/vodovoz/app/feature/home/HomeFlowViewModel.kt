@@ -8,6 +8,7 @@ import com.vodovoz.app.R
 import com.vodovoz.app.common.account.AccountManager
 import com.vodovoz.app.common.cart.CartManager
 import com.vodovoz.app.common.like.LikeManager
+import com.vodovoz.app.common.model.BaseVodovozAction
 import com.vodovoz.app.common.model.ButtonAction
 import com.vodovoz.app.common.model.DataAllAction
 import com.vodovoz.app.common.model.GlobalAppLinks
@@ -111,7 +112,8 @@ class HomeFlowViewModel @Inject constructor(
         val banners = bannersDeferred.awaitResultOrNull()
         val sectionPopularCategories = sectionPopularCategoriesDeferred.awaitResultOrNull()
         val orderMenu = orderMenuDeferred.awaitResultOrNull()
-        val sectionsTopAndBottom = sectionsTopAndBottomDeferred.awaitResultOrNull() ?: TopAndBottomSectionsModel.Empty
+        val sectionsTopAndBottom = sectionsTopAndBottomDeferred.awaitResultOrNull(
+        ) ?: TopAndBottomSectionsModel.Empty
         val topSection = sectionsTopAndBottom.topSection.toUi()
         val bottomSection = sectionsTopAndBottom.bottomSection.toUi()
 
@@ -266,7 +268,7 @@ class HomeFlowViewModel @Inject constructor(
     }
 
     fun handleButtonAction(action: ButtonAction) = viewModelScope.launch {
-        sendEvent(HomeEvents.ActivateButtonAction(action))
+        sendEvent(HomeEvents.ActivateAction(action))
     }
 
     fun navigateToSearch() = viewModelScope.launch {
@@ -314,7 +316,7 @@ class HomeFlowViewModel @Inject constructor(
         if (popularCategory.action == null) {
             sendEvent(HomeEvents.GoToCategoryProductList(popularCategory.id))
         } else {
-            sendEvent(HomeEvents.ActivateDataAllAction(popularCategory.action))
+            sendEvent(HomeEvents.ActivateAction(popularCategory.action))
         }
     }
 
@@ -338,13 +340,13 @@ class HomeFlowViewModel @Inject constructor(
     }
 
     fun activateBannerAction(banner: BannerUi) = viewModelScope.launch {
-        sendEvent(HomeEvents.ActivateVodovozAction(banner.action))
+        sendEvent(HomeEvents.ActivateAction(banner.action))
     }
 
     fun activateSpecialPromotionAction(action: VodovozAction) = viewModelScope.launch {
         updateState { s -> s.copy(showSpecialPromotionBS = false) }
         delay(100L)
-        sendEvent(HomeEvents.ActivateVodovozAction(action))
+        sendEvent(HomeEvents.ActivateAction(action))
     }
 
 
@@ -496,10 +498,8 @@ class HomeFlowViewModel @Inject constructor(
         data class GoToStories(val storyId: Long, val stories: List<StoryUi>) : HomeEvents()
         data class GoToProductDetails(val productId: Long) : HomeEvents()
         data class GoToPromotionDetails(val promotionId: Long) : HomeEvents()
-        data class ActivateButtonAction(val action: ButtonAction) : HomeEvents()
+        data class ActivateAction(val action: BaseVodovozAction): HomeEvents()
         data class GoToCategoryProductList(val categoryId: Long) : HomeEvents()
-        data class ActivateDataAllAction(val action: DataAllAction) : HomeEvents()
-        data class ActivateVodovozAction(val action: VodovozAction) : HomeEvents()
         data class GoToOrderDetails(val orderId: Long) : HomeEvents()
         data class GoToWebView(val url: String, val title: String) : HomeEvents()
         data class GoToProductAnalogs(val productId: Long) : HomeEvents()

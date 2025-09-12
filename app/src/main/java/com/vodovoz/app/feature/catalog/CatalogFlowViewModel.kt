@@ -3,6 +3,7 @@ package com.vodovoz.app.feature.catalog
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.viewModelScope
+import com.vodovoz.app.common.model.BaseVodovozAction
 import com.vodovoz.app.ui.mvi.Event
 import com.vodovoz.app.ui.mvi.MviViewModel
 import com.vodovoz.app.ui.mvi.State
@@ -59,7 +60,7 @@ class CatalogFlowViewModel @Inject constructor(
         if (catalogCategory.childCategories.isNotEmpty()) {
             sendEvent(CatalogEvents.GoToSubCategories(catalogCategory))
         } else if (catalogCategory.action != null) {
-            sendEvent(CatalogEvents.ActivateDataAllAction(catalogCategory.action))
+            sendEvent(CatalogEvents.ActivateAction(catalogCategory.action))
         } else {
             sendEvent(CatalogEvents.GoToProductList(catalogCategory))
         }
@@ -89,14 +90,13 @@ class CatalogFlowViewModel @Inject constructor(
     }
 
     fun activateBannerAction(banner: BannerUi) = viewModelScope.launch {
-        sendEvent(CatalogEvents.ActivateVodovozAction(banner.action))
+        sendEvent(CatalogEvents.ActivateAction(banner.action))
     }
 
     sealed class CatalogEvents : Event {
         data class GoToSubCategories(val catalogCategory: ParentCategoryUi) : CatalogEvents()
         data class GoToProductList(val catalogCategory: ParentCategoryUi) : CatalogEvents()
-        data class ActivateDataAllAction(val action: DataAllAction) : CatalogEvents()
-        data class ActivateVodovozAction(val action: VodovozAction) : CatalogEvents()
+        data class ActivateAction(val action: BaseVodovozAction) : CatalogEvents()
 
         data object GoToProfile : CatalogEvents()
         data object GoToSearch : CatalogEvents()

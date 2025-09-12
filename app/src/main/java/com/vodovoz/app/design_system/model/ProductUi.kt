@@ -19,9 +19,9 @@ import com.vodovoz.app.design_system.ExtendedTheme
 import com.vodovoz.app.design_system.composables.button.QuantityButtonSmall
 import com.vodovoz.app.design_system.composables.button.VodovozButtonDefaults
 import com.vodovoz.app.design_system.composables.button.VodovozButtonSmall
-import com.vodovoz.app.domain.general.model.product.PopularCategoryModel
 import com.vodovoz.app.domain.general.model.product.ButtonModel
 import com.vodovoz.app.domain.general.model.product.CategoryWithProductsModel
+import com.vodovoz.app.domain.general.model.product.PopularCategoryModel
 import com.vodovoz.app.domain.general.model.product.ProductModel
 import com.vodovoz.app.domain.general.model.product.SectionModel
 import com.vodovoz.app.domain.general.model.promotion.LabelModel
@@ -280,7 +280,7 @@ data class ProductUi(
     val image: String,
     val labels: List<LabelUi>,
     val isAvailable: Boolean,
-    val pricePerUnit: Int?,
+    val pricePerUnit: String?,
     val unitOfMeasurement: String?,
     val button: ColorfulButtonUi?,
 
@@ -354,13 +354,7 @@ val ProductUi.notPercentLabels get() = labels - percentLabels.toSet()
 
 @Composable
 fun ProductUi.PricePerUnitText(modifier: Modifier = Modifier) {
-    val pricePerUnitText =
-        if (pricePerUnit != null && unitOfMeasurement != null) stringResource(
-            R.string.unit_of_measurement,
-            pricePerUnit,
-            unitOfMeasurement
-        )
-        else ""
+    val pricePerUnitText = pricePerUnit ?: ""
 
     Text(
         modifier = modifier,

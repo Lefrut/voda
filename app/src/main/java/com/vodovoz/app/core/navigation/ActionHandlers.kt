@@ -6,6 +6,7 @@ import android.net.Uri
 import android.webkit.CookieManager
 import androidx.navigation.NavController
 import com.vodovoz.app.R
+import com.vodovoz.app.common.model.BaseVodovozAction
 import com.vodovoz.app.common.model.ButtonAction
 import com.vodovoz.app.common.model.DataAllAction
 import com.vodovoz.app.common.model.GlobalAppLinks
@@ -13,18 +14,14 @@ import com.vodovoz.app.common.model.VodovozAction
 import com.vodovoz.app.common.tab.TabManager
 import com.vodovoz.app.core.network.VodovozWebConfig
 
-inline fun<reified T: DataAllAction> T.activate(
+
+//todo - migrate to this
+fun BaseVodovozAction.activate(
     navController: NavController,
-    tabManager: TabManager,
-    activators: List<DataAllActionActivator> = emptyList(),
+    context: Context? = null,
+    cookie: String = "",
+    tabManager: TabManager? = null,
 ) {
-    val currentActivator = activators.firstOrNull { (it.action as? T) != null }
-
-    if (currentActivator != null) {
-        currentActivator.activate()
-        return
-    }
-
     when (this) {
         DataAllAction.AllDiscount -> {
             navController.navigateToHurryBuyUpProducts()
@@ -45,8 +42,11 @@ inline fun<reified T: DataAllAction> T.activate(
         }
 
         DataAllAction.Profile -> {
-            tabManager.setAuthRedirect(navController.graph.id)
-            tabManager.selectTab(R.id.graph_profile)
+            tabManager?.apply {
+                setAuthRedirect(navController.graph.id)
+                selectTab(R.id.graph_profile)
+            }
+
         }
 
         DataAllAction.WaterTracker -> {
@@ -82,40 +82,10 @@ inline fun<reified T: DataAllAction> T.activate(
 
         }
 
-    }
-}
-
-fun ButtonAction.activate(
-    navController: NavController,
-    tabManager: TabManager,
-    activators: List<DataAllActionActivator> = emptyList(),
-) {
-    when (this) {
-        is ButtonAction.Action -> {
-            value.activate(navController, tabManager, activators)
-        }
-
         is ButtonAction.Id -> {
             navController.navigateToButtonProductList(id)
         }
-    }
-}
 
-inline fun <reified T : VodovozAction> T.activate(
-    navController: NavController,
-    context: Context,
-    cookie: String,
-    tabManager: TabManager,
-    activators: List<VodovozActionActivator> = emptyList(),
-) {
-    val currentActivator = activators.firstOrNull { (it.action as? T) != null }
-
-    if (currentActivator != null) {
-        currentActivator.activate()
-        return
-    }
-
-    when (this) {
         is VodovozAction.Brand -> {
             navController.navigateToBrandProductList(id)
         }
@@ -140,11 +110,13 @@ inline fun <reified T : VodovozAction> T.activate(
             navController.navigateToPromotions(blockId, bannerId)
         }
 
-        is VodovozAction.Url -> {
-            runCatching {
-                val openLinkIntent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-                context.startActivity(openLinkIntent)
-            }
+        is VodovozAction.Unknown -> {
+
+        }
+
+        is VodovozAction.Url -> runCatching {
+            val openLinkIntent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+            context?.startActivity(openLinkIntent)
         }
 
         is VodovozAction.UrlWithCookie -> {
@@ -153,22 +125,11 @@ inline fun <reified T : VodovozAction> T.activate(
             webCookieManager.setCookie(VodovozWebConfig.VODOVOZ_URL, cookie)
             navController.navigateToWebView(url, "")
         }
-
-        is DataAllAction -> {
-            val dataAllActivators = activators.mapNotNull { it as? DataAllActionActivator }
-            activate(navController, tabManager, dataAllActivators)
-        }
-
-        is VodovozAction.Unknown -> {
-            /**
-             * You can create activator
-             * @see createActivator
-             * */
-        }
     }
 }
 
-open class Activator<out T : VodovozAction>(
+
+open class Activator<out T : BaseVodovozAction>(
     val action: T,
     private val activate: (T) -> Unit,
 ) {

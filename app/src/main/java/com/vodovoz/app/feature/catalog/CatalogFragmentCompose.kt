@@ -6,24 +6,23 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import com.vodovoz.app.ui.mvi.collectAsState
 import androidx.navigation.fragment.findNavController
 import com.vodovoz.app.R
 import com.vodovoz.app.common.account.AccountManager
 import com.vodovoz.app.common.cookie.CookieManager
 import com.vodovoz.app.common.tab.TabManager
+import com.vodovoz.app.core.navigation.ContentSearchNavigator
 import com.vodovoz.app.core.navigation.activate
 import com.vodovoz.app.core.navigation.navigateToCategoryProductList
 import com.vodovoz.app.core.navigation.navigateToSubCategories
 import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.composables.placeholders.NetworkErrorPlaceholder
 import com.vodovoz.app.design_system.effects.LifecycleEffect
-import com.vodovoz.app.core.navigation.ContentSearchNavigator
+import com.vodovoz.app.ui.mvi.collectAsState
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -65,7 +64,7 @@ class CatalogFragment : Fragment() {
             setContent {
                 VodovozTheme {
                     val viewState by viewModel.collectAsState()
-                    
+
 
                     when (viewState.uiState) {
                         CatalogFlowViewModel.CatalogUiState.Error -> {
@@ -111,10 +110,6 @@ class CatalogFragment : Fragment() {
                         findNavController().navigateToCategoryProductList(event.catalogCategory.id)
                     }
 
-                    is CatalogFlowViewModel.CatalogEvents.ActivateDataAllAction -> {
-                        event.action.activate(findNavController(), tabManager)
-                    }
-
                     CatalogFlowViewModel.CatalogEvents.GoToScanner -> {
                         searchNavigator.navigateToImageSearch()
                     }
@@ -123,7 +118,7 @@ class CatalogFragment : Fragment() {
                         searchNavigator.navigateToVoiceSearch()
                     }
 
-                    is CatalogFlowViewModel.CatalogEvents.ActivateVodovozAction -> {
+                    is CatalogFlowViewModel.CatalogEvents.ActivateAction -> {
                         event.action.activate(
                             navController = findNavController(),
                             context = requireActivity(),

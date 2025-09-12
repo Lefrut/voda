@@ -25,7 +25,7 @@ data class TOVAR_DETAIL_DTO(
     val DOCUMENTS: DOCUMENTS_DTO?,
     @Json(name = "DOPKNOPKI")
     val DOPKNOPKI: DOPKNOPKI_DTO?,
-    @Json(name = "DOPTSENA_ZA_EDINICY")
+    @Json(name = "PROPERTY_TSENA_ZA_EDINITSU_TOVARA_VALUE")
     val DOPTSENA_ZA_EDINICY: String?,
     @Json(name = "EDINICAIZMERENIYA")
     val EDINICAIZMERENIYA: String?,

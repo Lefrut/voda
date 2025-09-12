@@ -66,6 +66,6 @@ private fun String.toButtonAction(): ButtonAction {
     return if (id != null) {
         ButtonAction.Id(id)
     } else {
-        ButtonAction.Action(toDataAllAction())
+        toDataAllAction()
     }
 }
