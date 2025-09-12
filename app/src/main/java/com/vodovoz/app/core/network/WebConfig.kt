@@ -1,5 +1,7 @@
 package com.vodovoz.app.core.network
 
+import okhttp3.HttpUrl.Companion.toHttpUrl
+
 data object WebConfig {
 
     private const val MAPKIT_PROTOCOL = "https://"
@@ -24,8 +26,6 @@ data object VodovozWebConfig {
     private val VODOVOZ_URL_PATH = "$VODOVOZ_URL$VODOVOZ_PATH"
     private val VODOVOZ_INFO_URL = "${VODOVOZ_URL_PATH}informatsiya/"
 
-    val ABOUT_PAYMENT_URL = "${VODOVOZ_INFO_URL}oplata.php"
-    val ABOUT_DELIVERY_URL = "${VODOVOZ_INFO_URL}dosytavka.php"
     //todo - replace to GlobalAppLinks
     val ABOUT_SHOP_URL = "${VODOVOZ_INFO_URL}omagazine.php"
 

@@ -27,13 +27,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.vodovoz.app.design_system.composables.button.VodovozRadioButton
 import com.vodovoz.app.design_system.composables.card.VodovozOutlinedCard
-import com.vodovoz.app.feature.profile.waterapp.model.WaterAppActivityLevel
+import com.vodovoz.app.feature.profile.waterapp.model.WaterAppActivityLevelUi
 
 @Composable
 fun WaterAppActivityStage(
     modifier: Modifier = Modifier,
-    currentActivityLevel: WaterAppActivityLevel,
-    onActivityClick: (WaterAppActivityLevel) -> Unit,
+    currentActivityLevel: WaterAppActivityLevelUi,
+    onActivityClick: (WaterAppActivityLevelUi) -> Unit,
 ) {
     Column(modifier = modifier.fillMaxSize()) {
 
@@ -45,7 +45,7 @@ fun WaterAppActivityStage(
             verticalArrangement = Arrangement.spacedBy(16.dp),
             modifier = Modifier.padding(horizontal = 16.dp)
         ) {
-            WaterAppActivityLevel.entries.forEach { activityLevel ->
+            WaterAppActivityLevelUi.entries.forEach { activityLevel ->
                 key(activityLevel.name) {
                     ActivityLevelCard(
                         selected = currentActivityLevel == activityLevel,
@@ -63,8 +63,8 @@ fun WaterAppActivityStage(
 fun ActivityLevelCard(
     modifier: Modifier = Modifier,
     selected: Boolean,
-    activityLevel: WaterAppActivityLevel,
-    onClick: (WaterAppActivityLevel) -> Unit,
+    activityLevel: WaterAppActivityLevelUi,
+    onClick: (WaterAppActivityLevelUi) -> Unit,
 ) {
 
     VodovozOutlinedCard(

@@ -31,14 +31,17 @@ import com.vodovoz.app.feature.cart.composables.PromotionCodeBottomSheet
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CartScreen(viewModel: CartFlowViewModel, viewState: CartFlowViewModel.CartState) {
+
+    val uiState = viewState.uiState
+
     Column(modifier = Modifier.fillMaxSize()) {
         CartTopBar(
             title = viewState.title.ifEmpty {
-                viewState.uiState.placeholderOrNull?.title ?: ""
+                uiState.placeholderOrNull?.title ?: ""
             },
             onShareClick = { }
         )
-        when (val uiState = viewState.uiState) {
+        when (uiState) {
             CartFlowViewModel.CartUiState.Cart -> {
                 VodovozPullToRefreshBox(
                     isRefreshing = viewState.showRefreshIndicator,
@@ -113,7 +116,9 @@ fun CartScreen(viewModel: CartFlowViewModel, viewState: CartFlowViewModel.CartSt
                     awaitEachGesture {
                         awaitPointerEvent(PointerEventPass.Initial)
                             .changes
-                            .forEach { change -> change.consume() }
+                            .forEach { change ->
+                                change.consume()
+                            }
                     }
                 },
             contentAlignment = Alignment.Center
@@ -148,7 +153,7 @@ fun CartScreen(viewModel: CartFlowViewModel, viewState: CartFlowViewModel.CartSt
         VodovozDialog(
             title = stringResource(id = R.string.clear_cart_title),
             description = stringResource(id = R.string.clear_cart_description),
-            acceptButtonText = stringResource(id = R.string.clear_cart_accept_text).uppercase(),
+            acceptButtonText = stringResource(id = R.string.delete).uppercase(),
             cancelButtonText = stringResource(id = R.string.clear_cart_cancel_text).uppercase(),
             onDismiss = {
                 viewModel.closeClearCartDialog()

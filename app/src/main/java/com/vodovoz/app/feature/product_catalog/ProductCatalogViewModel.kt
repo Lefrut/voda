@@ -46,7 +46,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -61,7 +60,7 @@ class ProductCatalogViewModel @Inject constructor(
     private val userPreferencesRepository: UserPreferencesRepository,
 ) : PagingProductsMviViewModel<ProductUi, ProductCatalogViewModel.ProductCatalogState, ProductCatalogViewModel.ProductCatalogEvent>(
     state = ProductCatalogState(),
-    blockedProductsFlow = cartManager.blockedProductsState,
+    blockedProductsFlow = cartManager.blockedProductsFlow,
     favoritesFlow = likeManager.observeLikes(),
     cartFlow = cartManager.observeCarts(),
     canViewAdultProducts = userPreferencesRepository.canViewAdultProducts

@@ -22,8 +22,6 @@ import com.vodovoz.app.ui.paging.ItemsState
 import com.vodovoz.app.ui.paging.ProductsMviViewModel
 import com.vodovoz.app.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -37,7 +35,7 @@ class OrderDetailsFlowViewModel @Inject constructor(
     userPreferencesRepository: UserPreferencesRepository,
 ) : ProductsMviViewModel<OrderProductUi, OrderDetailsFlowViewModel.OrderDetailsState, OrderDetailsFlowViewModel.OrderDetailsEvent>(
     state = OrderDetailsState(),
-    blockedProductsFlow = cartManager.blockedProductsState,
+    blockedProductsFlow = cartManager.blockedProductsFlow,
     favoritesFlow = likeManager.observeLikes(),
     cartFlow = cartManager.observeCarts(),
     canViewAdultProducts = userPreferencesRepository.canViewAdultProducts
@@ -124,7 +122,7 @@ class OrderDetailsFlowViewModel @Inject constructor(
             orderDetailsButton.id == "povtorit" -> {
                 vodovozServiceRepository.repeatOrder(orderId).singleResult()
                     .onSuccess {
-                        cartManager.updateCartListState(true)
+                        cartManager.updateRefreshCart(true)
                         sendEvent(OrderDetailsEvent.GoToCart)
                     }
             }

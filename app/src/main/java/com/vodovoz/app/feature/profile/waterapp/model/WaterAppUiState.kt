@@ -76,7 +76,7 @@ sealed interface WaterAppUiState {
     data object GoalCompleted : WaterAppUiState
 
     companion object {
-        val checkpoints: List<WaterAppUiState> = listOf(Welcome, Settings, Main) + UserData.entries
+        val checkpoints: List<WaterAppUiState> = listOf(Welcome, Settings, Main)
     }
 
 

@@ -26,7 +26,6 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.singleOrNull
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import javax.inject.Inject
@@ -42,7 +41,7 @@ class SearchFlowViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
 ) : ProductsMviViewModel<ProductUi, SearchFlowViewModel.SearchState, SearchFlowViewModel.SearchEvents>(
     state = SearchState(),
-    blockedProductsFlow = cartManager.blockedProductsState,
+    blockedProductsFlow = cartManager.blockedProductsFlow,
     favoritesFlow = likeManager.observeLikes(),
     cartFlow = cartManager.observeCarts(),
     canViewAdultProducts = userPreferencesRepository.canViewAdultProducts

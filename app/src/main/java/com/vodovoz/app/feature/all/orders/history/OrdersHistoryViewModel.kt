@@ -28,7 +28,6 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.mapLatest
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -169,7 +168,7 @@ class OrdersHistoryViewModel @Inject constructor(
             button.id == "povtorit" -> {
                 vodovozServiceRepository.repeatOrder(ordersHistoryItem.id).singleResult()
                     .onSuccess {
-                        cartManager.updateCartListState(true)
+                        cartManager.updateRefreshCart(true)
                         sendEvent(AllOrdersEvent.GoToCart)
                     }
             }

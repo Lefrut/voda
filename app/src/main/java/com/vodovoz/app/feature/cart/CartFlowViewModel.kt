@@ -28,7 +28,6 @@ import com.vodovoz.app.ui.paging.ProductsMviViewModel
 import com.vodovoz.app.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -43,7 +42,7 @@ class CartFlowViewModel @Inject constructor(
     userPreferencesRepository: UserPreferencesRepository,
 ) : ProductsMviViewModel<CartItemUi, CartFlowViewModel.CartState, CartFlowViewModel.CartEvents>(
     state = CartState(),
-    blockedProductsFlow = cartManager.blockedProductsState,
+    blockedProductsFlow = cartManager.blockedProductsFlow,
     favoritesFlow = likeManager.observeLikes(),
     cartFlow = cartManager.observeCarts(),
     canViewAdultProducts = userPreferencesRepository.canViewAdultProducts
@@ -54,10 +53,10 @@ class CartFlowViewModel @Inject constructor(
     }
 
     private suspend fun listenCartUpdates() {
-        cartManager.observeUpdateCartList().filter { update -> update }.collect {
+        cartManager.observeRefreshCart().filter { update -> update }.collect {
             refresh()
             tabManager.updateBottomNavCartState()
-            cartManager.updateCartListState(false)
+            cartManager.updateRefreshCart(false)
         }
     }
 

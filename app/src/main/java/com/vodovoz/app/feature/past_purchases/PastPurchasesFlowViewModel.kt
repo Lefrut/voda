@@ -28,7 +28,6 @@ import com.vodovoz.app.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -41,7 +40,7 @@ class PastPurchasesFlowViewModel @Inject constructor(
     userPreferencesRepository: UserPreferencesRepository
 ) : PagingProductsMviViewModel<ProductUi, PastPurchasesFlowViewModel.PastPurchasesState, PastPurchasesFlowViewModel.PastPurchasesEvents>(
     state = PastPurchasesState(),
-    blockedProductsFlow = cartManager.blockedProductsState,
+    blockedProductsFlow = cartManager.blockedProductsFlow,
     favoritesFlow = likeManager.observeLikes(),
     cartFlow = cartManager.observeCarts(),
     canViewAdultProducts = userPreferencesRepository.canViewAdultProducts

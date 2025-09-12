@@ -6,13 +6,21 @@ import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.isActive
 
 fun Modifier.detectTap(onClick: () -> Unit): Modifier {
     return pointerInput(Unit) {
-        awaitEachGesture {
-            awaitFirstDown(pass = PointerEventPass.Initial)
-            waitForUpOrCancellation(pass = PointerEventPass.Initial)
-            onClick()
+        awaitPointerEventScope {
+            while (true){
+                awaitFirstDown(true, PointerEventPass.Initial)
+                val up = waitForUpOrCancellation(PointerEventPass.Initial)
+
+
+                if (up != null && !up.isConsumed) {
+                    onClick()
+                }
+            }
         }
     }
 }

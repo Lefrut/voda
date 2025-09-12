@@ -38,7 +38,6 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -54,7 +53,7 @@ class ProductDetailsFlowViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
 ) : ProductsMviViewModel<VodovozSectionUi<ProductUi>, ProductDetailsFlowViewModel.ProductDetailsState, ProductDetailsFlowViewModel.ProductDetailsEvents>(
     state = ProductDetailsState(),
-    blockedProductsFlow = cartManager.blockedProductsState,
+    blockedProductsFlow = cartManager.blockedProductsFlow,
     favoritesFlow = likeManager.observeLikes(),
     cartFlow = cartManager.observeCarts(),
     canViewAdultProducts = userPreferencesRepository.canViewAdultProducts
@@ -85,7 +84,7 @@ class ProductDetailsFlowViewModel @Inject constructor(
             }
             .launchIn(scope)
 
-        cartManager.blockedProductsState
+        cartManager.blockedProductsFlow
             .onEach { blocked ->
                 updateState { s ->
                     s.copy(
@@ -111,7 +110,7 @@ class ProductDetailsFlowViewModel @Inject constructor(
             .launchIn(scope)
     }
 
-    suspend fun listenCartUpdates() = cartManager.observeUpdateCartList().onEach { update ->
+    suspend fun listenCartUpdates() = cartManager.observeRefreshCart().onEach { update ->
         if (update) {
             vodovozServiceRepository.getPresentInfo().singleResult().onSuccess { presentInfo ->
                 updateState { s ->

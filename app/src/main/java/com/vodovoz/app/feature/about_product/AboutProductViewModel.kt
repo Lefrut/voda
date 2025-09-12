@@ -19,10 +19,8 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.mapLatest
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -35,7 +33,7 @@ class AboutProductViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
 ) : ProductsMviViewModel<ProductUi, AboutProductState, AboutProductEvent>(
     state = AboutProductState(),
-    blockedProductsFlow = cartManager.blockedProductsState,
+    blockedProductsFlow = cartManager.blockedProductsFlow,
     cartFlow = cartManager.observeCarts(),
     favoritesFlow = MutableStateFlow(emptyMap()),
     canViewAdultProducts = MutableStateFlow(false)
@@ -79,7 +77,7 @@ class AboutProductViewModel @Inject constructor(
 
     @OptIn(ExperimentalCoroutinesApi::class)
     suspend fun listenCartUpdates() =
-        cartManager.observeUpdateCartList().filter { update -> update }.mapLatest {
+        cartManager.observeRefreshCart().filter { update -> update }.mapLatest {
             updatePresentHtml()
         }.collect()
 

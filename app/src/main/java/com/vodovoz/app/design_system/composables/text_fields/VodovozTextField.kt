@@ -17,6 +17,7 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActionScope
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -175,9 +176,9 @@ fun BaseVodovozTextField(
         keyboardOptions = keyboardOptions,
         keyboardActions = keyboardActions,
         interactionSource = interactionSource,
-        singleLine = singleLine,
+        singleLine = maxLines == 1 || singleLine,
         maxLines = maxLines,
-        minLines = minLines
+        minLines = minLines,
     ) { innerTextField ->
         Column {
             if (!label.isNullOrEmpty()) {
@@ -188,6 +189,7 @@ fun BaseVodovozTextField(
                     modifier = Modifier.padding(bottom = 4.dp)
                 )
             }
+
             Row(
                 Modifier
                     .fillMaxWidth()
@@ -385,7 +387,7 @@ data object VodovozTextFieldDefaults {
 
 }
 
-@Preview
+@Preview(apiLevel = 34)
 @Composable
 private fun VodovozTextFieldPreview() {
     VodovozTheme {
@@ -395,16 +397,24 @@ private fun VodovozTextFieldPreview() {
                 .heightIn(300.dp)
                 .background(MaterialTheme.colorScheme.surface)
         ) {
+            
+            val value = remember {
+                mutableStateOf("")
+            }
 
             VodovozTextField(
                 modifier = Modifier.padding(horizontal = 16.dp),
-                value = "",
+                value = value.value,
                 hint = "Введите значение",
-                onValueChange = {},
+                onValueChange = {
+                    value.value = it
+                },
                 label = "Поле ввода",
                 supportingText = "",
                 isError = false,
-                prefix = "от"
+                prefix = "от",
+                minLines = 1,
+                maxLines = 1
             )
         }
     }

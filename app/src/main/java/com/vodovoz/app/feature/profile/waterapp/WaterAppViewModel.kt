@@ -6,7 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.vodovoz.app.common.water_app.WaterApp
 import com.vodovoz.app.domain.general.respository.WaterAppRepository
 import com.vodovoz.app.feature.profile.waterapp.model.ReminderIntervalUi
-import com.vodovoz.app.feature.profile.waterapp.model.WaterAppActivityLevel
+import com.vodovoz.app.feature.profile.waterapp.model.WaterAppActivityLevelUi
 import com.vodovoz.app.feature.profile.waterapp.model.WaterAppUiState
 import com.vodovoz.app.feature.profile.waterapp.model.WaterStepUi
 import com.vodovoz.app.feature.profile.waterapp.model.toStage
@@ -47,7 +47,7 @@ class WaterAppViewModel @Inject constructor(
         waterAppRepository.stageFlow.debounce(200).take(1).onEach { stageResult ->
             stageResult.onSuccess { stage ->
                 val currentUiState = WaterAppUiState.checkpoints.firstOrNull { waterAppUiState ->
-                    waterAppUiState.toString() == stage.name
+                    waterAppUiState.toStage() == stage
                 } ?: WaterAppUiState.Welcome
 
                 updateState { s ->
@@ -149,15 +149,15 @@ class WaterAppViewModel @Inject constructor(
     fun goToNextStage(currentStage: WaterAppUiState.UserData) = viewModelScope.launch {
         val wasCompleteSettings = stateSnapshot.completeSettings
         val userInfo = stateSnapshot.userInfo
+        val waterGoalUiState = WaterAppUiState.WaterGoal
 
-        val nextUiState = currentStage.next() ?: run {
-            waterAppRepository.saveUserInfo(userInfo)
-            waterAppRepository.saveDailyGoal(WaterApp.calculateDailyGoal(userInfo))
-            waterAppRepository.saveStage(WaterAppUiState.Settings.toStage())
+        val nextUiState = currentStage.next() ?: waterGoalUiState
 
-            WaterAppUiState.WaterGoal
+        if(nextUiState == waterGoalUiState) with(waterAppRepository){
+            saveUserInfo(userInfo)
+            saveDailyGoal(WaterApp.calculateDailyGoal(userInfo))
+            saveStage(WaterAppUiState.Settings.toStage())
         }
-
 
         updateState { s ->
             s.copy(
@@ -168,7 +168,7 @@ class WaterAppViewModel @Inject constructor(
         }
     }
 
-    fun selectActivityLevel(activityLevel: WaterAppActivityLevel) {
+    fun selectActivityLevel(activityLevel: WaterAppActivityLevelUi) {
         updateUserInfo {
             copy(
                 activityLevel = WaterApp.ActivityLevel.entries.firstOrNull { level ->
@@ -197,9 +197,10 @@ class WaterAppViewModel @Inject constructor(
 
     fun saveNotificationSettings() = viewModelScope.launch {
         val mainUiState = WaterAppUiState.Main
+        val userInfo = stateSnapshot.userInfo
         val notificationSettings = stateSnapshot.notificationSettings
         val updatedDailyGoal = stateSnapshot.dailyGoal.copy(
-            totalMl = WaterApp.calculateWaterNorm(stateSnapshot.userInfo)
+            totalMl = WaterApp.calculateWaterNorm(userInfo)
         )
 
         updateState { s ->
@@ -212,7 +213,7 @@ class WaterAppViewModel @Inject constructor(
 
         waterAppHelper.runOrCancelWorkManager(notificationSettings)
         listOf(
-            launch { waterAppRepository.saveUserInfo(stateSnapshot.userInfo) },
+            launch { waterAppRepository.saveUserInfo(userInfo) },
             launch { waterAppRepository.saveDailyGoal(updatedDailyGoal) },
             launch { waterAppRepository.saveNotificationSettings(notificationSettings) },
             launch { waterAppRepository.saveStage(mainUiState.toStage()) },

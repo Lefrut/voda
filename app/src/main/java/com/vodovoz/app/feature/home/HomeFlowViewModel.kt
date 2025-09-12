@@ -22,7 +22,6 @@ import com.vodovoz.app.design_system.model.StoryUi
 import com.vodovoz.app.design_system.model.mapToUi
 import com.vodovoz.app.design_system.model.toUi
 import com.vodovoz.app.design_system.model.toVodovozSectionUi
-import com.vodovoz.app.domain.general.model.product.SectionModel
 import com.vodovoz.app.domain.general.model.product.TopAndBottomSectionsModel
 import com.vodovoz.app.domain.general.model.promotion.toUi
 import com.vodovoz.app.domain.general.respository.UserPreferencesRepository
@@ -57,7 +56,6 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.shareIn
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.flow.withIndex
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
@@ -75,7 +73,7 @@ class HomeFlowViewModel @Inject constructor(
     private val userPreferencesRepository: UserPreferencesRepository,
 ) : ProductsMviViewModel<HomeListItem<*>, HomeFlowViewModel.HomeState, HomeFlowViewModel.HomeEvents>(
     state = HomeState(),
-    blockedProductsFlow = cartManager.blockedProductsState,
+    blockedProductsFlow = cartManager.blockedProductsFlow,
     favoritesFlow = likeManager.observeLikes(),
     cartFlow = cartManager.observeCarts(),
     canViewAdultProducts = userPreferencesRepository.canViewAdultProducts
@@ -161,7 +159,7 @@ class HomeFlowViewModel @Inject constructor(
     }
 
     private suspend fun fetchSecondaryDetails(): Boolean {
-        val jobs = listOf(
+        listOf(
             fetchSectionThenUpdateItems(
                 request = { vodovozServiceRepository.getPromotions() },
                 map = { HomeListItem.Promotions(it.toUi()) },
@@ -183,9 +181,7 @@ class HomeFlowViewModel @Inject constructor(
                 { HomeListItem.Products.viewedProducts(it.toVodovozSectionUi()) }
             )
 
-        )
-
-        joinAll(*jobs.toTypedArray())
+        ).joinAll()
 
         return true
     }
