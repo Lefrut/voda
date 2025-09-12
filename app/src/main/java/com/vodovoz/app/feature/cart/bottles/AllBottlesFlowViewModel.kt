@@ -7,7 +7,6 @@ import com.vodovoz.app.common.cart.CartManager
 import com.vodovoz.app.ui.mvi.Event
 import com.vodovoz.app.ui.mvi.MviViewModel
 import com.vodovoz.app.ui.mvi.State
-import kotlinx.coroutines.flow.update
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.feature.cart.bottles.model.BottleUi
 import com.vodovoz.app.feature.cart.bottles.model.mapToUi
@@ -139,8 +138,8 @@ class AllBottlesFlowViewModel @Inject constructor(
             .singleResult()
 
         addBottlesResult.onSuccess {
-            cartManager.updateCartListState(true)
-            cartManager.observeUpdateCartList().collectLatest { hasUpdates ->
+            cartManager.updateRefreshCart(true)
+            cartManager.observeRefreshCart().collectLatest { hasUpdates ->
                 if (!hasUpdates) {
                     updateState { s -> s.copy(buttonIsLoading = false) }
                     sendEvent(BottlesEvent.GoBack)

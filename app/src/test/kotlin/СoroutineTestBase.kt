@@ -10,7 +10,7 @@ import org.junit.Before
 @OptIn(ExperimentalCoroutinesApi::class)
 abstract class CoroutineTestBase {
 
-    private val dispatcher = StandardTestDispatcher()
+    protected val dispatcher = StandardTestDispatcher()
 
 
     @Before

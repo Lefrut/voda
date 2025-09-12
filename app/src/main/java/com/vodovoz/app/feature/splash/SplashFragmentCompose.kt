@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.IdRes
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
@@ -83,6 +84,11 @@ class SplashFragment : Fragment() {
 
             setContent {
                 VodovozTheme {
+
+                    LaunchedEffect(Unit) {
+                        activityViewModel.finishAndroidSplash()
+                    }
+
                     val viewState by splashViewModel.collectAsState()
                     val context = LocalContext.current
 
@@ -149,7 +155,9 @@ class SplashFragment : Fragment() {
             when (appState) {
                 AppState.App -> {
                     fetchDataForScreens().join()
-                    MapKitFactory.setApiKey(siteStateManager.siteStateSnapshot.mapkitKey)
+                    MapKitFactory.setApiKey(
+                        siteStateManager.siteStateSnapshot.mapkitKey
+                    )
                     MapKitFactory.initialize(requireActivity())
                     navController.navigateToScreen(R.id.mainFragment)
                 }

@@ -19,9 +19,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.SheetValue.PartiallyExpanded
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -29,7 +27,6 @@ import androidx.compose.ui.platform.SoftwareKeyboardController
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import com.vodovoz.app.ui.mvi.collectAsState
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.navOptions
 import com.google.android.gms.location.LocationServices
@@ -43,6 +40,7 @@ import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.effects.LifecycleEffect
 import com.vodovoz.app.design_system.model.toMapPoint
 import com.vodovoz.app.design_system.model.toPoint
+import com.vodovoz.app.ui.mvi.collectAsState
 import com.vodovoz.app.ui.yandex_map.VodovozUserLocationListener
 import com.vodovoz.app.ui.yandex_map.YandexMapUi
 import com.vodovoz.app.ui.yandex_map.animMove
@@ -88,8 +86,8 @@ class MapFragment : Fragment() {
         )
     }
     private val mapView: MapView get() = yandexMap.mapView
-    private val mapWindow: MapWindow get() = yandexMap.mapView.mapWindow
-    private val map: Map get() = mapView.mapWindow.map
+    private val mapWindow: MapWindow get() = mapView.mapWindow
+    private val map: Map get() = mapWindow.map
 
     private val userLocationListener by lazy { VodovozUserLocationListener(requireContext()) }
     private val userLocationLayer: UserLocationLayer by lazy {
@@ -109,7 +107,7 @@ class MapFragment : Fragment() {
 
             setContent {
                 val viewState by viewModel.collectAsState()
-                
+
                 val locationPermissionLauncher = rememberLauncherForActivityResult(
                     contract = ActivityResultContracts.RequestMultiplePermissions()
                 ) { result ->
@@ -121,9 +119,10 @@ class MapFragment : Fragment() {
                     }
                 }
 
-                val anchoredDraggableState = rememberSaveable(saver = AnchoredDraggableState.Saver()) {
-                    AnchoredDraggableState(initialValue = PartiallyExpanded)
-                }
+                val anchoredDraggableState =
+                    rememberSaveable(saver = AnchoredDraggableState.Saver()) {
+                        AnchoredDraggableState(initialValue = PartiallyExpanded)
+                    }
 
 
                 VodovozTheme {

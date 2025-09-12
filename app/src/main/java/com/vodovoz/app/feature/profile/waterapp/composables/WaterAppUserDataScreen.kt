@@ -48,7 +48,7 @@ import com.vodovoz.app.feature.profile.waterapp.composables.user_data.WaterAppHe
 import com.vodovoz.app.feature.profile.waterapp.composables.user_data.WaterAppStageBox
 import com.vodovoz.app.feature.profile.waterapp.composables.user_data.WaterAppTimeStage
 import com.vodovoz.app.feature.profile.waterapp.composables.user_data.WaterAppWeightStage
-import com.vodovoz.app.feature.profile.waterapp.model.WaterAppActivityLevel
+import com.vodovoz.app.feature.profile.waterapp.model.WaterAppActivityLevelUi
 import com.vodovoz.app.feature.profile.waterapp.model.WaterAppUiState
 
 @Composable
@@ -59,7 +59,7 @@ fun WaterAppUserDataScreen(
     notificationSettings: WaterApp.NotificationSettings,
     hideTopBar: Boolean,
     onGenderSelect: (isMan: Boolean) -> Unit,
-    onActivityLevelSelect: (WaterAppActivityLevel) -> Unit,
+    onActivityLevelSelect: (WaterAppActivityLevelUi) -> Unit,
     onWeightSelect: (Float) -> Unit,
     onHeightSelect: (Int) -> Unit,
     onWakeUpTimeChange: (String) -> Unit,
@@ -172,7 +172,7 @@ fun WaterAppUserDataScreen(
                         onNextClick = { onNextClick(state) },
                         content = {
                             WaterAppActivityStage(
-                                currentActivityLevel = WaterAppActivityLevel.getByValue(userInfo.activityLevel.sport.toString()),
+                                currentActivityLevel = WaterAppActivityLevelUi.getByValue(userInfo.activityLevel.sport.toString()),
                                 onActivityClick = onActivityLevelSelect
                             )
                         }

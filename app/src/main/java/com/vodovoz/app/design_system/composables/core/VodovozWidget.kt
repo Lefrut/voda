@@ -35,11 +35,17 @@ fun VodovozWidget(
             }
 
             is RadioButtonGroupUi<*> -> {
-                VodovozRadioButtonColumn(radioButtonGroup = widget, onOptionClick = onWidgetChange)
+                VodovozRadioButtonColumn(
+                    radioButtonGroup = widget,
+                    onOptionClick = onWidgetChange
+                )
             }
 
             is SwitchUi -> {
-                VodovozSwitch(switch = widget, onSwitchChange = onWidgetChange)
+                VodovozSwitch(
+                    switch = widget,
+                    onSwitchChange = onWidgetChange
+                )
             }
 
             is SingleCheckboxGroup<*> -> {

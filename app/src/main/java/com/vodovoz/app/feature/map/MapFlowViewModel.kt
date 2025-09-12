@@ -11,6 +11,7 @@ import com.vodovoz.app.design_system.model.distanceKm
 import com.vodovoz.app.design_system.model.mapToUi
 import com.vodovoz.app.design_system.model.toDomain
 import com.vodovoz.app.design_system.model.toUi
+import com.vodovoz.app.domain.general.model.location.MapAddressModel
 import com.vodovoz.app.domain.general.respository.MapServiceRepository
 import com.vodovoz.app.domain.general.respository.VodovozServiceRepository
 import com.vodovoz.app.feature.map.model.MapAddressUi
@@ -26,15 +27,16 @@ import com.vodovoz.app.util.extensions.debounceWithMax
 import com.vodovoz.app.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.retryWhen
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -77,7 +79,6 @@ class MapFlowViewModel @Inject constructor(
             .catch { fail -> emit(Result.failure(fail)) }
             .collect { mapAreasResult ->
                 mapAreasResult.onSuccess { mapZones ->
-
                     updateState { s ->
                         s.copy(
                             areas = mapZones.areas.mapToUi(),
@@ -85,8 +86,8 @@ class MapFlowViewModel @Inject constructor(
                             deliveryPopupWindow = mapZones.popupWindow?.toUi()
                         )
                     }
-
                 }
+
             }
     }
 
@@ -134,12 +135,10 @@ class MapFlowViewModel @Inject constructor(
             }.launchIn(viewModelScope)
 
 
-    fun changeQuery(query: String) {
-        viewModelScope.launch {
-            searchQueryFlow.emit(query)
-            updateState { s ->
-                s.copy(query = query)
-            }
+    fun changeQuery(query: String) = viewModelScope.launch {
+        searchQueryFlow.emit(query)
+        updateState { s ->
+            s.copy(query = query)
         }
     }
 
@@ -147,28 +146,22 @@ class MapFlowViewModel @Inject constructor(
         searchAddress(stateSnapshot.query)
     }
 
-    private suspend fun calculateDistanceFromMoscowToAddress(addressPoint: MapPointUi): Float? {
-        if (stateSnapshot.areas.isEmpty()) {
-            delay(850L)
+    private suspend fun getDistanceFromAreaBoundToAddress(addressPoint: MapPointUi): Float? {
+        while (stateSnapshot.areas.isEmpty()) {
+            delay(300L)
         }
 
         val coreMapArea = stateSnapshot.areas.find { area ->
             area.id == CORE_AREA_ID && area.isMoscowRingRow
-        } ?: run {
-            return null
-        }
+        } ?: run { return null }
 
         if (coreMapArea.contains(addressPoint)) {
             return 0f
         }
 
-        val nearestPoint = coreMapArea.findNearestPointTo(addressPoint) ?: run {
-            return null
-        }
-
-        val route = nearestPoint.getRoute(addressPoint) ?: run {
-            return null
-        }
+        val route = coreMapArea
+            .findNearestPointTo(addressPoint)
+            ?.getRoute(addressPoint) ?: return null
 
         val fromMoscowToPoint = route.distanceKm()
 
@@ -213,58 +206,91 @@ class MapFlowViewModel @Inject constructor(
     private var searchAddressJob: Job? = null
 
     fun searchAddress(addressName: String) = viewModelScope.launch {
-        if (addressName == stateSnapshot.currentMapAddress?.name || addressName.any { c -> c.isDigit() } || stateSnapshot.query == addressName) {
-
-            updateState { s ->
-                s.copy(addressIsLoading = true)
-            }
-
-            val currentAddress = mapServiceRepository.searchAddressInMoscow(
-                addressName
-            ).singleResult().getOrNull()?.toUi()
-
-            currentAddress?.let { mapAddress ->
-
-                val fromMoscowToPoint =
-                    calculateDistanceFromMoscowToAddress(mapAddress.point) ?: return@launch
-                changeAddress(currentAddress.copy(fromMoscowToPoint = fromMoscowToPoint))
+        searchAddressJob = updateAddressBySearch(
+            dataSource = {
+                mapServiceRepository.searchAddressInMoscow(addressName)
+            },
+            validation = {
+                addressName == stateSnapshot.currentMapAddress?.name
+                        || addressName.any { c -> c.isDigit() }
+                        || stateSnapshot.query == addressName
+            },
+            invalid = {
+                changeQuery(addressName)
+            },
+            valid = {
+                searchAddressJob?.cancel()
+            },
+            completeSuccess = { mapAddress ->
                 sendEvent(MapFlowEvents.HideKeyboard)
-                sendEvent(MapFlowEvents.MoveToAddress(currentAddress.point))
+                sendEvent(MapFlowEvents.MoveToAddress(mapAddress.point))
             }
-
-        } else {
-            changeQuery(addressName)
-        }
+        )
     }
-
 
     fun searchAddress(point: MapPointUi?) = viewModelScope.launch {
-        if (point == null || point == stateSnapshot.currentMapAddress?.point) return@launch
+        searchAddressJob = updateAddressBySearch(
+            dataSource = {
+                delay(350L)
+                point?.let {
+                    mapServiceRepository.getAddressByGeo(point.lat, point.lon)
+                } ?: emptyFlow()
+            },
+            validation = {
+                point != stateSnapshot.currentMapAddress?.point && point != null
+            },
+            valid = {
+                searchAddressJob?.cancel()
+            }
+        )
+    }
 
-        searchAddressJob?.cancel()
 
-        searchAddressJob = launch job@{
+    private suspend fun updateAddressBySearch(
+        dataSource: suspend () -> Flow<Result<MapAddressModel>>,
+        validation: () -> Boolean = { true },
+        valid: () -> Unit = {},
+        invalid: () -> Unit = {},
+        completeSuccess: suspend (MapAddressUi) -> Unit = {},
+    ): Job = coroutineScope {
+        launch {
+            if (!validation()) {
+                invalid()
+                return@launch
+            } else {
+                valid()
+            }
+
             updateState { s ->
                 s.copy(addressIsLoading = true)
             }
 
-            delay(350L)
+            val currentAddressResult = dataSource()
+                .singleResult()
+                .map { model ->
+                    model.toUi()
+                }
 
-            val addressByGeoResult =
-                mapServiceRepository.getAddressByGeo(point.lat, point.lon).singleResult()
-
-
-
-            addressByGeoResult.onSuccess { mapAddressModel ->
-                val mapAddress = mapAddressModel.toUi()
-
-                val fromMoscowToPoint =
-                    calculateDistanceFromMoscowToAddress(mapAddress.point) ?: return@job
-
-                changeAddress(mapAddress.copy(fromMoscowToPoint = fromMoscowToPoint))
+            currentAddressResult.onSuccess { mapAddress ->
+                val fromMoscowToPoint = getDistanceFromAreaBoundToAddress(
+                    mapAddress.point
+                ) ?: return@launch
+                val updatedMapAddress = mapAddress.copy(
+                    fromMoscowToPoint = fromMoscowToPoint
+                )
+                updateState { s ->
+                    s.copy(
+                        currentMapAddress = updatedMapAddress,
+                        mode = MapUiMode.OnlyMap,
+                        addressIsLoading = false,
+                        addressIsError = with(updatedMapAddress) { house.isBlank() }
+                    )
+                }
+                completeSuccess(updatedMapAddress)
             }
         }
     }
+
 
     private suspend fun MapPointUi.getRoute(end: MapPointUi): List<MapPointUi>? {
         return mapServiceRepository.getRoute(toDomain(), end.toDomain()).singleResult().getOrNull()

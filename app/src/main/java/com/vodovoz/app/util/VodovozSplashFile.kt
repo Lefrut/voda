@@ -22,18 +22,21 @@ object VodovozSplashFile {
     ): Result<Unit> = runCatching {
 
         val file = getSplashFile(context)
-        if (file.exists()) return@runCatching Unit
+        if (file.exists()) return@runCatching
 
-        withContext(Dispatchers.IO){
-            withTimeout(5000L) {
-                val url = URL(link)
-                url.openStream().use { input ->
-                    file.outputStream().use { output ->
-                        input.copyTo(output)
-                    }
-                }
-            }
+        withTimeout(5000L) {
+            file.writeToFile(link)
         }
     }
 
+}
+
+suspend fun File.writeToFile(url: String) {
+    withContext(Dispatchers.IO) {
+        URL(url).openStream()
+    }.use { input ->
+        outputStream().use { output ->
+            input.copyTo(output)
+        }
+    }
 }

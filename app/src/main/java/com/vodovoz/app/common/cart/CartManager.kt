@@ -15,7 +15,6 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withTimeout
 import java.util.concurrent.ConcurrentHashMap
@@ -27,22 +26,22 @@ class CartManager @Inject constructor(
     private val vodovozServiceRepository: VodovozServiceRepository,
     @IoDispatcher
     private val dispatcher: CoroutineDispatcher,
-) {
+) : AbstractCartManager() {
 
-    private val cartMutex = Mutex()
     private val coroutineScope = CoroutineScope(dispatcher)
 
-    private val updateCartListListener = MutableStateFlow(false)
-    fun observeUpdateCartList() = updateCartListListener.asStateFlow()
-    fun updateCartListState(update: Boolean) {
-        updateCartListListener.value = update
+    private val refreshCartState = MutableStateFlow(false)
+    fun observeRefreshCart() = refreshCartState.asStateFlow()
+
+    fun updateRefreshCart(refresh: Boolean) {
+        refreshCartState.update { refresh }
     }
 
     private val cart = ConcurrentHashMap<Long, Int>()
     private var firstCart: Map<Long, Int>? = null
     private val cartSharedFlow = MutableSharedFlow<Map<Long, Int>>(1)
-    private val _blockedProductsState = MutableStateFlow(emptySet<Long>())
-    val blockedProductsState = _blockedProductsState.asStateFlow()
+    private val _blockedProductsFlow = MutableStateFlow(emptySet<Long>())
+    val blockedProductsFlow = _blockedProductsFlow.asStateFlow()
     var cartVersion = 0
         private set
 
@@ -50,7 +49,7 @@ class CartManager @Inject constructor(
 
     suspend fun change(productId: Long, count: Int) = coroutineScope.launch {
         val currentCartVersion = cartMutex.withLock {
-            if (_blockedProductsState.value.contains(productId) || count < 0) return@launch
+            if (_blockedProductsFlow.value.contains(productId) || count < 0) return@launch
             val cartBeforeUpdate = cart.toMap()
             setCartItem(productId, count)
             if (firstCart == null) {
@@ -69,7 +68,7 @@ class CartManager @Inject constructor(
             val firstCartCopy = firstCart?.toMap()
             if (cartChanges.isEmpty() || firstCartCopy == null) return@launch
             firstCart = null
-            _blockedProductsState.update { s -> s + cartChanges.keys }
+            _blockedProductsFlow.update { s -> s + cartChanges.keys }
             firstCartCopy to cartChanges
         }
 
@@ -87,9 +86,9 @@ class CartManager @Inject constructor(
     }
 
     private fun unblockProducts(blockedProductsIds: Set<Long>, currentCartVersion: Int) {
-        _blockedProductsState.update { productIds -> productIds - blockedProductsIds }
+        _blockedProductsFlow.update { productIds -> productIds - blockedProductsIds }
         if (currentCartVersion >= cartVersion) {
-            updateCartListState(true)
+            updateRefreshCart(true)
         }
     }
 
@@ -111,20 +110,18 @@ class CartManager @Inject constructor(
         }.awaitAll()
     }
 
-    private suspend fun setCart(cart: Map<Long, Int>) {
-        this.cart.clear()
-        this.cart.putAll(cart)
-        cartSharedFlow.emit(this.cart.toMap())
+    private suspend fun setCart(newCart: Map<Long, Int>) {
+        cart.clear()
+        cart.putAll(newCart)
+        cartSharedFlow.emit(cart.toMap())
     }
 
-    private suspend fun plusCart(cart: Map<Long, Int>) {
-        for ((id, count) in cart) {
-            val existing = this.cart[id] ?: 0
-            this.cart[id] = existing + count
+    private suspend fun plusCart(otherCart: Map<Long, Int>) {
+        for ((id, count) in otherCart) {
+            val existing = cart[id] ?: 0
+            cart[id] = existing + count
         }
-
         cartSharedFlow.emit(cart.toMap())
-        cartSharedFlow.emit(this.cart.toMap())
     }
 
     private suspend fun setCartItem(id: Long, count: Int) {
@@ -133,17 +130,15 @@ class CartManager @Inject constructor(
     }
 
 
-    suspend fun clearCart() {
-        cartMutex.withLock {
-            cartVersion++
-            setCart(emptyMap())
-            _blockedProductsState.update { emptySet() }
-            updateCartListState(true)
-        }
+    suspend fun clearCart() = cartMutex.withLock {
+        cartVersion++
+        setCart(emptyMap())
+        _blockedProductsFlow.update { emptySet() }
+        updateRefreshCart(true)
     }
 
     suspend fun syncCart(newCart: Map<Long, Int>) = cartMutex.withLock {
-        if (firstCart != null || blockedProductsState.value.isNotEmpty()) {
+        if (firstCart != null || blockedProductsFlow.value.isNotEmpty()) {
             return@withLock
         }
         setCart(newCart)
@@ -158,7 +153,7 @@ class CartManager @Inject constructor(
         cartMutex.withLock {
             val formattedCartItems = formatCart(cartItems).ifEmpty { return@launch }
             val addInCart = parseCart(formattedCartItems)
-            if (blockedProductsState.value.any { id -> addInCart.contains(id) }) return@launch
+            if (blockedProductsFlow.value.any { id -> addInCart.contains(id) }) return@launch
 
             val currentCartVersion = ++cartVersion
 
@@ -173,7 +168,7 @@ class CartManager @Inject constructor(
             plusCart(addInCart)
             val cartWithAdd = this@CartManager.cart.toMap()
 
-            _blockedProductsState.update { s -> s + addInCart.keys }
+            _blockedProductsFlow.update { s -> s + addInCart.keys }
 
             if (cartChanges.isNotEmpty() && firstCartCopy != null) {
                 sendOrRestoreData(
