@@ -9,7 +9,6 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import com.vodovoz.app.ui.mvi.collectAsState
 import androidx.navigation.fragment.findNavController
 import com.vodovoz.app.common.tab.TabManager
 import com.vodovoz.app.core.navigation.activate
@@ -19,6 +18,7 @@ import com.vodovoz.app.core.navigation.navigateToSubCategories
 import com.vodovoz.app.design_system.VodovozTheme
 import com.vodovoz.app.design_system.effects.LifecycleEffect
 import com.vodovoz.app.feature.sub_categories.model.SubCategoriesEvent
+import com.vodovoz.app.ui.mvi.collectAsState
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -67,7 +67,10 @@ class SubCategoriesFragment : Fragment() {
                                 }
 
                                 is SubCategoriesEvent.ActivateDataAllAction -> {
-                                    event.action.activate(findNavController(), tabManager)
+                                    event.action.activate(
+                                        navController = findNavController(),
+                                        tabManager = tabManager
+                                    )
                                 }
                             }
 

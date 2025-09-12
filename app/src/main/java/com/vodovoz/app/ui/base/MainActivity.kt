@@ -72,13 +72,17 @@ class MainActivity :
         setContentView(R.layout.activity_main)
     }
 
+    //todo - downloadSplashFile
     private fun downloadSplashFile() = lifecycleScope.launch {
-        viewModel.setFileState(SplashFileState.Loading)
-        VodovozSplashFile.downloadSplashFile(applicationContext).onSuccess {
-            viewModel.setFileState(SplashFileState.Success)
-        }.onFailure {
-            viewModel.setFileState(SplashFileState.Error)
-        }
+
+        viewModel.setFileState(SplashFileState.Success)
+        //todo - downloadSplashFile
+//        viewModel.setFileState(SplashFileState.Loading)
+//        VodovozSplashFile.downloadSplashFile(applicationContext).onSuccess {
+//            viewModel.setFileState(SplashFileState.Success)
+//        }.onFailure {
+//            viewModel.setFileState(SplashFileState.Error)
+//        }
     }
 
 
