@@ -13,7 +13,7 @@ data class CartDetailsDTO(
     @Json(name = "COUNT")
     val COUNT: String?,
     @Json(name = "KORZINA")
-    val KORZINA: List<KORZINA_PRODUCT_DTO>,
+    val KORZINA: List<KORZINA_PRODUCT_DTO>?,
     @Json(name = "KNOPKI")
     val KNOPKI: KORZINA_KNOPKI_DTO?,
     @Json(name = "ITOG")

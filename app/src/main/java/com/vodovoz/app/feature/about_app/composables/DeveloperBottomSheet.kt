@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -27,7 +28,8 @@ fun DeveloperBottomSheet(
         modifier = modifier,
         sheetState = rememberModalBottomSheetState(),
         onDismissRequest = onDismissClick,
-        dragHandle = { VodovozDragHandle() }
+        dragHandle = { VodovozDragHandle() },
+        containerColor = MaterialTheme.colorScheme.background
     ) {
         Column(
             modifier = Modifier.padding(

@@ -8,6 +8,7 @@ import com.vodovoz.app.core.network.interceptor.BaseUrlInterceptor
 import com.vodovoz.app.core.network.interceptor.BlockAppInterceptor
 import com.vodovoz.app.core.network.interceptor.CookieHandlerInterceptor
 import com.vodovoz.app.core.network.interceptor.LastErrorInterceptor
+import com.vodovoz.app.core.network.interceptor.VersionQueryInterceptor
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -19,13 +20,16 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import java.time.LocalDateTime
 import java.util.concurrent.TimeUnit
-import javax.inject.Named
 import javax.inject.Qualifier
 import javax.inject.Singleton
 
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
-annotation class VodovozInterceptor
+annotation class VodovozInterceptorDI
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class VodovozQualifier
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -35,7 +39,15 @@ abstract class NetworkModule {
     @Binds
     @Singleton
     @IntoSet
-    @VodovozInterceptor
+    @VodovozInterceptorDI
+    abstract fun providerVersionQueryInterceptor(
+        baseUrlInterceptor: VersionQueryInterceptor,
+    ): Interceptor
+
+    @Binds
+    @Singleton
+    @IntoSet
+    @VodovozInterceptorDI
     abstract fun providerBaseUrlInterceptor(
         baseUrlInterceptor: BaseUrlInterceptor,
     ): Interceptor
@@ -43,7 +55,7 @@ abstract class NetworkModule {
     @Binds
     @Singleton
     @IntoSet
-    @VodovozInterceptor
+    @VodovozInterceptorDI
     abstract fun providerErrorCacheInterceptor(
         lastErrorInterceptor: LastErrorInterceptor,
     ): Interceptor
@@ -52,7 +64,7 @@ abstract class NetworkModule {
     @Binds
     @Singleton
     @IntoSet
-    @VodovozInterceptor
+    @VodovozInterceptorDI
     abstract fun bindCookieHandlerInterceptor(
         interceptor: CookieHandlerInterceptor,
     ): Interceptor
@@ -60,7 +72,7 @@ abstract class NetworkModule {
     @Binds
     @Singleton
     @IntoSet
-    @VodovozInterceptor
+    @VodovozInterceptorDI
     abstract fun bindAppSignalInterceptor(
         interceptor: BlockAppInterceptor,
     ): Interceptor
@@ -70,9 +82,9 @@ abstract class NetworkModule {
 
         @Provides
         @Singleton
-        @Named("vodovoz")
+        @VodovozQualifier
         fun providesOkHttpClient(
-            @VodovozInterceptor
+            @VodovozInterceptorDI
             interceptors: Set<@JvmSuppressWildcards Interceptor>,
         ): OkHttpClient {
             val okHttpClient = OkHttpClient.Builder()
@@ -95,7 +107,7 @@ abstract class NetworkModule {
         @Provides
         @Singleton
         @IntoSet
-        @VodovozInterceptor
+        @VodovozInterceptorDI
         fun provideLoggingInterceptor(): Interceptor {
             return HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY)
         }

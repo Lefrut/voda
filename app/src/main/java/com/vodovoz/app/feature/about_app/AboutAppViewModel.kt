@@ -4,6 +4,7 @@ import androidx.compose.runtime.Stable
 import androidx.lifecycle.viewModelScope
 import com.vodovoz.app.common.account.AccountManager
 import com.vodovoz.app.common.model.GlobalAppLinks
+import com.vodovoz.app.core.network.VodovozWebConfig
 import com.vodovoz.app.core.network.interceptor.BaseUrlInterceptor
 import com.vodovoz.app.feature.about_app.composables.AppMode
 import com.vodovoz.app.feature.about_app.model.AboutAppEvent
@@ -75,7 +76,7 @@ class AboutAppViewModel @Inject constructor(
             }
 
             AppMode.Prod -> {
-                baseUrlInterceptor.updateBaseUrl("https://m.vodovoz.ru/")
+                baseUrlInterceptor.updateBaseUrl(VodovozWebConfig.VODOVOZ_URL)
             }
         }
         updateState { s ->

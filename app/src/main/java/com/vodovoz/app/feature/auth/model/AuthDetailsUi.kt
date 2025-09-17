@@ -69,14 +69,15 @@ fun AuthDetailsUi.Companion.authValidators() = listOf(
     EmptyTextValidator
 )
 
-fun AuthDetailsModel.toUi(agreement: String): AuthDetailsUi {
+fun AuthDetailsModel.toUi(
+    agreement: String): AuthDetailsUi {
 
     val agreementCheckbox = CheckboxUi(
         name = agreement,
         id = AGREEMENT_CHECKBOX_ID,
         checked = agreementChecked ?: false,
         isRequired = true,
-        //todo - backed
+        //todo - need to upgrade backed for this
         urlTitles = emptyList()
     )
 

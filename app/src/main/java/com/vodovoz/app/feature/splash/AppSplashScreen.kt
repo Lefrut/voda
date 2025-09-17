@@ -26,7 +26,7 @@ import com.vodovoz.app.feature.splash.model.SplashUiState
 
 @Composable
 fun AppSplashScreen(viewModel: SplashViewModel, viewState: SplashState) {
-    //todo - for animation
+    //todo - when will be animation
 //    val context = LocalContext.current
 //    val composition = rememberLottieComposition(
 //        LottieCompositionSpec.File(viewState.filePath)
@@ -52,7 +52,7 @@ fun AppSplashScreen(viewModel: SplashViewModel, viewState: SplashState) {
 
             SplashUiState.Animation -> {
                 SplashPlaceholder()
-                //todo - for animation
+                //todo - when will be animation
 //                LottieAnimation(
 //                    composition = composition.value,
 //                    progress = { lottieAnimationState.progress },
