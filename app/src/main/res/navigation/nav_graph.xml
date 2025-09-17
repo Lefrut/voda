@@ -5,20 +5,20 @@
 
     <fragment
         android:id="@+id/splashFragment"
-        android:name="com.vodovoz.app.feature.splash.SplashFragment"
+        android:name="com.m.vodovoz.feature.splash.SplashFragment"
         android:label="SplashFragment" />
     <fragment
         android:id="@+id/mainFragment"
-        android:name="com.vodovoz.app.feature.main.MainFragment"
+        android:name="com.m.vodovoz.feature.main.MainFragment"
         android:label="MainFragment" />
     <fragment
         android:id="@+id/blockAppFragment"
-        android:name="com.vodovoz.app.feature.block_app.BlockAppFragment"
+        android:name="com.m.vodovoz.feature.block_app.BlockAppFragment"
         android:label="BlockAppFragment" />
 
     <fragment
         android:id="@+id/imagePickerFragment"
-        android:name="com.vodovoz.app.common.media.ImagePickerFragment"
+        android:name="com.m.vodovoz.common.media.ImagePickerFragment"
         android:label="ImagePickerFragment" />
 
 </navigation>

@@ -47,7 +47,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:361656277458:android:4ff9b45fb799a4f2d6500b",
         "android_client_info": {
-          "package_name": "com.vodovoz.app"
+          "package_name": "com.m.vodovoz"
         }
       },
       "oauth_client": [
@@ -55,7 +55,7 @@
           "client_id": "361656277458-6rs9q1qnh7gl4m18d7eerfl8n990u68v.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.vodovoz.app",
+            "package_name": "com.m.vodovoz",
             "certificate_hash": "f3938ef3b59f2c2704cde7cc6e5aa72ce4433e94"
           }
         },

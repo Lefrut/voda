@@ -11,7 +11,7 @@ plugins {
 }
 
 android {
-    namespace = "com.vodovoz.app"
+    namespace = "com.m.vodovoz"
     compileSdk = 35
 
     defaultConfig {

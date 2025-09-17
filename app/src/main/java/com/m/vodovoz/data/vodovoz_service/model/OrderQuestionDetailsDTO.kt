@@ -1,0 +1,36 @@
+package com.m.vodovoz.data.vodovoz_service.model
+
+
+import androidx.annotation.Keep
+import com.squareup.moshi.Json
+import com.m.vodovoz.data.vodovoz_service.model.user_data.POLE_DTO
+
+@Keep
+data class OrderQuestionDetailsDTO(
+    @Json(name = "TITLE")
+    val TITLE: String?,
+    @Json(name = "INFORMIROVANIE")
+    val INFORMIROVANIE: String?,
+    @Json(name = "LISTADATA")
+    val LISTADATA: List<POLE_DTO>?,
+    @Json(name = "KNOPKA")
+    val KNOPKA: KNOPKA_ORDER_DTO?
+)
+
+@Keep
+data class KNOPKA_ORDER_DTO(
+    @Json(name = "BACKGROUND")
+    val BACKGROUND: String?,
+    @Json(name = "NAME")
+    val NAME: String?,
+    @Json(name = "TITLE")
+    val TITLE: String?,
+    @Json(name = "COLOR")
+    val COLOR: String?,
+    @Json(name = "TEXTCOLOR")
+    val TEXTCOLOR: String?,
+    @Json(name = "ID")
+    val ID: String?,
+    @Json(name = "TEXT")
+    val TEXT: String?,
+)

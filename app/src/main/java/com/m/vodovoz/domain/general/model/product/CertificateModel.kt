@@ -1,0 +1,7 @@
+package com.m.vodovoz.domain.general.model.product
+
+data class CertificateModel(
+    val id: Int,
+    val name: String,
+    val image: String
+)

@@ -1,0 +1,142 @@
+package com.m.vodovoz.design_system.composables.button
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.fromHtml
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import com.m.vodovoz.R
+import com.m.vodovoz.design_system.VodovozTheme
+import com.m.vodovoz.design_system.composables.buildPriceAndOldPriceAnnotatedString
+import com.m.vodovoz.design_system.composables.floating.BottomFloatingContainer
+import com.m.vodovoz.design_system.model.ColorfulButtonUi
+
+@Composable
+fun ProductBottomFloatingButton(
+    modifier: Modifier = Modifier,
+    cartQuantity: Int,
+    totalPrice: Int,
+    oldPrice: Int,
+    price: Int,
+    giftText: String,
+    isLoading: Boolean,
+    isAvailable: Boolean,
+    analogButton: ColorfulButtonUi?,
+    contentPadding: PaddingValues = PaddingValues(top = 10.dp, bottom = 8.dp),
+    onIncrementProduct: () -> Unit,
+    onDecrementProduct: () -> Unit,
+    onAnalogClick: () -> Unit,
+) {
+
+    BottomFloatingContainer(modifier = modifier, contentPadding = contentPadding) {
+        if (isAvailable && giftText.isNotBlank()) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(bottom = 11.dp)
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_info),
+                    contentDescription = null,
+                    modifier = Modifier.size(16.dp),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+
+                Text(
+                    modifier = Modifier.padding(start = 8.dp),
+                    text = AnnotatedString.fromHtml(giftText),
+                    color = MaterialTheme.colorScheme.onBackground,
+                    style = MaterialTheme.typography.labelSmall
+                )
+            }
+        }
+
+
+        when {
+            cartQuantity > 0 && isAvailable -> {
+                ProductQuantityButton(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    isLoading = isLoading,
+                    onPlus = onIncrementProduct,
+                    onMinus = onDecrementProduct,
+                    quantity = cartQuantity,
+                    totalPrice = totalPrice
+                )
+            }
+
+            isAvailable -> {
+                VodovozButton(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    text = buildPriceAndOldPriceAnnotatedString(
+                        price = price,
+                        oldPrice = oldPrice
+                    ),
+                    onClick = onIncrementProduct
+                )
+            }
+
+            analogButton != null -> {
+                VodovozButton(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    text = analogButton.name,
+                    onClick = onAnalogClick,
+                    colors = ButtonDefaults.filledTonalButtonColors(
+                        contentColor = analogButton.textColor,
+                        containerColor = analogButton.backgroundColor
+                    )
+                )
+            }
+
+            else -> {
+                VodovozButton(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    text = stringResource(id = R.string.analogs),
+                    onClick = onAnalogClick,
+                    colors = VodovozButtonDefaults.secondaryColors()
+                )
+            }
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun FloatingProductButtonPreview() {
+    VodovozTheme {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.White),
+            contentAlignment = Alignment.BottomCenter
+        ) {
+            ProductBottomFloatingButton(
+                isLoading = false,
+                cartQuantity = 0,
+                totalPrice = 500,
+                oldPrice = 300,
+                price = 250,
+                giftText = "500",
+                onIncrementProduct = {},
+                onDecrementProduct = {},
+                isAvailable = false,
+                analogButton = ColorfulButtonUi("Analog", Color.Black.value, Color.White.value),
+                onAnalogClick = {}
+            )
+        }
+    }
+}

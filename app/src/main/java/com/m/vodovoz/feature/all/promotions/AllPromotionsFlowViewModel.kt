@@ -1,0 +1,214 @@
+package com.m.vodovoz.feature.all.promotions
+
+import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.Stable
+import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.viewModelScope
+import androidx.paging.CombinedLoadStates
+import androidx.paging.LoadState
+import androidx.paging.PagingData
+import androidx.paging.map
+import com.m.vodovoz.R
+import com.m.vodovoz.common.resources.ResourcesProvider
+import com.m.vodovoz.design_system.model.AboutAdvertisingUi
+import com.m.vodovoz.design_system.model.PromotionCategoryUi
+import com.m.vodovoz.design_system.model.PromotionUi
+import com.m.vodovoz.design_system.model.mapToDomain
+import com.m.vodovoz.design_system.model.mapToUi
+import com.m.vodovoz.design_system.model.toUi
+import com.m.vodovoz.domain.general.model.promotion.PromotionsSectionModel
+import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
+import com.m.vodovoz.ui.mvi.Event
+import com.m.vodovoz.ui.paging.PagingMviViewModel
+import com.m.vodovoz.ui.paging.PagingState
+import com.m.vodovoz.ui.paging.emptyCombinedLoadStates
+import com.m.vodovoz.util.extensions.singleResult
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
+import javax.inject.Inject
+
+@HiltViewModel
+class AllPromotionsFlowViewModel @Inject constructor(
+    savedState: SavedStateHandle,
+    private val vodovozServiceRepository: VodovozServiceRepository,
+    private val resourcesProvider: ResourcesProvider,
+) : PagingMviViewModel<PromotionUi, AllPromotionsFlowViewModel.AllPromotionsState, AllPromotionsFlowViewModel.AllPromotionsEvent>(
+    AllPromotionsState()
+) {
+
+    private val dataSource = savedState.get<AllPromotionsFragment.DataSource>("dataSource")
+        ?: AllPromotionsFragment.DataSource.All
+
+    init {
+        fetchPromotions()
+    }
+
+
+    private suspend fun getAllPromotions(): PromotionsSectionModel? {
+        return when (dataSource) {
+            AllPromotionsFragment.DataSource.All -> vodovozServiceRepository.getAllPromotionsDetails()
+                .singleResult().getOrNull()
+
+            is AllPromotionsFragment.DataSource.ByBanner -> vodovozServiceRepository.getBannerPromotions(
+                bannerId = dataSource.bannerId,
+                blockId = dataSource.blockId,
+                categoryId = stateSnapshot.currentCategory.id
+            ).singleResult().getOrNull()
+        }
+    }
+
+    private fun getAllPromotionsPaged(categoryId: Int): Flow<PagingData<PromotionUi>> {
+        return when (dataSource) {
+            AllPromotionsFragment.DataSource.All -> vodovozServiceRepository.getAllPromotionsPaged(
+                categoryId = categoryId.takeIf { it > -1 }
+            )
+
+            is AllPromotionsFragment.DataSource.ByBanner -> vodovozServiceRepository.getBannerPromotionsPaged(
+                bannerId = dataSource.bannerId,
+                blockId = dataSource.blockId,
+                categoryId = categoryId.takeIf { it > -1 }
+            )
+        }.map { pagingData ->
+            pagingData.map { promotionModel ->
+                promotionModel.toUi()
+            }
+        }
+    }
+
+    fun fetchPromotions() = viewModelScope.launch {
+        updateState { s ->
+            s.copy(uiState = UiState.Loading)
+        }
+
+        val sectionPromotions = if (stateSnapshot.categories.isEmpty()) {
+            getAllPromotions()
+        } else {
+            PromotionsSectionModel(
+                title = stateSnapshot.title,
+                categories = stateSnapshot.categories.mapToDomain(),
+                promotions = emptyList(),
+                button = null
+            )
+        }
+
+
+        if (sectionPromotions == null) {
+            updateState { s ->
+                s.copy(uiState = UiState.Error)
+            }
+            return@launch
+        }
+
+
+        val categories = listOf(
+            PromotionCategoryUi(
+                id = -1,
+                code = "",
+                name = resourcesProvider.getString(
+                    R.string.all
+                )
+            )
+        ) + sectionPromotions.categories.mapToUi()
+
+
+        val currentCategory =
+            if (stateSnapshot.currentCategory == PromotionCategoryUi.Empty) {
+                (categories.firstOrNull() ?: PromotionCategoryUi.Empty)
+            } else {
+                stateSnapshot.currentCategory
+            }
+
+        updateState { s ->
+            val title = sectionPromotions.title
+
+            s.copy(
+                title = title,
+                categories = categories.distinct(),
+                currentCategory = currentCategory,
+                uiState = UiState.Success
+            )
+        }
+
+        getAllPromotionsPaged(currentCategory.id).collect { pagingData ->
+            collectPagingData(pagingData)
+        }
+
+    }
+
+    fun selectSection(category: PromotionCategoryUi) = viewModelScope.launch {
+        if (category == stateSnapshot.currentCategory) return@launch
+
+        sendEvent(AllPromotionsEvent.ScrollTop)
+        updateState { s ->
+            s.copy(currentCategory = category)
+        }
+        fetchPromotions()
+    }
+
+    fun closeAdvertisingBottomSheet() = viewModelScope.launch {
+        updateState { s ->
+            s.copy(
+                showAdvertisingBottomSheet = false
+            )
+        }
+    }
+
+    fun showAdvertisingBottomSheet(promotionUi: PromotionUi) = viewModelScope.launch {
+        promotionUi.aboutAdvertisingUi?.let {
+            updateState { s ->
+                s.copy(
+                    currentAdvertising = promotionUi.aboutAdvertisingUi,
+                    showAdvertisingBottomSheet = true
+                )
+            }
+        }
+    }
+
+    fun navigateToPromotionDetails(promotion: PromotionUi) = viewModelScope.launch {
+        sendEvent(AllPromotionsEvent.GoToProductDetails(promotionId = promotion.id))
+    }
+
+    fun navigateBack() = viewModelScope.launch {
+        sendEvent(AllPromotionsEvent.GoBack)
+    }
+
+    @Immutable
+    data class AllPromotionsState(
+        val title: String = "",
+        val categories: List<PromotionCategoryUi> = emptyList(),
+        val currentCategory: PromotionCategoryUi = PromotionCategoryUi.Empty,
+        val showAdvertisingBottomSheet: Boolean = false,
+        val currentAdvertising: AboutAdvertisingUi = AboutAdvertisingUi.Empty,
+        val uiState: UiState = UiState.Loading,
+        val appendState: LoadState = LoadState.NotLoading(false),
+        override val items: List<PromotionUi> = emptyList(),
+        override val loadStates: CombinedLoadStates = emptyCombinedLoadStates,
+    ) : PagingState<PromotionUi, AllPromotionsState>() {
+
+        override fun copyPagingState(
+            items: List<PromotionUi>,
+            loadStates: CombinedLoadStates,
+        ): AllPromotionsState = copy(items = items, loadStates = loadStates)
+    }
+
+    @Stable
+    sealed interface UiState {
+        data object Loading : UiState
+        data object Success : UiState
+        data object Error : UiState
+    }
+
+    sealed class AllPromotionsEvent : Event {
+
+        data object ScrollTop : AllPromotionsEvent()
+
+        data class GoToProductDetails(
+            val promotionId: Long,
+        ) : AllPromotionsEvent()
+
+        data object GoBack : AllPromotionsEvent()
+
+    }
+}

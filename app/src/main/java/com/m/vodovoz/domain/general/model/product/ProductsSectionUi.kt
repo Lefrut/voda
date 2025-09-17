@@ -1,0 +1,58 @@
+package com.m.vodovoz.domain.general.model.product
+
+import androidx.compose.runtime.Immutable
+import com.m.vodovoz.design_system.model.ForAdultsUi
+import com.m.vodovoz.design_system.model.ProductUi
+import com.m.vodovoz.design_system.model.toUi
+import com.m.vodovoz.feature.home.model.CategoryUi
+import com.m.vodovoz.feature.home.model.toUi
+import com.m.vodovoz.feature.product_comments.model.SortUi
+import com.m.vodovoz.feature.product_comments.model.toUi
+
+@Immutable
+data class ProductsSectionUi(
+    val title: String,
+    val sortingTitle: String,
+    val productsQuantityText: String,
+    val products: List<ProductUi>,
+    val sorting: List<SortUi>,
+    val categories: List<CategoryUi>,
+    val share: ShareUi,
+    val forAdults: ForAdultsUi?
+) {
+    companion object {
+        val Empty =
+            ProductsSectionUi("", "", "", emptyList(), emptyList(), emptyList(), ShareUi.Empty, null)
+    }
+}
+
+@Immutable
+data class ShareUi(
+    val url: String,
+    val text: String,
+) {
+    companion object {
+        val Empty = ShareUi("", "")
+    }
+}
+
+fun ShareModel.toUi(): ShareUi {
+    return ShareUi(
+        url = url,
+        text = text
+    )
+}
+
+
+fun ProductsSectionModel.toUi(): ProductsSectionUi {
+    return ProductsSectionUi(
+        title,
+        sortingTitle,
+        productsQuantityText,
+        products.map { it.toUi() },
+        sorting.map { it.toUi() },
+        categories.map { it.toUi() },
+        share.toUi(),
+        forAdults?.toUi()
+    )
+}
