@@ -1,0 +1,39 @@
+package com.m.vodovoz.feature.home.composables
+
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import com.m.vodovoz.design_system.composables.decoration.AdvertisingChip
+import com.m.vodovoz.design_system.model.AboutAdvertisingUi
+import com.m.vodovoz.design_system.model.BannerUi
+
+@Suppress("NonSkippableComposable")
+@Composable
+fun HomeBanners(
+    modifier: Modifier = Modifier,
+    banners: List<BannerUi>,
+    onBannerClick: (BannerUi) -> Unit,
+    onAdvertisingClick: (AboutAdvertisingUi) -> Unit,
+) {
+    val pagerState = rememberAutoScrollPagerState(itemsCount = banners.size)
+    val pictures = banners.map { banner -> banner.detailPicture }
+
+    AutoScrollImagePager(
+        modifier = modifier.padding(top = 8.dp),
+        images = pictures,
+        onImageClick = { page ->
+            onBannerClick(banners[page])
+        },
+        pagerState = pagerState,
+        pageWidth = Dp.Unspecified,
+        chip = { page ->
+            val advertising = banners[page].advertising
+            advertising?.let {
+                AdvertisingChip { onAdvertisingClick(advertising) }
+            }
+        }
+    )
+}

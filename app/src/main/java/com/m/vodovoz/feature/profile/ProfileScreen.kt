@@ -1,0 +1,192 @@
+package com.m.vodovoz.feature.profile
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CornerSize
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.Indicator
+import androidx.compose.material3.pulltorefresh.PullToRefreshState
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import com.m.vodovoz.design_system.composables.bottom_sheet.InfoBottomSheet
+import com.m.vodovoz.design_system.composables.decoration.AdvertisingChip
+import com.m.vodovoz.design_system.composables.pull_to_refresh.VodovozPullToRefreshBox
+import com.m.vodovoz.feature.all.promotions.composables.AdvertisingInfoBottomSheet
+import com.m.vodovoz.feature.home.composables.AutoScrollImagePager
+import com.m.vodovoz.feature.home.composables.rememberAutoScrollPagerState
+import com.m.vodovoz.feature.profile.composables.BonusesBottomSheet
+import com.m.vodovoz.feature.profile.composables.ProfileCardsRow
+import com.m.vodovoz.feature.profile.composables.ProfileMenuColumn
+import com.m.vodovoz.feature.profile.composables.ProfileUserInfoRow
+import com.m.vodovoz.feature.profile.composables.ProfileWalletItemsRow
+import com.m.vodovoz.feature.profile.composables.SupportingBottomSheet
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ProfileScreen(
+    viewModel: ProfileFlowViewModel,
+    viewState: ProfileFlowViewModel.ProfileState,
+) {
+    VodovozPullToRefreshBox(
+        isRefreshing = viewState.showRefreshIndicator,
+        onRefresh = { viewModel.refresh() },
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.surface)
+                .verticalScroll(rememberScrollState())
+        ) {
+            Column(
+                modifier = Modifier
+                    .clip(
+                        MaterialTheme.shapes.large.copy(
+                            topStart = CornerSize(0.dp),
+                            topEnd = CornerSize(0.dp)
+                        )
+                    )
+                    .background(MaterialTheme.colorScheme.background)
+            ) {
+                ProfileUserInfoRow(
+                    userInfoBlock = viewState.userInfoBlock,
+                    onClick = {
+                        viewModel.navigateToUserData()
+                    }
+                )
+                ProfileCardsRow(
+                    modifier = Modifier.padding(top = 16.dp),
+                    cards = viewState.cards,
+                    onCardClick = { profileCard ->
+                        viewModel.activateProfileCard(profileCard)
+                    }
+                )
+                ProfileWalletItemsRow(
+                    modifier = Modifier.padding(top = 16.dp),
+                    walletItems = viewState.walletItems,
+                    onCardClick = { walletItem ->
+                        viewModel.activateWalletItem(walletItem)
+                    }
+                )
+
+                val bannerImages = viewState.banners.map { bannerUi -> bannerUi.detailPicture }
+                val pagerState = rememberAutoScrollPagerState(itemsCount = bannerImages.size)
+
+                AutoScrollImagePager(
+                    modifier = Modifier
+                        .padding(top = 17.dp, bottom = 16.dp)
+                        .height(68.dp),
+                    images = bannerImages,
+                    onImageClick = { page ->
+                        val banner = viewState.banners[page]
+                        viewModel.activateBannerAction(banner)
+                    },
+                    pageWidth = Dp.Unspecified,
+                    pagerState = pagerState,
+                    chip = { page ->
+                        val advertising = viewState.banners[page].advertising
+                        advertising?.let {
+                            AdvertisingChip { viewModel.showAdvertisingBottomSheet(advertising) }
+                        }
+                    }
+                )
+            }
+
+
+
+            ProfileMenuColumn(
+                modifier = Modifier
+                    .padding(top = 8.dp)
+                    .clip(MaterialTheme.shapes.extraLarge),
+                menuItems = viewState.smallMenu,
+                onItemClick = { menuItem ->
+                    viewModel.activateMenuItem(menuItem)
+                }
+            )
+
+            ProfileMenuColumn(
+                modifier = Modifier
+                    .padding(top = 8.dp)
+                    .clip(
+                        MaterialTheme.shapes.large.copy(
+                            bottomEnd = CornerSize(0.dp),
+                            bottomStart = CornerSize(0.dp)
+                        )
+                    ),
+                menuItems = viewState.normalMenu,
+                onItemClick = { menuItem ->
+                    viewModel.activateMenuItem(menuItem)
+                }
+            )
+        }
+    }
+
+    if (viewState.showAdvertisingBS) {
+        AdvertisingInfoBottomSheet(advertising = viewState.currentAdvertising) {
+            viewModel.closeAdvertisingBottomSheet()
+        }
+    }
+
+    if (viewState.showSupportingBS) {
+        SupportingBottomSheet(
+            data = viewState.currentSupportingBSData,
+            onItemClick = { chatItem ->
+                viewModel.navigateByChatItem(chatItem)
+            },
+            onCopyClick = { text ->
+                viewModel.copyUserId(text)
+            },
+            onDismissRequest = {
+                viewModel.closeSupportingBottomSheet()
+            }
+        )
+
+    }
+
+    val currentBalanceBSData = viewState.currentTextBSData
+    if (viewState.showTextBS && currentBalanceBSData != null) {
+        InfoBottomSheet(
+            title = currentBalanceBSData.title,
+            text = currentBalanceBSData.text,
+            onDismissRequest = {
+                viewModel.closeTextBottomSheet()
+            },
+            onApply = {
+                viewModel.closeTextBottomSheet()
+            }
+        )
+    }
+
+    val bonusesBSData = viewState.currentBonusesBSData
+    if (bonusesBSData != null && viewState.showBonusesBS) {
+        BonusesBottomSheet(
+            data = bonusesBSData,
+            onDismissRequest = {
+                viewModel.hideBonusesBottomSheet()
+            },
+            onCopyClick = { s ->
+                viewModel.copyBonusesCode(s)
+            },
+            onSubscribeChange = { subscribe ->
+                viewModel.changeBonusesSubscribe(subscribe)
+            },
+            onConditionButtonClick = { bonusesPopupWindow ->
+                viewModel.navigateToBonusesConditions(bonusesPopupWindow)
+            }
+        )
+    }
+}

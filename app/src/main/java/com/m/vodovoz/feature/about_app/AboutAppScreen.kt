@@ -1,0 +1,45 @@
+package com.m.vodovoz.feature.about_app
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import com.m.vodovoz.R
+import com.m.vodovoz.design_system.composables.top_bar.VodovozTopBar
+import com.m.vodovoz.feature.about_app.composables.AboutAppBody
+import com.m.vodovoz.feature.about_app.model.AboutAppState
+
+@Composable
+fun AboutAppScreen(viewModel: AboutAppViewModel, viewState: AboutAppState) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .systemBarsPadding(),
+    ) {
+        VodovozTopBar(
+            onBack = {
+                viewModel.navigateBack()
+            },
+            title = stringResource(R.string.about_app),
+            actionIconId = R.drawable.ic_share,
+            onActionClick = {
+                viewModel.share()
+            }
+        )
+        AboutAppBody(
+            modifier = Modifier.weight(1f),
+            version = viewState.version,
+            onOptionClick = { aboutAppOption ->
+                viewModel.activateOption(aboutAppOption)
+            },
+            onTripleClick = {
+                viewModel.showDeveloperBS()
+            }
+        )
+    }
+}

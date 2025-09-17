@@ -1,0 +1,44 @@
+package com.m.vodovoz.data.vodovoz_service.mappers
+
+import com.m.vodovoz.data.vodovoz_service.model.ACTION_DTO
+import com.m.vodovoz.common.model.DataAllAction
+import com.m.vodovoz.common.model.VodovozAction
+
+
+fun ACTION_DTO.toAction(blockId: Long): VodovozAction? {
+    val id = ID ?: return null
+    val action = ACTION ?: return null
+
+    return when (action.uppercase()) {
+        "TOVAR" -> VodovozAction.Product(id.toLongOrNull() ?: return null)
+        "TOVARY" -> VodovozAction.Products(blockId, id.toLongOrNull() ?: return null)
+        "RAZDEL" -> VodovozAction.Category(id.toLongOrNull() ?: return null)
+        "AKCIYA" -> VodovozAction.Promotion(id.toLongOrNull() ?: return null)
+        "AKCII" -> VodovozAction.Promotions(blockId, id.toLongOrNull() ?: return null)
+        "BRAND" -> VodovozAction.Brand(id.toLongOrNull() ?: return null)
+        "URL" -> VodovozAction.Url(id)
+        "URLKYKI" -> VodovozAction.UrlWithCookie(id)
+        "DANNYEVSE" -> id.toDataAllAction()
+        else -> VodovozAction.Unknown(action, id)
+    }
+}
+
+fun String.toDataAllAction(): DataAllAction {
+    return when (this) {
+        "uslugi" -> DataAllAction.AllServices
+        "vseskidki" -> DataAllAction.AllDiscount
+        "vsenovinki" -> DataAllAction.AllNewProducts
+        "vseakcii" -> DataAllAction.AllPromotions
+        "dostavka" -> DataAllAction.Delivery
+        "profil" -> DataAllAction.Profile
+        "trekervodi" -> DataAllAction.WaterTracker
+        "pokypkasertificat" -> DataAllAction.BuyCertificate
+        "sanitarnaya_obrabotka" -> DataAllAction.SanitaryMaintenance
+        "remont_kulerov" -> DataAllAction.CoolerRepair
+        "arenda_kulera" -> DataAllAction.CoolerRental
+        "besplatnaya_arenda_kulera" -> DataAllAction.FreeCoolerRental
+        else -> DataAllAction.Unknown
+    }
+}
+
+

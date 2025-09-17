@@ -1,0 +1,25 @@
+package com.m.vodovoz.feature.cart.ordering.model
+
+import androidx.compose.runtime.Immutable
+import com.m.vodovoz.domain.general.model.order.OrderNotifyItemModel
+
+
+@Immutable
+data class OrderNotifyItemUi(
+    val name: String,
+    val value: String,
+    val code: String,
+){
+    companion object{
+        val Empty = OrderNotifyItemUi("","", "")
+    }
+}
+
+fun OrderNotifyItemModel.toUi(): OrderNotifyItemUi{
+    return OrderNotifyItemUi(name, value, code)
+}
+
+fun List<OrderNotifyItemModel>.mapToUi(): List<OrderNotifyItemUi>{
+    return map { it.toUi() }
+}
+

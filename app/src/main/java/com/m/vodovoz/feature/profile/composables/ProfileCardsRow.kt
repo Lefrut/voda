@@ -1,0 +1,100 @@
+package com.m.vodovoz.feature.profile.composables
+
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.takeOrElse
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.style.LineHeightStyle
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import coil3.compose.AsyncImage
+import com.m.vodovoz.feature.profile.model.ProfileCardUi
+
+@Suppress("NonSkippableComposable")
+@Composable
+fun ProfileCardsRow(
+    modifier: Modifier = Modifier,
+    cards: List<ProfileCardUi>,
+    onCardClick: (ProfileCardUi) -> Unit,
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        cards.take(3).forEach { card ->
+            ProfileCard(
+                card = card,
+                modifier = Modifier
+                    .weight(1f),
+                onClick = { profileCardUi ->
+                    onCardClick(profileCardUi)
+                }
+            )
+        }
+    }
+}
+
+@Composable
+private fun ProfileCard(
+    modifier: Modifier = Modifier,
+    card: ProfileCardUi,
+    onClick: (ProfileCardUi) -> Unit,
+) {
+    val textStyle = with(MaterialTheme.typography.labelSmall) {
+        copy(
+            lineHeight = fontSize, letterSpacing = 0.sp,
+            lineHeightStyle = LineHeightStyle(
+                LineHeightStyle.Alignment.Top,
+                LineHeightStyle.Trim.None
+            )
+        )
+    }
+
+    Column(
+        modifier = modifier
+            .clip(MaterialTheme.shapes.large)
+            .border(1.dp, MaterialTheme.colorScheme.outline, MaterialTheme.shapes.large)
+            .clickable {
+                onClick(card)
+            }
+            .padding(start = 8.dp, end = 4.dp, top = 8.dp, bottom = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterVertically)
+    ) {
+        AsyncImage(
+            model = card.imageUrl,
+            contentDescription = null,
+            modifier = Modifier.size(24.dp),
+            contentScale = ContentScale.FillBounds
+        )
+        Text(
+            text = card.title,
+            color = card.titleColor.takeOrElse { MaterialTheme.colorScheme.onBackground },
+            style = textStyle,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+        Text(
+            text = card.description,
+            color = card.descriptionColor.takeOrElse { MaterialTheme.colorScheme.onBackground },
+            style = textStyle,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+
+    }
+}
