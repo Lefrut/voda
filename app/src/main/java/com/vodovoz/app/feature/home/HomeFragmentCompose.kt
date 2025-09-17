@@ -64,6 +64,7 @@ import com.vodovoz.app.util.extensions.debugLog
 import com.vodovoz.app.util.extensions.isVpnActive
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.onSubscription
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -122,8 +123,6 @@ class HomeFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View {
-
-
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
 
@@ -471,7 +470,10 @@ class HomeFragment : Fragment() {
                             )
                         }
                         if (section == getString(R.string.contact_us)) {
-                            viewModel.goToProfile()
+                            tabManager.apply {
+                                setAuthRedirect(findNavController().graph.id)
+                                selectTab(R.id.graph_profile)
+                            }
                         }
                     }
 
@@ -488,11 +490,14 @@ class HomeFragment : Fragment() {
                     }
 
                     "remont_kulerov" -> {
-                        findNavController().navigateToAllServices()
+                        findNavController().navigateToServiceDetails(98886)
                     }
 
                     "feedback" -> {
-                        viewModel.goToProfile()
+                        tabManager.apply {
+                            setAuthRedirect(findNavController().graph.id)
+                            selectTab(R.id.graph_profile)
+                        }
                     }
 
                     "TOVARY" -> {
@@ -524,7 +529,10 @@ class HomeFragment : Fragment() {
                     }
 
                     "profil" -> {
-                        viewModel.goToProfile()
+                        tabManager.apply {
+                            setAuthRedirect(findNavController().graph.id)
+                            selectTab(R.id.graph_profile)
+                        }
                     }
 
                     "pokypkasertificat" -> {

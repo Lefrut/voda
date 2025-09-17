@@ -33,7 +33,7 @@ fun CartDetailsDTO.toDomain(): CartDetailsModel {
     return CartDetailsModel(
         title = TITLE ?: "",
         countText = COUNT ?: "",
-        items = KORZINA.mapToDomain(),
+        items = KORZINA?.mapToDomain() ?: throw IllegalArgumentException("Cart items can't be null"),
         present = PODAROK?.toDomain(
             orderPrice = orderSummary.getOrNull(1)?.value?.filter {
                 it.isDigit()

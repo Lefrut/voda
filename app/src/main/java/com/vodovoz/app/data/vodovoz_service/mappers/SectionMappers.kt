@@ -7,7 +7,6 @@ import com.vodovoz.app.data.vodovoz_service.model.KNOPKA_INT_DTO
 import com.vodovoz.app.data.vodovoz_service.model.RAZDEL_DTO
 import com.vodovoz.app.data.vodovoz_service.model.SuperTopAndBottomSectionsDTO
 import com.vodovoz.app.common.model.ButtonAction
-import com.vodovoz.app.common.model.NewVodovozAction
 import com.vodovoz.app.domain.general.model.product.ButtonModel
 import com.vodovoz.app.domain.general.model.product.CategoryWithProductsModel
 import com.vodovoz.app.domain.general.model.product.ProductModel

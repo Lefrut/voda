@@ -2,8 +2,7 @@ package com.vodovoz.app.data.vodovoz_service.di
 
 import com.squareup.moshi.Moshi
 import com.vodovoz.app.core.network.VodovozWebConfig
-import com.vodovoz.app.core.network.interceptor.BaseUrlInterceptor
-import com.vodovoz.app.core.network.interceptor.CookieHandlerInterceptor
+import com.vodovoz.app.core.network.di.VodovozQualifier
 import com.vodovoz.app.core.network.retrofit.NoOpCallAdapterFactory
 import com.vodovoz.app.core.network.retrofit.NoOpConverterFactory
 import com.vodovoz.app.data.vodovoz_service.VodovozService
@@ -20,12 +19,8 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import okhttp3.Interceptor
 import okhttp3.OkHttpClient
-import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
-import java.util.concurrent.TimeUnit
-import javax.inject.Named
 import javax.inject.Singleton
 
 
@@ -61,9 +56,9 @@ abstract class VodovozServiceModule {
     companion object {
         @Provides
         @Singleton
-        @Named("vodovoz")
+        @VodovozQualifier
         fun providesVodovozRetrofit(
-            @Named("vodovoz")
+            @VodovozQualifier
             okHttpClient: OkHttpClient,
             moshi: Moshi,
         ): Retrofit {
@@ -77,7 +72,7 @@ abstract class VodovozServiceModule {
 
         @Provides
         @Singleton
-        fun providesVodovozService(@Named("vodovoz") retrofit: Retrofit): VodovozService {
+        fun providesVodovozService(@VodovozQualifier retrofit: Retrofit): VodovozService {
             return retrofit.create(VodovozService::class.java)
         }
     }

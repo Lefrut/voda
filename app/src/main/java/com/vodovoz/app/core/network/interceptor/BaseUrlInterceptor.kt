@@ -1,5 +1,6 @@
 package com.vodovoz.app.core.network.interceptor
 
+import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.Interceptor
 import okhttp3.Response
@@ -10,37 +11,29 @@ import javax.inject.Singleton
 class BaseUrlInterceptor @Inject constructor() : Interceptor {
 
     @Volatile
-    private var scheme: String? = null
-
-    @Volatile
-    private var host: String? = null
+    private var newBaseUrl: HttpUrl? = null
 
     fun updateBaseUrl(url: String) {
-        url.toHttpUrlOrNull()?.let { httpUrl ->
-            scheme = httpUrl.scheme
-            host = httpUrl.host
-        }
+        newBaseUrl = url.toHttpUrlOrNull()
     }
 
-    fun clear(){
-        scheme = null
-        host   = null
+    fun clear() {
+        newBaseUrl = null
     }
 
     override fun intercept(chain: Interceptor.Chain): Response {
         val request = chain.request()
-        val currentScheme = scheme
-        val currentHost = host
+        val baseUrl = newBaseUrl ?: return chain.proceed(request)
 
-        if (currentScheme == null || currentHost == null) return chain.proceed(request)
+        val newUrl = with(request.url){
+            baseUrl.newBuilder()
+                .addEncodedPathSegments(encodedPath.substring(1))
+                .encodedQuery(encodedQuery)
+                .build()
+        }
 
         val newRequest = request.newBuilder()
-            .url(
-                request.url.newBuilder()
-                    .scheme(currentScheme)
-                    .host(currentHost)
-                    .build()
-            )
+            .url(newUrl)
             .build()
 
         return chain.proceed(newRequest)

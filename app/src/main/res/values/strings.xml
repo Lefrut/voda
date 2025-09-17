@@ -199,7 +199,7 @@
         Версия приложения: %2$s\n
         ID пользователя: %3$d
     </string>
-    <string name="device_info">Android: %1$s, Версия: %2$s, %3$s.</string>
+    <string name="device_info">%1$s Android: %2$s Версия: %3$s</string>
     <string name="tablet">Планшет</string>
     <string name="no_email_client">Нет почтового клиента</string>
     <string name="choose_email_client">Написать разработчикам</string>
@@ -278,8 +278,8 @@
     <string name="remove_address_description">Вы действительно хотите удалить адрес?</string>
     <string name="add_address_error">Не удалось создать адрес, попробуйте снова!</string>
     <string name="update_address_error">Не удалось изменить адрес, попробуйте снова!</string>
-    <string name="contact_us">Связаться с нами</string>
-    <string name="about_store">О магазине</string>
+    <string name="contact_us" translatable="false">Связаться с нами</string>
+    <string name="about_store" translatable="false">О магазине</string>
     <string name="update">Обновить</string>
     <string name="update_is_downloaded">Обновление скачано</string>
     <string name="error_invalid_address">Некорректный адрес</string>

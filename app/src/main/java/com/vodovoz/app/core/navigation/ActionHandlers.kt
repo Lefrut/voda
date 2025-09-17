@@ -15,13 +15,13 @@ import com.vodovoz.app.common.tab.TabManager
 import com.vodovoz.app.core.network.VodovozWebConfig
 
 
-//todo - migrate to this
 fun BaseVodovozAction.activate(
     navController: NavController,
     context: Context? = null,
     cookie: String = "",
     tabManager: TabManager? = null,
 ) {
+
     when (this) {
         DataAllAction.AllDiscount -> {
             navController.navigateToHurryBuyUpProducts()

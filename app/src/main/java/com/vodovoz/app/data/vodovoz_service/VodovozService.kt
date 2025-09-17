@@ -469,7 +469,7 @@ interface VodovozService {
         @Query("search") query: String,
     ): Response<VodovozResponseDTO<MiniSearchRecommendationsDTO>>
 
-    @GET("searching/index.php?action=search&nav=1")
+    @GET("searching/index.php?action=search")
     suspend fun getSearchProducts(
         @Query("search") query: String,
         @Query("nav") page: Int = 1,
@@ -763,7 +763,7 @@ interface VodovozService {
     ): Response<VodovozResponseDTO<ProductsSectionDTO>>
 
     //todo - super_top_new.php
-    @GET("glavnaya/super_top.php?action=topglav")
+    @GET("glavnaya/super_top_new.php?action=topglav")
     suspend fun getSuperTop(): Response<VodovozResponseDTO<SuperTopAndBottomSectionsDTO>>
 
     @GET("glavnaya/super_top_new.php?action=details")

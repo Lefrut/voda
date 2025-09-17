@@ -18,8 +18,7 @@ data object VodovozWebConfig {
 
     private const val VODOVOZ_PROTOCOL = "https://"
 
-    //todo - change to prod. url "m.vodovoz.ru/"
-    private const val VODOVOZ_DOMAIN = "vodovoz.net/"
+    private const val VODOVOZ_DOMAIN = "m.vodovoz.ru/"
 
     var VODOVOZ_URL = "$VODOVOZ_PROTOCOL$VODOVOZ_DOMAIN"
     const val VODOVOZ_PATH = "newmobile_new/"
