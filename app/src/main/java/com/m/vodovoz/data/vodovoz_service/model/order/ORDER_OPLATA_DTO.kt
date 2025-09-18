@@ -6,7 +6,6 @@ import com.squareup.moshi.JsonClass
 import androidx.annotation.Keep
 
 @Keep
-@JsonClass(generateAdapter = true)
 data class ORDER_OPLATA_DTO(
     @Json(name = "ZAGOLOVOK")
     val ZAGOLOVOK: String?,

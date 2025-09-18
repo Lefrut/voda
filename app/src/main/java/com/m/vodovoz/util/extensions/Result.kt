@@ -26,7 +26,7 @@ suspend fun<T> Flow<Result<T>>.deferredResult(): Deferred<Result<T>> {
     }
 }
 
-suspend fun<T> Deferred<Result<T>>.awaitResultOrNull(): T? {
+suspend fun<T> Deferred<Result<T>>.awaitOrNull(): T? {
     return await().getOrNull()
 }
 

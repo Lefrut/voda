@@ -15,6 +15,7 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -28,14 +29,14 @@ import androidx.compose.ui.text.fromHtml
 import androidx.compose.ui.unit.dp
 import androidx.paging.CombinedLoadStates
 import coil3.compose.rememberAsyncImagePainter
-import com.valentinilk.shimmer.ShimmerBounds
-import com.valentinilk.shimmer.rememberShimmer
 import com.m.vodovoz.design_system.composables.chip.TimeLeftChip
 import com.m.vodovoz.design_system.composables.chip.VodovozColorChip
 import com.m.vodovoz.design_system.composables.list.gridProducts
 import com.m.vodovoz.design_system.model.ProductUi
 import com.m.vodovoz.design_system.model.PromotionDetailsUi
 import com.m.vodovoz.design_system.vodovozTextLinkStyle
+import com.valentinilk.shimmer.ShimmerBounds
+import com.valentinilk.shimmer.rememberShimmer
 
 @Suppress("NonSkippableComposable")
 @Composable
@@ -89,30 +90,35 @@ fun PromotionDetailsBody(
                         VodovozColorChip(color = label.color, text = label.name)
                     }
 
-                    TimeLeftChip(text = promotionDetails.timeLeft)
+                    if (!promotionDetails.timeLeft.isNullOrBlank()) {
+                        TimeLeftChip(text = promotionDetails.timeLeft)
+                    }
                 }
 
 
-                Text(
-                    modifier = Modifier.padding(top = 24.dp),
-                    text = AnnotatedString.fromHtml(
-                        promotionDetails.description,
-                        vodovozTextLinkStyle
-                    ) { linkAnnotation ->
-                        if (linkAnnotation is LinkAnnotation.Url) onHyperlinkClick(
-                            linkAnnotation.url
-                        )
-                    },
-                    color = MaterialTheme.colorScheme.onBackground,
-                    style = MaterialTheme.typography.bodySmall
-                )
+                SelectionContainer(modifier = Modifier.padding(top = 24.dp)) {
+                    Text(
+                        text = AnnotatedString.fromHtml(
+                            promotionDetails.description,
+                            vodovozTextLinkStyle
+                        ) { linkAnnotation ->
+                            if (linkAnnotation is LinkAnnotation.Url) onHyperlinkClick(
+                                linkAnnotation.url
+                            )
+                        },
+                        color = MaterialTheme.colorScheme.onBackground,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
 
-                Text(
-                    modifier = Modifier.padding(top = 32.dp),
-                    text = productsTitle,
-                    color = MaterialTheme.colorScheme.onBackground,
-                    style = MaterialTheme.typography.headlineSmall
-                )
+                if (products.isNotEmpty()) {
+                    Text(
+                        modifier = Modifier.padding(top = 32.dp),
+                        text = productsTitle,
+                        color = MaterialTheme.colorScheme.onBackground,
+                        style = MaterialTheme.typography.headlineSmall
+                    )
+                }
 
                 Spacer(modifier = Modifier.height(16.dp))
             }

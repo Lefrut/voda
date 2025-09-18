@@ -68,7 +68,8 @@ class LoginFlowViewModel @Inject constructor(
                         buttons = authDetails.buttons.updateButton(AUTH_BUTTON) { button ->
                             button.copy(enabled = false)
                         },
-                        warning = GlobalAppExtraAgreement.html
+                        warning = GlobalAppExtraAgreement.html,
+                        waringTitles = GlobalAppExtraAgreement.titles
                     ),
                     uiState = LoginUiState.Success,
                 )

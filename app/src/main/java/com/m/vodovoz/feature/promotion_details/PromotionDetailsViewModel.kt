@@ -24,6 +24,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
+@Stable
 class PromotionDetailsViewModel @Inject constructor(
     savedState: SavedStateHandle,
     private val cartManager: CartManager,

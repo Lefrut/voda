@@ -1,13 +1,11 @@
 package com.m.vodovoz.feature.buy_certificate
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.systemBarsPadding
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import com.m.vodovoz.design_system.composables.scaffold.VodovozScaffold
 import com.m.vodovoz.design_system.composables.snackbar.VodovozSnackbarHost
 import com.m.vodovoz.design_system.composables.top_bar.VodovozTopBar
 import com.m.vodovoz.feature.buy_certificate.composables.BuyCertificateBody
@@ -16,20 +14,24 @@ import com.m.vodovoz.feature.buy_certificate.composables.BuyCertificateBody
 fun BuyCertificateScreen(
     viewModel: BuyCertificateViewModel,
     viewState: BuyCertificateViewModel.BuyCertificateState,
-    snackbarHostState: SnackbarHostState
+    snackbarHostState: SnackbarHostState,
 ) {
-    Column(
-        modifier = Modifier
-            .systemBarsPadding()
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-    ) {
-        VodovozTopBar(
-            onBack = { viewModel.navigateBack() },
-            title = viewState.title
-        )
+
+    VodovozScaffold(
+        topBar = {
+            VodovozTopBar(
+                onBack = { viewModel.navigateBack() },
+                title = viewState.title
+            )
+        },
+        snackbarHost = {
+            VodovozSnackbarHost(hostState = snackbarHostState)
+        }
+    ) { paddingValues ->
         BuyCertificateBody(
-            modifier = Modifier.weight(1f),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues),
             certificates = viewState.certificates,
             certificatesTitle = viewState.certificatesTitle,
             currentCertificate = viewState.currentCertificate,
@@ -60,6 +62,6 @@ fun BuyCertificateScreen(
                 viewModel.navigateToFAQ(faqUi)
             }
         )
-        VodovozSnackbarHost(hostState = snackbarHostState)
+
     }
 }

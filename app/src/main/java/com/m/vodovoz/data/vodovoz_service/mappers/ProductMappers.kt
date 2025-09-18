@@ -80,9 +80,9 @@ fun AnalogsSectionDTO.toDomain(): ProductsSectionModel {
     )
 }
 
-fun List<TOVAR_DATA_DTO?>.mapToDomain(): List<ProductModel> {
+fun List<TOVAR_DATA_DTO>.mapToDomain(): List<ProductModel> {
     return mapNotNull { productDTO ->
-        productDTO?.toDomain()
+        productDTO.toDomain()
     }
 }
 

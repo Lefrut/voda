@@ -12,7 +12,7 @@ import com.m.vodovoz.design_system.model.VodovozItemUi
 import com.m.vodovoz.design_system.model.VodovozSectionUi
 
 @Stable
-sealed class HomeListItem<out T>(open val position: Int): VodovozItemUi<HomeListItem<T>>() {
+sealed class HomeListItem<out T>(open val position: Int) : VodovozItemUi<HomeListItem<T>>() {
 
     abstract val value: T
 
@@ -21,11 +21,13 @@ sealed class HomeListItem<out T>(open val position: Int): VodovozItemUi<HomeList
         cartLoading: Boolean,
         isFavorite: Boolean,
         cartQuantity: Int,
-        items: List<VodovozItemUi<*>>
-    ): HomeListItem<T> { return this }
+        items: List<VodovozItemUi<*>>,
+    ): HomeListItem<T> {
+        return this
+    }
 
     data class Banner(override val value: List<BannerUi>) :
-        HomeListItem<List<BannerUi>>(Positions.BANNER) 
+        HomeListItem<List<BannerUi>>(Positions.BANNER)
 
     data class Stories(override val value: List<StoryUi>) :
         HomeListItem<List<StoryUi>>(Positions.STORIES)
@@ -38,7 +40,7 @@ sealed class HomeListItem<out T>(open val position: Int): VodovozItemUi<HomeList
 
     data class Divider(
         override val position: Int,
-        override val value: Any = Any()
+        override val value: Any = Any(),
     ) : HomeListItem<Any>(position)
 
     data class Promotions(override val value: SectionUi<PromotionUi>) :
@@ -52,7 +54,7 @@ sealed class HomeListItem<out T>(open val position: Int): VodovozItemUi<HomeList
         data class Section(
             override val position: Int,
             override val value: VodovozSectionUi<ProductUi>,
-        ) : Products<VodovozSectionUi<ProductUi>>(position, value){
+        ) : Products<VodovozSectionUi<ProductUi>>(position, value) {
 
             override val items: List<VodovozItemUi<*>>
                 get() = value.items
@@ -62,17 +64,17 @@ sealed class HomeListItem<out T>(open val position: Int): VodovozItemUi<HomeList
                 cartLoading: Boolean,
                 isFavorite: Boolean,
                 cartQuantity: Int,
-                items: List<VodovozItemUi<*>>
+                items: List<VodovozItemUi<*>>,
             ): Section {
-                return copy(value = value.copyItem(items = items)) 
+                return copy(value = value.copyItem(items = items))
             }
         }
 
-        data class CategoryWithProductsSection(
+        data class CategoriesWithProductsSection(
             val currentCategoryId: Long,
             override val position: Int,
             override val value: VodovozSectionUi<CategoryWithProductsUi>,
-        ) : Products<VodovozSectionUi<CategoryWithProductsUi>>(position, value){
+        ) : Products<VodovozSectionUi<CategoryWithProductsUi>>(position, value) {
 
             override val items: List<VodovozItemUi<*>>
                 get() = value.items
@@ -82,8 +84,8 @@ sealed class HomeListItem<out T>(open val position: Int): VodovozItemUi<HomeList
                 cartLoading: Boolean,
                 isFavorite: Boolean,
                 cartQuantity: Int,
-                items: List<VodovozItemUi<*>>
-            ): CategoryWithProductsSection {
+                items: List<VodovozItemUi<*>>,
+            ): CategoriesWithProductsSection {
                 return copy(value = value.copyItem(items = items))
             }
 
@@ -100,14 +102,14 @@ sealed class HomeListItem<out T>(open val position: Int): VodovozItemUi<HomeList
                 Section(Positions.VIEWED, items)
 
             fun topSection(section: VodovozSectionUi<CategoryWithProductsUi>) =
-                CategoryWithProductsSection(
+                CategoriesWithProductsSection(
                     currentCategoryId = section.items.firstOrNull()?.id ?: -1,
                     position = Positions.TOP_SECTION,
                     value = section
                 )
 
             fun bottomSection(section: VodovozSectionUi<CategoryWithProductsUi>) =
-                CategoryWithProductsSection(
+                CategoriesWithProductsSection(
                     currentCategoryId = section.items.firstOrNull()?.id ?: -1,
                     position = Positions.BOTTOM_SECTION,
                     value = section
@@ -116,7 +118,7 @@ sealed class HomeListItem<out T>(open val position: Int): VodovozItemUi<HomeList
     }
 
 
-    private object Positions {
+    object Positions {
         const val BANNER = 100
         const val STORIES = 200
         const val ORDER = 300
@@ -131,10 +133,40 @@ sealed class HomeListItem<out T>(open val position: Int): VodovozItemUi<HomeList
 
 }
 
-inline fun <reified T : HomeListItem<*>> List<HomeListItem<*>>.getOrNull(): T? {
-    return firstOrNull { item -> item is T } as? T
+fun <T> List<HomeListItem<T>>.plusItem(item: HomeListItem<T>): List<HomeListItem<T>> {
+    return (listOf(item) + this).distinctBy { it.position }
 }
 
-inline fun <VALUE, reified T : HomeListItem<VALUE>> List<HomeListItem<*>>.getValueOrNull(): VALUE? {
-    return getOrNull<T>()?.value
+inline fun <reified T : HomeListItem<*>> List<HomeListItem<*>>.firstOrNull(
+    position: Int? = null,
+): T? {
+    return firstOrNull { item ->
+        item is T && (position == null || position == item.position)
+    } as? T
+}
+
+inline fun <VALUE, reified T : HomeListItem<VALUE>> List<HomeListItem<*>>.firstValueOrNull(
+    position: Int? = null,
+): VALUE? {
+    return firstOrNull<T>(position)?.value
+}
+
+
+val HomeListItem.Products.CategoriesWithProductsSection.products
+    get() = value.items.firstOrNull { it.id == currentCategoryId }?.items ?: emptyList()
+
+fun HomeListItem.Products.CategoriesWithProductsSection.withProducts(
+    products: List<ProductUi>,
+): HomeListItem.Products.CategoriesWithProductsSection {
+    return copy(
+        value = value.withItems {
+            map { categoryWithProducts ->
+                if (categoryWithProducts.id == currentCategoryId) {
+                    categoryWithProducts.copy(items = products)
+                } else {
+                    categoryWithProducts
+                }
+            }
+        }
+    )
 }

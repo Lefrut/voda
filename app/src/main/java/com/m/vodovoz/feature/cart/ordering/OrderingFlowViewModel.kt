@@ -36,7 +36,6 @@ import com.m.vodovoz.util.formatters.VodovozDateFormatters
 import com.m.vodovoz.util.toIntRoundOrNull
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import javax.inject.Inject
@@ -251,8 +250,6 @@ class OrderingFlowViewModel @Inject constructor(
                     )
                 }
 
-
-
                 if (recipientErrors.isNotEmpty() || addressId == null || date == null) {
                     sendEvent(OrderingEvents.ScrollToTop)
                     return@launch
@@ -370,7 +367,8 @@ class OrderingFlowViewModel @Inject constructor(
 
         if (recipientErrors.isNotEmpty()) {
             sendEvent(OrderingEvents.ScrollToTop)
-            return@launch
+        } else if (paymentErrors.isNotEmpty()) {
+            sendEvent(OrderingEvents.ScrollToBottom)
         }
     }
 
@@ -445,7 +443,9 @@ class OrderingFlowViewModel @Inject constructor(
             )
         }
 
-        val orderingDetailsResult = vodovozServiceRepository.getOrderingDetails().singleResult()
+        val orderingDetailsResult = vodovozServiceRepository.getOrderingDetails(
+            addressId = address.id
+        ).singleResult()
 
         orderingDetailsResult.onSuccess { orderingDetails ->
             updateState { s ->
@@ -453,8 +453,20 @@ class OrderingFlowViewModel @Inject constructor(
 
                 s.copy(
                     totals = orderingDetails.totals.mapToUi(),
-                    paymentSection = orderingDetails.paymentSection.toUi {
-                        it.mapToUi()
+                    paymentSection = orderingDetails.paymentSection.toUi { list ->
+                        list.mapToUi()
+                            .map { menuItemUi ->
+                                if (menuItemUi.id == CALL_YOU_MENU_ID) {
+                                    updateState { s ->
+                                        s.copy(
+                                            ordering = s.ordering.copy(
+                                                callYouId = menuItemUi.defaultValue
+                                            )
+                                        )
+                                    }
+                                    menuItemUi
+                                } else menuItemUi
+                            }
                     },
                     recipientSection = orderingDetails.recipientSection.toUi { list ->
                         list.mapToUi().map { menuItemUi ->
@@ -471,7 +483,7 @@ class OrderingFlowViewModel @Inject constructor(
             }
         }
 
-        refreshRecipient()
+        refreshRecipient().join()
     }
 
     fun setDeliveryDateTime(
@@ -635,6 +647,7 @@ class OrderingFlowViewModel @Inject constructor(
         data class GoToAddresses(val addressId: Long?) : OrderingEvents()
         data object ScrollToTop : OrderingEvents()
         data object RefreshCart : OrderingEvents()
+        data object ScrollToBottom : OrderingEvents()
 
         data class GoToDeliveryDate(
             val addressId: Long,

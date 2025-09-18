@@ -1,6 +1,7 @@
 package com.m.vodovoz.feature.home.composables
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,11 +20,14 @@ import androidx.compose.ui.unit.dp
 import com.m.vodovoz.common.model.ButtonAction
 import com.m.vodovoz.design_system.composables.card.GridProductCard
 import com.m.vodovoz.design_system.composables.chip.VodovozChip
+import com.m.vodovoz.design_system.composables.decoration.SkeletonBox
 import com.m.vodovoz.design_system.composables.tab_row.VodovozScrollableTabRow
 import com.m.vodovoz.design_system.model.CategoryWithProductsUi
 import com.m.vodovoz.design_system.model.ProductUi
 import com.m.vodovoz.design_system.model.SectionContentUi
 import com.m.vodovoz.util.extensions.indexOfOrNull
+import com.valentinilk.shimmer.ShimmerBounds
+import com.valentinilk.shimmer.rememberShimmer
 
 @Composable
 fun HomeCategoryProducts(
@@ -44,13 +48,16 @@ fun HomeCategoryProducts(
     val items = sectionCategoriesWithProducts.items
 
     Column(modifier = modifier) {
-        TitleAndButton(
-            title = sectionCategoriesWithProducts.title,
-            button = button,
-            onShowAllClick = { onShowAllClick(it) }
-        )
+        if (sectionCategoriesWithProducts.title.isNotBlank()) {
+            TitleAndButton(
+                title = sectionCategoriesWithProducts.title,
+                button = button,
+                onShowAllClick = { onShowAllClick(it) }
+            )
+        }
 
-        val currentCategoryWithProducts = items.find { it.id == categoryWithProductsId }
+        val currentCategoryWithProducts =
+            items.find { it.id == categoryWithProductsId } ?: CategoryWithProductsUi.Empty
 
         if (items.size > 1) {
             VodovozScrollableTabRow(
@@ -74,6 +81,9 @@ fun HomeCategoryProducts(
         }
 
 
+        val shimmerState = rememberShimmer(ShimmerBounds.View)
+        val itemWidth = 160.dp
+
         LazyRow(
             state = lazyListState,
             modifier = Modifier.padding(top = 16.dp),
@@ -81,19 +91,41 @@ fun HomeCategoryProducts(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            items(
-                items = currentCategoryWithProducts?.items ?: emptyList(),
-                key = { it.id }
-            ) { product ->
-                GridProductCard(
-                    modifier = Modifier.width(160.dp),
-                    product = product,
-                    onClick = onProductClick,
-                    onLike = onProductLike,
-                    onIncrementToCart = onIncrementToCart,
-                    onDecrementToCart = onDecrementToCart,
-                    onAnalogsClick = onProductAnalogsClick
-                )
+            if (currentCategoryWithProducts.items.isEmpty()) {
+                items(List(10) { it }) {
+                    Box(
+                        modifier = Modifier
+                    ) {
+                        GridProductCard(
+                            modifier = Modifier.width(itemWidth),
+                            product = ProductUi.Empty,
+                            onClick = {},
+                            onLike = {},
+                            onIncrementToCart = {},
+                            onDecrementToCart = { },
+                            onAnalogsClick = {}
+                        )
+                        SkeletonBox(
+                            shimmerState = shimmerState,
+                            modifier = Modifier.matchParentSize()
+                        )
+                    }
+                }
+            } else {
+                items(
+                    items = currentCategoryWithProducts.items,
+                    key = { it.id }
+                ) { product ->
+                    GridProductCard(
+                        modifier = Modifier.width(itemWidth),
+                        product = product,
+                        onClick = onProductClick,
+                        onLike = onProductLike,
+                        onIncrementToCart = onIncrementToCart,
+                        onDecrementToCart = onDecrementToCart,
+                        onAnalogsClick = onProductAnalogsClick
+                    )
+                }
             }
         }
 

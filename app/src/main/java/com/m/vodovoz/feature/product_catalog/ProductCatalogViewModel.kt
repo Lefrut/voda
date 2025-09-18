@@ -21,6 +21,7 @@ import com.m.vodovoz.design_system.model.filters.FiltersPriceUi
 import com.m.vodovoz.design_system.model.filters.FiltersUi
 import com.m.vodovoz.design_system.model.filters.toDomain
 import com.m.vodovoz.design_system.model.findParentOfOnlyLeaf
+import com.m.vodovoz.design_system.model.findSiblingsOf
 import com.m.vodovoz.design_system.model.toCategory
 import com.m.vodovoz.design_system.model.toUi
 import com.m.vodovoz.domain.general.model.exceptions.EmptyResultException
@@ -331,17 +332,19 @@ class ProductCatalogViewModel @Inject constructor(
 
             updateState { state ->
 
+                val allCategoriesFromTree = with(stateSnapshot) {
+                    categoryTree.findSiblingsOf(currentCategory.id).allCategories()
+                }
+
                 val categoryTreeList: List<CategoryUi> = buildList {
-                    addAll(stateSnapshot.categoryTree.allCategories()
-                        .map { category -> category.toCategory() }
-                    )
+                    addAll(allCategoriesFromTree.map { category -> category.toCategory() })
                     removeIf { categoryUi -> categoryUi.id == state.currentCategory.id }
                 }
 
                 val categories = if (dataSource is DataSource.Category) {
                     categoryTreeList
                 } else {
-                    productsSection.categories.ifEmpty { categoryTreeList }
+                    productsSection.categories
                 }.takeIf { it.size > 1 } ?: emptyList()
 
                 state.copy(
@@ -447,7 +450,6 @@ class ProductCatalogViewModel @Inject constructor(
             } else backendCategories
 
             updateState { s ->
-
                 s.copy(categoryTree = childrenCategoriesOfParent)
             }
         }.onFailure {

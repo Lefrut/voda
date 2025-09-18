@@ -28,6 +28,7 @@ import com.m.vodovoz.data.vodovoz_service.model.SearchRecommendationsDTO
 import com.m.vodovoz.data.vodovoz_service.model.SiteStateResponseDTO
 import com.m.vodovoz.data.vodovoz_service.model.StoriesDTO
 import com.m.vodovoz.data.vodovoz_service.model.SuperTopAndBottomSectionsDTO
+import com.m.vodovoz.data.vodovoz_service.model.TOVAR_DATA_DTO
 import com.m.vodovoz.data.vodovoz_service.model.VodovozErrorResponseDTO
 import com.m.vodovoz.data.vodovoz_service.model.VodovozPlaceholderDTO
 import com.m.vodovoz.data.vodovoz_service.model.VodovozResponseDTO
@@ -762,9 +763,14 @@ interface VodovozService {
         @Query("ascdesc") order: String = "",
     ): Response<VodovozResponseDTO<ProductsSectionDTO>>
 
-    //todo - super_top_new.php
     @GET("glavnaya/super_top_new.php?action=topglav")
-    suspend fun getSuperTop(): Response<VodovozResponseDTO<SuperTopAndBottomSectionsDTO>>
+    suspend fun getSuperTopCategories(): Response<VodovozResponseDTO<SuperTopAndBottomSectionsDTO>>
+
+    @GET("glavnaya/super_top_new.php?action=tovar")
+    suspend fun getSuperTopByCategory(
+        @Query("idknokpa") categoryId: Long
+    ): Response<VodovozResponseDTO<List<TOVAR_DATA_DTO>>>
+
 
     @GET("glavnaya/super_top_new.php?action=details")
     suspend fun getAllSuperTop(

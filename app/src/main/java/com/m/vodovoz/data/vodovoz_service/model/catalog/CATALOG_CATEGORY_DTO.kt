@@ -17,7 +17,7 @@ data class CATALOG_CATEGORY_DTO(
     @Json(name = "PICTURE")
     val PICTURE: String?,
     @Json(name = "PODRAZDEL")
-    val PODRAZDEL: List<CATALOG_CATEGORY_DTO?>?,
+    val PODRAZDEL: List<CATALOG_CATEGORY_DTO>?,
     @Json(name = "SUBSECTIONS")
     val SUBSECTIONS: Int?,
     @Json(name = "UF_SILKAPEREXOD")

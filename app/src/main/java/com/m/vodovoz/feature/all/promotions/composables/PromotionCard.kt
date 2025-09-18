@@ -35,9 +35,7 @@ fun PromotionCard(
             .fillMaxWidth()
             .heightIn(150.dp)
             .clip(MaterialTheme.shapes.large)
-            .clickable {
-                onClick(promotion)
-            }
+            .clickable { onClick(promotion) }
     ) {
         Image(
             painter = asyncImagePainter,

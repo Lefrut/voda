@@ -3,12 +3,12 @@ package com.m.vodovoz.domain.general.model.product
 import com.m.vodovoz.common.model.ButtonAction
 import com.m.vodovoz.domain.general.model.exceptions.VodovozPlaceholderModel
 
-data class TopAndBottomSectionsModel(
+data class SuperTopModel(
     val topSection: SectionModel<CategoryWithProductsModel>,
     val bottomSection: SectionModel<CategoryWithProductsModel>,
 ){
     companion object{
-        val Empty = TopAndBottomSectionsModel(SectionModel.empty(), SectionModel.empty())
+        val Empty = SuperTopModel(SectionModel.empty(), SectionModel.empty())
     }
 }
 

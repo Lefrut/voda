@@ -16,6 +16,7 @@ import com.m.vodovoz.common.model.ButtonAction
 import com.m.vodovoz.design_system.composables.decoration.VodovozHorizontalDivider
 import com.m.vodovoz.design_system.model.AboutAdvertisingUi
 import com.m.vodovoz.design_system.model.BannerUi
+import com.m.vodovoz.design_system.model.CategoryWithProductsUi
 import com.m.vodovoz.design_system.model.ProductUi
 import com.m.vodovoz.design_system.model.PromotionUi
 import com.m.vodovoz.design_system.model.StoryUi
@@ -30,7 +31,7 @@ fun HomeBody(
     modifier: Modifier = Modifier,
     items: List<HomeListItem<*>>,
     onStoryClick: (StoryUi) -> Unit,
-    onCategorySelect: (HomeListItem.Products.CategoryWithProductsSection, Long) -> Unit,
+    onCategorySelect: (HomeListItem.Products.CategoriesWithProductsSection, CategoryWithProductsUi) -> Unit,
     onPopularCategoryClick: (PopularCategoryUi) -> Unit,
     onOrderClick: (HomeOrderUi) -> Unit,
     onOrderMenuItemClick: (MenuItemUi) -> Unit,
@@ -89,7 +90,7 @@ fun HomeBody(
                         }
                     }
 
-                    is HomeListItem.Products.CategoryWithProductsSection -> {
+                    is HomeListItem.Products.CategoriesWithProductsSection -> {
                         val categorySection = item.value
 
                         if(categorySection.items.isNotEmpty()){
@@ -99,7 +100,7 @@ fun HomeBody(
                                 categoryWithProductsId = item.currentCategoryId,
                                 sectionCategoriesWithProducts = categorySection,
                                 onCategorySelect = { categoryWithProducts ->
-                                    onCategorySelect(item, categoryWithProducts.id)
+                                    onCategorySelect(item, categoryWithProducts)
                                 },
                                 onProductClick = onProductCardClick,
                                 onProductLike = onProductLike,

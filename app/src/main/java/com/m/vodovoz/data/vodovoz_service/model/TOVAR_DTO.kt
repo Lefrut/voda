@@ -7,7 +7,7 @@ import com.squareup.moshi.Json
 @Keep
 data class TOVAR_DTO(
     @Json(name = "DATA")
-    val DATA: List<TOVAR_DATA_DTO?>?,
+    val DATA: List<TOVAR_DATA_DTO>?,
     @Json(name = "NAMETOVAR")
     val NAMETOVAR: String?,
     @Json(name = "SORTIROKA")
@@ -21,5 +21,5 @@ data class TOVARY_DTO(
     @Json(name = "NAME")
     val NAME: String?,
     @Json(name = "TOVARY")
-    val TOVARY: List<TOVAR_DATA_DTO?>?,
+    val TOVARY: List<TOVAR_DATA_DTO>?,
 )

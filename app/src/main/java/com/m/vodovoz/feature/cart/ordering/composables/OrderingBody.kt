@@ -2,6 +2,7 @@ package com.m.vodovoz.feature.cart.ordering.composables
 
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.verticalScroll
@@ -29,12 +30,10 @@ fun OrderingBody(
     selectedNotifyItem: OrderNotifyItemUi,
     recipientSection: SectionUi<OrderingMenuItemUi>,
     totals: List<OrderSummaryItemUi>,
-    button: ColorfulButtonUi,
     onRecipientItemClick: (OrderingMenuItemUi) -> Unit,
     onCommentChange: (FieldUi, FieldUi) -> Unit,
     onNotifyItemSelect: (OrderNotifyItemUi) -> Unit,
     onPaymentButtonClick: (OrderingMenuItemUi) -> Unit,
-    onButtonClick: () -> Unit,
 ) {
     Column(
         modifier = modifier
@@ -85,17 +84,12 @@ fun OrderingBody(
         }
 
         OrderSummaryColumn(
-            modifier = Modifier.padding(horizontal = 16.dp),
+            modifier = Modifier.padding(
+                start = 16.dp,
+                end = 16.dp,
+                bottom = 24.dp
+            ),
             items = totals
         )
-
-        VodovozButton(
-            modifier = Modifier.padding(vertical = 24.dp, horizontal = 16.dp),
-            text = button.name,
-            onClick = onButtonClick,
-            isLoading = button.loading,
-            enabled = button.enabled
-        )
-
     }
 }

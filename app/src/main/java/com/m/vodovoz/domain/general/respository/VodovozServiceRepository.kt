@@ -40,7 +40,7 @@ import com.m.vodovoz.domain.general.model.product.ProductsSectionModel
 import com.m.vodovoz.domain.general.model.product.SearchRecommendationsModel
 import com.m.vodovoz.domain.general.model.product.SectionModel
 import com.m.vodovoz.domain.general.model.product.SortModel
-import com.m.vodovoz.domain.general.model.product.TopAndBottomSectionsModel
+import com.m.vodovoz.domain.general.model.product.SuperTopModel
 import com.m.vodovoz.domain.general.model.product.UnratedProductsSectionModel
 import com.m.vodovoz.domain.general.model.product.WaitFeedbackProductModel
 import com.m.vodovoz.domain.general.model.promotion.BannerModel
@@ -501,7 +501,9 @@ interface VodovozServiceRepository {
         sort: SortModel = SortModel.Empty,
     ): Flow<PagingData<ProductModel>>
 
-    fun getSuperTop(): Flow<Result<TopAndBottomSectionsModel>>
+    fun getSuperTopCategories(): Flow<Result<SuperTopModel>>
+
+    fun getSuperTopProducts(categoryId: Long): Flow<Result<List<ProductModel>>>
 
     fun getAllSuperTop(
         buttonId: Int,

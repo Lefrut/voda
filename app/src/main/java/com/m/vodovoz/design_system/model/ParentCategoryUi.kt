@@ -24,31 +24,40 @@ data class ParentCategoryUi(
 
 }
 
-fun List<ParentCategoryUi>.findParentOfOnlyLeaf(): ParentCategoryUi? {
-    fun traverse(
-        node: ParentCategoryUi,
-        parent: ParentCategoryUi?,
-        acc: MutableList<Pair<ParentCategoryUi, ParentCategoryUi>>
-    ) {
-        if (node.childCategories.isEmpty()) {
-            if (parent != null) acc += node to parent
-        } else {
-            node.childCategories.forEach { child ->
-                traverse(child, node, acc)
-            }
+fun List<ParentCategoryUi>.traverseTree(
+    block: (node: ParentCategoryUi, parent: ParentCategoryUi?) -> Boolean,
+): ParentCategoryUi? {
+    fun traverse(node: ParentCategoryUi, parent: ParentCategoryUi?): ParentCategoryUi? {
+        if (block(node, parent)) return node
+        node.childCategories.forEach { child ->
+            traverse(child, node)?.let { return it }
         }
+        return null
     }
 
-    val leafParentPairs = mutableListOf<Pair<ParentCategoryUi, ParentCategoryUi>>()
     for (root in this) {
-        traverse(root, null, leafParentPairs)
+        traverse(root, null)?.let { return it }
+    }
+    return null
+}
+
+fun List<ParentCategoryUi>.findSiblingsOf(categoryId: Int): List<ParentCategoryUi> {
+    return traverseTree { node, _ ->
+        node.childCategories.any { it.id == categoryId.toLong() }
+    }?.childCategories.orEmpty()
+}
+
+fun List<ParentCategoryUi>.findParentOfOnlyLeaf(): ParentCategoryUi? {
+    val leafParentPairs = mutableListOf<Pair<ParentCategoryUi, ParentCategoryUi>>()
+
+    traverseTree { node, parent ->
+        if (node.childCategories.isEmpty() && parent != null) {
+            leafParentPairs += node to parent
+        }
+        false
     }
 
-    return if (leafParentPairs.size == 1) {
-        leafParentPairs.first().second
-    } else {
-        null
-    }
+    return if (leafParentPairs.size == 1) leafParentPairs.first().second else null
 }
 
 fun ParentCategoryUi.allCategories(): List<ParentCategoryUi> {

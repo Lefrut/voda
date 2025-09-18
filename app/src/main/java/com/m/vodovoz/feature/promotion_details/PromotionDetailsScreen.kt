@@ -11,7 +11,6 @@ import com.m.vodovoz.design_system.composables.top_bar.VodovozTopBar
 import com.m.vodovoz.feature.promotion_details.composables.PromotionDetailsBody
 import com.m.vodovoz.feature.promotion_details.composables.PromotionDetailsLoadingPlaceholder
 
-@Suppress("NonSkippableComposable")
 @Composable
 fun PromotionDetailsScreen(
     viewModel: PromotionDetailsViewModel,
