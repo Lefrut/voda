@@ -32,6 +32,8 @@ data class POLE_DTO(
     val SPISOK: List<SPISOK>?,
     @Json(name = "OPIS")
     val OPIS: String?,
+    @Json(name = "OPISANIE")
+    val OPISANIE: String?,
     @Json(name = "TEXT_V_POLE")
     val TEXT_V_POLE: String?,
     @Json(name = "TEXTVPOLE")

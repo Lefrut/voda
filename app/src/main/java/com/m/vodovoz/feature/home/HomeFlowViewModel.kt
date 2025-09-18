@@ -8,14 +8,15 @@ import com.m.vodovoz.R
 import com.m.vodovoz.common.account.AccountManager
 import com.m.vodovoz.common.cart.CartManager
 import com.m.vodovoz.common.like.LikeManager
+import com.m.vodovoz.common.model.AppLink
 import com.m.vodovoz.common.model.BaseVodovozAction
 import com.m.vodovoz.common.model.ButtonAction
-import com.m.vodovoz.common.model.DataAllAction
 import com.m.vodovoz.common.model.GlobalAppLinks
 import com.m.vodovoz.common.model.VodovozAction
 import com.m.vodovoz.common.resources.ResourcesProvider
 import com.m.vodovoz.design_system.model.AboutAdvertisingUi
 import com.m.vodovoz.design_system.model.BannerUi
+import com.m.vodovoz.design_system.model.CategoryWithProductsUi
 import com.m.vodovoz.design_system.model.ProductUi
 import com.m.vodovoz.design_system.model.PromotionUi
 import com.m.vodovoz.design_system.model.SpecialPromotionUi
@@ -23,7 +24,7 @@ import com.m.vodovoz.design_system.model.StoryUi
 import com.m.vodovoz.design_system.model.mapToUi
 import com.m.vodovoz.design_system.model.toUi
 import com.m.vodovoz.design_system.model.toVodovozSectionUi
-import com.m.vodovoz.domain.general.model.product.TopAndBottomSectionsModel
+import com.m.vodovoz.domain.general.model.product.SuperTopModel
 import com.m.vodovoz.domain.general.model.promotion.toUi
 import com.m.vodovoz.domain.general.respository.UserPreferencesRepository
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
@@ -36,13 +37,15 @@ import com.m.vodovoz.feature.home.model.PopularCategoryUi
 import com.m.vodovoz.feature.home.model.UnratedProductUi
 import com.m.vodovoz.feature.home.model.UnratedProductsSectionUi
 import com.m.vodovoz.feature.home.model.compareVersions
-import com.m.vodovoz.feature.home.model.getOrNull
-import com.m.vodovoz.feature.home.model.getValueOrNull
+import com.m.vodovoz.feature.home.model.firstOrNull
+import com.m.vodovoz.feature.home.model.firstValueOrNull
+import com.m.vodovoz.feature.home.model.plusItem
 import com.m.vodovoz.feature.home.model.toUi
+import com.m.vodovoz.feature.home.model.withProducts
 import com.m.vodovoz.ui.mvi.Event
 import com.m.vodovoz.ui.paging.ItemsState
 import com.m.vodovoz.ui.paging.ProductsMviViewModel
-import com.m.vodovoz.util.extensions.awaitResultOrNull
+import com.m.vodovoz.util.extensions.awaitOrNull
 import com.m.vodovoz.util.extensions.deferredResult
 import com.m.vodovoz.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -82,7 +85,7 @@ class HomeFlowViewModel @Inject constructor(
 
 
     suspend fun listenStories(): Unit = state.map {
-        stateSnapshot.items.getValueOrNull<List<StoryUi>, HomeListItem.Stories>()
+        stateSnapshot.items.firstValueOrNull<List<StoryUi>, HomeListItem.Stories>()
             ?: emptyList()
     }.distinctUntilChanged()
         .combine(userPreferencesRepository.viewedStoryIds) { stories, storiesIds ->
@@ -107,15 +110,27 @@ class HomeFlowViewModel @Inject constructor(
         val sectionPopularCategoriesDeferred =
             vodovozServiceRepository.getPopularCategories().deferredResult()
         val orderMenuDeferred = vodovozServiceRepository.getOrderMenu().deferredResult()
-        val sectionsTopAndBottomDeferred = vodovozServiceRepository.getSuperTop().deferredResult()
+        val sectionsTopDeferred =
+            vodovozServiceRepository.getSuperTopCategories().deferredResult()
+        val superTop = sectionsTopDeferred.awaitOrNull() ?: SuperTopModel.Empty
 
-        val banners = bannersDeferred.awaitResultOrNull()
-        val sectionPopularCategories = sectionPopularCategoriesDeferred.awaitResultOrNull()
-        val orderMenu = orderMenuDeferred.awaitResultOrNull()
-        val sectionsTopAndBottom = sectionsTopAndBottomDeferred.awaitResultOrNull(
-        ) ?: TopAndBottomSectionsModel.Empty
-        val topSection = sectionsTopAndBottom.topSection.toUi()
-        val bottomSection = sectionsTopAndBottom.bottomSection.toUi()
+        val sectionTopItem = with(
+            HomeListItem.Products.topSection(
+                superTop.topSection.toUi()
+            )
+        ) {
+            val products = vodovozServiceRepository.getSuperTopProducts(
+                currentCategoryId
+            ).singleResult().getOrNull()?.mapToUi() ?: emptyList()
+            withProducts(products)
+        }
+
+
+        val banners = bannersDeferred.awaitOrNull()
+        val sectionPopularCategories = sectionPopularCategoriesDeferred.awaitOrNull()
+        val orderMenu = orderMenuDeferred.awaitOrNull()
+
+        val bottomSection = superTop.bottomSection.toUi()
 
         if (banners != null || orderMenu != null || sectionPopularCategories != null) {
             updateState { s ->
@@ -132,7 +147,7 @@ class HomeFlowViewModel @Inject constructor(
                         sectionPopularCategories?.let {
                             add(HomeListItem.PopularCategories(sectionPopularCategories.toUi()))
                         }
-                        add(HomeListItem.Products.topSection(topSection))
+                        add(sectionTopItem)
                         add(HomeListItem.Products.bottomSection(bottomSection))
                     }
                 )
@@ -144,41 +159,53 @@ class HomeFlowViewModel @Inject constructor(
         return true
     }
 
-    private fun <T, Ui : HomeListItem<*>> fetchSectionThenUpdateItems(
-        request: suspend () -> Flow<Result<T>>,
-        map: (T) -> Ui,
+    private fun <Model, Ui : HomeListItem<*>> fetchDataThenUpdateItems(
+        request: suspend () -> Flow<Result<Model>>,
+        map: (Model) -> Ui,
     ): Job = viewModelScope.launch {
         request()
             .singleResult()
             .mapCatching(map)
-            .onSuccess { ui ->
+            .onSuccess { newItem ->
                 updateState { s ->
                     s.copy(
-                        items = s.items + ui
+                        items = s.items.plusItem(newItem)
                     )
                 }
             }
     }
 
     private suspend fun fetchSecondaryDetails(): Boolean {
+
+        val superTopBottomItem = stateSnapshot.superTopBottomItem
+
         listOf(
-            fetchSectionThenUpdateItems(
+            superTopBottomItem?.let {
+                val currentCategoryId = superTopBottomItem.currentCategoryId
+                fetchDataThenUpdateItems(
+                    request = { vodovozServiceRepository.getSuperTopProducts(currentCategoryId) },
+                    map = { products ->
+                        superTopBottomItem.withProducts(products.mapToUi())
+                    }
+                )
+            } ?: Job(),
+            fetchDataThenUpdateItems(
                 request = { vodovozServiceRepository.getPromotions() },
                 map = { HomeListItem.Promotions(it.toUi()) },
             ),
-            fetchSectionThenUpdateItems(
+            fetchDataThenUpdateItems(
                 request = { vodovozServiceRepository.getHurryUpBuyProducts() },
                 map = { HomeListItem.Products.hurryBuyUp(it.toVodovozSectionUi()) },
             ),
-            fetchSectionThenUpdateItems(
+            fetchDataThenUpdateItems(
                 request = { vodovozServiceRepository.getNewProducts() },
                 map = { HomeListItem.Products.newProducts(it.toVodovozSectionUi()) },
             ),
-            fetchSectionThenUpdateItems(
+            fetchDataThenUpdateItems(
                 request = { vodovozServiceRepository.getStories() },
                 map = { HomeListItem.Stories(it.mapToUi()) },
             ),
-            fetchSectionThenUpdateItems(
+            fetchDataThenUpdateItems(
                 { vodovozServiceRepository.getViewedProducts() },
                 { HomeListItem.Products.viewedProducts(it.toVodovozSectionUi()) }
             )
@@ -194,7 +221,6 @@ class HomeFlowViewModel @Inject constructor(
         emit(fetchPrimaryDetails())
         emit(fetchBottomSheets())
         emit(fetchSecondaryDetails())
-        return@flow
     }.withIndex().onEach { indexedValue ->
         onEachIndexed(indexedValue.index)
     }.launchIn(viewModelScope)
@@ -226,18 +252,29 @@ class HomeFlowViewModel @Inject constructor(
     }
 
     fun selectCategory(
-        item: HomeListItem.Products.CategoryWithProductsSection,
-        id: Long,
+        item: HomeListItem.Products.CategoriesWithProductsSection,
+        categoryWithProducts: CategoryWithProductsUi,
     ) = viewModelScope.launch {
+
+        val updatedItem = item.copy(
+            currentCategoryId = categoryWithProducts.id
+        )
+
+
         updateState { s ->
-            s.copy(
-                items = s.items.map { homeItem ->
-                    if (homeItem.position == item.position && homeItem is HomeListItem.Products.CategoryWithProductsSection) {
-                        homeItem.copy(currentCategoryId = id)
-                    } else homeItem
-                }
-            )
+            s.copy(items = s.items.plusItem(updatedItem))
         }
+
+        if (categoryWithProducts.items.isNotEmpty()) return@launch
+
+        fetchDataThenUpdateItems(
+            request = {
+                vodovozServiceRepository.getSuperTopProducts(categoryWithProducts.id)
+            },
+            map = {
+                updatedItem.withProducts(it.mapToUi())
+            }
+        ).join()
     }
 
     fun closeSpecialPromotionBottomSheet() = viewModelScope.launch {
@@ -249,7 +286,7 @@ class HomeFlowViewModel @Inject constructor(
     }
 
     fun navigateToStories(startStory: StoryUi) = viewModelScope.launch {
-        val storiesItem = stateSnapshot.items.getOrNull<HomeListItem.Stories>()
+        val storiesItem = stateSnapshot.items.firstOrNull<HomeListItem.Stories>()
 
         sendEvent(
             HomeEvents.GoToStories(
@@ -355,15 +392,17 @@ class HomeFlowViewModel @Inject constructor(
     }
 
     fun navigateByMenuItem(menuItem: MenuItemUi) = viewModelScope.launch {
+        fun getWebViewEvent(
+            link: AppLink,
+        ) = HomeEvents.GoToWebView(link.url, link.title)
+
+
         val event = when (menuItem.type) {
             MenuItemTypeUi.History -> HomeEvents.GoToOrdersHistory
-            MenuItemTypeUi.Payment -> with(GlobalAppLinks.aboutPayment) {
-                HomeEvents.GoToWebView(url, title)
-            }
 
-            MenuItemTypeUi.Delivery -> with(GlobalAppLinks.aboutDelivery) {
-                HomeEvents.GoToWebView(url, title)
-            }
+            MenuItemTypeUi.Payment -> getWebViewEvent(GlobalAppLinks.aboutPayment)
+
+            MenuItemTypeUi.Delivery -> getWebViewEvent(GlobalAppLinks.aboutDelivery)
 
             MenuItemTypeUi.None -> {
                 return@launch
@@ -498,7 +537,7 @@ class HomeFlowViewModel @Inject constructor(
         data class GoToStories(val storyId: Long, val stories: List<StoryUi>) : HomeEvents()
         data class GoToProductDetails(val productId: Long) : HomeEvents()
         data class GoToPromotionDetails(val promotionId: Long) : HomeEvents()
-        data class ActivateAction(val action: BaseVodovozAction): HomeEvents()
+        data class ActivateAction(val action: BaseVodovozAction) : HomeEvents()
         data class GoToCategoryProductList(val categoryId: Long) : HomeEvents()
         data class GoToOrderDetails(val orderId: Long) : HomeEvents()
         data class GoToWebView(val url: String, val title: String) : HomeEvents()
@@ -531,7 +570,12 @@ class HomeFlowViewModel @Inject constructor(
     ) : ItemsState<HomeListItem<*>, HomeState>() {
 
         val stories
-            get() = items.getValueOrNull<List<StoryUi>, HomeListItem.Stories>() ?: emptyList()
+            get() = items.firstValueOrNull<List<StoryUi>, HomeListItem.Stories>() ?: emptyList()
+
+        val superTopBottomItem =
+            items.firstOrNull<HomeListItem.Products.CategoriesWithProductsSection>(
+                HomeListItem.Positions.BOTTOM_SECTION
+            )
 
         override fun withItems(newItems: List<HomeListItem<*>>): HomeState {
             return copy(items = newItems)

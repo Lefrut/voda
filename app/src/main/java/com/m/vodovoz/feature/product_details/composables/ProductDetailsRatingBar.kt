@@ -39,6 +39,15 @@ fun ProductDetailsRatingBar(
             .padding(horizontal = 16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
+        Icon(
+            painter = painterResource(id = R.drawable.ic_star_active),
+            contentDescription = null,
+            tint = if (rating <= 0f) MaterialTheme.colorScheme.surfaceVariant else MaterialTheme.colorScheme.tertiary,
+            modifier = Modifier
+                .padding(end = 4.dp)
+                .size(14.dp),
+        )
+
         Text(
             text = formatRating(rating),
             color = if (rating <= 0f) MaterialTheme.colorScheme.surfaceTint else MaterialTheme.colorScheme.onBackground,
@@ -46,7 +55,7 @@ fun ProductDetailsRatingBar(
         )
 
         Text(
-            modifier = Modifier.padding(horizontal = 4.dp),
+            modifier = Modifier.padding(horizontal = 8.dp),
             text = stringResource(R.string.middle_dot),
             color = MaterialTheme.colorScheme.surfaceTint,
             style = MaterialTheme.typography.titleMedium.copy(
@@ -57,19 +66,10 @@ fun ProductDetailsRatingBar(
             )
         )
 
-        Icon(
-            painter = painterResource(id = R.drawable.ic_star_active),
-            contentDescription = null,
-            tint = if (rating <= 0f) MaterialTheme.colorScheme.surfaceVariant else MaterialTheme.colorScheme.tertiary,
-            modifier = Modifier
-                .size(16.dp),
-        )
-
         val hasReviews = numberOfReviews > 0
 
         Text(
             modifier = Modifier
-                .padding(start = 16.dp)
                 .clickable(
                     null,
                     null,

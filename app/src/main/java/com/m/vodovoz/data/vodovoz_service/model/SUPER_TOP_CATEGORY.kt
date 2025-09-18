@@ -5,9 +5,7 @@ import androidx.annotation.Keep
 import com.squareup.moshi.Json
 
 @Keep
-data class CATEGORY_WITH_PRODUCTS_DTO(
-    @Json(name = "data")
-    val data: List<TOVAR_DATA_DTO>?,
+data class SUPER_TOP_CATEGORY(
     @Json(name = "ID")
     val ID: Long?,
     @Json(name = "NAME")

@@ -7,7 +7,7 @@ import com.squareup.moshi.Json
 @Keep
 data class SuperTopAndBottomSectionsDTO(
     @Json(name = "RAZDEL_NIZ")
-    val RAZDEL_NIZ: CATEGORY_RAZDEL?,
+    val RAZDEL_NIZ: SUPER_TOP_RAZDEL?,
     @Json(name = "RAZDEL_VERH")
-    val RAZDEL_VERH: CATEGORY_RAZDEL?
+    val RAZDEL_VERH: SUPER_TOP_RAZDEL?
 )

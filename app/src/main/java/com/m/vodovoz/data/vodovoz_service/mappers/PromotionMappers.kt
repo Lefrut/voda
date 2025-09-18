@@ -18,10 +18,10 @@ import com.m.vodovoz.domain.general.model.promotion.PromotionsSectionModel
 fun AKCIYA_DTO.toDomain(): PromotionDetailsModel? {
     return PromotionDetailsModel(
         id = ID ?: return null,
-        picture = DETAIL_PICTURE?.toVodovozUrl() ?: return null,
-        name = NAME ?: return null,
+        picture = DETAIL_PICTURE?.toVodovozUrl() ?: "",
+        name = NAME ?: "",
         description = DETAIL_TEXT ?: "",
-        endDate = mapToZonedDateTime(DATAOUT ?: return null) ?: return null,
+        endDate = DATAOUT?.let { mapToZonedDateTime(DATAOUT) },
         advertising = OREKLAME?.toDomain(),
         label = HIT?.toDomain()
     )
@@ -83,8 +83,8 @@ fun OREKLAME_DTO.toDomain(): AboutAdvertisingModel? {
     val dannye = DANNYE ?: return null
     return AboutAdvertisingModel(
         name = this.NAME ?: "",
-        title = this.ZAGOLOVOK ?: return null,
-        aboutCompanyTitle = this.NAMEVNUTRI ?: return null,
+        title = this.ZAGOLOVOK ?: "",
+        aboutCompanyTitle = this.NAMEVNUTRI ?: "",
         aboutCompany = HtmlCompat.fromHtml(dannye, HtmlCompat.FROM_HTML_MODE_LEGACY).toString()
     )
 }

@@ -10,5 +10,5 @@ data class TOVAR_SECTION_DTO(
     @Json(name = "NAME")
     val NAME: String?,
     @Json(name = "REKOMEND")
-    val REKOMEND: List<TOVAR_DATA_DTO?>?
+    val REKOMEND: List<TOVAR_DATA_DTO>?
 )

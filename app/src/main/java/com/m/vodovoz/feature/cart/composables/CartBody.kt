@@ -40,7 +40,6 @@ fun CartBody(
     bottlesButton: CartButtonUi?,
     promotionCodeButton: CartPromoButtonUi?,
     presentButton: CartButtonUi?,
-    blockOrderButton: Boolean,
     onClearCartClick: () -> Unit,
     onRemoveCartItem: (CartItemUi) -> Unit,
     onIncrementCartItem: (CartItemUi) -> Unit,
@@ -50,7 +49,6 @@ fun CartBody(
     onPromotionCodeButtonClick: (CartPromoButtonUi) -> Unit,
     onPresentButtonClick: () -> Unit,
     onBottlesButtonClick: () -> Unit,
-    onOrderClick: () -> Unit,
 ) {
     LazyColumn(
         modifier = modifier.fillMaxSize(),
@@ -172,18 +170,8 @@ fun CartBody(
 
         item {
             OrderSummaryColumn(
-                modifier = Modifier.padding(top = 24.dp, start = 16.dp, end = 16.dp),
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 24.dp),
                 items = cartOrderSummary
-            )
-        }
-
-        item {
-            VodovozButton(
-                modifier = Modifier.padding(top = 24.dp, start = 16.dp, end = 16.dp),
-                text = stringResource(id = R.string.place_order),
-                onClick = {
-                    if (!blockOrderButton) onOrderClick()
-                }
             )
         }
     }

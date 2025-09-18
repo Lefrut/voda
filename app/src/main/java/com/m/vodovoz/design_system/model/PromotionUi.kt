@@ -43,7 +43,7 @@ data class PromotionDetailsUi(
     val picture: String,
     val name: String,
     val description: String,
-    val timeLeft: String,
+    val timeLeft: String?,
     val advertising: AboutAdvertisingUi?,
     val label: LabelUi?,
 ) {
@@ -66,7 +66,7 @@ fun PromotionDetailsModel.toUi(): PromotionDetailsUi {
         picture = this.picture,
         name = this.name,
         description = this.description,
-        timeLeft = timeRemainingToEnd(endDate),
+        timeLeft = endDate?.let { timeRemainingToEnd(endDate) } ,
         advertising = this.advertising?.toUi(),
         label = label?.toUi()
     )

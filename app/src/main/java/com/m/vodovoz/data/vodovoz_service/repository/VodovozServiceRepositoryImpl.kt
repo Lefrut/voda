@@ -4,12 +4,10 @@ import androidx.core.text.HtmlCompat
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
-import com.squareup.moshi.Moshi
-import com.squareup.moshi.Types
 import com.m.vodovoz.common.account.AccountManager
 import com.m.vodovoz.common.cookie.CookieManager
-import com.m.vodovoz.common.model.VodovozBoolean
 import com.m.vodovoz.common.model.AppConfig
+import com.m.vodovoz.common.model.VodovozBoolean
 import com.m.vodovoz.common.model.from
 import com.m.vodovoz.core.network.retrofit.messageWithCode
 import com.m.vodovoz.core.network.retrofit.prepareImageParts
@@ -33,41 +31,25 @@ import com.m.vodovoz.data.vodovoz_service.model.order.OrderDetailsDTO
 import com.m.vodovoz.data.vodovoz_service.model.order.OrdersHistoryDetailsDTO
 import com.m.vodovoz.data.vodovoz_service.paging.VodovozPagingSource
 import com.m.vodovoz.design_system.model.widgets.FieldUi
-import com.m.vodovoz.domain.general.model.product.CatalogDetailsModel
+import com.m.vodovoz.domain.general.model.cart.BottomCartModel
+import com.m.vodovoz.domain.general.model.cart.CartDetailsModel
 import com.m.vodovoz.domain.general.model.exceptions.EmptyResultException
-import com.m.vodovoz.domain.general.model.widgets.FieldModel
-import com.m.vodovoz.domain.general.model.product.FilterValueModel
-import com.m.vodovoz.domain.general.model.product.FiltersModel
-import com.m.vodovoz.domain.general.model.location.MapZonesModel
-import com.m.vodovoz.domain.general.model.order.OrderWithMenuModel
-import com.m.vodovoz.domain.general.model.product.ParentCategoryModel
-import com.m.vodovoz.domain.general.model.product.PopularCategoryModel
-import com.m.vodovoz.domain.general.model.promotion.PresentInfoModel
-import com.m.vodovoz.domain.general.model.product.ProductCommentsInfoModel
 import com.m.vodovoz.domain.general.model.exceptions.RequestException
-import com.m.vodovoz.domain.general.model.product.SearchRecommendationsModel
-import com.m.vodovoz.domain.general.model.product.SortModel
 import com.m.vodovoz.domain.general.model.exceptions.TooManyRequestsException
 import com.m.vodovoz.domain.general.model.exceptions.UserBlockedException
 import com.m.vodovoz.domain.general.model.exceptions.UserNotLoginException
 import com.m.vodovoz.domain.general.model.exceptions.ValidationException
 import com.m.vodovoz.domain.general.model.exceptions.VodovozPlaceholderModel
-import com.m.vodovoz.domain.general.model.promotion.BrandModel
-import com.m.vodovoz.domain.general.model.promotion.BrandSectionModel
-import com.m.vodovoz.domain.general.model.cart.BottomCartModel
-import com.m.vodovoz.domain.general.model.cart.CartDetailsModel
-import com.m.vodovoz.domain.general.model.product.BuyCertificateDetailsModel
-import com.m.vodovoz.domain.general.model.product.BuyCertificateModel
-import com.m.vodovoz.domain.general.model.product.CertificateActivationDetailsModel
-import com.m.vodovoz.domain.general.model.product.format
 import com.m.vodovoz.domain.general.model.location.AddAddressDetailsModel
 import com.m.vodovoz.domain.general.model.location.AddressModel
 import com.m.vodovoz.domain.general.model.location.MapAddressModel
+import com.m.vodovoz.domain.general.model.location.MapZonesModel
 import com.m.vodovoz.domain.general.model.order.CancelOrderDetailsModel
 import com.m.vodovoz.domain.general.model.order.DeliveryDateDetailsModel
 import com.m.vodovoz.domain.general.model.order.FormModel
 import com.m.vodovoz.domain.general.model.order.OrderCallYouDetailsModel
 import com.m.vodovoz.domain.general.model.order.OrderDetailsModel
+import com.m.vodovoz.domain.general.model.order.OrderWithMenuModel
 import com.m.vodovoz.domain.general.model.order.OrderingDetailsModel
 import com.m.vodovoz.domain.general.model.order.OrdersHistoryDetailsModel
 import com.m.vodovoz.domain.general.model.order.OrdersHistoryItemModel
@@ -76,16 +58,32 @@ import com.m.vodovoz.domain.general.model.order.RecipientDetailsModel
 import com.m.vodovoz.domain.general.model.order.RecipientModel
 import com.m.vodovoz.domain.general.model.order.WhereOrderDetailsModel
 import com.m.vodovoz.domain.general.model.product.AllBottlesDetailsModel
+import com.m.vodovoz.domain.general.model.product.BuyCertificateDetailsModel
+import com.m.vodovoz.domain.general.model.product.BuyCertificateModel
+import com.m.vodovoz.domain.general.model.product.CatalogDetailsModel
+import com.m.vodovoz.domain.general.model.product.CertificateActivationDetailsModel
 import com.m.vodovoz.domain.general.model.product.CommentModel
+import com.m.vodovoz.domain.general.model.product.FilterValueModel
+import com.m.vodovoz.domain.general.model.product.FiltersModel
+import com.m.vodovoz.domain.general.model.product.ParentCategoryModel
+import com.m.vodovoz.domain.general.model.product.PopularCategoryModel
+import com.m.vodovoz.domain.general.model.product.ProductCommentsInfoModel
 import com.m.vodovoz.domain.general.model.product.ProductDetailsScreenModel
 import com.m.vodovoz.domain.general.model.product.ProductModel
 import com.m.vodovoz.domain.general.model.product.ProductsSectionModel
+import com.m.vodovoz.domain.general.model.product.SearchRecommendationsModel
 import com.m.vodovoz.domain.general.model.product.SectionModel
-import com.m.vodovoz.domain.general.model.product.TopAndBottomSectionsModel
+import com.m.vodovoz.domain.general.model.product.SortModel
+import com.m.vodovoz.domain.general.model.product.SuperTopModel
 import com.m.vodovoz.domain.general.model.product.UnratedProductsSectionModel
 import com.m.vodovoz.domain.general.model.product.WaitFeedbackProductModel
+import com.m.vodovoz.domain.general.model.product.format
+import com.m.vodovoz.domain.general.model.product.toSliderQueries
 import com.m.vodovoz.domain.general.model.promotion.BannerModel
+import com.m.vodovoz.domain.general.model.promotion.BrandModel
+import com.m.vodovoz.domain.general.model.promotion.BrandSectionModel
 import com.m.vodovoz.domain.general.model.promotion.PopupWindowInfoModel
+import com.m.vodovoz.domain.general.model.promotion.PresentInfoModel
 import com.m.vodovoz.domain.general.model.promotion.ProductsTitle
 import com.m.vodovoz.domain.general.model.promotion.PromotionDetailsModel
 import com.m.vodovoz.domain.general.model.promotion.PromotionModel
@@ -93,8 +91,6 @@ import com.m.vodovoz.domain.general.model.promotion.PromotionsSectionModel
 import com.m.vodovoz.domain.general.model.promotion.StoryModel
 import com.m.vodovoz.domain.general.model.service.AllServicesDetailsModel
 import com.m.vodovoz.domain.general.model.service.ServiceDetailsModel
-import com.m.vodovoz.domain.general.model.widgets.toQueries
-import com.m.vodovoz.domain.general.model.product.toSliderQueries
 import com.m.vodovoz.domain.general.model.user.AuthDetailsModel
 import com.m.vodovoz.domain.general.model.user.BonusesPopupWindowModel
 import com.m.vodovoz.domain.general.model.user.ChangePasswordDetailsModel
@@ -105,8 +101,12 @@ import com.m.vodovoz.domain.general.model.user.QuestionnairesWelcomeDetailsModel
 import com.m.vodovoz.domain.general.model.user.RequestCodeModel
 import com.m.vodovoz.domain.general.model.user.UserAuthInfoModel
 import com.m.vodovoz.domain.general.model.user.UserDataModel
+import com.m.vodovoz.domain.general.model.widgets.FieldModel
+import com.m.vodovoz.domain.general.model.widgets.toQueries
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
 import com.m.vodovoz.util.formatters.VodovozDateFormatters
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.Types
 import kotlinx.coroutines.flow.Flow
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
@@ -2057,9 +2057,8 @@ class VodovozServiceRepositoryImpl @Inject constructor(
                         vodovozService.getPromotionDetails(promotionId, page, limit)
                     },
                     mapper = { promotionDetailsDTOVodovozResponseDTO ->
-                        promotionDetailsDTOVodovozResponseDTO.data?.TOVAR?.DATA?.mapToDomain()
-                            ?: emptyList()
-                    },
+                        promotionDetailsDTOVodovozResponseDTO.data?.TOVAR?.DATA?.mapToDomain() ?: emptyList()
+                    }
                 )
             }
         ).flow
@@ -2218,15 +2217,21 @@ class VodovozServiceRepositoryImpl @Inject constructor(
         ).flow
     }
 
-    override fun getSuperTop(): Flow<Result<TopAndBottomSectionsModel>> = executeRequest(
+    override fun getSuperTopCategories(): Flow<Result<SuperTopModel>> = executeRequest(
         request = {
-            vodovozService.getSuperTop()
+            vodovozService.getSuperTopCategories()
         },
         mapper = { topAndBottomDTO ->
             topAndBottomDTO.data?.toDomain()
                 ?: throw IllegalArgumentException("SuperTop can't be null")
         }
     )
+
+    override fun getSuperTopProducts(categoryId: Long): Flow<Result<List<ProductModel>>> =
+        executeRequest(
+            request = { vodovozService.getSuperTopByCategory(categoryId) },
+            mapper = { it.data!!.mapToDomain() }
+        )
 
 
     override fun getAllSuperTop(

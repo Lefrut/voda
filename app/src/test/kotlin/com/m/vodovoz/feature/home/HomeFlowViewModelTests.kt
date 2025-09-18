@@ -11,8 +11,8 @@ import com.m.vodovoz.domain.general.model.promotion.PopupWindowInfoModel
 import com.m.vodovoz.domain.general.model.promotion.SpecialPromotionModel
 import com.m.vodovoz.feature.home.model.HomeListItem
 import com.m.vodovoz.feature.home.model.compareVersions
-import com.m.vodovoz.feature.home.model.getOrNull
-import com.m.vodovoz.feature.home.model.getValueOrNull
+import com.m.vodovoz.feature.home.model.firstOrNull
+import com.m.vodovoz.feature.home.model.firstValueOrNull
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockkStatic
@@ -83,9 +83,9 @@ class HomeFlowViewModelTests : ViewModelTestBase<HomeFlowViewModel>() {
             HomeListItem.Divider(444),
         )
 
-        val storiesItem = items.getOrNull<HomeListItem.Stories>()
-        val dividerItem = items.getOrNull<HomeListItem.Divider>()
-        val stories = items.getValueOrNull() ?: storiesUi
+        val storiesItem = items.firstOrNull<HomeListItem.Stories>()
+        val dividerItem = items.firstOrNull<HomeListItem.Divider>()
+        val stories = items.firstValueOrNull() ?: storiesUi
 
         assertTrue(storiesItem != null)
         assertTrue(dividerItem != null)
@@ -171,12 +171,12 @@ class HomeFlowViewModelTests : ViewModelTestBase<HomeFlowViewModel>() {
             HomeFlowViewModel.HomeState(items = homeItemsTest.shuffled())
         )
 
-        viewModel.selectCategory(topSection, 1).join()
+        viewModel.selectCategory(topSection, CategoryWithProductsUi.Empty.copy(1)).join()
 
         val updatedTopSection =
             viewModel.stateSnapshot.items.firstOrNull {
                 it.position == topSection.position
-            } as HomeListItem.Products.CategoryWithProductsSection
+            } as HomeListItem.Products.CategoriesWithProductsSection
 
         assertEquals(
             1, updatedTopSection.currentCategoryId

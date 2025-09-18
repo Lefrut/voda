@@ -10,5 +10,5 @@ data class CatalogDetailsDTO(
     @Json(name = "BANNER")
     val BANNER: List<BannerDTO?>?,
     @Json(name = "RAZDEL")
-    val RAZDEL: List<CATALOG_CATEGORY_DTO?>?
+    val RAZDEL: List<CATALOG_CATEGORY_DTO>?
 )

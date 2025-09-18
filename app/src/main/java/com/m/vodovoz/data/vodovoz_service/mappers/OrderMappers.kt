@@ -250,7 +250,7 @@ fun ORDER_OPLATA_ITEM_DTO.toDomain(): OrderingMenuItemModel {
         name = NAME ?: "",
         description = OPISANIE ?: "",
         id = ID ?: "",
-        defaultValue = null
+        defaultValue = DEFAULTVALUE
     )
 }
 

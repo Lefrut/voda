@@ -4,10 +4,10 @@ import com.m.vodovoz.data.vodovoz_service.di.toVodovozUrl
 import com.m.vodovoz.data.vodovoz_service.model.user_data.FOTO_DTO
 import com.m.vodovoz.data.vodovoz_service.model.user_data.POLE_DTO
 import com.m.vodovoz.data.vodovoz_service.model.user_data.UserDataDTO
-import com.m.vodovoz.domain.general.model.widgets.FieldModel
-import com.m.vodovoz.domain.general.model.widgets.FieldOptionModel
 import com.m.vodovoz.domain.general.model.user.UserDataModel
 import com.m.vodovoz.domain.general.model.user.UserDataPhotoModel
+import com.m.vodovoz.domain.general.model.widgets.FieldModel
+import com.m.vodovoz.domain.general.model.widgets.FieldOptionModel
 
 fun UserDataDTO.toDomain(): UserDataModel {
     return UserDataModel(
@@ -41,7 +41,7 @@ fun POLE_DTO.toDomain(): FieldModel? {
         valueType = POLE ?: "text",
         isRequired = (OBYZATELNO ?: OBAZATELEN) == "Y",
         readOnly = ZABLOCKPOLE == "Y",
-        supportingText = OPIS ?: "",
+        supportingText = OPIS ?: OPISANIE ?: "",
         hint = TEXTOPIS ?: TEXT_V_POLE ?: TEXTVPOLE ?: "",
         values = SPISOK?.mapNotNull { item ->
             FieldOptionModel(

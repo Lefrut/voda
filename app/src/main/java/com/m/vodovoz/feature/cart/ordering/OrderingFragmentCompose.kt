@@ -236,6 +236,10 @@ class OrderingFragment : Fragment() {
                 OrderingFlowViewModel.OrderingEvents.GoToHome -> {
                     tabManager.selectTab(R.id.graph_home)
                 }
+
+                OrderingFlowViewModel.OrderingEvents.ScrollToBottom -> {
+                    scrollState.animateScrollTo(scrollState.maxValue)
+                }
             }
         }
     }

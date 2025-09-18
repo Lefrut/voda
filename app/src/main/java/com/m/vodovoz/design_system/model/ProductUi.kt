@@ -191,7 +191,12 @@ data class VodovozSectionUi<E : VodovozItemUi<E>>(
     }
 
     companion object {
-        fun <E : VodovozItemUi<E>> empty() = VodovozSectionUi("", emptyList<E>(), null, null)
+        fun <E : VodovozItemUi<E>> empty() = VodovozSectionUi(
+            "",
+            emptyList<E>(),
+            null,
+            null
+        )
     }
 }
 
@@ -223,9 +228,9 @@ interface SectionContentUi<E> {
 
 }
 
-fun <E, E2> SectionModel<E>.toUi(
-    mapItems: (List<E>) -> List<E2>,
-): SectionUi<E2> {
+fun <T, R> SectionModel<T>.toUi(
+    mapItems: (List<T>) -> List<R>,
+): SectionUi<R> {
     return SectionUi(
         title = title,
         items = mapItems(items),
@@ -234,9 +239,9 @@ fun <E, E2> SectionModel<E>.toUi(
     )
 }
 
-inline fun <E, E2 : VodovozItemUi<E2>> SectionModel<E>.mapToVodovozUi(
-    crossinline map: (E) -> E2,
-): VodovozSectionUi<E2> =
+inline fun <T, R : VodovozItemUi<R>> SectionModel<T>.mapToVodovozUi(
+    crossinline map: (T) -> R,
+): VodovozSectionUi<R> =
     VodovozSectionUi(
         title = title,
         items = items.map(map),

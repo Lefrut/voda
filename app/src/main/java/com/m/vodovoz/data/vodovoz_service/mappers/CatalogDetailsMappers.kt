@@ -26,6 +26,6 @@ fun CATALOG_CATEGORY_DTO.toDomain(): ParentCategoryModel? {
     )
 }
 
-fun List<CATALOG_CATEGORY_DTO?>.mapToDomain(): List<ParentCategoryModel> {
-    return mapNotNull { category -> category?.toDomain() }
+fun List<CATALOG_CATEGORY_DTO>.mapToDomain(): List<ParentCategoryModel> {
+    return mapNotNull { category -> category.toDomain() }
 }
