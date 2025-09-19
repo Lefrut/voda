@@ -108,11 +108,12 @@ class UserDataFlowViewModel @Inject constructor(
         }
 
         val updateUserDataResult =
-            vodovozServiceRepository.updateUserData(stateSnapshot.fields.mapToDomain()).singleResult()
+            vodovozServiceRepository.updateUserData(
+                stateSnapshot.fields.mapToDomain()
+            ).singleResult()
         updateUserDataResult.onSuccess { message ->
             sendEvent(UserDataEvents.UpdateProfile)
             sendEvent(UserDataEvents.ShowSnackbar(message))
-
         }.onFailure {
             sendEvent(
                 UserDataEvents.ShowSnackbar(resourcesProvider.getString(R.string.update_user_data_error))

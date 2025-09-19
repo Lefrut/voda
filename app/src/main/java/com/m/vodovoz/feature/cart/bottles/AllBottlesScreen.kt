@@ -60,7 +60,7 @@ fun AllBottlesScreen(
                         end = 16.dp,
                         bottom = 16.dp
                     ),
-                    text = stringResource(R.string.add_to_cart),
+                    text = stringResource(R.string.choose),
                     isLoading = viewState.buttonIsLoading,
                     onClick = {
                         viewModel.addBottlesToCart()
@@ -83,7 +83,7 @@ fun AllBottlesScreen(
                 viewModel.incrementBottle(bottle)
             },
             onAddBottle = { bottle ->
-                viewModel.addBottle(bottle)
+                viewModel.incrementBottle(bottle)
             }
         )
     }

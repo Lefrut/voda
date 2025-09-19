@@ -4,12 +4,13 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.viewModelScope
 import com.m.vodovoz.common.cart.CartManager
-import com.m.vodovoz.ui.mvi.Event
-import com.m.vodovoz.ui.mvi.MviViewModel
-import com.m.vodovoz.ui.mvi.State
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
 import com.m.vodovoz.feature.cart.bottles.model.BottleUi
 import com.m.vodovoz.feature.cart.bottles.model.mapToUi
+import com.m.vodovoz.feature.cart.bottles.model.updateCartQuantity
+import com.m.vodovoz.ui.mvi.Event
+import com.m.vodovoz.ui.mvi.MviViewModel
+import com.m.vodovoz.ui.mvi.State
 import com.m.vodovoz.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -36,10 +37,67 @@ class AllBottlesFlowViewModel @Inject constructor(
     private fun listenBottlesChanges() = viewModelScope.launch {
         state.map { pagingState -> pagingState.bottles }.collectLatest {
             updateState { s ->
-                s.copy(hideButton = !s.bottles.any { bottle -> bottle.cartQuantity > 0 } || s.isSingleBottleMode)
+                s.copy(
+                    hideButton = !s.bottles.any { bottle ->
+                        bottle.cartQuantity > 0
+                    } || s.isSingleBottleMode
+                )
             }
         }
     }
+
+    private inner class SingleMode : ViewModelMode() {
+
+        override suspend fun incrementBottle(bottle: BottleUi) {
+            updateBottleCartQuantity(bottle) { 1 }
+            addBottlesToCart().join()
+        }
+
+        override suspend fun decrementBottle(bottle: BottleUi) {}
+
+        override fun startLoading() {
+            updateState { s ->
+                s.copy(uiState = BottlesUiState.Loading)
+            }
+        }
+
+        override suspend fun handleFail() {
+            sendEvent(BottlesEvent.GoBack)
+        }
+    }
+
+    private inner class MultipleMode : ViewModelMode() {
+        override suspend fun incrementBottle(bottle: BottleUi) {
+            updateBottleCartQuantity(bottle) { cartQuantity -> cartQuantity + 1 }
+        }
+
+        override suspend fun decrementBottle(bottle: BottleUi) {
+            updateBottleCartQuantity(bottle) { cartQuantity ->
+                (cartQuantity - 1).coerceAtLeast(0)
+            }
+        }
+
+        override fun startLoading() {
+            updateState { s ->
+                s.copy(buttonIsLoading = true)
+            }
+        }
+
+        override suspend fun handleFail() {
+            updateState { s ->
+                s.copy(buttonIsLoading = false)
+            }
+        }
+    }
+
+    private val viewModelMode
+        get() = if (stateSnapshot.isSingleBottleMode) {
+            SingleMode()
+        }
+        else {
+            MultipleMode()
+        }
+
 
     fun fetchAllBottlesDetails() = viewModelScope.launch(Dispatchers.IO) {
         updateState { s ->
@@ -66,7 +124,10 @@ class AllBottlesFlowViewModel @Inject constructor(
 
     fun changeSearchMode(searchMode: Boolean) = viewModelScope.launch {
         updateState { s ->
-            s.copy(isSearchMode = searchMode, searchQuery = "")
+            s.copy(
+                isSearchMode = searchMode,
+                searchQuery = ""
+            )
         }
     }
 
@@ -80,54 +141,27 @@ class AllBottlesFlowViewModel @Inject constructor(
         sendEvent(BottlesEvent.GoBack)
     }
 
-    fun addBottle(bottle: BottleUi) = viewModelScope.launch {
-        updateState { s ->
-            s.copy(
-                bottles = s.bottles.map { b -> if (b.id == bottle.id) b.copy(cartQuantity = 1) else b }
-            )
-        }
-
-        if (stateSnapshot.isSingleBottleMode) {
-            addBottlesToCart()
-            return@launch
-        }
-    }
-
     fun incrementBottle(bottle: BottleUi) = viewModelScope.launch {
-        if (stateSnapshot.isSingleBottleMode) return@launch
-
-        updateState { s ->
-            s.copy(bottles = s.bottles.map { if (it.id == bottle.id) it.copy(cartQuantity = it.cartQuantity + 1) else it })
-        }
-
+        viewModelMode.incrementBottle(bottle)
     }
 
     fun decrementBottle(bottle: BottleUi) = viewModelScope.launch {
-        if (bottle.cartQuantity <= 0 || stateSnapshot.isSingleBottleMode) return@launch
+        viewModelMode.decrementBottle(bottle)
+    }
 
-        updateState { s ->
-            s.copy(
-                bottles = s.bottles.map {
-                    if (it.id == bottle.id) it.copy(cartQuantity = it.cartQuantity - 1)
-                    else it
-                }
+    private fun updateBottleCartQuantity(
+        bottle: BottleUi,
+        block: (cartQuantity: Int) -> Int,
+    ) {
+        updateState { state ->
+            state.copy(
+                bottles = state.bottles.updateCartQuantity(bottle, block)
             )
         }
     }
 
     fun addBottlesToCart() = viewModelScope.launch {
-        if (stateSnapshot.isSingleBottleMode) {
-            updateState { s ->
-                s.copy(uiState = BottlesUiState.Loading)
-            }
-        } else {
-            updateState { s ->
-                s.copy(
-                    buttonIsLoading = true
-                )
-            }
-        }
-
+        viewModelMode.startLoading()
 
         val bottlesMap = stateSnapshot.bottles.associate {
             it.id to it.cartQuantity
@@ -141,17 +175,17 @@ class AllBottlesFlowViewModel @Inject constructor(
             cartManager.updateRefreshCart(true)
             cartManager.observeRefreshCart().collectLatest { hasUpdates ->
                 if (!hasUpdates) {
-                    updateState { s -> s.copy(buttonIsLoading = false) }
+                    updateState { s ->
+                        s.copy(
+                            buttonIsLoading = false,
+                            uiState = BottlesUiState.Success
+                        )
+                    }
                     sendEvent(BottlesEvent.GoBack)
                 }
             }
         }.onFailure {
-            updateState { s ->
-                s.copy(buttonIsLoading = false)
-            }
-            if (stateSnapshot.isSingleBottleMode) {
-                sendEvent(BottlesEvent.GoBack)
-            }
+            viewModelMode.handleFail()
         }
 
 
@@ -170,7 +204,7 @@ class AllBottlesFlowViewModel @Inject constructor(
         val buttonIsLoading: Boolean = false,
     ) : State
 
-    @Immutable
+    @Stable
     sealed interface BottlesUiState {
         data object Loading : BottlesUiState
         data object Error : BottlesUiState
@@ -180,4 +214,15 @@ class AllBottlesFlowViewModel @Inject constructor(
     sealed interface BottlesEvent : Event {
         data object GoBack : BottlesEvent
     }
+
+    private sealed class ViewModelMode {
+        abstract suspend fun incrementBottle(bottle: BottleUi)
+
+        abstract suspend fun decrementBottle(bottle: BottleUi)
+
+        abstract fun startLoading()
+
+        abstract suspend fun handleFail()
+    }
+
 }

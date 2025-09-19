@@ -28,11 +28,13 @@ interface WaterAppRepository {
     suspend fun saveStage(stage: WaterApp.Stage): Result<WaterApp.Stage>
     suspend fun clearStage(): Result<Unit>
 
-    suspend fun clear() = kotlin.runCatching {
+    suspend fun clear() = runCatching {
         clearStage()
         clearDailyGoal()
         clearUserInfo()
         clearNotificationSettings()
+
+        Unit
     }
 
 

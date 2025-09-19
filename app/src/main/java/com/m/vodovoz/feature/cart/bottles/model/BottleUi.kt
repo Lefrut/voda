@@ -9,13 +9,27 @@ data class BottleUi(
     val id: Long,
     val articleText: String,
     val description: String,
-    val cartQuantity: Int
+    val cartQuantity: Int,
 )
 
-fun BottleModel.toUi(): BottleUi{
+fun BottleModel.toUi(): BottleUi {
     return BottleUi(name, id, articleText, description, cartQuantity)
 }
 
-fun List<BottleModel>.mapToUi(): List<BottleUi>{
+fun List<BottleModel>.mapToUi(): List<BottleUi> {
     return map { it.toUi() }
+}
+
+
+fun List<BottleUi>.updateCartQuantity(
+    bottle: BottleUi,
+    block: (cartQuantity: Int) -> Int,
+): List<BottleUi> {
+    return map { b ->
+        if (b.id == bottle.id) {
+            b.copy(cartQuantity = block(b.cartQuantity))
+        } else {
+            b
+        }
+    }
 }

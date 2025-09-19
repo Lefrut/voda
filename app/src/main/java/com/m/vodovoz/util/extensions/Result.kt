@@ -6,6 +6,7 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.singleOrNull
 
 fun <T> Flow<Result<T>>.catchResult(): Flow<Result<T>> = catch { throwable ->
@@ -14,7 +15,7 @@ fun <T> Flow<Result<T>>.catchResult(): Flow<Result<T>> = catch { throwable ->
 
 fun<T> resultFailure(throwable: Throwable = Throwable()) = Result.failure<T>(throwable)
 
-suspend fun<T> Flow<Result<T>>.singleResult() = singleOrNull() ?: resultFailure(NoSuchElementException("Result flow is empty"))
+suspend fun<T> Flow<Result<T>>.singleResult() = firstOrNull() ?: resultFailure(NoSuchElementException("Result flow is empty"))
 
 
 

@@ -30,19 +30,6 @@ class AllBottlesFlowFragment : Fragment() {
 
     internal val viewModel: AllBottlesFlowViewModel by viewModels()
 
-    @Inject
-    lateinit var tabManager: TabManager
-
-    override fun onStart() {
-        super.onStart()
-        tabManager.changeTabVisibility(false)
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        tabManager.changeTabVisibility(true)
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -54,8 +41,6 @@ class AllBottlesFlowFragment : Fragment() {
 
                 VodovozTheme {
                     val viewState by viewModel.collectAsState()
-                    
-
 
                     Crossfade(
                         modifier = Modifier.background(MaterialTheme.colorScheme.background),

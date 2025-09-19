@@ -29,6 +29,7 @@ import com.m.vodovoz.R
 import com.m.vodovoz.common.account.AccountManager
 import com.m.vodovoz.common.cookie.CookieManager
 import com.m.vodovoz.common.model.GlobalAppLinks
+import com.m.vodovoz.common.model.VodovozAction
 import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.core.navigation.ContentSearchNavigator
 import com.m.vodovoz.core.navigation.activate
@@ -63,6 +64,7 @@ import com.m.vodovoz.feature.sitestate.SiteStateManager
 import com.m.vodovoz.ui.mvi.collectAsState
 import com.m.vodovoz.util.extensions.debugLog
 import com.m.vodovoz.util.extensions.isVpnActive
+import com.m.vodovoz.util.extensions.openUrl
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.onSubscription
@@ -525,9 +527,7 @@ class HomeFragment : Fragment() {
                     "URL" -> {
                         val url = pushData.id ?: return@collect
 
-                        findNavController().navigateToWebView(
-                            url, requireContext().getString(R.string.space)
-                        )
+                        requireContext().openUrl(url)
                     }
 
                     "trekervodi" -> {

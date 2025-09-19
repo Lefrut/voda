@@ -13,6 +13,7 @@ import com.m.vodovoz.common.model.GlobalAppLinks
 import com.m.vodovoz.common.model.VodovozAction
 import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.core.network.VodovozWebConfig
+import com.m.vodovoz.util.extensions.openUrl
 
 
 fun BaseVodovozAction.activate(
@@ -115,15 +116,14 @@ fun BaseVodovozAction.activate(
         }
 
         is VodovozAction.Url -> runCatching {
-            val openLinkIntent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-            context?.startActivity(openLinkIntent)
+            context?.openUrl(url)
         }
 
         is VodovozAction.UrlWithCookie -> {
             val webCookieManager = CookieManager.getInstance()
             webCookieManager.acceptCookie()
             webCookieManager.setCookie(VodovozWebConfig.VODOVOZ_URL, cookie)
-            navController.navigateToWebView(url, "")
+            navController.navigateToWebView(url, " ")
         }
     }
 }
