@@ -34,8 +34,6 @@ class UserPreferencesRepositoryImpl @Inject constructor(
     }
 
     override suspend fun clearAll(): Result<Unit> {
-        return runCatching {
-            storiesDataStore.clear()
-        }
+        return runCatching { storiesDataStore.clear() }
     }
 }

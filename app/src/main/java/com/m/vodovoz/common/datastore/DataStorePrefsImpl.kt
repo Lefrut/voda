@@ -21,10 +21,6 @@ private val Context.dataStore by preferencesDataStore(
         listOf(
             SharedPreferencesMigration(
                 context = context,
-                sharedPreferencesName = "User"
-            ),
-            SharedPreferencesMigration(
-                context = context,
                 sharedPreferencesName = "Favorites"
             )
         )

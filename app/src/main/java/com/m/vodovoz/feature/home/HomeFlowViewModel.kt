@@ -572,8 +572,8 @@ class HomeFlowViewModel @Inject constructor(
         val stories
             get() = items.firstValueOrNull<List<StoryUi>, HomeListItem.Stories>() ?: emptyList()
 
-        val superTopBottomItem =
-            items.firstOrNull<HomeListItem.Products.CategoriesWithProductsSection>(
+        val superTopBottomItem
+            get() = items.firstOrNull<HomeListItem.Products.CategoriesWithProductsSection>(
                 HomeListItem.Positions.BOTTOM_SECTION
             )
 

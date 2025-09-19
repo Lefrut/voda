@@ -178,7 +178,7 @@ class AddAddressViewModel @Inject constructor(
 
         val params = getWidgetIdsAndValues()
 
-        val mapAddress = stateSnapshot.mapAddress ?: return@launch
+        val mapAddress = stateSnapshot.mapAddress
 
         updateState { s ->
             s.copy(button = s.button.copy(loading = true))
@@ -186,7 +186,7 @@ class AddAddressViewModel @Inject constructor(
 
         val updateAddressResult = vodovozServiceRepository.updateAddress(
             addressId = addressId,
-            address = mapAddress.toDomain(),
+            address = mapAddress?.toDomain(),
             params = params
         ).singleResult()
 

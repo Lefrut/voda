@@ -46,7 +46,6 @@ class VodovozApplication : Application(), Configuration.Provider, SingletonImage
         NotificationChannels.create(this)
     }
 
-    //todo - need review
     private fun initYandexMetrica() {
         if (!BuildConfig.DEBUG) {
             val config: YandexMetricaConfig =
