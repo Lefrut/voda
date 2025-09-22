@@ -60,6 +60,7 @@ import com.m.vodovoz.domain.general.model.order.WhereOrderDetailsModel
 import com.m.vodovoz.domain.general.model.product.AllBottlesDetailsModel
 import com.m.vodovoz.domain.general.model.product.BuyCertificateDetailsModel
 import com.m.vodovoz.domain.general.model.product.BuyCertificateModel
+import com.m.vodovoz.domain.general.model.product.CartProductsModel
 import com.m.vodovoz.domain.general.model.product.CatalogDetailsModel
 import com.m.vodovoz.domain.general.model.product.CertificateActivationDetailsModel
 import com.m.vodovoz.domain.general.model.product.CommentModel
@@ -1851,6 +1852,15 @@ class VodovozServiceRepositoryImpl @Inject constructor(
             mapper = { response -> response.data ?: "" }
         )
 
+    override suspend fun updateMultipleProductsToCart(cartProducts: CartProductsModel): Flow<Result<String>> {
+        return executeRequest(
+            request = {
+                vodovozService.updateMultipleProductsToCart(cartProducts.productsIdsWithQuantity)
+            },
+            mapper = { it.data ?: "" }
+        )
+    }
+
     override suspend fun removeProductFromCart(productId: Long): Flow<Result<String>> =
         executeRequest(
             request = { vodovozService.removeProductFromCart(productId) },
@@ -2057,7 +2067,8 @@ class VodovozServiceRepositoryImpl @Inject constructor(
                         vodovozService.getPromotionDetails(promotionId, page, limit)
                     },
                     mapper = { promotionDetailsDTOVodovozResponseDTO ->
-                        promotionDetailsDTOVodovozResponseDTO.data?.TOVAR?.DATA?.mapToDomain() ?: emptyList()
+                        promotionDetailsDTOVodovozResponseDTO.data?.TOVAR?.DATA?.mapToDomain()
+                            ?: emptyList()
                     }
                 )
             }

@@ -14,6 +14,8 @@ import com.m.vodovoz.design_system.model.toUi
 import com.m.vodovoz.domain.general.model.exceptions.EmptyResultException
 import com.m.vodovoz.domain.general.respository.UserPreferencesRepository
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
+import com.m.vodovoz.feature.cart.bottles.model.BottleUi
+import com.m.vodovoz.feature.cart.bottles.model.toBottle
 import com.m.vodovoz.feature.cart.model.CartButtonUi
 import com.m.vodovoz.feature.cart.model.CartItemUi
 import com.m.vodovoz.feature.cart.model.CartPresentItemUi
@@ -167,11 +169,18 @@ class CartFlowViewModel @Inject constructor(
 
     private fun setSensitiveButtonsAvailability(buttonEnabled: Boolean) {
         updateState { s ->
+            val present = s.present
+
             s.copy(
-                present = s.present?.copy(
-                    button = s.present.button?.copy(enabled = buttonEnabled)
+                present = present?.copy(
+                    button = present.button?.copy(
+                        enabled = buttonEnabled
+                    )
                 ),
                 presentButton = s.presentButton?.copy(enabled = buttonEnabled),
+                bottlesButton = s.bottlesButton?.copy(
+                    enabled = buttonEnabled
+                ),
                 blockOrderButton = !buttonEnabled
             )
         }
@@ -304,7 +313,20 @@ class CartFlowViewModel @Inject constructor(
     }
 
     fun navigateToAllBottles() = viewModelScope.launch {
-        sendEvent(CartEvents.GoToAllBottles)
+        val bottles = stateSnapshot.items.filter { item ->
+            listOf(
+                item.currentPrice,
+                item.discountPrice,
+                item.basePrice
+            ).any { price ->
+                price < 0
+            }
+        }.map { item -> item.toBottle() }
+
+
+        sendEvent(
+            CartEvents.GoToAllBottles(bottles)
+        )
     }
 
     fun navigateToOrder() = viewModelScope.launch {
@@ -346,9 +368,10 @@ class CartFlowViewModel @Inject constructor(
         data class Empty(val placeholder: VodovozPlaceholderUi) : CartUiState
         data object Error : CartUiState
 
-        val placeholderOrNull: VodovozPlaceholderUi? get() {
-            return (this as? Empty)?.placeholder
-        }
+        val placeholderOrNull: VodovozPlaceholderUi?
+            get() {
+                return (this as? Empty)?.placeholder
+            }
     }
 
 
@@ -365,7 +388,7 @@ class CartFlowViewModel @Inject constructor(
 
         data object GoToProfile : CartEvents()
         data object GoToCatalog : CartEvents()
-        data object GoToAllBottles : CartEvents()
+        data class GoToAllBottles(val bottles: List<BottleUi>) : CartEvents()
 
         data class GoToProductDetails(val productId: Long) : CartEvents()
     }

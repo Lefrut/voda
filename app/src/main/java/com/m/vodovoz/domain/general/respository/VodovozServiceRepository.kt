@@ -26,6 +26,7 @@ import com.m.vodovoz.domain.general.model.order.WhereOrderDetailsModel
 import com.m.vodovoz.domain.general.model.product.AllBottlesDetailsModel
 import com.m.vodovoz.domain.general.model.product.BuyCertificateDetailsModel
 import com.m.vodovoz.domain.general.model.product.BuyCertificateModel
+import com.m.vodovoz.domain.general.model.product.CartProductsModel
 import com.m.vodovoz.domain.general.model.product.CatalogDetailsModel
 import com.m.vodovoz.domain.general.model.product.CertificateActivationDetailsModel
 import com.m.vodovoz.domain.general.model.product.CommentModel
@@ -401,6 +402,10 @@ interface VodovozServiceRepository {
 
     suspend fun addMultipleProductsToCart(
         productIdsWithQuantity: String,
+    ): Flow<Result<String>>
+
+    suspend fun updateMultipleProductsToCart(
+        cartProducts: CartProductsModel
     ): Flow<Result<String>>
 
     suspend fun removeProductFromCart(
