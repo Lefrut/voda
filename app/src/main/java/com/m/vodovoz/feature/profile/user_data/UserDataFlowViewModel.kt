@@ -5,10 +5,6 @@ import androidx.compose.runtime.Stable
 import androidx.lifecycle.viewModelScope
 import com.m.vodovoz.R
 import com.m.vodovoz.common.account.LogoutManager
-import com.m.vodovoz.ui.mvi.Event
-import com.m.vodovoz.ui.mvi.MviViewModel
-import com.m.vodovoz.ui.mvi.State
-import kotlinx.coroutines.flow.update
 import com.m.vodovoz.common.media.MediaManager
 import com.m.vodovoz.common.resources.ResourcesProvider
 import com.m.vodovoz.design_system.model.widgets.FieldUi
@@ -18,6 +14,9 @@ import com.m.vodovoz.design_system.model.widgets.mapToUi
 import com.m.vodovoz.design_system.model.widgets.updateFieldAndResetError
 import com.m.vodovoz.domain.general.model.exceptions.UserNotLoginException
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
+import com.m.vodovoz.ui.mvi.Event
+import com.m.vodovoz.ui.mvi.MviViewModel
+import com.m.vodovoz.ui.mvi.State
 import com.m.vodovoz.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -40,12 +39,10 @@ class UserDataFlowViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            mediaManager
-                .observeAvatarImage()
-                .collect { imageFile ->
-                    updateUserAvatar(imageFile ?: return@collect)
-                    mediaManager.removeAvatarImage()
-                }
+            mediaManager.observeAvatarImage().collect { imageFile ->
+                updateUserAvatar(imageFile ?: return@collect)
+                mediaManager.removeAvatarImage()
+            }
         }
         fetchUserData()
     }
@@ -166,9 +163,6 @@ class UserDataFlowViewModel @Inject constructor(
         }.onFailure {
             sendEvent(UserDataEvents.ShowSnackbar(resourcesProvider.getString(R.string.delete_account_error)))
         }
-
-
-
 
         updateState { s ->
             s.copy(uiState = UserDataUiState.Success)

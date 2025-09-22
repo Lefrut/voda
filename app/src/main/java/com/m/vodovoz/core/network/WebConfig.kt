@@ -25,7 +25,6 @@ data object VodovozWebConfig {
     private val VODOVOZ_URL_PATH = "$VODOVOZ_URL$VODOVOZ_PATH"
     private val VODOVOZ_INFO_URL = "${VODOVOZ_URL_PATH}informatsiya/"
 
-    //todo - replace to GlobalAppLinks
     val ABOUT_SHOP_URL = "${VODOVOZ_INFO_URL}omagazine.php"
 
     fun toFullUrl(path: String): String {

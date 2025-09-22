@@ -4,7 +4,6 @@ import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -58,12 +57,11 @@ fun AllBottlesScreen(
                     modifier = Modifier.padding(
                         start = 16.dp,
                         end = 16.dp,
-                        bottom = 16.dp
                     ),
                     text = stringResource(R.string.choose),
                     isLoading = viewState.buttonIsLoading,
                     onClick = {
-                        viewModel.addBottlesToCart()
+                        viewModel.updateBottlesOnline()
                     }
                 )
             }

@@ -124,7 +124,7 @@ class CartFragment : Fragment() {
                     LaunchedEffect(viewState.showPromotionCodeBottomSheet) {
                         if (viewState.showPromotionCodeBottomSheet) tabManager.changeTabVisibility(false)
                         else {
-                            delay(135)
+                            delay(145)
                             tabManager.changeTabVisibility(true)
                         }
                     }
@@ -177,8 +177,8 @@ class CartFragment : Fragment() {
                         tabManager.selectTab(R.id.graph_catalog)
                     }
 
-                    CartFlowViewModel.CartEvents.GoToAllBottles -> {
-                        findNavController().navigateToAllBottles()
+                    is CartFlowViewModel.CartEvents.GoToAllBottles -> {
+                        findNavController().navigateToAllBottles(event.bottles)
                     }
                 }
             }

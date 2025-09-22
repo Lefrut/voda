@@ -18,7 +18,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.m.vodovoz.R
-import com.m.vodovoz.design_system.composables.button.VodovozButton
 import com.m.vodovoz.design_system.composables.decoration.OrderSummaryColumn
 import com.m.vodovoz.design_system.composables.decoration.VodovozSwipeToDismiss
 import com.m.vodovoz.design_system.model.order.OrderSummaryItemUi
@@ -139,7 +138,8 @@ fun CartBody(
                     modifier = Modifier.padding(top = 16.dp, start = 16.dp, end = 16.dp),
                     image = image,
                     name = name,
-                    onClick = onBottlesButtonClick
+                    onClick = onBottlesButtonClick,
+                    enabled = enabled
                 )
             }
         }

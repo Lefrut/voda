@@ -53,8 +53,7 @@ fun CartScreen(viewModel: CartFlowViewModel, viewState: CartFlowViewModel.CartSt
                     modifier = Modifier.padding(horizontal = 16.dp),
                     text = stringResource(id = R.string.place_order),
                     onClick = {
-                        val block = viewState.blockOrderButton || viewState.showRefreshIndicator
-                        if (!block) {
+                        if (!viewState.blockOrderButton) {
                             viewModel.navigateToOrder()
                         }
                     }

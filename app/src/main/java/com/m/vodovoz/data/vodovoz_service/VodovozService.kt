@@ -579,6 +579,11 @@ interface VodovozService {
         @Query("idquanit") productIdsWithQuantity: String,
     ): Response<VodovozResponseDTO<String>>
 
+    @GET("korzina/function/add/index.php?action=addtoqua&ydaltara=Y")
+    suspend fun updateMultipleProductsToCart(
+        @Query("idquanit") productIdsWithQuantity: String,
+    ): Response<VodovozResponseDTO<String>>
+
     @GET("korzina/function/deletto/index.php?action=deletto")
     suspend fun removeProductFromCart(
         @Query("id") productId: Long,

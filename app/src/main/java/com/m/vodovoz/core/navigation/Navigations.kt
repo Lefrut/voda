@@ -19,6 +19,7 @@ import com.m.vodovoz.design_system.model.filters.FiltersUi
 import com.m.vodovoz.feature.addresses.model.AddressScreenTypeUi
 import com.m.vodovoz.feature.all.promotions.AllPromotionsFragment
 import com.m.vodovoz.feature.buy_certificate.model.FAQUi
+import com.m.vodovoz.feature.cart.bottles.model.BottleUi
 import com.m.vodovoz.feature.cart.model.CartPresentPopupWindowUi
 import com.m.vodovoz.feature.cart.model.CartPresentUi
 import com.m.vodovoz.feature.home.model.CategoryUi
@@ -224,10 +225,10 @@ fun NavController.navigateToOrderQuestion(orderId: Long) {
     )
 }
 
-fun NavController.navigateToAllBottles() {
+fun NavController.navigateToAllBottles(bottles: List<BottleUi>) {
     navigate(
         R.id.allBottlesFragment,
-        Bundle.EMPTY,
+        bundleOf("bottles" to bottles),
         navOptions {
             slideAnim()
         }
