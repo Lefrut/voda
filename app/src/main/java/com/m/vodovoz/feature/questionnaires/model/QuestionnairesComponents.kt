@@ -14,7 +14,12 @@ import com.m.vodovoz.domain.general.model.user.toFieldModel
 sealed class QuestionnaireComponentUi(
     open val id: String,
     open val error: Boolean,
-) {
+)
+
+interface OptionComponentUi {
+
+    val options: List<ComponentOptionUi>
+
 }
 
 @Immutable
@@ -36,10 +41,10 @@ data class SwitchUi(
 data class ConditionsCheckboxListUi(
     override val id: String,
     val label: String,
-    val options: List<CheckOption>,
+    override val options: List<ComponentOptionUi>,
     val conditions: List<ConditionUi>,
     override val error: Boolean = false,
-) : QuestionnaireComponentUi(id, error)
+) : QuestionnaireComponentUi(id, error), OptionComponentUi
 
 @Immutable
 data class ConditionUi(
@@ -52,30 +57,47 @@ data class ConditionUi(
 data class CheckboxListUi(
     override val id: String,
     val label: String,
-    val options: List<CheckOption>,
+    override val options: List<ComponentOptionUi>,
     val isRequired: Boolean,
     override val error: Boolean = false,
-) : QuestionnaireComponentUi(id, error)
+) : QuestionnaireComponentUi(id, error), OptionComponentUi
+
+fun CheckboxListUi.update(option: ComponentOptionUi): CheckboxListUi {
+    val updatedOptions = options.map { opt ->
+        if (opt.label == option.label) opt.copy(value = option.value)
+        else opt
+    }
+    return copy(options = updatedOptions, error = false)
+}
+
+fun ConditionsCheckboxListUi.update(option: ComponentOptionUi): ConditionsCheckboxListUi {
+    val updatedOptions = options.map { opt ->
+        if (opt.label == option.label) opt.copy(value = option.value)
+        else opt
+    }
+    return copy(options = updatedOptions, error = false)
+}
 
 @Immutable
 data class ToggleListUi(
     override val id: String,
     val label: String,
-    val options: List<ToggleOption>,
+    override val options: List<ComponentOptionUi>,
     val isRequired: Boolean,
     override val error: Boolean = false,
-) : QuestionnaireComponentUi(id, error)
+) : QuestionnaireComponentUi(id, error), OptionComponentUi
+
+fun ToggleListUi.update(option: ComponentOptionUi): ToggleListUi {
+    val updatedOptions = options.map { opt ->
+        opt.copy(value = (opt.label == option.label))
+    }
+    return copy(options = updatedOptions, error = false)
+}
 
 @Immutable
-data class CheckOption(
+data class ComponentOptionUi(
     val label: String,
-    val isChecked: Boolean,
-)
-
-@Immutable
-data class ToggleOption(
-    val label: String,
-    val isSelected: Boolean,
+    val value: Boolean,
 )
 
 fun ConditionModel.toUi(): ConditionUi {
@@ -96,7 +118,7 @@ fun QuestionnairesItemModel.toUi(): QuestionnaireComponentUi? {
             ConditionsCheckboxListUi(
                 id = code,
                 label = name,
-                options = values.map { CheckOption(it, false) },
+                options = values.map { ComponentOptionUi(it, false) },
                 conditions = conditions.map { it.toUi() },
             )
         }
@@ -115,7 +137,7 @@ fun QuestionnairesItemModel.toUi(): QuestionnaireComponentUi? {
             CheckboxListUi(
                 id = code,
                 label = name,
-                options = values.map { CheckOption(it, false) },
+                options = values.map { ComponentOptionUi(it, false) },
                 isRequired = required
             )
         }
@@ -124,7 +146,7 @@ fun QuestionnairesItemModel.toUi(): QuestionnaireComponentUi? {
             ToggleListUi(
                 id = code,
                 label = name,
-                options = values.map { ToggleOption(it, it == value) },
+                options = values.map { ComponentOptionUi(it, it == value) },
                 isRequired = required
             )
         }
@@ -138,11 +160,11 @@ fun QuestionnaireComponentUi.errorIfInvalid(
 ): QuestionnaireComponentUi {
     val isInvalidAndErrorComponent = when (this) {
         is CheckboxListUi -> {
-            options.none { it.isChecked } to copy(error = true)
+            options.none { it.value } to copy(error = true)
         }
 
         is ConditionsCheckboxListUi -> {
-            options.any { !it.isChecked } to copy(error = true)
+            options.any { !it.value } to copy(error = true)
         }
 
         is FieldComponentUi -> {
@@ -163,7 +185,7 @@ fun QuestionnaireComponentUi.errorIfInvalid(
         }
 
         is ToggleListUi -> {
-            options.none { it.isSelected } to copy(error = true)
+            options.none { it.value } to copy(error = true)
         }
     }
 
@@ -173,7 +195,7 @@ fun QuestionnaireComponentUi.errorIfInvalid(
 }
 
 
-inline fun <reified T : QuestionnaireComponentUi> QuestionnaireComponentUi.ifSame(
+inline fun <reified T : QuestionnaireComponentUi> QuestionnaireComponentUi.updateIfSame(
     id: String,
     onSame: T.() -> QuestionnaireComponentUi,
 ): QuestionnaireComponentUi {
@@ -181,3 +203,38 @@ inline fun <reified T : QuestionnaireComponentUi> QuestionnaireComponentUi.ifSam
         onSame()
     } else this
 }
+
+inline fun <reified T : QuestionnaireComponentUi, reified T2 : QuestionnaireComponentUi> QuestionnaireComponentUi.updateIfSame(
+    id: String,
+    onSame1: T.() -> QuestionnaireComponentUi,
+    onSame2: T2.() -> QuestionnaireComponentUi,
+): QuestionnaireComponentUi {
+    val initial = this
+
+    listOf(
+        updateIfSame<T>(id, onSame1),
+        updateIfSame<T2>(id, onSame2)
+    ).forEach { updatedComponent ->
+        if (updatedComponent != initial) return updatedComponent
+    }
+    return initial
+}
+
+inline fun <reified T : QuestionnaireComponentUi, reified T2 : QuestionnaireComponentUi, reified T3 : QuestionnaireComponentUi> QuestionnaireComponentUi.updateIfSame(
+    id: String,
+    onSame1: T.() -> QuestionnaireComponentUi,
+    onSame2: T2.() -> QuestionnaireComponentUi,
+    onSame3: T3.() -> QuestionnaireComponentUi,
+): QuestionnaireComponentUi {
+    val initial = this
+
+    listOf(
+        updateIfSame<T>(id, onSame1),
+        updateIfSame<T2>(id, onSame2),
+        updateIfSame<T3>(id, onSame3)
+    ).forEach { updatedComponent ->
+        if (updatedComponent != initial) return updatedComponent
+    }
+    return initial
+}
+

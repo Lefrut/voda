@@ -17,7 +17,6 @@ data object WebConfig {
 data object VodovozWebConfig {
 
     private const val VODOVOZ_PROTOCOL = "https://"
-
     private const val VODOVOZ_DOMAIN = "m.vodovoz.ru/"
 
     var VODOVOZ_URL = "$VODOVOZ_PROTOCOL$VODOVOZ_DOMAIN"

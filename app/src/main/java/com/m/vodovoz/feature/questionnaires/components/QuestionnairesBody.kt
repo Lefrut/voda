@@ -34,15 +34,14 @@ import com.m.vodovoz.design_system.composables.decoration.VodovozHorizontalDivid
 import com.m.vodovoz.design_system.composables.text_fields.VodovozTextField
 import com.m.vodovoz.design_system.model.ColorfulButtonUi
 import com.m.vodovoz.design_system.model.widgets.FieldUi
-import com.m.vodovoz.feature.questionnaires.model.CheckOption
 import com.m.vodovoz.feature.questionnaires.model.CheckboxListUi
+import com.m.vodovoz.feature.questionnaires.model.ComponentOptionUi
 import com.m.vodovoz.feature.questionnaires.model.ConditionUi
 import com.m.vodovoz.feature.questionnaires.model.ConditionsCheckboxListUi
 import com.m.vodovoz.feature.questionnaires.model.FieldComponentUi
 import com.m.vodovoz.feature.questionnaires.model.QuestionnaireComponentUi
 import com.m.vodovoz.feature.questionnaires.model.SwitchUi
 import com.m.vodovoz.feature.questionnaires.model.ToggleListUi
-import com.m.vodovoz.feature.questionnaires.model.ToggleOption
 
 @Suppress("NonSkippableComposable")
 @Composable
@@ -51,13 +50,11 @@ fun QuestionnairesBody(
     components: List<QuestionnaireComponentUi>,
     button: ColorfulButtonUi,
     onButtonClick: (ColorfulButtonUi) -> Unit,
-    onCheckboxChange: (CheckboxListUi, CheckOption) -> Unit,
-    onConditionCheckboxChange: (ConditionsCheckboxListUi, CheckOption) -> Unit,
     onConditionClick: (ConditionUi) -> Unit,
     onFieldChange: (FieldComponentUi, FieldUi) -> Unit,
-    onToggleChange: (ToggleListUi, ToggleOption) -> Unit,
+    onOptionChange: (QuestionnaireComponentUi, ComponentOptionUi) -> Unit,
     onSwitchChange: (SwitchUi, String) -> Unit,
-    onFieldClick: (FieldComponentUi) -> Unit
+    onFieldClick: (FieldComponentUi) -> Unit,
 ) {
     Column(
         modifier = modifier.fillMaxSize()
@@ -76,7 +73,7 @@ fun QuestionnairesBody(
                         is CheckboxListUi -> {
                             CheckboxListComponent(
                                 ui = component,
-                                onClick = onCheckboxChange
+                                onClick = onOptionChange
                             )
                         }
 
@@ -107,14 +104,14 @@ fun QuestionnairesBody(
                         is ToggleListUi -> {
                             ToggleListComponent(
                                 ui = component,
-                                onClick = onToggleChange
+                                onClick = onOptionChange
                             )
                         }
 
                         is ConditionsCheckboxListUi -> {
                             ConditionCheckboxListComponent(
                                 ui = component,
-                                onClick = onConditionCheckboxChange,
+                                onClick = onOptionChange,
                                 onConditionClick = onConditionClick
                             )
                         }
@@ -135,7 +132,7 @@ fun QuestionnairesBody(
 private fun ConditionCheckboxListComponent(
     modifier: Modifier = Modifier,
     ui: ConditionsCheckboxListUi,
-    onClick: (ConditionsCheckboxListUi, CheckOption) -> Unit,
+    onClick: (ConditionsCheckboxListUi, ComponentOptionUi) -> Unit,
     onConditionClick: (ConditionUi) -> Unit,
 ) {
     Column(
@@ -162,15 +159,17 @@ private fun ConditionCheckboxListComponent(
         Column {
 
             ui.options.forEach { option ->
+                val updatedOption = option.copy(value = !option.value)
+
                 Row(
                     modifier = Modifier
-                        .clickable { onClick(ui, option) }
+                        .clickable { onClick(ui, updatedOption) }
                         .padding(16.dp)) {
                     Checkbox(
                         modifier = Modifier.size(24.dp),
-                        checked = option.isChecked,
+                        checked = option.value,
                         onCheckedChange = {
-                            onClick(ui, option)
+                            onClick(ui, updatedOption)
                         },
                         colors = CheckboxDefaults.colors(
                             checkmarkColor = MaterialTheme.colorScheme.background,
@@ -243,7 +242,7 @@ private fun SwitchComponent(
 private fun CheckboxListComponent(
     modifier: Modifier = Modifier,
     ui: CheckboxListUi,
-    onClick: (CheckboxListUi, CheckOption) -> Unit,
+    onClick: (CheckboxListUi, ComponentOptionUi) -> Unit,
 ) {
     Column(modifier = modifier) {
         Text(
@@ -253,10 +252,12 @@ private fun CheckboxListComponent(
             style = MaterialTheme.typography.headlineSmall
         )
         ui.options.forEach { opt ->
+            val updatedOption = opt.copy(value = !opt.value)
+
             Row(
                 modifier = Modifier
                     .clickable {
-                        onClick(ui, opt)
+                        onClick(ui, updatedOption)
                     }
                     .padding(16.dp),
                 verticalAlignment = Alignment.CenterVertically
@@ -270,9 +271,9 @@ private fun CheckboxListComponent(
 
                 Checkbox(
                     modifier = Modifier.size(24.dp),
-                    checked = opt.isChecked,
+                    checked = opt.value,
                     onCheckedChange = {
-                        onClick(ui, opt)
+                        onClick(ui, updatedOption)
                     },
                     colors = CheckboxDefaults.colors(
                         checkmarkColor = MaterialTheme.colorScheme.background,
@@ -290,7 +291,7 @@ private fun CheckboxListComponent(
 private fun ToggleListComponent(
     modifier: Modifier = Modifier,
     ui: ToggleListUi,
-    onClick: (ToggleListUi, ToggleOption) -> Unit,
+    onClick: (ToggleListUi, ComponentOptionUi) -> Unit,
 ) {
     Column(modifier = modifier) {
         Text(
@@ -299,17 +300,17 @@ private fun ToggleListComponent(
             color = if (ui.error) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onBackground,
             style = MaterialTheme.typography.headlineSmall
         )
-        ui.options.forEach { opt ->
+        ui.options.forEach { option ->
             Row(
                 modifier = Modifier
                     .clickable {
-                        onClick(ui, opt)
+                        onClick(ui, option)
                     }
                     .padding(16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = opt.label,
+                    text = option.label,
                     modifier = Modifier.weight(1f),
                     color = MaterialTheme.colorScheme.onBackground,
                     style = MaterialTheme.typography.bodyMedium
@@ -317,9 +318,9 @@ private fun ToggleListComponent(
 
                 VodovozRadioButton(
                     modifier = Modifier.padding(start = 16.dp),
-                    selected = opt.isSelected,
+                    selected = option.value,
                     onClick = {
-                        onClick(ui, opt)
+                        onClick(ui, option)
                     }
                 )
             }

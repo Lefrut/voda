@@ -4,10 +4,6 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.viewModelScope
 import com.m.vodovoz.R
-import com.m.vodovoz.ui.mvi.Event
-import com.m.vodovoz.ui.mvi.MviViewModel
-import com.m.vodovoz.ui.mvi.State
-import kotlinx.coroutines.flow.update
 import com.m.vodovoz.common.resources.ResourcesProvider
 import com.m.vodovoz.design_system.model.ColorfulButtonUi
 import com.m.vodovoz.design_system.model.VodovozPlaceholderUi
@@ -15,18 +11,23 @@ import com.m.vodovoz.design_system.model.mapToUi
 import com.m.vodovoz.design_system.model.toUi
 import com.m.vodovoz.domain.general.model.exceptions.RequestException
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
-import com.m.vodovoz.feature.questionnaires.model.CheckOption
 import com.m.vodovoz.feature.questionnaires.model.CheckboxListUi
+import com.m.vodovoz.feature.questionnaires.model.ComponentOptionUi
 import com.m.vodovoz.feature.questionnaires.model.ConditionUi
 import com.m.vodovoz.feature.questionnaires.model.ConditionsCheckboxListUi
 import com.m.vodovoz.feature.questionnaires.model.FieldComponentUi
+import com.m.vodovoz.feature.questionnaires.model.OptionComponentUi
 import com.m.vodovoz.feature.questionnaires.model.QuestionnaireComponentUi
 import com.m.vodovoz.feature.questionnaires.model.SwitchUi
 import com.m.vodovoz.feature.questionnaires.model.ToggleListUi
-import com.m.vodovoz.feature.questionnaires.model.ToggleOption
 import com.m.vodovoz.feature.questionnaires.model.errorIfInvalid
-import com.m.vodovoz.feature.questionnaires.model.ifSame
 import com.m.vodovoz.feature.questionnaires.model.toUi
+import com.m.vodovoz.feature.questionnaires.model.update
+import com.m.vodovoz.feature.questionnaires.model.updateIfSame
+import com.m.vodovoz.ui.mvi.Event
+import com.m.vodovoz.ui.mvi.MviViewModel
+import com.m.vodovoz.ui.mvi.State
+import com.m.vodovoz.util.extensions.indexOfOrZero
 import com.m.vodovoz.util.extensions.singleResult
 import com.m.vodovoz.util.formatters.VodovozDateFormatters
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -110,7 +111,7 @@ class QuestionnairesFlowViewModel @Inject constructor(
 
     fun updateText(id: String, newValue: String) = viewModelScope.launch {
         mapThenUpdateComponents {
-            ifSame<FieldComponentUi>(id) {
+            updateIfSame<FieldComponentUi>(id) {
                 copy(ui = ui.copy(value = newValue, isError = false))
             }
         }
@@ -119,7 +120,7 @@ class QuestionnairesFlowViewModel @Inject constructor(
 
     fun updateSwitch(id: String, option: String) = viewModelScope.launch {
         mapThenUpdateComponents {
-            ifSame<SwitchUi>(id) {
+            updateIfSame<SwitchUi>(id) {
                 copy(
                     selectedOption = option,
                     error = false
@@ -128,51 +129,49 @@ class QuestionnairesFlowViewModel @Inject constructor(
         }
     }
 
-    fun updateCheckbox(id: String, option: CheckOption) = viewModelScope.launch {
-        mapThenUpdateComponents {
-            ifSame<CheckboxListUi>(id) {
-                val updatedOptions = options.map { opt ->
-                    if (opt.label == option.label) opt.copy(isChecked = !opt.isChecked)
-                    else opt
-                }
-                copy(options = updatedOptions, error = false)
+    fun <T : QuestionnaireComponentUi> updateOptions(component: T, option: ComponentOptionUi) =
+        viewModelScope.launch {
+            mapThenUpdateComponents {
+                updateIfSame<CheckboxListUi, ToggleListUi, ConditionsCheckboxListUi>(
+                    id = component.id,
+                    onSame1 = { update(option) },
+                    onSame2 = { update(option) },
+                    onSame3 = { update(option) }
+                )
             }
         }
-    }
 
-    fun updateToggle(id: String, option: ToggleOption) = viewModelScope.launch {
-        mapThenUpdateComponents {
-            ifSame<ToggleListUi>(id) {
-                val updatedOptions = options.map { opt ->
-                    opt.copy(isSelected = (opt.label == option.label))
-                }
-                copy(options = updatedOptions, error = false)
-            }
-        }
-    }
-
-    fun updateConditionCheckbox(id: String, option: CheckOption) = viewModelScope.launch {
-        mapThenUpdateComponents {
-            ifSame<ConditionsCheckboxListUi>(id) {
-                val updatedOptions = options.map { opt ->
-                    if (opt.label == option.label) opt.copy(isChecked = !opt.isChecked)
-                    else opt
-                }
-                copy(options = updatedOptions, error = false)
-            }
-        }
-    }
 
     fun checkBirthdayField(component: FieldComponentUi) = viewModelScope.launch {
-        if (component.ui.id != "DR") return@launch
+        val components = stateSnapshot.components
+        val previousComponent = with(components) {
+            val index = indexOfOrZero(component) - 1
+            get(index.coerceAtLeast(0))
+        }
+        val field = component.ui
 
-        updateState { s ->
-            s.copy(
-                showDatePicker = true,
-                currentDateField = component
-            )
+        if (field.id == "DR") {
+            updateState { s ->
+                s.copy(
+                    showDatePicker = true,
+                    currentDateField = component
+                )
+            }
         }
 
+        if (field.label.contains("Другое", true) && previousComponent is OptionComponentUi) {
+            val updatedOption = previousComponent.options.lastOrNull()?.copy(
+                value = true
+            ) ?: return@launch
+
+            mapThenUpdateComponents {
+                updateIfSame<ToggleListUi, CheckboxListUi>(
+                    id = previousComponent.id,
+                    onSame1 = { update(updatedOption) },
+                    onSame2 = { update(updatedOption) }
+                )
+            }
+        }
     }
 
     fun closeDatePicker() = viewModelScope.launch {
@@ -182,12 +181,12 @@ class QuestionnairesFlowViewModel @Inject constructor(
     }
 
     private fun mapThenUpdateComponents(
-        onComponentChange: QuestionnaireComponentUi.() -> QuestionnaireComponentUi,
+        transform: QuestionnaireComponentUi.() -> QuestionnaireComponentUi,
     ) {
         updateState { s ->
             s.copy(
                 components = stateSnapshot.components.map { component ->
-                    onComponentChange(component)
+                    transform(component)
                 }
             )
         }
@@ -283,16 +282,16 @@ class QuestionnairesFlowViewModel @Inject constructor(
                     is FieldComponentUi -> comp.ui.value
                     is SwitchUi -> comp.selectedOption
                     is CheckboxListUi -> comp.options
-                        .filter { it.isChecked }
+                        .filter { it.value }
                         .joinToString(",") { it.label }
 
                     is ToggleListUi -> comp.options
-                        .firstOrNull { it.isSelected }
+                        .firstOrNull { it.value }
                         ?.label
                         .orEmpty()
 
                     is ConditionsCheckboxListUi -> comp.options
-                        .filter { it.isChecked }
+                        .filter { it.value }
                         .joinToString(",") { it.label }
                 }
                 if (raw.isBlank()) return@mapNotNull null
