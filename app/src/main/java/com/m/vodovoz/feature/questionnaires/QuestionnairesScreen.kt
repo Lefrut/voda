@@ -1,6 +1,5 @@
 package com.m.vodovoz.feature.questionnaires
 
-import com.m.vodovoz.design_system.composables.date_picker.VodovozCalendarDialog
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -15,10 +14,11 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import com.kizitonwose.calendar.core.CalendarDay
 import com.kizitonwose.calendar.core.DayPosition
-import com.m.vodovoz.util.formatters.VodovozDateFormatters
+import com.m.vodovoz.design_system.composables.date_picker.VodovozCalendarDialog
 import com.m.vodovoz.design_system.composables.snackbar.VodovozSnackbarHost
 import com.m.vodovoz.design_system.composables.top_bar.VodovozTopBar
 import com.m.vodovoz.feature.questionnaires.components.QuestionnairesBody
+import com.m.vodovoz.util.formatters.VodovozDateFormatters
 import java.time.LocalDate
 
 @Composable
@@ -53,14 +53,8 @@ fun QuestionnairesScreen(
             onSwitchChange = { switch, option ->
                 viewModel.updateSwitch(switch.id, option)
             },
-            onToggleChange = { toggle, option ->
-                viewModel.updateToggle(toggle.id, option)
-            },
-            onCheckboxChange = { list, option ->
-                viewModel.updateCheckbox(list.id, option)
-            },
-            onConditionCheckboxChange = { conditionList, option ->
-                viewModel.updateConditionCheckbox(conditionList.id, option)
+            onOptionChange = { component, option ->
+                viewModel.updateOptions(component, option)
             },
             onConditionClick = { condition ->
                 viewModel.navigateToWebView(condition)
@@ -76,7 +70,7 @@ fun QuestionnairesScreen(
 
     val currentDateField = viewState.currentDateField
 
-    if (viewState.showDatePicker && currentDateField != null ) {
+    if (viewState.showDatePicker && currentDateField != null) {
 
         val currentDay = rememberSaveable(currentDateField.ui.value) {
             val localDate = runCatching {
@@ -102,7 +96,6 @@ fun QuestionnairesScreen(
             }
         )
     }
-
 
 
 }

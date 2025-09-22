@@ -13,6 +13,7 @@ import androidx.annotation.Keep
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -49,6 +50,7 @@ import com.m.vodovoz.core.navigation.navigateToProductAnalogs
 import com.m.vodovoz.core.navigation.navigateToProductDetails
 import com.m.vodovoz.core.navigation.navigateToPromotionDetails
 import com.m.vodovoz.core.navigation.navigateToPromotions
+import com.m.vodovoz.core.navigation.navigateToQuestionnaires
 import com.m.vodovoz.core.navigation.navigateToSearch
 import com.m.vodovoz.core.navigation.navigateToServiceDetails
 import com.m.vodovoz.core.navigation.navigateToStories
@@ -67,6 +69,7 @@ import com.m.vodovoz.util.extensions.isVpnActive
 import com.m.vodovoz.util.extensions.openUrl
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.onSubscription
 import kotlinx.coroutines.launch
 import okhttp3.internal.toLongOrDefault
@@ -128,6 +131,7 @@ class HomeFragment : Fragment() {
     ): View {
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+
 
             setContent {
                 VodovozTheme {
