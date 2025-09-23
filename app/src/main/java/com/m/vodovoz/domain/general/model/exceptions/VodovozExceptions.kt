@@ -62,7 +62,7 @@ data class VodovozPlaceholderModel(
 ) {
     companion object {
         val Empty = VodovozPlaceholderModel(
-            "", "", "", ""
+            title = "", headerHtml = "", descriptionHtml = "", imageUrl = ""
         )
     }
 }

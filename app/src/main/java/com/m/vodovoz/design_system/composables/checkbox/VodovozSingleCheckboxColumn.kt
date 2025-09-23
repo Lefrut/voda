@@ -31,7 +31,12 @@ fun <T : Any> VodovozSingleCheckboxColumn(
 
             Row(
                 modifier = Modifier
-                    .clickable { onCheckboxClick(singleCheckboxGroup, singleCheckboxGroup.copy(checkbox = if(selected) null else option)) }
+                    .clickable {
+                        onCheckboxClick(
+                            singleCheckboxGroup,
+                            singleCheckboxGroup.copy(checkbox = if (selected) null else option)
+                        )
+                    }
                     .padding(16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -43,10 +48,15 @@ fun <T : Any> VodovozSingleCheckboxColumn(
                 )
 
                 Checkbox(
-                    modifier = Modifier.padding(start = 16.dp).size(24.dp),
+                    modifier = Modifier
+                        .padding(start = 16.dp)
+                        .size(24.dp),
                     checked = selected,
                     onCheckedChange = {
-                        onCheckboxClick(singleCheckboxGroup, singleCheckboxGroup.copy(checkbox = if(selected) null else option))
+                        onCheckboxClick(
+                            singleCheckboxGroup,
+                            singleCheckboxGroup.copy(checkbox = if (selected) null else option)
+                        )
                     },
                     colors = CheckboxDefaults.colors(
                         checkmarkColor = MaterialTheme.colorScheme.background,

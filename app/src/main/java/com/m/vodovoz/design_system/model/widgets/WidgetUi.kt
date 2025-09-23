@@ -3,10 +3,14 @@ package com.m.vodovoz.design_system.model.widgets
 import androidx.compose.runtime.Stable
 
 @Stable
-sealed class WidgetUi(open val id: String){
+sealed class WidgetUi(open val id: String) {
 
     abstract fun value(): String
 
+}
+
+fun List<WidgetUi>.toMap(): Map<String, String> {
+    return associate { it.id to it.value() }
 }
 
 interface WidgetUpdater {
@@ -85,14 +89,13 @@ class SwitchWidgetUpdater : WidgetUpdater {
         updatedWidget: WidgetUi,
         getString: (Int) -> String,
     ): List<WidgetUi> {
-        return widgets
-            .map { mapWidget ->
-                if (mapWidget.id == updatedWidget.id) {
-                    updatedWidget
-                } else {
-                    mapWidget
-                }
+        return widgets.map { mapWidget ->
+            if (mapWidget.id == updatedWidget.id) {
+                updatedWidget
+            } else {
+                mapWidget
             }
+        }
     }
 }
 
@@ -109,22 +112,21 @@ class SingleCheckboxGroupUpdater : WidgetUpdater {
     ): List<WidgetUi> {
         return widgets
             .map { mapWidget ->
-                if (mapWidget.id == updatedWidget.id) { updatedWidget } else { mapWidget }
+                if (mapWidget.id == updatedWidget.id) {
+                    updatedWidget
+                } else {
+                    mapWidget
+                }
             }
     }
 }
 
 
-class WidgetUpdaterKeeper(
-    private val updaters: List<WidgetUpdater> = listOf(
-        FieldWidgetUpdater(),
-        SwitchWidgetUpdater(),
-        RadioGroupUpdater(),
-        SingleCheckboxGroupUpdater()
-    ),
+class WidgetUpdaterKeeperImpl(
+    private val updaters: List<WidgetUpdater>,
     private val getString: (Int) -> String,
-) {
-    fun updateWidget(
+) : WidgetUpdaterKeeper {
+    override fun updateWidget(
         widgets: List<WidgetUi>,
         widget: WidgetUi,
         updatedWidget: WidgetUi,
@@ -134,5 +136,34 @@ class WidgetUpdaterKeeper(
         } ?: return widgets
 
         return updater.update(widgets, widget, updatedWidget, getString)
+    }
+}
+
+interface WidgetUpdaterKeeper {
+    fun updateWidget(
+        widgets: List<WidgetUi>,
+        widget: WidgetUi,
+        updatedWidget: WidgetUi,
+    ): List<WidgetUi>
+}
+
+interface WidgetUpdaterKeeperFactory {
+
+
+    companion object {
+
+        val baseUpdaters = listOf(
+            FieldWidgetUpdater(),
+            SwitchWidgetUpdater(),
+            RadioGroupUpdater(),
+            SingleCheckboxGroupUpdater()
+        )
+
+        fun createWidgetUpdateKeeper(
+            updaters: List<WidgetUpdater> = baseUpdaters,
+            getString: (Int) -> String,
+        ): WidgetUpdaterKeeper {
+            return WidgetUpdaterKeeperImpl(updaters, getString)
+        }
     }
 }

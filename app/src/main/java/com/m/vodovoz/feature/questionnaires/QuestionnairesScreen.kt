@@ -53,15 +53,9 @@ fun QuestionnairesScreen(
             onSwitchChange = { switch, option ->
                 viewModel.updateSwitch(switch.id, option)
             },
-            onOptionChange = { component, option ->
-                viewModel.updateOptions(component, option)
-            },
-            onConditionClick = { condition ->
-                viewModel.navigateToWebView(condition)
-            },
-            onFieldClick = { fieldComponent ->
-                viewModel.checkBirthdayField(fieldComponent)
-            }
+            onOptionChange = viewModel::updateOptions,
+            onConditionClick = viewModel::navigateToWebView,
+            onFieldClick = viewModel::checkBirthdayField
         )
 
         VodovozSnackbarHost(snackbarHostState)

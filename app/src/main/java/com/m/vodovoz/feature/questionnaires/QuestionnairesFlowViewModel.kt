@@ -27,6 +27,7 @@ import com.m.vodovoz.feature.questionnaires.model.updateIfSame
 import com.m.vodovoz.ui.mvi.Event
 import com.m.vodovoz.ui.mvi.MviViewModel
 import com.m.vodovoz.ui.mvi.State
+import com.m.vodovoz.util.extensions.handleResultFlow
 import com.m.vodovoz.util.extensions.indexOfOrZero
 import com.m.vodovoz.util.extensions.singleResult
 import com.m.vodovoz.util.formatters.VodovozDateFormatters
@@ -52,61 +53,59 @@ class QuestionnairesFlowViewModel @Inject constructor(
 
 
     fun fetchWelcomeDetails() = viewModelScope.launch {
-        updateState { s ->
-            s.copy(
-                uiState = QuestionnairesUiState.Loading,
-                currentWho = null,
-                showCancelDialog = false
-            )
-        }
-
-        val welcomeDetailsResult =
-            vodovozServiceRepository.getQuestionnairesWelcomeDetails().singleResult()
-
-        welcomeDetailsResult.onSuccess { welcomeDetails ->
-            updateState { s ->
-                s.copy(
-                    uiState = QuestionnairesUiState.Welcome(
-                        title = welcomeDetails.title,
-                        image = welcomeDetails.image,
-                        header = welcomeDetails.header,
-                        description = welcomeDetails.description,
-                        buttons = welcomeDetails.buttons.mapToUi()
-                    )
+        handleResultFlow(
+            request = {
+                vodovozServiceRepository.getQuestionnairesWelcomeDetails()
+            },
+            transform = {
+                QuestionnairesUiState.Welcome(
+                    title = title,
+                    image = image,
+                    header = header,
+                    description = description,
+                    buttons = buttons.mapToUi()
                 )
+            },
+            success = {
+                updateState { s ->
+                    s.copy(uiState = it)
+                }
+            },
+            failure = {
+                updateState { s ->
+                    s.copy(uiState = QuestionnairesUiState.Error)
+                }
             }
-        }.onFailure {
-            updateState { s ->
-                s.copy(uiState = QuestionnairesUiState.Error)
-            }
-        }
+        )
     }
 
     private fun fetchQuestionnairesDetails() = viewModelScope.launch {
-        val currentWho = stateSnapshot.currentWho ?: return@launch
+        handleResultFlow(
+            request = {
+                val currentWho = stateSnapshot.currentWho ?: return@launch
 
-        updateState { s ->
-            s.copy(uiState = QuestionnairesUiState.Loading)
-        }
+                updateState { s ->
+                    s.copy(uiState = QuestionnairesUiState.Loading)
+                }
 
-        val questionnairesDetailsResult =
-            vodovozServiceRepository.getQuestionnairesDetails(currentWho).singleResult()
-
-        questionnairesDetailsResult.onSuccess { questionnairesDetails ->
-
-            updateState { s ->
-                s.copy(
-                    button = questionnairesDetails.button.toUi(),
-                    components = questionnairesDetails.items.mapNotNull { it.toUi() },
-                    title = questionnairesDetails.title,
+                vodovozServiceRepository.getQuestionnairesDetails(currentWho)
+            },
+            transform = {
+                stateSnapshot.copy(
+                    button = button.toUi(),
+                    components = items.mapNotNull { it.toUi() },
+                    title = title,
                     uiState = QuestionnairesUiState.Body
                 )
+            },
+            success = {
+                updateState { it }
+            },
+            failure = {
+                delay(250)
+                fetchWelcomeDetails().join()
             }
-
-        }.onFailure {
-            delay(250)
-            fetchWelcomeDetails()
-        }
+        )
     }
 
     fun updateText(id: String, newValue: String) = viewModelScope.launch {
@@ -222,7 +221,7 @@ class QuestionnairesFlowViewModel @Inject constructor(
         updateState { s ->
             s.copy(currentWho = btn.id)
         }
-        fetchQuestionnairesDetails()
+        fetchQuestionnairesDetails().join()
     }
 
     fun sendAnswers() = viewModelScope.launch {

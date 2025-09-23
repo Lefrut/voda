@@ -132,7 +132,6 @@ class HomeFragment : Fragment() {
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
 
-
             setContent {
                 VodovozTheme {
                     val viewState by viewModel.collectAsState()
