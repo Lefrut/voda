@@ -41,21 +41,17 @@ class AddAddressFragment : Fragment() {
     @Inject
     lateinit var tabManager: TabManager
 
-    private var initialTabVisibility: Boolean = true
 
     private val mapKit: MapKit by lazy { MapKitFactory.getInstance() }
 
     override fun onStart() {
         super.onStart()
         mapKit.onStart()
-        initialTabVisibility = tabManager.observeTabVisibility().value
-        tabManager.changeTabVisibility(false)
     }
 
     override fun onStop() {
         mapKit.onStop()
         super.onStop()
-        tabManager.changeTabVisibility(initialTabVisibility)
     }
 
     override fun onCreateView(

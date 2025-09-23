@@ -146,15 +146,12 @@ class QuestionnairesFlowFragment : Fragment() {
 
                                 is QuestionnairesFlowViewModel.QuestionnaireEvents.GoToWebView -> {
                                     findNavController().navigateToWebView(
-                                        event.url,
-                                        requireContext().getString(R.string.space)
+                                        event.url, requireContext().getString(R.string.space)
                                     )
                                 }
 
                                 QuestionnairesFlowViewModel.QuestionnaireEvents.ScrollToTop -> {
-                                    launch {
-                                        scrollState.animateScrollTo(0)
-                                    }
+                                    launch { scrollState.animateScrollTo(0) }
                                 }
 
                                 is QuestionnairesFlowViewModel.QuestionnaireEvents.ShowToast -> {

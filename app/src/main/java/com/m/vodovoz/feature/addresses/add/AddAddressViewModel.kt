@@ -12,15 +12,11 @@ import com.m.vodovoz.common.resources.ResourcesProvider
 import com.m.vodovoz.design_system.model.toUi
 import com.m.vodovoz.design_system.model.widgets.EmptyTextValidator
 import com.m.vodovoz.design_system.model.widgets.FieldUi
-import com.m.vodovoz.design_system.model.widgets.FieldWidgetUpdater
 import com.m.vodovoz.design_system.model.widgets.NoRequiredValidator
-import com.m.vodovoz.design_system.model.widgets.RadioGroupUpdater
-import com.m.vodovoz.design_system.model.widgets.SingleCheckboxGroupUpdater
 import com.m.vodovoz.design_system.model.widgets.SwitchUi
-import com.m.vodovoz.design_system.model.widgets.SwitchWidgetUpdater
 import com.m.vodovoz.design_system.model.widgets.WidgetUi
 import com.m.vodovoz.design_system.model.widgets.WidgetUpdater
-import com.m.vodovoz.design_system.model.widgets.WidgetUpdaterKeeper
+import com.m.vodovoz.design_system.model.widgets.WidgetUpdaterKeeperFactory
 import com.m.vodovoz.design_system.model.widgets.checkFields
 import com.m.vodovoz.design_system.model.widgets.mapToUi
 import com.m.vodovoz.design_system.model.widgets.toUi
@@ -49,19 +45,8 @@ class AddAddressViewModel @Inject constructor(
     private val addressId = savedStateHandle.get<Long>("addressId")?.also { id ->
         updateState { s -> s.copy(addressId = id) }
     }
-
     private val addressType = savedStateHandle.get<Int>("addressType")
-
     private val addressName = savedStateHandle.get<String>("addressName")
-
-
-    companion object {
-        private const val PRIVATE_HOUSE_ID = "chasdom"
-        private const val DELIVERY_OFFICE_ID = "dostavkaofis"
-        private const val FLOOR_ID = "floor"
-        private const val FLAT_ID = "flat"
-
-    }
 
     init {
         savedStateHandle.get<MapAddressUi>("mapAddress")?.let { mapAddress ->
@@ -170,7 +155,12 @@ class AddAddressViewModel @Inject constructor(
         ) { fields, isValid ->
             if (!isValid) {
                 updateState { s ->
-                    s.copy(gridFields = fields, button = s.button.copy(enabled = false))
+                    s.copy(
+                        gridFields = fields,
+                        button = s.button.copy(
+                            enabled = false
+                        )
+                    )
                 }
                 return@launch
             }
@@ -211,53 +201,9 @@ class AddAddressViewModel @Inject constructor(
 
     }
 
-    private val addressTypesSwitchUpdater = object : WidgetUpdater {
-
-        override fun canHandle(widget: WidgetUi, updatedWidget: WidgetUi): Boolean {
-            return widget is SwitchUi && updatedWidget is SwitchUi
-                    && ((widget.id == PRIVATE_HOUSE_ID && updatedWidget.id == PRIVATE_HOUSE_ID)
-                    || (widget.id == DELIVERY_OFFICE_ID && updatedWidget.id == DELIVERY_OFFICE_ID))
-        }
-
-        override fun update(
-            widgets: List<WidgetUi>,
-            widget: WidgetUi,
-            updatedWidget: WidgetUi,
-            getString: (Int) -> String,
-        ): List<WidgetUi> {
-            val changed = updatedWidget as SwitchUi
-            val turningOn = changed.value
-
-            return widgets.map { current ->
-                when {
-                    current.id == changed.id -> changed
-
-                    turningOn && current is SwitchUi &&
-                            (current.id == PRIVATE_HOUSE_ID || current.id == DELIVERY_OFFICE_ID) ->
-                        current.copy(value = false)
-
-                    else -> current
-                }
-            }
-        }
-
-    }
-
-    private val widgetUpdaterKeeper = WidgetUpdaterKeeper(
-        updaters = listOf(
-            addressTypesSwitchUpdater,
-            FieldWidgetUpdater(
-                listOf(
-                    NoRequiredValidator,
-                    EmptyTextValidator,
-                )
-            ),
-            SwitchWidgetUpdater(),
-            RadioGroupUpdater(),
-            SingleCheckboxGroupUpdater()
-        ),
-        getString = { id -> resourcesProvider.getString(id) }
-    )
+    private val widgetUpdaterKeeper = WidgetUpdaterKeeperFactory.createWidgetUpdateKeeper(
+        updaters = listOf(addressSwitchesUpdater) + WidgetUpdaterKeeperFactory.baseUpdaters
+    ) { id -> resourcesProvider.getString(id) }
 
     fun changeWidget(widget: WidgetUi, updatedWidget: WidgetUi) {
         val updatedLinearFields = widgetUpdaterKeeper.updateWidget(
@@ -311,7 +257,8 @@ class AddAddressViewModel @Inject constructor(
                 s.copy(
                     uiState = AddAddressUiState.Form,
                     linearFields = addAddressDetails.linearFields.mapToUi(),
-                    gridFields = addAddressDetails.gridFields.mapToUi().updateByPrivateHouseRules(linearSwitches),
+                    gridFields = addAddressDetails.gridFields.mapToUi()
+                        .updateByPrivateHouseRules(linearSwitches),
                     addressField = addressField.copy(
                         value = stateSnapshot.mapAddress?.name ?: addressName ?: addressField.value
                     ),
@@ -331,10 +278,10 @@ class AddAddressViewModel @Inject constructor(
     }
 
     private fun List<FieldUi>.updateByPrivateHouseRules(
-        switches: List<SwitchUi>
+        switches: List<SwitchUi>,
     ): List<FieldUi> {
         val privateHouseSwitch = switches.find { it.id == PRIVATE_HOUSE_ID } ?: return this
-        return map {gridField ->
+        return map { gridField ->
             if (gridField.id == FLOOR_ID || gridField.id == FLAT_ID) {
                 gridField.copy(
                     isRequired = !privateHouseSwitch.value,
@@ -370,5 +317,41 @@ class AddAddressViewModel @Inject constructor(
         }
     }
 
+
+}
+
+private const val PRIVATE_HOUSE_ID = "chasdom"
+private const val DELIVERY_OFFICE_ID = "dostavkaofis"
+private const val FLOOR_ID = "floor"
+private const val FLAT_ID = "flat"
+
+private val addressSwitchesUpdater = object : WidgetUpdater {
+    override fun canHandle(widget: WidgetUi, updatedWidget: WidgetUi): Boolean {
+        return widget is SwitchUi && updatedWidget is SwitchUi
+                && ((widget.id == PRIVATE_HOUSE_ID && updatedWidget.id == PRIVATE_HOUSE_ID)
+                || (widget.id == DELIVERY_OFFICE_ID && updatedWidget.id == DELIVERY_OFFICE_ID))
+    }
+
+    override fun update(
+        widgets: List<WidgetUi>,
+        widget: WidgetUi,
+        updatedWidget: WidgetUi,
+        getString: (Int) -> String,
+    ): List<WidgetUi> {
+        val changed = updatedWidget as SwitchUi
+        val turningOn = changed.value
+
+        return widgets.map { current ->
+            when {
+                current.id == changed.id -> changed
+
+                turningOn && current is SwitchUi &&
+                        (current.id == PRIVATE_HOUSE_ID || current.id == DELIVERY_OFFICE_ID) ->
+                    current.copy(value = false)
+
+                else -> current
+            }
+        }
+    }
 
 }

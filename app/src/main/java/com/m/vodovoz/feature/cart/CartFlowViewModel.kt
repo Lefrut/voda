@@ -295,7 +295,7 @@ class CartFlowViewModel @Inject constructor(
             sendEvent(CartEvents.GoToProfile)
         } else {
             val present = stateSnapshot.present ?: return@launch
-            val popupWindow = stateSnapshot.present?.popupWindow ?: return@launch
+            val popupWindow = present.popupWindow ?: return@launch
             if (popupWindow.items.isEmpty()) return@launch
 
             sendEvent(CartEvents.GoToGifts(present, popupWindow))

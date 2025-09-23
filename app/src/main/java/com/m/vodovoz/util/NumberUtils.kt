@@ -56,6 +56,6 @@ fun String.formatNumber(): String {
 }
 
 fun String.isTrailingDotOnly(): Boolean {
-    val trimmed = this.trim().replace(",", ".")
+    val trimmed = trim().replace(",", ".")
     return trimmed.matches(Regex("""\d+\."""))
 }
