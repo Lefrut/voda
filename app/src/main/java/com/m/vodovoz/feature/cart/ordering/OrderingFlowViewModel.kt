@@ -26,6 +26,7 @@ import com.m.vodovoz.feature.cart.ordering.model.OrderingUi
 import com.m.vodovoz.feature.cart.ordering.model.mapToUi
 import com.m.vodovoz.feature.delivery_date.model.DeliveryDateOptionUi
 import com.m.vodovoz.feature.delivery_date.model.DeliveryTimeIntervalUi
+import com.m.vodovoz.feature.delivery_date.model.displayDate
 import com.m.vodovoz.feature.order_call_you.model.CallYouItemUi
 import com.m.vodovoz.feature.payment_method.model.PaymentMethodItemUi
 import com.m.vodovoz.ui.mvi.Event
@@ -298,6 +299,7 @@ class OrderingFlowViewModel @Inject constructor(
                 s.copy(button = s.button.copy(loading = true))
             }
 
+
             vodovozServiceRepository.doOrder(
                 addressId = ordering.addressId,
                 deliveryDate = ordering.date,
@@ -309,7 +311,9 @@ class OrderingFlowViewModel @Inject constructor(
                 balance = VodovozBoolean.from(ordering.paymentBalance).value,
                 deviceInfo = deviceInfo,
                 notifyDriverId = stateSnapshot.selectedNotifyItem.value,
-                params = earlierDelivery?.let { mapOf(earlierDelivery) }
+                params = (earlierDelivery?.let {
+                    mapOf(earlierDelivery)
+                } ?: emptyMap()) + stateSnapshot.totals.associate { it.id to it.value }
             ).singleResult().onSuccess { placeholder ->
                 updateState { s ->
                     s.copy(uiState = OrderingUiState.Success(placeholder.toUi()))
@@ -377,9 +381,8 @@ class OrderingFlowViewModel @Inject constructor(
             s.copy(showRefreshIndicator = true)
         }
 
-        fetchRecipient()
+        fetchRecipient().join()
 
-        delay(350)
 
         updateState { s ->
             s.copy(showRefreshIndicator = false)
@@ -399,26 +402,7 @@ class OrderingFlowViewModel @Inject constructor(
                     recipientName = recipientModel.fio.takeIf { it.isNotBlank() }
                 )
 
-                val orderingPhone = updatedOrdering.recipientPhone
-                val orderingName = updatedOrdering.recipientName
-
-                s.copy(
-                    ordering = updatedOrdering,
-                    recipientSection = if (orderingPhone != null && orderingName != null) {
-                        changeOrderingSection(
-                            clearErrors = false,
-                            section = s.recipientSection,
-                            menuItemIds = listOf(RECIPIENT_MENU_ID),
-                            map = { menuItemUi ->
-                                menuItemUi.copy(
-                                    name = orderingPhone,
-                                    description = orderingName,
-                                    error = false
-                                )
-                            }
-                        )
-                    } else s.recipientSection
-                )
+                s.copy(ordering = updatedOrdering)
             }
         }
     }
@@ -504,12 +488,16 @@ class OrderingFlowViewModel @Inject constructor(
                     section = s.recipientSection,
                     menuItemIds = listOf(DELIVERY_TIME_MENU_ID),
                     map = { itemUi ->
+
+                        val displayDate = date.displayDate(
+                            resourcesProvider.getString(R.string.today),
+                            resourcesProvider.getString(R.string.tomorrow)
+                        )
                         itemUi.copy(
                             error = false,
                             name = resourcesProvider.getString(
                                 R.string.date_time_inteval,
-                                date.value,
-                                timeInterval.name
+                                displayDate, timeInterval.name
                             ),
                             description = resourcesProvider.getString(R.string.delivery)
                         )

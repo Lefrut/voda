@@ -13,7 +13,6 @@ import com.m.vodovoz.design_system.model.widgets.toUi
 import com.m.vodovoz.ui.mvi.MviViewModel
 import com.m.vodovoz.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 

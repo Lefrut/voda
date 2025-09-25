@@ -49,14 +49,13 @@ class AllPromotionsFlowViewModel @Inject constructor(
     private suspend fun getAllPromotions(): PromotionsSectionModel? {
         return when (dataSource) {
             AllPromotionsFragment.DataSource.All -> vodovozServiceRepository.getAllPromotionsDetails()
-                .singleResult().getOrNull()
 
             is AllPromotionsFragment.DataSource.ByBanner -> vodovozServiceRepository.getBannerPromotions(
                 bannerId = dataSource.bannerId,
                 blockId = dataSource.blockId,
                 categoryId = stateSnapshot.currentCategory.id
-            ).singleResult().getOrNull()
-        }
+            )
+        }.singleResult().getOrNull()
     }
 
     private fun getAllPromotionsPaged(categoryId: Int): Flow<PagingData<PromotionUi>> {

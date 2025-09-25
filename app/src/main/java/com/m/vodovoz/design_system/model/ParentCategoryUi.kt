@@ -47,6 +47,23 @@ fun List<ParentCategoryUi>.findSiblingsOf(categoryId: Int): List<ParentCategoryU
     }?.childCategories.orEmpty()
 }
 
+fun List<ParentCategoryUi>.getChildrenOrSiblings(categoryId: Int): List<ParentCategoryUi> {
+    var parent: ParentCategoryUi? = null
+
+    val node = traverseTree { current, p ->
+        if (current.id == categoryId.toLong()) {
+            parent = p
+            true
+        } else false
+    }
+
+    return if (node?.childCategories?.isNotEmpty() == true) {
+        node.childCategories
+    } else {
+        parent?.childCategories.orEmpty()
+    }
+}
+
 fun List<ParentCategoryUi>.findParentOfOnlyLeaf(): ParentCategoryUi? {
     val leafParentPairs = mutableListOf<Pair<ParentCategoryUi, ParentCategoryUi>>()
 

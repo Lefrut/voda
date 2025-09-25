@@ -4,8 +4,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -49,14 +47,15 @@ fun SearchScreen(viewModel: SearchFlowViewModel, viewState: SearchFlowViewModel.
                 .consumeWindowInsets(paddingValues)
         ) {
             when (val uiState = viewState.uiState) {
-                is SearchFlowViewModel.UiState.Empty -> {
+                is SearchFlowViewModel.UiState.Empty -> with(uiState.placeholder) {
                     SearchEmptyPlaceholder(
-                        imagePainter = if (uiState.image.isEmpty()) {
+                        imagePainter = if (imageUrl.isEmpty()) {
                             painterResource(id = R.drawable.pic_search)
                         } else {
-                            rememberAsyncImagePainter(model = uiState.image)
+                            rememberAsyncImagePainter(model = imageUrl)
                         },
-                        description = uiState.description
+                        description = descriptionHtml,
+                        title = headerHtml
                     )
                 }
 

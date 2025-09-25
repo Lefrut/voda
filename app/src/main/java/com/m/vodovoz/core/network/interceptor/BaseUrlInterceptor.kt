@@ -25,6 +25,7 @@ class BaseUrlInterceptor @Inject constructor() : Interceptor {
         val request = chain.request()
         val baseUrl = newBaseUrl ?: return chain.proceed(request)
 
+
         val newUrl = with(request.url){
             baseUrl.newBuilder()
                 .addEncodedPathSegments(encodedPath.substring(1))

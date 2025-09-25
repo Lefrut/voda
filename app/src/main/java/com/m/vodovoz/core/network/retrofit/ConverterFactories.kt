@@ -35,7 +35,8 @@ import java.lang.reflect.Type
      }
 
     companion object {
-        fun create(moshi: Moshi): NoOpConverterFactory {
+
+        fun create(moshi: Moshi): Converter.Factory {
             return NoOpConverterFactory(moshi)
         }
     }

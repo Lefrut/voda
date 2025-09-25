@@ -18,6 +18,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.navOptions
 import com.m.vodovoz.R
 import com.m.vodovoz.common.account.AccountManager
+import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.design_system.VodovozTheme
 import com.m.vodovoz.design_system.effects.LifecycleEffect
 import com.m.vodovoz.feature.cart.CartFlowViewModel
@@ -32,7 +33,6 @@ import com.m.vodovoz.ui.base.model.AppState
 import com.m.vodovoz.ui.base.model.SplashFileState
 import com.m.vodovoz.ui.mvi.collectAsState
 import com.m.vodovoz.util.VodovozSplashFile
-import com.m.vodovoz.util.extensions.debugLog
 import com.m.vodovoz.util.extensions.disableFullScreen
 import com.m.vodovoz.util.extensions.enableFullScreen
 import com.yandex.mapkit.MapKitFactory
@@ -40,8 +40,8 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
-import org.json.JSONObject
 import javax.inject.Inject
 
 
@@ -60,8 +60,12 @@ class SplashFragment : Fragment() {
 
     @Inject
     lateinit var accountManager: AccountManager
+
     @Inject
     lateinit var siteStateManager: SiteStateManager
+
+    @Inject
+    lateinit var tabManager: TabManager
 
     override fun onStart() {
         super.onStart()
@@ -217,8 +221,12 @@ class SplashFragment : Fragment() {
             }.join()
         }
         importantJob.join()
-        catalogViewModel.fetchCatalogDetails()
-        profileViewModel.fetchProfileDetails()
-        cartFlowViewModel.fetchCartDetails()
+        val jobs = listOf(
+            catalogViewModel.fetchCatalogDetails(),
+            profileViewModel.fetchProfileDetails(),
+            cartFlowViewModel.fetchCartDetails()
+        )
+        tabManager.updateBottomNavCartState()
+        jobs.joinAll()
     }
 }

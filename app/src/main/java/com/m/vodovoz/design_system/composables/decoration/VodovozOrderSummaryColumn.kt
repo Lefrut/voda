@@ -30,29 +30,31 @@ fun OrderSummaryColumn(modifier: Modifier = Modifier, items: List<OrderSummaryIt
                 }
             )
 
-            OrderSummaryItem(
-                item = updatedItem,
-                style = if (isFirstItem) {
-                    MaterialTheme.typography.titleMedium
-                } else {
-                    MaterialTheme.typography.bodySmall
-                },
-                nameColor = if (isFirstItem) {
-                    MaterialTheme.colorScheme.onBackground
-                } else {
-                    MaterialTheme.colorScheme.surfaceTint
-                }
-            )
-
-            Spacer(
-                modifier = Modifier.height(
-                    when (index) {
-                        0 -> 16.dp
-                        items.lastIndex -> 0.dp
-                        else -> 4.dp
+            if (updatedItem.displayValue.isNotBlank()) {
+                OrderSummaryItem(
+                    item = updatedItem,
+                    style = if (isFirstItem) {
+                        MaterialTheme.typography.titleMedium
+                    } else {
+                        MaterialTheme.typography.bodySmall
+                    },
+                    nameColor = if (isFirstItem) {
+                        MaterialTheme.colorScheme.onBackground
+                    } else {
+                        MaterialTheme.colorScheme.surfaceTint
                     }
                 )
-            )
+
+                Spacer(
+                    modifier = Modifier.height(
+                        when (index) {
+                            0 -> 16.dp
+                            items.lastIndex -> 0.dp
+                            else -> 4.dp
+                        }
+                    )
+                )
+            }
         }
     }
 }
@@ -75,7 +77,7 @@ private fun OrderSummaryItem(
             modifier = Modifier
                 .padding(start = 8.dp)
                 .weight(1f),
-            text = item.value,
+            text = item.displayValue,
             color = item.color.takeOrElse {
                 MaterialTheme.colorScheme.surfaceTint
             },

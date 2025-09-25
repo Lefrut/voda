@@ -25,11 +25,11 @@ fun <T> Response<T>.stringErrorBody(): String {
 
 fun List<ByteArray>.prepareImageParts(name: String): List<MultipartBody.Part> {
     return mapIndexed { index, bytes ->
-        val requestBody = bytes.toRequestBody("image/*".toMediaType())
+        val requestBody = bytes.toRequestBody("image/jpeg".toMediaType())
         MultipartBody.Part.createFormData(
-            name,
-            "image_$index.jpg",
-            requestBody
+            name = name,
+            filename = "userpic_$index.jpeg",
+            body = requestBody
         )
     }
 }

@@ -26,7 +26,7 @@ class NoOpCallAdapterFactory private constructor() : CallAdapter.Factory() {
     }
 
     companion object {
-        fun create(): NoOpCallAdapterFactory {
+        fun create(): CallAdapter.Factory {
             return NoOpCallAdapterFactory()
         }
     }

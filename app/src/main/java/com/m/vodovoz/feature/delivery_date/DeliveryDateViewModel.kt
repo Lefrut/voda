@@ -18,7 +18,6 @@ import com.m.vodovoz.ui.mvi.MviViewModel
 import com.m.vodovoz.util.extensions.singleResult
 import com.m.vodovoz.util.formatters.VodovozDateFormatters
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.util.UUID
@@ -59,7 +58,9 @@ class DeliveryDateViewModel @Inject constructor(
     fun fetchDeliveryDateDetails() = viewModelScope.launch {
         val selectedLocalDate = try {
             LocalDate.parse(stateSnapshot.selectedDateOption.value, VodovozDateFormatters.DMY)
-        } catch (_: Throwable) { LocalDate.now().plusDays(1) }
+        } catch (_: Throwable) {
+            LocalDate.now().plusDays(1)
+        }
 
         val deliveryDateDetailsResult = vodovozServiceRepository.getDeliveryDateDetails(
             addressId = addressId,
@@ -83,10 +84,14 @@ class DeliveryDateViewModel @Inject constructor(
                     ?: SectionUi.empty()
 
 
+                val selectedTimeInterval = selectedTimeSection.items.firstOrNull {
+                    it.value == s.selectedTimeInterval.value
+                } ?: DeliveryTimeIntervalUi.Empty
+
                 s.copy(
                     title = deliveryDateDetails.title,
                     button = deliveryDateDetails.button.toUi().copy(
-                        enabled = s.selectedTimeInterval != DeliveryTimeIntervalUi.Empty
+                        enabled = selectedTimeInterval != DeliveryTimeIntervalUi.Empty
                     ),
                     options = dateOptions,
                     timeSections = timeSections,
@@ -94,9 +99,7 @@ class DeliveryDateViewModel @Inject constructor(
                     selectedDateOption = s.selectedDateOption.takeIf {
                         it != DeliveryDateOptionUi.Empty
                     } ?: dateOptions.firstOrNull() ?: DeliveryDateOptionUi.Empty,
-                    selectedTimeInterval = selectedTimeSection.items.firstOrNull {
-                        it.value == s.selectedTimeInterval.value
-                    } ?: s.selectedTimeInterval,
+                    selectedTimeInterval = selectedTimeInterval,
                     uiState = DeliveryDateUiState.Success,
                     earlierCheckbox = deliveryDateDetails.earlierCheckbox?.toUi()?.copy(
                         checked = s.earlierCheckbox?.checked ?: (earlierDelivery == true)

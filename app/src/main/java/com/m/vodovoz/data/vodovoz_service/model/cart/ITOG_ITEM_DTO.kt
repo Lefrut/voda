@@ -10,8 +10,10 @@ data class ITOG_ITEM_DTO(
     val name: String?,
     @Json(name = "VALUE")
     val value: String?,
+    @Json(name = "ID")
+    val id: String?,
     @Json(name = "VIDNO")
-    val formattedValue: String?,
+    val displayValue: String?,
     @Json(name = "COLOR")
     val color: String?,
 )

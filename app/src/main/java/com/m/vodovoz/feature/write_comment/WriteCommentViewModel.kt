@@ -25,14 +25,13 @@ import com.m.vodovoz.feature.write_comment.model.WriteCommentEvent
 import com.m.vodovoz.feature.write_comment.model.WriteCommentState
 import com.m.vodovoz.feature.write_comment.model.WriteCommentUiState
 import com.m.vodovoz.ui.mvi.MviViewModel
-import com.m.vodovoz.util.extensions.compress
+import com.m.vodovoz.util.extensions.compressAsJPEG
 import com.m.vodovoz.util.extensions.resizeBitmap
 import com.m.vodovoz.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.mapLatest
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.math.roundToInt
@@ -57,7 +56,7 @@ class WriteCommentViewModel @Inject constructor(
         label = resourcesProvider.getString(R.string.comment),
         value = "",
         keyboardType = KeyboardType.Text,
-        isRequired = false,
+        isRequired = true,
         isError = false,
         readOnly = false,
         supportingText = resourcesProvider.getString(R.string.minimal_count_15),
@@ -65,8 +64,10 @@ class WriteCommentViewModel @Inject constructor(
         type = FieldTypeUi.Text,
         isValueVisible = true
     )
-    private val CommentValidator = FieldValidator {
-        if (it.value.length in 15..1000) FieldValidationResult.VALID else FieldValidationResult.INVALID
+    private val commentValidator = FieldValidator {
+        if (it.value.length in 15..1000) {
+            FieldValidationResult.VALID
+        } else { FieldValidationResult.INVALID }
     }
 
 
@@ -104,7 +105,7 @@ class WriteCommentViewModel @Inject constructor(
     fun writeComment() = viewModelScope.launch {
         val isValid = listOf(stateSnapshot.field).checkFields(
             putErrors = true,
-            validators = listOf(NoRequiredValidator, CommentValidator),
+            validators = listOf(NoRequiredValidator, commentValidator),
             getSupportingText = { field ->
                 field.getErrorText { resId -> resourcesProvider.getString(resId) }
             }
@@ -125,7 +126,7 @@ class WriteCommentViewModel @Inject constructor(
         val imageBytesArray = stateSnapshot.imagesUri.mapNotNull { uri ->
             val byteArray = contentProvider.getBytesArray(uri.toUri()) ?: return@mapNotNull null
             val bitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
-            bitmap.resizeBitmap(1080).compress(150_000)
+            bitmap.resizeBitmap(1080).compressAsJPEG(150_000)
         }
 
         vodovozServiceRepository.sendComment(

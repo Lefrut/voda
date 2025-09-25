@@ -54,9 +54,11 @@ fun List<ITOG_ITEM_DTO>.mapToDomain(): List<OrderSummaryItemModel> {
 
 fun ITOG_ITEM_DTO.toDomain(): OrderSummaryItemModel? {
     return OrderSummaryItemModel(
-        name = name ?: return null,
-        value = formattedValue ?: value ?: return null,
-        color = color ?: ""
+        name = name ?: "",
+        value = value ?: "",
+        color = color ?: "",
+        displayValue = displayValue ?: "",
+        id = id ?: ""
     )
 }
 
@@ -125,7 +127,7 @@ fun PRODUCT_PODAROK_DTO.toDomain(): CartPresentItemModel? {
         name = NAME ?: "",
         image = DETAIL_PICTURE?.toVodovozUrl() ?: "",
         price = EXTENDED_PRICE?.PRICE,
-        oldPrice = EXTENDED_PRICE?.PRICE
+        oldPrice = EXTENDED_PRICE?.OLD_PRICE
     )
 }
 

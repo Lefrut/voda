@@ -133,6 +133,7 @@ class HomeFragment : Fragment() {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
 
             setContent {
+
                 VodovozTheme {
                     val viewState by viewModel.collectAsState()
                     val snackbarHostState = remember { SnackbarHostState() }

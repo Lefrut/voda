@@ -23,7 +23,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -44,6 +43,7 @@ import coil3.compose.AsyncImage
 import com.m.vodovoz.core.network.VodovozWebConfig
 import com.m.vodovoz.design_system.composables.button.VodovozButtonsColumn
 import com.m.vodovoz.design_system.composables.card.GridProductCard
+import com.m.vodovoz.design_system.composables.floating.BottomFloatingContainer
 import com.m.vodovoz.design_system.composables.placeholders.LoadingPlaceholder
 import com.m.vodovoz.design_system.composables.scaffold.VodovozScaffold
 import com.m.vodovoz.design_system.model.ColorfulButtonUi
@@ -68,17 +68,19 @@ fun ServiceDetailBody(
     onDecrementProductToCart: (ProductUi) -> Unit,
     onAnalogsClick: (ProductUi) -> Unit,
     onLoadingChange: (Boolean) -> Unit,
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
 ) {
     VodovozScaffold(
         modifier = modifier,
         bottomBar = {
             button?.let {
-                VodovozButtonsColumn(
-                    modifier = Modifier.padding(16.dp),
-                    buttons = listOf(button),
-                    onButtonClick = onButtonClick
-                )
+                BottomFloatingContainer {
+                    VodovozButtonsColumn(
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        buttons = listOf(button),
+                        onButtonClick = onButtonClick
+                    )
+                }
             }
         },
         contentWindowInsets = WindowInsets(0.dp)
@@ -152,7 +154,7 @@ fun ServiceDetailsWebView(
     modifier: Modifier = Modifier,
     html: String,
     onLoadingChange: (Boolean) -> Unit,
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
 ) {
     val coroutineScope = rememberCoroutineScope()
     val webViewBundle: Bundle = rememberSaveable { bundleOf() }
@@ -200,7 +202,7 @@ fun ServiceDetailsWebView(
                         override fun onReceivedError(
                             view: WebView?,
                             request: WebResourceRequest?,
-                            error: WebResourceError?
+                            error: WebResourceError?,
                         ) {
                             errorOccurred = true
                             onLoadingChange(false)
@@ -238,9 +240,9 @@ fun ServiceDetailsWebView(
     }
 
     BackHandler {
-        if(webView.canGoBack()){
+        if (webView.canGoBack()) {
             webView.goBack()
-        }else{
+        } else {
             onBackClick()
         }
     }

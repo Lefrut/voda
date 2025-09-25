@@ -8,7 +8,6 @@ import androidx.paging.map
 import com.m.vodovoz.ui.mvi.Event
 import com.m.vodovoz.ui.mvi.MviViewModel
 import com.m.vodovoz.ui.mvi.State
-import kotlinx.coroutines.flow.update
 import com.m.vodovoz.design_system.model.BrandUi
 import com.m.vodovoz.design_system.model.toUi
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository

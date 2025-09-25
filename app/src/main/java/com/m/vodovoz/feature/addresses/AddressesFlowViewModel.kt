@@ -7,7 +7,6 @@ import androidx.lifecycle.viewModelScope
 import com.m.vodovoz.ui.mvi.Event
 import com.m.vodovoz.ui.mvi.MviViewModel
 import com.m.vodovoz.ui.mvi.State
-import kotlinx.coroutines.flow.update
 import com.m.vodovoz.design_system.model.SectionUi
 import com.m.vodovoz.design_system.model.VodovozPlaceholderUi
 import com.m.vodovoz.design_system.model.toUi

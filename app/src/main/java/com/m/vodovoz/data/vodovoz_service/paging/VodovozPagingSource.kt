@@ -31,7 +31,7 @@ class VodovozPagingSource<T : Any, R : Any> (
                 request(page, params.loadSize)
             },
             mapper = mapper,
-            onFail = onFail,
+            fail = onFail,
             type = Types.newParameterizedType(VodovozResponseDTO::class.java, clazz.java)
         ).singleOrNull()
             ?: return LoadResult.Error(NoSuchElementException("No elements received from the flow"))

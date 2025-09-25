@@ -27,7 +27,6 @@ import com.m.vodovoz.util.extensions.debounceWithMax
 import com.m.vodovoz.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -55,6 +54,7 @@ class MapFlowViewModel @Inject constructor(
     }
 
     private val searchQueryFlow = MutableStateFlow(stateSnapshot.query)
+    private val activeSearchJobs = mutableListOf<Job>()
 
     companion object {
         const val CORE_AREA_ID = 91851
@@ -118,21 +118,21 @@ class MapFlowViewModel @Inject constructor(
         sendEvent(MapFlowEvents.CheckGeo)
     }
 
-    private fun handleSearchQueries() =
-        searchQueryFlow.filter { query -> query.isNotBlank() }.debounceWithMax(250L, 6)
-            .onEach { query ->
-                val addressesInMoscowByQueryResult =
-                    mapServiceRepository.getAddressesInMoscowByQuery(query).singleResult()
+    private fun handleSearchQueries() = searchQueryFlow.filter { query ->
+        query.isNotBlank()
+    }.debounceWithMax(250L, 6).onEach { query ->
+        val addressesInMoscowByQueryResult =
+            mapServiceRepository.getAddressesInMoscowByQuery(query).singleResult()
 
 
-                addressesInMoscowByQueryResult.onSuccess { addresses ->
-                    updateState { s ->
-                        s.copy(
-                            recommendedAddresses = addresses.ifEmpty { s.recommendedAddresses }
-                        )
-                    }
-                }
-            }.launchIn(viewModelScope)
+        addressesInMoscowByQueryResult.onSuccess { addresses ->
+            updateState { s ->
+                s.copy(
+                    recommendedAddresses = addresses.ifEmpty { s.recommendedAddresses }
+                )
+            }
+        }
+    }.launchIn(viewModelScope)
 
 
     fun changeQuery(query: String) = viewModelScope.launch {
@@ -161,7 +161,7 @@ class MapFlowViewModel @Inject constructor(
 
         val route = coreMapArea
             .findNearestPointTo(addressPoint)
-            ?.getRoute(addressPoint) ?: return null
+            ?.routeTo(addressPoint) ?: return null
 
         val fromMoscowToPoint = route.distanceKm()
 
@@ -203,62 +203,48 @@ class MapFlowViewModel @Inject constructor(
         sendEvent(MapFlowEvents.HideAddressBottomSheet)
     }
 
-    private var searchAddressJob: Job? = null
+    fun searchAddress(addressName: String) = searchThenUpdateAddress(
+        dataSource = {
+            mapServiceRepository.searchAddressInMoscow(addressName)
+        },
+        validation = {
+            addressName == stateSnapshot.currentMapAddress?.name
+                    || addressName.any { c -> c.isDigit() }
+                    || stateSnapshot.query == addressName
+        },
+        invalid = {
+            changeQuery(addressName)
+        },
+        completeSuccess = { mapAddress ->
+            sendEvent(MapFlowEvents.HideKeyboard)
+            sendEvent(MapFlowEvents.MoveToAddress(mapAddress.point))
+        }
+    )
 
-    fun searchAddress(addressName: String) = viewModelScope.launch {
-        searchAddressJob = updateAddressBySearch(
-            dataSource = {
-                mapServiceRepository.searchAddressInMoscow(addressName)
-            },
-            validation = {
-                addressName == stateSnapshot.currentMapAddress?.name
-                        || addressName.any { c -> c.isDigit() }
-                        || stateSnapshot.query == addressName
-            },
-            invalid = {
-                changeQuery(addressName)
-            },
-            valid = {
-                searchAddressJob?.cancel()
-            },
-            completeSuccess = { mapAddress ->
-                sendEvent(MapFlowEvents.HideKeyboard)
-                sendEvent(MapFlowEvents.MoveToAddress(mapAddress.point))
-            }
-        )
-    }
+    fun searchAddress(point: MapPointUi?) = searchThenUpdateAddress(
+        dataSource = {
+            delay(350L)
+            point?.let {
+                mapServiceRepository.getAddressByGeo(point.lat, point.lon)
+            } ?: emptyFlow()
+        },
+        validation = {
+            point != stateSnapshot.currentMapAddress?.point && point != null
+        },
+    )
 
-    fun searchAddress(point: MapPointUi?) = viewModelScope.launch {
-        searchAddressJob = updateAddressBySearch(
-            dataSource = {
-                delay(350L)
-                point?.let {
-                    mapServiceRepository.getAddressByGeo(point.lat, point.lon)
-                } ?: emptyFlow()
-            },
-            validation = {
-                point != stateSnapshot.currentMapAddress?.point && point != null
-            },
-            valid = {
-                searchAddressJob?.cancel()
-            }
-        )
-    }
-
-
-    private suspend fun updateAddressBySearch(
+    private fun searchThenUpdateAddress(
         dataSource: suspend () -> Flow<Result<MapAddressModel>>,
         validation: () -> Boolean = { true },
-        valid: () -> Unit = {},
         invalid: () -> Unit = {},
         completeSuccess: suspend (MapAddressUi) -> Unit = {},
-    ): Job = coroutineScope {
-        launch {
+    ): Job = viewModelScope.launch {
+        val activeJobsSnapshot = activeSearchJobs.toList()
+        val newSearchJob = launch job@{
             if (!validation()) {
-                invalid()
-                return@launch
+                invalid().also { return@job }
             } else {
-                valid()
+                activeJobsSnapshot.forEach { job -> job.cancel() }
             }
 
             updateState { s ->
@@ -267,14 +253,12 @@ class MapFlowViewModel @Inject constructor(
 
             val currentAddressResult = dataSource()
                 .singleResult()
-                .map { model ->
-                    model.toUi()
-                }
+                .map { model -> model.toUi() }
 
             currentAddressResult.onSuccess { mapAddress ->
                 val fromMoscowToPoint = getDistanceFromAreaBoundToAddress(
                     mapAddress.point
-                ) ?: return@launch
+                ) ?: return@job
                 val updatedMapAddress = mapAddress.copy(
                     fromMoscowToPoint = fromMoscowToPoint
                 )
@@ -289,24 +273,15 @@ class MapFlowViewModel @Inject constructor(
                 completeSuccess(updatedMapAddress)
             }
         }
+        activeSearchJobs.add(newSearchJob)
+        newSearchJob.join()
     }
 
-
-    private suspend fun MapPointUi.getRoute(end: MapPointUi): List<MapPointUi>? {
-        return mapServiceRepository.getRoute(toDomain(), end.toDomain()).singleResult().getOrNull()
-            ?.mapToUi()
-    }
-
-    private fun changeAddress(address: MapAddressUi) {
-        updateState { s ->
-            s.copy(
-                currentMapAddress = address,
-                mode = MapUiMode.OnlyMap,
-                addressIsLoading = false,
-                addressIsError = with(address) { house.isBlank() }
-            )
-        }
-
+    private suspend fun MapPointUi.routeTo(end: MapPointUi): List<MapPointUi>? {
+        return mapServiceRepository.getRoute(
+            start = this.toDomain(),
+            end = end.toDomain()
+        ).singleResult().getOrNull()?.mapToUi()
     }
 
     fun changeToSearchMode() {

@@ -1,15 +1,14 @@
 package com.m.vodovoz.feature.product_comments
 
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.Stable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.map
+import com.m.vodovoz.R
 import com.m.vodovoz.common.account.AccountManager
-import com.m.vodovoz.ui.mvi.Event
-import com.m.vodovoz.ui.mvi.MviViewModel
-import com.m.vodovoz.ui.mvi.State
-import kotlinx.coroutines.flow.update
+import com.m.vodovoz.common.resources.ResourcesProvider
 import com.m.vodovoz.design_system.model.CommentUi
 import com.m.vodovoz.design_system.model.toUi
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
@@ -17,6 +16,9 @@ import com.m.vodovoz.feature.product_comments.model.ProductCommentsInfoUi
 import com.m.vodovoz.feature.product_comments.model.SortUi
 import com.m.vodovoz.feature.product_comments.model.toDomain
 import com.m.vodovoz.feature.product_comments.model.toUi
+import com.m.vodovoz.ui.mvi.Event
+import com.m.vodovoz.ui.mvi.MviViewModel
+import com.m.vodovoz.ui.mvi.State
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
@@ -27,10 +29,12 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
+@Stable
 class ProductCommentsFlowViewModel @Inject constructor(
     savedState: SavedStateHandle,
     private val accountManager: AccountManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
+    private val resourcesProvider: ResourcesProvider,
 ) : MviViewModel<ProductCommentsFlowViewModel.ProductCommentsState, ProductCommentsFlowViewModel.ProductCommentsEvents>(
     ProductCommentsState()
 ) {
@@ -57,10 +61,24 @@ class ProductCommentsFlowViewModel @Inject constructor(
 
         if (productCommentsInfo != null) {
             updateState { s ->
-                val uiInfo = productCommentsInfo.toUi()
+                val uiInfo = with(productCommentsInfo.toUi()) {
+                    copy(
+                        sorting = buildList {
+                            add(
+                                SortUi(
+                                    name = resourcesProvider.getString(R.string.all),
+                                    value = "",
+                                    order = ""
+                                )
+                            )
+                            addAll(sorting)
+                        }
+                    )
+                }
                 val currentSort = uiInfo.sorting.firstOrNull() ?: SortUi.Empty
                 s.copy(
-                    productCommentsInfo = uiInfo,
+                    productCommentsInfo = uiInfo.copy(
+                    ),
                     currentSort = uiInfo.sorting.firstOrNull() ?: SortUi.Empty,
                     pagedComments = vodovozServiceRepository.getProductCommentsPaged(
                         productId, currentSort.toDomain()

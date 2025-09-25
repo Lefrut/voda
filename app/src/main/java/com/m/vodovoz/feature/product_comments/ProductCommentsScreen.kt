@@ -57,7 +57,6 @@ import com.m.vodovoz.util.extensions.indexOfOrNull
 import java.math.RoundingMode
 
 @OptIn(ExperimentalSharedTransitionApi::class)
-@Suppress("NonSkippableComposable")
 @Composable
 fun ProductCommentsScreen(
     viewModel: ProductCommentsFlowViewModel,
