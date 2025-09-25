@@ -50,21 +50,21 @@ val moshiWithJsonAdapter: Moshi =
 @Keep
 inline fun <reified T, R> executeRequest(
     crossinline request: suspend () -> Response<T>,
+    crossinline response: (Response<T>) -> Unit = {},
     crossinline mapper: (T) -> R,
-    crossinline onFail: ((Response<ResponseBody>) -> Result<R>) = { response ->
-        val exception = RequestException(response.messageWithCode())
+    crossinline fail: ((Response<ResponseBody>) -> Result<R>) = { r ->
+        val exception = RequestException(r.messageWithCode())
         Result.failure(exception)
     },
-    crossinline onResponse: (Response<T>) -> Unit = {},
     type: Type = typeOf<T>().javaType,
 ): Flow<Result<R>> {
     return flow {
-        val response = request()
+        val requestResponse = request()
 
-        onResponse(response)
+        response(requestResponse)
 
-        val stringBody = response.stringBody().ifEmpty {
-            response.stringErrorBody()
+        val stringBody = requestResponse.stringBody().ifEmpty {
+            requestResponse.stringErrorBody()
         }.decodeUnicodeEscapes()
 
         val bodyResult = kotlin.runCatching {
@@ -72,10 +72,10 @@ inline fun <reified T, R> executeRequest(
             adapter.fromJson(stringBody)
         }
         val body = bodyResult.getOrNull()
-        val responseCode = response.code()
+        val responseCode = requestResponse.code()
         val errorCode = responseCode.takeIf { code -> code !in 200..299 } ?: 520
         val failResult = {
-            onFail(Response.error(errorCode, stringBody.jsonToResponseBody()))
+            fail(Response.error(errorCode, stringBody.jsonToResponseBody()))
         }
         var finalResult: Result<R> = Result.failure(
             IllegalArgumentException("final result not initialized")

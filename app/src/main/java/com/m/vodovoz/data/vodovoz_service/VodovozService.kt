@@ -9,13 +9,13 @@ import com.m.vodovoz.data.vodovoz_service.model.CATEGORY_NODE_DTO
 import com.m.vodovoz.data.vodovoz_service.model.CancelOrderDetailsDTO
 import com.m.vodovoz.data.vodovoz_service.model.CertificateActivationDetailsDTO
 import com.m.vodovoz.data.vodovoz_service.model.FieldsDTO
+import com.m.vodovoz.data.vodovoz_service.model.FormDTO
 import com.m.vodovoz.data.vodovoz_service.model.MiniSearchRecommendationsDTO
 import com.m.vodovoz.data.vodovoz_service.model.OrderMenuDTO
 import com.m.vodovoz.data.vodovoz_service.model.OrderPlaceholderDTO
 import com.m.vodovoz.data.vodovoz_service.model.OrderQuestionDetailsDTO
 import com.m.vodovoz.data.vodovoz_service.model.PopularCategoriesDTO
 import com.m.vodovoz.data.vodovoz_service.model.PopupWindowDTO
-import com.m.vodovoz.data.vodovoz_service.model.FormDTO
 import com.m.vodovoz.data.vodovoz_service.model.PresentDTO
 import com.m.vodovoz.data.vodovoz_service.model.ProductCommentsDTO
 import com.m.vodovoz.data.vodovoz_service.model.ProductsSectionDTO
@@ -47,13 +47,13 @@ import com.m.vodovoz.data.vodovoz_service.model.certificate.BuyCertificateDetail
 import com.m.vodovoz.data.vodovoz_service.model.delivery_date.DeliveryDateDetailsDTO
 import com.m.vodovoz.data.vodovoz_service.model.filters.FiltersDTO
 import com.m.vodovoz.data.vodovoz_service.model.notification_settings.NotificationSettingsDetailsDTO
-import com.m.vodovoz.data.vodovoz_service.model.order.OrderDetailsDTO
-import com.m.vodovoz.data.vodovoz_service.model.order.WhereMyOrderDetailsDTO
-import com.m.vodovoz.data.vodovoz_service.model.order.OrdersHistoryDetailsDTO
 import com.m.vodovoz.data.vodovoz_service.model.order.OrderCallYouDetailsDTO
+import com.m.vodovoz.data.vodovoz_service.model.order.OrderDetailsDTO
 import com.m.vodovoz.data.vodovoz_service.model.order.OrderingDetailsDTO
+import com.m.vodovoz.data.vodovoz_service.model.order.OrdersHistoryDetailsDTO
 import com.m.vodovoz.data.vodovoz_service.model.order.RecipientDTO
 import com.m.vodovoz.data.vodovoz_service.model.order.RecipientDetailsDTO
+import com.m.vodovoz.data.vodovoz_service.model.order.WhereMyOrderDetailsDTO
 import com.m.vodovoz.data.vodovoz_service.model.payment_method.PaymentMethodDetailsDTO
 import com.m.vodovoz.data.vodovoz_service.model.product_details.ProductDetailsDTO
 import com.m.vodovoz.data.vodovoz_service.model.profile.BonusesPopupWindowDTO
@@ -64,6 +64,7 @@ import com.m.vodovoz.data.vodovoz_service.model.services.ServiceOrderDetailsDTO
 import com.m.vodovoz.data.vodovoz_service.model.unrated_products.UnratedProductsSectionDTO
 import com.m.vodovoz.data.vodovoz_service.model.user_data.UserDataDTO
 import okhttp3.MultipartBody
+import okhttp3.RequestBody
 import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Headers
@@ -146,10 +147,10 @@ interface VodovozService {
         @Query("nettovar") callYouId: Long?,
         @Query("kupon") coupon: String?,
         @Query("schet") balance: String?,
-        @Query("device") deviceInfo: String?,
+        @Query("device", encoded = true) deviceInfo: String?,
         @Query("driver") notifyDriverId: String? = null,
         @Query("comment") message: String? = null,
-        @QueryMap queries: Map<String, String>? = null
+        @QueryMap queries: Map<String, String>? = null,
     ): Response<VodovozResponseDTO<VodovozPlaceholderDTO>>
 
     @GET("oformlenie/zvonok.php?action=vampozvonit")
@@ -203,7 +204,7 @@ interface VodovozService {
         @Query("userid") userId: Long?,
         @Query("adresid") addressId: Long?,
         @Query("date") date: String?,
-        @Query("indos") timeInterval: String?
+        @Query("indos") timeInterval: String?,
     ): Response<VodovozResponseDTO<OrderingDetailsDTO>>
 
     @GET("profile/historyorder/voditel.php")
@@ -337,13 +338,13 @@ interface VodovozService {
 
     @GET("profile/bonus.php?action=glav")
     suspend fun getBonusesPopupWindow(
-        @Query("userid") userId: Long?
+        @Query("userid") userId: Long?,
     ): Response<VodovozResponseDTO<BonusesPopupWindowDTO>>
 
     @GET("profile/bonus.php?action=glav")
     suspend fun updateBonusesSubscribe(
         @Query("userid") userId: Long?,
-        @Query("lgb_subscribe") subscribe: String
+        @Query("lgb_subscribe") subscribe: String,
     ): Response<VodovozResponseDTO<String>>
 
     @GET("profile/index.php?action=glav")
@@ -455,7 +456,7 @@ interface VodovozService {
         @Query("filtervalue") filtersAndValues: String? = null,
         @Query("price_to") priceTo: Float? = null,
         @Query("price_from") priceFrom: Float? = null,
-        @QueryMap queries: Map<String, String?> = emptyMap()
+        @QueryMap queries: Map<String, String?> = emptyMap(),
     ): Response<VodovozResponseDTO<ProductsSectionDTO>>
 
     /**
@@ -507,7 +508,7 @@ interface VodovozService {
     suspend fun requestPhoneCode(
         @Path("path", encoded = true) url: String,
         @Query("telefon") phone: String,
-        @QueryMap params: Map<String, String>
+        @QueryMap params: Map<String, String>,
     ): Response<VodovozResponseDTO<RequestCodeDTO>>
 
     @GET("{path}?action=tochkakarta")
@@ -622,11 +623,11 @@ interface VodovozService {
     @Multipart
     @POST("comments.php?action=add")
     suspend fun sendComment(
-        @Query("userid") userId: Long?,
-        @Query("id") productId: Long?,
-        @Query("rating_value") rating: Int,
-        @Query("message") message: String,
-        @Part images: List<MultipartBody.Part>?
+        @Part("userid") userId: RequestBody,
+        @Part("id") productId: RequestBody,
+        @Part("rating_value") rating: RequestBody,
+        @Part("message") message: RequestBody,
+        @Part images: List<MultipartBody.Part>?,
     ): Response<VodovozResponseDTO<VodovozPlaceholderDTO>>
 
     @GET("osnova/form/obratnayasvyaz.php?action=glav")
@@ -637,7 +638,7 @@ interface VodovozService {
     @GET("osnova/form/obratnayasvyaz.php?action=otpravka")
     suspend fun sendMessage(
         @Query("userid") userId: Long?,
-        @QueryMap queries: Map<String, String>
+        @QueryMap queries: Map<String, String>,
     ): Response<VodovozResponseDTO<VodovozPlaceholderDTO>>
 
     /**
@@ -773,7 +774,7 @@ interface VodovozService {
 
     @GET("glavnaya/super_top_new.php?action=tovar")
     suspend fun getSuperTopByCategory(
-        @Query("idknokpa") categoryId: Long
+        @Query("idknokpa") categoryId: Long,
     ): Response<VodovozResponseDTO<List<TOVAR_DATA_DTO>>>
 
 

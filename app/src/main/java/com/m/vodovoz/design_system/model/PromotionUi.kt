@@ -2,8 +2,8 @@ package com.m.vodovoz.design_system.model
 
 import androidx.compose.runtime.Immutable
 import com.m.vodovoz.domain.general.model.promotion.AboutAdvertisingModel
-import com.m.vodovoz.domain.general.model.promotion.PromotionDetailsModel
 import com.m.vodovoz.domain.general.model.promotion.PromotionCategoryModel
+import com.m.vodovoz.domain.general.model.promotion.PromotionDetailsModel
 import com.m.vodovoz.domain.general.model.promotion.PromotionModel
 import com.m.vodovoz.domain.general.model.promotion.SpecialPromotionModel
 import java.time.Duration
@@ -66,7 +66,7 @@ fun PromotionDetailsModel.toUi(): PromotionDetailsUi {
         picture = this.picture,
         name = this.name,
         description = this.description,
-        timeLeft = endDate?.let { timeRemainingToEnd(endDate) } ,
+        timeLeft = endDate?.let { timeRemainingToEnd(endDate) },
         advertising = this.advertising?.toUi(),
         label = label?.toUi()
     )
@@ -84,7 +84,6 @@ data class PromotionUi(
     val name: String,
     val aboutAdvertisingUi: AboutAdvertisingUi?,
 )
-
 
 
 @Immutable
@@ -171,7 +170,7 @@ fun PromotionModel.toUi(): PromotionUi {
     )
 }
 
-fun timeRemainingToEnd(endDateTime: ZonedDateTime): String {
+fun timeRemainingToEnd(endDateTime: ZonedDateTime): String? {
     val now = ZonedDateTime.now()
     val duration = Duration.between(now, endDateTime)
 
@@ -179,9 +178,11 @@ fun timeRemainingToEnd(endDateTime: ZonedDateTime): String {
     val hours = duration.toHours() % 24
     val minutes = duration.toMinutes() % 60
 
-    return String.format(Locale.getDefault(), "%02dд : %dч : %02dм", days, hours, minutes)
+    return runCatching {
+        String.format(Locale.ROOT, "%02dд : %dч : %02dм", days, hours, minutes)
+    }.getOrNull()
 }
 
-fun List<PromotionModel>.toUi(): List<PromotionUi> {
+fun List<PromotionModel>.mapToUi(): List<PromotionUi> {
     return map { it.toUi() }
 }

@@ -7,18 +7,16 @@ import android.view.ViewGroup
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import com.m.vodovoz.ui.mvi.collectAsState
 import androidx.navigation.fragment.findNavController
-import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.design_system.VodovozTheme
 import com.m.vodovoz.design_system.effects.LifecycleEffect
+import com.m.vodovoz.ui.mvi.collectAsState
 import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class NotificationSettingsFragment : Fragment() {
@@ -36,7 +34,7 @@ class NotificationSettingsFragment : Fragment() {
             setContent {
                 VodovozTheme {
                     val viewState by viewModel.collectAsState()
-                    
+
                     val snackbarHostState = remember { SnackbarHostState() }
 
                     NotificationSettingsScreen(
@@ -49,7 +47,11 @@ class NotificationSettingsFragment : Fragment() {
                         viewModel.events.collect { event ->
                             when (event) {
                                 is NotificationSettingsViewModel.NotSettingsEvents.ShowToast -> {
-                                    snackbarHostState.showSnackbar(event.message)
+                                    launch {
+                                        snackbarHostState.currentSnackbarData?.dismiss()
+                                        snackbarHostState.showSnackbar(event.message)
+                                    }
+
                                 }
 
                                 NotificationSettingsViewModel.NotSettingsEvents.GoBack -> {

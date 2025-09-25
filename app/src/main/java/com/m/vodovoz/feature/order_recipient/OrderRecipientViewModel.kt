@@ -4,7 +4,6 @@ import androidx.compose.runtime.Stable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.m.vodovoz.common.resources.ResourcesProvider
-import com.m.vodovoz.design_system.model.ColorfulButtonUi
 import com.m.vodovoz.design_system.model.toUi
 import com.m.vodovoz.design_system.model.widgets.EmailValidator
 import com.m.vodovoz.design_system.model.widgets.FieldUi
@@ -24,7 +23,6 @@ import com.m.vodovoz.feature.order_recipient.model.OrderRecipientUiState
 import com.m.vodovoz.ui.mvi.MviViewModel
 import com.m.vodovoz.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -74,24 +72,29 @@ class OrderRecipientViewModel @Inject constructor(
     }
 
     fun changeField(field: FieldUi, updatedField: FieldUi) {
-        stateSnapshot.fields.checkFields(
+        val updatedFields = stateSnapshot.fields.updateField(
+            field = field,
+            newField = updatedField
+        )
+
+        val isValid = updatedFields.checkFields(
             putErrors = false,
-            validators = listOf(PhoneNumberValidator)
-        ) { updatedFields, isValid ->
-            updateState { s ->
-                s.copy(
-                    fields = updatedFields.updateField(
-                        field = field,
-                        newField = updatedField
-                    ),
-                    button = s.button.copy(enabled = isValid)
-                )
-            }
+            validators = listOf(
+                PhoneNumberValidator,
+            )
+        )
+
+        updateState { s ->
+            s.copy(
+                fields = updatedFields,
+                button = s.button.copy(enabled = isValid)
+            )
         }
+
 
     }
 
-    fun activateButton(button: ColorfulButtonUi) = viewModelScope.launch {
+    fun activateButton() = viewModelScope.launch {
         stateSnapshot.fields.checkFields(
             putErrors = true,
             validators = listOf(

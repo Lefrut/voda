@@ -6,5 +6,15 @@ data class MapAddressModel(
     val city: String,
     val street: String,
     val house: String,
-    val fromMoscowToPoint: String = ""
-)
+    val fromMoscowToPoint: String = "",
+) {
+    companion object {
+        val Empty = MapAddressModel(
+            point = MapPointModel.Empty,
+            name = "",
+            city = "",
+            street = "",
+            house = ""
+        )
+    }
+}

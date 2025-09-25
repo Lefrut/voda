@@ -6,12 +6,14 @@ import com.m.vodovoz.common.account.AccountManager
 import com.m.vodovoz.common.model.GlobalAppLinks
 import com.m.vodovoz.core.network.VodovozWebConfig
 import com.m.vodovoz.core.network.interceptor.BaseUrlInterceptor
+import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
 import com.m.vodovoz.feature.about_app.composables.AppMode
 import com.m.vodovoz.feature.about_app.model.AboutAppEvent
 import com.m.vodovoz.feature.about_app.model.AboutAppOption
 import com.m.vodovoz.feature.about_app.model.AboutAppState
 import com.m.vodovoz.feature.sitestate.SiteStateManager
 import com.m.vodovoz.ui.mvi.MviViewModel
+import com.m.vodovoz.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -22,6 +24,7 @@ class AboutAppViewModel @Inject constructor(
     private val accountManager: AccountManager,
     private val siteStateManager: SiteStateManager,
     private val baseUrlInterceptor: BaseUrlInterceptor,
+    private val vodovozServiceRepository: VodovozServiceRepository,
 ) : MviViewModel<AboutAppState, AboutAppEvent>(AboutAppState()) {
 
     fun navigateBack() = viewModelScope.launch {
@@ -82,6 +85,7 @@ class AboutAppViewModel @Inject constructor(
         updateState { s ->
             s.copy(showDeveloperBS = false)
         }
+        vodovozServiceRepository.relogin().singleResult()
         sendEvent(AboutAppEvent.RefreshApp)
     }
 }

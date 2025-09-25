@@ -21,7 +21,7 @@ import com.m.vodovoz.design_system.model.filters.FiltersPriceUi
 import com.m.vodovoz.design_system.model.filters.FiltersUi
 import com.m.vodovoz.design_system.model.filters.toDomain
 import com.m.vodovoz.design_system.model.findParentOfOnlyLeaf
-import com.m.vodovoz.design_system.model.findSiblingsOf
+import com.m.vodovoz.design_system.model.getChildrenOrSiblings
 import com.m.vodovoz.design_system.model.toCategory
 import com.m.vodovoz.design_system.model.toUi
 import com.m.vodovoz.domain.general.model.exceptions.EmptyResultException
@@ -332,20 +332,19 @@ class ProductCatalogViewModel @Inject constructor(
 
             updateState { state ->
 
-                val allCategoriesFromTree = with(stateSnapshot) {
-                    categoryTree.findSiblingsOf(currentCategory.id).allCategories()
+                val childOrSiblingCategories = with(stateSnapshot) {
+                    categoryTree.getChildrenOrSiblings(currentCategory.id).allCategories()
                 }
 
                 val categoryTreeList: List<CategoryUi> = buildList {
-                    addAll(allCategoriesFromTree.map { category -> category.toCategory() })
-                    removeIf { categoryUi -> categoryUi.id == state.currentCategory.id }
+                    addAll(childOrSiblingCategories.map { category -> category.toCategory() })
                 }
 
                 val categories = if (dataSource is DataSource.Category) {
                     categoryTreeList
                 } else {
-                    productsSection.categories
-                }.takeIf { it.size > 1 } ?: emptyList()
+                    productsSection.categories.takeIf { it.size > 1 } ?: emptyList()
+                }
 
                 state.copy(
                     productsSection = productsSection.copy(categories = categories),
@@ -425,14 +424,11 @@ class ProductCatalogViewModel @Inject constructor(
     }
 
     private fun fetchCategoriesTree(categoryId: Long) = viewModelScope.launch {
-        if (stateSnapshot.currentBottomSheetCategory.takeIf { it.id == categoryId && it.countChildren == 0 } != null) return@launch
-        if (
-            stateSnapshot.categoryTree.allCategories().firstOrNull {
-                it.id == categoryId && it.countChildren == 0
-            } != null
+        val currentAllCategories = stateSnapshot.categoryTree.allCategories()
+        if (dataSource !is DataSource.Category
+            || (stateSnapshot.currentBottomSheetCategory.takeIf { it.id == categoryId && it.countChildren == 0 } != null)
+            || (currentAllCategories.firstOrNull { it.id == categoryId && it.countChildren == 0 } != null)
         ) return@launch
-
-        if (dataSource !is DataSource.Category) return@launch
 
         val categoryTreeResult =
             vodovozServiceRepository.getCategoryTree(categoryId).singleResult()

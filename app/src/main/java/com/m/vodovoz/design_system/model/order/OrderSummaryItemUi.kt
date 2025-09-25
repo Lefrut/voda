@@ -7,7 +7,9 @@ import com.m.vodovoz.ui.graphics.fromHexOrUnspecified
 
 @Immutable
 data class OrderSummaryItemUi(
+    val id: String,
     val name: String,
+    val displayValue: String,
     val value: String,
     val color: Color,
 )
@@ -20,7 +22,9 @@ fun List<OrderSummaryItemModel>.mapToUi(): List<OrderSummaryItemUi> {
 fun OrderSummaryItemModel.toUi(): OrderSummaryItemUi {
     return OrderSummaryItemUi(
         name = name,
+        displayValue = displayValue,
         value = value,
+        id = id,
         color = Color.fromHexOrUnspecified(color)
     )
 }

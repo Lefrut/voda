@@ -66,7 +66,7 @@ fun Context.isVpnActive(): Boolean {
     return capabilities.hasTransport(NetworkCapabilities.TRANSPORT_VPN)
 }
 
-fun Bitmap.compress(maxSizeBytes: Int): ByteArray {
+fun Bitmap.compressAsJPEG(maxSizeBytes: Int): ByteArray {
     var quality = 90
     var bytes: ByteArray
     do {

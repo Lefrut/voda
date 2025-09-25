@@ -18,11 +18,9 @@ import com.m.vodovoz.common.block_app_signal.BlockAppSignalProvider
 import com.m.vodovoz.common.cache.HttpErrorCache
 import com.m.vodovoz.common.cache.HttpErrorCacheProvider
 import com.m.vodovoz.common.cache.emptyHttpErrorCache
-import com.m.vodovoz.common.notification.FirebaseNotificationManager
 import com.m.vodovoz.feature.sitestate.SiteStateManager
 import com.m.vodovoz.ui.base.model.SplashFileState
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.json.JSONObject
 import javax.inject.Inject
@@ -95,9 +93,12 @@ class MainActivity : AppCompatActivity(),
         handlePushIntent(intent)
     }
 
+
     private fun handlePushIntent(intent: Intent) {
         val data = intent.extras ?: return
-        val params = RemoteMessage(data).data.toMap().ifEmpty { return }
+        val params = RemoteMessage(data).data.toMap().ifEmpty {
+            return
+        }
 
         val jsonData = if (params.isNotEmpty()) {
             JSONObject(params)
@@ -114,6 +115,5 @@ class MainActivity : AppCompatActivity(),
         val path = appLinkData?.lastPathSegment
         siteStateManager.saveDeepLinkPath(path)
     }
-
 }
 

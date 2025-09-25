@@ -31,6 +31,7 @@ import com.m.vodovoz.feature.catalog.CatalogFlowViewModel
 import com.m.vodovoz.feature.favorite.FavoriteFlowViewModel
 import com.m.vodovoz.feature.home.HomeFlowViewModel
 import com.m.vodovoz.feature.profile.ProfileFlowViewModel
+import com.m.vodovoz.ui.base.MainActivityViewModel
 import com.m.vodovoz.ui.mvi.collectAsState
 import com.m.vodovoz.util.extensions.isTablet
 import dagger.hilt.android.AndroidEntryPoint
@@ -48,6 +49,7 @@ class AboutAppFragment : Fragment() {
     private val favoriteViewModel: FavoriteFlowViewModel by activityViewModels()
     private val catalogFlowViewModel: CatalogFlowViewModel by activityViewModels()
     private val profileViewModel: ProfileFlowViewModel by activityViewModels()
+    private val activityViewModel: MainActivityViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,

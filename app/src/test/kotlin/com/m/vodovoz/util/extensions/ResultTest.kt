@@ -1,7 +1,8 @@
 package com.m.vodovoz.util.extensions
 
 import CoroutineTestBase
-import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -11,8 +12,11 @@ import org.junit.Test
 class ResultTest : CoroutineTestBase() {
 
     @Test
-    fun catchResult() {
-
+    fun catchResult() = runTest {
+        val t = Throwable()
+        flow<Result<Unit>> { throw t }.catchResult().collect { result ->
+            assertEquals(t.toString(), result.exceptionOrNull().toString())
+        }
     }
 
     @Test
@@ -39,6 +43,21 @@ class ResultTest : CoroutineTestBase() {
     }
 
     @Test
-    fun deferredResult() {
+    fun deferredResult() = runTest {
+        val deferred = async {}
+        val deferredResult = flowOf(
+            Result.success("labuba")
+        ).deferredResult()
+
+        assertEquals(
+            "labuba",
+            deferredResult.await().getOrNull()
+        )
+        deferred.await()
+        assertEquals(
+            deferred.key,
+            deferredResult.key
+        )
+
     }
 }

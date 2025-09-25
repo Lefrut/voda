@@ -17,7 +17,6 @@ import com.m.vodovoz.R
 import com.m.vodovoz.design_system.composables.chip.VodovozChip
 import com.m.vodovoz.design_system.composables.tab_row.VodovozScrollableTabRow
 import com.m.vodovoz.feature.home.model.CategoryUi
-import com.m.vodovoz.util.extensions.indexOfOrNull
 
 @NonRestartableComposable
 @Composable
@@ -33,7 +32,9 @@ fun ProductListCategoriesRow(
 
     VodovozScrollableTabRow(
         modifier = modifier,
-        selectedTabIndex = (categories.indexOfOrNull(currentCategory) ?: 0) + countOtherTabs,
+        selectedTabIndex = categories.indexOfFirst { category ->
+            category.id == currentCategory.id
+        } + countOtherTabs,
         edgePadding = 16.dp,
         spacing = 8.dp
     ) {
@@ -54,7 +55,7 @@ fun ProductListCategoriesRow(
         if (showEmptyCategory) {
             VodovozChip(
                 text = stringResource(id = R.string.all),
-                selected = currentCategory == CategoryUi.Empty,
+                selected = currentCategory.id == CategoryUi.Empty.id,
                 onSelect = { onCategoryClick(CategoryUi.Empty) }
             )
         }
@@ -63,7 +64,7 @@ fun ProductListCategoriesRow(
             key(category.id) {
                 VodovozChip(
                     text = category.name,
-                    selected = category == currentCategory,
+                    selected = category.id == currentCategory.id,
                     onSelect = { onCategoryClick(category) }
                 )
             }

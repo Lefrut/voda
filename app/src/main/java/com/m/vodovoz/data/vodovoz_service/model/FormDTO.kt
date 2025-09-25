@@ -1,7 +1,9 @@
 package com.m.vodovoz.data.vodovoz_service.model
 
+import androidx.annotation.Keep
 import com.squareup.moshi.Json
 
+@Keep
 data class FormDTO(
     @Json(name = "TITLE")
     val TITLE: String?,

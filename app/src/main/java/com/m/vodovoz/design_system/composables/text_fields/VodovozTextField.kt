@@ -17,7 +17,6 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActionScope
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -34,6 +33,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
@@ -58,10 +58,11 @@ fun VodovozTextField(
     field: FieldUi,
     onFieldChange: (currentField: FieldUi, newField: FieldUi) -> Unit,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
-    onDone: KeyboardActionScope.() -> Unit = {},
+    onDone: (KeyboardActionScope.() -> Unit)? = null,
     maxLines: Int = 1,
     minLines: Int = 1,
 ) {
+    val keyboardController = LocalSoftwareKeyboardController.current
     val interactionSource = remember {
         MutableInteractionSource()
     }
@@ -106,7 +107,12 @@ fun VodovozTextField(
                 keyboardOptions = keyboardOptions.copy(
                     keyboardType = field.keyboardType
                 ),
-                keyboardActions = KeyboardActions(onDone = onDone),
+                keyboardActions = KeyboardActions(
+                    onDone = {
+                        if (onDone != null) { onDone() }
+                        else { keyboardController?.hide() }
+                    }
+                ),
                 readOnly = field.readOnly,
                 label = field.label,
                 hint = field.hint,
@@ -397,7 +403,7 @@ private fun VodovozTextFieldPreview() {
                 .heightIn(300.dp)
                 .background(MaterialTheme.colorScheme.surface)
         ) {
-            
+
             val value = remember {
                 mutableStateOf("")
             }

@@ -234,6 +234,7 @@ class OrderingFragment : Fragment() {
                 }
 
                 OrderingFlowViewModel.OrderingEvents.GoToHome -> {
+                    findNavController().popBackStack()
                     tabManager.selectTab(R.id.graph_home)
                 }
 

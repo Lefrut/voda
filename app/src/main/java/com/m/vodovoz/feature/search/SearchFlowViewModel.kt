@@ -9,6 +9,7 @@ import com.m.vodovoz.common.like.LikeManager
 import com.m.vodovoz.common.search.SearchManager
 import com.m.vodovoz.design_system.model.ProductUi
 import com.m.vodovoz.design_system.model.SectionUi
+import com.m.vodovoz.design_system.model.VodovozPlaceholderUi
 import com.m.vodovoz.design_system.model.toUi
 import com.m.vodovoz.domain.general.model.exceptions.EmptyResultException
 import com.m.vodovoz.domain.general.respository.UserPreferencesRepository
@@ -118,12 +119,10 @@ class SearchFlowViewModel @Inject constructor(
 
 
         }.onFailure { error ->
-
-            val uiState = when (error) {
-                is EmptyResultException -> with(error.placeholder) {
+            val uiState = when {
+                error is EmptyResultException && error.placeholder != null -> {
                     UiState.Empty(
-                        description = this?.descriptionHtml ?: "",
-                        image = this?.imageUrl ?: ""
+                        placeholder = error.placeholder.toUi()
                     )
                 }
 
@@ -277,7 +276,7 @@ class SearchFlowViewModel @Inject constructor(
     sealed interface UiState {
         data object Loading : UiState
         data object Success : UiState
-        data class Empty(val image: String, val description: String) : UiState
+        data class Empty(val placeholder: VodovozPlaceholderUi) : UiState
         data object Error : UiState
 
     }

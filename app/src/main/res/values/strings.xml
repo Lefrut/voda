@@ -309,5 +309,7 @@
     <string name="middle_dot">·</string>
     <string name="test">Тестовый</string>
     <string name="prod">Продакшн</string>
+    <string name="tomorrow">Завтра</string>
+    <string name="today">Сегодня</string>
 
 </resources>

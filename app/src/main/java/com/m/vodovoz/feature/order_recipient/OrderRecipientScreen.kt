@@ -46,7 +46,7 @@ fun OrderRecipientScreen(
                         viewModel.changeField(field, updatedField)
                     },
                     onButtonClick = { button ->
-                        viewModel.activateButton(button)
+                        viewModel.activateButton()
                     }
                 )
 
