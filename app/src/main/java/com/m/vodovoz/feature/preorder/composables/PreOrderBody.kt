@@ -57,7 +57,6 @@ fun PreOrderBody(
                 onFieldChange = { field, updatedField ->
                     onFieldValueChange(field, updatedField.value)
                 },
-                onDone = {},
             )
 
             checkbox?.let {

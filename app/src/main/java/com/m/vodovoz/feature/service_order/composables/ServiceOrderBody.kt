@@ -47,7 +47,6 @@ fun ServiceOrderBody(
         VodovozTextFieldsColumn(
             fields = fields,
             onFieldChange = onFieldChange,
-            onDone = {},
         )
 
         Spacer(modifier = Modifier.weight(1f))
