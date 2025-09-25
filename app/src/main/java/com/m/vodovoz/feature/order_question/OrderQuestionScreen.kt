@@ -63,7 +63,6 @@ fun OrderQuestionScreen(
                 onFieldChange = { field, updatedField ->
                     viewModel.changeField(field, updatedField)
                 },
-                onDone = {}
             )
 
             Spacer(modifier = Modifier.weight(1f))

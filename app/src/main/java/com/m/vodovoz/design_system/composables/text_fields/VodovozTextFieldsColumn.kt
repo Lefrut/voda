@@ -24,7 +24,7 @@ fun VodovozTextFieldsColumn(
     fields: List<FieldUi>,
     onFieldChange: (currentField: FieldUi, newField: FieldUi) -> Unit,
     onFieldClick: (FieldUi) -> Unit = {},
-    onDone: KeyboardActionScope.() -> Unit = {}
+    onDone: (KeyboardActionScope.() -> Unit)? = null
 ) {
     Column(
         modifier = modifier,
