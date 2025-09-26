@@ -23,7 +23,7 @@ fun <T> Response<T>.stringErrorBody(): String {
     return errorBody()?.string() ?: ""
 }
 
-fun List<ByteArray>.prepareImageParts(name: String): List<MultipartBody.Part> {
+fun List<ByteArray>.asImageParts(name: String): List<MultipartBody.Part> {
     return mapIndexed { index, bytes ->
         val requestBody = bytes.toRequestBody("image/jpeg".toMediaType())
         MultipartBody.Part.createFormData(

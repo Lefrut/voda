@@ -66,7 +66,10 @@ import com.m.vodovoz.data.vodovoz_service.model.user_data.UserDataDTO
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import retrofit2.Response
+import retrofit2.http.Body
 import retrofit2.http.GET
+import retrofit2.http.Header
+import retrofit2.http.HeaderMap
 import retrofit2.http.Headers
 import retrofit2.http.Multipart
 import retrofit2.http.POST
@@ -620,14 +623,9 @@ interface VodovozService {
         @Query("nav") page: Int = 1,
     ): Response<VodovozResponseDTO<WaitFeedbackProductsDTO>>
 
-    @Multipart
-    @POST("comments.php?action=add")
+    @POST("comments.php")
     suspend fun sendComment(
-        @Part("userid") userId: RequestBody,
-        @Part("id") productId: RequestBody,
-        @Part("rating_value") rating: RequestBody,
-        @Part("message") message: RequestBody,
-        @Part images: List<MultipartBody.Part>?,
+        @Body body: RequestBody
     ): Response<VodovozResponseDTO<VodovozPlaceholderDTO>>
 
     @GET("osnova/form/obratnayasvyaz.php?action=glav")
