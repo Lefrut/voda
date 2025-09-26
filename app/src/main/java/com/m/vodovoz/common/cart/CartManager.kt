@@ -1,5 +1,6 @@
 package com.m.vodovoz.common.cart
 
+import com.m.vodovoz.common.di.DefaultDispatcher
 import com.m.vodovoz.common.di.IoDispatcher
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
 import com.m.vodovoz.util.extensions.singleResult
@@ -24,7 +25,7 @@ import javax.inject.Singleton
 @Singleton
 class CartManager @Inject constructor(
     private val vodovozServiceRepository: VodovozServiceRepository,
-    @IoDispatcher
+    @DefaultDispatcher
     private val dispatcher: CoroutineDispatcher,
 ) : AbstractCartManager() {
 
