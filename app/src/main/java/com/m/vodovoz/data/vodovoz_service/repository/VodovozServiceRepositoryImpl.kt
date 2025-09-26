@@ -1663,7 +1663,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
                 vodovozService.getSiteState()
             },
             mapper = { response ->
-                val siteState = response!!.toDomain()
+                val siteState = response.toDomain()
                 siteState
             },
             fail = onFail@{ response ->
