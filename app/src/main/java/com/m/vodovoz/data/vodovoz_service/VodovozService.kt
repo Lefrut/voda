@@ -541,7 +541,7 @@ interface VodovozService {
      * Main requests
      * */
     @GET("config/closesait.php?action=saitosnova&android=${BuildConfig.VERSION_NAME}")
-    suspend fun getSiteState(): Response<SiteStateResponseDTO?>
+    suspend fun getSiteState(): Response<SiteStateResponseDTO>
 
     /**
      * PreOrder screen

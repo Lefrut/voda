@@ -1,16 +1,17 @@
 package com.m.vodovoz.data.vodovoz_service.mappers
 
 import androidx.annotation.Keep
-import com.squareup.moshi.Moshi
-import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import com.m.vodovoz.common.moshi.adapter.LocalDateTimeJsonAdapter
 import com.m.vodovoz.core.network.retrofit.messageWithCode
 import com.m.vodovoz.core.network.retrofit.stringBody
 import com.m.vodovoz.core.network.retrofit.stringErrorBody
+import com.m.vodovoz.core.network.serialization.fromJson
 import com.m.vodovoz.domain.general.model.exceptions.RequestException
 import com.m.vodovoz.util.extensions.catchResult
 import com.m.vodovoz.util.extensions.debugLog
 import com.m.vodovoz.util.extensions.decodeUnicodeEscapes
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -48,7 +49,7 @@ val moshiWithJsonAdapter: Moshi =
 
 
 @Keep
-inline fun <reified T, R> executeRequest(
+inline fun <reified T : Any, R> executeRequest(
     crossinline request: suspend () -> Response<T>,
     crossinline response: (Response<T>) -> Unit = {},
     crossinline mapper: (T) -> R,
@@ -68,35 +69,19 @@ inline fun <reified T, R> executeRequest(
         }.decodeUnicodeEscapes()
 
         val bodyResult = kotlin.runCatching {
-            val adapter = moshiWithJsonAdapter.adapter<T>(type).lenient()
-            adapter.fromJson(stringBody)
+            moshiWithJsonAdapter.fromJson<T>(stringBody, type)
         }
-        val body = bodyResult.getOrNull()
         val responseCode = requestResponse.code()
-        val errorCode = responseCode.takeIf { code -> code !in 200..299 } ?: 520
-        val failResult = {
-            fail(Response.error(errorCode, stringBody.jsonToResponseBody()))
-        }
-        var finalResult: Result<R> = Result.failure(
-            IllegalArgumentException("final result not initialized")
-        )
 
-        bodyResult.onSuccess {
-            if (body != null && responseCode == 200) {
-                val mapResult = kotlin.runCatching { mapper(body) }
+        val errorCode = responseCode.takeIf { code ->
+            code !in 200..299
+        } ?: 520
 
-                mapResult.onSuccess {
-                    finalResult = mapResult
-                }.onFailure {
-                    debugLog { it.message + it.stackTraceToString() }
-                    finalResult = failResult()
-                }
-            } else {
-                finalResult = failResult()
-            }
-        }.onFailure {
-            debugLog { it.message + it.stackTraceToString() }
-            finalResult = failResult()
+        val finalResult = bodyResult.mapCatching { body ->
+            require(responseCode == 200) { "Bad response code: $responseCode" }
+            mapper(body) ?: throw IllegalStateException("Mapper returned null")
+        }.recoverCatching {
+            fail(Response.error(errorCode, stringBody.jsonToResponseBody())).getOrThrow()
         }
 
         emit(finalResult)
@@ -107,7 +92,7 @@ inline fun <reified T, R> executeRequest(
             }
         }
 
-    }.flowOn(Dispatchers.IO)
+    }
 }
 
 
