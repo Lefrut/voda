@@ -10,7 +10,6 @@ import com.m.vodovoz.common.model.AppConfig
 import com.m.vodovoz.common.model.VodovozBoolean
 import com.m.vodovoz.common.model.from
 import com.m.vodovoz.core.network.retrofit.messageWithCode
-import com.m.vodovoz.core.network.retrofit.prepareImageParts
 import com.m.vodovoz.core.network.retrofit.stringBody
 import com.m.vodovoz.core.network.retrofit.stringErrorBody
 import com.m.vodovoz.core.network.serialization.fromJson
@@ -109,11 +108,18 @@ import com.m.vodovoz.util.formatters.VodovozDateFormatters
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
 import kotlinx.coroutines.flow.Flow
+import okhttp3.Headers
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
+import okhttp3.Response
+import okhttp3.logging.HttpLoggingInterceptor
+import okio.BufferedSink
 import java.io.File
 import java.time.LocalDate
 import javax.inject.Inject
@@ -1926,13 +1932,30 @@ class VodovozServiceRepositoryImpl @Inject constructor(
     ): Flow<Result<VodovozPlaceholderModel>> {
         return executeRequest(
             request = {
-                vodovozService.sendComment(
-                    userId = accountManager.fetchAccountId().toString().toRequestBody("text/plain".toMediaType()),
-                    productId = productId.toString().toRequestBody("text/plain".toMediaType()),
-                    rating = rating.toString().toRequestBody("text/plain".toMediaType()),
-                    message = message.toRequestBody("text/plain".toMediaType()),
-                    images = imageBytesArray.prepareImageParts("commentimages")
-                )
+
+                val multipartBuilder = MultipartBody.Builder().setType(MultipartBody.FORM)
+
+                mapOf(
+                    "message" to message,
+                    "rating_value" to rating.toString(),
+                    "id" to productId.toString(),
+                    "userid" to accountManager.fetchAccountId().toString(),
+                    "action" to "add"
+                ).forEach { (name, value) ->
+                    multipartBuilder.addFormDataPart(name, value)
+                }
+
+                imageBytesArray.forEachIndexed { index, bytes ->
+                    val fileName = "userpic_$index.jpeg"
+                    multipartBuilder.addFormDataPart(
+                        name = "commentimages[]",
+                        filename = fileName,
+                        body = bytes.toRequestBody("image/jpeg".toMediaType())
+                    )
+                }
+
+
+                vodovozService.sendComment(body = multipartBuilder.build())
             },
             mapper = {
                 it.data!!.toDomain()
