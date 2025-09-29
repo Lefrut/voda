@@ -158,7 +158,6 @@ dependencies {
     implementation("androidx.biometric:biometric-ktx:1.2.0-alpha05")
 
 
-    //todo - for debug
     //debugImplementation("com.squareup.leakcanary:leakcanary-android:2.14")
     implementation("androidx.core:core-splashscreen:1.0.1")
 

@@ -388,7 +388,6 @@ fun ProductUi.Button(
     val product = this@Button
     val currentView = LocalView.current
 
-    //todo - you can delete this lambda and upgrade by clean architecture! XD
     val onAnalogsOrPreOrderClick = { it: ProductUi ->
         if (it.button?.id == "predzakaz") currentView.findNavController().navigateToPreOrder(it.id)
         else onAnalogsClick(it)
