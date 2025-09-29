@@ -13,7 +13,6 @@ import androidx.annotation.Keep
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -30,7 +29,6 @@ import com.m.vodovoz.R
 import com.m.vodovoz.common.account.AccountManager
 import com.m.vodovoz.common.cookie.CookieManager
 import com.m.vodovoz.common.model.GlobalAppLinks
-import com.m.vodovoz.common.model.VodovozAction
 import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.core.navigation.ContentSearchNavigator
 import com.m.vodovoz.core.navigation.activate
@@ -50,7 +48,6 @@ import com.m.vodovoz.core.navigation.navigateToProductAnalogs
 import com.m.vodovoz.core.navigation.navigateToProductDetails
 import com.m.vodovoz.core.navigation.navigateToPromotionDetails
 import com.m.vodovoz.core.navigation.navigateToPromotions
-import com.m.vodovoz.core.navigation.navigateToQuestionnaires
 import com.m.vodovoz.core.navigation.navigateToSearch
 import com.m.vodovoz.core.navigation.navigateToServiceDetails
 import com.m.vodovoz.core.navigation.navigateToStories
@@ -69,7 +66,6 @@ import com.m.vodovoz.util.extensions.isVpnActive
 import com.m.vodovoz.util.extensions.openUrl
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.onSubscription
 import kotlinx.coroutines.launch
 import okhttp3.internal.toLongOrDefault
@@ -433,11 +429,23 @@ class HomeFragment : Fragment() {
 
                         if (!blockId.isNullOrEmpty()) {
                             findNavController().navigateToBannerProductList(
-                                sectionId.toLongOrDefault(-1),
-                                blockId.toLongOrDefault(-1)
+                                bannerId = sectionId.toLongOrDefault(-1),
+                                blockId = blockId.toLongOrDefault(-1)
                             )
                         } else findNavController().navigateToCategoryProductList(sectionId.toLong())
 
+                    }
+
+                    "TOVARY" -> {
+                        val sectionId = pushData.id
+                        val blockId = pushData.blockId
+
+                        if (!sectionId.isNullOrBlank() && !blockId.isNullOrBlank()) {
+                            findNavController().navigateToBannerProductList(
+                                bannerId = sectionId.toLongOrDefault(-1),
+                                blockId = blockId.toLongOrDefault(-1)
+                            )
+                        }
                     }
 
                     "Karta" -> {
@@ -512,12 +520,6 @@ class HomeFragment : Fragment() {
                             setAuthRedirect(findNavController().graph.id)
                             selectTab(R.id.graph_profile)
                         }
-                    }
-
-                    "TOVARY" -> {
-                        findNavController().navigateToCategoryProductList(
-                            pushData.id?.toLongOrNull() ?: return@collect
-                        )
                     }
 
                     "ACTIONS" -> {
