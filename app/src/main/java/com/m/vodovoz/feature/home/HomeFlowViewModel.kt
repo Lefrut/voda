@@ -49,7 +49,9 @@ import com.m.vodovoz.util.extensions.awaitOrNull
 import com.m.vodovoz.util.extensions.deferredResult
 import com.m.vodovoz.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CompletableJob
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
@@ -188,7 +190,7 @@ class HomeFlowViewModel @Inject constructor(
                         superTopBottomItem.withProducts(products.mapToUi())
                     }
                 )
-            } ?: Job(),
+            } ?: Job().apply { complete() },
             fetchDataThenUpdateItems(
                 request = { vodovozServiceRepository.getPromotions() },
                 map = { HomeListItem.Promotions(it.toUi()) },
