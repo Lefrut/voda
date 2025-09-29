@@ -2,36 +2,38 @@ package com.m.vodovoz.data.vodovoz_service.paging
 
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
-import com.squareup.moshi.Types
 import com.m.vodovoz.core.network.retrofit.messageWithCode
 import com.m.vodovoz.data.vodovoz_service.mappers.executeRequest
 import com.m.vodovoz.data.vodovoz_service.model.VodovozResponseDTO
 import com.m.vodovoz.domain.general.model.exceptions.RequestException
 import com.m.vodovoz.util.extensions.debugLog
+import com.squareup.moshi.Types
 import kotlinx.coroutines.flow.singleOrNull
 import okhttp3.ResponseBody
 import retrofit2.Response
 import kotlin.reflect.KClass
 
-class VodovozPagingSource<T : Any, R : Any> (
+class VodovozPagingSource<T : Any, R : Any>(
     private val clazz: KClass<T>,
     private val request: suspend (page: Int, limit: Int) -> Response<VodovozResponseDTO<T>>,
-    private val mapper: (VodovozResponseDTO<T>) -> List<R>,
-    private val onFail: (Response<ResponseBody>) -> Result<List<R>> = { response ->
+    private val mapper: (T) -> List<R>,
+    private val fail: (Response<ResponseBody>) -> Result<List<R>> = { response ->
         val exception = RequestException(response.messageWithCode())
         Result.failure(exception)
-    }
+    },
 ) : PagingSource<Int, R>() {
 
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, R> {
         val page = params.key ?: 1
 
-        val result = executeRequest(
+        val result = executeRequest<VodovozResponseDTO<T>, List<R>>(
             request = {
                 request(page, params.loadSize)
             },
-            mapper = mapper,
-            fail = onFail,
+            mapper = {
+                mapper(it.data!!)
+            },
+            fail = fail,
             type = Types.newParameterizedType(VodovozResponseDTO::class.java, clazz.java)
         ).singleOrNull()
             ?: return LoadResult.Error(NoSuchElementException("No elements received from the flow"))

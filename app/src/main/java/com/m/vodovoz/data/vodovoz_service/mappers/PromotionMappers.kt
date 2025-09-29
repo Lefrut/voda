@@ -31,7 +31,7 @@ fun PromotionsDTO.toDomain(): PromotionsSectionModel {
     return PromotionsSectionModel(
         title = TITLE ?: "",
         categories = RAZDELI?.mapToDomain() ?: emptyList(),
-        promotions = DATA?.toDomain() ?: emptyList(),
+        promotions = DATA?.mapToDomain() ?: emptyList(),
         button = KNOPKA?.toDomain()
     )
 
@@ -52,7 +52,7 @@ fun PROMOTION_RAZDEL_DTO.toDomain(): PromotionCategoryModel? {
     )
 }
 
-fun List<PROMOTION_DATA_DTO>.toDomain(): List<PromotionModel> {
+fun List<PROMOTION_DATA_DTO>.mapToDomain(): List<PromotionModel> {
     return mapNotNull { promotionDataDto ->
         promotionDataDto.toDomain()
     }

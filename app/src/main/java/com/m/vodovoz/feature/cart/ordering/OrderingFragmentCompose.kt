@@ -6,7 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
@@ -102,11 +102,8 @@ class OrderingFragment : Fragment() {
                                 }
                             )
 
-                            DisposableEffect(Unit) {
-                                tabManager.changeTabVisibility(false)
-                                onDispose {
-                                    tabManager.changeTabVisibility(true)
-                                }
+                            LaunchedEffect(Unit) {
+                                tabManager.changeTabVisibility(true)
                             }
                         }
                     }
