@@ -26,19 +26,6 @@ import com.m.vodovoz.feature.splash.model.SplashUiState
 
 @Composable
 fun AppSplashScreen(viewModel: SplashViewModel, viewState: SplashState) {
-    //todo - when will be animation
-//    val context = LocalContext.current
-//    val composition = rememberLottieComposition(
-//        LottieCompositionSpec.File(viewState.filePath)
-//
-//    )
-//
-//    val lottieAnimationState = animateLottieCompositionAsState(
-//        composition = composition.value,
-//        iterations = LottieConstants.IterateForever
-//    )
-
-
     Box(modifier = Modifier.fillMaxSize()) {
         when (viewState.uiState) {
             SplashUiState.Error -> {
@@ -52,25 +39,6 @@ fun AppSplashScreen(viewModel: SplashViewModel, viewState: SplashState) {
 
             SplashUiState.Animation -> {
                 SplashPlaceholder()
-                //todo - when will be animation
-//                LottieAnimation(
-//                    composition = composition.value,
-//                    progress = { lottieAnimationState.progress },
-//                    modifier = Modifier.fillMaxSize(),
-//                    contentScale = ContentScale.FillBounds
-//                )
-//
-//                if (!lottieAnimationState.isPlaying || context.isTablet()) {
-//                    SplashPlaceholder()
-//                }
-//
-//                LaunchedEffect(Unit) {
-//                    snapshotFlow { lottieAnimationState.isPlaying }.filter { isPlaying ->
-//                        isPlaying
-//                    }.take(1).collect {
-//                        viewModel.hideAndroidSplash()
-//                    }
-//                }
             }
 
             SplashUiState.Placeholder -> {

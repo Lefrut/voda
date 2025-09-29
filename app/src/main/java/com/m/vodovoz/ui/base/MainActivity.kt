@@ -71,15 +71,7 @@ class MainActivity : AppCompatActivity(),
     }
 
     private fun downloadSplashFile() = lifecycleScope.launch {
-
         viewModel.setFileState(SplashFileState.Success)
-        //todo - when will be animation
-//        viewModel.setFileState(SplashFileState.Loading)
-//        VodovozSplashFile.downloadSplashFile(applicationContext).onSuccess {
-//            viewModel.setFileState(SplashFileState.Success)
-//        }.onFailure {
-//            viewModel.setFileState(SplashFileState.Error)
-//        }
     }
 
 
