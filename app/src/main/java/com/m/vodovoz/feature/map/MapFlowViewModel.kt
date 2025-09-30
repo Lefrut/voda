@@ -204,7 +204,7 @@ class MapFlowViewModel @Inject constructor(
     }
 
     fun searchAddress(addressName: String) = searchThenUpdateAddress(
-        dataSource = {
+        datasource = {
             mapServiceRepository.searchAddressInMoscow(addressName)
         },
         validation = {
@@ -215,14 +215,14 @@ class MapFlowViewModel @Inject constructor(
         invalid = {
             changeQuery(addressName)
         },
-        completeSuccess = { mapAddress ->
+        successful = { mapAddress ->
             sendEvent(MapFlowEvents.HideKeyboard)
             sendEvent(MapFlowEvents.MoveToAddress(mapAddress.point))
         }
     )
 
     fun searchAddress(point: MapPointUi?) = searchThenUpdateAddress(
-        dataSource = {
+        datasource = {
             delay(350L)
             point?.let {
                 mapServiceRepository.getAddressByGeo(point.lat, point.lon)
@@ -234,15 +234,15 @@ class MapFlowViewModel @Inject constructor(
     )
 
     private fun searchThenUpdateAddress(
-        dataSource: suspend () -> Flow<Result<MapAddressModel>>,
+        datasource: suspend () -> Flow<Result<MapAddressModel>>,
         validation: () -> Boolean = { true },
         invalid: () -> Unit = {},
-        completeSuccess: suspend (MapAddressUi) -> Unit = {},
+        successful: suspend (MapAddressUi) -> Unit = {},
     ): Job = viewModelScope.launch {
         val activeJobsSnapshot = activeSearchJobs.toList()
-        val newSearchJob = launch job@{
+        val newSearchJob = launch childLaunch@{
             if (!validation()) {
-                invalid().also { return@job }
+                invalid().also { return@childLaunch }
             } else {
                 activeJobsSnapshot.forEach { job -> job.cancel() }
             }
@@ -251,14 +251,14 @@ class MapFlowViewModel @Inject constructor(
                 s.copy(addressIsLoading = true)
             }
 
-            val currentAddressResult = dataSource()
+            val currentAddressResult = datasource()
                 .singleResult()
                 .map { model -> model.toUi() }
 
             currentAddressResult.onSuccess { mapAddress ->
                 val fromMoscowToPoint = getDistanceFromAreaBoundToAddress(
                     mapAddress.point
-                ) ?: return@job
+                ) ?: return@childLaunch
                 val updatedMapAddress = mapAddress.copy(
                     fromMoscowToPoint = fromMoscowToPoint
                 )
@@ -270,7 +270,7 @@ class MapFlowViewModel @Inject constructor(
                         addressIsError = with(updatedMapAddress) { house.isBlank() }
                     )
                 }
-                completeSuccess(updatedMapAddress)
+                successful(updatedMapAddress)
             }
         }
         activeSearchJobs.add(newSearchJob)
@@ -298,22 +298,26 @@ class MapFlowViewModel @Inject constructor(
     }
 
     fun navigateToAddAddress() = viewModelScope.launch {
-        if (stateSnapshot.addressIsLoading || stateSnapshot.addressIsError || stateSnapshot.buttonIsLoading) return@launch
+        val mapAddress = stateSnapshot.currentMapAddress
+
+        if (
+            stateSnapshot.addressIsLoading || stateSnapshot.addressIsError
+            || stateSnapshot.buttonIsLoading
+            || mapAddress == null
+        ) return@launch
 
         updateState { s ->
             s.copy(buttonIsLoading = true)
         }
 
-        val mapAddress = stateSnapshot.currentMapAddress
         val screenType = stateSnapshot.screenType
 
-        when {
-            screenType == MapScreenTypeUi.Add && mapAddress != null -> {
+        when (screenType) {
+            MapScreenTypeUi.Add -> {
                 sendEvent(MapFlowEvents.GoToAddAddress(mapAddress))
-
             }
 
-            screenType == MapScreenTypeUi.Edit && mapAddress != null -> {
+            MapScreenTypeUi.Edit -> {
                 sendEvent(MapFlowEvents.BackToAddAddress(mapAddress))
             }
         }
@@ -357,7 +361,7 @@ class MapFlowViewModel @Inject constructor(
 
     @Stable
     enum class MapScreenTypeUi {
-        Add, Edit
+        Add, Edit;
     }
 
     @Stable

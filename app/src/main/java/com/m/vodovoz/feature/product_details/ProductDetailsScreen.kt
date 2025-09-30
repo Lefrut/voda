@@ -17,6 +17,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.util.lerp
 import com.m.vodovoz.design_system.composables.button.ProductBottomFloatingButton
 import com.m.vodovoz.design_system.composables.placeholders.NetworkErrorPlaceholder
+import com.m.vodovoz.design_system.composables.scaffold.VodovozScaffold
 import com.m.vodovoz.feature.product_details.composables.MultiProductBottomSheet
 import com.m.vodovoz.feature.product_details.composables.PresentBottomSheet
 import com.m.vodovoz.feature.product_details.composables.ProductDetailsBody
@@ -38,7 +39,7 @@ fun ProductDetailsScreen(
         label = "floatingButtonProgress"
     )
 
-    Scaffold(
+    VodovozScaffold(
         topBar = {
             ProductDetailsTopBar(
                 onNavigationClick = {
@@ -80,7 +81,6 @@ fun ProductDetailsScreen(
                 }
             )
         },
-        contentWindowInsets = WindowInsets(0, 0, 0, 0)
     ) { paddingValues ->
         when (viewState.uiState) {
             ProductDetailsFlowViewModel.ProductDetailsUiState.Loading -> {

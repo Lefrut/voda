@@ -8,6 +8,7 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.m.vodovoz.design_system.composables.text.LinkedText
@@ -20,7 +21,7 @@ fun VodovozCheckbox(
     onCheckboxClick: (CheckboxUi, CheckboxUi) -> Unit,
     onUrlClick: (url: String, title: String) -> Unit,
 ) {
-    Row(modifier = modifier) {
+    Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
         Checkbox(
             modifier = Modifier.size(24.dp),
             checked = checkbox.checked,

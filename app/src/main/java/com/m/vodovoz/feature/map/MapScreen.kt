@@ -117,7 +117,9 @@ fun MapScreen(
             Column(modifier = Modifier.fillMaxSize()) {
                 AnimatedVisibility(
                     modifier = Modifier.fillMaxSize(),
-                    visible = viewState.mode is MapFlowViewModel.MapUiMode.Search && viewState.query.isNotBlank() && viewState.recommendedAddresses.isNotEmpty(),
+                    visible = viewState.mode is MapFlowViewModel.MapUiMode.Search
+                            && viewState.query.isNotBlank()
+                            && viewState.recommendedAddresses.isNotEmpty(),
                     enter = fadeIn(tween(150)),
                     exit = fadeOut(tween(120))
                 ) {
