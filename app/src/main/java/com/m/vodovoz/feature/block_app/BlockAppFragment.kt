@@ -146,7 +146,7 @@ class BlockAppFragment : Fragment() {
                     if (lastSignal == BlockAppSignal.Type.Block) {
                         blockAppSignal.setSignal(BlockAppSignal.Type.Reload)
                     } else {
-                        mainActivityViewModel.checkAppState().join()
+                        mainActivityViewModel.fetchAppConfig().join()
                     }
                     findNavController().popBackStack()
                     return@collect
