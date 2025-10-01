@@ -50,6 +50,11 @@ class MainActivity : AppCompatActivity(),
 
     private val viewModel: MainActivityViewModel by viewModels()
 
+    override fun onResume() {
+        super.onResume()
+        viewModel.updateCookieIfNeeded()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         installSplashScreen().setKeepOnScreenCondition {
@@ -57,7 +62,7 @@ class MainActivity : AppCompatActivity(),
         }
         setupUi()
         downloadSplashFile()
-        viewModel.checkAppState()
+        viewModel.fetchAppConfig()
         handleIntent(intent)
     }
 
