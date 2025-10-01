@@ -2,6 +2,7 @@ package com.m.vodovoz.ui.base
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.m.vodovoz.common.cookie.CookieManager
 import com.m.vodovoz.domain.general.model.exceptions.UserBlockedException
 import com.m.vodovoz.domain.general.model.exceptions.UserNotLoginException
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
@@ -21,6 +22,7 @@ import javax.inject.Inject
 class MainActivityViewModel @Inject constructor(
     private val siteStateManager: SiteStateManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
+    private val cookieManager: CookieManager,
 ) : ViewModel() {
 
     private val _appState = MutableStateFlow<AppState>(AppState.Loading)
@@ -32,7 +34,13 @@ class MainActivityViewModel @Inject constructor(
     private val _fileState = MutableStateFlow<SplashFileState>(SplashFileState.Loading)
     val fileState = _fileState.asStateFlow()
 
-    fun checkAppState() = viewModelScope.launch {
+    fun updateCookieIfNeeded() = viewModelScope.launch {
+        if (cookieManager.isOldCookie() && appState.value == AppState.App) {
+            vodovozServiceRepository.relogin().singleResult()
+        }
+    }
+
+    fun fetchAppConfig() = viewModelScope.launch {
         _appState.update { AppState.Loading }
 
         val siteStateDeferred = async { siteStateManager.requestSiteState() }

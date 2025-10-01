@@ -1,9 +1,9 @@
 package com.m.vodovoz.design_system.composables.placeholders
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.os.Parcelable
 import androidx.annotation.DrawableRes
-import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.fadeIn
@@ -18,10 +18,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
-import androidx.compose.runtime.currentCompositeKeyHash
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.Saver
@@ -29,7 +27,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalSavedStateRegistryOwner
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -43,12 +40,15 @@ import com.m.vodovoz.common.block_app_signal.BlockAppSignal
 import com.m.vodovoz.common.cache.VodovozHttpError
 import com.m.vodovoz.core.navigation.findRootNavController
 import com.m.vodovoz.core.navigation.slideAnim
+import com.m.vodovoz.data.vodovoz_service.mappers.toDomain
 import com.m.vodovoz.design_system.VodovozTheme
 import com.m.vodovoz.design_system.composables.button.VodovozButton
+import com.m.vodovoz.design_system.composables.button.VodovozButtonsColumn
 import com.m.vodovoz.design_system.effects.LifecycleEffect
+import com.m.vodovoz.design_system.model.ColorfulButtonUi
+import com.m.vodovoz.design_system.model.toUi
 import com.m.vodovoz.ui.base.blockAppSignal
 import com.m.vodovoz.ui.base.httpErrorCache
-import com.m.vodovoz.util.extensions.isInternetAvailable
 import kotlinx.coroutines.flow.map
 import kotlinx.parcelize.Parcelize
 
@@ -57,7 +57,6 @@ sealed class PlaceholderType {
 
     data class Http(val error: VodovozHttpErrorUi) : PlaceholderType()
     data object NetworkError : PlaceholderType()
-    data object Unknown : PlaceholderType()
 
 }
 
@@ -66,6 +65,7 @@ sealed class PlaceholderType {
 data class VodovozHttpErrorUi(
     val title: String,
     val message: String,
+    val button: ColorfulButtonUi? = null,
 ) : Parcelable {
 
     companion object {
@@ -83,7 +83,9 @@ data class VodovozHttpErrorUi(
 
 fun VodovozHttpError.toUi(): VodovozHttpErrorUi {
     return VodovozHttpErrorUi(
-        title ?: "", message ?: ""
+        title = title ?: "",
+        message = message ?: "",
+        button = button?.toDomain()?.toUi()
     )
 }
 
@@ -96,6 +98,7 @@ sealed interface ErrorPlaceholderMode {
 }
 
 
+@SuppressLint("ContextCastToActivity")
 @Composable
 private fun rememberHttpError(): VodovozHttpErrorUi {
     val activity = LocalContext.current as? Activity
@@ -116,14 +119,12 @@ private fun rememberHttpError(): VodovozHttpErrorUi {
 
 @Composable
 private fun rememberAutoPlaceholderType(): PlaceholderType {
-    val context = LocalContext.current
     val httpError = rememberHttpError()
 
     return remember(httpError) {
         return@remember when {
-            context.isInternetAvailable() == false -> PlaceholderType.NetworkError
             httpError != VodovozHttpErrorUi.Empty -> PlaceholderType.Http(httpError)
-            else -> PlaceholderType.Unknown
+            else -> PlaceholderType.NetworkError
         }
     }
 }
@@ -143,6 +144,7 @@ private suspend fun BlockAppSignal.Type.handleAppSignal(
 
 }
 
+@SuppressLint("ContextCastToActivity")
 @Composable
 fun NetworkErrorPlaceholder(
     modifier: Modifier = Modifier,
@@ -157,7 +159,9 @@ fun NetworkErrorPlaceholder(
             rememberAutoPlaceholderType()
         }
 
-        is ErrorPlaceholderMode.Fixed -> { mode.type }
+        is ErrorPlaceholderMode.Fixed -> {
+            mode.type
+        }
     }
 
     LifecycleEffect {
@@ -189,21 +193,15 @@ fun NetworkErrorPlaceholder(
             is PlaceholderType.Http -> {
                 HttpError(
                     modifier = modifier,
-                    httpError = placeholderType.error
+                    httpError = placeholderType.error,
+                    onButtonClick = onTryAgainClick
                 )
             }
 
             PlaceholderType.NetworkError -> {
-                NetworkError(modifier = modifier) {
-                    onTryAgainClick()
-                }
-            }
-
-            PlaceholderType.Unknown -> {
-                BaseError(
-                    title = stringResource(R.string.unknown_error),
-                    message = "",
-                    imageId = R.drawable.pic_search
+                NetworkError(
+                    modifier = modifier,
+                    onTryAgainClick = onTryAgainClick
                 )
             }
         }
@@ -211,23 +209,30 @@ fun NetworkErrorPlaceholder(
 }
 
 @Composable
-private fun HttpError(modifier: Modifier = Modifier, httpError: VodovozHttpErrorUi) {
-    BaseError(
+private fun HttpError(
+    modifier: Modifier = Modifier,
+    httpError: VodovozHttpErrorUi,
+    onButtonClick: () -> Unit,
+) {
+    ErrorBasePlaceholder(
         modifier = modifier,
         title = httpError.title,
         message = httpError.message,
-        imageId = R.drawable.pic_search
+        imageId = R.drawable.pic_search,
+        button = httpError.button,
+        onButtonClick = onButtonClick
     )
 }
 
 @Composable
-fun BaseError(
+fun ErrorBasePlaceholder(
     modifier: Modifier = Modifier,
     title: String,
     message: String,
     @DrawableRes
     imageId: Int,
-    onButtonClick: (() -> Unit)? = null,
+    button: ColorfulButtonUi?,
+    onButtonClick: () -> Unit = {},
 ) {
     Column(
         modifier = modifier
@@ -272,15 +277,23 @@ fun BaseError(
 
         Spacer(modifier = Modifier.weight(1.9f))
 
-        onButtonClick?.let {
-            VodovozButton(
-                text = stringResource(R.string.try_again),
-                onClick = onButtonClick,
-                modifier = Modifier
-                    .padding(horizontal = 16.dp)
-                    .padding(bottom = 24.dp)
-            )
-        }
+        val buttonModifier = Modifier
+            .padding(horizontal = 16.dp)
+            .padding(bottom = 24.dp)
+
+        button?.let {
+            VodovozButtonsColumn(
+                modifier = buttonModifier,
+                buttons = listOf(button)
+            ) { onButtonClick() }
+        } ?: VodovozButton(
+            modifier = buttonModifier,
+            text = stringResource(R.string.try_again),
+            onClick = {
+                onButtonClick()
+            }
+        )
+
     }
 
 }
@@ -288,11 +301,16 @@ fun BaseError(
 
 @Composable
 private fun NetworkError(modifier: Modifier = Modifier, onTryAgainClick: () -> Unit) {
-    BaseError(
+    ErrorBasePlaceholder(
         modifier = modifier,
         title = stringResource(R.string.connection_error),
         message = stringResource(R.string.check_intenet_connection),
         imageId = R.drawable.pic_wifi_error,
+        button = ColorfulButtonUi(
+            name = stringResource(R.string.try_again),
+            backgroundColorValue = MaterialTheme.colorScheme.primary.value,
+            textColorValue = MaterialTheme.colorScheme.background.value
+        ),
         onButtonClick = onTryAgainClick
     )
 }

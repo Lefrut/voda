@@ -140,7 +140,7 @@ class SplashFragment : Fragment() {
     private suspend fun listenEvents(): Unit = splashViewModel.events.collect { event ->
         when (event) {
             SplashEvent.RefreshApp -> {
-                activityViewModel.checkAppState()
+                activityViewModel.fetchAppConfig()
             }
 
             SplashEvent.HideAndroidSplash -> {

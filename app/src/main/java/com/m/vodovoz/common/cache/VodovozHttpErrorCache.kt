@@ -4,6 +4,8 @@ import androidx.annotation.Keep
 import com.squareup.moshi.Json
 import com.squareup.moshi.Moshi
 import com.m.vodovoz.core.network.serialization.fromJson
+import com.m.vodovoz.data.vodovoz_service.model.COLORFUL_KNOPKA_DTO
+import com.m.vodovoz.data.vodovoz_service.model.VodovozButtonDTO
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
@@ -36,5 +38,7 @@ data class VodovozHttpError(
     val title: String?,
     @Json(name = "message")
     val message: String?,
+    @Json(name = "KNOPKA")
+    val button: VodovozButtonDTO?,
 ) : HttpError()
 
