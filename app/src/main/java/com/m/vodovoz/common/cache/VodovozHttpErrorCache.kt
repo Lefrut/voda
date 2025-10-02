@@ -38,7 +38,5 @@ data class VodovozHttpError(
     val title: String?,
     @Json(name = "message")
     val message: String?,
-    @Json(name = "KNOPKA")
-    val button: VodovozButtonDTO?,
 ) : HttpError()
 

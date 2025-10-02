@@ -318,6 +318,7 @@ class OrderingFlowViewModel @Inject constructor(
                 updateState { s ->
                     s.copy(uiState = OrderingUiState.Success(placeholder.toUi()))
                 }
+                sendEvent(OrderingEvents.UpdateBottomCart)
             }
 
             updateState { s ->
@@ -636,6 +637,7 @@ class OrderingFlowViewModel @Inject constructor(
         data object ScrollToTop : OrderingEvents()
         data object RefreshCart : OrderingEvents()
         data object ScrollToBottom : OrderingEvents()
+        data object UpdateBottomCart : OrderingEvents()
 
         data class GoToDeliveryDate(
             val addressId: Long,

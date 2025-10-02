@@ -82,7 +82,7 @@ fun OrderDetailsProductColumnPreview() {
                 showcase = false,
                 image = "",
                 labels = listOf(LabelUi("Label", Color.Black, Color.White)),
-                pricePerUnit = 50,
+                pricePerUnit = "50/шт",
                 unitOfMeasurement = "шт.",
                 catalogQuantity = 10,
                 isFavorite = false,

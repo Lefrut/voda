@@ -24,6 +24,7 @@ import com.m.vodovoz.common.webview.model.WebViewUiState
 import com.m.vodovoz.design_system.composables.placeholders.LoadingPlaceholder
 import com.m.vodovoz.design_system.composables.placeholders.NetworkErrorPlaceholder
 import com.m.vodovoz.design_system.composables.top_bar.VodovozTopBar
+import com.m.vodovoz.util.extensions.openUrl
 import kotlinx.coroutines.delay
 
 @Composable
@@ -128,6 +129,18 @@ private fun WebView(
 private class WebClient(
     private val onError: () -> Unit,
 ) : WebViewClient() {
+
+    override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
+        val url = request?.url.toString()
+        val result = if (url.startsWith("http://") || url.startsWith("https://")) {
+            false
+        } else {
+            view?.context?.openUrl(url)
+            true
+        }
+
+        return result
+    }
 
     override fun onReceivedError(
         view: WebView?,
