@@ -18,7 +18,7 @@ data class OrderProductUi(
     val showcase: Boolean,
     val image: String,
     val labels: List<LabelUi>,
-    val pricePerUnit: Int?,
+    val pricePerUnit: String?,
     val unitOfMeasurement: String?,
     val catalogQuantity: Int,
     override val isFavorite: Boolean,
@@ -41,12 +41,6 @@ data class OrderProductPresentUi(
     val title: String,
     val color: Color,
 )
-
-fun List<OrderProductUi>.withUpdatedFavorites(favorites: Map<Long, Boolean>): List<OrderProductUi> {
-    return map { product ->
-        product.copy(isFavorite = favorites[product.id] ?: product.isFavorite)
-    }
-}
 
 fun List<OrderProductModel>.mapToUi(): List<OrderProductUi> {
     return map { it.toUi() }

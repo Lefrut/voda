@@ -13,7 +13,7 @@ data class OrderProductModel(
     val showcase: Boolean,
     val image: String,
     val labels: List<LabelModel>,
-    val pricePerUnit: Int?,
+    val pricePerUnit: String?,
     val unitOfMeasurement: String?,
     val catalogQuantity: Int,
     val isFavorite: Boolean,

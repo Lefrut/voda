@@ -9,7 +9,7 @@ import com.m.vodovoz.core.network.interceptor.BaseUrlInterceptor
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
 import com.m.vodovoz.feature.about_app.composables.AppMode
 import com.m.vodovoz.feature.about_app.model.AboutAppEvent
-import com.m.vodovoz.feature.about_app.model.AboutAppOption
+import com.m.vodovoz.feature.about_app.model.AboutAppOptionUi
 import com.m.vodovoz.feature.about_app.model.AboutAppState
 import com.m.vodovoz.feature.sitestate.SiteStateManager
 import com.m.vodovoz.ui.mvi.MviViewModel
@@ -35,24 +35,30 @@ class AboutAppViewModel @Inject constructor(
         sendEvent(AboutAppEvent.Share)
     }
 
-    fun activateOption(aboutAppOption: AboutAppOption) = viewModelScope.launch {
+    fun activateOption(aboutAppOption: AboutAppOptionUi) = viewModelScope.launch {
         when (aboutAppOption) {
-            AboutAppOption.ContactDevelopers -> {
+            AboutAppOptionUi.ContactDevelopers -> {
                 sendEvent(AboutAppEvent.WriteToDevelopers(accountManager.fetchAccountId() ?: -1))
             }
 
-            AboutAppOption.RateApp -> {
+            AboutAppOptionUi.RateApp -> {
                 sendEvent(AboutAppEvent.RateApp)
             }
 
-            AboutAppOption.PrivacyPolicy -> {
+            AboutAppOptionUi.PrivacyPolicy -> {
                 with(GlobalAppLinks.policy) {
                     sendEvent(AboutAppEvent.GoToWebView(url, title))
                 }
             }
 
-            AboutAppOption.TermsOfUse -> {
+            AboutAppOptionUi.TermsOfUse -> {
                 with(GlobalAppLinks.termsOfUse) {
+                    sendEvent(AboutAppEvent.GoToWebView(url, title))
+                }
+            }
+
+            AboutAppOptionUi.PersonalData -> {
+                with(GlobalAppLinks.personal){
                     sendEvent(AboutAppEvent.GoToWebView(url, title))
                 }
             }

@@ -233,3 +233,9 @@ tailrec fun Context.window(): Window? =
         is ContextWrapper -> baseContext.window()
         else -> null
     }
+
+tailrec fun Context.findActivity(): Activity? = when (this) {
+    is Activity -> this
+    is ContextWrapper -> baseContext.findActivity()
+    else -> null
+}
