@@ -25,6 +25,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -45,6 +46,7 @@ import com.m.vodovoz.design_system.effects.LifecycleEffect
 import com.m.vodovoz.design_system.model.ColorfulButtonUi
 import com.m.vodovoz.ui.base.blockAppSignal
 import com.m.vodovoz.ui.base.httpErrorCache
+import com.m.vodovoz.util.extensions.isInternetAvailable
 import kotlinx.coroutines.flow.map
 import kotlinx.parcelize.Parcelize
 
@@ -108,9 +110,11 @@ private fun rememberHttpError(): VodovozHttpErrorUi {
 @Composable
 private fun rememberAutoPlaceholderType(): PlaceholderType {
     val httpError = rememberHttpError()
+    val context = LocalContext.current
 
     return remember(httpError) {
         return@remember when {
+            context.isInternetAvailable() == false -> PlaceholderType.NetworkError
             httpError != VodovozHttpErrorUi.Empty -> PlaceholderType.Http(httpError)
             else -> PlaceholderType.NetworkError
         }
