@@ -70,7 +70,6 @@ fun HomeScreen(
                 }
             )
         },
-        contentWindowInsets = WindowInsets(0, 0, 0, 0)
     ) { paddingValues ->
         VodovozPullToRefreshBox(
             modifier = Modifier.padding(paddingValues),

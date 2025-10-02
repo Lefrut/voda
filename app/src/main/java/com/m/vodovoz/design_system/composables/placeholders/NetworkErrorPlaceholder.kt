@@ -1,8 +1,8 @@
 package com.m.vodovoz.design_system.composables.placeholders
 
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.os.Parcelable
+import androidx.activity.compose.LocalActivity
 import androidx.annotation.DrawableRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.MutableTransitionState
@@ -23,10 +23,8 @@ import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.Saver
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -40,13 +38,11 @@ import com.m.vodovoz.common.block_app_signal.BlockAppSignal
 import com.m.vodovoz.common.cache.VodovozHttpError
 import com.m.vodovoz.core.navigation.findRootNavController
 import com.m.vodovoz.core.navigation.slideAnim
-import com.m.vodovoz.data.vodovoz_service.mappers.toDomain
 import com.m.vodovoz.design_system.VodovozTheme
 import com.m.vodovoz.design_system.composables.button.VodovozButton
 import com.m.vodovoz.design_system.composables.button.VodovozButtonsColumn
 import com.m.vodovoz.design_system.effects.LifecycleEffect
 import com.m.vodovoz.design_system.model.ColorfulButtonUi
-import com.m.vodovoz.design_system.model.toUi
 import com.m.vodovoz.ui.base.blockAppSignal
 import com.m.vodovoz.ui.base.httpErrorCache
 import kotlinx.coroutines.flow.map
@@ -85,7 +81,6 @@ fun VodovozHttpError.toUi(): VodovozHttpErrorUi {
     return VodovozHttpErrorUi(
         title = title ?: "",
         message = message ?: "",
-        button = button?.toDomain()?.toUi()
     )
 }
 
@@ -98,23 +93,16 @@ sealed interface ErrorPlaceholderMode {
 }
 
 
-@SuppressLint("ContextCastToActivity")
 @Composable
 private fun rememberHttpError(): VodovozHttpErrorUi {
-    val activity = LocalContext.current as? Activity
+    val activity = LocalActivity.current
 
     val httpErrorCache = remember { activity.httpErrorCache }
-    val httpErrorState by httpErrorCache.lastHttpError.map { httpError ->
-        (httpError as? VodovozHttpError)?.toUi()
-    }.collectAsStateWithLifecycle(VodovozHttpErrorUi.Unspecified)
+    val httpError by httpErrorCache.lastHttpError.map {
+        (it as? VodovozHttpError)?.toUi()
+    }.collectAsStateWithLifecycle(VodovozHttpErrorUi.Empty)
 
-
-    val httpError: VodovozHttpErrorUi = rememberSaveable(
-        httpErrorState != VodovozHttpErrorUi.Unspecified,
-        VodovozHttpErrorUi.Saver,
-    ) { httpErrorState ?: VodovozHttpErrorUi.Empty }
-
-    return httpError
+    return httpError ?: VodovozHttpErrorUi.Empty
 }
 
 @Composable
@@ -144,14 +132,13 @@ private suspend fun BlockAppSignal.Type.handleAppSignal(
 
 }
 
-@SuppressLint("ContextCastToActivity")
 @Composable
 fun NetworkErrorPlaceholder(
     modifier: Modifier = Modifier,
     mode: ErrorPlaceholderMode = ErrorPlaceholderMode.Automatic,
     onTryAgainClick: () -> Unit,
 ) {
-    val activity = LocalContext.current as? Activity
+    val activity = LocalActivity.current
     val view = LocalView.current
 
     val placeholderType = when (mode) {
