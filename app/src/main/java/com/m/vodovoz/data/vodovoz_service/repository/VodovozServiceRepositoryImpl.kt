@@ -727,13 +727,13 @@ class VodovozServiceRepositoryImpl @Inject constructor(
     }
 
     override fun getOrderDetails(orderId: Long): Flow<Result<OrderDetailsModel>> {
-        return executeRequest<VodovozResponseDTO<OrderDetailsDTO>, OrderDetailsModel>(
+        return executeRequest(
             request = {
                 val userId = accountManager.fetchAccountId()
                 vodovozService.getOrderDetails(userId, orderId)
             },
-            mapper = { it ->
-                it.data!!.toDomain()
+            mapper = { response ->
+                response.data!!.toDomain()
             },
             fail = { response ->
                 val placeholder =

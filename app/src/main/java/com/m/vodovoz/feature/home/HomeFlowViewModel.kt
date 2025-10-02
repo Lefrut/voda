@@ -49,9 +49,7 @@ import com.m.vodovoz.util.extensions.awaitOrNull
 import com.m.vodovoz.util.extensions.deferredResult
 import com.m.vodovoz.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.CompletableJob
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
@@ -495,8 +493,11 @@ class HomeFlowViewModel @Inject constructor(
     private suspend fun fetchBottomSheets() {
         val popupWindowInfoModel = vodovozServiceRepository.getPopupWindowInfo(
         ).singleResult().getOrNull()
+        val unratedProductsSection = vodovozServiceRepository.getUnratedProductsDetails(
+        ).singleResult().getOrNull()
 
         val specialPromotion = popupWindowInfoModel?.specialPromotion?.toUi()
+
 
         val updateAppWindow: AppUpdateInfoUi? = popupWindowInfoModel
             ?.appUpdateInfo
@@ -510,6 +511,7 @@ class HomeFlowViewModel @Inject constructor(
                 specialPromotion = specialPromotion ?: s.specialPromotion,
                 showSpecialPromotionBS = specialPromotion != null && s.specialPromotion == SpecialPromotionUi.Empty && updateAppWindow == null,
                 uiState = if (updateAppWindow != null) HomeUiState.AppNeedUpdate(updateAppWindow) else s.uiState,
+                sectionUnratedProducts = unratedProductsSection?.toUi() ?: s.sectionUnratedProducts
             )
         }
     }

@@ -49,7 +49,6 @@ class AboutAppFragment : Fragment() {
     private val favoriteViewModel: FavoriteFlowViewModel by activityViewModels()
     private val catalogFlowViewModel: CatalogFlowViewModel by activityViewModels()
     private val profileViewModel: ProfileFlowViewModel by activityViewModels()
-    private val activityViewModel: MainActivityViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,

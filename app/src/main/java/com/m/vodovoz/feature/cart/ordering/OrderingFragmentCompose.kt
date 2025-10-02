@@ -13,6 +13,7 @@ import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.navOptions
 import com.m.vodovoz.R
@@ -40,6 +41,7 @@ import com.m.vodovoz.ui.mvi.collectAsState
 import com.m.vodovoz.util.extensions.openUrl
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.onSubscription
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -237,6 +239,12 @@ class OrderingFragment : Fragment() {
 
                 OrderingFlowViewModel.OrderingEvents.ScrollToBottom -> {
                     scrollState.animateScrollTo(scrollState.maxValue)
+                }
+
+                OrderingFlowViewModel.OrderingEvents.UpdateBottomCart -> {
+                    viewLifecycleOwner.lifecycleScope.launch {
+                        tabManager.updateBottomNavCartState()
+                    }
                 }
             }
         }

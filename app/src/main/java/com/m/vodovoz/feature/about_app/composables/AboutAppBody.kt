@@ -2,9 +2,6 @@ package com.m.vodovoz.feature.about_app.composables
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.awaitEachGesture
-import androidx.compose.foundation.gestures.awaitFirstDown
-import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -30,13 +27,13 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.m.vodovoz.R
-import com.m.vodovoz.feature.about_app.model.AboutAppOption
+import com.m.vodovoz.feature.about_app.model.AboutAppOptionUi
 
 @Composable
 fun AboutAppBody(
     modifier: Modifier = Modifier,
     version: String,
-    onOptionClick: (AboutAppOption) -> Unit,
+    onOptionClick: (AboutAppOptionUi) -> Unit,
     onTripleClick: () -> Unit,
 ) {
     Column(
@@ -80,7 +77,7 @@ fun AboutAppBody(
 
         Spacer(Modifier.weight(1f))
 
-        AboutAppOption.entries.forEach { option ->
+        AboutAppOptionUi.entries.forEach { option ->
             AboutAppOptionItem(option = option, onClick = onOptionClick)
         }
     }
@@ -89,8 +86,8 @@ fun AboutAppBody(
 @Composable
 fun AboutAppOptionItem(
     modifier: Modifier = Modifier,
-    option: AboutAppOption,
-    onClick: (AboutAppOption) -> Unit,
+    option: AboutAppOptionUi,
+    onClick: (AboutAppOptionUi) -> Unit,
 ) {
     val borderColor = MaterialTheme.colorScheme.surfaceVariant
     Row(
@@ -118,7 +115,7 @@ fun AboutAppOptionItem(
 
         Text(
             modifier = Modifier.weight(1f),
-            text = stringResource(option.textId),
+            text = option.text(),
             color = MaterialTheme.colorScheme.onBackground,
             style = MaterialTheme.typography.bodyMedium
         )

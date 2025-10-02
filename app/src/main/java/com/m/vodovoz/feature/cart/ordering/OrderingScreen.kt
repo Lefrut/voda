@@ -25,6 +25,7 @@ fun OrderingScreen(
     scrollState: ScrollState,
 ) {
     val context = LocalContext.current
+    val uiState = viewState.uiState
 
     VodovozScaffold(
         topBar = {
@@ -37,16 +38,19 @@ fun OrderingScreen(
         },
         bottomBar = {
             val button = viewState.button
-            BottomFloatingContainer {
-                VodovozButton(
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                    text = button.name,
-                    onClick = {
-                        viewModel.doOrder(context.deviceInfo())
-                    },
-                    isLoading = button.loading,
-                    enabled = button.enabled
-                )
+
+            if(uiState == OrderingFlowViewModel.OrderingUiState.Order){
+                BottomFloatingContainer {
+                    VodovozButton(
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        text = button.name,
+                        onClick = {
+                            viewModel.doOrder(context.deviceInfo())
+                        },
+                        isLoading = button.loading,
+                        enabled = button.enabled
+                    )
+                }
             }
 
         }
@@ -59,7 +63,7 @@ fun OrderingScreen(
             }
         ) {
 
-            when (viewState.uiState) {
+            when (uiState) {
                 OrderingFlowViewModel.OrderingUiState.Error -> {
                     NetworkErrorPlaceholder {
                         viewModel.fetchOrderingDetails()
