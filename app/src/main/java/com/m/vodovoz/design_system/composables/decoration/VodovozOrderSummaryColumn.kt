@@ -30,7 +30,7 @@ fun OrderSummaryColumn(modifier: Modifier = Modifier, items: List<OrderSummaryIt
                 }
             )
 
-            if (updatedItem.displayValue.isNotBlank() || updatedItem.value.isNotBlank()) {
+            if ((updatedItem.displayValue.isNotBlank() || updatedItem.value.isNotBlank()) && updatedItem.name.isNotBlank()) {
                 OrderSummaryItem(
                     item = updatedItem,
                     style = if (isFirstItem) {

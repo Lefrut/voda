@@ -38,11 +38,13 @@ fun AppSplashScreen(viewModel: SplashViewModel, viewState: SplashState) {
             }
 
             SplashUiState.Animation -> {
-                SplashPlaceholder()
+                //todo -
+                //SplashPlaceholder()
             }
 
             SplashUiState.Placeholder -> {
-                SplashPlaceholder()
+                //todo -
+                //SplashPlaceholder()
             }
         }
     }
