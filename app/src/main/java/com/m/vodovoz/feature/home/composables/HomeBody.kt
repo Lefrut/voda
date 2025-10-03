@@ -20,6 +20,7 @@ import com.m.vodovoz.design_system.model.CategoryWithProductsUi
 import com.m.vodovoz.design_system.model.ProductUi
 import com.m.vodovoz.design_system.model.PromotionUi
 import com.m.vodovoz.design_system.model.StoryUi
+import com.m.vodovoz.feature.home.model.HomeItem
 import com.m.vodovoz.feature.home.model.HomeListItem
 import com.m.vodovoz.feature.home.model.HomeOrderUi
 import com.m.vodovoz.feature.home.model.MenuItemUi
@@ -53,110 +54,80 @@ fun HomeBody(
                 rememberOverscrollEffect()
             )
     ) {
-
-        items.sortedBy { item -> item.position }.forEach { item ->
+        items.sortedBy { it.position }.forEach { item ->
             key(item.position) {
-                when (item) {
-                    is HomeListItem.Banner -> {
-                        if (item.value.isNotEmpty()) {
-                            HomeBanners(
-                                banners = item.value,
-                                onAdvertisingClick = onAboutAdvertisingClick,
-                                onBannerClick = onBannerClick
-                            )
-                        }
-                    }
-
-                    is HomeListItem.OrderWithMenu -> {
-                        val orderWithMenu = item.value
-                        if (orderWithMenu.order != null || orderWithMenu.menuItems.isNotEmpty()) {
-                            HomeOrderMenu(
-                                modifier = Modifier.padding(top = 24.dp),
-                                orderWithMenu = orderWithMenu,
-                                onOrderClick = onOrderClick,
-                                onMenuItemClick = onOrderMenuItemClick
-                            )
-                        }
-                    }
-
-                    is HomeListItem.PopularCategories -> {
-                        val sectionPopularCategories = item.value
-                        if (sectionPopularCategories.items.isNotEmpty()) {
-                            HomePopularCategories(
-                                modifier = Modifier.padding(top = 4.dp),
-                                onPopularCategoryClick = onPopularCategoryClick,
-                                sectionPopularCategories = sectionPopularCategories
-                            )
-                        }
-                    }
-
-                    is HomeListItem.Products.CategoriesWithProductsSection -> {
-                        val categorySection = item.value
-
-                        if(categorySection.items.isNotEmpty()){
-                            HomeCategoryProducts(
-                                modifier = Modifier.padding(top = 32.dp),
-                                onShowAllClick = onShowAllClick,
-                                categoryWithProductsId = item.currentCategoryId,
-                                sectionCategoriesWithProducts = categorySection,
-                                onCategorySelect = { categoryWithProducts ->
-                                    onCategorySelect(item, categoryWithProducts)
-                                },
-                                onProductClick = onProductCardClick,
-                                onProductLike = onProductLike,
-                                onIncrementToCart = onIncrementProductToCart,
-                                onDecrementToCart = onDecrementProductToCart,
-                                onProductAnalogsClick = onProductAnalogsClick
-                            )
-                        }
-                    }
-
-                    is HomeListItem.Products.Section -> {
-                        val productsSection = item.value
-
-                        if (productsSection.items.isNotEmpty()) {
-                            HomeProductsRow(
-                                modifier = Modifier.padding(top = 32.dp),
-                                sectionProducts = productsSection,
-                                onProductClick = onProductCardClick,
-                                onShowAllClick = onShowAllClick,
-                                onProductLike = onProductLike,
-                                onDecrementToCart = onDecrementProductToCart,
-                                onIncrementToCart = onIncrementProductToCart,
-                                onAnalogsClick = onProductAnalogsClick
-                            )
-
-                        }
-                    }
-
-                    is HomeListItem.Promotions -> {
-                        val sectionPromotions = item.value
-                        if (sectionPromotions.items.isNotEmpty()) {
-                            HomePromotions(
-                                modifier = Modifier.padding(top = 32.dp),
-                                onShowAllClick = onShowAllClick,
-                                onPromotionClick = onPromotionClick,
-                                sectionPromotions = sectionPromotions,
-                                onAboutAdvertisingClick = onAboutAdvertisingClick
-                            )
-                        }
-                    }
-
-                    is HomeListItem.Stories -> {
-                        val stories = item.value
-                        if (stories.isNotEmpty()) {
-                            HomeStories(
-                                modifier = Modifier.padding(top = 16.dp),
-                                stories = stories,
-                                onStoryClick = onStoryClick
-                            )
-                        }
-                    }
-
-                    is HomeListItem.Divider -> {
+                HomeItem(
+                    item = item,
+                    banner = {
+                        HomeBanners(
+                            banners = value,
+                            onAdvertisingClick = onAboutAdvertisingClick,
+                            onBannerClick = onBannerClick
+                        )
+                    },
+                    divider = {
                         VodovozHorizontalDivider(modifier = Modifier.padding(top = 4.dp))
+                    },
+                    orderWithMenu = {
+                        HomeOrderMenu(
+                            modifier = Modifier.padding(top = 24.dp),
+                            orderWithMenu = value,
+                            onOrderClick = onOrderClick,
+                            onMenuItemClick = onOrderMenuItemClick
+                        )
+                    },
+                    popularCategories = {
+                        HomePopularCategories(
+                            modifier = Modifier.padding(top = 4.dp),
+                            onPopularCategoryClick = onPopularCategoryClick,
+                            sectionPopularCategories = value
+                        )
+                    },
+                    categoriesWithProductsSection = {
+                        HomeCategoryProducts(
+                            modifier = Modifier.padding(top = 32.dp),
+                            onShowAllClick = onShowAllClick,
+                            categoryWithProductsId = currentCategoryId,
+                            sectionCategoriesWithProducts = value,
+                            onCategorySelect = { categoryWithProducts ->
+                                onCategorySelect(this, categoryWithProducts)
+                            },
+                            onProductClick = onProductCardClick,
+                            onProductLike = onProductLike,
+                            onIncrementToCart = onIncrementProductToCart,
+                            onDecrementToCart = onDecrementProductToCart,
+                            onProductAnalogsClick = onProductAnalogsClick
+                        )
+                    },
+                    productsSection = {
+                        HomeProductsRow(
+                            modifier = Modifier.padding(top = 32.dp),
+                            sectionProducts = value,
+                            onProductClick = onProductCardClick,
+                            onShowAllClick = onShowAllClick,
+                            onProductLike = onProductLike,
+                            onDecrementToCart = onDecrementProductToCart,
+                            onIncrementToCart = onIncrementProductToCart,
+                            onAnalogsClick = onProductAnalogsClick
+                        )
+                    },
+                    promotions = {
+                        HomePromotions(
+                            modifier = Modifier.padding(top = 32.dp),
+                            onShowAllClick = onShowAllClick,
+                            onPromotionClick = onPromotionClick,
+                            sectionPromotions = value,
+                            onAboutAdvertisingClick = onAboutAdvertisingClick
+                        )
+                    },
+                    stories = {
+                        HomeStories(
+                            modifier = Modifier.padding(top = 16.dp),
+                            stories = value,
+                            onStoryClick = onStoryClick
+                        )
                     }
-                }
+                )
             }
         }
 

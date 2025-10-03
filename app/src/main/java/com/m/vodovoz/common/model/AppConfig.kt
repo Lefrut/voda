@@ -1,5 +1,7 @@
 package com.m.vodovoz.common.model
 
+import kotlin.reflect.KProperty
+
 data class AppConfig(
     val isActive: Boolean,
     val testUrl: String,
@@ -48,8 +50,8 @@ data class JivoChat(
 data class Agreement(
     val html: String,
     val titles: List<String>,
-){
-    companion object{
+) {
+    companion object {
         val Empty = Agreement("", emptyList())
     }
 }
@@ -75,8 +77,35 @@ data class BlockSiteContact(
     val image: String,
 )
 
-var GlobalAppLinks: AppLinks = AppLinks.Empty
-var GlobalAppExtraAgreement: Agreement = Agreement.Empty
+var GlobalAppLinks: AppLinks by SingletonDelegate(AppLinks.Empty)
+
+var GlobalAppExtraAgreement: Agreement by SingletonDelegate(Agreement.Empty)
+
+class SingletonDelegate<T : Any>(
+    private val empty: T,
+) {
+
+    var instance = empty
+        private set
+
+    @Suppress("NOTHING_TO_INLINE")
+    inline operator fun getValue(
+        nothing: Nothing?,
+        property: KProperty<*>,
+    ): T {
+        return instance
+    }
+
+    operator fun setValue(
+        nothing: Nothing?,
+        property: KProperty<*>,
+        appLinks: T,
+    ) {
+        if (instance == empty) {
+            instance = appLinks
+        }
+    }
+}
 
 data class AppLinks(
     val policy: AppLink,

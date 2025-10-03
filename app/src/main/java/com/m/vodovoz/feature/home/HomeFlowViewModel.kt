@@ -21,6 +21,7 @@ import com.m.vodovoz.design_system.model.ProductUi
 import com.m.vodovoz.design_system.model.PromotionUi
 import com.m.vodovoz.design_system.model.SpecialPromotionUi
 import com.m.vodovoz.design_system.model.StoryUi
+import com.m.vodovoz.design_system.model.VodovozSectionUi
 import com.m.vodovoz.design_system.model.mapToUi
 import com.m.vodovoz.design_system.model.toUi
 import com.m.vodovoz.design_system.model.toVodovozSectionUi
@@ -115,9 +116,7 @@ class HomeFlowViewModel @Inject constructor(
         val superTop = sectionsTopDeferred.awaitOrNull() ?: SuperTopModel.Empty
 
         val sectionTopItem = with(
-            HomeListItem.Products.topSection(
-                superTop.topSection.toUi()
-            )
+            HomeListItem.Products.topSection(superTop.topSection.toUi())
         ) {
             val products = vodovozServiceRepository.getSuperTopProducts(
                 currentCategoryId
@@ -180,15 +179,16 @@ class HomeFlowViewModel @Inject constructor(
         val superTopBottomItem = stateSnapshot.superTopBottomItem
 
         listOf(
-            superTopBottomItem?.let {
-                val currentCategoryId = superTopBottomItem.currentCategoryId
-                fetchDataThenUpdateItems(
-                    request = { vodovozServiceRepository.getSuperTopProducts(currentCategoryId) },
-                    map = { products ->
-                        superTopBottomItem.withProducts(products.mapToUi())
-                    }
-                )
-            } ?: Job().apply { complete() },
+            fetchDataThenUpdateItems(
+                request = {
+                    vodovozServiceRepository.getSuperTopProducts(
+                        stateSnapshot.superTopBottomItem.currentCategoryId
+                    )
+                },
+                map = { products ->
+                    superTopBottomItem.withProducts(products.mapToUi())
+                }
+            ),
             fetchDataThenUpdateItems(
                 request = { vodovozServiceRepository.getPromotions() },
                 map = { HomeListItem.Promotions(it.toUi()) },
@@ -579,7 +579,7 @@ class HomeFlowViewModel @Inject constructor(
         val superTopBottomItem
             get() = items.firstOrNull<HomeListItem.Products.CategoriesWithProductsSection>(
                 HomeListItem.Positions.BOTTOM_SECTION
-            )
+            ) ?: HomeListItem.Products.bottomSection(VodovozSectionUi.empty())
 
         override fun withItems(newItems: List<HomeListItem<*>>): HomeState {
             return copy(items = newItems)

@@ -17,9 +17,13 @@ import com.m.vodovoz.ui.mvi.Event
 import com.m.vodovoz.ui.paging.PagingProductsMviViewModel
 import com.m.vodovoz.ui.paging.PagingState
 import com.m.vodovoz.ui.paging.emptyCombinedLoadStates
+import com.m.vodovoz.util.extensions.onFailure
+import com.m.vodovoz.util.extensions.onSuccess
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -58,38 +62,31 @@ class PromotionDetailsViewModel @Inject constructor(
     }
 
 
-    fun fetchPromotionDetails() {
+    fun fetchPromotionDetails(): Job = vodovozServiceRepository.getPromotionDetails(
+        promotionId
+    ).onStart {
         updateState { s ->
             s.copy(uiState = UiState.Loading)
         }
-        vodovozServiceRepository.getPromotionDetails(promotionId)
-            .onEach { promotionDetailsResult ->
-                promotionDetailsResult.onSuccess { titleAndPromotionDetails ->
+    }.onSuccess { titleAndPromotionDetails ->
+        updateState { s ->
+            s.copy(
+                promotionDetails = titleAndPromotionDetails.second.toUi(),
+                productsTitle = titleAndPromotionDetails.first.title,
+                uiState = UiState.Success
+            )
+        }
+        vodovozServiceRepository.getPromotionDetailsProductsPaged(
+            promotionId = promotionId
+        ).map { pagingData ->
+            pagingData.map { productModel -> productModel.toUi() }
+        }.collectPagingData()
+    }.onFailure {
+        updateState { s ->
+            s.copy(uiState = UiState.Error)
+        }
+    }.launchIn(viewModelScope)
 
-
-                    updateState { s ->
-                        s.copy(
-                            promotionDetails = titleAndPromotionDetails.second.toUi(),
-                            productsTitle = titleAndPromotionDetails.first.title,
-                            uiState = UiState.Success
-                        )
-                    }
-
-                    vodovozServiceRepository.getPromotionDetailsProductsPaged(promotionId)
-                        .onEach { pagingData ->
-                            val pg = pagingData.map { productModel ->
-                                productModel.toUi()
-                            }
-                            collectPagingData(pg)
-                        }.launchIn(viewModelScope)
-
-                }.onFailure {
-                    updateState { s ->
-                        s.copy(uiState = UiState.Error)
-                    }
-                }
-            }.launchIn(viewModelScope)
-    }
 
     fun navigateBack() = viewModelScope.launch {
         sendEvent(PromotionDetailEvent.GoBack)

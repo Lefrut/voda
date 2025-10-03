@@ -12,6 +12,7 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.m.vodovoz.R
 import com.m.vodovoz.common.tab.TabManager
@@ -37,6 +38,7 @@ import com.m.vodovoz.util.extensions.copyText
 import com.m.vodovoz.util.extensions.shareText
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.onSubscription
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -183,12 +185,12 @@ class ProductDetailsFragment : Fragment() {
                 }
 
                 is ProductDetailsFlowViewModel.ProductDetailsEvents.Copy -> {
-                    requireContext().copyText(event.text)
-
-                    mainFragment?.snackBarHostState?.showSnackbar(
-                        VodovozSnackBarVisuals.create(getString(R.string.article_copied))
-                    )
-
+                    viewLifecycleOwner.lifecycleScope.launch {
+                        requireContext().copyText(event.text)
+                        mainFragment?.snackBarHostState?.showSnackbar(
+                            VodovozSnackBarVisuals.create(getString(R.string.article_copied))
+                        )
+                    }
                 }
 
                 is ProductDetailsFlowViewModel.ProductDetailsEvents.GoToBrandProducts -> {

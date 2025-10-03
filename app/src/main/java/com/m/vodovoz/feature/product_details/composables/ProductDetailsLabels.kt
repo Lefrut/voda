@@ -36,7 +36,11 @@ fun ProductDetailsLabels(
                 color = labelWithColor.color,
                 shape = MaterialTheme.shapes.medium
             ) {
-                Text(modifier = Modifier.padding(horizontal = 8.dp),text = labelWithColor.name, style = MaterialTheme.typography.labelMedium)
+                Text(
+                    modifier = Modifier.padding(horizontal = 8.dp),
+                    text = labelWithColor.name,
+                    style = MaterialTheme.typography.labelMedium
+                )
             }
         }
     }

@@ -39,11 +39,7 @@ abstract class PagingMviViewModel<ITEM : Any, S : PagingState<ITEM, S>, E>(
         kotlin.runCatching { pagingDataListener[itemIndex] }
     }
 
-    suspend fun collectPagingData(pagingData: PagingData<ITEM>) {
-        pagingDataListener.collectPagingData(pagingData)
-    }
-
-    suspend fun Flow<PagingData<ITEM>>.collectPagingData() = collect { pagingData ->
+    protected suspend fun Flow<PagingData<ITEM>>.collectPagingData() = collect { pagingData ->
         pagingDataListener.collectPagingData(pagingData)
     }
 }
@@ -53,6 +49,7 @@ abstract class ItemsMviViewModel<ITEM : Any, S : ItemsState<ITEM, S>, E> protect
     MviViewModel<S, E>(state) {
 
 
+    @Suppress("unused")
     open suspend fun <T> collectItemsWith(
         source: Flow<T>,
         updateItems: suspend (List<ITEM>, T) -> List<ITEM>,

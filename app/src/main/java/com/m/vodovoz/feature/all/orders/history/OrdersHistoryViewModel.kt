@@ -27,6 +27,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -81,12 +82,11 @@ class OrdersHistoryViewModel @Inject constructor(
             vodovozServiceRepository.getOrdersHistoryItemsPaged(
                 stateSnapshot.currentFilters.joinToString(",") { it.id },
                 stateSnapshot.searchQuery
-            ).collectLatest { pagingData ->
-                val pg = pagingData.map { historyItemModel ->
+            ).map { pagingData ->
+                pagingData.map { historyItemModel ->
                     historyItemModel.toUi()
                 }
-                collectPagingData(pg)
-            }
+            }.collectPagingData()
 
 
         }.onFailure { t ->
