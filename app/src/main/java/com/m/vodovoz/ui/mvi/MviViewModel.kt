@@ -7,15 +7,31 @@ import androidx.compose.runtime.State
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewModelScope
 import com.m.vodovoz.design_system.effects.LifecycleEffect
 import com.m.vodovoz.ui.paging.ItemsMviViewModel
 import com.m.vodovoz.ui.paging.ItemsState
 import com.m.vodovoz.ui.paging.VodovozItemsListeners
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
+
+fun ViewModel.viewModelScopeLaunch(
+    context: CoroutineContext = EmptyCoroutineContext,
+    start: CoroutineStart = CoroutineStart.DEFAULT,
+    block: suspend CoroutineScope.() -> Unit,
+) = viewModelScope.launch(
+    context = context,
+    start = start,
+    block = block
+)
 
 abstract class MviViewModel<STATE, EVENT>(state: STATE) : ViewModel() {
 
