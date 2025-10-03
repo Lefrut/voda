@@ -1,4 +1,5 @@
 <resources>
+
     <style name="Theme.Vodovoz" parent="Theme.MaterialComponents.Light.NoActionBar">
         <item name="colorPrimary">@color/bluePrimary</item>
         <item name="colorPrimaryDark">@color/bluePrimary</item>
@@ -9,11 +10,13 @@
     </style>
 
     <style name="Theme.AppSplash" parent="Theme.SplashScreen">
-        <item name="windowSplashScreenBackground">@color/bluePrimary</item>
-        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_logo</item>
+        <!--<item name="android:windowBackground">@drawable/ic_splash</item>-->
+        <item name="windowSplashScreenBackground">@drawable/ic_splash</item>
+        <item name="windowSplashScreenAnimatedIcon">@android:color/transparent</item>
         <item name="windowSplashScreenIconBackgroundColor">@android:color/transparent</item>
         <item name="windowSplashScreenAnimationDuration">0</item>
         <item name="postSplashScreenTheme">@style/Theme.Vodovoz</item>
+        <item name="popupMenuStyle">@style/Vodovoz.PopupMenu</item>
     </style>
 
     <style name="AlertDialog" parent="ThemeOverlay.MaterialComponents.MaterialAlertDialog">
