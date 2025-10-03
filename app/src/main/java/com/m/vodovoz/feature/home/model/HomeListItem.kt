@@ -1,5 +1,6 @@
 package com.m.vodovoz.feature.home.model
 
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import com.m.vodovoz.design_system.model.BannerUi
 import com.m.vodovoz.design_system.model.CategoryWithProductsUi
@@ -51,13 +52,13 @@ sealed class HomeListItem<out T>(open val position: Int) : VodovozItemUi<HomeLis
         override val value: T,
     ) : HomeListItem<T>(position) {
 
+        override val items: List<VodovozItemUi<*>>
+            get() = value.items
+
         data class Section(
             override val position: Int,
             override val value: VodovozSectionUi<ProductUi>,
         ) : Products<VodovozSectionUi<ProductUi>>(position, value) {
-
-            override val items: List<VodovozItemUi<*>>
-                get() = value.items
 
             override fun copyItem(
                 forAdults: ForAdultsUi?,
@@ -76,9 +77,6 @@ sealed class HomeListItem<out T>(open val position: Int) : VodovozItemUi<HomeLis
             override val value: VodovozSectionUi<CategoryWithProductsUi>,
         ) : Products<VodovozSectionUi<CategoryWithProductsUi>>(position, value) {
 
-            override val items: List<VodovozItemUi<*>>
-                get() = value.items
-
             override fun copyItem(
                 forAdults: ForAdultsUi?,
                 cartLoading: Boolean,
@@ -92,23 +90,23 @@ sealed class HomeListItem<out T>(open val position: Int) : VodovozItemUi<HomeLis
         }
 
         companion object Factory {
-            fun hurryBuyUp(items: VodovozSectionUi<ProductUi>) =
+            fun hurryBuyUp(items: VodovozSectionUi<ProductUi>): Products<*> =
                 Section(Positions.HURRY_BUY_UP, items)
 
-            fun newProducts(items: VodovozSectionUi<ProductUi>) =
+            fun newProducts(items: VodovozSectionUi<ProductUi>): Products<*> =
                 Section(Positions.NEW_PRODUCTS, items)
 
-            fun viewedProducts(items: VodovozSectionUi<ProductUi>) =
+            fun viewedProducts(items: VodovozSectionUi<ProductUi>): Products<*> =
                 Section(Positions.VIEWED, items)
 
-            fun topSection(section: VodovozSectionUi<CategoryWithProductsUi>) =
+            fun topSection(section: VodovozSectionUi<CategoryWithProductsUi>): CategoriesWithProductsSection =
                 CategoriesWithProductsSection(
                     currentCategoryId = section.items.firstOrNull()?.id ?: -1,
                     position = Positions.TOP_SECTION,
                     value = section
                 )
 
-            fun bottomSection(section: VodovozSectionUi<CategoryWithProductsUi>) =
+            fun bottomSection(section: VodovozSectionUi<CategoryWithProductsUi>): CategoriesWithProductsSection =
                 CategoriesWithProductsSection(
                     currentCategoryId = section.items.firstOrNull()?.id ?: -1,
                     position = Positions.BOTTOM_SECTION,
@@ -151,6 +149,10 @@ inline fun <VALUE, reified T : HomeListItem<VALUE>> List<HomeListItem<*>>.firstV
     return firstOrNull<T>(position)?.value
 }
 
+inline fun List<HomeListItem<*>>.forEach(action: (HomeListItem<*>) -> Unit) {
+    sortedBy { it.position }.forEach(action)
+}
+
 
 val HomeListItem.Products.CategoriesWithProductsSection.products
     get() = value.items.firstOrNull { it.id == currentCategoryId }?.items ?: emptyList()
@@ -170,3 +172,55 @@ fun HomeListItem.Products.CategoriesWithProductsSection.withProducts(
         }
     )
 }
+
+@Composable
+inline fun HomeItem(
+    item: HomeListItem<*>,
+    banner: @Composable HomeListItem.Banner.() -> Unit,
+    divider: @Composable HomeListItem.Divider.() -> Unit,
+    orderWithMenu: @Composable HomeListItem.OrderWithMenu.() -> Unit,
+    popularCategories: @Composable HomeListItem.PopularCategories.() -> Unit,
+    categoriesWithProductsSection: @Composable HomeListItem.Products.CategoriesWithProductsSection.() -> Unit,
+    productsSection: @Composable HomeListItem.Products.Section.() -> Unit,
+    promotions: @Composable HomeListItem.Promotions.() -> Unit,
+    stories: @Composable HomeListItem.Stories.() -> Unit,
+) {
+    with(item) {
+        when (this) {
+            is HomeListItem.Banner -> if (value.isNotEmpty()) banner()
+            is HomeListItem.Divider -> divider()
+            is HomeListItem.OrderWithMenu -> if (value.order != null || value.menuItems.isNotEmpty()) orderWithMenu()
+            is HomeListItem.PopularCategories -> if (value.items.isNotEmpty()) popularCategories()
+            is HomeListItem.Products.CategoriesWithProductsSection -> if (value.items.isNotEmpty()) categoriesWithProductsSection()
+            is HomeListItem.Products.Section -> if (value.items.isNotEmpty()) productsSection()
+            is HomeListItem.Promotions -> if (value.items.isNotEmpty()) promotions()
+            is HomeListItem.Stories -> if (value.isNotEmpty()) stories()
+        }
+    }
+}
+
+fun List<HomeListItem<*>>.homeListItemIterator(): HomeListItemIterator<HomeListItem<*>> {
+    return HomeListItemIterator(this)
+}
+
+
+
+class HomeListItemIterator<T : HomeListItem<*>>(
+    data: List<T>,
+) : Iterator<T> {
+
+    private val sortedList = data.sortedBy { it.position }
+    var index: Int = 0
+
+    override fun hasNext(): Boolean {
+        return index <= sortedList.size - 1
+    }
+
+    override fun next(): T {
+        TODO()
+        return sortedList[++index]
+    }
+
+}
+
+

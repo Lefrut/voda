@@ -7,6 +7,7 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.m.vodovoz.R
 import com.m.vodovoz.common.tab.TabManager
@@ -28,6 +29,7 @@ import com.m.vodovoz.util.extensions.copyText
 import com.m.vodovoz.util.extensions.openUrl
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -54,7 +56,7 @@ class OrderDetailsFragment : Fragment() {
             setContent {
                 VodovozTheme {
                     val viewState by viewModel.collectAsState()
-                    
+
 
                     when (viewState.uiState) {
                         OrderDetailsFlowViewModel.OrderDetailsUiState.Body -> {
@@ -87,10 +89,12 @@ class OrderDetailsFragment : Fragment() {
                         viewModel.events.collectLatest { event ->
                             when (event) {
                                 is OrderDetailsFlowViewModel.OrderDetailsEvent.CopyText -> {
-                                    requireContext().copyText(event.text)
-                                    mainFragment?.snackBarHostState?.showSnackbar(
-                                        VodovozSnackBarVisuals.create(getString(R.string.order_number_copied))
-                                    )
+                                    viewLifecycleOwner.lifecycleScope.launch {
+                                        requireContext().copyText(event.text)
+                                        mainFragment?.snackBarHostState?.showSnackbar(
+                                            VodovozSnackBarVisuals.create(getString(R.string.order_number_copied))
+                                        )
+                                    }
                                 }
 
                                 OrderDetailsFlowViewModel.OrderDetailsEvent.GoBack -> {

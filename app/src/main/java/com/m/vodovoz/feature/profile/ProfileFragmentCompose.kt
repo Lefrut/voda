@@ -18,7 +18,6 @@ import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
-import com.m.vodovoz.ui.mvi.collectAsState
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
@@ -41,10 +40,12 @@ import com.m.vodovoz.design_system.composables.placeholders.VodovozPlaceholder
 import com.m.vodovoz.design_system.composables.snackbar.VodovozSnackBarVisuals
 import com.m.vodovoz.feature.profile.navigation.ProfileChatsNavigator
 import com.m.vodovoz.ui.insets.InsetsVisibilityState
+import com.m.vodovoz.ui.mvi.collectAsState
 import com.m.vodovoz.ui.snackbar.snackBarHostState
 import com.m.vodovoz.util.extensions.copyText
 import com.m.vodovoz.util.extensions.openUrl
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -88,7 +89,7 @@ class ProfileFragment : Fragment() {
             setContent {
                 VodovozTheme {
                     val viewState by viewModel.collectAsState()
-                    
+
                     when (val uiState = viewState.uiState) {
                         ProfileFlowViewModel.ProfileUiState.Loading -> {
                             LoadingPlaceholder()
@@ -170,10 +171,13 @@ class ProfileFragment : Fragment() {
                         }
 
                         is ProfileFlowViewModel.ProfileEvents.Copy -> {
-                            requireContext().copyText(events.value)
-                            mainFragment?.snackBarHostState?.showSnackbar(
-                                VodovozSnackBarVisuals.create(events.snackbarMessage)
-                            )
+                            viewLifecycleOwner.lifecycleScope.launch {
+                                requireContext().copyText(events.value)
+                                mainFragment?.snackBarHostState?.showSnackbar(
+                                    VodovozSnackBarVisuals.create(events.snackbarMessage)
+                                )
+                            }
+
                         }
 
                         is ProfileFlowViewModel.ProfileEvents.GoByChatItemId -> {

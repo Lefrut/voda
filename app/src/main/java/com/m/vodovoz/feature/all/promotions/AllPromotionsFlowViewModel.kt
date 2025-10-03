@@ -130,10 +130,7 @@ class AllPromotionsFlowViewModel @Inject constructor(
             )
         }
 
-        getAllPromotionsPaged(currentCategory.id).collect { pagingData ->
-            collectPagingData(pagingData)
-        }
-
+        getAllPromotionsPaged(currentCategory.id).collectPagingData()
     }
 
     fun selectSection(category: PromotionCategoryUi) = viewModelScope.launch {
