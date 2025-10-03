@@ -13,7 +13,9 @@ import androidx.navigation.fragment.findNavController
 import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.core.navigation.activate
 import com.m.vodovoz.core.navigation.navigateToCategoryProductList
+import com.m.vodovoz.core.navigation.navigateToQrCode
 import com.m.vodovoz.core.navigation.navigateToSearch
+import com.m.vodovoz.core.navigation.navigateToSpeechDialog
 import com.m.vodovoz.core.navigation.navigateToSubCategories
 import com.m.vodovoz.design_system.VodovozTheme
 import com.m.vodovoz.design_system.effects.LifecycleEffect
@@ -36,7 +38,7 @@ class SubCategoriesFragment : Fragment() {
         savedInstanceState: Bundle?,
     ): View {
         return ComposeView(requireContext()).apply {
-            setViewCompositionStrategy(ViewCompositionStrategy.Default)
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
 
             setContent {
                 VodovozTheme {
@@ -71,6 +73,14 @@ class SubCategoriesFragment : Fragment() {
                                         navController = findNavController(),
                                         tabManager = tabManager
                                     )
+                                }
+
+                                SubCategoriesEvent.GoToScanner -> {
+                                    findNavController().navigateToQrCode()
+                                }
+
+                                SubCategoriesEvent.GoToSpeechRecognizer -> {
+                                    findNavController().navigateToSpeechDialog()
                                 }
                             }
 

@@ -6,6 +6,8 @@ import com.m.vodovoz.design_system.model.ParentCategoryUi
 sealed interface SubCategoriesEvent {
     data object GoToSearch : SubCategoriesEvent
     data object GoBack : SubCategoriesEvent
+    data object GoToSpeechRecognizer : SubCategoriesEvent
+    data object GoToScanner : SubCategoriesEvent
 
     data class GoToProductList(val categoryId: Long) : SubCategoriesEvent
 

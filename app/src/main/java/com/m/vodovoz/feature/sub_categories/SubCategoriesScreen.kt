@@ -27,10 +27,10 @@ fun SubCategoriesScreen(
                     viewModel.changeSearchQuery(s)
                 },
                 onMicClick = {
-
+                    viewModel.navigateToSpeechRecognizer()
                 },
                 onScanClick = {
-
+                    viewModel.navigateToScanner()
                 },
                 onNavigationClick = {
                     viewModel.navigateBack()

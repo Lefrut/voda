@@ -30,7 +30,7 @@ fun OrderSummaryColumn(modifier: Modifier = Modifier, items: List<OrderSummaryIt
                 }
             )
 
-            if (updatedItem.displayValue.isNotBlank()) {
+            if (updatedItem.displayValue.isNotBlank() || updatedItem.value.isNotBlank()) {
                 OrderSummaryItem(
                     item = updatedItem,
                     style = if (isFirstItem) {
@@ -77,7 +77,7 @@ private fun OrderSummaryItem(
             modifier = Modifier
                 .padding(start = 8.dp)
                 .weight(1f),
-            text = item.displayValue,
+            text = item.displayValue.ifEmpty { item.value },
             color = item.color.takeOrElse {
                 MaterialTheme.colorScheme.surfaceTint
             },

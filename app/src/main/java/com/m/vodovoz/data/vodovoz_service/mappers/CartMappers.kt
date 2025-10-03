@@ -52,7 +52,7 @@ fun List<ITOG_ITEM_DTO>.mapToDomain(): List<OrderSummaryItemModel> {
     return mapNotNull { it.toDomain() }.ifEmpty { throw IllegalArgumentException("OrderSummary can't be null") }
 }
 
-fun ITOG_ITEM_DTO.toDomain(): OrderSummaryItemModel? {
+fun ITOG_ITEM_DTO.toDomain(): OrderSummaryItemModel {
     return OrderSummaryItemModel(
         name = name ?: "",
         value = value ?: "",
