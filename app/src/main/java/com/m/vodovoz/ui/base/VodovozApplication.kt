@@ -41,7 +41,8 @@ class VodovozApplication : Application(), Configuration.Provider, SingletonImage
         AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags("ru"))
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
 
-        initYandexMetrica()
+        //todo - release
+//        initYandexMetrica()
         Timber.plant(Timber.DebugTree())
         NotificationChannels.create(this)
     }
