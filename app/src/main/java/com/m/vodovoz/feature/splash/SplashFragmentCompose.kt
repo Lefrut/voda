@@ -5,7 +5,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.IdRes
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
@@ -32,7 +31,6 @@ import com.m.vodovoz.ui.base.MainActivityViewModel
 import com.m.vodovoz.ui.base.model.AppState
 import com.m.vodovoz.ui.base.model.SplashFileState
 import com.m.vodovoz.ui.mvi.collectAsState
-import com.m.vodovoz.util.VodovozSplashFile
 import com.m.vodovoz.util.extensions.disableFullScreen
 import com.m.vodovoz.util.extensions.enableFullScreen
 import com.yandex.mapkit.MapKitFactory
@@ -40,7 +38,6 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -73,7 +70,7 @@ class SplashFragment : Fragment() {
     }
 
     override fun onStop() {
-        activityViewModel.finishAndroidSplash()
+        activityViewModel.hideAndroidSplash()
         requireActivity().disableFullScreen()
         super.onStop()
     }
@@ -88,10 +85,6 @@ class SplashFragment : Fragment() {
 
             setContent {
                 VodovozTheme {
-
-                    LaunchedEffect(Unit) {
-                        activityViewModel.finishAndroidSplash()
-                    }
 
                     val viewState by splashViewModel.collectAsState()
                     val context = LocalContext.current
@@ -109,9 +102,8 @@ class SplashFragment : Fragment() {
                                 }
 
                                 SplashFileState.Success -> {
-                                    splashViewModel.changeToAnimation(
-                                        VodovozSplashFile.getSplashFile(context)
-                                    )
+                                    //VodovozSplashFile.getSplashFile(context)
+                                    splashViewModel.changeToAnimation()
                                 }
 
                                 SplashFileState.Loading -> {}
@@ -144,16 +136,14 @@ class SplashFragment : Fragment() {
             }
 
             SplashEvent.HideAndroidSplash -> {
-                activityViewModel.finishAndroidSplash()
+                activityViewModel.hideAndroidSplash()
             }
         }
     }
 
     private suspend fun listenAppState(): Unit =
         activityViewModel.appState.collect { appState ->
-
             val navController = findNavController()
-            val androidSplash = activityViewModel.androidSplash.value
 
             when (appState) {
                 AppState.App -> {
@@ -162,30 +152,31 @@ class SplashFragment : Fragment() {
                         siteStateManager.siteStateSnapshot.mapkitKey
                     )
                     MapKitFactory.initialize(requireActivity())
-                    navController.navigateToScreen(R.id.mainFragment)
+                    navController.navigateToScreen(
+                        screenId = R.id.mainFragment,
+                        hideAndroidSplash = false
+                    )
                 }
 
                 AppState.Blocked -> {
-                    if (androidSplash) {
-                        splashViewModel.hideAndroidSplash()
-                    }
-
                     navController.navigateToScreen(
-                        R.id.blockAppFragment,
+                        screenId = R.id.blockAppFragment,
+                        hideAndroidSplash = false
                     )
                 }
 
                 AppState.ErrorLoading -> {
                     delay(100L)
                     splashViewModel.setErrorUiState()
-                    if (androidSplash) {
-                        splashViewModel.hideAndroidSplash()
-                    }
+                    activityViewModel.hideAndroidSplash()
                 }
 
                 AppState.Loading -> {
                     if (navController.currentDestination?.id != R.id.splashFragment) {
-                        navController.navigateToScreen(R.id.splashFragment)
+                        navController.navigateToScreen(
+                            screenId = R.id.splashFragment,
+                            hideAndroidSplash = true
+                        )
                     }
                 }
 
@@ -197,16 +188,31 @@ class SplashFragment : Fragment() {
         }
 
 
-    private fun NavController.navigateToScreen(@IdRes screenId: Int) = navigate(
-        resId = screenId,
-        args = null,
-        navOptions = navOptions {
-            currentDestination?.id?.let { id ->
-                popUpTo(id) { inclusive = true }
+    private fun NavController.navigateToScreen(
+        @IdRes screenId: Int,
+        hideAndroidSplash: Boolean,
+    ) {
+
+
+        navigate(
+            resId = screenId,
+            args = null,
+            navOptions = navOptions {
+                currentDestination?.id?.let { id ->
+                    popUpTo(id) { inclusive = true }
+                }
+                launchSingleTop = true
+
+                requireActivity().lifecycleScope.launch {
+                    delay(60)
+                    if (hideAndroidSplash) {
+                        activityViewModel.hideAndroidSplash()
+                    }
+                }
             }
-            launchSingleTop = true
-        }
-    )
+        )
+    }
+
 
     private fun fetchDataForScreens() = lifecycleScope.launch {
         splashViewModel.sendFirebaseToken()
@@ -221,12 +227,11 @@ class SplashFragment : Fragment() {
             }.join()
         }
         importantJob.join()
-        val jobs = listOf(
+        listOf(
             catalogViewModel.fetchCatalogDetails(),
             profileViewModel.fetchProfileDetails(),
             cartFlowViewModel.fetchCartDetails()
         )
         tabManager.updateBottomNavCartState()
-        jobs.joinAll()
     }
 }
