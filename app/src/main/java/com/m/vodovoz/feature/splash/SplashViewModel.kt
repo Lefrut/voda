@@ -11,7 +11,6 @@ import com.m.vodovoz.feature.splash.model.SplashUiState
 import com.m.vodovoz.ui.mvi.MviViewModel
 import com.m.vodovoz.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.io.File
 import javax.inject.Inject
@@ -43,14 +42,16 @@ class SplashViewModel @Inject constructor(
         sendEvent(SplashEvent.RefreshApp)
     }
 
-    fun changeToAnimation(splashFile: File) = viewModelScope.launch {
-
+    fun changeToAnimation() = viewModelScope.launch {
         updateState { s ->
-            s.copy(
-                filePath = splashFile.absolutePath,
-                uiState = if (s.uiState is SplashUiState.Error) SplashUiState.Error else SplashUiState.Animation
-            )
+            s.copy(uiState = SplashUiState.Animation)
         }
+//        updateState { s ->
+//            s.copy(
+//                filePath = splashFile.absolutePath,
+//                uiState = if (s.uiState is SplashUiState.Error) SplashUiState.Error else SplashUiState.Animation
+//            )
+//        }
     }
 
     fun hideAndroidSplash() = viewModelScope.launch {

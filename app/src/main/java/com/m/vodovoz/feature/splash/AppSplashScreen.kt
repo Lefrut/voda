@@ -38,13 +38,11 @@ fun AppSplashScreen(viewModel: SplashViewModel, viewState: SplashState) {
             }
 
             SplashUiState.Animation -> {
-                //todo -
-                //SplashPlaceholder()
+                SplashPlaceholder()
             }
 
             SplashUiState.Placeholder -> {
-                //todo -
-                //SplashPlaceholder()
+                SplashPlaceholder()
             }
         }
     }
@@ -56,9 +54,9 @@ private fun SplashPlaceholder(modifier: Modifier = Modifier) {
     val infiniteTransition = rememberInfiniteTransition(label = "infiniteTransition")
     val scale by infiniteTransition.animateFloat(
         initialValue = 1f,
-        targetValue = 1.2f,
+        targetValue = 1.3f,
         animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 2500, easing = LinearEasing),
+            animation = tween(durationMillis = 5000, easing = LinearEasing),
             repeatMode = RepeatMode.Reverse
         ),
         label = "scale"

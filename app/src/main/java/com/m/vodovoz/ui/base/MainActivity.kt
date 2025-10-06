@@ -19,6 +19,7 @@ import com.m.vodovoz.common.cache.HttpErrorCache
 import com.m.vodovoz.common.cache.HttpErrorCacheProvider
 import com.m.vodovoz.common.cache.emptyHttpErrorCache
 import com.m.vodovoz.feature.sitestate.SiteStateManager
+import com.m.vodovoz.ui.base.model.AppState
 import com.m.vodovoz.ui.base.model.SplashFileState
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -60,6 +61,7 @@ class MainActivity : AppCompatActivity(),
         installSplashScreen().setKeepOnScreenCondition {
             viewModel.androidSplash.value
         }
+
         setupUi()
         downloadSplashFile()
         viewModel.fetchAppConfig()

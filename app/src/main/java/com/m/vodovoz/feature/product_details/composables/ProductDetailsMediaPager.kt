@@ -73,10 +73,11 @@ fun ProductDetailsMediaPager(
                     is ProductMediaUi.Picture -> {}
                     is ProductMediaUi.YoutubeVideo, is ProductMediaUi.RutubeVideo -> Image(
                         modifier = Modifier
-                            .align(Alignment.Center)
+                            .align(Alignment.BottomEnd)
+                            .padding(end = 24.dp, bottom = 9.dp)
                             .size(42.dp)
                             .clip(CircleShape),
-                        painter = painterResource(id = R.drawable.svg_play_video),
+                        painter = painterResource(id = R.drawable.ic_play),
                         contentDescription = null
                     )
 

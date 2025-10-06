@@ -81,7 +81,7 @@ class MainActivityViewModel @Inject constructor(
         _appState.update { AppState.App }
     }
 
-    fun finishAndroidSplash() = viewModelScope.launch {
+    fun hideAndroidSplash() = viewModelScope.launch {
         _androidSplash.update { false }
     }
 
