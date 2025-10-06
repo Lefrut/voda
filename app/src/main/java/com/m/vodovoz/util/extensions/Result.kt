@@ -18,6 +18,10 @@ fun <T> resultFailure(throwable: Throwable = Throwable()) = Result.failure<T>(th
 suspend fun <T> Flow<Result<T>>.singleResult() =
     firstOrNull() ?: resultFailure(NoSuchElementException("Result flow is empty"))
 
+suspend fun <T> Flow<Result<T>>.singleGetOrNull() =
+    firstOrNull()?.getOrNull()
+
+
 
 suspend fun <T> Flow<Result<T>>.deferredResult(): Deferred<Result<T>> {
     return coroutineScope {

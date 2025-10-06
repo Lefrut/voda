@@ -19,6 +19,8 @@ import com.m.vodovoz.core.navigation.navigateToMap
 import com.m.vodovoz.design_system.VodovozTheme
 import com.m.vodovoz.design_system.effects.LifecycleEffect
 import com.m.vodovoz.feature.addresses.model.AddressScreenTypeUi
+import com.yandex.mapkit.MapKit
+import com.yandex.mapkit.MapKitFactory
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -29,6 +31,7 @@ class AddressesFragment : Fragment() {
     lateinit var tabManager: TabManager
 
     internal val viewModel: AddressesFlowViewModel by viewModels()
+    private val mapKit: MapKit by lazy { MapKitFactory.getInstance() }
 
     override fun onStart() {
         super.onStart()
@@ -36,9 +39,15 @@ class AddressesFragment : Fragment() {
         when(screenType){
             AddressScreenTypeUi.Add -> {}
             AddressScreenTypeUi.Choose -> {
+                mapKit.onStart()
                 tabManager.changeTabVisibility(false)
             }
         }
+    }
+
+    override fun onStop() {
+        mapKit.onStart()
+        super.onStop()
     }
 
     override fun onCreateView(
