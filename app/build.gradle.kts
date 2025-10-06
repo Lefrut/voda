@@ -18,7 +18,7 @@ android {
         applicationId = "com.m.vodovoz"
         minSdk = 21
         targetSdk = 35
-        versionCode = 200
+        versionCode = 201
         versionName = "2.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
