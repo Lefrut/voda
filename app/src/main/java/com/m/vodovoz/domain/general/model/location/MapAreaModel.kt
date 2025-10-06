@@ -6,4 +6,10 @@ data class MapAreaModel(
     val isMoscowRingRow: Boolean,
     val color: String,
     val points: List<MapPointModel>
-)
+){
+
+    companion object{
+
+        const val CORE_AREA_ID = 91851
+    }
+}

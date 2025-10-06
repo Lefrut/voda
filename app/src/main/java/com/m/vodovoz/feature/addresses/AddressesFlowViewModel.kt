@@ -4,19 +4,42 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import com.m.vodovoz.ui.mvi.Event
-import com.m.vodovoz.ui.mvi.MviViewModel
-import com.m.vodovoz.ui.mvi.State
+import com.m.vodovoz.common.model.VodovozBoolean
+import com.m.vodovoz.common.model.boolean
+import com.m.vodovoz.common.model.from
+import com.m.vodovoz.design_system.model.MapPointUi
 import com.m.vodovoz.design_system.model.SectionUi
 import com.m.vodovoz.design_system.model.VodovozPlaceholderUi
+import com.m.vodovoz.design_system.model.contains
+import com.m.vodovoz.design_system.model.distanceKm
+import com.m.vodovoz.design_system.model.mapToUi
+import com.m.vodovoz.design_system.model.toDomain
 import com.m.vodovoz.design_system.model.toUi
+import com.m.vodovoz.design_system.model.widgets.mapToUi
+import com.m.vodovoz.design_system.model.widgets.toUi
 import com.m.vodovoz.domain.general.model.exceptions.EmptyResultException
+import com.m.vodovoz.domain.general.model.location.MapAreaModel
+import com.m.vodovoz.domain.general.respository.MapServiceRepository
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
 import com.m.vodovoz.feature.addresses.model.AddressScreenTypeUi
 import com.m.vodovoz.feature.addresses.model.AddressUi
 import com.m.vodovoz.feature.addresses.model.mapToUi
+import com.m.vodovoz.feature.map.model.MapAreaUi
+import com.m.vodovoz.feature.map.model.findNearestPointTo
+import com.m.vodovoz.feature.map.model.mapToUi
+import com.m.vodovoz.feature.map.model.toDomain
+import com.m.vodovoz.feature.map.model.toUi
+import com.m.vodovoz.ui.mvi.Event
+import com.m.vodovoz.ui.mvi.MviViewModel
+import com.m.vodovoz.ui.mvi.State
+import com.m.vodovoz.util.extensions.onFailure
+import com.m.vodovoz.util.extensions.onSuccess
+import com.m.vodovoz.util.extensions.singleGetOrNull
 import com.m.vodovoz.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.retry
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -25,6 +48,7 @@ import javax.inject.Inject
 class AddressesFlowViewModel @Inject constructor(
     savedState: SavedStateHandle,
     private val vodovozServiceRepository: VodovozServiceRepository,
+    private val mapServiceRepository: MapServiceRepository,
 ) : MviViewModel<AddressesFlowViewModel.AddressesState, AddressesFlowViewModel.AddressesEvents>(
     AddressesState(
         screenType = savedState.get<AddressScreenTypeUi>("screenType") ?: AddressScreenTypeUi.Add
@@ -33,6 +57,20 @@ class AddressesFlowViewModel @Inject constructor(
 
     private val selectedAddressId = savedState.get<Long>("addressId")
 
+    init {
+        fetchMapAreas()
+    }
+
+    private fun fetchMapAreas() = vodovozServiceRepository.getMapAreas().onFailure { throwable ->
+        throw throwable
+    }.onSuccess { mapZonesModel ->
+        updateState { s ->
+            s.copy(mapAreas = mapZonesModel.areas.mapToUi())
+        }
+    }.retry {
+        delay(350)
+        true
+    }.launchIn(viewModelScope)
 
     fun fetchAddresses() = viewModelScope.launch {
         val addressesResult = vodovozServiceRepository.getAddresses().singleResult()
@@ -82,10 +120,66 @@ class AddressesFlowViewModel @Inject constructor(
         sendEvent(AddressesEvents.GoToMap)
     }
 
-    fun navigateToOrdering() = viewModelScope.launch {
+    fun searchThenNavigateToOrdering() = viewModelScope.launch {
+        updateState { s ->
+            s.copy(buttonLoading = true)
+        }
 
-        sendEvent(AddressesEvents.GoBackToOrdering(stateSnapshot.selectedAddress))
+        val selectedAddress = stateSnapshot.selectedAddress
+        val mapAddress = mapServiceRepository.searchAddressInMoscow(
+            selectedAddress.address
+        ).singleGetOrNull()?.toUi() ?: return@launch
+        val addressPoint = mapAddress.point
+
+        val mapAreas = stateSnapshot.mapAreas.ifEmpty {
+            return@launch
+        }
+        val coreMapArea = mapAreas.find { area ->
+            area.id == MapAreaModel.CORE_AREA_ID && area.isMoscowRingRow
+        } ?: return@launch
+
+        val fromMoscowToPoint = if (coreMapArea.contains(addressPoint)) {
+            0f
+        } else {
+            val nearestPoint = coreMapArea.findNearestPointTo(addressPoint) ?: return@launch
+            val route = nearestPoint.routeTo(addressPoint) ?: return@launch
+            route.distanceKm()
+        }
+
+        val addressDetails = vodovozServiceRepository.getAddAddressDetails(
+            selectedAddress.id
+        ).singleGetOrNull() ?: return@launch
+
+
+        val addressParams = with(addressDetails) {
+            linearSwitches.mapToUi().associate { w ->
+                w.id to VodovozBoolean.from(w.value()).boolean.toString()
+            } + linearFields.mapToUi().associate { w ->
+                w.id to w.value()
+            } + gridFields.mapToUi().associate { w ->
+                w.id to w.value()
+            } + with(addressField.toUi()) { id to mapAddress.name }
+        }
+
+        vodovozServiceRepository.updateAddress(
+            addressId = selectedAddress.id,
+            address = mapAddress.copy(fromMoscowToPoint = fromMoscowToPoint).toDomain(),
+            params = addressParams
+        ).singleResult().onSuccess {
+            sendEvent(AddressesEvents.GoBackToOrdering(selectedAddress))
+        }
+
+    }.invokeOnCompletion {
+        updateState { s -> s.copy(buttonLoading = false) }
     }
+
+    private suspend fun MapPointUi.routeTo(end: MapPointUi): List<MapPointUi>? {
+        return mapServiceRepository.getRoute(
+            start = this.toDomain(),
+            end = end.toDomain()
+        ).singleGetOrNull()?.mapToUi()
+    }
+
 
     fun editAddress(address: AddressUi) = viewModelScope.launch {
         sendEvent(AddressesEvents.GoToEditAddress(address.id, address.address))
@@ -129,7 +223,7 @@ class AddressesFlowViewModel @Inject constructor(
         refresh()
     }
 
-    fun refresh() = viewModelScope.launch{
+    fun refresh() = viewModelScope.launch {
         updateState {
             it.copy(showRefreshIndicator = true)
         }
@@ -156,8 +250,11 @@ class AddressesFlowViewModel @Inject constructor(
         val uiState: AddressesUiState = AddressesUiState.Loading,
         val showRemoveAddressDialog: Boolean = false,
         val currentRemoveAddress: AddressUi? = null,
-        val showRefreshIndicator: Boolean = false
-    ) : State
+        val showRefreshIndicator: Boolean = false,
+        val mapAreas: List<MapAreaUi> = emptyList(),
+        val buttonLoading: Boolean = false,
+    ) : State {
+    }
 
     @Stable
     sealed interface AddressesUiState {

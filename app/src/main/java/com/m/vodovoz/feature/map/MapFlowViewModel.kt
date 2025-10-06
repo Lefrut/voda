@@ -12,6 +12,7 @@ import com.m.vodovoz.design_system.model.mapToUi
 import com.m.vodovoz.design_system.model.toDomain
 import com.m.vodovoz.design_system.model.toUi
 import com.m.vodovoz.domain.general.model.location.MapAddressModel
+import com.m.vodovoz.domain.general.model.location.MapAreaModel
 import com.m.vodovoz.domain.general.respository.MapServiceRepository
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
 import com.m.vodovoz.feature.map.model.MapAddressUi
@@ -55,10 +56,6 @@ class MapFlowViewModel @Inject constructor(
 
     private val searchQueryFlow = MutableStateFlow(stateSnapshot.query)
     private val activeSearchJobs = mutableListOf<Job>()
-
-    companion object {
-        const val CORE_AREA_ID = 91851
-    }
 
     init {
         handleSearchQueries()
@@ -152,7 +149,7 @@ class MapFlowViewModel @Inject constructor(
         }
 
         val coreMapArea = stateSnapshot.areas.find { area ->
-            area.id == CORE_AREA_ID && area.isMoscowRingRow
+            area.id == MapAreaModel.CORE_AREA_ID && area.isMoscowRingRow
         } ?: run { return null }
 
         if (coreMapArea.contains(addressPoint)) {
