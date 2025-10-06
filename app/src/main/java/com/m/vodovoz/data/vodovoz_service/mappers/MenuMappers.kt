@@ -12,7 +12,7 @@ import com.m.vodovoz.domain.general.model.widgets.MenuItemTypeModel
 fun OrderMenuDTO.toDomain(): OrderWithMenuModel {
     return OrderWithMenuModel(
         order = ZAKAZ?.toDomain(),
-        menuItems = MENU?.mapNotNull { menuDto -> menuDto?.toDomain() } ?: emptyList()
+        menuItems = MENU?.mapNotNull { menuDto -> menuDto.toDomain() } ?: emptyList()
 
     )
 }
@@ -20,10 +20,10 @@ fun OrderMenuDTO.toDomain(): OrderWithMenuModel {
 fun ZAKAZ_DTO.toDomain(): HomeOrderModel? {
     return HomeOrderModel(
         orderId = this.IDZAKAZ ?: return null,
-        title = this.ZAGALOVOK ?: return null,
-        description = this.OPISANIE ?: return null,
+        title = this.ZAGALOVOK ?: "",
+        description = this.OPISANIE ?: "",
         borderColorHex = BORDERCOLOR ?: "",
-        price = this.PRICE ?: return null
+        price = this.PRICE ?: ""
     )
 }
 
