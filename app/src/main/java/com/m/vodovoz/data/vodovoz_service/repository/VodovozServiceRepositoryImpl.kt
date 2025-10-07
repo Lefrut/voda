@@ -192,6 +192,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
                     geo = geo,
                     city = address?.city,
                     street = address?.street,
+                    fromMoscowToAddressKm = address?.fromMoscowToPoint,
                     params = params
                 )
             },

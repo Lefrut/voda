@@ -42,6 +42,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.retry
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.math.roundToInt
 
 @HiltViewModel
 @Stable
@@ -163,7 +164,7 @@ class AddressesFlowViewModel @Inject constructor(
 
         vodovozServiceRepository.updateAddress(
             addressId = selectedAddress.id,
-            address = mapAddress.copy(fromMoscowToPoint = fromMoscowToPoint).toDomain(),
+            address = mapAddress.copy(fromMoscowToPoint = fromMoscowToPoint.roundToInt()).toDomain(),
             params = addressParams
         ).singleResult().onSuccess {
             sendEvent(AddressesEvents.GoBackToOrdering(selectedAddress))

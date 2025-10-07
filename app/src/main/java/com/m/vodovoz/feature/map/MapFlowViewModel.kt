@@ -39,6 +39,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.retryWhen
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.math.roundToInt
 
 @HiltViewModel
 @Stable
@@ -257,7 +258,7 @@ class MapFlowViewModel @Inject constructor(
                     mapAddress.point
                 ) ?: return@childLaunch
                 val updatedMapAddress = mapAddress.copy(
-                    fromMoscowToPoint = fromMoscowToPoint
+                    fromMoscowToPoint = fromMoscowToPoint.roundToInt()
                 )
                 updateState { s ->
                     s.copy(
