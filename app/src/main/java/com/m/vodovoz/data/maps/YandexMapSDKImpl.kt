@@ -1,5 +1,7 @@
 package com.m.vodovoz.data.maps
 
+import android.location.Location
+import com.m.vodovoz.design_system.model.distanceKm
 import com.yandex.mapkit.RequestPoint
 import com.yandex.mapkit.RequestPointType
 import com.yandex.mapkit.directions.DirectionsFactory
@@ -27,6 +29,7 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.coroutines.resumeWithException
+import kotlin.math.floor
 
 
 typealias YandexSearchResponse = Response
@@ -105,7 +108,7 @@ class YandexMapSDKImpl @Inject constructor() : YandexMapSDK {
     }
 
 
-    override suspend fun getRoute(start: Point, end: Point): List<Point> {
+    override suspend fun getRoutes(start: Point, end: Point): List<Point> {
         return suspendCancellableCoroutine { cont ->
             val requestPoints = listOf(
                 RequestPoint(start, RequestPointType.WAYPOINT, null),
@@ -118,11 +121,13 @@ class YandexMapSDKImpl @Inject constructor() : YandexMapSDK {
                 VehicleOptions(),
                 object : DrivingSession.DrivingRouteListener {
                     override fun onDrivingRoutes(routes: MutableList<DrivingRoute>) {
-                        val route = routes.firstOrNull()
-                        if (route != null) {
-                            cont.resume(route.geometry.points) { _, _, _ -> }
-                        } else {
-                            cont.resumeWithException(IllegalStateException("Empty route list"))
+
+                        val closestRoutePoints = routes
+                            .map { it.geometry.points }
+                            .minByOrNull { it.distanceKm() }
+
+                        if (closestRoutePoints != null) {
+                            cont.resume(closestRoutePoints) { _, _, _ -> }
                         }
                     }
 
@@ -136,4 +141,17 @@ class YandexMapSDKImpl @Inject constructor() : YandexMapSDK {
     }
 
 
+}
+
+private fun List<Point>.distanceKm(): Float {
+    return zipWithNext { a, b ->
+        a.distanceBetween(b).toFloat()
+    }.sum() / 1000f
+}
+
+private fun Point.distanceBetween(p2: Point): Double {
+    val result = FloatArray(1)
+    Location.distanceBetween(latitude, longitude, p2.latitude, p2.longitude, result)
+    val firstResult = result.getOrNull(0) ?: 0.0f
+    return floor(firstResult).toDouble()
 }

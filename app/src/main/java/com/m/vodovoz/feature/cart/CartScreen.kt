@@ -31,6 +31,7 @@ import com.m.vodovoz.design_system.composables.scaffold.VodovozScaffold
 import com.m.vodovoz.feature.cart.composables.CartBody
 import com.m.vodovoz.feature.cart.composables.CartTopBar
 import com.m.vodovoz.feature.cart.composables.PromotionCodeBottomSheet
+import okhttp3.internal.toLongOrDefault
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -56,7 +57,11 @@ fun CartScreen(viewModel: CartFlowViewModel, viewState: CartFlowViewModel.CartSt
                         if (!viewState.blockOrderButton) {
                             viewModel.navigateToOrder()
                         }
-                    }
+                    },
+                    enabled = !(viewState.orderSummary.firstOrNull()?.run {
+                        value.ifEmpty { displayValue }.filter { it.isDigit() }
+                            .toLongOrDefault(0) <= 0
+                    } ?: true)
                 )
             }
         }

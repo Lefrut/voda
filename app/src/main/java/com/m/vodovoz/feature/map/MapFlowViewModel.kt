@@ -18,7 +18,7 @@ import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
 import com.m.vodovoz.feature.map.model.MapAddressUi
 import com.m.vodovoz.feature.map.model.MapAreaUi
 import com.m.vodovoz.feature.map.model.MapPopupWindowUi
-import com.m.vodovoz.feature.map.model.findNearestPointTo
+import com.m.vodovoz.feature.map.model.findNearestPointsTo
 import com.m.vodovoz.feature.map.model.mapToUi
 import com.m.vodovoz.feature.map.model.toUi
 import com.m.vodovoz.ui.mvi.Event
@@ -28,6 +28,9 @@ import com.m.vodovoz.util.extensions.debounceWithMax
 import com.m.vodovoz.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -39,6 +42,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.retryWhen
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.math.floor
 
 @HiltViewModel
 @Stable
@@ -156,11 +160,11 @@ class MapFlowViewModel @Inject constructor(
             return 0f
         }
 
-        val route = coreMapArea
-            .findNearestPointTo(addressPoint)
-            ?.routeTo(addressPoint) ?: return null
-
-        val fromMoscowToPoint = route.distanceKm()
+        val nearestPoints = coreMapArea.findNearestPointsTo(addressPoint)
+        val routes = nearestPoints.map { nearestPoint ->
+            coroutineScope { async { nearestPoint.routeTo(addressPoint) } }
+        }.awaitAll()
+        val fromMoscowToPoint = routes.minOf { route -> route?.distanceKm() ?: Float.MAX_VALUE }
 
         return fromMoscowToPoint
     }
@@ -253,21 +257,16 @@ class MapFlowViewModel @Inject constructor(
                 .map { model -> model.toUi() }
 
             currentAddressResult.onSuccess { mapAddress ->
-                val fromMoscowToPoint = getDistanceFromAreaBoundToAddress(
-                    mapAddress.point
-                ) ?: return@childLaunch
-                val updatedMapAddress = mapAddress.copy(
-                    fromMoscowToPoint = fromMoscowToPoint
-                )
+
                 updateState { s ->
                     s.copy(
-                        currentMapAddress = updatedMapAddress,
+                        currentMapAddress = mapAddress,
                         mode = MapUiMode.OnlyMap,
                         addressIsLoading = false,
-                        addressIsError = with(updatedMapAddress) { house.isBlank() }
+                        addressIsError = with(mapAddress) { house.isBlank() }
                     )
                 }
-                successful(updatedMapAddress)
+                successful(mapAddress)
             }
         }
         activeSearchJobs.add(newSearchJob)
@@ -275,7 +274,7 @@ class MapFlowViewModel @Inject constructor(
     }
 
     private suspend fun MapPointUi.routeTo(end: MapPointUi): List<MapPointUi>? {
-        return mapServiceRepository.getRoute(
+        return mapServiceRepository.getRoutes(
             start = this.toDomain(),
             end = end.toDomain()
         ).singleResult().getOrNull()?.mapToUi()
@@ -306,23 +305,30 @@ class MapFlowViewModel @Inject constructor(
         updateState { s ->
             s.copy(buttonIsLoading = true)
         }
+        val fromMoscowToPoint = getDistanceFromAreaBoundToAddress(
+            mapAddress.point
+        ) ?: return@launch
+
+        val updatedMapAddress = mapAddress.copy(
+            fromMoscowToPoint = floor(fromMoscowToPoint).toInt()
+        )
 
         val screenType = stateSnapshot.screenType
 
         when (screenType) {
             MapScreenTypeUi.Add -> {
-                sendEvent(MapFlowEvents.GoToAddAddress(mapAddress))
+                sendEvent(MapFlowEvents.GoToAddAddress(updatedMapAddress))
             }
 
             MapScreenTypeUi.Edit -> {
-                sendEvent(MapFlowEvents.BackToAddAddress(mapAddress))
+                sendEvent(MapFlowEvents.BackToAddAddress(updatedMapAddress))
             }
         }
 
+    }.invokeOnCompletion {
         updateState { s ->
             s.copy(buttonIsLoading = false)
         }
-
     }
 
     fun showDeliveryBottomSheet() {

@@ -72,9 +72,6 @@ class MapServiceRepositoryImpl @Inject constructor(
                 components = yandexAddressComponents,
                 kinds = listOf(
                     Address.Component.Kind.LOCALITY,
-                    Address.Component.Kind.DISTRICT,
-                    Address.Component.Kind.AREA,
-                    Address.Component.Kind.PROVINCE
                 )
             ) ?: ""
 
@@ -89,7 +86,6 @@ class MapServiceRepositoryImpl @Inject constructor(
                 components = yandexAddressComponents,
                 kinds = listOf(
                     Address.Component.Kind.HOUSE,
-                    Address.Component.Kind.ENTRANCE
                 )
             ) ?: ""
 
@@ -108,11 +104,11 @@ class MapServiceRepositoryImpl @Inject constructor(
             )
         }.catchResult()
 
-    override fun getRoute(
+    override fun getRoutes(
         start: MapPointModel,
         end: MapPointModel,
     ): Flow<Result<List<MapPointModel>>> = flow {
-        val points = mapSDK.getRoute(start.toData(), end.toData())
+        val points = mapSDK.getRoutes(start.toData(), end.toData())
         emit(Result.success(points.mapToDomain()))
     }.catchResult()
 

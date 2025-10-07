@@ -7,6 +7,7 @@ import com.yandex.mapkit.geometry.BoundingBox
 import com.yandex.mapkit.geometry.Point
 import com.yandex.mapkit.map.CameraPosition
 import com.yandex.mapkit.map.Map
+import kotlin.math.floor
 
 fun calculateBounds(
     p1: Point,
@@ -91,7 +92,8 @@ fun MapPointUi.isOffRoute(
 fun MapPointUi.distanceBetween(p2: MapPointUi): Double {
     val result = FloatArray(1)
     Location.distanceBetween(lat, lon, p2.lat, p2.lon, result)
-    return result.getOrNull(0)?.toDouble() ?: 0.0
+    val firstResult = result.getOrNull(0) ?: 0.0f
+    return floor(firstResult).toDouble()
 }
 
 fun List<MapPointUi>.getNearestRoutePoint(point: MapPointUi): MapPointUi {

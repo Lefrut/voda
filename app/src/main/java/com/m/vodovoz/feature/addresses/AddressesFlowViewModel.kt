@@ -25,7 +25,7 @@ import com.m.vodovoz.feature.addresses.model.AddressScreenTypeUi
 import com.m.vodovoz.feature.addresses.model.AddressUi
 import com.m.vodovoz.feature.addresses.model.mapToUi
 import com.m.vodovoz.feature.map.model.MapAreaUi
-import com.m.vodovoz.feature.map.model.findNearestPointTo
+import com.m.vodovoz.feature.map.model.findNearestPointsTo
 import com.m.vodovoz.feature.map.model.mapToUi
 import com.m.vodovoz.feature.map.model.toDomain
 import com.m.vodovoz.feature.map.model.toUi
@@ -37,11 +37,14 @@ import com.m.vodovoz.util.extensions.onSuccess
 import com.m.vodovoz.util.extensions.singleGetOrNull
 import com.m.vodovoz.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.retry
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.math.floor
 
 @HiltViewModel
 @Stable
@@ -125,7 +128,12 @@ class AddressesFlowViewModel @Inject constructor(
             s.copy(buttonLoading = true)
         }
 
+
         val selectedAddress = stateSnapshot.selectedAddress
+        val addressDetails = vodovozServiceRepository.getAddAddressDetails(
+            selectedAddress.id
+        ).singleGetOrNull() ?: return@launch
+
         val mapAddress = mapServiceRepository.searchAddressInMoscow(
             selectedAddress.address
         ).singleGetOrNull()?.toUi() ?: return@launch
@@ -141,15 +149,15 @@ class AddressesFlowViewModel @Inject constructor(
         val fromMoscowToPoint = if (coreMapArea.contains(addressPoint)) {
             0f
         } else {
-            val nearestPoint = coreMapArea.findNearestPointTo(addressPoint) ?: return@launch
-            val route = nearestPoint.routeTo(addressPoint) ?: return@launch
-            route.distanceKm()
+            val nearestPoints = coreMapArea.findNearestPointsTo(addressPoint)
+            val routes = nearestPoints.map { nearestPoint ->
+                async { nearestPoint.routeTo(addressPoint) }
+            }.awaitAll()
+            val fromMoscowToPoint = routes.minOf { route ->
+                route?.distanceKm() ?: Float.MAX_VALUE
+            }
+            fromMoscowToPoint
         }
-
-        val addressDetails = vodovozServiceRepository.getAddAddressDetails(
-            selectedAddress.id
-        ).singleGetOrNull() ?: return@launch
-
 
         val addressParams = with(addressDetails) {
             linearSwitches.mapToUi().associate { w ->
@@ -163,7 +171,8 @@ class AddressesFlowViewModel @Inject constructor(
 
         vodovozServiceRepository.updateAddress(
             addressId = selectedAddress.id,
-            address = mapAddress.copy(fromMoscowToPoint = fromMoscowToPoint).toDomain(),
+            address = mapAddress.copy(fromMoscowToPoint = floor(fromMoscowToPoint).toInt())
+                .toDomain(),
             params = addressParams
         ).singleResult().onSuccess {
             sendEvent(AddressesEvents.GoBackToOrdering(selectedAddress))
@@ -174,7 +183,7 @@ class AddressesFlowViewModel @Inject constructor(
     }
 
     private suspend fun MapPointUi.routeTo(end: MapPointUi): List<MapPointUi>? {
-        return mapServiceRepository.getRoute(
+        return mapServiceRepository.getRoutes(
             start = this.toDomain(),
             end = end.toDomain()
         ).singleGetOrNull()?.mapToUi()

@@ -75,6 +75,7 @@ class AccountManager @Inject constructor(
             val eventParameters = "{\"UserID\":\"${accountIdListener.value ?: "0"}\"" +
                     if (eventParam != null) ",$eventParam}" else "}"
             YandexMetrica.reportEvent(text, eventParameters)
+
         }
     }
 

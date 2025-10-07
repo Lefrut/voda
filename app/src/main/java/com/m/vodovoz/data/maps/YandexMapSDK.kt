@@ -9,6 +9,6 @@ interface YandexMapSDK {
 
     suspend fun searchAddressInMoscow(address: String): YandexSearchResponse
 
-    suspend fun getRoute(start: Point, end: Point): List<Point>
+    suspend fun getRoutes(start: Point, end: Point): List<Point>
 
 }
