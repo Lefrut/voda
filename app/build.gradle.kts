@@ -18,9 +18,7 @@ android {
         applicationId = "com.m.vodovoz"
         minSdk = 21
         targetSdk = 35
-        //todo - release
         versionCode = 2012
-        //todo - release
         versionName = "2.0.12"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
