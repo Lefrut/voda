@@ -126,7 +126,12 @@ class AddressesFlowViewModel @Inject constructor(
             s.copy(buttonLoading = true)
         }
 
+
         val selectedAddress = stateSnapshot.selectedAddress
+        val addressDetails = vodovozServiceRepository.getAddAddressDetails(
+            selectedAddress.id
+        ).singleGetOrNull() ?: return@launch
+
         val mapAddress = mapServiceRepository.searchAddressInMoscow(
             selectedAddress.address
         ).singleGetOrNull()?.toUi() ?: return@launch
@@ -143,14 +148,13 @@ class AddressesFlowViewModel @Inject constructor(
             0f
         } else {
             val nearestPoint = coreMapArea.findNearestPointTo(addressPoint) ?: return@launch
-            val route = nearestPoint.routeTo(addressPoint) ?: return@launch
-            route.distanceKm()
+            val routes = addressPoint.routeTo(nearestPoint) ?: return@launch
+            val distanceKm = routes.minOf { route ->
+                val dropCount = 30.coerceAtMost(route.size - 2)
+                route.dropLast(dropCount).distanceKm()
+            }
+            distanceKm
         }
-
-        val addressDetails = vodovozServiceRepository.getAddAddressDetails(
-            selectedAddress.id
-        ).singleGetOrNull() ?: return@launch
-
 
         val addressParams = with(addressDetails) {
             linearSwitches.mapToUi().associate { w ->
@@ -164,7 +168,8 @@ class AddressesFlowViewModel @Inject constructor(
 
         vodovozServiceRepository.updateAddress(
             addressId = selectedAddress.id,
-            address = mapAddress.copy(fromMoscowToPoint = fromMoscowToPoint.roundToInt()).toDomain(),
+            address = mapAddress.copy(fromMoscowToPoint = fromMoscowToPoint.roundToInt())
+                .toDomain(),
             params = addressParams
         ).singleResult().onSuccess {
             sendEvent(AddressesEvents.GoBackToOrdering(selectedAddress))
@@ -174,11 +179,11 @@ class AddressesFlowViewModel @Inject constructor(
         updateState { s -> s.copy(buttonLoading = false) }
     }
 
-    private suspend fun MapPointUi.routeTo(end: MapPointUi): List<MapPointUi>? {
-        return mapServiceRepository.getRoute(
+    private suspend fun MapPointUi.routeTo(end: MapPointUi): List<List<MapPointUi>>? {
+        return mapServiceRepository.getRoutes(
             start = this.toDomain(),
             end = end.toDomain()
-        ).singleGetOrNull()?.mapToUi()
+        ).singleGetOrNull()?.map { it.mapToUi() }
     }
 
 

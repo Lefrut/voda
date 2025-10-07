@@ -157,11 +157,14 @@ class MapFlowViewModel @Inject constructor(
             return 0f
         }
 
-        val route = coreMapArea
+        val routes = coreMapArea
             .findNearestPointTo(addressPoint)
             ?.routeTo(addressPoint) ?: return null
 
-        val fromMoscowToPoint = route.distanceKm()
+        val fromMoscowToPoint = routes.minOf { route ->
+            val dropCount = 30.coerceAtMost(route.size - 2)
+            route.dropLast(dropCount).distanceKm()
+        }
 
         return fromMoscowToPoint
     }
@@ -275,11 +278,11 @@ class MapFlowViewModel @Inject constructor(
         newSearchJob.join()
     }
 
-    private suspend fun MapPointUi.routeTo(end: MapPointUi): List<MapPointUi>? {
-        return mapServiceRepository.getRoute(
+    private suspend fun MapPointUi.routeTo(end: MapPointUi): List<List<MapPointUi>>? {
+        return mapServiceRepository.getRoutes(
             start = this.toDomain(),
             end = end.toDomain()
-        ).singleResult().getOrNull()?.mapToUi()
+        ).singleResult().getOrNull()?.map { it.mapToUi() }
     }
 
     fun changeToSearchMode() {

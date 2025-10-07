@@ -281,8 +281,8 @@ interface VodovozService {
 
     @GET("oformlenie/address.php?action=update&iblock_id=102")
     suspend fun updateAddress(
-        @Query("userid") userId: Long?,
         @Query("addressid") addressId: Long,
+        @Query("userid") userId: Long?,
         @Query("ktochka") geo: String?,
         @Query("city") city: String? = null,
         @Query("street") street: String? = null,

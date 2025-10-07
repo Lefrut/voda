@@ -183,7 +183,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
             request = {
                 val point = address?.point
                 val geo = point?.let {
-                    "${point.lat} ${point.lon}"
+                    "${point.lat},${point.lon}"
                 }
 
                 vodovozService.updateAddress(
