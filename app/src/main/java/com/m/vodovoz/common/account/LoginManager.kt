@@ -1,6 +1,7 @@
 package com.m.vodovoz.common.account
 
 import com.m.vodovoz.common.like.LikeManager
+import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.common.token.FirebaseTokenManager
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -9,7 +10,8 @@ import javax.inject.Singleton
 class LoginManager @Inject constructor(
     private val accountManager: AccountManager,
     private val likeManager: LikeManager,
-    private val firebaseTokenManager: FirebaseTokenManager
+    private val firebaseTokenManager: FirebaseTokenManager,
+    private val tabManager: TabManager
 ) {
 
 
@@ -17,6 +19,7 @@ class LoginManager @Inject constructor(
         userId: Long,
         userToken: String
     ) {
+        tabManager.updateBottomNavCartState()
         accountManager.updateUserId(userId)
         accountManager.updateUserToken(userToken)
         likeManager.updateLikesAfterLogin()

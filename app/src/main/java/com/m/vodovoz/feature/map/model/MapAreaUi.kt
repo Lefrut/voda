@@ -32,8 +32,9 @@ fun MapAreaModel.toUi(): MapAreaUi {
 }
 
 
-fun MapAreaUi.findNearestPointsTo(target: MapPointUi, count: Int = 10): List<MapPointUi> {
-    return points.sortedBy {
-        it.distanceBetween(target)
-    }.take(count)
+fun MapAreaUi.findNearestPointsTo(target: MapPointUi, count: Int = 12): List<MapPointUi> {
+    return points
+        .sortedBy { it.distanceBetween(target) }
+        .filterIndexed { index, _ -> index % 2 == 0 }
+        .take(count)
 }

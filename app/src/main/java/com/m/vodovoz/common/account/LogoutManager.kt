@@ -1,10 +1,10 @@
 package com.m.vodovoz.common.account
 
 import com.m.vodovoz.common.cookie.CookieManager
+import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.common.token.FirebaseTokenManager
 import com.m.vodovoz.common.water_app.WaterApp
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
-import com.m.vodovoz.domain.general.respository.WaterAppRepository
 import com.m.vodovoz.feature.profile.waterapp.WaterAppHelper
 import com.m.vodovoz.util.extensions.singleResult
 import kotlinx.coroutines.flow.Flow
@@ -20,6 +20,7 @@ class LogoutManager @Inject constructor(
     private val firebaseTokenManager: FirebaseTokenManager,
     private val cookieManager: CookieManager,
     private val waterAppHelper: WaterAppHelper,
+    private val tabManager: TabManager,
 ) {
 
 
@@ -43,7 +44,10 @@ class LogoutManager @Inject constructor(
                 waterAppHelper.runOrCancelWorkManager(
                     WaterApp.NotificationSettings.Default
                 )
-            }
+            },
+            suspend {
+                tabManager.updateBottomNavCartState()
+            },
         )
 
         logoutResult.onSuccess {

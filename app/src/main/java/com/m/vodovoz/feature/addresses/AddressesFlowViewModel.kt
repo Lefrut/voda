@@ -37,12 +37,14 @@ import com.m.vodovoz.util.extensions.onSuccess
 import com.m.vodovoz.util.extensions.singleGetOrNull
 import com.m.vodovoz.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.retry
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import kotlin.math.roundToInt
+import kotlin.math.floor
 
 @HiltViewModel
 @Stable
@@ -148,10 +150,12 @@ class AddressesFlowViewModel @Inject constructor(
             0f
         } else {
             val nearestPoints = coreMapArea.findNearestPointsTo(addressPoint)
-            val routes = nearestPoints.mapNotNull { nearestPoint ->
-                addressPoint.routeTo(nearestPoint)
+            val routes = nearestPoints.map { nearestPoint ->
+                async { nearestPoint.routeTo(addressPoint) }
+            }.awaitAll()
+            val fromMoscowToPoint = routes.minOf { route ->
+                route?.distanceKm() ?: Float.MAX_VALUE
             }
-            val fromMoscowToPoint = routes.minOf { route -> route.distanceKm() }
             fromMoscowToPoint
         }
 
@@ -167,7 +171,7 @@ class AddressesFlowViewModel @Inject constructor(
 
         vodovozServiceRepository.updateAddress(
             addressId = selectedAddress.id,
-            address = mapAddress.copy(fromMoscowToPoint = fromMoscowToPoint.roundToInt())
+            address = mapAddress.copy(fromMoscowToPoint = floor(fromMoscowToPoint).toInt())
                 .toDomain(),
             params = addressParams
         ).singleResult().onSuccess {
