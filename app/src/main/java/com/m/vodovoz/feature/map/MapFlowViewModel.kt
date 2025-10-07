@@ -18,7 +18,7 @@ import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
 import com.m.vodovoz.feature.map.model.MapAddressUi
 import com.m.vodovoz.feature.map.model.MapAreaUi
 import com.m.vodovoz.feature.map.model.MapPopupWindowUi
-import com.m.vodovoz.feature.map.model.findNearestPointTo
+import com.m.vodovoz.feature.map.model.findNearestPointsTo
 import com.m.vodovoz.feature.map.model.mapToUi
 import com.m.vodovoz.feature.map.model.toUi
 import com.m.vodovoz.ui.mvi.Event
@@ -157,14 +157,11 @@ class MapFlowViewModel @Inject constructor(
             return 0f
         }
 
-        val routes = coreMapArea
-            .findNearestPointTo(addressPoint)
-            ?.routeTo(addressPoint) ?: return null
-
-        val fromMoscowToPoint = routes.minOf { route ->
-            val dropCount = 30.coerceAtMost(route.size - 2)
-            route.dropLast(dropCount).distanceKm()
+        val nearestPoints = coreMapArea.findNearestPointsTo(addressPoint)
+        val routes = nearestPoints.mapNotNull { nearestPoint ->
+            addressPoint.routeTo(nearestPoint)
         }
+        val fromMoscowToPoint = routes.minOf { route -> route.distanceKm() }
 
         return fromMoscowToPoint
     }
@@ -257,32 +254,27 @@ class MapFlowViewModel @Inject constructor(
                 .map { model -> model.toUi() }
 
             currentAddressResult.onSuccess { mapAddress ->
-                val fromMoscowToPoint = getDistanceFromAreaBoundToAddress(
-                    mapAddress.point
-                ) ?: return@childLaunch
-                val updatedMapAddress = mapAddress.copy(
-                    fromMoscowToPoint = fromMoscowToPoint.roundToInt()
-                )
+
                 updateState { s ->
                     s.copy(
-                        currentMapAddress = updatedMapAddress,
+                        currentMapAddress = mapAddress,
                         mode = MapUiMode.OnlyMap,
                         addressIsLoading = false,
-                        addressIsError = with(updatedMapAddress) { house.isBlank() }
+                        addressIsError = with(mapAddress) { house.isBlank() }
                     )
                 }
-                successful(updatedMapAddress)
+                successful(mapAddress)
             }
         }
         activeSearchJobs.add(newSearchJob)
         newSearchJob.join()
     }
 
-    private suspend fun MapPointUi.routeTo(end: MapPointUi): List<List<MapPointUi>>? {
+    private suspend fun MapPointUi.routeTo(end: MapPointUi): List<MapPointUi>? {
         return mapServiceRepository.getRoutes(
             start = this.toDomain(),
             end = end.toDomain()
-        ).singleResult().getOrNull()?.map { it.mapToUi() }
+        ).singleResult().getOrNull()?.mapToUi()
     }
 
     fun changeToSearchMode() {
@@ -310,23 +302,30 @@ class MapFlowViewModel @Inject constructor(
         updateState { s ->
             s.copy(buttonIsLoading = true)
         }
+        val fromMoscowToPoint = getDistanceFromAreaBoundToAddress(
+            mapAddress.point
+        ) ?: return@launch
+
+        val updatedMapAddress = mapAddress.copy(
+            fromMoscowToPoint = fromMoscowToPoint.roundToInt()
+        )
 
         val screenType = stateSnapshot.screenType
 
         when (screenType) {
             MapScreenTypeUi.Add -> {
-                sendEvent(MapFlowEvents.GoToAddAddress(mapAddress))
+                sendEvent(MapFlowEvents.GoToAddAddress(updatedMapAddress))
             }
 
             MapScreenTypeUi.Edit -> {
-                sendEvent(MapFlowEvents.BackToAddAddress(mapAddress))
+                sendEvent(MapFlowEvents.BackToAddAddress(updatedMapAddress))
             }
         }
 
+    }.invokeOnCompletion {
         updateState { s ->
             s.copy(buttonIsLoading = false)
         }
-
     }
 
     fun showDeliveryBottomSheet() {

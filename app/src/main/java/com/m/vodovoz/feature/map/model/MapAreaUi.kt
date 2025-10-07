@@ -3,8 +3,6 @@ package com.m.vodovoz.feature.map.model
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
 import com.m.vodovoz.design_system.model.MapPointUi
-import com.m.vodovoz.design_system.model.contains
-import com.m.vodovoz.design_system.model.distanceKm
 import com.m.vodovoz.design_system.model.mapToUi
 import com.m.vodovoz.domain.general.model.location.MapAreaModel
 import com.m.vodovoz.ui.graphics.fromHexOrUnspecified
@@ -34,6 +32,8 @@ fun MapAreaModel.toUi(): MapAreaUi {
 }
 
 
-fun MapAreaUi.findNearestPointTo(target: MapPointUi): MapPointUi? {
-    return points.minByOrNull { it.distanceBetween(target) }
+fun MapAreaUi.findNearestPointsTo(target: MapPointUi, count: Int = 10): List<MapPointUi> {
+    return points.sortedBy {
+        it.distanceBetween(target)
+    }.take(count)
 }

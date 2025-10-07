@@ -111,9 +111,9 @@ class MapServiceRepositoryImpl @Inject constructor(
     override fun getRoutes(
         start: MapPointModel,
         end: MapPointModel,
-    ): Flow<Result<List<List<MapPointModel>>>> = flow {
+    ): Flow<Result<List<MapPointModel>>> = flow {
         val points = mapSDK.getRoutes(start.toData(), end.toData())
-        emit(Result.success(points.map { it.mapToDomain() }))
+        emit(Result.success(points.mapToDomain()))
     }.catchResult()
 
 

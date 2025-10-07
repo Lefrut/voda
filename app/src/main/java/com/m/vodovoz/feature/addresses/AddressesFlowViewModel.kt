@@ -25,7 +25,7 @@ import com.m.vodovoz.feature.addresses.model.AddressScreenTypeUi
 import com.m.vodovoz.feature.addresses.model.AddressUi
 import com.m.vodovoz.feature.addresses.model.mapToUi
 import com.m.vodovoz.feature.map.model.MapAreaUi
-import com.m.vodovoz.feature.map.model.findNearestPointTo
+import com.m.vodovoz.feature.map.model.findNearestPointsTo
 import com.m.vodovoz.feature.map.model.mapToUi
 import com.m.vodovoz.feature.map.model.toDomain
 import com.m.vodovoz.feature.map.model.toUi
@@ -147,13 +147,12 @@ class AddressesFlowViewModel @Inject constructor(
         val fromMoscowToPoint = if (coreMapArea.contains(addressPoint)) {
             0f
         } else {
-            val nearestPoint = coreMapArea.findNearestPointTo(addressPoint) ?: return@launch
-            val routes = addressPoint.routeTo(nearestPoint) ?: return@launch
-            val distanceKm = routes.minOf { route ->
-                val dropCount = 30.coerceAtMost(route.size - 2)
-                route.dropLast(dropCount).distanceKm()
+            val nearestPoints = coreMapArea.findNearestPointsTo(addressPoint)
+            val routes = nearestPoints.mapNotNull { nearestPoint ->
+                addressPoint.routeTo(nearestPoint)
             }
-            distanceKm
+            val fromMoscowToPoint = routes.minOf { route -> route.distanceKm() }
+            fromMoscowToPoint
         }
 
         val addressParams = with(addressDetails) {
@@ -179,11 +178,11 @@ class AddressesFlowViewModel @Inject constructor(
         updateState { s -> s.copy(buttonLoading = false) }
     }
 
-    private suspend fun MapPointUi.routeTo(end: MapPointUi): List<List<MapPointUi>>? {
+    private suspend fun MapPointUi.routeTo(end: MapPointUi): List<MapPointUi>? {
         return mapServiceRepository.getRoutes(
             start = this.toDomain(),
             end = end.toDomain()
-        ).singleGetOrNull()?.map { it.mapToUi() }
+        ).singleGetOrNull()?.mapToUi()
     }
 
 
