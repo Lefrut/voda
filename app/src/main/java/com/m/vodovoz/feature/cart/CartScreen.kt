@@ -31,6 +31,7 @@ import com.m.vodovoz.design_system.composables.scaffold.VodovozScaffold
 import com.m.vodovoz.feature.cart.composables.CartBody
 import com.m.vodovoz.feature.cart.composables.CartTopBar
 import com.m.vodovoz.feature.cart.composables.PromotionCodeBottomSheet
+import okhttp3.internal.toLongOrDefault
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -53,7 +54,12 @@ fun CartScreen(viewModel: CartFlowViewModel, viewState: CartFlowViewModel.CartSt
                     modifier = Modifier.padding(horizontal = 16.dp),
                     text = stringResource(id = R.string.place_order),
                     onClick = {
-                        if (!viewState.blockOrderButton) {
+                        val isZeroPrice = viewState.orderSummary.firstOrNull()?.run {
+                            value.ifEmpty { displayValue }.filter { it.isDigit() }
+                                .toLongOrDefault(0) <= 0
+                        } ?: true
+
+                        if (!viewState.blockOrderButton && !isZeroPrice) {
                             viewModel.navigateToOrder()
                         }
                     }

@@ -1,5 +1,6 @@
 package com.m.vodovoz.design_system.model
 
+import android.location.Location
 import android.os.Parcelable
 import androidx.compose.animation.core.AnimationVector2D
 import androidx.compose.animation.core.TwoWayConverter
@@ -9,13 +10,14 @@ import com.m.vodovoz.feature.map.model.MapAreaUi
 import com.m.vodovoz.ui.yandex_map.distanceBetween
 import com.yandex.mapkit.geometry.Point
 import kotlinx.parcelize.Parcelize
+import kotlin.math.floor
 
 @Parcelize
 @Immutable
 data class MapPointUi(
     val lat: Double,
     val lon: Double,
-): Parcelable {
+) : Parcelable {
     companion object {
         val Empty = MapPointUi(0.0, 0.0)
 
@@ -37,8 +39,7 @@ fun List<MapPointUi>.distanceKm(): Float {
 }
 
 
-
-fun MapAreaUi.contains(point: MapPointUi): Boolean{
+fun MapAreaUi.contains(point: MapPointUi): Boolean {
     val x = point.lon
     val y = point.lat
     var inside = false
@@ -65,8 +66,8 @@ fun MapPointModel.toUi(): MapPointUi {
     return MapPointUi(lat, lon)
 }
 
-fun List<MapPointModel>.mapToUi(): List<MapPointUi>{
-    return map{ point -> point.toUi() }
+fun List<MapPointModel>.mapToUi(): List<MapPointUi> {
+    return map { point -> point.toUi() }
 }
 
 fun MapPointUi.toDomain(): MapPointModel {

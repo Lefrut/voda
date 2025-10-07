@@ -28,6 +28,9 @@ import com.m.vodovoz.util.extensions.debounceWithMax
 import com.m.vodovoz.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -39,7 +42,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.retryWhen
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import kotlin.math.roundToInt
+import kotlin.math.floor
 
 @HiltViewModel
 @Stable
@@ -158,10 +161,10 @@ class MapFlowViewModel @Inject constructor(
         }
 
         val nearestPoints = coreMapArea.findNearestPointsTo(addressPoint)
-        val routes = nearestPoints.mapNotNull { nearestPoint ->
-            addressPoint.routeTo(nearestPoint)
-        }
-        val fromMoscowToPoint = routes.minOf { route -> route.distanceKm() }
+        val routes = nearestPoints.map { nearestPoint ->
+            coroutineScope { async { nearestPoint.routeTo(addressPoint) } }
+        }.awaitAll()
+        val fromMoscowToPoint = routes.minOf { route -> route?.distanceKm() ?: Float.MAX_VALUE }
 
         return fromMoscowToPoint
     }
@@ -307,7 +310,7 @@ class MapFlowViewModel @Inject constructor(
         ) ?: return@launch
 
         val updatedMapAddress = mapAddress.copy(
-            fromMoscowToPoint = fromMoscowToPoint.roundToInt()
+            fromMoscowToPoint = floor(fromMoscowToPoint).toInt()
         )
 
         val screenType = stateSnapshot.screenType

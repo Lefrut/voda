@@ -72,9 +72,6 @@ class MapServiceRepositoryImpl @Inject constructor(
                 components = yandexAddressComponents,
                 kinds = listOf(
                     Address.Component.Kind.LOCALITY,
-                    Address.Component.Kind.DISTRICT,
-                    Address.Component.Kind.AREA,
-                    Address.Component.Kind.PROVINCE
                 )
             ) ?: ""
 
@@ -89,7 +86,6 @@ class MapServiceRepositoryImpl @Inject constructor(
                 components = yandexAddressComponents,
                 kinds = listOf(
                     Address.Component.Kind.HOUSE,
-                    Address.Component.Kind.ENTRANCE
                 )
             ) ?: ""
 
