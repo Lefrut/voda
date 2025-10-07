@@ -105,7 +105,7 @@ class YandexMapSDKImpl @Inject constructor() : YandexMapSDK {
     }
 
 
-    override suspend fun getRoutes(start: Point, end: Point): List<List<Point>> {
+    override suspend fun getRoutes(start: Point, end: Point): List<Point> {
         return suspendCancellableCoroutine { cont ->
             val requestPoints = listOf(
                 RequestPoint(start, RequestPointType.WAYPOINT, null),
@@ -118,8 +118,11 @@ class YandexMapSDKImpl @Inject constructor() : YandexMapSDK {
                 VehicleOptions(),
                 object : DrivingSession.DrivingRouteListener {
                     override fun onDrivingRoutes(routes: MutableList<DrivingRoute>) {
-                        val route = routes.map { it.geometry.points }.take(10)
-                        cont.resume(route) { _, _, _ -> }
+                        val route = routes.map { it.geometry.points }.firstOrNull()
+                        if (route != null) {
+                            cont.resume(route) { _, _, _ ->
+                            }
+                        }
                     }
 
                     override fun onDrivingRoutesError(error: Error) {
