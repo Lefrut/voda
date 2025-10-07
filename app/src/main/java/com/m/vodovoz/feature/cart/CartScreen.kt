@@ -54,15 +54,14 @@ fun CartScreen(viewModel: CartFlowViewModel, viewState: CartFlowViewModel.CartSt
                     modifier = Modifier.padding(horizontal = 16.dp),
                     text = stringResource(id = R.string.place_order),
                     onClick = {
-                        val isZeroPrice = viewState.orderSummary.firstOrNull()?.run {
-                            value.ifEmpty { displayValue }.filter { it.isDigit() }
-                                .toLongOrDefault(0) <= 0
-                        } ?: true
-
-                        if (!viewState.blockOrderButton && !isZeroPrice) {
+                        if (!viewState.blockOrderButton) {
                             viewModel.navigateToOrder()
                         }
-                    }
+                    },
+                    enabled = !(viewState.orderSummary.firstOrNull()?.run {
+                        value.ifEmpty { displayValue }.filter { it.isDigit() }
+                            .toLongOrDefault(0) <= 0
+                    } ?: true)
                 )
             }
         }
