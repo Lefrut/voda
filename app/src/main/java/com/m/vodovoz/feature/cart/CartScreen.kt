@@ -80,6 +80,7 @@ fun CartScreen(viewModel: CartFlowViewModel, viewState: CartFlowViewModel.CartSt
                         CartBody(
                             cartItems = viewState.items,
                             cartPresent = viewState.present,
+                            removableItemId = viewState.currentRemoveItem?.itemId,
                             countCartItemsText = viewState.countText,
                             bottlesButton = viewState.bottlesButton,
                             presentButton = viewState.presentButton,

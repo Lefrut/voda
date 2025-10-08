@@ -210,7 +210,10 @@ class CartFlowViewModel @Inject constructor(
 
     fun closeTrashDialog() = viewModelScope.launch {
         updateState { s ->
-            s.copy(showRemoveItemDialog = false)
+            s.copy(
+                showRemoveItemDialog = false,
+                currentRemoveItem = null
+            )
         }
     }
 

@@ -28,8 +28,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.m.vodovoz.R
 import com.m.vodovoz.design_system.composables.button.VodovozRadioButton
+import com.m.vodovoz.design_system.composables.decoration.RemovableItem
 import com.m.vodovoz.design_system.composables.decoration.VodovozHorizontalDivider
-import com.m.vodovoz.design_system.composables.decoration.VodovozSwipeToDismiss
 import com.m.vodovoz.design_system.model.SectionUi
 import com.m.vodovoz.design_system.modifiers.bottomLine
 import com.m.vodovoz.feature.addresses.model.AddressScreenTypeUi
@@ -40,6 +40,7 @@ import com.m.vodovoz.feature.addresses.model.AddressUi
 fun AddressesBody(
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues,
+    removableAddressId: Long?,
     addressSections: List<SectionUi<AddressUi>>,
     screenTypeUi: AddressScreenTypeUi,
     selectedAddress: AddressUi,
@@ -70,10 +71,10 @@ fun AddressesBody(
                 items = addressSection.items,
                 key = { _, address -> address.id }
             ) { i, address ->
-
-                VodovozSwipeToDismiss(
+                RemovableItem(
                     modifier = Modifier.animateItem(fadeInSpec = null, fadeOutSpec = null),
-                    onRemove = { onRemoveAddressSwipe(address) }
+                    isRevealed = removableAddressId == address.id,
+                    onExpanded = { onRemoveAddressSwipe(address) }
                 ) {
                     AddressItemCard(
                         modifier = if (i != addressSection.items.lastIndex) Modifier.bottomLine(
@@ -85,7 +86,6 @@ fun AddressesBody(
                         onClick = onAddressSelect,
                         onEditClick = onEditAddressClick
                     )
-
                 }
             }
 

@@ -25,6 +25,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.fromHtml
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.m.vodovoz.R
 import com.m.vodovoz.design_system.ExtendedTheme
@@ -164,7 +165,8 @@ fun CartItemCard(
                             modifier = Modifier.alignByBaseline(),
                             text = cartItem.priceText,
                             color = MaterialTheme.colorScheme.onBackground,
-                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
+                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
+                            maxLines = 1
                         )
                         if (cartItem.hasDiscount) {
                             val discountText = stringResource(
@@ -180,6 +182,8 @@ fun CartItemCard(
                                 style = ExtendedTheme.typography.labelExtraSmallVariant.copy(
                                     textDecoration = TextDecoration.LineThrough
                                 ),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
                             )
                         }
                     }

@@ -103,6 +103,7 @@ fun AddressesScreen(
                     AddressesBody(
                         contentPadding = PaddingValues(bottom = paddingValues.calculateBottomPadding() + 24.dp),
                         screenTypeUi = viewState.screenType,
+                        removableAddressId = viewState.currentRemoveAddress?.id,
                         addressSections = viewState.addressSections,
                         selectedAddress = viewState.selectedAddress,
                         onEditAddressClick = { address ->
