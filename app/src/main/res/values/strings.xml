@@ -32,6 +32,8 @@
     <string name="about_app">О приложении</string>
     <string name="cancel">Отмена</string>
 
+    <string name="no">Нет</string>
+
     <string name="bring_here_btn_text">Доставить сюда</string>
     <string name="write_comment_btn_text">Написать отзыв</string>
 

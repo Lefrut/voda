@@ -6,12 +6,15 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.res.stringResource
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.m.vodovoz.ui.mvi.collectAsState
 import androidx.navigation.fragment.findNavController
+import com.m.vodovoz.R
 import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.design_system.VodovozTheme
+import com.m.vodovoz.design_system.composables.dialogs.VodovozDialog
 import com.m.vodovoz.design_system.effects.LifecycleEffect
 import com.m.vodovoz.feature.cart.gifts.model.GiftsEvent
 import dagger.hilt.android.AndroidEntryPoint
@@ -47,6 +50,23 @@ class GiftsFragment : Fragment() {
                     val viewState by viewModel.collectAsState()
 
                     GiftsScreen(viewModel = viewModel, viewState = viewState)
+
+                    if(viewState.showForAdultsDialog){
+                        with(viewState.forAdultsDialog){
+                            VodovozDialog(
+                                title = title,
+                                description = description,
+                                acceptButtonText = button.name,
+                                cancelButtonText = stringResource(id = R.string.no),
+                                onDismiss = {
+                                    viewModel.closeForAdultsDialog()
+                                },
+                                onAccept = {
+                                    viewModel.acceptForAdults()
+                                }
+                            )
+                        }
+                    }
 
                     LifecycleEffect {
                         viewModel.events.collect { event ->

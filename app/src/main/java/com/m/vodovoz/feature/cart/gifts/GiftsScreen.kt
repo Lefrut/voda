@@ -67,7 +67,7 @@ fun GiftsScreen(viewModel: GiftsViewModel, viewState: GiftsState) {
                 )
             }
 
-            viewState.gifts.forEachIndexed { index, gift ->
+            viewState.items.forEachIndexed { index, gift ->
                 key(gift.name + gift.id) {
                     Column {
                         GiftItem(
@@ -77,7 +77,7 @@ fun GiftsScreen(viewModel: GiftsViewModel, viewState: GiftsState) {
                             viewModel.selectGift(presentItem)
                         }
 
-                        if (viewState.gifts.lastIndex != index) {
+                        if (viewState.items.lastIndex != index) {
                             HorizontalDivider(
                                 modifier = Modifier.padding(vertical = 16.dp),
                                 thickness = 1.dp,
@@ -98,7 +98,7 @@ fun GiftsScreen(viewModel: GiftsViewModel, viewState: GiftsState) {
                 contentColor = button.textColor.takeOrElse { MaterialTheme.colorScheme.background }
             ),
             onClick = {
-                viewModel.chooseGift()
+                viewModel.tryToChooseGift()
             }
         )
     }

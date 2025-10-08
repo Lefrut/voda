@@ -2,7 +2,6 @@ package com.m.vodovoz.design_system.composables.decoration
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -28,14 +27,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.input.pointer.util.VelocityTracker1D
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.m.vodovoz.R
-import com.m.vodovoz.util.extensions.debugLog
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
@@ -43,17 +41,20 @@ import kotlin.math.roundToInt
 fun SwipeableItem(
     modifier: Modifier = Modifier,
     isRevealed: Boolean = false,
+    gesturesEnabled: Boolean = true,
     actions: @Composable RowScope.() -> Unit,
     onExpanded: () -> Unit = {},
     onCollapsed: () -> Unit = {},
     content: @Composable () -> Unit,
 ) {
+
     var contextMenuWidth by remember {
         mutableFloatStateOf(0f)
     }
     val offset = remember {
         Animatable(initialValue = 0f)
     }
+
     val scope = rememberCoroutineScope()
 
     LaunchedEffect(isRevealed, contextMenuWidth) {
@@ -83,35 +84,34 @@ fun SwipeableItem(
             modifier = Modifier
                 .fillMaxSize()
                 .offset { IntOffset(-offset.value.roundToInt(), 0) }
-                .pointerInput(contextMenuWidth) {
+                .pointerInput(contextMenuWidth, gesturesEnabled) {
+                    if(!gesturesEnabled) return@pointerInput
+
+                    val velocityTracker = VelocityTracker1D(true)
+                    val velocityThreshold = 1500f
+
                     detectHorizontalDragGestures(
-                        onHorizontalDrag = { _, dragAmount ->
+                        onDragStart = {
+                            velocityTracker.resetTracking()
+                        },
+                        onHorizontalDrag = { change, dragAmount ->
+                            change.consume()
                             scope.launch {
-                                debugLog {
-                                    "dragAmount: $dragAmount"
-                                }
+                                velocityTracker.addDataPoint(change.uptimeMillis, -dragAmount)
                                 val newOffset =
                                     (offset.value + -dragAmount).coerceIn(0f, contextMenuWidth)
-                                debugLog {
-                                    "newOffset: $newOffset"
-                                }
                                 offset.snapTo(newOffset)
                             }
                         },
                         onDragEnd = {
-                            when {
-                                offset.value >= contextMenuWidth / 2f -> {
-                                    scope.launch {
-                                        offset.animateTo(contextMenuWidth)
-                                        onExpanded()
-                                    }
-                                }
-
-                                else -> {
-                                    scope.launch {
-                                        offset.animateTo(0f)
-                                        onCollapsed()
-                                    }
+                            scope.launch {
+                                val currentVelocity = velocityTracker.calculateVelocity()
+                                if (currentVelocity > velocityThreshold || offset.value >= contextMenuWidth / 2f) {
+                                    offset.animateTo(contextMenuWidth)
+                                    onExpanded()
+                                } else {
+                                    offset.animateTo(0f)
+                                    onCollapsed()
                                 }
                             }
                         }
@@ -132,19 +132,10 @@ fun RemovableItem(
     onCollapsed: () -> Unit = {},
     content: @Composable () -> Unit,
 ) {
-    val removableItemModifier = if (gesturesEnabled) {
-        modifier
-    } else modifier.pointerInput(Unit) {
-        awaitEachGesture {
-            awaitPointerEvent(PointerEventPass.Initial).changes.forEach { inputChange ->
-                inputChange.consume()
-            }
-        }
-    }
-
     SwipeableItem(
-        modifier = removableItemModifier,
+        modifier = modifier,
         isRevealed = isRevealed,
+        gesturesEnabled = gesturesEnabled,
         actions = {
             Box(
                 modifier = Modifier
