@@ -4,6 +4,7 @@ import com.m.vodovoz.common.model.VodovozBoolean
 import com.m.vodovoz.common.model.boolean
 import com.m.vodovoz.common.model.from
 import com.m.vodovoz.data.vodovoz_service.di.toVodovozUrl
+import com.m.vodovoz.data.vodovoz_service.model.TOVAR_18_DTO
 import com.m.vodovoz.data.vodovoz_service.model.cart.CART_KNOPKA_DTO
 import com.m.vodovoz.data.vodovoz_service.model.cart.CartDetailsDTO
 import com.m.vodovoz.data.vodovoz_service.model.cart.ITOG_ITEM_DTO
@@ -127,7 +128,8 @@ fun PRODUCT_PODAROK_DTO.toDomain(): CartPresentItemModel? {
         name = NAME ?: "",
         image = DETAIL_PICTURE?.toVodovozUrl() ?: "",
         price = EXTENDED_PRICE?.PRICE,
-        oldPrice = EXTENDED_PRICE?.OLD_PRICE
+        oldPrice = EXTENDED_PRICE?.OLD_PRICE,
+        forAdults = TOVAR18?.toDomain()
     )
 }
 

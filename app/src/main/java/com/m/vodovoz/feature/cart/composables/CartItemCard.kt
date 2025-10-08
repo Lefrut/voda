@@ -71,7 +71,7 @@ fun CartItemCard(
             AsyncImageBlur(
                 model = cartItem.image,
                 showBlur = forAdults != null,
-                text = forAdults?.textBlur ?: ""
+                placeholderText = forAdults?.textBlur ?: ""
             ) { asyncImagePainter ->
                 Image(
                     painter = asyncImagePainter,

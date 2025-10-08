@@ -34,7 +34,6 @@ import com.m.vodovoz.R
 import com.m.vodovoz.design_system.ExtendedTheme
 import com.m.vodovoz.design_system.VodovozTheme
 import com.m.vodovoz.design_system.composables.blur.AsyncImageBlur
-import com.m.vodovoz.design_system.composables.blur.VodovozBlur
 import com.m.vodovoz.design_system.composables.chip.VodovozColorChipSmall
 import com.m.vodovoz.design_system.model.Button
 import com.m.vodovoz.design_system.model.ColorfulButtonUi
@@ -70,7 +69,7 @@ fun LinearProductCard(
                     .fillMaxHeight(),
                 model = product.image,
                 showBlur = product.forAdults != null,
-                text = forAdults?.textBlur ?: ""
+                placeholderText = forAdults?.textBlur ?: ""
             ) { asyncImagePainter ->
                 LinearImageSection(
                     imagePainter = asyncImagePainter,

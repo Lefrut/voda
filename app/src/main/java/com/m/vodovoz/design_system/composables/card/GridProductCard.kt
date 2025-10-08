@@ -19,7 +19,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -34,14 +33,11 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImagePainter
-import coil3.compose.rememberAsyncImagePainter
 import com.m.vodovoz.R
 import com.m.vodovoz.design_system.ExtendedTheme
 import com.m.vodovoz.design_system.VodovozTheme
 import com.m.vodovoz.design_system.composables.blur.AsyncImageBlur
-import com.m.vodovoz.design_system.composables.blur.VodovozBlur
 import com.m.vodovoz.design_system.composables.chip.VodovozColorChipSmall
 import com.m.vodovoz.design_system.model.Button
 import com.m.vodovoz.design_system.model.ColorfulButtonUi
@@ -92,7 +88,7 @@ fun GridProductCard(
             modifier = Modifier.clip(MaterialTheme.shapes.small),
             model = product.image,
             showBlur = forAdults != null,
-            text = forAdults?.textBlur ?: ""
+            placeholderText = forAdults?.textBlur ?: ""
         ) { imagePainter ->
             GridImageSection(
                 imagePainter = imagePainter,

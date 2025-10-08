@@ -19,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
@@ -28,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.m.vodovoz.R
 import com.m.vodovoz.design_system.ExtendedTheme
+import com.m.vodovoz.design_system.composables.blur.VodovozBlur
 import com.m.vodovoz.design_system.composables.button.VodovozButton
 import com.m.vodovoz.design_system.composables.button.VodovozRadioButton
 import com.m.vodovoz.design_system.composables.top_bar.VodovozTopBar
@@ -120,12 +122,20 @@ private fun GiftItem(
             .padding(horizontal = 16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        AsyncImage(
-            model = item.image,
-            contentDescription = null,
-            modifier = Modifier.size(50.dp),
-            contentScale = ContentScale.FillBounds
-        )
+        val forAdults = item.forAdults
+        VodovozBlur(
+            modifier = Modifier.clip(MaterialTheme.shapes.extraSmall),
+            showBlur = forAdults != null,
+            placeholderText = "",
+            placeholderImage = null
+        ) {
+            AsyncImage(
+                model = item.image,
+                contentDescription = null,
+                modifier = Modifier.size(50.dp),
+                contentScale = ContentScale.FillBounds
+            )
+        }
         Column(
             modifier = Modifier
                 .weight(1f)
