@@ -57,7 +57,6 @@ class CartFlowViewModel @Inject constructor(
     private suspend fun listenCartUpdates() {
         cartManager.observeRefreshCart().filter { update -> update }.collect {
             refresh()
-            tabManager.updateBottomNavCartState()
             cartManager.updateRefreshCart(false)
         }
     }
@@ -68,6 +67,8 @@ class CartFlowViewModel @Inject constructor(
         }
 
         val currentCartVersion = cartManager.cartVersion
+
+        val updateBottomCartJob = launch { tabManager.updateBottomNavCartState() }
         val cartDetailsResult = vodovozServiceRepository.getCartDetails(
             stateSnapshot.promoCode
         ).singleResult()
@@ -119,6 +120,7 @@ class CartFlowViewModel @Inject constructor(
                 s.copy(uiState = uiState)
             }
         }
+        updateBottomCartJob.join()
     }
 
     fun refresh() = viewModelScope.launch {
