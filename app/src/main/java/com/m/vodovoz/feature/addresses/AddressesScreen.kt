@@ -66,7 +66,8 @@ fun AddressesScreen(
                             }
                         }
                     },
-                    isLoading = viewState.buttonLoading
+                    isLoading = viewState.buttonLoading,
+                    enabled = viewState.buttonEnabled
                 )
             }
 

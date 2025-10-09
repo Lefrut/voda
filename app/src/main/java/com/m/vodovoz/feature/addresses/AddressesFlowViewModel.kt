@@ -229,18 +229,24 @@ class AddressesFlowViewModel @Inject constructor(
             )
         }
         vodovozServiceRepository.removeAddress(currentRemoveAddress.id.toInt()).singleResult()
-        refresh()
+        refresh().join()
     }
 
     fun refresh() = viewModelScope.launch {
         updateState {
-            it.copy(showRefreshIndicator = true)
+            it.copy(
+                showRefreshIndicator = true,
+                buttonEnabled = false
+            )
         }
 
         fetchAddresses().join()
 
         updateState {
-            it.copy(showRefreshIndicator = false)
+            it.copy(
+                showRefreshIndicator = false,
+                buttonEnabled = true
+            )
         }
     }
 
@@ -262,6 +268,7 @@ class AddressesFlowViewModel @Inject constructor(
         val showRefreshIndicator: Boolean = false,
         val mapAreas: List<MapAreaUi> = emptyList(),
         val buttonLoading: Boolean = false,
+        val buttonEnabled: Boolean = false,
     ) : State {
     }
 

@@ -50,6 +50,11 @@ class AddressesFragment : Fragment() {
         super.onStop()
     }
 
+    override fun onResume() {
+        super.onResume()
+        viewModel.refresh()
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -61,16 +66,11 @@ class AddressesFragment : Fragment() {
             setContent {
                 val viewState by viewModel.collectAsState()
                 
-
                 VodovozTheme {
                     AddressesScreen(
                         viewModel = viewModel,
                         viewState = viewState
                     )
-                }
-
-                LaunchedEffect(Unit) {
-                    viewModel.refresh()
                 }
 
                 LifecycleEffect {
