@@ -125,6 +125,7 @@ interface VodovozServiceRepository {
         deliveryTimeInterval: String,
         phone: String,
         paymentMethodId: Long,
+        paymentChange: String?,
         callYouId: Long? = null,
         coupon: String?,
         balance: String?,

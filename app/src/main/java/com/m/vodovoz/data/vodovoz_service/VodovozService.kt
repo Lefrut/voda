@@ -68,8 +68,6 @@ import okhttp3.RequestBody
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
-import retrofit2.http.Header
-import retrofit2.http.HeaderMap
 import retrofit2.http.Headers
 import retrofit2.http.Multipart
 import retrofit2.http.POST
@@ -147,12 +145,13 @@ interface VodovozService {
         @Query("indos") deliveryTimeInterval: String,
         @Query("dopphone") phone: String,
         @Query("payment") paymentMethodId: Long,
+        @Query("sdacha") paymentChange: String?,
         @Query("nettovar") callYouId: Long?,
         @Query("kupon") coupon: String?,
         @Query("schet") balance: String?,
         @Query("device", encoded = true) deviceInfo: String?,
-        @Query("driver") notifyDriverId: String? = null,
-        @Query("comment") message: String? = null,
+        @Query("driver") notifyDriverId: String?,
+        @Query("comment") message: String?,
         @QueryMap queries: Map<String, String>? = null,
     ): Response<VodovozResponseDTO<VodovozPlaceholderDTO>>
 
@@ -625,7 +624,7 @@ interface VodovozService {
 
     @POST("comments.php")
     suspend fun sendComment(
-        @Body body: RequestBody
+        @Body body: RequestBody,
     ): Response<VodovozResponseDTO<VodovozPlaceholderDTO>>
 
     @GET("osnova/form/obratnayasvyaz.php?action=glav")

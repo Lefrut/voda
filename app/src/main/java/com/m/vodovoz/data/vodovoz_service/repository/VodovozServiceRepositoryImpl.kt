@@ -24,7 +24,6 @@ import com.m.vodovoz.data.vodovoz_service.model.VodovozErrorResponseDTO
 import com.m.vodovoz.data.vodovoz_service.model.VodovozPlaceholderDTO
 import com.m.vodovoz.data.vodovoz_service.model.VodovozResponseDTO
 import com.m.vodovoz.data.vodovoz_service.model.WaitFeedbackProductsDTO
-import com.m.vodovoz.data.vodovoz_service.model.order.OrderDetailsDTO
 import com.m.vodovoz.data.vodovoz_service.model.order.OrdersHistoryDetailsDTO
 import com.m.vodovoz.data.vodovoz_service.paging.VodovozPagerFactory
 import com.m.vodovoz.design_system.model.widgets.FieldUi
@@ -331,6 +330,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
         deliveryTimeInterval: String,
         phone: String,
         paymentMethodId: Long,
+        paymentChange: String?,
         callYouId: Long?,
         coupon: String?,
         balance: String?,
@@ -348,11 +348,14 @@ class VodovozServiceRepositoryImpl @Inject constructor(
                     deliveryTimeInterval = deliveryTimeInterval,
                     phone = phone,
                     paymentMethodId = paymentMethodId,
+                    paymentChange = paymentChange,
+                    notifyDriverId = notifyDriverId,
                     callYouId = callYouId,
                     coupon = coupon,
                     balance = balance,
                     deviceInfo = deviceInfo,
-                    queries = params
+                    queries = params,
+                    message = message
                 )
             },
             mapper = {

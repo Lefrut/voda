@@ -36,7 +36,6 @@ import com.m.vodovoz.util.extensions.singleResult
 import com.m.vodovoz.util.formatters.VodovozDateFormatters
 import com.m.vodovoz.util.toIntRoundOrNull
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import javax.inject.Inject
@@ -306,6 +305,7 @@ class OrderingFlowViewModel @Inject constructor(
                 deliveryTimeInterval = ordering.timeInterval,
                 phone = ordering.recipientPhone,
                 paymentMethodId = ordering.paymentId.toLongOrNull() ?: 0,
+                paymentChange = ordering.paymentChange,
                 callYouId = ordering.callYouId.toLongOrNull(),
                 coupon = coupon,
                 balance = VodovozBoolean.from(ordering.paymentBalance).value,
