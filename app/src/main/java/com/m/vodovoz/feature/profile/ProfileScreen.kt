@@ -86,24 +86,26 @@ fun ProfileScreen(
                 val bannerImages = viewState.banners.map { bannerUi -> bannerUi.detailPicture }
                 val pagerState = rememberAutoScrollPagerState(itemsCount = bannerImages.size)
 
-                AutoScrollImagePager(
-                    modifier = Modifier
-                        .padding(top = 17.dp, bottom = 16.dp)
-                        .height(68.dp),
-                    images = bannerImages,
-                    onImageClick = { page ->
-                        val banner = viewState.banners[page]
-                        viewModel.activateBannerAction(banner)
-                    },
-                    pageWidth = Dp.Unspecified,
-                    pagerState = pagerState,
-                    chip = { page ->
-                        val advertising = viewState.banners[page].advertising
-                        advertising?.let {
-                            AdvertisingChip { viewModel.showAdvertisingBottomSheet(advertising) }
+                if(bannerImages.isNotEmpty()){
+                    AutoScrollImagePager(
+                        modifier = Modifier
+                            .padding(top = 17.dp, bottom = 16.dp)
+                            .height(68.dp),
+                        images = bannerImages,
+                        onImageClick = { page ->
+                            val banner = viewState.banners[page]
+                            viewModel.activateBannerAction(banner)
+                        },
+                        pageWidth = Dp.Unspecified,
+                        pagerState = pagerState,
+                        chip = { page ->
+                            val advertising = viewState.banners[page].advertising
+                            advertising?.let {
+                                AdvertisingChip { viewModel.showAdvertisingBottomSheet(advertising) }
+                            }
                         }
-                    }
-                )
+                    )
+                }
             }
 
 
