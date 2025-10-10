@@ -27,6 +27,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.m.vodovoz.R
+import com.m.vodovoz.design_system.ExtendedTheme
 import com.m.vodovoz.design_system.composables.button.VodovozRadioButton
 import com.m.vodovoz.design_system.composables.decoration.RemovableItem
 import com.m.vodovoz.design_system.composables.decoration.VodovozHorizontalDivider
@@ -137,7 +138,7 @@ private fun AddressItemCard(
                 .weight(1f),
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-            if (address.description.isNotEmpty() && screenTypeUi != AddressScreenTypeUi.Choose) {
+            if (address.description.isNotEmpty()) {
                 Text(
                     text = address.description,
                     style = MaterialTheme.typography.bodyMedium.copy(
@@ -155,6 +156,18 @@ private fun AddressItemCard(
                 style = MaterialTheme.typography.bodyMedium.copy(letterSpacing = 0.sp),
                 color = MaterialTheme.colorScheme.onBackground
             )
+
+            if (address.otherInfo.isNotEmpty()) {
+                val buttonSmallStyle = ExtendedTheme.typography.buttonSmall
+                Text(
+                    text = address.otherInfo,
+                    style = buttonSmallStyle.copy(
+                        letterSpacing = 0.sp,
+                        lineHeight = buttonSmallStyle.fontSize
+                    ),
+                    color = MaterialTheme.colorScheme.surfaceTint
+                )
+            }
         }
 
         Icon(

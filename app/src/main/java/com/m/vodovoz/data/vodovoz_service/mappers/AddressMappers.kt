@@ -86,7 +86,8 @@ fun ADDRESS_ITEM_DTO.toDomain(): AddressModel? {
         id = ID ?: return null,
         personTypeId = PERSON_TYPE_ID ?: -1,
         description = OPISANIE ?: "",
-        address = ADRESS ?: return null
+        address = ADRESS ?: return null,
+        otherInfo = PODADRESS ?: ""
     )
 }
 

@@ -12,9 +12,16 @@ data class AddressUi(
     val personTypeId: Int,
     val description: String,
     val address: String,
-): Parcelable {
-    companion object{
-        val Empty = AddressUi(-1, -1, "", "")
+    val otherInfo: String,
+) : Parcelable {
+    companion object {
+        val Empty = AddressUi(
+            id = -1,
+            personTypeId = -1,
+            description = "",
+            address = "",
+            otherInfo = ""
+        )
     }
 }
 
@@ -24,5 +31,11 @@ fun List<AddressModel>.mapToUi(): List<AddressUi> {
 }
 
 fun AddressModel.toUi(): AddressUi {
-    return AddressUi(id, personTypeId, description, address)
+    return AddressUi(
+        id = id,
+        personTypeId = personTypeId,
+        description = description,
+        address = address,
+        otherInfo = otherInfo
+    )
 }
