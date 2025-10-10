@@ -21,6 +21,9 @@ suspend fun <T> Flow<Result<T>>.singleResult() =
 suspend fun <T> Flow<Result<T>>.singleGetOrNull() =
     firstOrNull()?.getOrNull()
 
+suspend fun <T> Flow<Result<T>>.singleGetOrThrow() =
+    first().getOrThrow()
+
 
 
 suspend fun <T> Flow<Result<T>>.deferredResult(): Deferred<Result<T>> {
