@@ -4,5 +4,6 @@ data class SwitchModel(
     val id: String,
     val name: String,
     val value: Boolean,
-    val type: String
+    val type: String,
+    val enabled: Boolean
 )

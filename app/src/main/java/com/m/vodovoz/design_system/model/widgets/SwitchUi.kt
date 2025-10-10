@@ -23,7 +23,7 @@ fun SwitchModel.toUi(): SwitchUi {
         id = id,
         name = name,
         value = VodovozBoolean.from(value).toBoolean(),
-        enabled = true
+        enabled = enabled
     )
 }
 

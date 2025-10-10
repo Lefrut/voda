@@ -13,5 +13,7 @@ data class SWITCH_DTO(
     @Json(name = "TYPE")
     val TYPE: String?,
     @Json(name = "VALUE")
-    val VALUE: Boolean?
+    val VALUE: Boolean?,
+    @Json(name = "ZABLOCKPOLE")
+    val ZABLOCKPOLE: String?,
 )

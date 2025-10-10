@@ -251,9 +251,7 @@ class AddAddressViewModel @Inject constructor(
             updateState { s ->
 
                 val addressField = addAddressDetails.addressField.toUi()
-                val linearSwitches = addAddressDetails.linearSwitches.mapToUi().filter { switch ->
-                    addressId == null || (switch.id == PRIVATE_HOUSE_ID && VodovozAddressType.Personal.value == addressType) || switch.id != DELIVERY_OFFICE_ID
-                }
+                val linearSwitches = addAddressDetails.linearSwitches.mapToUi()
                 s.copy(
                     uiState = AddAddressUiState.Form,
                     linearFields = addAddressDetails.linearFields.mapToUi(),

@@ -1,5 +1,8 @@
 package com.m.vodovoz.data.vodovoz_service.mappers
 
+import com.m.vodovoz.common.model.VodovozBoolean
+import com.m.vodovoz.common.model.boolean
+import com.m.vodovoz.common.model.from
 import com.m.vodovoz.data.vodovoz_service.di.toVodovozUrl
 import com.m.vodovoz.data.vodovoz_service.model.address.ADDRESSES_SECTION_DTO
 import com.m.vodovoz.data.vodovoz_service.model.address.ADDRESS_ITEM_DTO
@@ -10,18 +13,18 @@ import com.m.vodovoz.data.vodovoz_service.model.address.MapAreaDTO
 import com.m.vodovoz.data.vodovoz_service.model.address.MapPopupWindowDTO
 import com.m.vodovoz.data.vodovoz_service.model.address.MapZonesDTO
 import com.m.vodovoz.data.vodovoz_service.model.address.SWITCH_DTO
-import com.m.vodovoz.domain.general.model.widgets.ImageButtonModel
-import com.m.vodovoz.domain.general.model.location.MapPopupWindowModel
-import com.m.vodovoz.domain.general.model.location.MapZonesModel
-import com.m.vodovoz.domain.general.model.widgets.SwitchModel
 import com.m.vodovoz.domain.general.model.location.AddAddressDetailsModel
 import com.m.vodovoz.domain.general.model.location.AddressModel
 import com.m.vodovoz.domain.general.model.location.MapAreaModel
 import com.m.vodovoz.domain.general.model.location.MapPointModel
+import com.m.vodovoz.domain.general.model.location.MapPopupWindowModel
+import com.m.vodovoz.domain.general.model.location.MapZonesModel
 import com.m.vodovoz.domain.general.model.product.SectionModel
+import com.m.vodovoz.domain.general.model.widgets.ImageButtonModel
+import com.m.vodovoz.domain.general.model.widgets.SwitchModel
 import kotlin.random.Random
 
-fun MapAreaDTO.toDomain(): MapAreaModel?{
+fun MapAreaDTO.toDomain(): MapAreaModel? {
     return MapAreaModel(
         id = ID ?: return null,
         name = TEXT ?: "",
@@ -36,7 +39,7 @@ fun MapAreaDTO.toDomain(): MapAreaModel?{
     )
 }
 
-fun List<MapAreaDTO>.mapToDomain(): List<MapAreaModel>{
+fun List<MapAreaDTO>.mapToDomain(): List<MapAreaModel> {
     return mapNotNull { it.toDomain() }.ifEmpty { throw IllegalArgumentException("MapAreas can't be empty") }
 }
 
@@ -107,6 +110,7 @@ fun SWITCH_DTO.toDomain(): SwitchModel? {
         id = PROP_CODE ?: return null,
         name = NAME ?: return null,
         type = TYPE ?: "",
-        value = VALUE ?: false
+        value = VALUE ?: false,
+        enabled = !VodovozBoolean.from(ZABLOCKPOLE).boolean
     )
 }
