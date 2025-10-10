@@ -1,7 +1,13 @@
 package com.m.vodovoz.common.cart
 
+import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import java.util.concurrent.atomic.AtomicInteger
+import javax.inject.Inject
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
@@ -18,6 +24,15 @@ import kotlin.uuid.Uuid
  *
  * Клиент уведомляет корзину которая клиентов о нынешнем количестве элементов корзины.
  *
+ * В корзине хранится история операций, операция добавляется в корзину при обращении к интерфейсу корзины
+ * и корректных значений передаваемого продукта.
+ * Каждый новый запрос в корзине, добавляет операцию с нышней версией обновления, групируются по версии
+ * Если за 350 мл секунд не добавилась новая операция с данной версией обновления, то продукты начинают грузится
+ * Если продукт грузится то при запросе к корзине операция не добавляется
+ * В ходе выполнения запроса к интерфейсу корзины, с помощью операции и ее данных определяется операция к серверу,
+ * а так же способ возвращение корзины в состояние без ее воздействия.
+ * Операция возвращает результат, если результат неуспешный, то операция изменяет состояние на
+ *
  *
  *
  *
@@ -27,31 +42,13 @@ import kotlin.uuid.Uuid
 
 private suspend fun clientTest() {
 
-    val cart = object : AbstractAppCart() {
 
-        override suspend fun addProduct(id: Long, quantity: Int): Result<Unit> {
-            TODO("Not yet implemented")
-        }
-
-        override suspend fun addProducts(idsAndQuantities: Map<Long, Int>): Result<Unit> {
-            TODO("Not yet implemented")
-        }
-
-        override suspend fun changeProduct(id: Long, quantity: Int): Result<Unit> {
-            TODO("Not yet implemented")
-        }
-
-        override suspend fun changeProducts(idsAndQuantities: Map<Long, Int>): Result<Unit> {
-            TODO("Not yet implemented")
-        }
-
-    }
-
-    cart.addProduct(2, 10)
 
 }
 
-private abstract class AbstractAppCart : CartOperations {
+private abstract class AbstractAppCart constructor(
+    private val vodovozServiceRepository: VodovozServiceRepository,
+) : CartOperations {
 
     data class Item(
         val id: Long,
@@ -59,40 +56,85 @@ private abstract class AbstractAppCart : CartOperations {
         val quantity: Int,
     )
 
-    private val currentOperationsFlow: MutableStateFlow<List<Operation>> =
-        MutableStateFlow(emptyList())
-    private val currentOperations: List<Operation> get() = currentOperationsFlow.value
-    private val items: MutableSharedFlow<Map<Long, Item>> = MutableSharedFlow(1)
+    fun createItem(id: Long, quantity: Int): Item {
+        return Item(id, false, quantity)
+    }
+
+    fun createItems(idsAndQuantities: Map<Long, Int>): Map<Long, Item> {
+        return idsAndQuantities.mapValues { (id, quantity) -> createItem(id, quantity) }
+    }
+
+    private val updateVersion = AtomicInteger(0)
+    private val currentOperationsFlow: MutableStateFlow<Map<Int, List<Operation>>> =
+        MutableStateFlow(emptyMap())
+    private val itemsFlow: MutableSharedFlow<Map<Long, Item>> = MutableSharedFlow(1)
+
+    private val updatingMutex = Mutex()
+
+    protected suspend fun updateItems(block: Map<Long, Item>.() -> Map<Long, Item>): Map<Long, Item> =
+        updatingMutex.withLock {
+            val items = itemsFlow.firstOrNull() ?: return emptyMap()
+            val updatedItems = block(items)
+            itemsFlow.emit(updatedItems)
+            return updatedItems
+        }
 
     override suspend fun addProduct(id: Long, quantity: Int): Result<Unit> {
+        val item = createItem(id, quantity)
+        updateItems { plus(item.id to item) }
+
+
         TODO("Not yet implemented")
     }
 
     protected suspend fun doOperation(
         operation: Operation,
     ) {
-        currentOperationsFlow.emit(currentOperations + operation)
 
+        when (operation) {
+            is Operation.Add -> {
+                if (operation.idsAndQuantities.size > 1) {
+                    //vodovozServiceRepository.addMultipleProductsToCart()
+                } else {
+                    //vodovozServiceRepository.addProductToCart()
+                }
+            }
 
-
-        currentOperationsFlow.emit(currentOperations - operation)
+            is Operation.Change -> {
+                operation.idsAndQuantities.forEach { (id, quantity) ->
+                    vodovozServiceRepository.updateProductInCart(id, quantity)
+                }
+            }
+        }
     }
 
-    protected sealed class Operation{
+    protected sealed class Operation {
         abstract val operationId: String
         abstract val idsAndQuantities: Map<Long, Int>
 
+
         @OptIn(ExperimentalUuidApi::class)
-        protected data class Add(
+        data class Add(
             override val idsAndQuantities: Map<Long, Int>,
             override val operationId: String = Uuid.random().toString(),
         ) : Operation()
 
         @OptIn(ExperimentalUuidApi::class)
-        protected data class Change(
+        data class Change(
             override val idsAndQuantities: Map<Long, Int>,
-            override val operationId: String = Uuid.random().toString()
+            override val operationId: String = Uuid.random().toString(),
         ) : Operation()
+    }
+
+    private class SendCommand(
+
+    ) {
+
+        suspend fun send() {
+
+        }
+
+
     }
 
 }
