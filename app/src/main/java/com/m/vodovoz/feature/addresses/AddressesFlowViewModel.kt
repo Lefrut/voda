@@ -87,7 +87,7 @@ class AddressesFlowViewModel @Inject constructor(
             }
 
             val selectedAddress = addressSections.flatMap { it.items }.find {
-                it.id == selectedAddressId
+                it.id == selectedAddressId || it.id == stateSnapshot.selectedAddress.id
             } ?: addressSections.firstOrNull()?.items?.firstOrNull() ?: AddressUi.Empty
 
 
@@ -116,7 +116,7 @@ class AddressesFlowViewModel @Inject constructor(
     }
 
     fun navigateBack() = viewModelScope.launch {
-        sendEvent(AddressesEvents.GoBack)
+        sendEvent(AddressesEvents.GoBack(stateSnapshot.selectedAddress))
     }
 
     fun addAddress() = viewModelScope.launch {
@@ -225,7 +225,8 @@ class AddressesFlowViewModel @Inject constructor(
                     section.copy(items = section.items.filter { it.id != currentRemoveAddress.id })
                 },
                 showRemoveAddressDialog = false,
-                currentRemoveAddress = null
+                currentRemoveAddress = null,
+                selectedAddress = AddressUi.Empty
             )
         }
         vodovozServiceRepository.removeAddress(currentRemoveAddress.id.toInt()).singleResult()
@@ -251,7 +252,7 @@ class AddressesFlowViewModel @Inject constructor(
     }
 
     sealed class AddressesEvents : Event {
-        data object GoBack : AddressesEvents()
+        data class GoBack(val address: AddressUi) : AddressesEvents()
         data object GoToMap : AddressesEvents()
         data class GoToEditAddress(val addressId: Long, val addressName: String) : AddressesEvents()
         data class GoBackToOrdering(val address: AddressUi) : AddressesEvents()

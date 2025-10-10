@@ -84,8 +84,11 @@ class AddressesFragment : Fragment() {
     private suspend fun observeEvents() {
         viewModel.events.collect { event ->
             when (event) {
-                AddressesFlowViewModel.AddressesEvents.GoBack -> {
-                    findNavController().popBackStack()
+                is AddressesFlowViewModel.AddressesEvents.GoBack -> {
+                    with(findNavController()) {
+                        previousBackStackEntry?.savedStateHandle?.set("address", event.address)
+                        popBackStack()
+                    }
                 }
 
                 AddressesFlowViewModel.AddressesEvents.GoToMap -> {
