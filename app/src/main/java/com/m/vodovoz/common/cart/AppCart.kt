@@ -1,34 +1,41 @@
 package com.m.vodovoz.common.cart
 
-import com.m.vodovoz.common.cart.AbstractAppCart.Command
+import com.m.vodovoz.common.cart.AbstractAppCart.OperationCanceler
+import com.m.vodovoz.common.cart.AbstractAppCart.OperationRunner
 import com.m.vodovoz.domain.general.model.product.toCartProducts
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
 import com.m.vodovoz.util.extensions.singleGetOrThrow
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import java.util.UUID
 import java.util.concurrent.atomic.AtomicInteger
-import kotlin.uuid.ExperimentalUuidApi
-import kotlin.uuid.Uuid
 
 
 /** Задача:
- * Элемент корзины содержит информацию о его состоянии загрузки, количество в корзине и идентификатор.
+ * [AbstractAppCart.Item] содержит информацию о его состоянии загрузки, количество в корзине и идентификатор.
  *
- * Обращение к операциям корзины идет через интерфейс.
- * изменение(удаление и т.д.), добавление как одного так и нескольких эзкмемпялов корзины.
- * если в течении 350 не поступила новая операция, то экземпляр помечается в корзине как грузящийся,
- * после чего делается запрос в зависимости от операции. Корзина отправляет запроса на облачное изменение через объект,
- * после обновления корзины
+ * Обращение к операциям корзины идет через интерфейс [CartOperations] (изменение, удаление и т.д...).
  *
- * Клиент уведомляет корзину которая клиентов о нынешнем количестве элементов корзины.
+ * [AbstractAppCart] содержит объект, который содержит историю операций и уведомляет корзину о их готовности.
+ * Объект уведомляет корзину о операциях т.к. корзина подписывается.
  *
- * В корзине хранится история операций, операция добавляется в корзину при обращении к интерфейсу корзины.
  * В соответсвии с операцией выполняется обновление локальной корзины, идет ожидание и проверка является
  * ли этот экзмепляр корзины последним, если да, то в соответсвии с операцией выполняется
  * соответсвующий метод загрузки на сервер
@@ -41,24 +48,53 @@ import kotlin.uuid.Uuid
  *
  *
  *
- *
+ * Мне нужен объект котрый складирует информацию о списке операций и
  *
  *
  * */
 
 private suspend fun clientTest() {
 
-
 }
 
-private abstract class AbstractAppCart constructor(
+private abstract class AbstractAppCart(
     private val vodovozServiceRepository: VodovozServiceRepository,
+    dispatcher: CoroutineDispatcher = Dispatchers.Default,
 ) : CartOperations {
 
-    private val scope = CoroutineScope(Dispatchers.Default)
-    private val updateVersion = AtomicInteger(0)
-    private val currentOperationsFlow =
+    private val scope = CoroutineScope(dispatcher)
+    private val version = AtomicInteger(0)
+
+    private val _operationsFlow =
         MutableStateFlow<Map<Int, List<OperationInfo>>>(emptyMap())
+
+    private val operations = _operationsFlow.value
+
+    private fun operations(version: Int): List<OperationInfo> {
+        return _operationsFlow.value[version] ?: emptyList()
+    }
+
+    @OptIn(FlowPreview::class)
+    private val operationsExecutor = _operationsFlow
+        .map { map -> map[version.get()] ?: emptyList() }
+        .filter { map -> map.isNotEmpty() }
+        .distinctUntilChanged()
+        .debounce(350)
+        .onEach { version.incrementAndGet() }
+        .map { operationInfos ->
+            operationInfos.map { operationInfo ->
+                scope.async { typesWithOperationHandlers[operationInfo.type]?.run(operationInfo) }
+            }.awaitAll().mapNotNull { it }
+        }
+        .onEach { list ->
+            list.forEach { result ->
+                result.onFailure {
+
+                }
+            }
+        }
+        .launchIn(scope)
+
     private val itemsFlow = MutableSharedFlow<Map<Long, Item>>(1)
 
     private val updatingMutex = Mutex()
@@ -72,100 +108,166 @@ private abstract class AbstractAppCart constructor(
         return updatedItems
     }
 
-    override suspend fun addProduct(id: Long, quantity: Int): Result<Unit> {
-        val item = Item.createItem(id, quantity)
-        updateItems { plus(item.id to item) }
-
-        return Result.failure(Throwable())
-    }
-
-    protected suspend fun doOperation() {
-
-    }
-
-    @OptIn(ExperimentalUuidApi::class)
-    sealed class OperationInfo(
-        val idsAndQuantities: Map<Long, Int>,
-        val type: OperationType,
-        val operationId: String = Uuid.random().toString(),
-    ){
-
-
-    }
-
-    enum class OperationType {
-        MultiAdd, Add, Change;
-    }
-
-    private val addCommand = createFlowCommand {
-        idsAndQuantities.map { (id, quantity) ->
-            vodovozServiceRepository.addProductToCart(id, quantity)
-        }.first()
-    }
-
-    private val addMultiCommand: Command = createFlowCommand {
-        vodovozServiceRepository.addMultipleProductsToCart(
-            idsAndQuantities.toCartProducts().productsIdsWithQuantity
-        )
-    }
-
-    private val changeCommand: Command = createFlowCommand {
-        vodovozServiceRepository.addMultipleProductsToCart(
-            idsAndQuantities.toCartProducts().productsIdsWithQuantity
-        )
-    }
-
-
-    private fun createFlowCommand(
-        block: suspend OperationInfo.() -> Flow<Result<String>>,
-    ) = Command {
-        runCatching { block(it).singleGetOrThrow() }
-    }
-
-
-    private val typesWithCommands = mapOf(
-        OperationType.Add to addCommand,
-        OperationType.Change to changeCommand,
-        OperationType.MultiAdd to addMultiCommand
+    override suspend fun addProduct(
+        id: Long,
+        quantity: Int,
+    ) = recordOperation(
+        type = OperationType.Add,
+        item = newItem(id, quantity)
     )
 
+    override suspend fun changeProducts(
+        idsAndQuantities: Map<Long, Int>,
+    ) = newItems(idsAndQuantities).forEach { (id, item) ->
+        changeProduct(id, item.quantity)
+    }
 
-    fun interface Command {
-        suspend fun run(operation: OperationInfo): Result<Unit>
+    protected suspend fun recordOperation(
+        type: OperationType,
+        item: Item,
+    ) = recordOperation(
+        type = type,
+        items = listOf(item)
+    )
+
+    protected suspend fun recordOperation(
+        type: OperationType,
+        items: List<Item>,
+    ) {
+        if (items.isEmpty()) return
+        val operation = OperationInfo(items, type)
+
+        updatingMutex.withLock {
+            val currentVersion = version.get()
+            val updatedOperations = operations(currentVersion).plus(operation)
+            _operationsFlow.update {
+                it.mapValues { (version, operations) ->
+                    if (currentVersion == version) updatedOperations
+                    else operations
+                }
+            }
+        }
     }
 
     data class Item(
         val id: Long,
         val isLoading: Boolean,
         val quantity: Int,
+    )
+
+    data class OperationInfo(
+        val items: List<Item>,
+        val type: OperationType,
+        val id: String = UUID.randomUUID().toString(),
+        val state: OperationState = OperationState.Loading,
     ) {
-
-        companion object {
-            fun createItem(id: Long, quantity: Int): Item {
-                return Item(id, false, quantity)
-            }
-
-            fun createItems(idsAndQuantities: Map<Long, Int>): Map<Long, Item> {
-                return idsAndQuantities.mapValues { (id, quantity) ->
-                    createItem(id, quantity)
-                }
-            }
+        init {
+            check(items.isNotEmpty()) { "OperationInfo items can't be empty" }
         }
 
+        val firstItem by lazy { items.first() }
+    }
 
+    enum class OperationType {
+        MultiAdd, Add, Change, Clear;
+    }
+
+    enum class OperationState {
+        Loading,
+        Success,
+        Canceled;
     }
 
 
+    private val typesWithOperationHandlers = mapOf(
+        OperationType.Add to OperationHandler(
+            run = createOperationRunner {
+                vodovozServiceRepository.addProductToCart(firstItem.id, firstItem.quantity)
+            },
+            cancel = createOperationCanceler {
+
+            }
+        ),
+        OperationType.Change to OperationHandler(
+            run = createOperationRunner {
+                vodovozServiceRepository.updateProductInCart(firstItem.id, firstItem.quantity)
+            },
+            cancel = createOperationCanceler {
+
+            }
+        ),
+        OperationType.MultiAdd to OperationHandler(
+            run = createOperationRunner {
+                vodovozServiceRepository.addMultipleProductsToCart(items.format())
+            },
+            cancel = createOperationCanceler {
+
+            }
+        ),
+        OperationType.Clear to OperationHandler(
+            run = createOperationRunner {
+                vodovozServiceRepository.clearCart()
+            },
+            cancel = createOperationCanceler {
+
+            }
+        )
+    )
+
+    class OperationHandler(
+        run: OperationRunner = OperationRunner { runCatching {} },
+        cancel: OperationCanceler = OperationCanceler { },
+    ) : OperationRunner by run, OperationCanceler by cancel {
+
+        companion object {
+            val empty = OperationHandler()
+        }
+    }
+
+    fun interface OperationRunner {
+        suspend fun run(operation: OperationInfo): Result<Unit>
+    }
+
+    fun interface OperationCanceler {
+        suspend fun cancel(operation: OperationInfo)
+    }
+
+    private fun createOperationRunner(
+        block: suspend OperationInfo.() -> Flow<Result<String>>,
+    ) = OperationRunner { operationInfo ->
+        runCatching { block(operationInfo).singleGetOrThrow() }
+    }
+
+    private fun createOperationCanceler(
+        block: suspend OperationInfo.() -> Unit,
+    ) = OperationCanceler { operationInfo ->
+        runCatching { block(operationInfo) }
+    }
+
+    fun newItem(id: Long, quantity: Int): Item {
+        return Item(id, false, quantity)
+    }
+
+    fun newItems(idsAndQuantities: Map<Long, Int>): Map<Long, Item> {
+        return idsAndQuantities.mapValues { (id, quantity) ->
+            newItem(id, quantity)
+        }
+    }
+
+}
+
+private fun List<AbstractAppCart.Item>.format(): String {
+    return associate { it.id to it.quantity }.toCartProducts().productsIdsWithQuantity
 }
 
 
 private interface CartOperations {
 
-    suspend fun addProduct(id: Long, quantity: Int): Result<Unit>
+    suspend fun addProduct(id: Long, quantity: Int)
 
-    suspend fun addProducts(idsAndQuantities: Map<Long, Int>): Result<Unit>
+    suspend fun addProducts(idsAndQuantities: Map<Long, Int>)
 
-    suspend fun changeProduct(id: Long, quantity: Int): Result<Unit>
+    suspend fun changeProduct(id: Long, quantity: Int)
 
-    suspend fun changeProducts(idsAndQuantities: Map<Long, Int>): Result<Unit>
+    suspend fun changeProducts(idsAndQuantities: Map<Long, Int>)
 }
