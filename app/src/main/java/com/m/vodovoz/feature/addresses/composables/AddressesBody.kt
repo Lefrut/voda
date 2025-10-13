@@ -54,7 +54,7 @@ fun AddressesBody(
         contentPadding = contentPadding
     ) {
         addressSections.forEachIndexed { index, addressSection ->
-            if (screenTypeUi == AddressScreenTypeUi.Choose && addressSection.items.isNotEmpty()) {
+            if (addressSection.items.isNotEmpty()) {
                 item {
                     Text(
                         modifier = Modifier.padding(
@@ -90,7 +90,7 @@ fun AddressesBody(
                 }
             }
 
-            if (index != addressSections.lastIndex && screenTypeUi != AddressScreenTypeUi.Add && addressSection.items.isNotEmpty()) {
+            if (index != addressSections.lastIndex && addressSection.items.isNotEmpty()) {
                 item {
                     VodovozHorizontalDivider()
                 }
