@@ -4,6 +4,7 @@ import com.m.vodovoz.common.cart.AbstractAppCart.Item
 import com.m.vodovoz.domain.general.model.product.toCartProducts
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
 import com.m.vodovoz.util.extensions.singleGetOrThrow
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -100,41 +101,43 @@ private abstract class AbstractAppCart(
     private val scope = CoroutineScope(dispatcher)
     private val version = AtomicInteger(0)
 
-    private val _operationsFlow =
+    private val _operationsByVersionFlow =
         MutableStateFlow<Map<Int, List<OperationInfo>>>(emptyMap())
 
-    private val operations = _operationsFlow.value
-
-    private fun operations(version: Int): List<OperationInfo> {
-        return _operationsFlow.value[version] ?: emptyList()
+    private fun getOperationsByVersion(version: Int): List<OperationInfo> {
+        return _operationsByVersionFlow.value[version] ?: emptyList()
     }
 
     @OptIn(FlowPreview::class)
-    private val operationsExecutor = _operationsFlow
-        .map { map -> map[version.get()] ?: emptyList() }
-        .filter { map -> map.isNotEmpty() }
+    private val operationsExecutor = _operationsByVersionFlow
+        .map { getOperationsByVersion(version.get()) }
+        .filter { it.isNotEmpty() }
         .distinctUntilChanged()
         .debounce(350)
-        .onEach { version.incrementAndGet() }
-        .debounce(50)
+        .onEach {
+            updatingMutex.withLock {
+                if (it != getOperationsByVersion(version.get())) {
+                    version.incrementAndGet()
+                } else {
+                    throw CancellationException("Operations mismatch, aborting")
+                }
+            }
+        }
         .map { operationInfos ->
             operationInfos.map { operationInfo ->
                 scope.async { operationHandlers[operationInfo.type].run(operationInfo) }
             }.awaitAll()
         }
-        .onEach { _ ->
-            //todo
-        }
         .launchIn(scope)
 
-    private val itemsFlow = MutableSharedFlow<Map<Long, Item>>(1)
+    private val itemsSharedFlow = MutableSharedFlow<Map<Long, Item>>(1)
 
     protected suspend fun updateItems(
         block: Map<Long, Item>.() -> Map<Long, Item>,
     ): Map<Long, Item> = updatingMutex.withLock {
-        val items = itemsFlow.firstOrNull() ?: return emptyMap()
+        val items = itemsSharedFlow.firstOrNull() ?: return emptyMap()
         val updatedItems = block(items)
-        itemsFlow.emit(updatedItems)
+        itemsSharedFlow.emit(updatedItems)
         return updatedItems
     }
 
@@ -182,8 +185,8 @@ private abstract class AbstractAppCart(
 
         updatingMutex.withLock {
             val currentVersion = version.get()
-            val updatedOperations = operations(currentVersion).plus(operation)
-            _operationsFlow.update {
+            val updatedOperations = getOperationsByVersion(currentVersion).plus(operation)
+            _operationsByVersionFlow.update {
                 it.mapValues { (version, operations) ->
                     if (currentVersion == version) updatedOperations
                     else operations
