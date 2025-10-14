@@ -74,6 +74,7 @@ class OrderingFlowViewModel @Inject constructor(
                 }
 
                 s.copy(
+                    ordering = OrderingUi.Empty,
                     title = orderingDetails.title,
                     comment = s.comment ?: orderingDetails.commentField?.toUi(),
                     paymentSection = orderingDetails.paymentSection.toUi { items ->

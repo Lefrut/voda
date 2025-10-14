@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
@@ -71,6 +72,10 @@ class AddressesFragment : Fragment() {
                         viewModel = viewModel,
                         viewState = viewState
                     )
+
+                    BackHandler {
+                        viewModel.navigateBack()
+                    }
                 }
 
                 LifecycleEffect {
