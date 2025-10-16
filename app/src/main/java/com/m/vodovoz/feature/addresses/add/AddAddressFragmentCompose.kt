@@ -41,7 +41,6 @@ class AddAddressFragment : Fragment() {
     @Inject
     lateinit var tabManager: TabManager
 
-
     private val mapKit: MapKit by lazy { MapKitFactory.getInstance() }
 
     override fun onStart() {

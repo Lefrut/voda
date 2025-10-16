@@ -62,39 +62,26 @@ private abstract class AbstractAppCart(
     dispatcher: CoroutineDispatcher = Dispatchers.Default,
 ) : CartOperations {
 
-    private val operationHandlers: OperationHandlerFactory = OperationHandlerOwner(
-        multiAdd = OperationHandler(
-            run = createOperationRunner {
-                vodovozServiceRepository.addProductToCart(firstItem.id, firstItem.quantity)
-            },
-            cancel = createOperationCanceler {
-
+    private val multiAddHandler = OperationHandler(
+        run = createOperationRunner {
+            vodovozServiceRepository.addProductToCart(firstItem.id, firstItem.quantity)
+        },
+        cancel = createOperationCanceler {
+            updateItems {
+                values.minus(items.toSet()).associateBy { it.id }
             }
-        ),
-        add = OperationHandler(
-            run = createOperationRunner {
-                vodovozServiceRepository.updateProductInCart(firstItem.id, firstItem.quantity)
-            },
-            cancel = createOperationCanceler {
+        }
+    )
 
+    private val addHandler = OperationHandler(
+        run = createOperationRunner {
+            vodovozServiceRepository.updateProductInCart(firstItem.id, firstItem.quantity)
+        },
+        cancel = createOperationCanceler {
+            updateItems {
+                values.minus(items.toSet()).associateBy { it.id }
             }
-        ),
-        clear = OperationHandler(
-            run = createOperationRunner {
-                vodovozServiceRepository.addMultipleProductsToCart(items.format())
-            },
-            cancel = createOperationCanceler {
-
-            }
-        ),
-        change = OperationHandler(
-            run = createOperationRunner {
-                vodovozServiceRepository.clearCart()
-            },
-            cancel = createOperationCanceler {
-
-            }
-        )
+        }
     )
 
     private val updatingMutex = Mutex()
@@ -125,19 +112,19 @@ private abstract class AbstractAppCart(
         }
         .map { operationInfos ->
             operationInfos.map { operationInfo ->
-                scope.async { operationHandlers[operationInfo.type].run(operationInfo) }
+                scope.async { getOperationHandler(operationInfo.type).run(operationInfo) }
             }.awaitAll()
         }
         .launchIn(scope)
 
-    private val itemsSharedFlow = MutableSharedFlow<Map<Long, Item>>(1)
+    private val _itemsSharedFlow = MutableSharedFlow<Map<Long, Item>>(1)
 
     protected suspend fun updateItems(
         block: Map<Long, Item>.() -> Map<Long, Item>,
     ): Map<Long, Item> = updatingMutex.withLock {
-        val items = itemsSharedFlow.firstOrNull() ?: return emptyMap()
+        val items = _itemsSharedFlow.firstOrNull() ?: return emptyMap()
         val updatedItems = block(items)
-        itemsSharedFlow.emit(updatedItems)
+        _itemsSharedFlow.emit(updatedItems)
         return updatedItems
     }
 
@@ -195,6 +182,38 @@ private abstract class AbstractAppCart(
         }
     }
 
+    private fun getOperationHandler(operationType: OperationType): OperationHandler {
+        return when (operationType) {
+            OperationType.MultiAdd -> multiAddHandler
+            OperationType.Add -> addHandler
+            OperationType.Change -> OperationHandler(
+                run = createOperationRunner {
+                    vodovozServiceRepository.updateProductInCart(
+                        productId = firstItem.id,
+                        quantity = firstItem.quantity
+                    )
+                },
+                cancel = createOperationCanceler {
+                    updateItems {
+                        values.minus(items.toSet()).associateBy { it.id }
+                    }
+                }
+            )
+
+            OperationType.Clear -> OperationHandler(
+                run = createOperationRunner {
+                    vodovozServiceRepository.clearCart()
+                },
+                cancel = createOperationCanceler {
+                    updateItems {
+                        values.minus(items.toSet()).associateBy { it.id }
+                    }
+                }
+            )
+
+        }
+    }
+
     data class Item(
         val id: Long,
         val isLoading: Boolean,
@@ -226,27 +245,34 @@ private fun createOperationCanceler(
 }
 
 
-private interface OperationHandlerFactory {
+private interface OperationStrategy :
+    LocalUpdatableOperation,
+    OnlineUpdatableOperation,
+    CancelableOperation {
 
-    operator fun get(operationType: OperationType): OperationHandler
+    override suspend fun updateLocal(operation: OperationInfo)
+
+    override suspend fun updateOnline(operation: OperationInfo): Result<Unit>
+
+    override suspend fun cancel(operation: OperationInfo)
 
 }
 
-private class OperationHandlerOwner(
-    private val multiAdd: OperationHandler,
-    private val add: OperationHandler,
-    private val clear: OperationHandler,
-    private val change: OperationHandler,
-) : OperationHandlerFactory {
+private fun interface LocalUpdatableOperation {
 
-    override fun get(operationType: OperationType): OperationHandler {
-        return when (operationType) {
-            OperationType.MultiAdd -> multiAdd
-            OperationType.Add -> add
-            OperationType.Change -> change
-            OperationType.Clear -> clear
-        }
-    }
+    suspend fun updateLocal(operation: OperationInfo)
+
+}
+
+private fun interface OnlineUpdatableOperation {
+
+    suspend fun updateOnline(operation: OperationInfo): Result<Unit>
+
+}
+
+private fun interface CancelableOperation {
+
+    suspend fun cancel(operation: OperationInfo)
 
 }
 

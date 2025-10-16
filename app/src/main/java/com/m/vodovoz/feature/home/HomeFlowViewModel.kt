@@ -50,6 +50,7 @@ import com.m.vodovoz.util.extensions.awaitOrNull
 import com.m.vodovoz.util.extensions.deferredResult
 import com.m.vodovoz.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -57,6 +58,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
@@ -223,7 +225,7 @@ class HomeFlowViewModel @Inject constructor(
         emit(fetchSecondaryDetails())
     }.withIndex().onEach { indexedValue ->
         onEachIndexed(indexedValue.index)
-    }.launchIn(viewModelScope)
+    }.flowOn(Dispatchers.Default).launchIn(viewModelScope)
 
 
     fun refresh() = viewModelScope.launch {
