@@ -17,6 +17,7 @@ import dagger.hilt.components.SingletonComponent
 import dagger.multibindings.IntoSet
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
+import okhttp3.Response
 import okhttp3.logging.HttpLoggingInterceptor
 import java.time.LocalDateTime
 import java.util.concurrent.TimeUnit
@@ -88,14 +89,9 @@ abstract class NetworkModule {
             interceptors: Set<@JvmSuppressWildcards Interceptor>,
         ): OkHttpClient {
             val okHttpClient = OkHttpClient.Builder()
-            for (interceptor in interceptors) {
-                if (!BuildConfig.DEBUG && interceptor is HttpLoggingInterceptor) {
-                    continue
-                }
+            interceptors.forEach { interceptor ->
                 okHttpClient.addInterceptor(interceptor)
             }
-
-
             return okHttpClient
                 .connectTimeout(15, TimeUnit.SECONDS)
                 .writeTimeout(15, TimeUnit.SECONDS)
@@ -104,12 +100,17 @@ abstract class NetworkModule {
 
         }
 
+
+
         @Provides
         @Singleton
         @IntoSet
         @VodovozInterceptorDI
         fun provideLoggingInterceptor(): Interceptor {
-            return HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY)
+            return if(BuildConfig.DEBUG){
+                HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY)
+            }
+            else Interceptor { chain -> chain.proceed(chain.request()) }
         }
 
         @Provides
