@@ -91,7 +91,7 @@ class AddressesFragment : Fragment() {
             when (event) {
                 is AddressesFlowViewModel.AddressesEvents.GoBack -> {
                     with(findNavController()) {
-                        previousBackStackEntry?.savedStateHandle?.set("address", event.address)
+                        previousBackStackEntry?.savedStateHandle?.set("back_address", event.address)
                         popBackStack()
                     }
                 }

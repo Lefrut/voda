@@ -410,11 +410,6 @@ class OrderingFlowViewModel @Inject constructor(
     }
 
     fun setAddress(address: AddressUi) = viewModelScope.launch {
-        if(address == AddressUi.Empty){
-            fetchOrderingDetails().join()
-            return@launch
-        }
-
         updateState { s ->
             s.copy(
                 ordering = OrderingUi.Empty.copy(addressId = address.id),
@@ -619,6 +614,12 @@ class OrderingFlowViewModel @Inject constructor(
                 ordering = s.ordering.copy(earlierDelivery = checkbox.id to checkbox.value())
             )
         }
+    }
+
+    fun refreshOrderIfEmptyAddress(address: AddressUi) = viewModelScope.launch {
+        if (address != AddressUi.Empty) return@launch
+
+        fetchOrderingDetails().join()
     }
 
     @Immutable

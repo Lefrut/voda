@@ -132,6 +132,10 @@ class OrderingFragment : Fragment() {
                 findNavController().currentBackStackEntry?.savedStateHandle
 
             backEntrySavedStateHandle?.apply {
+                remove<AddressUi>("back_address")?.let { address ->
+                    viewModel.refreshOrderIfEmptyAddress(address)
+                }
+
                 remove<AddressUi>("address")?.let { address ->
                     viewModel.setAddress(address)
                 }
