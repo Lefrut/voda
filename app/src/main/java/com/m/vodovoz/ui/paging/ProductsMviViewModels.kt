@@ -1,11 +1,15 @@
 package com.m.vodovoz.ui.paging
 
+import com.m.vodovoz.common.cart.CartManager
 import com.m.vodovoz.design_system.model.VodovozItemUi
 import com.m.vodovoz.design_system.model.withCanViewForAdults
 import com.m.vodovoz.design_system.model.withUpdatedCartRecursive
 import com.m.vodovoz.design_system.model.withUpdatedFavoritesRecursive
 import com.m.vodovoz.design_system.model.withUpdatedLoadingsRecursive
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 
 abstract class PagingProductsMviViewModel<ITEM : VodovozItemUi<ITEM>, S : PagingState<ITEM, S>, E>(
     state: S,

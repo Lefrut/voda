@@ -1,7 +1,5 @@
 package com.m.vodovoz.core.network
 
-import okhttp3.HttpUrl.Companion.toHttpUrl
-
 data object WebConfig {
 
     private const val MAPKIT_PROTOCOL = "https://"
@@ -17,8 +15,7 @@ data object WebConfig {
 data object VodovozWebConfig {
 
     private const val VODOVOZ_PROTOCOL = "https://"
-    //todo - m.vodovoz.ru/
-    private const val VODOVOZ_DOMAIN = "vodovoz.net/"
+    private const val VODOVOZ_DOMAIN = "m.vodovoz.ru/"
 
     var VODOVOZ_URL = "$VODOVOZ_PROTOCOL$VODOVOZ_DOMAIN"
     const val VODOVOZ_PATH = "newmobile_new/"
