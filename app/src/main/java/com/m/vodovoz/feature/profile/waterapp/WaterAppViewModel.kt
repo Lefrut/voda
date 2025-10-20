@@ -4,7 +4,7 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.viewModelScope
 import com.m.vodovoz.common.water_app.WaterApp
-import com.m.vodovoz.common.water_app.WaterApp.NotificationSettings
+import com.m.vodovoz.common.water_app.NotificationSettings
 import com.m.vodovoz.domain.general.respository.WaterAppRepository
 import com.m.vodovoz.feature.profile.waterapp.model.ReminderIntervalUi
 import com.m.vodovoz.feature.profile.waterapp.model.WaterAppActivityLevelUi
@@ -39,9 +39,6 @@ class WaterAppViewModel @Inject constructor(
     WaterAppState()
 ) {
 
-    init {
-        setInitialStage()
-    }
 
     @OptIn(FlowPreview::class)
     private fun setInitialStage() =
@@ -75,7 +72,7 @@ class WaterAppViewModel @Inject constructor(
 
 
     private inline fun updateNotificationSettings(
-        crossinline block: WaterApp.NotificationSettings.() -> WaterApp.NotificationSettings,
+        crossinline block: NotificationSettings.() -> NotificationSettings,
     ) {
         updateState { s ->
             s.copy(notificationSettings = block(s.notificationSettings))
@@ -102,12 +99,18 @@ class WaterAppViewModel @Inject constructor(
     val notificationSettingsJob = waterAppRepository.settingsFlow.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
-        initialValue = Result.success(NotificationSettings.Default)
+        initialValue = Result.success(WaterApp.DefaultNotificationSettings)
     ).onEach { result ->
         updateNotificationSettings {
             result.getOrNull() ?: this
         }
     }.launchIn(viewModelScope)
+
+    init {
+        setInitialStage()
+        userInfoJob
+        notificationSettingsJob
+    }
 
 
     @OptIn(FlowPreview::class)
@@ -352,7 +355,7 @@ class WaterAppViewModel @Inject constructor(
     data class WaterAppState(
         val userInfo: WaterApp.UserInfo = WaterApp.UserInfo.ManDefault,
         val dailyGoal: WaterApp.DailyGoal = WaterApp.DailyGoal.create(3500),
-        val notificationSettings: WaterApp.NotificationSettings = WaterApp.NotificationSettings.Default,
+        val notificationSettings: NotificationSettings = WaterApp.DefaultNotificationSettings,
         val uiState: WaterAppUiState = WaterAppUiState.Loading,
         val completeSettings: Boolean = false,
         val reminderIntervals: List<ReminderIntervalUi> = WaterAppUiState.Settings.reminderIntervals,

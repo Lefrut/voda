@@ -1,6 +1,7 @@
 package com.m.vodovoz.data.water_app.repository
 
 import androidx.annotation.Keep
+import com.m.vodovoz.common.water_app.NotificationSettings
 import com.squareup.moshi.Moshi
 import com.m.vodovoz.common.water_app.WaterApp
 import com.m.vodovoz.core.network.serialization.fromJson
@@ -10,22 +11,25 @@ import com.m.vodovoz.data.water_app.di.WaterAppMoshiQualifier
 import com.m.vodovoz.domain.general.respository.WaterAppRepository
 import com.m.vodovoz.domain.general.respository.toUnknownException
 import com.m.vodovoz.feature.profile.waterapp.model.WaterAppUiState
+import com.m.vodovoz.util.extensions.debugLog
 import com.m.vodovoz.util.extensions.firstResult
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import javax.inject.Inject
+import javax.inject.Named
 import javax.inject.Singleton
 import kotlin.reflect.KClass
 
 @Singleton
 open class WaterAppRepositoryImpl @Inject constructor(
     private val storage: WaterAppStorage,
-    @WaterAppMoshiQualifier
-    protected val moshi: Moshi,
+    @Named("water_app")
+    private val moshi: Moshi,
 ) : WaterAppRepository {
 
-    override suspend fun getNotificationSettings(): Result<WaterApp.NotificationSettings> =
+    override suspend fun getNotificationSettings(): Result<NotificationSettings> =
         settingsFlow.firstResult()
 
     override suspend fun getDailyGoal(): Result<WaterApp.DailyGoal> = dailyGoalFlow.firstResult()
@@ -43,11 +47,11 @@ open class WaterAppRepositoryImpl @Inject constructor(
         )
 
 
-    override val settingsFlow: Flow<Result<WaterApp.NotificationSettings>>
+    override val settingsFlow: Flow<Result<NotificationSettings>>
         get() = getFlowOperation(
-            clazz = WaterApp.NotificationSettings::class,
+            clazz = NotificationSettings::class,
             defaultValue = {
-                WaterApp.NotificationSettings.Default
+                WaterApp.DefaultNotificationSettings
             },
             flow = storage.notificationSettingsFlow,
             onFormatError = ::clearNotificationSettings
@@ -74,9 +78,9 @@ open class WaterAppRepositoryImpl @Inject constructor(
 
 
     override suspend fun saveNotificationSettings(
-        notificationSettings: WaterApp.NotificationSettings,
-    ): Result<WaterApp.NotificationSettings> = saveOperation(
-        clazz = WaterApp.NotificationSettings::class,
+        notificationSettings: NotificationSettings,
+    ): Result<NotificationSettings> = saveOperation(
+        clazz = NotificationSettings::class,
         data = notificationSettings,
         block = storage::saveNotificationSettings
     )

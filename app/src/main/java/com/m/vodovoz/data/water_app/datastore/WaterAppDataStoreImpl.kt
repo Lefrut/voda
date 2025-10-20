@@ -34,8 +34,7 @@ class WaterAppDataStoreImpl @Inject constructor(
         it[key] ?: ""
     }
 
-    val mutex = Mutex()
-    private suspend fun<T> editData(key: Preferences.Key<T>, value: T) = mutex.withLock {
+    private suspend fun<T> editData(key: Preferences.Key<T>, value: T) {
         dataStore.edit { mutablePreferences ->
             mutablePreferences[key] = value
         }
@@ -86,8 +85,8 @@ class WaterAppDataStoreImpl @Inject constructor(
     }
 
     companion object {
-        private val notificationSettingsKey = stringPreferencesKey("NOTIFICATION_SETTINGS_KEY")
-        private val userInfoKey = stringPreferencesKey("USER_INFO_KEY")
+        private val notificationSettingsKey = stringPreferencesKey("NOTIFICATION_SETTINGS")
+        private val userInfoKey = stringPreferencesKey("USER_INFO")
         private val dailyGoalKey = stringPreferencesKey("DAILY_GOAL")
         private val stageKey = stringPreferencesKey("STAGE")
     }

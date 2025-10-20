@@ -7,6 +7,7 @@ import androidx.work.Constraints
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequest
 import androidx.work.WorkManager
+import com.m.vodovoz.common.water_app.NotificationSettings
 import com.m.vodovoz.common.water_app.WaterApp
 import com.m.vodovoz.feature.profile.waterapp.worker.WaterAppWorker
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -36,7 +37,7 @@ class WaterAppHelper @Inject constructor(
 
 
     fun runOrCancelWorkManager(
-        notificationSettings: WaterApp.NotificationSettings,
+        notificationSettings: NotificationSettings,
     ) {
         val workManager = WorkManager.getInstance(context)
         workManager.cancelAllWorkByTag(WATER_WORK_MANAGER_TAG)

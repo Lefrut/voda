@@ -42,7 +42,7 @@ class LogoutManager @Inject constructor(
             },
             {
                 waterAppHelper.runOrCancelWorkManager(
-                    WaterApp.NotificationSettings.Default
+                    WaterApp.DefaultNotificationSettings
                 )
             },
             suspend {

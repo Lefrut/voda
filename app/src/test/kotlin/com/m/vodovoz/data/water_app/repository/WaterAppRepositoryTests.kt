@@ -36,7 +36,7 @@ class WaterAppRepositoryTests: CoroutineTestBase() {
     private lateinit var waterAppStorage: WaterAppStorage
     private lateinit var moshi: Moshi
 
-    private val defaultNotificationSettings = WaterApp.NotificationSettings.Default
+    private val defaultNotificationSettings = WaterApp.DefaultNotificationSettings
 
     private val notificationSettings = defaultNotificationSettings.copy(
         enableNotifications = true,

@@ -46,6 +46,7 @@ import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.m.vodovoz.R
+import com.m.vodovoz.common.water_app.NotificationSettings
 import com.m.vodovoz.common.water_app.WaterApp
 import com.m.vodovoz.design_system.composables.button.VodovozButton
 import com.m.vodovoz.design_system.composables.swich.vodovozColors
@@ -63,7 +64,7 @@ fun WaterAppSettingsScreen(
     onCloseClick: () -> Unit,
     intervals: List<ReminderIntervalUi>,
     userInfo: WaterApp.UserInfo,
-    notificationSettings: WaterApp.NotificationSettings,
+    notificationSettings: NotificationSettings,
     showParameters: Boolean,
     onReminderIntervalClick: (ReminderIntervalUi) -> Unit,
     onHaveNotificationsChange: () -> Unit,
