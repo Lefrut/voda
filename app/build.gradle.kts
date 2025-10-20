@@ -38,7 +38,7 @@ android {
     buildTypes {
         //todo
         getByName("release") {
-            isDebuggable = true
+            isDebuggable = false
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(
