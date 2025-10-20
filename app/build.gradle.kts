@@ -19,15 +19,16 @@ android {
         minSdk = 21
         targetSdk = 35
         //todo
-        versionCode = 2070
+        versionCode = 2080
         //todo
-        versionName = "2.0.7"
+        versionName = "2.0.8"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     signingConfigs {
+        //todo
         create("release") {
-            storeFile = file("/home/VODOVOZ/rk_sotin/Projects/VodovozJava/VodovozVersion1.jks")
+            storeFile = file("/Users/kirill/StudioProjects/voda/lalalala.jks")
             keyAlias = "zinou"
             storePassword = "zinou123"
             keyPassword = "zinou123"
@@ -35,8 +36,9 @@ android {
     }
 
     buildTypes {
+        //todo
         getByName("release") {
-            isDebuggable = false
+            isDebuggable = true
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(
@@ -162,7 +164,7 @@ dependencies {
     //debugImplementation("com.squareup.leakcanary:leakcanary-android:2.14")
     implementation("androidx.core:core-splashscreen:1.0.1")
 
-    implementation("androidx.datastore:datastore-preferences:1.1.7")
+    implementation("androidx.datastore:datastore-preferences:1.1.1")
 
     //Compose
     implementation("androidx.activity:activity-compose:1.9.1")

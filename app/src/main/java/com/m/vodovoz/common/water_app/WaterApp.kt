@@ -9,6 +9,7 @@ import java.time.LocalTime
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.hours
 
+@Keep
 data object WaterApp {
 
     fun calculateDailyGoal(userInfo: UserInfo): DailyGoal {
@@ -41,7 +42,6 @@ data object WaterApp {
 
 
     @Keep
-    @Stable
     data class NotificationSettings(
         val enableNotifications: Boolean,
         val notificationsDelay: Duration,
@@ -59,7 +59,6 @@ data object WaterApp {
     }
 
     @Keep
-    @Stable
     data class UserInfo(
         val gender: Gender,
         val height: Float,
@@ -75,7 +74,6 @@ data object WaterApp {
     }
 
     @Keep
-    @Stable
     enum class Gender {
         Man, Girl;
 

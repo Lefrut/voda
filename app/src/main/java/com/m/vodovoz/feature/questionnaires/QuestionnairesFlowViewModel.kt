@@ -66,9 +66,9 @@ class QuestionnairesFlowViewModel @Inject constructor(
                     buttons = buttons.mapToUi()
                 )
             },
-            success = {
+            success = { uiState ->
                 updateState { s ->
-                    s.copy(uiState = it)
+                    s.copy(uiState = uiState,)
                 }
             },
             failure = {
@@ -90,16 +90,16 @@ class QuestionnairesFlowViewModel @Inject constructor(
 
                 vodovozServiceRepository.getQuestionnairesDetails(currentWho)
             },
-            transform = {
-                stateSnapshot.copy(
-                    button = button.toUi(),
-                    components = items.mapNotNull { it.toUi() },
-                    title = title,
-                    uiState = QuestionnairesUiState.Body
-                )
-            },
-            success = {
-                updateState { it }
+            transform = { toUi() },
+            success = { questionnaireDetails ->
+                updateState {
+                    stateSnapshot.copy(
+                        button = questionnaireDetails.button,
+                        components = questionnaireDetails.items,
+                        title = questionnaireDetails.title,
+                        uiState = QuestionnairesUiState.Body
+                    )
+                }
             },
             failure = {
                 delay(250)
@@ -194,10 +194,7 @@ class QuestionnairesFlowViewModel @Inject constructor(
 
     fun navigateBack() = viewModelScope.launch {
         val uiState = stateSnapshot.uiState
-        if (uiState is QuestionnairesUiState.Body
-            || stateSnapshot.currentWho != null
-            && uiState !is QuestionnairesUiState.Success
-        ) {
+        if (uiState is QuestionnairesUiState.Body) {
             showCancelDialog()
         } else {
             sendEvent(QuestionnaireEvents.GoBack)

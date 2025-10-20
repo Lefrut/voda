@@ -1,9 +1,11 @@
 package com.m.vodovoz.common.moshi.adapter
 
+import androidx.annotation.Keep
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.ToJson
 import java.time.LocalDate
 
+@Keep
 class LocalDateJsonAdapter {
 
     @ToJson

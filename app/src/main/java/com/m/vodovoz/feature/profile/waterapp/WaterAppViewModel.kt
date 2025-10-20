@@ -4,6 +4,7 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.viewModelScope
 import com.m.vodovoz.common.water_app.WaterApp
+import com.m.vodovoz.common.water_app.WaterApp.NotificationSettings
 import com.m.vodovoz.domain.general.respository.WaterAppRepository
 import com.m.vodovoz.feature.profile.waterapp.model.ReminderIntervalUi
 import com.m.vodovoz.feature.profile.waterapp.model.WaterAppActivityLevelUi
@@ -17,12 +18,12 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.take
-import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.LocalTime
@@ -44,7 +45,7 @@ class WaterAppViewModel @Inject constructor(
 
     @OptIn(FlowPreview::class)
     private fun setInitialStage() =
-        waterAppRepository.stageFlow.debounce(200).take(1).onEach { stageResult ->
+        waterAppRepository.stageFlow.take(1).onEach { stageResult ->
             stageResult.onSuccess { stage ->
                 val currentUiState = WaterAppUiState.checkpoints.firstOrNull { waterAppUiState ->
                     waterAppUiState.toStage() == stage
@@ -89,23 +90,30 @@ class WaterAppViewModel @Inject constructor(
         }
     }
 
-    suspend fun listenUserInfo(): Nothing = coroutineScope {
-        waterAppRepository.userInfoFlow.stateIn(this).collect {
-            updateUserInfo { it.getOrNull() ?: this }
-        }
-    }
+    val userInfoJob = waterAppRepository.userInfoFlow.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = Result.success(WaterApp.UserInfo.ManDefault)
+    ).onEach {
+        updateUserInfo { it.getOrNull() ?: this }
+    }.launchIn(viewModelScope)
 
 
-    suspend fun listenNotificationSettings(): Nothing = coroutineScope {
-        waterAppRepository.settingsFlow.stateIn(this).collect {
-            updateNotificationSettings { it.getOrNull() ?: this }
+    val notificationSettingsJob = waterAppRepository.settingsFlow.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = Result.success(NotificationSettings.Default)
+    ).onEach { result ->
+        updateNotificationSettings {
+            result.getOrNull() ?: this
         }
-    }
+    }.launchIn(viewModelScope)
+
 
     @OptIn(FlowPreview::class)
     suspend fun listenDailyGoal(): Nothing = coroutineScope {
         val currentDate = LocalDate.now()
-        waterAppRepository.dailyGoalFlow.debounce(300L).stateIn(this).collect { result ->
+        waterAppRepository.dailyGoalFlow.debounce(100L).stateIn(this).collect { result ->
             val updatedDailyGoal = result.getOrNull()
             val dailyGoal = WaterApp.calculateDailyGoal(stateSnapshot.userInfo)
 
@@ -153,7 +161,7 @@ class WaterAppViewModel @Inject constructor(
 
         val nextUiState = currentStage.next() ?: waterGoalUiState
 
-        if(nextUiState == waterGoalUiState) with(waterAppRepository){
+        if (nextUiState == waterGoalUiState) with(waterAppRepository) {
             saveUserInfo(userInfo)
             saveDailyGoal(WaterApp.calculateDailyGoal(userInfo))
             saveStage(WaterAppUiState.Settings.toStage())
@@ -212,12 +220,16 @@ class WaterAppViewModel @Inject constructor(
         }
 
         waterAppHelper.runOrCancelWorkManager(notificationSettings)
-        listOf(
-            launch { waterAppRepository.saveUserInfo(userInfo) },
-            launch { waterAppRepository.saveDailyGoal(updatedDailyGoal) },
-            launch { waterAppRepository.saveNotificationSettings(notificationSettings) },
-            launch { waterAppRepository.saveStage(mainUiState.toStage()) },
-        ).joinAll()
+        waterAppRepository.saveUserInfo(userInfo)
+        waterAppRepository.saveDailyGoal(updatedDailyGoal)
+        waterAppRepository.saveNotificationSettings(notificationSettings)
+        waterAppRepository.saveStage(mainUiState.toStage())
+//        listOf(
+//            launch { waterAppRepository.saveUserInfo(userInfo) },
+//            launch { waterAppRepository.saveDailyGoal(updatedDailyGoal) },
+//            launch { waterAppRepository.saveNotificationSettings(notificationSettings) },
+//            launch { waterAppRepository.saveStage(mainUiState.toStage()) },
+//        ).joinAll()
 
     }
 

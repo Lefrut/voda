@@ -10,7 +10,6 @@ import android.view.ViewGroup
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
@@ -65,7 +64,7 @@ class WaterAppFragment : Fragment() {
                     context,
                     permission
                 ) == PackageManager.PERMISSION_GRANTED
-            } ?: false
+            } == true
         } else {
             true
         }
@@ -272,12 +271,6 @@ class WaterAppFragment : Fragment() {
 
                     }
 
-                    LifecycleEffect {
-                        viewModel.listenNotificationSettings()
-                    }
-                    LifecycleEffect {
-                        viewModel.listenUserInfo()
-                    }
                     LifecycleEffect {
                         viewModel.listenDailyGoal()
                     }

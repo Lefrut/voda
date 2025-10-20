@@ -1,5 +1,6 @@
 package com.m.vodovoz.core.datastore
 
+import androidx.annotation.Keep
 import androidx.datastore.preferences.core.MutablePreferences
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
@@ -11,6 +12,7 @@ import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 
+@Keep
 inline operator fun <reified T> Preferences.get(keyName: String): T? {
     asMap().forEach { (t, u) ->
         if (t.name == keyName) return u as? T
@@ -18,6 +20,7 @@ inline operator fun <reified T> Preferences.get(keyName: String): T? {
     return null
 }
 
+@Keep
 @Suppress("UNCHECKED_CAST")
 inline operator fun <reified T> MutablePreferences.set(keyName: String, value: T) {
     val key: Preferences.Key<T> = when (value) {
