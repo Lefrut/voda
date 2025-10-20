@@ -95,10 +95,15 @@ fun AutoScrollImagePager(
 
 @Composable
 fun rememberAutoScrollPagerState(initialIndex: Int = 0, itemsCount: Int): PagerState {
+    if (itemsCount <= 0) {
+        return rememberPagerState(0) { 0 }
+    }
+
     val pageCount = itemsCount * 100
     val halfOfPageCount = pageCount / 2
 
-    return rememberPagerState(halfOfPageCount - (halfOfPageCount % itemsCount) + initialIndex) { pageCount }
+    val initialPage = halfOfPageCount - (halfOfPageCount % itemsCount) + initialIndex
 
+    return rememberPagerState(initialPage) { pageCount }
 }
 
