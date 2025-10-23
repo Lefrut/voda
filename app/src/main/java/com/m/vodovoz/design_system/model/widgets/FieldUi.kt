@@ -52,6 +52,7 @@ data class FieldUi(
     val hint: String = "",
     val type: FieldTypeUi,
     val isValueVisible: Boolean,
+    val isVisible: Boolean = true
 ) : WidgetUi(id) {
     companion object {
         val Empty = FieldUi(
@@ -64,7 +65,7 @@ data class FieldUi(
             readOnly = false,
             supportingText = "",
             type = FieldTypeUi.Text,
-            isValueVisible = true
+            isValueVisible = true,
         )
     }
 
@@ -308,7 +309,8 @@ fun FieldModel.toUi(): FieldUi {
             options = values.map { option ->
                 DropDownOptionUi(option.id, option.value)
             }
-        ) else FieldTypeUi.Text
+        ) else FieldTypeUi.Text,
+        isVisible = isVisible
     )
 }
 

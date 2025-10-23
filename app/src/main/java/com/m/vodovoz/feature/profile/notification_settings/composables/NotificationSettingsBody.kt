@@ -40,7 +40,7 @@ fun NotificationSettingsBody(
         verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
 
-        if(header.isNotBlank()){
+        if (header.isNotBlank()) {
             Text(
                 modifier = Modifier.padding(horizontal = 16.dp),
                 text = header,
@@ -50,10 +50,18 @@ fun NotificationSettingsBody(
         }
 
         sections.forEach { switchSection ->
-            NotificationSectionColumn(
-                section = switchSection,
-                onWidgetChange = onWidgetChange
-            )
+            if (
+                switchSection.items.any {
+                    val field = it as? FieldUi
+                    val isVisibleField = field?.isVisible
+                    isVisibleField == true || field == null
+                }
+            ) {
+                NotificationSectionColumn(
+                    section = switchSection,
+                    onWidgetChange = onWidgetChange
+                )
+            }
         }
     }
 }
@@ -98,7 +106,8 @@ fun NotificationSectionColumn(
                         onSwitchChange = onWidgetChange
                     )
                 }
-                else ->{}
+
+                else -> {}
             }
 
             HorizontalDivider(

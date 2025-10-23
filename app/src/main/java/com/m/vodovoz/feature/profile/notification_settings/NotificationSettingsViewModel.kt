@@ -15,7 +15,9 @@ import com.m.vodovoz.design_system.model.widgets.SwitchUi
 import com.m.vodovoz.design_system.model.widgets.WidgetUi
 import com.m.vodovoz.design_system.model.widgets.WidgetUpdaterKeeperFactory
 import com.m.vodovoz.design_system.model.widgets.checkFields
+import com.m.vodovoz.design_system.model.widgets.toQueryMap
 import com.m.vodovoz.design_system.model.widgets.toUi
+import com.m.vodovoz.design_system.model.widgets.vodovozValidators
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
 import com.m.vodovoz.ui.mvi.Event
 import com.m.vodovoz.ui.mvi.MviViewModel
@@ -114,32 +116,10 @@ class NotificationSettingsViewModel @Inject constructor(
         val widgets = stateSnapshot.sections.map { sectionUi ->
             sectionUi.items
         }.flatten()
-
-        if (!widgets.mapNotNull { it as? FieldUi }.checkFields(true)) {
-            sendEvent(
-                NotSettingsEvents.ShowToast(
-                    resourcesProvider.getString(R.string.notification_settings_validation_error)
-                )
-            )
-            updateState { s ->
-                s.copy(button = s.button.copy(loading = false))
-            }
-        }
-
-
-        val queriesMap = widgets.mapNotNull { widget ->
-            when (widget) {
-                is FieldUi -> widget.id to widget.value()
-
-                is SwitchUi -> widget.id to VodovozBoolean.from(widget.value).value
-
-                else -> null
-            }
-        }.associate { it.first to it.second }
-
-
-        val result =
-            vodovozServiceRepository.updateNotificationSettings(queriesMap).singleResult()
+        val queriesMap = widgets.toQueryMap()
+        val result = vodovozServiceRepository.updateNotificationSettings(
+            queriesMap
+        ).singleResult()
 
         result.onFailure {
             sendEvent(
@@ -147,8 +127,12 @@ class NotificationSettingsViewModel @Inject constructor(
                     resourcesProvider.getString(R.string.notification_settings_save_error)
                 )
             )
-            fetchNotificationSettingsDetails()
+        }.onSuccess { message ->
+            sendEvent(
+                NotSettingsEvents.ShowToast(message)
+            )
         }
+        fetchNotificationSettingsDetails()
 
         updateState { s ->
             s.copy(button = s.button.copy(loading = false))

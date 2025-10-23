@@ -49,6 +49,7 @@ import com.m.vodovoz.design_system.VodovozTheme
 import com.m.vodovoz.design_system.composables.decoration.PasswordIcon
 import com.m.vodovoz.design_system.model.widgets.FieldTypeUi
 import com.m.vodovoz.design_system.model.widgets.FieldUi
+import com.m.vodovoz.design_system.modifiers.isElementVisible
 import com.m.vodovoz.design_system.text.PhoneNumberVisualTransformation
 import com.m.vodovoz.util.formatRussianPhoneNumber
 
@@ -87,58 +88,58 @@ fun VodovozTextField(
         }
     }
 
-    when (field.type) {
-        is FieldTypeUi.DropDown -> {
-            VodovozDropDownTextField(
-                modifier = modifier,
-                field = field,
-                onFieldChange = onFieldChange
-            )
-        }
+    if(field.isVisible){
+        when (field.type) {
+            is FieldTypeUi.DropDown -> {
+                VodovozDropDownTextField(
+                    modifier = modifier,
+                    field = field,
+                    onFieldChange = onFieldChange
+                )
+            }
 
-        FieldTypeUi.Text -> {
-            VodovozTextField(
-                modifier = modifier,
-                value = field.value,
-                onValueChange = { newValue ->
-                    onFieldChange(field, field.copy(value = newValue))
-                },
-                isError = field.isError,
-                keyboardOptions = keyboardOptions.copy(
-                    keyboardType = field.keyboardType
-                ),
-                keyboardActions = KeyboardActions(
-                    onDone = {
-                        if (onDone != null) { onDone() }
-                        else { keyboardController?.hide() }
-                    }
-                ),
-                readOnly = field.readOnly,
-                label = field.label,
-                hint = field.hint,
-                maxLines = if (isMessage) 3 else maxLines,
-                minLines = if (isMessage) 2 else minLines,
-                supportingText = field.supportingText,
-                visualTransformation = visualTransformation,
-                trailingIcon = {
-                    if (field.keyboardType == KeyboardType.Password) {
-                        PasswordIcon(valueIsVisible = field.isValueVisible) {
-                            onFieldChange(
-                                field,
-                                field.copy(
-                                    isValueVisible = !field.isValueVisible
-                                )
-                            )
+            FieldTypeUi.Text -> {
+                VodovozTextField(
+                    modifier = modifier,
+                    value = field.value,
+                    onValueChange = { newValue ->
+                        onFieldChange(field, field.copy(value = newValue))
+                    },
+                    isError = field.isError,
+                    keyboardOptions = keyboardOptions.copy(
+                        keyboardType = field.keyboardType
+                    ),
+                    keyboardActions = KeyboardActions(
+                        onDone = {
+                            if (onDone != null) { onDone() }
+                            else { keyboardController?.hide() }
                         }
-                    }
-                },
-                prefix = null,
-                interactionSource = interactionSource
-            )
+                    ),
+                    readOnly = field.readOnly,
+                    label = field.label,
+                    hint = field.hint,
+                    maxLines = if (isMessage) 3 else maxLines,
+                    minLines = if (isMessage) 2 else minLines,
+                    supportingText = field.supportingText,
+                    visualTransformation = visualTransformation,
+                    trailingIcon = {
+                        if (field.keyboardType == KeyboardType.Password) {
+                            PasswordIcon(valueIsVisible = field.isValueVisible) {
+                                onFieldChange(
+                                    field,
+                                    field.copy(
+                                        isValueVisible = !field.isValueVisible
+                                    )
+                                )
+                            }
+                        }
+                    },
+                    prefix = null,
+                    interactionSource = interactionSource
+                )
+            }
         }
     }
-
-
 }
 
 @Composable
@@ -272,6 +273,7 @@ fun VodovozTextField(
     prefix: String? = null,
     trailingIcon: @Composable (() -> Unit)? = null,
     isError: Boolean = false,
+    isVisible: Boolean = true,
     visualTransformation: VisualTransformation = VisualTransformation.None,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     keyboardActions: KeyboardActions = KeyboardActions.Default,
@@ -310,48 +312,50 @@ fun VodovozTextField(
 
     var lastTextValue by remember(value) { mutableStateOf(value) }
 
-    BaseVodovozTextField(
-        modifier = modifier,
-        value = textFieldValue,
-        onValueChange = onValueChange@{ newTextFieldValueState ->
-            if (readOnly) return@onValueChange
+    if(isVisible){
+        BaseVodovozTextField(
+            modifier = modifier,
+            value = textFieldValue,
+            onValueChange = onValueChange@{ newTextFieldValueState ->
+                if (readOnly) return@onValueChange
 
-            val newText =
-                if (isPhone) formatRussianPhoneNumber(newTextFieldValueState.text) else newTextFieldValueState.text
-            val newSelection =
-                if (newTextFieldValueState.selection.start < russianPhoneCode.length && isPhone) {
-                    TextRange(russianPhoneCode.length)
-                } else newTextFieldValueState.selection
+                val newText =
+                    if (isPhone) formatRussianPhoneNumber(newTextFieldValueState.text) else newTextFieldValueState.text
+                val newSelection =
+                    if (newTextFieldValueState.selection.start < russianPhoneCode.length && isPhone) {
+                        TextRange(russianPhoneCode.length)
+                    } else newTextFieldValueState.selection
 
-            textFieldValueState = newTextFieldValueState.copy(
-                text = newText,
-                selection = newSelection
-            )
+                textFieldValueState = newTextFieldValueState.copy(
+                    text = newText,
+                    selection = newSelection
+                )
 
-            val stringChangedSinceLastInvocation = lastTextValue != newText
-            lastTextValue = newText
+                val stringChangedSinceLastInvocation = lastTextValue != newText
+                lastTextValue = newText
 
-            if (stringChangedSinceLastInvocation) {
-                onValueChange(newText)
-            }
-        },
-        supportingText = supportingText,
-        label = label,
-        textStyle = textStyle,
-        hint = hint,
-        prefix = prefix,
-        enabled = enabled,
-        readOnly = readOnly,
-        keyboardActions = keyboardActions,
-        keyboardOptions = keyboardOptions,
-        isError = isError,
-        interactionSource = interactionSource,
-        trailingIcon = trailingIcon,
-        visualTransformation = visualTransformation,
-        maxLines = maxLines,
-        minLines = minLines,
-        colors = colors
-    )
+                if (stringChangedSinceLastInvocation) {
+                    onValueChange(newText)
+                }
+            },
+            supportingText = supportingText,
+            label = label,
+            textStyle = textStyle,
+            hint = hint,
+            prefix = prefix,
+            enabled = enabled,
+            readOnly = readOnly,
+            keyboardActions = keyboardActions,
+            keyboardOptions = keyboardOptions,
+            isError = isError,
+            interactionSource = interactionSource,
+            trailingIcon = trailingIcon,
+            visualTransformation = visualTransformation,
+            maxLines = maxLines,
+            minLines = minLines,
+            colors = colors
+        )
+    }
 }
 
 

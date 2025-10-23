@@ -1449,7 +1449,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
         filters: FiltersModel,
     ): Flow<Result<ProductsSectionModel>> {
         val filtersQuery = filters.filters.joinToString(",") { it.name }
-        val filtersAndValuesQuery = filters.filters.format()
+        val filtersAndValuesQuery = filters.filters.filter { it.currentBounds == null }.format()
         val boundsMap = filters.filters.toSliderQueries()
 
         return executeRequest(

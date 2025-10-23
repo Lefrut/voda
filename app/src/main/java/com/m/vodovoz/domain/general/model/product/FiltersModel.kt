@@ -21,17 +21,17 @@ data class FilterValueModel(
 
 fun List<FilterModel>.format(): String {
     return joinToString(";") { filter ->
-        val currentBounds = filter.currentBounds
-        val data = if (currentBounds?.start != null) {
-            listOf(currentBounds.start, currentBounds.endInclusive).joinToString(",")
-        } else filter.values.joinToString(",") { it.id }
-
+        val data = filter.values.joinToString(",") { it.id }
         "${filter.id}@${data}"
     }
 }
 
-fun List<FilterModel>.toSliderQueries(): Map<String,String?> {
-    return filter { it.currentBounds != it.bounds && it.currentBounds != null }
+fun List<FilterModel>.toSliderQueries(): Map<String, String?> {
+    return filter { it ->
+        val bounds = it.bounds
+        val currentBounds = it.currentBounds
+        currentBounds != null && bounds?.isCloseTo(currentBounds) != true
+    }
         .flatMap { filter ->
             listOf(
                 "${filter.id}_from" to filter.currentBounds?.start?.toString(),
@@ -39,4 +39,15 @@ fun List<FilterModel>.toSliderQueries(): Map<String,String?> {
             )
         }
         .toMap()
+}
+
+private fun ClosedRange<Float>.isCloseTo(
+    other: ClosedRange<Float>,
+    epsilon: Float = 0.02f
+): Boolean {
+    val thisStart = start - epsilon
+    val thisEnd = endInclusive + epsilon
+    val otherStart = other.start - epsilon
+    val otherEnd = other.endInclusive + epsilon
+    return thisStart <= otherEnd && otherStart <= thisEnd
 }
