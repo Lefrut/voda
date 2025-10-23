@@ -30,7 +30,7 @@ fun List<FilterModel>.toSliderQueries(): Map<String, String?> {
     return filter { it ->
         val bounds = it.bounds
         val currentBounds = it.currentBounds
-        currentBounds != null && bounds?.isCloseTo(currentBounds) != true
+        currentBounds != null && bounds?.isCloseToStrict(currentBounds) == false
     }
         .flatMap { filter ->
             listOf(
@@ -41,13 +41,12 @@ fun List<FilterModel>.toSliderQueries(): Map<String, String?> {
         .toMap()
 }
 
-private fun ClosedRange<Float>.isCloseTo(
+fun ClosedRange<Float>.isCloseToStrict(
     other: ClosedRange<Float>,
     epsilon: Float = 0.02f
 ): Boolean {
-    val thisStart = start - epsilon
-    val thisEnd = endInclusive + epsilon
-    val otherStart = other.start - epsilon
-    val otherEnd = other.endInclusive + epsilon
-    return thisStart <= otherEnd && otherStart <= thisEnd
+    val startDiff = kotlin.math.abs(this.start - other.start)
+    val endDiff = kotlin.math.abs(this.endInclusive - other.endInclusive)
+
+    return startDiff <= epsilon && endDiff <= epsilon
 }
