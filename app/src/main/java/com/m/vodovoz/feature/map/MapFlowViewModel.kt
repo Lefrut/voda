@@ -41,6 +41,8 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.retryWhen
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeout
+import kotlinx.coroutines.withTimeoutOrNull
 import javax.inject.Inject
 import kotlin.math.floor
 
@@ -305,9 +307,11 @@ class MapFlowViewModel @Inject constructor(
         updateState { s ->
             s.copy(buttonIsLoading = true)
         }
-        val fromMoscowToPoint = getDistanceFromAreaBoundToAddress(
-            mapAddress.point
-        ) ?: return@launch
+        val fromMoscowToPoint = withTimeoutOrNull(1000) {
+            getDistanceFromAreaBoundToAddress(
+                mapAddress.point
+            )
+        } ?: return@launch
 
         val updatedMapAddress = mapAddress.copy(
             fromMoscowToPoint = floor(fromMoscowToPoint).toInt()

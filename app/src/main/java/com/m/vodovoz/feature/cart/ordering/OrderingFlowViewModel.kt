@@ -76,7 +76,7 @@ class OrderingFlowViewModel @Inject constructor(
                 s.copy(
                     ordering = OrderingUi.Empty,
                     title = orderingDetails.title,
-                    comment = s.comment ?: orderingDetails.commentField?.toUi(),
+                    comment = orderingDetails.commentField?.toUi(),
                     paymentSection = orderingDetails.paymentSection.toUi { items ->
                         items.mapToUi()
                     },
@@ -309,6 +309,7 @@ class OrderingFlowViewModel @Inject constructor(
                 paymentChange = ordering.paymentChange,
                 callYouId = ordering.callYouId.toLongOrNull(),
                 coupon = coupon,
+                message = stateSnapshot.comment?.value() ?: "",
                 balance = VodovozBoolean.from(ordering.paymentBalance).value,
                 deviceInfo = deviceInfo,
                 notifyDriverId = stateSnapshot.selectedNotifyItem.value,
@@ -438,6 +439,7 @@ class OrderingFlowViewModel @Inject constructor(
                 val recipientSection = s.recipientSection
 
                 s.copy(
+                    comment = orderingDetails.commentField?.toUi(),
                     totals = orderingDetails.totals.mapToUi(),
                     paymentSection = orderingDetails.paymentSection.toUi { list ->
                         list.mapToUi()
