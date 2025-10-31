@@ -405,9 +405,22 @@ class OrderingFlowViewModel @Inject constructor(
                     recipientName = recipientModel.fio.takeIf { it.isNotBlank() }
                 )
 
-                s.copy(ordering = updatedOrdering)
+                s.copy(
+                    ordering = updatedOrdering,
+                    recipientSection = changeOrderingSection(
+                        clearErrors = true,
+                        section = s.recipientSection,
+                        menuItemIds = listOf(RECIPIENT_MENU_ID)
+                    ) {
+                        it.copy(
+                            name = recipientModel.fio,
+                            description = recipientModel.phone,
+                            error = false,
+                        )
+                    }
+                )
             }
-        }
+        }.onFailure {}
     }
 
     fun setAddress(address: AddressUi) = viewModelScope.launch {
