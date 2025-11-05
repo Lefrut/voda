@@ -37,6 +37,7 @@ import com.m.vodovoz.domain.general.model.exceptions.UserNotLoginException
 import com.m.vodovoz.domain.general.model.exceptions.ValidationException
 import com.m.vodovoz.domain.general.model.exceptions.VodovozPlaceholderModel
 import com.m.vodovoz.domain.general.model.location.AddAddressDetailsModel
+import com.m.vodovoz.domain.general.model.location.AddressLabelsModel
 import com.m.vodovoz.domain.general.model.location.AddressModel
 import com.m.vodovoz.domain.general.model.location.MapAddressModel
 import com.m.vodovoz.domain.general.model.location.MapZonesModel
@@ -164,6 +165,17 @@ class VodovozServiceRepositoryImpl @Inject constructor(
                     accountManager.fetchAccountId(),
                     addressId
                 )
+            },
+            mapper = {
+                it.data!!.toDomain()
+            }
+        )
+    }
+
+    override fun getAddressLabels(addressId: Long?): Flow<Result<AddressLabelsModel>> {
+        return executeRequest(
+            request = {
+                vodovozService.getAddressLabels(accountManager.fetchAccountId())
             },
             mapper = {
                 it.data!!.toDomain()
@@ -328,7 +340,9 @@ class VodovozServiceRepositoryImpl @Inject constructor(
         addressId: Long,
         deliveryDate: String,
         deliveryTimeInterval: String,
-        phone: String,
+        userFIO: String,
+        userPhone: String,
+        userEmail: String?,
         paymentMethodId: Long,
         paymentChange: String?,
         callYouId: Long?,
@@ -346,7 +360,9 @@ class VodovozServiceRepositoryImpl @Inject constructor(
                     userId = accountManager.fetchAccountId(),
                     deliveryDate = deliveryDate,
                     deliveryTimeInterval = deliveryTimeInterval,
-                    phone = phone,
+                    userPhone = userPhone,
+                    userEmail = userEmail,
+                    userFIO = userFIO,
                     paymentMethodId = paymentMethodId,
                     paymentChange = paymentChange,
                     notifyDriverId = notifyDriverId,
@@ -765,9 +781,9 @@ class VodovozServiceRepositoryImpl @Inject constructor(
         return executeRequest(
             request = {
                 vodovozService.getWhereMyOrderDetails(
-                    accountManager.fetchAccountId(),
-                    orderId,
-                    driverId
+                    userId = accountManager.fetchAccountId(),
+                    orderId = orderId,
+                    driverId = driverId
                 )
             },
             mapper = {

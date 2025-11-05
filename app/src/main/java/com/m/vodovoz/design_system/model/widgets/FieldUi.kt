@@ -276,7 +276,7 @@ fun FieldModel.toUi(): FieldUi {
 
     val keyboardType = when (id.lowercase()) {
         "email", "emaildryg", "dr125", "dr51", "dr176" -> KeyboardType.Email
-        "tel", "dr124", "phone", "dr50", "dr171" -> KeyboardType.Phone
+        "tel", "dr124", "phone", "dr50", "dr171", "dopphone" -> KeyboardType.Phone
         "pass", "parol" -> KeyboardType.Password
         "data", "date" -> KeyboardType.Unspecified
         "oplata", "inn" -> KeyboardType.Number

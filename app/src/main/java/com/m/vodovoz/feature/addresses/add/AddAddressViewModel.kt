@@ -4,7 +4,6 @@ import androidx.compose.runtime.Stable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.m.vodovoz.R
-import com.m.vodovoz.common.model.VodovozAddressType
 import com.m.vodovoz.common.model.VodovozBoolean
 import com.m.vodovoz.common.model.boolean
 import com.m.vodovoz.common.model.from
@@ -45,7 +44,6 @@ class AddAddressViewModel @Inject constructor(
     private val addressId = savedStateHandle.get<Long>("addressId")?.also { id ->
         updateState { s -> s.copy(addressId = id) }
     }
-    private val addressType = savedStateHandle.get<Int>("addressType")
     private val addressName = savedStateHandle.get<String>("addressName")
 
     init {
@@ -124,8 +122,10 @@ class AddAddressViewModel @Inject constructor(
             )
         }
 
-        val addAddressResult =
-            vodovozServiceRepository.addAddress(mapAddress.toDomain(), params).singleResult()
+        val addAddressResult = vodovozServiceRepository.addAddress(
+            address = mapAddress.toDomain(),
+            params = params
+        ).singleResult()
 
 
 

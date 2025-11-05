@@ -34,6 +34,7 @@ import com.m.vodovoz.data.vodovoz_service.model.VodovozPlaceholderDTO
 import com.m.vodovoz.data.vodovoz_service.model.VodovozResponseDTO
 import com.m.vodovoz.data.vodovoz_service.model.WaitFeedbackProductsDTO
 import com.m.vodovoz.data.vodovoz_service.model.address.AddAddressDetailsDTO
+import com.m.vodovoz.data.vodovoz_service.model.address.AddressLabelsDTO
 import com.m.vodovoz.data.vodovoz_service.model.address.AddressesDTO
 import com.m.vodovoz.data.vodovoz_service.model.address.MapZonesDTO
 import com.m.vodovoz.data.vodovoz_service.model.auth.AuthDetailsDTO
@@ -143,7 +144,9 @@ interface VodovozService {
         @Query("userid") userId: Long?,
         @Query("date") deliveryDate: String,
         @Query("indos") deliveryTimeInterval: String,
-        @Query("dopphone") phone: String,
+        @Query("fio_f") userFIO: String,
+        @Query("phone_f") userPhone: String,
+        @Query("email_f") userEmail: String?,
         @Query("payment") paymentMethodId: Long,
         @Query("sdacha") paymentChange: String?,
         @Query("nettovar") callYouId: Long?,
@@ -301,6 +304,31 @@ interface VodovozService {
         @Query("userid") userId: Long?,
         @Query("addressid") addressId: Long?,
     ): Response<VodovozResponseDTO<AddAddressDetailsDTO>>
+
+    @GET("oformlenie/metki.php?action=getlist")
+    suspend fun getAddressLabels(
+        @Query("userid") userId: Long?,
+    ): Response<VodovozResponseDTO<AddressLabelsDTO>>
+
+    //todo
+    @GET("oformlenie/metki.php?action=add")
+    suspend fun addAddressLabel(
+        @Query("userid") userId: Long?,
+        @Query("slovo") label: String
+    ): Response<VodovozResponseDTO<String>>
+
+    @GET("oformlenie/metki.php?action=del")
+    suspend fun deleteAddressLabel(
+        @Query("userid") userId: Long?,
+        @Query("slovo") label: String
+    ): Response<VodovozResponseDTO<String>>
+
+    @GET("oformlenie/metki.php?action=delfull")
+    suspend fun deleteAddressLabels(
+        @Query("userid") userId: Long?,
+    ): Response<VodovozResponseDTO<String>>
+
+
 
 
     @GET("profile/karta/index.php?action=tochkakarta")

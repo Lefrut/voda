@@ -7,6 +7,7 @@ import com.m.vodovoz.domain.general.model.cart.BottomCartModel
 import com.m.vodovoz.domain.general.model.cart.CartDetailsModel
 import com.m.vodovoz.domain.general.model.exceptions.VodovozPlaceholderModel
 import com.m.vodovoz.domain.general.model.location.AddAddressDetailsModel
+import com.m.vodovoz.domain.general.model.location.AddressLabelsModel
 import com.m.vodovoz.domain.general.model.location.AddressModel
 import com.m.vodovoz.domain.general.model.location.MapAddressModel
 import com.m.vodovoz.domain.general.model.location.MapZonesModel
@@ -80,6 +81,9 @@ interface VodovozServiceRepository {
 
     fun getAddAddressDetails(addressId: Long?): Flow<Result<AddAddressDetailsModel>>
 
+    fun getAddressLabels(addressId: Long?): Flow<Result<AddressLabelsModel>>
+
+
     fun updateAddress(
         addressId: Long,
         address: MapAddressModel?,
@@ -123,7 +127,9 @@ interface VodovozServiceRepository {
         addressId: Long,
         deliveryDate: String,
         deliveryTimeInterval: String,
-        phone: String,
+        userFIO: String,
+        userPhone: String,
+        userEmail: String?,
         paymentMethodId: Long,
         paymentChange: String?,
         callYouId: Long? = null,

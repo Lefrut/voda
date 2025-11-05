@@ -17,13 +17,16 @@ import com.m.vodovoz.design_system.model.order.mapToUi
 import com.m.vodovoz.design_system.model.toUi
 import com.m.vodovoz.design_system.model.widgets.CheckboxUi
 import com.m.vodovoz.design_system.model.widgets.FieldUi
+import com.m.vodovoz.design_system.model.widgets.toQueryMap
 import com.m.vodovoz.design_system.model.widgets.toUi
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
 import com.m.vodovoz.feature.addresses.model.AddressUi
 import com.m.vodovoz.feature.cart.ordering.model.OrderNotifyItemUi
+import com.m.vodovoz.feature.cart.ordering.model.OrderNotifySectionUi
 import com.m.vodovoz.feature.cart.ordering.model.OrderingMenuItemUi
 import com.m.vodovoz.feature.cart.ordering.model.OrderingUi
 import com.m.vodovoz.feature.cart.ordering.model.mapToUi
+import com.m.vodovoz.feature.cart.ordering.model.toUi
 import com.m.vodovoz.feature.delivery_date.model.DeliveryDateOptionUi
 import com.m.vodovoz.feature.delivery_date.model.DeliveryTimeIntervalUi
 import com.m.vodovoz.feature.delivery_date.model.displayDate
@@ -69,10 +72,7 @@ class OrderingFlowViewModel @Inject constructor(
         orderingDetailsResult.onSuccess { orderingDetails ->
             updateState { s ->
 
-                val notifySection = orderingDetails.notifySection.toUi { items ->
-                    items.mapToUi()
-                }
-
+                val notifySection = orderingDetails.notifySection.toUi()
                 s.copy(
                     ordering = OrderingUi.Empty,
                     title = orderingDetails.title,
@@ -99,7 +99,7 @@ class OrderingFlowViewModel @Inject constructor(
                     button = orderingDetails.button.toUi(),
                     selectedNotifyItem = s.selectedNotifyItem.takeIf { it ->
                         it != OrderNotifyItemUi.Empty
-                    } ?: notifySection.items.firstOrNull() ?: s.selectedNotifyItem,
+                    } ?: notifySection.options.firstOrNull() ?: s.selectedNotifyItem,
                     uiState = OrderingUiState.Order,
                 )
             }
@@ -293,29 +293,35 @@ class OrderingFlowViewModel @Inject constructor(
         if (
             ordering.addressId != null && ordering.date != null
             && ordering.timeInterval != null && ordering.recipientPhone != null
-            && ordering.paymentId != null && ordering.callYouId != null
+            && ordering.paymentId != null && ordering.callYouId != null && ordering.recipientName != null
         ) {
             updateState { s ->
                 s.copy(button = s.button.copy(loading = true))
             }
 
 
+            val params = with(stateSnapshot){
+                mapOf(earlierDelivery ?: ("" to "")) + totals.associate {
+                    it.id to it.value
+                } + notifySection.extraPhoneField.toQueryMap() + comment.toQueryMap()
+            }
+
             vodovozServiceRepository.doOrder(
                 addressId = ordering.addressId,
                 deliveryDate = ordering.date,
                 deliveryTimeInterval = ordering.timeInterval,
-                phone = ordering.recipientPhone,
+                userFIO = ordering.recipientName,
+                userPhone = ordering.recipientPhone,
+                userEmail = ordering.recipientEmail,
                 paymentMethodId = ordering.paymentId.toLongOrNull() ?: 0,
                 paymentChange = ordering.paymentChange,
                 callYouId = ordering.callYouId.toLongOrNull(),
                 coupon = coupon,
-                message = stateSnapshot.comment?.value() ?: "",
                 balance = VodovozBoolean.from(ordering.paymentBalance).value,
                 deviceInfo = deviceInfo,
-                notifyDriverId = stateSnapshot.selectedNotifyItem.value,
-                params = (earlierDelivery?.let {
-                    mapOf(earlierDelivery)
-                } ?: emptyMap()) + stateSnapshot.totals.associate { it.id to it.value }
+                notifyDriverId = stateSnapshot.selectedNotifyItem?.value,
+                message = stateSnapshot.comment?.value() ?: "",
+                params = params
             ).singleResult().onSuccess { placeholder ->
                 updateState { s ->
                     s.copy(uiState = OrderingUiState.Success(placeholder.toUi()))
@@ -637,13 +643,23 @@ class OrderingFlowViewModel @Inject constructor(
         fetchOrderingDetails().join()
     }
 
+    fun changeExtraPhoneField(field: FieldUi, updatedField: FieldUi) = viewModelScope.launch {
+        updateState { s ->
+            s.copy(
+                notifySection = s.notifySection.copy(
+                    extraPhoneField = updatedField
+                )
+            )
+        }
+    }
+
     @Immutable
     data class OrderingState(
         val title: String = "",
         val comment: FieldUi? = null,
         val paymentSection: SectionUi<OrderingMenuItemUi> = SectionUi.empty(),
-        val notifySection: SectionUi<OrderNotifyItemUi> = SectionUi.empty(),
-        val selectedNotifyItem: OrderNotifyItemUi = OrderNotifyItemUi.Empty,
+        val notifySection: OrderNotifySectionUi = OrderNotifySectionUi.Empty,
+        val selectedNotifyItem: OrderNotifyItemUi? = null,
         val recipientSection: SectionUi<OrderingMenuItemUi> = SectionUi.empty(),
         val totals: List<OrderSummaryItemUi> = emptyList(),
         val button: ColorfulButtonUi = ColorfulButtonUi.Empty,

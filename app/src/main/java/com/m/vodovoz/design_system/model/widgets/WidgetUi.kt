@@ -9,6 +9,14 @@ sealed class WidgetUi(open val id: String) {
 
 }
 
+
+fun WidgetUi?.toQueryMap(): Map<String, String> {
+    return if (this == null) {
+        emptyMap()
+    } else mapOf(id to value())
+}
+
+
 fun List<WidgetUi>.toQueryMap(): Map<String, String> {
     return associate { it.id to it.value() }
 }

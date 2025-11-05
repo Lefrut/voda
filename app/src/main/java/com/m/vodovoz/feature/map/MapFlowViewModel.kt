@@ -45,6 +45,7 @@ import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.withTimeoutOrNull
 import javax.inject.Inject
 import kotlin.math.floor
+import kotlin.time.Duration.Companion.seconds
 
 @HiltViewModel
 @Stable
@@ -307,10 +308,8 @@ class MapFlowViewModel @Inject constructor(
         updateState { s ->
             s.copy(buttonIsLoading = true)
         }
-        val fromMoscowToPoint = withTimeoutOrNull(1000) {
-            getDistanceFromAreaBoundToAddress(
-                mapAddress.point
-            )
+        val fromMoscowToPoint = withTimeoutOrNull(7500) {
+            getDistanceFromAreaBoundToAddress(mapAddress.point)
         } ?: return@launch
 
         val updatedMapAddress = mapAddress.copy(

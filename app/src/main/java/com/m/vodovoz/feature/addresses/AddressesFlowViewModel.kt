@@ -128,11 +128,11 @@ class AddressesFlowViewModel @Inject constructor(
             s.copy(buttonLoading = true)
         }
 
-
         val selectedAddress = stateSnapshot.selectedAddress
         val addressDetails = vodovozServiceRepository.getAddAddressDetails(
             selectedAddress.id
         ).singleGetOrNull() ?: return@launch
+
 
         val mapAddress = mapServiceRepository.searchAddressInMoscow(
             selectedAddress.address

@@ -4,20 +4,12 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.viewModelScope
 import com.m.vodovoz.R
-import com.m.vodovoz.common.model.VodovozBoolean
-import com.m.vodovoz.common.model.from
 import com.m.vodovoz.common.resources.ResourcesProvider
-import com.m.vodovoz.design_system.model.ColorfulButtonUi
 import com.m.vodovoz.design_system.model.SectionUi
-import com.m.vodovoz.design_system.model.toUi
-import com.m.vodovoz.design_system.model.widgets.FieldUi
-import com.m.vodovoz.design_system.model.widgets.SwitchUi
 import com.m.vodovoz.design_system.model.widgets.WidgetUi
 import com.m.vodovoz.design_system.model.widgets.WidgetUpdaterKeeperFactory
-import com.m.vodovoz.design_system.model.widgets.checkFields
 import com.m.vodovoz.design_system.model.widgets.toQueryMap
 import com.m.vodovoz.design_system.model.widgets.toUi
-import com.m.vodovoz.design_system.model.widgets.vodovozValidators
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
 import com.m.vodovoz.ui.mvi.Event
 import com.m.vodovoz.ui.mvi.MviViewModel
@@ -62,7 +54,6 @@ class NotificationSettingsViewModel @Inject constructor(
                     sections = notificationSettingDetails.sections.map { section ->
                         section.toUi()
                     },
-                    button = notificationSettingDetails.button.toUi()
                 )
             }
 
@@ -105,14 +96,11 @@ class NotificationSettingsViewModel @Inject constructor(
                 }
             )
         }
+
+        saveNotificationSettings().join()
     }
 
-    fun saveNotificationSettings() = viewModelScope.launch {
-
-        updateState { s ->
-            s.copy(button = s.button.copy(loading = true))
-        }
-
+    private fun saveNotificationSettings() = viewModelScope.launch {
         val widgets = stateSnapshot.sections.map { sectionUi ->
             sectionUi.items
         }.flatten()
@@ -132,11 +120,7 @@ class NotificationSettingsViewModel @Inject constructor(
                 NotSettingsEvents.ShowToast(message)
             )
         }
-        fetchNotificationSettingsDetails()
-
-        updateState { s ->
-            s.copy(button = s.button.copy(loading = false))
-        }
+        fetchNotificationSettingsDetails().join()
     }
 
 
@@ -145,7 +129,6 @@ class NotificationSettingsViewModel @Inject constructor(
         val title: String = "",
         val uiState: NotSettingsUiState = NotSettingsUiState.Loading,
         val sections: List<SectionUi<WidgetUi>> = emptyList(),
-        val button: ColorfulButtonUi = ColorfulButtonUi.Empty,
     ) : State
 
     sealed class NotSettingsEvents : Event {
