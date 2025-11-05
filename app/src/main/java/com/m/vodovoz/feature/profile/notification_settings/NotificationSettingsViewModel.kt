@@ -19,11 +19,11 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.sample
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -36,16 +36,23 @@ class NotificationSettingsViewModel @Inject constructor(
     NotSettingsState()
 ) {
 
-    @OptIn(FlowPreview::class)
     private val widgetsChangesHandlerJob = state.map { s ->
         s.sections.flatMap { sectionUi -> sectionUi.items }
-    }.drop(1).debounce(150L).onEach {
+    }.distinctUntilChanged().drop(2).onEach {
+        changeScreenLock(true)
         saveNotificationSettings()
+        changeScreenLock(false)
     }.launchIn(viewModelScope)
 
     init {
         viewModelScope.launch { delay(200) }.invokeOnCompletion {
             fetchNotificationSettingsDetails()
+        }
+    }
+
+    private fun changeScreenLock(lockScreen: Boolean) {
+        updateState { s ->
+            s.copy(lockScreen = lockScreen)
         }
     }
 
@@ -113,8 +120,7 @@ class NotificationSettingsViewModel @Inject constructor(
     }
 
 
-
-    private fun saveNotificationSettings() = viewModelScope.launch {
+    private suspend fun saveNotificationSettings() {
         val widgets = stateSnapshot.sections.map { sectionUi ->
             sectionUi.items
         }.flatten()
@@ -124,6 +130,7 @@ class NotificationSettingsViewModel @Inject constructor(
         ).singleResult()
 
         result.onFailure {
+            fetchNotificationSettingsDetails().join()
             sendEvent(
                 NotSettingsEvents.ShowToast(
                     resourcesProvider.getString(R.string.notification_settings_save_error)
@@ -134,7 +141,6 @@ class NotificationSettingsViewModel @Inject constructor(
                 NotSettingsEvents.ShowToast(message)
             )
         }
-        fetchNotificationSettingsDetails().join()
     }
 
 
@@ -143,6 +149,7 @@ class NotificationSettingsViewModel @Inject constructor(
         val title: String = "",
         val uiState: NotSettingsUiState = NotSettingsUiState.Loading,
         val sections: List<SectionUi<WidgetUi>> = emptyList(),
+        val lockScreen: Boolean = false
     ) : State
 
     sealed class NotSettingsEvents : Event {

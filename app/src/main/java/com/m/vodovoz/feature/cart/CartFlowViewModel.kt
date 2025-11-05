@@ -142,7 +142,7 @@ class CartFlowViewModel @Inject constructor(
 
     fun clearCart() = viewModelScope.launch {
         updateState { s ->
-            s.copy(blockCart = true, showClearCartDialog = false)
+            s.copy(lockCart = true, showClearCartDialog = false)
         }
         val clearCartResult = vodovozServiceRepository.clearCart().singleResult()
 
@@ -151,7 +151,7 @@ class CartFlowViewModel @Inject constructor(
         }
 
         updateState { s ->
-            s.copy(blockCart = false)
+            s.copy(lockCart = false)
         }
     }
 
@@ -222,7 +222,7 @@ class CartFlowViewModel @Inject constructor(
     fun removeCartItem(currentRemoveItem: CartItemUi) = viewModelScope.launch {
         updateState { s ->
             s.copy(
-                blockCart = true,
+                lockCart = true,
                 showRemoveItemDialog = false,
                 currentRemoveItem = null
             )
@@ -233,7 +233,7 @@ class CartFlowViewModel @Inject constructor(
 
         updateState { s ->
             s.copy(
-                blockCart = false
+                lockCart = false
             )
         }
     }
@@ -308,12 +308,12 @@ class CartFlowViewModel @Inject constructor(
     }
 
     fun addGiftToCart(presentItem: CartPresentItemUi) = viewModelScope.launch {
-        updateState { s -> s.copy(blockCart = true) }
+        updateState { s -> s.copy(lockCart = true) }
 
         vodovozServiceRepository.addProductToCart(presentItem.id, 1).singleResult()
         fetchCartDetails().join()
 
-        updateState { s -> s.copy(blockCart = false) }
+        updateState { s -> s.copy(lockCart = false) }
 
     }
 
@@ -356,7 +356,7 @@ class CartFlowViewModel @Inject constructor(
         val showRemoveItemDialog: Boolean = false,
         val currentRemoveItem: CartItemUi? = null,
         val showRefreshIndicator: Boolean = false,
-        val blockCart: Boolean = false,
+        val lockCart: Boolean = false,
         val orderSummary: List<OrderSummaryItemUi> = emptyList(),
         val showPromotionCodeBottomSheet: Boolean = false,
         val blockOrderButton: Boolean = false,

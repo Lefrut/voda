@@ -10,6 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.m.vodovoz.R
 import com.m.vodovoz.design_system.composables.placeholders.LoadingPlaceholder
+import com.m.vodovoz.design_system.composables.placeholders.LockPlaceholder
 import com.m.vodovoz.design_system.composables.placeholders.NetworkErrorPlaceholder
 import com.m.vodovoz.design_system.composables.scaffold.VodovozScaffold
 import com.m.vodovoz.design_system.composables.snackbar.VodovozSnackbarHost
@@ -62,6 +63,10 @@ fun NotificationSettingsScreen(
             }
         }
 
+    }
+
+    if(viewState.lockScreen){
+        LockPlaceholder()
     }
 
 }
