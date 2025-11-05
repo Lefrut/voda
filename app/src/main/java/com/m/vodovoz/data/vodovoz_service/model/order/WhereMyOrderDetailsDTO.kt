@@ -8,8 +8,6 @@ import com.squareup.moshi.Json
 data class WhereMyOrderDetailsDTO(
     @Json(name = "TITLE")
     val TITLE: String?,
-    @Json(name = "OPISANIE")
-    val OPISANIE: String?,
     @Json(name = "VODITEL")
     val VODITEL: VODITEL_DTO?,
     @Json(name = "KLIENT")

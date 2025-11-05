@@ -5,16 +5,16 @@ import com.m.vodovoz.data.vodovoz_service.model.order.IMAGE_AND_TEXT_DTO
 import com.m.vodovoz.data.vodovoz_service.model.order.TOCHKA_DTO
 import com.m.vodovoz.data.vodovoz_service.model.order.WHERE_ORDER_BUTTON_DTO
 import com.m.vodovoz.data.vodovoz_service.model.order.WhereMyOrderDetailsDTO
-import com.m.vodovoz.domain.general.model.widgets.ImageAndTextModel
-import com.m.vodovoz.domain.general.model.widgets.ImageButtonModel
 import com.m.vodovoz.domain.general.model.location.MapPointModel
 import com.m.vodovoz.domain.general.model.order.WhereOrderDetailsModel
+import com.m.vodovoz.domain.general.model.widgets.ImageAndTextModel
+import com.m.vodovoz.domain.general.model.widgets.ImageButtonModel
 
 fun WhereMyOrderDetailsDTO.toDomain(): WhereOrderDetailsModel {
     return WhereOrderDetailsModel(
         title = TITLE ?: "",
         secondTitle = VODITEL?.TITLE ?: "",
-        description = OPISANIE ?: "",
+        description = VODITEL?.OPISANIE ?: "",
         finishPoint = KLIENT?.TOCHKA?.toDomain(),
         driverPont = VODITEL?.TOCHKA?.toDomain(),
         buttons = VODITEL?.KNOPKI?.mapToDomain() ?: emptyList(),
