@@ -16,7 +16,14 @@ import com.m.vodovoz.ui.mvi.MviViewModel
 import com.m.vodovoz.ui.mvi.State
 import com.m.vodovoz.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.sample
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -28,6 +35,13 @@ class NotificationSettingsViewModel @Inject constructor(
 ) : MviViewModel<NotificationSettingsViewModel.NotSettingsState, NotificationSettingsViewModel.NotSettingsEvents>(
     NotSettingsState()
 ) {
+
+    @OptIn(FlowPreview::class)
+    private val widgetsChangesHandlerJob = state.map { s ->
+        s.sections.flatMap { sectionUi -> sectionUi.items }
+    }.drop(1).debounce(150L).onEach {
+        saveNotificationSettings()
+    }.launchIn(viewModelScope)
 
     init {
         viewModelScope.launch { delay(200) }.invokeOnCompletion {
@@ -96,9 +110,9 @@ class NotificationSettingsViewModel @Inject constructor(
                 }
             )
         }
-
-        saveNotificationSettings().join()
     }
+
+
 
     private fun saveNotificationSettings() = viewModelScope.launch {
         val widgets = stateSnapshot.sections.map { sectionUi ->

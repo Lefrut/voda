@@ -28,7 +28,7 @@ android {
     signingConfigs {
         //todo
         create("release") {
-            storeFile = file("/Users/kirill/StudioProjects/voda/lalalala.jks")
+            storeFile = file("/home/VODOVOZ/rk_krutov/Рабочий стол/Боевая котлин/VodovozKotlinCurrentDevelopment/VodovozKotlin/lalalala.jks")
             keyAlias = "zinou"
             storePassword = "zinou123"
             keyPassword = "zinou123"
