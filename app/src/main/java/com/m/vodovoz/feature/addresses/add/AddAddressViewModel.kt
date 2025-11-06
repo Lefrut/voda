@@ -89,7 +89,6 @@ class AddAddressViewModel @Inject constructor(
         navigateBack()
     }
 
-    //todo - need to add address label
     private fun getWidgetIdsAndValues(): Map<String, String> = with(stateSnapshot) {
         return (linearSwitches.associate { w ->
             w.id to VodovozBoolean.from(w.value()).boolean.toString()

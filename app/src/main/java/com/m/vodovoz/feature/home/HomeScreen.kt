@@ -1,7 +1,6 @@
 package com.m.vodovoz.feature.home
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
@@ -93,7 +92,7 @@ fun HomeScreen(
                     HomeBody(
                         modifier = Modifier.nestedScroll(homeNestedScrollConnection),
                         items = viewState.items,
-                        onCategorySelect = { item ,categoryWithProductsId ->
+                        onCategorySelect = { item, categoryWithProductsId ->
                             viewModel.selectCategory(item, categoryWithProductsId)
                         },
                         onOrderMenuItemClick = { menuItem ->
@@ -159,7 +158,8 @@ fun HomeScreen(
                 val action = specialPromotion.actionWithButton?.action
                     ?: return@SpecialPromotionBottomSheet
                 viewModel.activateSpecialPromotionAction(action)
-            }
+            },
+            onAboutAdvertisingClick = viewModel::showAdvertisingBottomSheet
         )
     }
 

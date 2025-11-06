@@ -114,7 +114,8 @@ fun RecipientDetailsDTO.toDomain(): RecipientDetailsModel {
         fields = POLYA?.mapToDomain()
             ?: throw IllegalArgumentException("RecipientDetails fields can't be null"),
         button = KNOPKA?.toDomain()
-            ?: throw IllegalArgumentException("RecipientDetails button can't be null")
+            ?: throw IllegalArgumentException("RecipientDetails button can't be null"),
+        checkboxes = CHECKBOX?.mapToDomain() ?: emptyList()
     )
 }
 

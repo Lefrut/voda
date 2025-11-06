@@ -15,7 +15,7 @@ data class CheckboxUi(
     val isRequired: Boolean,
     val name: String,
     val urlTitles: List<String>,
-    val error: Boolean = false
+    val error: Boolean = false,
 ) : WidgetUi(id), Parcelable {
     override fun value(): String {
         return VodovozBoolean.from(checked).value
@@ -33,6 +33,11 @@ fun List<CheckboxUi>.updateCheckbox(
         set(fieldIndex, newCheckbox)
     }
 }
+
+val List<CheckboxUi>.isValid: Boolean
+    get() = all { checkbox ->
+        (checkbox.checked && checkbox.isRequired) || !checkbox.isRequired
+    }
 
 
 fun CheckboxModel.toUi(): CheckboxUi {

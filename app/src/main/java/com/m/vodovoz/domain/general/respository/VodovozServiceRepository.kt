@@ -2,6 +2,7 @@ package com.m.vodovoz.domain.general.respository
 
 import androidx.paging.PagingData
 import com.m.vodovoz.common.model.AppConfig
+import com.m.vodovoz.design_system.model.widgets.CheckboxUi
 import com.m.vodovoz.design_system.model.widgets.FieldUi
 import com.m.vodovoz.domain.general.model.cart.BottomCartModel
 import com.m.vodovoz.domain.general.model.cart.CartDetailsModel
@@ -110,7 +111,7 @@ interface VodovozServiceRepository {
 
     fun sendOrderRecipient(
         addressId: Long,
-        fields: List<FieldModel>,
+        params: Map<String, String>
     ): Flow<Result<String>>
 
     fun getOrderCallYouDetails(

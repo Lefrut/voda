@@ -5,17 +5,17 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.m.vodovoz.common.resources.ResourcesProvider
 import com.m.vodovoz.design_system.model.toUi
-import com.m.vodovoz.design_system.model.widgets.EmailValidator
+import com.m.vodovoz.design_system.model.widgets.CheckboxUi
 import com.m.vodovoz.design_system.model.widgets.FieldUi
-import com.m.vodovoz.design_system.model.widgets.INNValidator
-import com.m.vodovoz.design_system.model.widgets.NameValidator
-import com.m.vodovoz.design_system.model.widgets.NoRequiredValidator
 import com.m.vodovoz.design_system.model.widgets.PhoneNumberValidator
 import com.m.vodovoz.design_system.model.widgets.checkFields
 import com.m.vodovoz.design_system.model.widgets.getErrorText
-import com.m.vodovoz.design_system.model.widgets.mapToDomain
+import com.m.vodovoz.design_system.model.widgets.isValid
 import com.m.vodovoz.design_system.model.widgets.mapToUi
-import com.m.vodovoz.design_system.model.widgets.updateField
+import com.m.vodovoz.design_system.model.widgets.toQueryMap
+import com.m.vodovoz.design_system.model.widgets.updateCheckbox
+import com.m.vodovoz.design_system.model.widgets.updateFieldAndResetError
+import com.m.vodovoz.design_system.model.widgets.vodovozValidators
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
 import com.m.vodovoz.feature.order_recipient.model.OrderRecipientEvent
 import com.m.vodovoz.feature.order_recipient.model.OrderRecipientState
@@ -55,7 +55,8 @@ class OrderRecipientViewModel @Inject constructor(
                     uiState = OrderRecipientUiState.Recipient,
                     title = recipientDetails.title,
                     fields = recipientDetails.fields.mapToUi(),
-                    button = recipientDetails.button.toUi()
+                    button = recipientDetails.button.toUi(),
+                    checkboxes = recipientDetails.checkboxes.mapToUi()
                 )
             }
         }.onFailure {
@@ -72,38 +73,53 @@ class OrderRecipientViewModel @Inject constructor(
     }
 
     fun changeField(field: FieldUi, updatedField: FieldUi) {
-        val updatedFields = stateSnapshot.fields.updateField(
+        val updatedFields = stateSnapshot.fields.updateFieldAndResetError(
             field = field,
             newField = updatedField
         )
 
         val isValid = updatedFields.checkFields(
-            putErrors = false,
-            validators = listOf(
-                PhoneNumberValidator,
-            )
+            validators = listOf(PhoneNumberValidator)
         )
 
         updateState { s ->
             s.copy(
                 fields = updatedFields,
-                button = s.button.copy(enabled = isValid)
+                button = s.button.copy(
+                    enabled = isValid && s.checkboxes.isValid
+                )
             )
         }
+    }
 
+    fun changeCheckbox(checkbox: CheckboxUi, updatedCheckbox: CheckboxUi) {
+        val updatedCheckboxes = stateSnapshot.checkboxes.updateCheckbox(
+            checkbox = checkbox,
+            newCheckbox = updatedCheckbox
+        )
 
+        updateState { s ->
+            s.copy(
+                checkboxes = updatedCheckboxes,
+                button = s.button.copy(
+                    enabled = updatedCheckboxes.isValid && s.fields.checkFields(
+                        validators = listOf(
+                            PhoneNumberValidator
+                        )
+                    )
+                )
+            )
+        }
+    }
+
+    fun navigateToWebView(url: String, title: String) = viewModelScope.launch {
+        sendEvent(OrderRecipientEvent.GoToWebView(url, title))
     }
 
     fun activateButton() = viewModelScope.launch {
         stateSnapshot.fields.checkFields(
             putErrors = true,
-            validators = listOf(
-                NoRequiredValidator,
-                INNValidator,
-                PhoneNumberValidator,
-                EmailValidator,
-                NameValidator
-            ),
+            validators = vodovozValidators,
             getSupportingText = { field ->
                 field.getErrorText { resId -> resourcesProvider.getString(resId) }
             }
@@ -127,7 +143,7 @@ class OrderRecipientViewModel @Inject constructor(
 
         vodovozServiceRepository.sendOrderRecipient(
             addressId = addressId,
-            fields = stateSnapshot.fields.mapToDomain()
+            params = with(stateSnapshot) { checkboxes + fields }.toQueryMap(),
         ).singleResult()
 
         sendEvent(OrderRecipientEvent.GoBackToOrdering)

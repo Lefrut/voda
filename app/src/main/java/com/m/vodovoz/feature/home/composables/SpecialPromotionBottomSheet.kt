@@ -9,13 +9,11 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.unit.dp
 import com.m.vodovoz.design_system.composables.bottom_sheet.VodovozDragHandle
+import com.m.vodovoz.design_system.model.AboutAdvertisingUi
 import com.m.vodovoz.design_system.model.SpecialPromotionUi
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -24,6 +22,7 @@ fun SpecialPromotionBottomSheet(
     state: SheetState = rememberModalBottomSheetState(true),
     onDismissRequest: () -> Unit,
     onButtonClick: (SpecialPromotionUi) -> Unit,
+    onAboutAdvertisingClick: (AboutAdvertisingUi) -> Unit,
 ) {
     ModalBottomSheet(
         modifier = Modifier,
@@ -43,7 +42,9 @@ fun SpecialPromotionBottomSheet(
             picture = specialPromotionUi.picture,
             description = specialPromotionUi.text,
             button = specialPromotionUi.actionWithButton?.colorfulButton,
-            onButtonClick = { onButtonClick(specialPromotionUi) }
+            aboutAdvertising = specialPromotionUi.aboutAdvertising,
+            onAboutAdvertisingClick = onAboutAdvertisingClick,
+            onButtonClick = { onButtonClick(specialPromotionUi) },
         )
     }
 }

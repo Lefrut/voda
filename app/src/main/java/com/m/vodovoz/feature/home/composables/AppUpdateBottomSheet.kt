@@ -1,6 +1,5 @@
 package com.m.vodovoz.feature.home.composables
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -39,7 +38,7 @@ fun AppUpdateBottomSheet(
             picture = appUpdateInfoUi.picture,
             description = appUpdateInfoUi.text,
             button = appUpdateInfoUi.colorfulButton,
-            onButtonClick = { onButtonClick(appUpdateInfoUi) }
+            onButtonClick = { onButtonClick(appUpdateInfoUi) },
         )
     }
 }

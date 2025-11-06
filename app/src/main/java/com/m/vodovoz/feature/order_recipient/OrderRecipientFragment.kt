@@ -9,12 +9,13 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import com.m.vodovoz.ui.mvi.collectAsState
 import androidx.navigation.fragment.findNavController
 import com.m.vodovoz.common.tab.TabManager
+import com.m.vodovoz.core.navigation.navigateToWebView
 import com.m.vodovoz.design_system.VodovozTheme
 import com.m.vodovoz.design_system.effects.LifecycleEffect
 import com.m.vodovoz.feature.order_recipient.model.OrderRecipientEvent
+import com.m.vodovoz.ui.mvi.collectAsState
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -55,15 +56,22 @@ class OrderRecipientFragment : Fragment() {
 
                     LifecycleEffect {
                         viewModel.events.collect { event ->
+                            val navController = findNavController()
                             when (event) {
                                 OrderRecipientEvent.GoBack -> {
-                                    findNavController().popBackStack()
+                                    navController.popBackStack()
                                 }
 
                                 OrderRecipientEvent.GoBackToOrdering -> {
-                                    val navController = findNavController()
-                                    navController.previousBackStackEntry?.savedStateHandle?.set("updateRecipient", true)
+                                    navController.previousBackStackEntry?.savedStateHandle?.set(
+                                        "updateRecipient",
+                                        true
+                                    )
                                     navController.popBackStack()
+                                }
+
+                                is OrderRecipientEvent.GoToWebView -> {
+                                    navController.navigateToWebView(event.url, event.title)
                                 }
                             }
                         }

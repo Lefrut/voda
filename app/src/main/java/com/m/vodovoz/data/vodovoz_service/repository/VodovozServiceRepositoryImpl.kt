@@ -26,7 +26,9 @@ import com.m.vodovoz.data.vodovoz_service.model.VodovozResponseDTO
 import com.m.vodovoz.data.vodovoz_service.model.WaitFeedbackProductsDTO
 import com.m.vodovoz.data.vodovoz_service.model.order.OrdersHistoryDetailsDTO
 import com.m.vodovoz.data.vodovoz_service.paging.VodovozPagerFactory
+import com.m.vodovoz.design_system.model.widgets.CheckboxUi
 import com.m.vodovoz.design_system.model.widgets.FieldUi
+import com.m.vodovoz.design_system.model.widgets.toQueryMap
 import com.m.vodovoz.domain.general.model.cart.BottomCartModel
 import com.m.vodovoz.domain.general.model.cart.CartDetailsModel
 import com.m.vodovoz.domain.general.model.exceptions.EmptyResultException
@@ -99,6 +101,7 @@ import com.m.vodovoz.domain.general.model.user.QuestionnairesWelcomeDetailsModel
 import com.m.vodovoz.domain.general.model.user.RequestCodeModel
 import com.m.vodovoz.domain.general.model.user.UserAuthInfoModel
 import com.m.vodovoz.domain.general.model.user.UserDataModel
+import com.m.vodovoz.domain.general.model.widgets.CheckboxModel
 import com.m.vodovoz.domain.general.model.widgets.FieldModel
 import com.m.vodovoz.domain.general.model.widgets.toQueries
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
@@ -289,14 +292,14 @@ class VodovozServiceRepositoryImpl @Inject constructor(
 
     override fun sendOrderRecipient(
         addressId: Long,
-        fields: List<FieldModel>,
+        params: Map<String, String>
     ): Flow<Result<String>> {
         return executeRequest(
             request = {
                 vodovozService.sendOrderRecipient(
                     addressId = addressId,
                     userId = accountManager.fetchAccountId(),
-                    params = fields.toQueries()
+                    params = params
                 )
             },
             mapper = {

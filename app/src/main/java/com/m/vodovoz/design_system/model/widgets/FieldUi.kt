@@ -86,6 +86,7 @@ val vodovozValidators
         EmailValidator,
         MessageValidator,
         NameValidator,
+        INNValidator,
         EmptyTextValidator
     )
 

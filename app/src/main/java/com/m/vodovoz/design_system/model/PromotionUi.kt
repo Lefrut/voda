@@ -18,10 +18,11 @@ data class SpecialPromotionUi(
     val text: String,
     val picture: String,
     val actionWithButton: ActionWithButtonUi?,
+    val aboutAdvertising: AboutAdvertisingUi?
 ) {
 
     companion object {
-        val Empty = SpecialPromotionUi(-1, "", "", "", ActionWithButtonUi.Empty)
+        val Empty = SpecialPromotionUi(-1, "", "", "", null, null)
     }
 
 }
@@ -33,7 +34,8 @@ fun SpecialPromotionModel.toUi(): SpecialPromotionUi {
         name = name,
         text = text,
         picture = picture,
-        actionWithButton = actionWithButton?.toUi()
+        actionWithButton = actionWithButton?.toUi(),
+        aboutAdvertising = aboutAdvertising?.toUi()
     )
 }
 

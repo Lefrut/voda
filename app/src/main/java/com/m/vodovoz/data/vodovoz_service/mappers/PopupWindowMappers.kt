@@ -22,7 +22,8 @@ fun SPECTIAL_PROMOTION_DTO.toDomain(): SpecialPromotionModel {
         name = NAME ?: "",
         text = TEXT ?: "",
         picture = KARTINKA?.toVodovozUrl() ?: "",
-        actionWithButton = HARAKTERISTIK?.toDomain()
+        actionWithButton = HARAKTERISTIK?.toDomain(),
+        aboutAdvertising = OREKLAME?.toDomain()
     )
 }
 

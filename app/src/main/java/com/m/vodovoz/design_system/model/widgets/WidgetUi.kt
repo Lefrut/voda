@@ -21,9 +21,6 @@ fun List<WidgetUi>.toQueryMap(): Map<String, String> {
     return associate { it.id to it.value() }
 }
 
-fun List<WidgetUi>.toMap(): Map<String, String> {
-    return associate { it.id to it.value() }
-}
 
 interface WidgetUpdater {
     fun canHandle(widget: WidgetUi, updatedWidget: WidgetUi): Boolean

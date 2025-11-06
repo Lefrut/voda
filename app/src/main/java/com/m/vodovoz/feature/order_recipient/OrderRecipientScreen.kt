@@ -42,12 +42,13 @@ fun OrderRecipientScreen(
                 OrderRecipientBody(
                     fields = viewState.fields,
                     button = viewState.button,
-                    onFieldChange = { field, updatedField ->
-                        viewModel.changeField(field, updatedField)
-                    },
-                    onButtonClick = { button ->
+                    checkboxes = viewState.checkboxes,
+                    onFieldChange = viewModel::changeField,
+                    onCheckboxChange = viewModel::changeCheckbox,
+                    onButtonClick = { _ ->
                         viewModel.activateButton()
-                    }
+                    },
+                    onUrlClick = viewModel::navigateToWebView
                 )
 
             }
