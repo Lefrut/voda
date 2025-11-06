@@ -309,70 +309,21 @@ class HomeFragment : Fragment() {
             siteStateManager.observeDeepLinkPath()
                 .collect { path ->
                     if (path == null) return@collect
+                    val navController = findNavController()
 
                     debugLog { "DeepLinkPath: $path" }
                     when (path) {
-                        "catalog" -> {
-                            tabManager.selectTab(R.id.graph_catalog)
-                        }
-
-                        "action" -> {
-                            findNavController().navigateToPromotions()
-                        }
-
-                        "brand" -> {
-                            findNavController().navigateToAllBrands()
-                        }
-
-                        "about" -> {
-                            findNavController().navigateToWebView(
-                                VodovozWebConfig.ABOUT_SHOP_URL,
-                                getString(R.string.about_store)
-                            )
-                        }
-
-                        "dostavka" -> {
-                            with(GlobalAppLinks.aboutDelivery) {
-                                findNavController().navigateToWebView(
-                                    url = url,
-                                    title = title
-                                )
-                            }
-
-                        }
-
-                        "service" -> {
-                            findNavController().navigateToAllServices()
-                        }
-
-                        "remont_kulerov" -> {
-                            findNavController().navigateToServiceDetails(98886)
-                        }
-
-                        "feedback" -> {
-                            tabManager.selectTab(R.id.graph_profile)
-                        }
-
-                        "basket" -> {
-                            tabManager.selectTab(R.id.graph_cart)
-                        }
-
-                        "mobile_app" -> {
-                            findNavController().navigateToAboutApp()
-                        }
-
                         "kalkulyator_vody" -> {
                             accountManager.reportEvent("trekervodi_ssilka")
-                            findNavController().navigateToWaterApp()
+                            navController.navigateToWaterApp()
                         }
-
+                        "orders" -> {
+                            navController.navigateToOrdersHistory()
+                        }
                         else -> {
-                            val productId = path.filter { char ->
-                                char.isDigit()
-                            }.toLongOrNull() ?: return@collect
-                            findNavController().navigateToProductDetails(productId)
+                            val number = path.toLongOrNull()
+                            if(number != null) navController.navigateToOrderDetails(number)
                         }
-
                     }
                     siteStateManager.clearDeepLinkListener()
                 }
