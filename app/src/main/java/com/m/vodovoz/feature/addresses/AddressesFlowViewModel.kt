@@ -130,12 +130,17 @@ class AddressesFlowViewModel @Inject constructor(
 
         val selectedAddress = stateSnapshot.selectedAddress
         val addressDetails = vodovozServiceRepository.getAddAddressDetails(
-            selectedAddress.id
+            addressId = selectedAddress.id
         ).singleGetOrNull() ?: return@launch
+        val fromMoscowRingToAddress = addressDetails.formMoscowRingToAddressKm
 
+        if (fromMoscowRingToAddress != null) {
+            sendEvent(AddressesEvents.GoBackToOrdering(selectedAddress))
+            return@launch
+        }
 
         val mapAddress = mapServiceRepository.searchAddressInMoscow(
-            selectedAddress.address
+            address = selectedAddress.address
         ).singleGetOrNull()?.toUi() ?: return@launch
         val addressPoint = mapAddress.point
 
@@ -146,7 +151,7 @@ class AddressesFlowViewModel @Inject constructor(
             area.id == MapAreaModel.CORE_AREA_ID && area.isMoscowRingRow
         } ?: return@launch
 
-        val fromMoscowToPoint = if (coreMapArea.contains(addressPoint)) {
+        val updatedFromMoscowRingToAddress = if (coreMapArea.contains(addressPoint)) {
             0f
         } else {
             val nearestPoints = coreMapArea.findNearestPointsTo(addressPoint)
@@ -166,13 +171,16 @@ class AddressesFlowViewModel @Inject constructor(
                 w.id to w.value()
             } + gridFields.mapToUi().associate { w ->
                 w.id to w.value()
-            } + with(addressField.toUi()) { id to mapAddress.name }
+            } + with(addressField.toUi()) {
+                id to mapAddress.name
+            } + mapOf(label.id to label.name)
         }
 
         vodovozServiceRepository.updateAddress(
             addressId = selectedAddress.id,
-            address = mapAddress.copy(fromMoscowToPoint = floor(fromMoscowToPoint).toInt())
-                .toDomain(),
+            address = mapAddress.copy(
+                fromMoscowToPoint = floor(updatedFromMoscowRingToAddress).toInt()
+            ).toDomain(),
             params = addressParams
         ).singleResult().onSuccess {
             sendEvent(AddressesEvents.GoBackToOrdering(selectedAddress))

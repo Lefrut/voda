@@ -8,6 +8,7 @@ import com.m.vodovoz.data.vodovoz_service.model.address.ADDRESSES_SECTION_DTO
 import com.m.vodovoz.data.vodovoz_service.model.address.ADDRESS_ITEM_DTO
 import com.m.vodovoz.data.vodovoz_service.model.address.ADDRESS_METKA_DTO
 import com.m.vodovoz.data.vodovoz_service.model.address.ADDRESS_METKA_OKNO_DTO
+import com.m.vodovoz.data.vodovoz_service.model.address.ADD_ADDRESS_LABEL_DTO
 import com.m.vodovoz.data.vodovoz_service.model.address.AddAddressDetailsDTO
 import com.m.vodovoz.data.vodovoz_service.model.address.AddressLabelsDTO
 import com.m.vodovoz.data.vodovoz_service.model.address.AddressesDTO
@@ -100,9 +101,10 @@ fun ADDRESS_ITEM_DTO.toDomain(): AddressModel? {
 
 fun AddAddressDetailsDTO.toDomain(): AddAddressDetailsModel {
     return AddAddressDetailsModel(
-        addressId = TIP ?: -1,
+        addressId = id ?: -1,
         addressField = addressField?.toDomain()
             ?: throw IllegalArgumentException("AddAddressDetails field can't be null"),
+        label = label?.toDomain() ?: AddressLabelModel.Empty,
         formMoscowRingToAddressKm = fromMKADToAddressKm,
         coordinates = coordinates?.toDomain(),
         gridFields = gridFields?.mapToDomain() ?: emptyList(),
@@ -113,6 +115,10 @@ fun AddAddressDetailsDTO.toDomain(): AddAddressDetailsModel {
             switch.toDomain()
         } ?: emptyList()
     )
+}
+
+fun ADD_ADDRESS_LABEL_DTO.toDomain(): AddressLabelModel {
+    return AddressLabelModel(ID ?: "", NAME ?: "", true)
 }
 
 fun AddressLabelsDTO.toDomain(): AddressLabelsModel {

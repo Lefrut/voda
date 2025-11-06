@@ -310,7 +310,6 @@ interface VodovozService {
         @Query("userid") userId: Long?,
     ): Response<VodovozResponseDTO<AddressLabelsDTO>>
 
-    //todo
     @GET("oformlenie/metki.php?action=add")
     suspend fun addAddressLabel(
         @Query("userid") userId: Long?,
@@ -324,7 +323,7 @@ interface VodovozService {
     ): Response<VodovozResponseDTO<String>>
 
     @GET("oformlenie/metki.php?action=delfull")
-    suspend fun deleteAddressLabels(
+    suspend fun deleteAllAddressLabels(
         @Query("userid") userId: Long?,
     ): Response<VodovozResponseDTO<String>>
 

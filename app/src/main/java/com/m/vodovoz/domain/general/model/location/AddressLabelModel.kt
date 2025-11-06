@@ -3,5 +3,9 @@ package com.m.vodovoz.domain.general.model.location
 data class AddressLabelModel(
     val id: String,
     val name: String,
-    val enabled: Boolean
-)
+    val isRemoveable: Boolean,
+) {
+    companion object {
+        val Empty = AddressLabelModel("", "", false)
+    }
+}

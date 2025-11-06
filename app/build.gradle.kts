@@ -11,6 +11,7 @@ plugins {
 }
 
 android {
+    buildToolsVersion = "36.1.0"
     namespace = "com.m.vodovoz"
     compileSdk = 35
 
@@ -19,11 +20,12 @@ android {
         minSdk = 21
         targetSdk = 35
         //todo
-        versionCode = 2110
+        versionCode = 2120
         //todo
-        versionName = "2.1.1"
+        versionName = "2.1.2"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
+
 
     signingConfigs {
         //todo

@@ -313,5 +313,7 @@
     <string name="prod">Продакшн</string>
     <string name="tomorrow">Завтра</string>
     <string name="today">Сегодня</string>
+    <string name="labels">Метки</string>
+    <string name="add">Добавить</string>
 
 </resources>

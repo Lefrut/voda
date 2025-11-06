@@ -9,6 +9,7 @@ data class AddAddressDetailsModel(
     val coordinates: MapPointModel?,
     val formMoscowRingToAddressKm: Int?,
     val addressField: FieldModel,
+    val label: AddressLabelModel,
     val gridFields: List<FieldModel>,
     val linearSwitches: List<SwitchModel>,
     val linearFields: List<FieldModel>,

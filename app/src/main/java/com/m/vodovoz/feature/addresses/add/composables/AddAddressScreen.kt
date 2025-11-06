@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
@@ -20,6 +21,7 @@ import com.m.vodovoz.feature.addresses.add.AddAddressViewModel
 import com.m.vodovoz.feature.addresses.add.model.AddAddressState
 import com.m.vodovoz.feature.addresses.add.model.AddAddressUiState
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddAddressScreen(
     viewModel: AddAddressViewModel,
@@ -63,13 +65,14 @@ fun AddAddressScreen(
                         gridWidgets = viewState.gridFields,
                         linearWidgets = viewState.linearFields,
                         linearSwitches = viewState.linearSwitches,
+                        currentLabel = viewState.addressLabel,
+                        labels = viewState.labels,
                         button = viewState.button,
-                        onWidgetChange = { widget, updatedWidget ->
-                            viewModel.changeWidget(widget, updatedWidget)
-                        },
-                        onWidgetClick = { widget ->
-                            viewModel.checkWidgetOnAddress(widget)
-                        },
+                        onWidgetChange = viewModel::changeWidget,
+                        onWidgetClick = viewModel::checkWidgetOnAddress,
+                        onLabelClick = viewModel::selectAddressLabel,
+                        onLabelRemove = viewModel::removeAddressLabel,
+                        onAddLabelClick = viewModel::showAddLabelBS,
                         onSaveClick = {
                             if (editMode) {
                                 viewModel.updateAddress()
@@ -78,6 +81,15 @@ fun AddAddressScreen(
                             }
                         }
                     )
+
+                    if(viewState.showAddLabelBS && viewState.addLabelBS != null){
+                        AddLabelBottomSheet(
+                            addAddressLabelBSUi = viewState.addLabelBS,
+                            onValueChange = viewModel::changeAddedLabel,
+                            onAddClick = viewModel::addLabel,
+                            onDismissRequest = viewModel::closeAddLabelBS
+                        )
+                    }
                 }
 
                 AddAddressUiState.Loading -> {

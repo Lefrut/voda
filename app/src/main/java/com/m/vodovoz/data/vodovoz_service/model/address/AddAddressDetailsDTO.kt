@@ -9,7 +9,9 @@ import com.squareup.moshi.Json
 @Keep
 data class AddAddressDetailsDTO(
     @Json(name = "TIP")
-    val TIP: Long?,
+    val id: Long?,
+    @Json(name = "METKA")
+    val label: ADD_ADDRESS_LABEL_DTO?,
     @Json(name = "addressField")
     val addressField: POLE_DTO?,
     @Json(name = "coordinate")

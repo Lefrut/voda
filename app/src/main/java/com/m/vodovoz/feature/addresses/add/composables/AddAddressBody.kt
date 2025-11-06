@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import com.m.vodovoz.design_system.composables.button.VodovozButtonsColumn
 import com.m.vodovoz.design_system.composables.core.VodovozWidget
 import com.m.vodovoz.design_system.composables.text_fields.VodovozTextField
+import com.m.vodovoz.design_system.model.AddressLabelUi
 import com.m.vodovoz.design_system.model.ColorfulButtonUi
 import com.m.vodovoz.design_system.model.widgets.FieldUi
 import com.m.vodovoz.design_system.model.widgets.SwitchUi
@@ -32,9 +33,14 @@ fun AddAddressBody(
     gridWidgets: List<FieldUi>,
     linearWidgets: List<WidgetUi>,
     linearSwitches: List<SwitchUi>,
+    labels: List<AddressLabelUi>,
+    currentLabel: AddressLabelUi,
     button: ColorfulButtonUi,
     onWidgetChange: (WidgetUi, WidgetUi) -> Unit,
     onWidgetClick: (WidgetUi) -> Unit,
+    onLabelRemove: (AddressLabelUi) -> Unit,
+    onLabelClick: (AddressLabelUi) -> Unit,
+    onAddLabelClick: () -> Unit,
     onSaveClick: () -> Unit,
 ) {
     Column(
@@ -100,6 +106,16 @@ fun AddAddressBody(
                     )
                 }
             }
+        }
+
+        if (labels.isNotEmpty()) {
+            AddAddressLabels(
+                labels = labels,
+                currentLabel = currentLabel,
+                onRemove = onLabelRemove,
+                onClick = onLabelClick,
+                onAdd = onAddLabelClick
+            )
         }
 
 

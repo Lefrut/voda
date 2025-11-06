@@ -8,6 +8,9 @@ import com.m.vodovoz.common.model.VodovozBoolean
 import com.m.vodovoz.common.model.boolean
 import com.m.vodovoz.common.model.from
 import com.m.vodovoz.common.resources.ResourcesProvider
+import com.m.vodovoz.design_system.model.AddAddressLabelBSUi
+import com.m.vodovoz.design_system.model.AddressLabelUi
+import com.m.vodovoz.design_system.model.mapToUi
 import com.m.vodovoz.design_system.model.toUi
 import com.m.vodovoz.design_system.model.widgets.EmptyTextValidator
 import com.m.vodovoz.design_system.model.widgets.FieldUi
@@ -28,7 +31,10 @@ import com.m.vodovoz.feature.map.model.toDomain
 import com.m.vodovoz.ui.mvi.MviViewModel
 import com.m.vodovoz.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -83,6 +89,7 @@ class AddAddressViewModel @Inject constructor(
         navigateBack()
     }
 
+    //todo - need to add address label
     private fun getWidgetIdsAndValues(): Map<String, String> = with(stateSnapshot) {
         return (linearSwitches.associate { w ->
             w.id to VodovozBoolean.from(w.value()).boolean.toString()
@@ -90,7 +97,9 @@ class AddAddressViewModel @Inject constructor(
             w.id to w.value()
         } + gridFields.associate { w ->
             w.id to w.value()
-        } + with(addressField) { id to (mapAddress?.name ?: value()) })
+        } + with(addressField) {
+            id to (mapAddress?.name ?: value())
+        }) + mapOf(addressLabel.id to addressLabel.name)
     }
 
     fun addAddress() = viewModelScope.launch {
@@ -236,20 +245,22 @@ class AddAddressViewModel @Inject constructor(
 
     }
 
-    fun fetchAddressDetails() = viewModelScope.launch {
+    fun fetchAddressDetails() = vodovozServiceRepository.getAddAddressDetails(addressId).combine(
+        vodovozServiceRepository.getAddressLabels(addressId)
+    ) { p1, p2 ->
+        p1 to p2
+    }.onStart {
         updateState { s ->
             s.copy(uiState = AddAddressUiState.Loading)
         }
+    }.onEach { (addAddressDetailsResult, addressLabelsModel) ->
 
-        val addAddressDetailsResult =
-            vodovozServiceRepository.getAddAddressDetails(addressId).singleResult()
-
-        addAddressDetailsResult.onSuccess { addAddressDetails ->
-
-            delay(200L)
-
+        addAddressDetailsResult.onFailure {
             updateState { s ->
-
+                s.copy(uiState = AddAddressUiState.Error)
+            }
+        }.onSuccess { addAddressDetails ->
+            updateState { s ->
                 val addressField = addAddressDetails.addressField.toUi()
                 val linearSwitches = addAddressDetails.linearSwitches.mapToUi()
                 s.copy(
@@ -258,22 +269,26 @@ class AddAddressViewModel @Inject constructor(
                     gridFields = addAddressDetails.gridFields.mapToUi()
                         .updateByPrivateHouseRules(linearSwitches),
                     addressField = addressField.copy(
-                        value = stateSnapshot.mapAddress?.name ?: addressName ?: addressField.value
+                        value = stateSnapshot.mapAddress?.name ?: addressName
+                        ?: addressField.value
                     ),
                     button = addAddressDetails.button.toUi(),
-                    linearSwitches = linearSwitches
+                    linearSwitches = linearSwitches,
+                    addressLabel = addAddressDetails.label.toUi()
                 )
             }
-
-
-        }.onFailure {
-            updateState { s ->
-                s.copy(uiState = AddAddressUiState.Error)
-            }
+        }.mapCatching {
+            //todo - uncomment
+//            val addressLabels = addressLabelsModel.getOrThrow()
+//            updateState { s ->
+//                s.copy(
+//                    labels = addressLabels.labels.mapToUi(),
+//                    addLabelBS = addressLabels.popupWindow?.toUi()
+//                )
+//            }
         }
+    }.launchIn(viewModelScope)
 
-
-    }
 
     private fun List<FieldUi>.updateByPrivateHouseRules(
         switches: List<SwitchUi>,
@@ -315,6 +330,65 @@ class AddAddressViewModel @Inject constructor(
         }
     }
 
+    fun selectAddressLabel(addressLabel: AddressLabelUi) = viewModelScope.launch {
+        updateState { s ->
+            s.copy(addressLabel = addressLabel)
+        }
+    }
+
+    fun removeAddressLabel(addressLabel: AddressLabelUi) = viewModelScope.launch {
+        updateState { s ->
+            val currentAddressLabel = s.addressLabel
+            s.copy(
+                addressLabel = if (addressLabel == currentAddressLabel) AddressLabelUi.Empty else currentAddressLabel,
+                labels = buildList {
+                    addAll(s.labels)
+                    removeIf { it.name == addressLabel.name }
+                }
+            )
+        }
+        //todo - remove online
+    }
+
+    fun changeAddedLabel(value: String) {
+        updateAddLabelBS {
+            copy(value = value)
+        }
+    }
+
+    fun addLabel(labelName: String) {
+        updateAddLabelBS {
+            copy(button = button.copy(loading = true))
+        }
+
+
+        updateAddLabelBS(false) {
+            copy(value = "")
+        }
+    }
+
+    private fun updateAddLabelBS(
+        showBS: Boolean = stateSnapshot.showAddLabelBS,
+        block: AddAddressLabelBSUi.() -> AddAddressLabelBSUi = { this },
+    ) {
+        updateState { s ->
+            val bs = s.addLabelBS?.let {
+                block(s.addLabelBS)
+            }
+            s.copy(
+                showAddLabelBS = showBS,
+                addLabelBS = bs
+            )
+        }
+    }
+
+    fun showAddLabelBS() {
+        updateAddLabelBS(true)
+    }
+
+    fun closeAddLabelBS() {
+        updateAddLabelBS(false)
+    }
 
 }
 
