@@ -54,7 +54,7 @@ class HomeFlowViewModelTests : ViewModelTestBase<HomeFlowViewModel>() {
     private val topSection = HomeListItem.Products.topSection(
         VodovozSectionUi(
             title = "",
-            items = listOf(CategoryWithProductsUi.Empty.copy(1)),
+            items = listOf(CategoryWithProductsUi.Empty.copy(id = 1)),
             button = null,
             placeholder = null
         )
@@ -62,7 +62,7 @@ class HomeFlowViewModelTests : ViewModelTestBase<HomeFlowViewModel>() {
     private val bottomSection = HomeListItem.Products.bottomSection(
         VodovozSectionUi(
             title = "",
-            items = listOf(CategoryWithProductsUi.Empty.copy(2)),
+            items = listOf(CategoryWithProductsUi.Empty.copy(id = 2)),
             button = null,
             placeholder = null
         )
@@ -221,7 +221,7 @@ class HomeFlowViewModelTests : ViewModelTestBase<HomeFlowViewModel>() {
         mockkStatic(::compareVersions)
 
         every { any<SpecialPromotionModel>().toUi() } returns SpecialPromotionUi(
-            1, "", "", "", null
+            1, "", "", "", null, null
         )
 
         every { compareVersions(any(), any()) } returnsMany listOf(1, -1)

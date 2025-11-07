@@ -30,7 +30,8 @@ android {
     signingConfigs {
         //todo
         create("release") {
-            storeFile = file("/home/VODOVOZ/rk_krutov/Рабочий стол/Боевая котлин/VodovozKotlinCurrentDevelopment/VodovozKotlin/lalalala.jks")
+            storeFile =
+                file("/home/VODOVOZ/rk_krutov/Рабочий стол/Боевая котлин/VodovozKotlinCurrentDevelopment/VodovozKotlin/lalalala.jks")
             keyAlias = "zinou"
             storePassword = "zinou123"
             keyPassword = "zinou123"
@@ -69,8 +70,10 @@ android {
     kotlinOptions {
         jvmTarget = "17"
         freeCompilerArgs += listOf(
-            "-P", "plugin:androidx.compose.compiler.plugins.kotlin:metricsDestination=$rootDir/composeMetrics",
-            "-P", "plugin:androidx.compose.compiler.plugins.kotlin:reportsDestination=$rootDir/composeReports"
+            "-P",
+            "plugin:androidx.compose.compiler.plugins.kotlin:metricsDestination=$rootDir/composeMetrics",
+            "-P",
+            "plugin:androidx.compose.compiler.plugins.kotlin:reportsDestination=$rootDir/composeReports"
         )
     }
 
