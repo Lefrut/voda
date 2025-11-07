@@ -2,7 +2,6 @@ package com.m.vodovoz.domain.general.respository
 
 import androidx.paging.PagingData
 import com.m.vodovoz.common.model.AppConfig
-import com.m.vodovoz.design_system.model.widgets.CheckboxUi
 import com.m.vodovoz.design_system.model.widgets.FieldUi
 import com.m.vodovoz.domain.general.model.cart.BottomCartModel
 import com.m.vodovoz.domain.general.model.cart.CartDetailsModel
@@ -82,7 +81,13 @@ interface VodovozServiceRepository {
 
     fun getAddAddressDetails(addressId: Long?): Flow<Result<AddAddressDetailsModel>>
 
-    fun getAddressLabels(addressId: Long?): Flow<Result<AddressLabelsModel>>
+    fun getAddressLabels(): Flow<Result<AddressLabelsModel>>
+    
+    fun addAddressLabel(label: String): Flow<Result<String>>
+
+    fun deleteAddressLabel(label: String): Flow<Result<String>>
+
+    fun deleteAllAddressLabels(): Flow<Result<String>>
 
 
     fun updateAddress(

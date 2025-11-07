@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.m.vodovoz.R
@@ -73,6 +74,7 @@ fun AddressLabelChip(
         )
     ) {
         Text(
+            modifier = Modifier.weight(1f, fill = false),
             text = addressLabel.name,
             color = if (selected) {
                 MaterialTheme.colorScheme.background
@@ -81,17 +83,24 @@ fun AddressLabelChip(
             },
             style = MaterialTheme.typography.bodySmall.copy(
                 letterSpacing = 0.1.sp
-            )
+            ),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
         )
 
-        if(addressLabel.isRemoveable){
+        if (addressLabel.isRemoveable) {
             Icon(
                 imageVector = ImageVector.vectorResource(R.drawable.ic_close_circle),
                 contentDescription = null,
                 modifier = Modifier
                     .size(18.dp)
                     .clip(CircleShape)
-                    .clickable(onClick = { onRemove(addressLabel) })
+                    .clickable(onClick = { onRemove(addressLabel) }),
+                tint = if (selected) {
+                    MaterialTheme.colorScheme.surfaceVariant
+                } else {
+                    MaterialTheme.colorScheme.surfaceTint
+                }
             )
         }
 

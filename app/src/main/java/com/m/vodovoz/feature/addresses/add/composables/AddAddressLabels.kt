@@ -2,14 +2,14 @@ package com.m.vodovoz.feature.addresses.add.composables
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
@@ -50,15 +50,12 @@ fun AddAddressLabels(
             style = MaterialTheme.typography.headlineSmall
         )
 
-        Row(
+        FlowRow(
             modifier = Modifier
-                .padding(vertical = 16.dp)
-                .horizontalScroll(
-                    rememberScrollState()
-                )
-                .padding(horizontal = 16.dp),
+                .padding(16.dp)
+                .fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalAlignment = Alignment.CenterVertically
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             labels.distinctBy { it.name }.forEach { label ->
                 val uniqueName = label.name
@@ -84,9 +81,11 @@ fun AddAddressLabels(
                 horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally)
             ) {
                 Text(
+                    modifier = Modifier.weight(1f, fill = false),
                     text = stringResource(R.string.add),
                     color = MaterialTheme.colorScheme.primary,
-                    style = MaterialTheme.typography.bodySmall.copy(letterSpacing = 0.1.sp)
+                    style = MaterialTheme.typography.bodySmall.copy(letterSpacing = 0.1.sp),
+                    maxLines = 1
                 )
 
                 Icon(

@@ -479,7 +479,7 @@ fun ORDER_STATUS_DTO.toDomain(): OrderStatusModel? {
         background = BACKGROUND ?: "",
         image = IMAGE?.toVodovozUrl() ?: "",
         color = COLOR ?: "",
-        backgroundAlpha = BACKGROUNDOPACITY ?: 0.05f
+        backgroundAlpha = BACKGROUNDOPACITY ?: 1f
     )
 }
 

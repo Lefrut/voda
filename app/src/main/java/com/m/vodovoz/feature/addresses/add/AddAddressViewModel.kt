@@ -245,7 +245,7 @@ class AddAddressViewModel @Inject constructor(
     }
 
     fun fetchAddressDetails() = vodovozServiceRepository.getAddAddressDetails(addressId).combine(
-        vodovozServiceRepository.getAddressLabels(addressId)
+        vodovozServiceRepository.getAddressLabels()
     ) { p1, p2 ->
         p1 to p2
     }.onStart {
@@ -277,14 +277,13 @@ class AddAddressViewModel @Inject constructor(
                 )
             }
         }.mapCatching {
-            //todo - uncomment
-//            val addressLabels = addressLabelsModel.getOrThrow()
-//            updateState { s ->
-//                s.copy(
-//                    labels = addressLabels.labels.mapToUi(),
-//                    addLabelBS = addressLabels.popupWindow?.toUi()
-//                )
-//            }
+            val addressLabels = addressLabelsModel.getOrThrow()
+            updateState { s ->
+                s.copy(
+                    labels = addressLabels.labels.mapToUi(),
+                    addLabelBS = addressLabels.popupWindow?.toUi()
+                )
+            }
         }
     }.launchIn(viewModelScope)
 
@@ -346,23 +345,40 @@ class AddAddressViewModel @Inject constructor(
                 }
             )
         }
-        //todo - remove online
+        vodovozServiceRepository.deleteAddressLabel(addressLabel.name).singleResult()
     }
 
     fun changeAddedLabel(value: String) {
-        updateAddLabelBS {
-            copy(value = value)
-        }
+        updateAddLabelBS { copy(value = value) }
     }
 
-    fun addLabel(labelName: String) {
+    fun addLabel(label: String) = viewModelScope.launch {
+        if(label.isBlank()) return@launch
+
         updateAddLabelBS {
             copy(button = button.copy(loading = true))
         }
 
+        vodovozServiceRepository.addAddressLabel(label).singleResult()
+        vodovozServiceRepository.getAddressLabels().singleResult().mapCatching { labelsModel ->
+            labelsModel.labels.mapToUi()
+        }.recoverCatching {
+            stateSnapshot.labels
+        }.onSuccess { labels ->
+            updateState { state ->
+                val bs = state.addLabelBS
 
-        updateAddLabelBS(false) {
-            copy(value = "")
+                state.copy(
+                    labels = labels,
+                    showAddLabelBS = false,
+                    addLabelBS = bs?.copy(
+                        value = "",
+                        button = bs.button.copy(
+                            loading = false
+                        )
+                    )
+                )
+            }
         }
     }
 

@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.CornerSize
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -20,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import com.m.vodovoz.R
 import com.m.vodovoz.design_system.composables.bottom_sheet.VodovozDragHandle
@@ -69,14 +72,20 @@ fun AddLabelBottomSheet(
                 hint = addAddressLabelBSUi.hint,
                 trailingIcon = {
                     Icon(
-                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_close_circle),
+                        imageVector = ImageVector.vectorResource(
+                            id = R.drawable.ic_close_circle
+                        ),
                         contentDescription = null,
                         modifier = Modifier
+                            .padding(start = 8.dp)
                             .size(18.dp)
                             .clip(CircleShape)
-                            .clickable { onValueChange("") }
+                            .clickable { onValueChange("") },
+                        tint = MaterialTheme.colorScheme.surfaceVariant
                     )
-                }
+                },
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                keyboardActions = KeyboardActions { onAddClick(addAddressLabelBSUi.value) }
             )
 
             VodovozButtonsColumn(
