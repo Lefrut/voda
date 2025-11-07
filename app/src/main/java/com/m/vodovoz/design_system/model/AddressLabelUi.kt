@@ -74,7 +74,6 @@ fun AddressLabelChip(
         )
     ) {
         Text(
-            modifier = Modifier.weight(1f, fill = false),
             text = addressLabel.name,
             color = if (selected) {
                 MaterialTheme.colorScheme.background
