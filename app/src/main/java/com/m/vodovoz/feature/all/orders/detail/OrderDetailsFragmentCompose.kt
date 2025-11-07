@@ -10,6 +10,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.m.vodovoz.R
+import com.m.vodovoz.common.account.AccountManager
 import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.core.navigation.mainFragment
 import com.m.vodovoz.core.navigation.navigateToCancelOrder
@@ -29,6 +30,7 @@ import com.m.vodovoz.util.extensions.copyText
 import com.m.vodovoz.util.extensions.openUrl
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -40,10 +42,14 @@ class OrderDetailsFragment : Fragment() {
     @Inject
     lateinit var tabManager: TabManager
 
+    @Inject
+    lateinit var accountManager: AccountManager
+
     override fun onResume() {
         super.onResume()
         viewModel.fetchOrderDetails()
     }
+
 
     override fun onCreateView(
         inflater: android.view.LayoutInflater,
@@ -82,6 +88,13 @@ class OrderDetailsFragment : Fragment() {
                     if (viewState.showAboutOrderBS && currentAboutOrder != null) {
                         AboutOrderBottomSheet(data = currentAboutOrder) {
                             viewModel.closeAboutOrderBottomSheet()
+                        }
+                    }
+
+                    LifecycleEffect {
+                        accountManager.observeAccountId().filter { it == null }.collect {
+                            findNavController().popBackStack()
+                            tabManager.selectTab(R.id.graph_profile)
                         }
                     }
 

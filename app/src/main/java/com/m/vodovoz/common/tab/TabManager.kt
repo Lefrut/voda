@@ -48,9 +48,7 @@ class TabManager @Inject constructor(
     }
 
     fun selectTab(id: Int) {
-        scope.launch {
-            tabStateListener.emit(id)
-        }
+        scope.launch { tabStateListener.emit(id) }
     }
 
     fun reselect(id: Int) {

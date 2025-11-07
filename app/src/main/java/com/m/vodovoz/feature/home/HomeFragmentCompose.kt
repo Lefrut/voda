@@ -32,7 +32,6 @@ import com.m.vodovoz.common.model.GlobalAppLinks
 import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.core.navigation.ContentSearchNavigator
 import com.m.vodovoz.core.navigation.activate
-import com.m.vodovoz.core.navigation.navigateToAboutApp
 import com.m.vodovoz.core.navigation.navigateToAllBrands
 import com.m.vodovoz.core.navigation.navigateToAllServices
 import com.m.vodovoz.core.navigation.navigateToBannerProductList
@@ -309,22 +308,27 @@ class HomeFragment : Fragment() {
             siteStateManager.observeDeepLinkPath()
                 .collect { path ->
                     if (path == null) return@collect
+                    if (accountManager.fetchAccountId() == null) {
+                        accountManager.setPendingDeeplink(path)
+                    }
                     val navController = findNavController()
-
+                    val orderId = path.toLongOrNull()
                     debugLog { "DeepLinkPath: $path" }
-                    when (path) {
-                        "kalkulyator_vody" -> {
+                    when {
+                        path == "kalkulyator_vody" -> {
                             accountManager.reportEvent("trekervodi_ssilka")
                             navController.navigateToWaterApp()
                         }
-                        "orders" -> {
+
+                        path == AccountManager.ORDERS_DEEPLINK -> {
                             navController.navigateToOrdersHistory()
                         }
-                        else -> {
-                            val number = path.toLongOrNull()
-                            if(number != null) navController.navigateToOrderDetails(number)
+
+                        orderId != null -> {
+                            navController.navigateToOrderDetails(orderId)
                         }
                     }
+
                     siteStateManager.clearDeepLinkListener()
                 }
         }

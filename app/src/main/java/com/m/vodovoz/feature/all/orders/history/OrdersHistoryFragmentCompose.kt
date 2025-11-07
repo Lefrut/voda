@@ -5,7 +5,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
@@ -21,6 +20,7 @@ import com.m.vodovoz.design_system.VodovozTheme
 import com.m.vodovoz.design_system.effects.LifecycleEffect
 import com.m.vodovoz.util.extensions.openUrl
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.filter
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -65,12 +65,10 @@ class OrdersHistoryFragment : Fragment() {
     }
 
     private suspend fun observeAccount() {
-        accountManager.observeAccountId().collect { userId ->
-            if (userId == null) {
-                findNavController().popBackStack()
-                tabManager.setAuthRedirect(findNavController().graph.id)
-                tabManager.selectTab(R.id.graph_profile)
-            }
+        accountManager.observeAccountId().filter { it == null }.collect {
+            val navController = findNavController()
+            navController.popBackStack()
+            tabManager.selectTab(R.id.graph_profile)
         }
     }
 

@@ -6,6 +6,9 @@ import com.m.vodovoz.common.datastore.DataStorePrefs
 import com.yandex.metrica.YandexMetrica
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.onEach
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -91,12 +94,25 @@ class AccountManager @Inject constructor(
         val password: String,
     )
 
+    val pendingDeeplinkFlow = dataStorePrefs.getStringFlow(
+        PENDING_DEEPLINK_KEY
+    ).filter { deeplink ->
+        !deeplink.isNullOrBlank()
+    }.filterNotNull().onEach { setPendingDeeplink("") }
+
+    fun setPendingDeeplink(deeplink: String){
+        dataStorePrefs.putString(PENDING_DEEPLINK_KEY, deeplink)
+    }
+
     companion object {
         private const val USER_ID = "User_ID"
         private const val USER_TOKEN = "User_token"
         private const val EMAIL = "Email"
         private const val PASSWORD = "Password"
         private const val USE_BIO = "USE_BIO"
+
+        private const val PENDING_DEEPLINK_KEY = "pending_deeplink"
+        const val ORDERS_DEEPLINK = "orders"
     }
 
 }
