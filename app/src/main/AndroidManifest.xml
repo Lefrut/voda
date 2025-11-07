@@ -63,7 +63,7 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data android:scheme="https" />
-                <data android:host="m.vodovoz.ru" />
+                <data android:host="vodovoz.ru" />
                 <data android:pathPrefix="/landings/kalkulyator_vody/" />
             </intent-filter>
 
@@ -74,7 +74,7 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data android:scheme="https" />
-                <data android:host="m.vodovoz.ru" />
+                <data android:host="vodovoz.ru" />
                 <data android:pathPattern="/personal/orders/.*" />
             </intent-filter>
 
@@ -85,7 +85,7 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data android:scheme="https" />
-                <data android:host="m.vodovoz.ru" />
+                <data android:host="vodovoz.ru" />
                 <data android:pathPattern="/personal/orders/" />
             </intent-filter>
 

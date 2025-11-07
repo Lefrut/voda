@@ -12,7 +12,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.filterNotNull
 
 
-class PagingDataListener<T : Any>(
+class PagingDataPresenterWrapper<T : Any>(
     private val dispatcher: CoroutineDispatcher = Dispatchers.Default,
     private val onUpdateItems: suspend (ItemSnapshotList<T>) -> Unit,
 ) {
