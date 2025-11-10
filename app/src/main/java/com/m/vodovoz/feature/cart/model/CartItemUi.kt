@@ -30,19 +30,20 @@ data class CartItemUi(
     val hasDiscount: Boolean,
     val restriction: ProductRestrictionUi,
     val showcase: Boolean,
+    val additionalProductsText: AdditionalProductsTextUi?,
 ) : VodovozItemUi<CartItemUi>() {
     override fun copyItem(
         forAdults: ForAdultsUi?,
         cartLoading: Boolean,
         isFavorite: Boolean,
         cartQuantity: Int,
-        items: List<VodovozItemUi<*>>
+        items: List<VodovozItemUi<*>>,
     ): CartItemUi = copy(
-            cartQuantity = cartQuantity,
-            cartLoading = cartLoading,
-            isFavorite = isFavorite,
-            forAdults = forAdults
-        )
+        cartQuantity = cartQuantity,
+        cartLoading = cartLoading,
+        isFavorite = isFavorite,
+        forAdults = forAdults
+    )
 }
 
 
@@ -72,6 +73,7 @@ fun CartItemModel.toUi(): CartItemUi {
         restriction = ProductRestrictionUi.fromCode(restrictionsCode),
         showcase = showcase,
         cartLoading = false,
-        forAdults = forAdults?.toUi()
+        forAdults = forAdults?.toUi(),
+        additionalProductsText = additionalProductsText?.toUi()
     )
 }

@@ -44,7 +44,7 @@ fun CartScreen(viewModel: CartFlowViewModel, viewState: CartFlowViewModel.CartSt
                     modifier = Modifier.padding(horizontal = 16.dp),
                     text = stringResource(id = R.string.place_order),
                     onClick = {
-                        if (!viewState.blockOrderButton) {
+                        if (!viewState.lockOrderButton) {
                             viewModel.navigateToOrder()
                         }
                     },
@@ -68,7 +68,7 @@ fun CartScreen(viewModel: CartFlowViewModel, viewState: CartFlowViewModel.CartSt
                         onRefresh = { viewModel.refresh() },
                     ) {
                         CartBody(
-                            cartItems = viewState.items,
+                            cartItems = viewState.items1,
                             cartPresent = viewState.present,
                             removableItemId = viewState.currentRemoveItem?.itemId,
                             countCartItemsText = viewState.countText,

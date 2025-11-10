@@ -23,5 +23,6 @@ data class CartItemModel(
     val hasDiscount: Boolean,
     val restrictionsCode: Int,
     val showcase: Boolean,
-    val forAdults: ForAdultsModel?
+    val forAdults: ForAdultsModel?,
+    val additionalProductsText: AdditionalProductsTextModel?,
 )

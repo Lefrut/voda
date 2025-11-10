@@ -4,9 +4,9 @@ import com.m.vodovoz.common.model.VodovozBoolean
 import com.m.vodovoz.common.model.boolean
 import com.m.vodovoz.common.model.from
 import com.m.vodovoz.data.vodovoz_service.di.toVodovozUrl
-import com.m.vodovoz.data.vodovoz_service.model.TOVAR_18_DTO
 import com.m.vodovoz.data.vodovoz_service.model.cart.CART_KNOPKA_DTO
 import com.m.vodovoz.data.vodovoz_service.model.cart.CartDetailsDTO
+import com.m.vodovoz.data.vodovoz_service.model.cart.DOPTOVARY_TEXT_DTO
 import com.m.vodovoz.data.vodovoz_service.model.cart.ITOG_ITEM_DTO
 import com.m.vodovoz.data.vodovoz_service.model.cart.KNOPKA_PROMOKOD_DTO
 import com.m.vodovoz.data.vodovoz_service.model.cart.KORZINA_PRODUCT_DTO
@@ -15,6 +15,9 @@ import com.m.vodovoz.data.vodovoz_service.model.cart.OKNO_PROMOKOD_DTO
 import com.m.vodovoz.data.vodovoz_service.model.cart.PODAROK_DTO
 import com.m.vodovoz.data.vodovoz_service.model.cart.PODAROK_KNOPKA_DTO
 import com.m.vodovoz.data.vodovoz_service.model.cart.PRODUCT_PODAROK_DTO
+import com.m.vodovoz.data.vodovoz_service.model.cart.RecommendationsDTO
+import com.m.vodovoz.domain.general.model.cart.AdditionalProductsBSModel
+import com.m.vodovoz.domain.general.model.cart.AdditionalProductsTextModel
 import com.m.vodovoz.domain.general.model.cart.CartButtonModel
 import com.m.vodovoz.domain.general.model.cart.CartDetailsModel
 import com.m.vodovoz.domain.general.model.cart.CartItemModel
@@ -45,6 +48,15 @@ fun CartDetailsDTO.toDomain(): CartDetailsModel {
         promotionalCodeButton = KNOPKI?.PROMOKOD?.toDomain(),
         presentButton = KNOPKI?.PODARKI?.toDomain(),
         orderSummary = orderSummary
+    )
+}
+
+fun RecommendationsDTO.toDomain(): AdditionalProductsBSModel {
+    return AdditionalProductsBSModel(
+        title = title ?: "",
+        description = description ?: "",
+        products = products?.mapToDomain() ?: emptyList(),
+        button = button?.toDomain()
     )
 }
 
@@ -163,7 +175,16 @@ fun KORZINA_PRODUCT_DTO.toDomain(): CartItemModel? {
         hasDiscount = DISCOUNTS_APPLY ?: false,
         restrictionsCode = PODROBNO.ZAPRET_FISHKAM ?: 0,
         showcase = PODROBNO.URL == true,
-        forAdults = (TOVAR18 ?: PODROBNO.TOVAR18)?.toDomain()
+        forAdults = (TOVAR18 ?: PODROBNO.TOVAR18)?.toDomain(),
+        additionalProductsText = DOPTOVARY?.toDomain()
+    )
+}
+
+fun DOPTOVARY_TEXT_DTO.toDomain(): AdditionalProductsTextModel? {
+    return AdditionalProductsTextModel(
+        text = TEXT ?: return null,
+        articleNumber = ARTICLE ?: "",
+        productsId = TOVARY_ID ?: return null
     )
 }
 

@@ -2,8 +2,8 @@ package com.m.vodovoz.data.vodovoz_service.model.cart
 
 
 import androidx.annotation.Keep
-import com.squareup.moshi.Json
 import com.m.vodovoz.data.vodovoz_service.model.TOVAR_18_DTO
+import com.squareup.moshi.Json
 
 @Keep
 data class KORZINA_PRODUCT_DTO(
@@ -49,6 +49,8 @@ data class KORZINA_PRODUCT_DTO(
     val DISCOUNT_PRICE_PERCENT_FORMATED: String?,
     @Json(name = "DISCOUNTS_APPLY")
     val DISCOUNTS_APPLY: Boolean?,
+    @Json(name = "DOPTOVARY")
+    val DOPTOVARY: DOPTOVARY_TEXT_DTO?,
     @Json(name = "TOVAR18")
     val TOVAR18: TOVAR_18_DTO?,
 )

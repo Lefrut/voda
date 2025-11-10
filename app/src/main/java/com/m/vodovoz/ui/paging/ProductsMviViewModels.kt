@@ -21,7 +21,7 @@ abstract class PagingProductsMviViewModel2<ITEM1 : VodovozItemUi<ITEM1>, ITEM2 :
     override val favoritesFlow: Flow<Map<Long, Boolean>>,
     override val cartFlow: Flow<Map<Long, Int>>,
     override val canViewAdultProducts: Flow<Boolean>,
-) : PagingMviViewModel2<ITEM1, ITEM2, S, E>(state), VodovozItemsListeners<ITEM1>
+) : PagingMviViewModel2<ITEM1, ITEM2, S, E>(state), VodovozItemsListeners2<ITEM1, ITEM2>
 
 abstract class ProductsMviViewModel<ITEM : VodovozItemUi<ITEM>, S : ItemsState<ITEM, S>, E>(
     state: S,

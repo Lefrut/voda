@@ -150,7 +150,7 @@ abstract class ItemsMviViewModel2<ITEM1 : Any, ITEM2 : Any, S : ItemsState2<ITEM
 
 
     @Suppress("unused")
-    open suspend fun <T> collectItems1With(
+    open suspend fun <T> collectItemsWith1(
         source: Flow<T>,
         updateItems: suspend (List<ITEM1>, T) -> List<ITEM1>,
     ) {
@@ -166,7 +166,7 @@ abstract class ItemsMviViewModel2<ITEM1 : Any, ITEM2 : Any, S : ItemsState2<ITEM
     }
 
     @Suppress("unused")
-    open suspend fun <T> collectItems2With(
+    open suspend fun <T> collectItemsWith2(
         source: Flow<T>,
         updateItems: suspend (List<ITEM2>, T) -> List<ITEM2>,
     ) {
@@ -230,6 +230,10 @@ abstract class PagingState2<ITEM1 : Any, ITEM2 : Any, STATE> : ItemsState2<ITEM1
 
     fun withLoadStates2(newStates: CombinedLoadStates): STATE =
         copyPagingState(loadStates2 = newStates)
+
+    override fun withItems1(newItems: List<ITEM1>): STATE = copyPagingState(items1 = newItems)
+
+    override fun withItems2(newItems: List<ITEM2>): STATE = copyPagingState(items2 = newItems)
 
 
     protected abstract fun copyPagingState(

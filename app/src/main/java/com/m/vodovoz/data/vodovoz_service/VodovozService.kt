@@ -43,6 +43,7 @@ import com.m.vodovoz.data.vodovoz_service.model.auth.RequestCodeDTO
 import com.m.vodovoz.data.vodovoz_service.model.auth.UserAuthInfoDTO
 import com.m.vodovoz.data.vodovoz_service.model.cart.BottomCartDTO
 import com.m.vodovoz.data.vodovoz_service.model.cart.CartDetailsDTO
+import com.m.vodovoz.data.vodovoz_service.model.cart.RecommendationsDTO
 import com.m.vodovoz.data.vodovoz_service.model.catalog.CatalogDetailsDTO
 import com.m.vodovoz.data.vodovoz_service.model.certificate.BuyCertificateDetailsDTO
 import com.m.vodovoz.data.vodovoz_service.model.delivery_date.DeliveryDateDetailsDTO
@@ -313,21 +314,19 @@ interface VodovozService {
     @GET("oformlenie/metki.php?action=add")
     suspend fun addAddressLabel(
         @Query("userid") userId: Long?,
-        @Query("slovo") label: String
+        @Query("slovo") label: String,
     ): Response<VodovozResponseDTO<String>>
 
     @GET("oformlenie/metki.php?action=del")
     suspend fun deleteAddressLabel(
         @Query("userid") userId: Long?,
-        @Query("slovo") label: String
+        @Query("slovo") label: String,
     ): Response<VodovozResponseDTO<String>>
 
     @GET("oformlenie/metki.php?action=delfull")
     suspend fun deleteAllAddressLabels(
         @Query("userid") userId: Long?,
     ): Response<VodovozResponseDTO<String>>
-
-
 
 
     @GET("profile/karta/index.php?action=tochkakarta")
@@ -591,6 +590,14 @@ interface VodovozService {
 
     @GET("korzina/minikorzina.php?action=getbasketuser")
     suspend fun getBottomCart(): Response<VodovozResponseDTO<BottomCartDTO>>
+
+    @GET("korzina/doptovary.php?action=doptovar")
+    suspend fun getAdditionalProducts(
+        @Query("id") productsId: Long,
+        @Query("article") productsArticle: String,
+        @Query("userid") userId: Long?,
+        @Query("nav") page: Int = 1,
+    ): Response<VodovozResponseDTO<RecommendationsDTO>>
 
     @GET("korzina/index.php?action=getbasket")
     suspend fun getCartDetails(

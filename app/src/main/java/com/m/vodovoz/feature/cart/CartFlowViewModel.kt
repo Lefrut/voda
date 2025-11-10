@@ -3,10 +3,13 @@ package com.m.vodovoz.feature.cart
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.viewModelScope
+import androidx.paging.CombinedLoadStates
+import androidx.paging.map
 import com.m.vodovoz.common.account.AccountManager
 import com.m.vodovoz.common.cart.CartManager
 import com.m.vodovoz.common.like.LikeManager
 import com.m.vodovoz.common.tab.TabManager
+import com.m.vodovoz.design_system.model.ProductUi
 import com.m.vodovoz.design_system.model.VodovozPlaceholderUi
 import com.m.vodovoz.design_system.model.order.OrderSummaryItemUi
 import com.m.vodovoz.design_system.model.order.mapToUi
@@ -16,6 +19,8 @@ import com.m.vodovoz.domain.general.respository.UserPreferencesRepository
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
 import com.m.vodovoz.feature.cart.bottles.model.BottleUi
 import com.m.vodovoz.feature.cart.bottles.model.toBottle
+import com.m.vodovoz.feature.cart.model.AdditionalProductsBSUi
+import com.m.vodovoz.feature.cart.model.AdditionalProductsTextUi
 import com.m.vodovoz.feature.cart.model.CartButtonUi
 import com.m.vodovoz.feature.cart.model.CartItemUi
 import com.m.vodovoz.feature.cart.model.CartPresentItemUi
@@ -25,11 +30,16 @@ import com.m.vodovoz.feature.cart.model.CartPromoButtonUi
 import com.m.vodovoz.feature.cart.model.mapToUi
 import com.m.vodovoz.feature.cart.model.toUi
 import com.m.vodovoz.ui.mvi.Event
-import com.m.vodovoz.ui.paging.ItemsState
-import com.m.vodovoz.ui.paging.ProductsMviViewModel
+import com.m.vodovoz.ui.paging.PagingProductsMviViewModel2
+import com.m.vodovoz.ui.paging.PagingState2
+import com.m.vodovoz.ui.paging.emptyCombinedLoadStates
 import com.m.vodovoz.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -42,7 +52,7 @@ class CartFlowViewModel @Inject constructor(
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val tabManager: TabManager,
     userPreferencesRepository: UserPreferencesRepository,
-) : ProductsMviViewModel<CartItemUi, CartFlowViewModel.CartState, CartFlowViewModel.CartEvents>(
+) : PagingProductsMviViewModel2<CartItemUi, ProductUi, CartFlowViewModel.CartState, CartFlowViewModel.CartEvents>(
     state = CartState(),
     blockedProductsFlow = cartManager.blockedProductsFlow,
     favoritesFlow = likeManager.observeLikes(),
@@ -81,7 +91,7 @@ class CartFlowViewModel @Inject constructor(
                 s.copy(
                     title = cartDetails.title,
                     countText = cartDetails.countText,
-                    items = cartDetails.items.mapToUi(),
+                    items1 = cartDetails.items.mapToUi(),
                     present = cartDetails.present?.toUi(),
                     bottlesButton = cartDetails.bottlesButton?.toUi(),
                     promotionalCodeButton = promoButton,
@@ -133,6 +143,43 @@ class CartFlowViewModel @Inject constructor(
         }
     }
 
+    fun closeRecommendationsBS() {
+        updateState { s ->
+            s.copy(
+                showAdditionalProductsBS = false,
+                additionalProductsBS = null
+            )
+        }
+    }
+
+    fun fetchAndShowRecommendationsBS(additionalProductsText: AdditionalProductsTextUi) =
+        vodovozServiceRepository.getAdditionalProductsBS(
+            productsId = additionalProductsText.productsId,
+            productsArticle = additionalProductsText.articleNumber
+        ).onStart {
+            updateState { s ->
+                s.copy(
+                    showAdditionalProductsBS = true,
+                    additionalProductsBS = null
+                )
+            }
+        }.map { bsResult ->
+            bsResult.mapCatching { bSModel -> bSModel.toUi() }
+        }.onEach { bsResult ->
+            bsResult.onSuccess {
+                updateState { s ->
+                    s.copy(additionalProductsBS = bsResult.getOrNull())
+                }
+                vodovozServiceRepository.getAdditionalProductsPaged(
+                    productsId = additionalProductsText.productsId,
+                    productsArticle = additionalProductsText.articleNumber
+                ).map { data ->
+                    data.map { it.toUi() }
+                }.collectPagingData2()
+            }.onFailure {
+                closeRecommendationsBS()
+            }
+        }.launchIn(viewModelScope)
 
     fun showClearCartDialog() = viewModelScope.launch {
         updateState { s ->
@@ -183,7 +230,7 @@ class CartFlowViewModel @Inject constructor(
                 bottlesButton = s.bottlesButton?.copy(
                     enabled = buttonEnabled
                 ),
-                blockOrderButton = !buttonEnabled
+                lockOrderButton = !buttonEnabled
             )
         }
 
@@ -318,7 +365,7 @@ class CartFlowViewModel @Inject constructor(
     }
 
     fun navigateToAllBottles() = viewModelScope.launch {
-        val bottles = stateSnapshot.items.filter { item ->
+        val bottles = stateSnapshot.items1.filter { item ->
             listOf(
                 item.currentPrice,
                 item.discountPrice,
@@ -347,7 +394,8 @@ class CartFlowViewModel @Inject constructor(
         val title: String = "",
         val countText: String = "",
         val uiState: CartUiState = CartUiState.Loading,
-        override val items: List<CartItemUi> = emptyList(),
+        override val items1: List<CartItemUi> = emptyList(),
+        override val items2: List<ProductUi> = emptyList(),
         val present: CartPresentUi? = null,
         val bottlesButton: CartButtonUi? = null,
         val promotionalCodeButton: CartPromoButtonUi? = null,
@@ -359,11 +407,28 @@ class CartFlowViewModel @Inject constructor(
         val lockCart: Boolean = false,
         val orderSummary: List<OrderSummaryItemUi> = emptyList(),
         val showPromotionCodeBottomSheet: Boolean = false,
-        val blockOrderButton: Boolean = false,
+        val lockOrderButton: Boolean = false,
         val promoCode: String = "",
-    ) : ItemsState<CartItemUi, CartState>() {
+        val additionalProductsBS: AdditionalProductsBSUi? = null,
+        val showAdditionalProductsBS: Boolean = false,
+        override val loadStates1: CombinedLoadStates = emptyCombinedLoadStates,
+        override val loadStates2: CombinedLoadStates = emptyCombinedLoadStates,
+    ) : PagingState2<CartItemUi, ProductUi, CartState>() {
 
-        override fun withItems(newItems: List<CartItemUi>): CartState = copy(items = newItems)
+        override fun copyPagingState(
+            items1: List<CartItemUi>,
+            items2: List<ProductUi>,
+            loadStates1: CombinedLoadStates,
+            loadStates2: CombinedLoadStates,
+        ): CartState {
+            return copy(
+                items1 = items1,
+                items2 = items2,
+                loadStates1 = loadStates1,
+                loadStates2 = loadStates2
+            )
+        }
+
     }
 
     @Stable

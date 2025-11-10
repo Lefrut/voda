@@ -24,9 +24,12 @@ import com.m.vodovoz.data.vodovoz_service.model.VodovozErrorResponseDTO
 import com.m.vodovoz.data.vodovoz_service.model.VodovozPlaceholderDTO
 import com.m.vodovoz.data.vodovoz_service.model.VodovozResponseDTO
 import com.m.vodovoz.data.vodovoz_service.model.WaitFeedbackProductsDTO
+import com.m.vodovoz.data.vodovoz_service.model.cart.RecommendationsDTO
 import com.m.vodovoz.data.vodovoz_service.model.order.OrdersHistoryDetailsDTO
 import com.m.vodovoz.data.vodovoz_service.paging.VodovozPagerFactory
+import com.m.vodovoz.design_system.model.ProductUi
 import com.m.vodovoz.design_system.model.widgets.FieldUi
+import com.m.vodovoz.domain.general.model.cart.AdditionalProductsBSModel
 import com.m.vodovoz.domain.general.model.cart.BottomCartModel
 import com.m.vodovoz.domain.general.model.cart.CartDetailsModel
 import com.m.vodovoz.domain.general.model.exceptions.EmptyResultException
@@ -1836,6 +1839,45 @@ class VodovozServiceRepositoryImpl @Inject constructor(
                     response.stringErrorBody()
                 )
                 throw EmptyResultException(placeholder = value.data!!.toDomain())
+            }
+        )
+    }
+
+    override fun getAdditionalProductsBS(
+        productsId: Long,
+        productsArticle: String,
+    ): Flow<Result<AdditionalProductsBSModel>> {
+        return executeRequest(
+            request = {
+                vodovozService.getAdditionalProducts(
+                    productsId = productsId,
+                    productsArticle = productsArticle,
+                    userId = accountManager.fetchAccountId()
+                )
+            },
+            mapper = {
+                it.data!!.toDomain()
+            }
+        )
+    }
+
+    override fun getAdditionalProductsPaged(
+        productsId: Long,
+        productsArticle: String,
+    ): Flow<PagingData<ProductModel>> {
+        return VodovozPagerFactory.getFlow(
+            clazz = RecommendationsDTO::class,
+            request = { page, _ ->
+                val userId = accountManager.fetchAccountId()
+                vodovozService.getAdditionalProducts(
+                    userId = userId,
+                    page = page,
+                    productsId = productsId,
+                    productsArticle = productsArticle
+                )
+            },
+            mapper = { dto ->
+                dto.products!!.mapToDomain()
             }
         )
     }
