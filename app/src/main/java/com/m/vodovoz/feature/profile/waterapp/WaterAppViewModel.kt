@@ -3,9 +3,10 @@ package com.m.vodovoz.feature.profile.waterapp
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.viewModelScope
-import com.m.vodovoz.common.water_app.WaterApp
 import com.m.vodovoz.common.water_app.NotificationSettings
+import com.m.vodovoz.common.water_app.WaterApp
 import com.m.vodovoz.domain.general.respository.WaterAppRepository
+import com.m.vodovoz.domain.general.respository.clearAll
 import com.m.vodovoz.feature.profile.waterapp.model.ReminderIntervalUi
 import com.m.vodovoz.feature.profile.waterapp.model.WaterAppActivityLevelUi
 import com.m.vodovoz.feature.profile.waterapp.model.WaterAppUiState
@@ -139,7 +140,29 @@ class WaterAppViewModel @Inject constructor(
     }
 
     fun selectGender(man: Boolean) = viewModelScope.launch {
-        updateUserInfo { copy(gender = WaterApp.Gender.from(man)) }
+        updateUserInfo {
+            val newGender = WaterApp.Gender.from(man)
+            val defaultUserInfo = when (newGender) {
+                WaterApp.Gender.Man -> WaterApp.UserInfo.ManDefault
+                WaterApp.Gender.Girl -> WaterApp.UserInfo.GirlDefault
+            }
+
+            val oldDefault = when (gender) {
+                WaterApp.Gender.Man -> WaterApp.UserInfo.ManDefault
+                WaterApp.Gender.Girl -> WaterApp.UserInfo.GirlDefault
+            }
+
+            copy(
+                gender = newGender,
+                height = if (height == oldDefault.height) defaultUserInfo.height else height,
+                weight = if (weight == oldDefault.weight) defaultUserInfo.weight else weight,
+                activityLevel = if (activityLevel == oldDefault.activityLevel) {
+                    defaultUserInfo.activityLevel
+                } else {
+                    activityLevel
+                }
+            )
+        }
     }
 
     fun goToPreviousStage(userDataStage: WaterAppUiState.UserData) = viewModelScope.launch {
@@ -227,13 +250,6 @@ class WaterAppViewModel @Inject constructor(
         waterAppRepository.saveDailyGoal(updatedDailyGoal)
         waterAppRepository.saveNotificationSettings(notificationSettings)
         waterAppRepository.saveStage(mainUiState.toStage())
-//        listOf(
-//            launch { waterAppRepository.saveUserInfo(userInfo) },
-//            launch { waterAppRepository.saveDailyGoal(updatedDailyGoal) },
-//            launch { waterAppRepository.saveNotificationSettings(notificationSettings) },
-//            launch { waterAppRepository.saveStage(mainUiState.toStage()) },
-//        ).joinAll()
-
     }
 
     fun goToMainStage() = viewModelScope.launch {
@@ -303,7 +319,7 @@ class WaterAppViewModel @Inject constructor(
         waterAppRepository.saveDailyGoal(currentDailyGoal)
 
         if (!dailyGoal.wasCompleted && currentDailyGoal.currentMl == currentDailyGoal.totalMl) {
-            delay(2500L)
+            delay(300L)
             updateState { s -> s.copy(uiState = WaterAppUiState.GoalCompleted) }
         }
     }
@@ -331,6 +347,23 @@ class WaterAppViewModel @Inject constructor(
         } ?: WaterStepUi.Default250
 
         updateState { s -> s.copy(changeWaterStep = newWaterStep) }
+    }
+
+    fun showClearDialog() {
+        updateState { s ->
+            s.copy(showClearDialog = true)
+        }
+    }
+
+    fun closeClearDialog() {
+        updateState { s ->
+            s.copy(showClearDialog = false)
+        }
+    }
+
+    fun clearWaterAppData() = viewModelScope.launch {
+        updateState { WaterAppState(uiState = WaterAppUiState.Welcome) }
+        waterAppRepository.clearAll()
     }
 
     fun showNotificationSettingsDialog() = viewModelScope.launch {
@@ -361,6 +394,7 @@ class WaterAppViewModel @Inject constructor(
         val reminderIntervals: List<ReminderIntervalUi> = WaterAppUiState.Settings.reminderIntervals,
         val changeWaterStep: WaterStepUi = WaterStepUi.Default250,
         val showNotificationSettingsDialog: Boolean = false,
+        val showClearDialog: Boolean = false,
     ) : State
 
     sealed class WaterAppEvents : Event {

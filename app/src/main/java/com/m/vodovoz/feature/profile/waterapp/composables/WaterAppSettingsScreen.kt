@@ -39,10 +39,14 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.PlatformTextStyle
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.LineHeightStyle
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.m.vodovoz.R
@@ -70,6 +74,7 @@ fun WaterAppSettingsScreen(
     onHaveNotificationsChange: () -> Unit,
     onSettingsSaveClick: () -> Unit,
     onEditUserData: (WaterAppUiState.UserData) -> Unit,
+    onClearClick: () -> Unit
 ) {
     BackHandler {
         onCloseClick()
@@ -142,6 +147,7 @@ fun WaterAppSettingsScreen(
                     )
 
 
+                    @Suppress("COMPOSE_APPLIER_CALL_MISMATCH")
                     BoxWithConstraints(
                         modifier = Modifier.padding(
                             top = 16.dp,
@@ -216,6 +222,28 @@ fun WaterAppSettingsScreen(
                         )
                     }
                 }
+
+                Text(
+                    modifier = Modifier.padding(
+                        top = 16.dp,
+                        start = 16.dp,
+                        end = 16.dp,
+                    ),
+                    text = buildAnnotatedString {
+                        withStyle(SpanStyle(MaterialTheme.colorScheme.surfaceTint)) {
+                            append(stringResource(R.string.clear_water_data_text))
+                            append(stringResource(R.string.space))
+                        }
+                        pushLink(
+                            LinkAnnotation.Clickable("clear") { onClearClick() }
+                        )
+                        withStyle(SpanStyle(MaterialTheme.colorScheme.error)) {
+                            append(stringResource(R.string.there_is))
+                        }
+                        pop()
+                    },
+                    style = MaterialTheme.typography.bodySmall
+                )
             }
         }
 

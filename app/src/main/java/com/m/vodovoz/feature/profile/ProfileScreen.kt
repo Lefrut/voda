@@ -2,6 +2,7 @@ package com.m.vodovoz.feature.profile
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -86,10 +87,12 @@ fun ProfileScreen(
                 val bannerImages = viewState.banners.map { bannerUi -> bannerUi.detailPicture }
                 val pagerState = rememberAutoScrollPagerState(itemsCount = bannerImages.size)
 
+                Spacer(Modifier.height(16.dp))
+
                 if(bannerImages.isNotEmpty()){
                     AutoScrollImagePager(
                         modifier = Modifier
-                            .padding(top = 17.dp, bottom = 16.dp)
+                            .padding(bottom = 16.dp)
                             .height(68.dp),
                         images = bannerImages,
                         onImageClick = { page ->

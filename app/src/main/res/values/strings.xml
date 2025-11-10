@@ -315,5 +315,9 @@
     <string name="today">Сегодня</string>
     <string name="labels">Метки</string>
     <string name="add">Добавить</string>
+    <string name="there_is">здесь</string>
+    <string name="clear_water_data_text">Если вы хотите сбросить данные, то нажмите</string>
+    <string name="reset_data">Сброс данных</string>
+    <string name="you_sure_delete_data">Вы уверены, что хотите удалить данные?</string>
 
 </resources>

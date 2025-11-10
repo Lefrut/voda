@@ -29,15 +29,6 @@ interface WaterAppRepository {
     suspend fun saveStage(stage: WaterApp.Stage): Result<WaterApp.Stage>
     suspend fun clearStage(): Result<Unit>
 
-    suspend fun clear() = runCatching {
-        clearStage()
-        clearDailyGoal()
-        clearUserInfo()
-        clearNotificationSettings()
-
-        Unit
-    }
-
 
     sealed class Exception : RuntimeException()
 
@@ -52,6 +43,16 @@ interface WaterAppRepository {
     ) : Exception()
 
 }
+
+suspend fun WaterAppRepository.clearAll() = runCatching {
+    listOf(
+        clearStage(),
+        clearUserInfo(),
+        clearNotificationSettings(),
+        clearDailyGoal()
+    ).forEach { result -> result.getOrThrow() }
+}
+
 
 fun Throwable.toUnknownException(): WaterAppRepository.UnknownException {
     return WaterAppRepository.UnknownException(cause, message)

@@ -12,8 +12,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -71,6 +69,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.m.vodovoz.R
+import com.m.vodovoz.common.water_app.WaterApp
 import com.m.vodovoz.design_system.robotoFontFamily
 import com.m.vodovoz.feature.profile.waterapp.WaterAppHelper
 import com.m.vodovoz.feature.profile.waterapp.model.WaterStepUi
@@ -79,8 +78,6 @@ import com.m.vodovoz.ui.graphics.toAndroidPaths
 
 @Composable
 fun WaterAppBottleScreen(
-    maxLevel: Int,
-    currentLevel: Int,
     changeWaterStep: WaterStepUi,
     onBackClick: () -> Unit,
     onSettingsClick: () -> Unit,
@@ -88,7 +85,12 @@ fun WaterAppBottleScreen(
     onMinusClick: () -> Unit,
     onPlusClick: () -> Unit,
     onBottleClick: () -> Unit,
+    dailyGoal: WaterApp.DailyGoal,
 ) {
+    val currentLevel = dailyGoal.currentMl
+    val maxLevel = dailyGoal.totalMl
+    val wasCompleted = dailyGoal.wasCompleted
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -158,7 +160,11 @@ fun WaterAppBottleScreen(
 
         Text(
             modifier = Modifier.padding(top = 20.dp),
-            text = stringResource(R.string.click_on_bottle),
+            text = if (wasCompleted) {
+                stringResource(R.string.you_have_drunk_water_goal)
+            } else {
+                stringResource(R.string.click_on_bottle)
+            },
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.surfaceTint,
             textAlign = TextAlign.Center
@@ -173,36 +179,37 @@ fun WaterAppBottleScreen(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Icon(
-                painter = painterResource(R.drawable.ic_minus_rounded),
-                contentDescription = null,
-                modifier = Modifier
-                    .size(32.dp)
-                    .clip(CircleShape)
-                    .clickable(onClick = onMinusClick)
-                    .background(MaterialTheme.colorScheme.primaryContainer)
-                    .padding(4.dp),
-                tint = MaterialTheme.colorScheme.primary
-            )
+            if (!wasCompleted) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_minus_rounded),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(32.dp)
+                        .clip(CircleShape)
+                        .clickable(onClick = onMinusClick)
+                        .background(MaterialTheme.colorScheme.primaryContainer)
+                        .padding(4.dp),
+                    tint = MaterialTheme.colorScheme.primary
+                )
 
-            Text(
-                text = stringResource(R.string.quantity_ml, changeWaterStep.ml),
-                color = MaterialTheme.colorScheme.onBackground,
-                style = MaterialTheme.typography.bodyMedium.copy(letterSpacing = 0.15.sp)
-            )
+                Text(
+                    text = stringResource(R.string.quantity_ml, changeWaterStep.ml),
+                    color = MaterialTheme.colorScheme.onBackground,
+                    style = MaterialTheme.typography.bodyMedium.copy(letterSpacing = 0.15.sp)
+                )
 
-            Icon(
-                painter = painterResource(R.drawable.ic_plus_rounded),
-                contentDescription = null,
-                modifier = Modifier
-                    .size(32.dp)
-                    .clip(CircleShape)
-                    .clickable(onClick = onPlusClick)
-                    .background(MaterialTheme.colorScheme.primaryContainer)
-                    .padding(4.dp),
-                tint = MaterialTheme.colorScheme.primary
-            )
-
+                Icon(
+                    painter = painterResource(R.drawable.ic_plus_rounded),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(32.dp)
+                        .clip(CircleShape)
+                        .clickable(onClick = onPlusClick)
+                        .background(MaterialTheme.colorScheme.primaryContainer)
+                        .padding(4.dp),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
         }
 
     }
@@ -407,6 +414,7 @@ private fun WaterProgressBar(
         internalProgress =
             ((newOffset - minBarWidthPx) / (barWidthPx - minBarWidthPx)).coerceIn(0f, 1f)
 
+        //todo - ucomment if need
         onProgressChanged(internalProgress)
     }
 
@@ -448,10 +456,6 @@ private fun WaterProgressBar(
                 painter = painterResource(R.drawable.ic_water_thumb),
                 contentDescription = null,
                 modifier = Modifier
-                    .draggable(
-                        orientation = Orientation.Horizontal,
-                        state = draggableState,
-                    )
                     .padding(horizontal = 4.dp)
                     .size(iconSize)
 
