@@ -233,8 +233,8 @@ class WaterAppViewModel @Inject constructor(
         val mainUiState = WaterAppUiState.Main
         val userInfo = stateSnapshot.userInfo
         val notificationSettings = stateSnapshot.notificationSettings
-        val updatedDailyGoal = stateSnapshot.dailyGoal.copy(
-            totalMl = WaterApp.calculateWaterNorm(userInfo)
+        val updatedDailyGoal = stateSnapshot.dailyGoal.withTotalMl(
+            WaterApp.calculateWaterNorm(userInfo)
         )
 
         updateState { s ->

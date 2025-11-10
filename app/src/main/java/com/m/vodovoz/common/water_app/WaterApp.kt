@@ -1,7 +1,6 @@
 package com.m.vodovoz.common.water_app
 
 import androidx.annotation.Keep
-import androidx.compose.runtime.Stable
 import com.squareup.moshi.JsonClass
 import java.math.BigDecimal
 import java.math.RoundingMode
@@ -108,6 +107,13 @@ data object WaterApp {
             return withMl(currentMl + ml)
         }
 
+        fun withTotalMl(ml: Int): DailyGoal {
+            return copy(
+                totalMl = ml,
+                currentMl = currentMl.coerceAtMost(ml),
+            )
+        }
+
 
         companion object {
             fun create(totalMl: Int) = DailyGoal(
@@ -134,5 +140,5 @@ data class NotificationSettings(
     val enableNotifications: Boolean,
     val notificationsDelay: Duration,
     val wakeUpTime: LocalTime,
-    val sleepTime: LocalTime
+    val sleepTime: LocalTime,
 )
