@@ -1,5 +1,6 @@
 package com.m.vodovoz.feature.profile.waterapp.composables
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateDpAsState
@@ -158,9 +159,11 @@ fun WaterAppBottleScreen(
             onClick = onBottleClick
         )
 
+        val isDrunkAll = currentLevel >= maxLevel
+
         Text(
             modifier = Modifier.padding(top = 20.dp),
-            text = if (wasCompleted) {
+            text = if (isDrunkAll) {
                 stringResource(R.string.you_have_drunk_water_goal)
             } else {
                 stringResource(R.string.click_on_bottle)
@@ -175,11 +178,12 @@ fun WaterAppBottleScreen(
         Row(
             modifier = Modifier
                 .padding(bottom = 43.dp)
+                .height(40.dp)
                 .width(165.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            if (!wasCompleted) {
+            if(!isDrunkAll) {
                 Icon(
                     painter = painterResource(R.drawable.ic_minus_rounded),
                     contentDescription = null,
