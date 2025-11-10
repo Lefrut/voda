@@ -37,7 +37,7 @@ abstract class PagingMviViewModel2<ITEM1 : Any, ITEM2 : Any, S : PagingState2<IT
     state: S,
 ) : ItemsMviViewModel2<ITEM1, ITEM2, S, E>(state) {
 
-    private val pagingManager1 = PagingDataViewModelManager<ITEM1>(
+    private val pagingManager1 = PagingDataViewModelManager(
         scope = viewModelScope,
         onListUpdate = { items1 ->
             updateState { s -> s.withItems1(items1) }
@@ -47,7 +47,7 @@ abstract class PagingMviViewModel2<ITEM1 : Any, ITEM2 : Any, S : PagingState2<IT
         }
     )
 
-    private val pagingManager2 = PagingDataViewModelManager<ITEM2>(
+    private val pagingManager2 = PagingDataViewModelManager(
         scope = viewModelScope,
         onListUpdate = { items2 ->
             updateState { s -> s.withItems2(items2) }
@@ -101,6 +101,24 @@ private class PagingDataViewModelManager<T : Any>(
 
 }
 
+private suspend fun <T1, T2> mergeAndUpdateItems(
+    scope: CoroutineScope,
+    source: () -> Flow<T1>,
+    items: () -> Flow<List<T2>>,
+    map: suspend (List<T2>, T1) -> List<T2>,
+    update: (List<T2>) -> Unit = {},
+) {
+    items().distinctUntilChanged().combine(source()) { items, data ->
+        items to data
+    }.shareIn(
+        scope = scope,
+        started = SharingStarted.Eagerly,
+        replay = 1
+    ).collect { (items, data) ->
+        val result = map(items, data)
+        update(result)
+    }
+}
 
 abstract class ItemsMviViewModel<ITEM : Any, S : ItemsState<ITEM, S>, E> protected constructor(state: S) :
     MviViewModel<S, E>(state) {
@@ -109,20 +127,24 @@ abstract class ItemsMviViewModel<ITEM : Any, S : ItemsState<ITEM, S>, E> protect
     @Suppress("unused")
     open suspend fun <T> collectItemsWith(
         source: Flow<T>,
-        updateItems: suspend (List<ITEM>, T) -> List<ITEM>,
+        map: suspend (List<ITEM>, T) -> List<ITEM>,
     ) {
-        state.map { it.items }.distinctUntilChanged().combine(source) { _, data ->
-            data
-        }.shareIn(viewModelScope, SharingStarted.Eagerly, 1)
-            .collect { data ->
-                val result = updateItems(stateSnapshot.items, data)
-                updateState { s -> s.withItems(result) }
+        mergeAndUpdateItems(
+            scope = viewModelScope,
+            source = { source },
+            items = {
+                state.map { s -> s.items }
+            },
+            map = map,
+            update = {
+                updateState { s -> s.withItems(it) }
             }
+        )
     }
 
 }
 
-abstract class ItemsMviViewModel2<ITEM : Any, ITEM2 : Any, S : ItemsState2<ITEM, ITEM2, S>, E> protected constructor(
+abstract class ItemsMviViewModel2<ITEM1 : Any, ITEM2 : Any, S : ItemsState2<ITEM1, ITEM2, S>, E> protected constructor(
     state: S,
 ) : MviViewModel<S, E>(state) {
 
@@ -130,15 +152,17 @@ abstract class ItemsMviViewModel2<ITEM : Any, ITEM2 : Any, S : ItemsState2<ITEM,
     @Suppress("unused")
     open suspend fun <T> collectItems1With(
         source: Flow<T>,
-        updateItems: suspend (List<ITEM>, T) -> List<ITEM>,
+        updateItems: suspend (List<ITEM1>, T) -> List<ITEM1>,
     ) {
-        state.map { it.items1 }.distinctUntilChanged().combine(source) { _, data ->
-            data
-        }.shareIn(viewModelScope, SharingStarted.Eagerly, 1)
-            .collect { data ->
-                val result = updateItems(stateSnapshot.items1, data)
-                updateState { s -> s.withItems1(result) }
+        mergeAndUpdateItems(
+            scope = viewModelScope,
+            source = { source },
+            items = { state.map { s -> s.items1 } },
+            map = updateItems,
+            update = { items ->
+                updateState { s -> s.withItems1(items) }
             }
+        )
     }
 
     @Suppress("unused")
@@ -146,13 +170,15 @@ abstract class ItemsMviViewModel2<ITEM : Any, ITEM2 : Any, S : ItemsState2<ITEM,
         source: Flow<T>,
         updateItems: suspend (List<ITEM2>, T) -> List<ITEM2>,
     ) {
-        state.map { it.items2 }.distinctUntilChanged().combine(source) { _, data ->
-            data
-        }.shareIn(viewModelScope, SharingStarted.Eagerly, 1)
-            .collect { data ->
-                val result = updateItems(stateSnapshot.items2, data)
-                updateState { s -> s.withItems2(result) }
+        mergeAndUpdateItems(
+            scope = viewModelScope,
+            source = { source },
+            items = { state.map { s -> s.items2 } },
+            map = updateItems,
+            update = { items ->
+                updateState { s -> s.withItems2(items) }
             }
+        )
     }
 
 
@@ -166,6 +192,7 @@ abstract class ItemsState<ITEM : Any, STATE> {
     abstract fun withItems(newItems: List<ITEM>): STATE
 
 }
+
 
 abstract class ItemsState2<ITEM1 : Any, ITEM2 : Any, STATE> {
 
