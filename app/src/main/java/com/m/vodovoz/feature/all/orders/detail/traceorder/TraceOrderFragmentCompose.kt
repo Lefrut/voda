@@ -107,7 +107,7 @@ class TraceOrderFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         userLocationLayer.isVisible = true
-        userLocationLayer.isHeadingEnabled = true
+        userLocationLayer.isHeadingModeActive = true
         userLocationLayer.setObjectListener(userLocationListener)
     }
 

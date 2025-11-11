@@ -99,6 +99,7 @@ class MapFragment : Fragment() {
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreateView(
         inflater: LayoutInflater,
+
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View {
@@ -152,7 +153,7 @@ class MapFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         userLocationLayer.isVisible = true
-        userLocationLayer.isHeadingEnabled = true
+        userLocationLayer.isHeadingModeActive = true
         userLocationLayer.setObjectListener(userLocationListener)
 
     }

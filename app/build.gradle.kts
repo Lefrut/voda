@@ -22,12 +22,12 @@ android {
 
     defaultConfig {
         applicationId = "com.m.vodovoz"
-        minSdk = 21
+        minSdk = 26
         targetSdk = 35
         //todo
-        versionCode = 2140
+        versionCode = 2150
         //todo
-        versionName = "2.1.4"
+        versionName = "2.1.5"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -141,7 +141,7 @@ dependencies {
     ksp("com.squareup.moshi:moshi-kotlin-codegen:$moshiVersion")
 
     //MapKit
-    implementation("com.yandex.android:maps.mobile:4.6.0-full")
+    implementation("com.yandex.android:maps.mobile:4.19.0-full")
 
     //Paging
     implementation("androidx.paging:paging-runtime-ktx:3.3.6")

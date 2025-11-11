@@ -112,8 +112,8 @@ class YandexMapSDKImpl @Inject constructor() : YandexMapSDK {
     override suspend fun getRoutes(start: Point, end: Point): List<Point> {
         return suspendCancellableCoroutine { cont ->
             val requestPoints = listOf(
-                RequestPoint(start, RequestPointType.WAYPOINT, null, null),
-                RequestPoint(end, RequestPointType.WAYPOINT, null, null)
+                RequestPoint(start, RequestPointType.WAYPOINT, null, null, null),
+                RequestPoint(end, RequestPointType.WAYPOINT, null, null, null)
             )
 
             drivingRouter.requestRoutes(
