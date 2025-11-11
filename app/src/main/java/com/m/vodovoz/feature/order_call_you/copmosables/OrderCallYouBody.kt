@@ -41,7 +41,7 @@ fun OrderCallYouBody(
                     CallYouItemRadioButton(
                         item = item,
                         onItemSelect = onItemSelect,
-                        selected = item == currentItem
+                        selected = item.value == currentItem.value
                     )
                     HorizontalDivider(
                         thickness = 1.dp,
@@ -91,6 +91,13 @@ private fun CallYouItemRadioButton(
                 )
             }
         }
-        RadioButton(selected = selected, onClick = { onItemSelect(item) })
+        RadioButton(
+            selected = selected,
+            onClick = {
+                if (item.enabled) {
+                    onItemSelect(item)
+                }
+            }
+        )
     }
 }
