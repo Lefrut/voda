@@ -44,8 +44,10 @@ class VodovozApplication : Application(), Configuration.Provider, SingletonImage
         MapKitFactory.setApiKey(MAPKIT_API_KEY)
         MapKitFactory.initialize(this)
 
+        if (BuildConfig.DEBUG) {
+            Timber.plant(Timber.DebugTree())
+        }
         initYandexMetrica()
-        Timber.plant(Timber.DebugTree())
         NotificationChannels.create(this)
     }
 
