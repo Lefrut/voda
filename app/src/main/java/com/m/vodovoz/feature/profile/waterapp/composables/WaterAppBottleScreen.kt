@@ -418,7 +418,6 @@ private fun WaterProgressBar(
         internalProgress =
             ((newOffset - minBarWidthPx) / (barWidthPx - minBarWidthPx)).coerceIn(0f, 1f)
 
-        //todo - ucomment if need
         onProgressChanged(internalProgress)
     }
 

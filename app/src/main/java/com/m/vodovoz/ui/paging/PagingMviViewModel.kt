@@ -12,6 +12,8 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 abstract class PagingMviViewModel<ITEM : Any, S : PagingState<ITEM, S>, E>(
     state: S,
@@ -123,8 +125,9 @@ private suspend fun <T1, T2> mergeAndUpdateItems(
 abstract class ItemsMviViewModel<ITEM : Any, S : ItemsState<ITEM, S>, E> protected constructor(state: S) :
     MviViewModel<S, E>(state) {
 
+    private val itemsMutex = Mutex()
 
-    @Suppress("unused")
+
     open suspend fun <T> collectItemsWith(
         source: Flow<T>,
         map: suspend (List<ITEM>, T) -> List<ITEM>,
@@ -135,7 +138,9 @@ abstract class ItemsMviViewModel<ITEM : Any, S : ItemsState<ITEM, S>, E> protect
             items = {
                 state.map { s -> s.items }
             },
-            map = map,
+            map = { items, data ->
+                itemsMutex.withLock { map(stateSnapshot.items, data) }
+            },
             update = {
                 updateState { s -> s.withItems(it) }
             }
@@ -148,33 +153,36 @@ abstract class ItemsMviViewModel2<ITEM1 : Any, ITEM2 : Any, S : ItemsState2<ITEM
     state: S,
 ) : MviViewModel<S, E>(state) {
 
+    private val itemsMutex = Mutex()
 
-    @Suppress("unused")
     open suspend fun <T> collectItemsWith1(
         source: Flow<T>,
-        updateItems: suspend (List<ITEM1>, T) -> List<ITEM1>,
+        map: suspend (List<ITEM1>, T) -> List<ITEM1>,
     ) {
         mergeAndUpdateItems(
             scope = viewModelScope,
             source = { source },
             items = { state.map { s -> s.items1 } },
-            map = updateItems,
+            map = { _, data ->
+                itemsMutex.withLock { map(stateSnapshot.items1, data) }
+            },
             update = { items ->
                 updateState { s -> s.withItems1(items) }
             }
         )
     }
 
-    @Suppress("unused")
     open suspend fun <T> collectItemsWith2(
         source: Flow<T>,
-        updateItems: suspend (List<ITEM2>, T) -> List<ITEM2>,
+        map: suspend (List<ITEM2>, T) -> List<ITEM2>,
     ) {
         mergeAndUpdateItems(
             scope = viewModelScope,
             source = { source },
             items = { state.map { s -> s.items2 } },
-            map = updateItems,
+            map = { _, data ->
+                itemsMutex.withLock { map(stateSnapshot.items2, data) }
+            },
             update = { items ->
                 updateState { s -> s.withItems2(items) }
             }

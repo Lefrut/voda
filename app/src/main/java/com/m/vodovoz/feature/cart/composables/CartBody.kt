@@ -22,6 +22,7 @@ import com.m.vodovoz.design_system.composables.decoration.OrderSummaryColumn
 import com.m.vodovoz.design_system.composables.decoration.RemovableItem
 import com.m.vodovoz.design_system.model.order.OrderSummaryItemUi
 import com.m.vodovoz.design_system.modifiers.bottomLine
+import com.m.vodovoz.feature.cart.model.AdditionalProductsTextUi
 import com.m.vodovoz.feature.cart.model.CartButtonUi
 import com.m.vodovoz.feature.cart.model.CartItemUi
 import com.m.vodovoz.feature.cart.model.CartPresentUi
@@ -49,6 +50,7 @@ fun CartBody(
     onPromotionCodeButtonClick: (CartPromoButtonUi) -> Unit,
     onPresentButtonClick: () -> Unit,
     onBottlesButtonClick: () -> Unit,
+    onRecommendationsClick: (AdditionalProductsTextUi) -> Unit
 ) {
     LazyColumn(
         modifier = modifier.fillMaxSize(),
@@ -123,7 +125,8 @@ fun CartBody(
                     onLikeClick = onLikeCartItem,
                     onDecrement = onDecrementCartItem,
                     onIncrement = onIncrementCartItem,
-                    onRemove = onRemoveCartItem
+                    onRemove = onRemoveCartItem,
+                    onRecommendationsClick = onRecommendationsClick
                 )
             }
         }

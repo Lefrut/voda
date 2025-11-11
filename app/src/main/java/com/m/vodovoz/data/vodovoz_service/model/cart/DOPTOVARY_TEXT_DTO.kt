@@ -7,7 +7,7 @@ import com.squareup.moshi.Json
 data class DOPTOVARY_TEXT_DTO(
     @Json(name = "ID")
     val TOVARY_ID: Long?,
-    @Json(name = "MODULE")
+    @Json(name = "TEXT")
     val TEXT: String?,
     @Json(name = "ARTICLE")
     val ARTICLE: String?,

@@ -32,6 +32,7 @@ import com.m.vodovoz.design_system.ExtendedTheme
 import com.m.vodovoz.design_system.composables.blur.AsyncImageBlur
 import com.m.vodovoz.design_system.composables.button.CartCounterButton
 import com.m.vodovoz.design_system.composables.chip.VodovozColorChipSmall
+import com.m.vodovoz.feature.cart.model.AdditionalProductsTextUi
 import com.m.vodovoz.feature.cart.model.CartItemUi
 import com.m.vodovoz.feature.cart.model.ProductRestrictionUi
 import com.m.vodovoz.util.formatRoundedPrice
@@ -45,6 +46,7 @@ fun CartItemCard(
     onIncrement: (CartItemUi) -> Unit,
     onDecrement: (CartItemUi) -> Unit,
     onRemove: (CartItemUi) -> Unit,
+    onRecommendationsClick: (AdditionalProductsTextUi) -> Unit,
 ) {
 
     val isPresent = cartItem.label?.name?.contains("подарок", true) == true
@@ -139,6 +141,24 @@ fun CartItemCard(
                         Text(
                             text = stringResource(R.string.product_end),
                             color = MaterialTheme.colorScheme.error,
+                            style = ExtendedTheme.typography.labelSmallVariant
+                        )
+                    }
+
+                    val additionalProductsText = cartItem.additionalProductsText
+                    if (additionalProductsText != null) {
+                        Text(
+                            modifier = Modifier
+                                .padding(top = 4.dp)
+                                .clickable(
+                                    onClick = { onRecommendationsClick(additionalProductsText) },
+                                    indication = null,
+                                    interactionSource = null
+                                ),
+                            text = additionalProductsText.text.replaceFirstChar {
+                                it.uppercase()
+                            },
+                            color = MaterialTheme.colorScheme.primary,
                             style = ExtendedTheme.typography.labelSmallVariant
                         )
                     }

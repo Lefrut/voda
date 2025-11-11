@@ -21,6 +21,7 @@ import com.m.vodovoz.design_system.composables.scaffold.VodovozScaffold
 import com.m.vodovoz.feature.cart.composables.CartBody
 import com.m.vodovoz.feature.cart.composables.CartTopBar
 import com.m.vodovoz.feature.cart.composables.PromotionCodeBottomSheet
+import com.m.vodovoz.feature.cart.composables.RecommendationsBottomSheet
 import okhttp3.internal.toLongOrDefault
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -102,7 +103,26 @@ fun CartScreen(viewModel: CartFlowViewModel, viewState: CartFlowViewModel.CartSt
                             },
                             onPromotionCodeButtonClick = {
                                 viewModel.showPromotionCodeBottomSheet()
-                            }
+                            },
+                            onRecommendationsClick = viewModel::fetchAndShowRecommendationsBS
+                        )
+                    }
+
+                    val additionalProductsBS = viewState.additionalProductsBS
+                    val items2 = viewState.items2
+                    if (viewState.showAdditionalProductsBS && additionalProductsBS != null) {
+                        RecommendationsBottomSheet(
+                            additionalProductsBS = additionalProductsBS.copy(
+                                products = items2,
+                                loadStates = viewState.loadStates2
+                            ),
+                            onDismissRequest = viewModel::closeRecommendationsBS,
+                            onProductSee = viewModel::notifyPaging2,
+                            onProductAnalogsClick = viewModel::navigateToProductAnalogs,
+                            onProductClick = viewModel::navigateToProductDetails,
+                            onProductDecrementToCart = viewModel::decrementProduct,
+                            onProductIncrementToCart = viewModel::incrementProduct,
+                            onProductLike = viewModel::changeFavorite
                         )
                     }
                 }

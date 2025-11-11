@@ -33,6 +33,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImagePainter
 import com.m.vodovoz.R
 import com.m.vodovoz.design_system.ExtendedTheme
@@ -102,13 +103,14 @@ fun GridProductCard(
         Column(modifier = Modifier) {
             PriceAndRating(product = product)
 
-            product.PricePerUnitText()
+            product.PricePerUnitText(modifier = Modifier.height(12.dp))
 
             val labelSmallVariant = ExtendedTheme.typography.labelSmallVariant.copy(
                 lineHeightStyle = LineHeightStyle(
                     LineHeightStyle.Alignment.Top,
-                    LineHeightStyle.Trim.FirstLineTop
-                )
+                    LineHeightStyle.Trim.None,
+                ),
+                fontSize = 11.sp,
             )
 
             Text(
@@ -280,7 +282,7 @@ private fun GridProductCardPreview() {
         GridProductCard(
             product = sampleProduct,
             onClick = {},
-            modifier = Modifier.width(160.dp),
+            modifier = Modifier.width(160.dp).height(255.dp),
             onLike = {},
             onAnalogsClick = {},
             onDecrementToCart = {},

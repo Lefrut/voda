@@ -6,6 +6,8 @@ import com.m.vodovoz.design_system.model.withUpdatedCartRecursive
 import com.m.vodovoz.design_system.model.withUpdatedFavoritesRecursive
 import com.m.vodovoz.design_system.model.withUpdatedLoadingsRecursive
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 abstract class PagingProductsMviViewModel<ITEM : VodovozItemUi<ITEM>, S : PagingState<ITEM, S>, E>(
     state: S,
@@ -81,6 +83,10 @@ internal interface VodovozItemsListeners2<ITEM1 : VodovozItemUi<ITEM1>, ITEM2 : 
     val cartFlow: Flow<Map<Long, Int>>
     val canViewAdultProducts: Flow<Boolean>
 
+    companion object {
+        private val mutex = Mutex()
+    }
+
     suspend fun <T> collectItemsWith1(
         source: Flow<T>,
         map: suspend (List<ITEM1>, T) -> List<ITEM1>,
@@ -94,14 +100,16 @@ internal interface VodovozItemsListeners2<ITEM1 : VodovozItemUi<ITEM1>, ITEM2 : 
 
     suspend fun listenCanViewAdult1() = collectItemsWith1(
         source = canViewAdultProducts,
-        map = { items, canView -> items.withCanViewForAdults(canView) }
+        map = { items, canView ->
+            mutex.withLock { items.withCanViewForAdults(canView) }
+        }
     )
 
 
     suspend fun listenProductLoadings1() = collectItemsWith1(
         source = blockedProductsFlow,
         map = { items, blocked ->
-            items.withUpdatedLoadingsRecursive(blocked)
+            mutex.withLock { items.withUpdatedLoadingsRecursive(blocked) }
         }
     )
 
@@ -121,7 +129,9 @@ internal interface VodovozItemsListeners2<ITEM1 : VodovozItemUi<ITEM1>, ITEM2 : 
 
     suspend fun listenCanViewAdult2() = collectItemsWith2(
         source = canViewAdultProducts,
-        map = { items, canView -> items.withCanViewForAdults(canView) }
+        map = { items, canView ->
+            items.withCanViewForAdults(canView)
+        }
     )
 
     suspend fun listenProductLoadings2() = collectItemsWith2(

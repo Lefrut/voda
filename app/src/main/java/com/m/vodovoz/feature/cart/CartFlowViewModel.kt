@@ -40,6 +40,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -206,14 +207,34 @@ class CartFlowViewModel @Inject constructor(
         sendEvent(CartEvents.GoToProductDetails(cartItem.id))
     }
 
+    fun navigateToProductDetails(product: ProductUi) = viewModelScope.launch {
+        sendEvent(CartEvents.GoToProductDetails(productId = product.id))
+    }
+
+    fun navigateToProductAnalogs(product: ProductUi) = viewModelScope.launch {
+        sendEvent(CartEvents.GoToAnalogs(product.id))
+    }
+
+    fun incrementProduct(product: ProductUi) = viewModelScope.launch {
+        changeCartQuantity(product.id, product.cartQuantity + 1)
+    }
+
+    fun decrementProduct(product: ProductUi) = viewModelScope.launch {
+        changeCartQuantity(product.id, product.cartQuantity - 1)
+    }
+
+
     fun incrementCartItem(cartItem: CartItemUi) = viewModelScope.launch {
-        setSensitiveButtonsAvailability(false)
-        cartManager.change(cartItem.id, cartItem.cartQuantity + 1)
+        changeCartQuantity(cartItem.id, cartItem.cartQuantity + 1)
     }
 
     fun decrementCartItem(cartItem: CartItemUi) = viewModelScope.launch {
+        changeCartQuantity(cartItem.id, cartItem.cartQuantity - 1)
+    }
+
+    private suspend fun changeCartQuantity(id: Long, quantity: Int) {
         setSensitiveButtonsAvailability(false)
-        cartManager.change(cartItem.id, cartItem.cartQuantity - 1)
+        cartManager.change(id, quantity)
     }
 
     private fun setSensitiveButtonsAvailability(buttonEnabled: Boolean) {
@@ -239,6 +260,11 @@ class CartFlowViewModel @Inject constructor(
     fun changeFavorite(cartItem: CartItemUi) = viewModelScope.launch {
         likeManager.changeFavorite(cartItem.id, !cartItem.isFavorite)
     }
+
+    fun changeFavorite(product: ProductUi) = viewModelScope.launch {
+        likeManager.changeFavorite(product.id, !product.isFavorite)
+    }
+
 
     fun navigateToCatalog() = viewModelScope.launch {
         sendEvent(CartEvents.GoToCatalog)
@@ -415,6 +441,7 @@ class CartFlowViewModel @Inject constructor(
         override val loadStates2: CombinedLoadStates = emptyCombinedLoadStates,
     ) : PagingState2<CartItemUi, ProductUi, CartState>() {
 
+
         override fun copyPagingState(
             items1: List<CartItemUi>,
             items2: List<ProductUi>,
@@ -461,5 +488,6 @@ class CartFlowViewModel @Inject constructor(
         data class GoToAllBottles(val bottles: List<BottleUi>) : CartEvents()
 
         data class GoToProductDetails(val productId: Long) : CartEvents()
+        data class GoToAnalogs(val productId: Long): CartEvents()
     }
 }

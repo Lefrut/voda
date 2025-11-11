@@ -12,7 +12,7 @@ import coil3.request.CachePolicy
 import coil3.request.crossfade
 import coil3.svg.SvgDecoder
 import com.m.vodovoz.BuildConfig
-import com.m.vodovoz.common.constants.AppKeys
+import com.m.vodovoz.common.constants.AppKeys.MAPKIT_API_KEY
 import com.m.vodovoz.common.constants.AppKeys.YANDEX_METRICA_KEY
 import com.m.vodovoz.common.notification.NotificationChannels
 import com.m.vodovoz.core.network.VodovozWebConfig
@@ -40,6 +40,9 @@ class VodovozApplication : Application(), Configuration.Provider, SingletonImage
 
         AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags("ru"))
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+
+        MapKitFactory.setApiKey(MAPKIT_API_KEY)
+        MapKitFactory.initialize(this)
 
         initYandexMetrica()
         Timber.plant(Timber.DebugTree())

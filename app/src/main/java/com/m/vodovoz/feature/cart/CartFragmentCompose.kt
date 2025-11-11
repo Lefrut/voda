@@ -30,6 +30,7 @@ import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.core.navigation.navigateToAllBottles
 import com.m.vodovoz.core.navigation.navigateToGifts
 import com.m.vodovoz.core.navigation.navigateToOrdering
+import com.m.vodovoz.core.navigation.navigateToProductAnalogs
 import com.m.vodovoz.core.navigation.navigateToProductDetails
 import com.m.vodovoz.design_system.VodovozTheme
 import com.m.vodovoz.design_system.composables.placeholders.LoadingPlaceholder
@@ -82,7 +83,7 @@ class CartFragment : Fragment() {
             setContent {
                 VodovozTheme {
                     val viewState by viewModel.collectAsState()
-                    
+
 
                     when (val uiState = viewState.uiState) {
                         CartFlowViewModel.CartUiState.Cart -> {
@@ -122,7 +123,9 @@ class CartFragment : Fragment() {
                     }
 
                     LaunchedEffect(viewState.showPromotionCodeBottomSheet) {
-                        if (viewState.showPromotionCodeBottomSheet) tabManager.changeTabVisibility(false)
+                        if (viewState.showPromotionCodeBottomSheet) tabManager.changeTabVisibility(
+                            false
+                        )
                         else {
                             delay(145)
                             tabManager.changeTabVisibility(true)
@@ -179,6 +182,10 @@ class CartFragment : Fragment() {
 
                     is CartFlowViewModel.CartEvents.GoToAllBottles -> {
                         findNavController().navigateToAllBottles(event.bottles)
+                    }
+
+                    is CartFlowViewModel.CartEvents.GoToAnalogs -> {
+                        findNavController().navigateToProductAnalogs(event.productId)
                     }
                 }
             }

@@ -10,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 @Composable
@@ -17,6 +18,8 @@ fun LoadingPlaceholder(
     modifier: Modifier = Modifier,
     containerColor: Color = MaterialTheme.colorScheme.background,
     color: Color = MaterialTheme.colorScheme.primary,
+    strokeWidth: Dp = 4.dp,
+    indicatorSize: Dp = 36.dp,
 ) {
     Box(
         modifier = modifier
@@ -25,9 +28,9 @@ fun LoadingPlaceholder(
     ) {
         CircularProgressIndicator(
             color = color,
-            strokeWidth = 4.dp,
+            strokeWidth = strokeWidth,
             trackColor = Color.Transparent,
-            modifier = Modifier.size(36.dp)
+            modifier = Modifier.size(indicatorSize)
         )
     }
 }

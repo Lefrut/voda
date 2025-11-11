@@ -14,6 +14,11 @@ android {
     buildToolsVersion = "36.1.0"
     namespace = "com.m.vodovoz"
     compileSdk = 36
+    ndkVersion = "29.0.14206865"
+
+    packaging {
+        jniLibs { useLegacyPackaging = true }
+    }
 
     defaultConfig {
         applicationId = "com.m.vodovoz"
