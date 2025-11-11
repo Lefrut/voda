@@ -3,7 +3,7 @@ package com.m.vodovoz.common.account
 import androidx.annotation.Keep
 import com.m.vodovoz.BuildConfig
 import com.m.vodovoz.common.datastore.DataStorePrefs
-import com.yandex.metrica.YandexMetrica
+import io.appmetrica.analytics.AppMetrica
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filter
@@ -78,14 +78,14 @@ class AccountManager @Inject constructor(
             val eventParameters = "{\"UserID\":\"${accountIdListener.value ?: "0"}\"" +
                     if (eventParam != null) ",$eventParam}" else "}"
 
-            YandexMetrica.reportEvent(text, eventParameters)
+            AppMetrica.reportEvent(text, eventParameters)
         }
     }
 
     @Keep
     fun reportError(text: String, throwable: Throwable? = null) {
         if (!BuildConfig.DEBUG) {
-            YandexMetrica.reportError(text, throwable)
+            AppMetrica.reportError(text, throwable)
         }
     }
 

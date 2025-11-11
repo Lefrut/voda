@@ -29,6 +29,11 @@ android {
         //todo
         versionName = "2.1.5"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        ndk {
+            abiFilters += listOf("arm64-v8a", "x86_64")
+        }
+
     }
 
 
@@ -164,8 +169,8 @@ dependencies {
     implementation("androidx.work:work-runtime:2.10.3")
 
     //Yandex Metrica
-    implementation("com.yandex.android:mobmetricalib-ndk-crashes:1.1.0")
-    implementation("com.yandex.android:mobmetricalib:5.3.0")
+    implementation("io.appmetrica.analytics:analytics-ndk-crashes:3.1.0")
+    implementation("io.appmetrica.analytics:analytics:7.13.0")
 
     // Biometric
     implementation("androidx.biometric:biometric-ktx:1.2.0-alpha05")
@@ -188,9 +193,9 @@ dependencies {
 
 
     //Cam
-    implementation("androidx.camera:camera-camera2:1.4.2")
-    implementation("androidx.camera:camera-lifecycle:1.4.2")
-    implementation("androidx.camera:camera-view:1.4.2")
+    implementation("androidx.camera:camera-camera2:1.5.0")
+    implementation("androidx.camera:camera-lifecycle:1.5.0")
+    implementation("androidx.camera:camera-view:1.5.0")
     implementation("com.google.mlkit:barcode-scanning:17.3.0")
 
     //Coil
