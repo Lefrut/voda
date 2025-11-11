@@ -31,7 +31,7 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         ndk {
-            abiFilters += listOf("arm64-v8a", "x86_64")
+            abiFilters += listOf("arm64-v8a", "armeabi-v7a", "x86_64")
         }
 
     }
@@ -169,7 +169,6 @@ dependencies {
     implementation("androidx.work:work-runtime:2.10.3")
 
     //Yandex Metrica
-    implementation("io.appmetrica.analytics:analytics-ndk-crashes:3.1.0")
     implementation("io.appmetrica.analytics:analytics:7.13.0")
 
     // Biometric
@@ -196,7 +195,7 @@ dependencies {
     implementation("androidx.camera:camera-camera2:1.5.0")
     implementation("androidx.camera:camera-lifecycle:1.5.0")
     implementation("androidx.camera:camera-view:1.5.0")
-    implementation("com.google.mlkit:barcode-scanning:17.3.0")
+    implementation("com.google.android.gms:play-services-mlkit-barcode-scanning:18.3.1")
 
     //Coil
     implementation("io.coil-kt.coil3:coil-compose:3.0.4")
