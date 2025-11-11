@@ -95,10 +95,12 @@ class TraceOrderFragment : Fragment() {
 
     override fun onStart() {
         super.onStart()
+        mapView.onStart()
         mapKit.onStart()
     }
 
     override fun onStop() {
+        mapView.onStop()
         mapKit.onStop()
         super.onStop()
     }
