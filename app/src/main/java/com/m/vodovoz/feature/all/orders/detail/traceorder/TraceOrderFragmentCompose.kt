@@ -22,23 +22,22 @@ import androidx.compose.material3.SheetValue.PartiallyExpanded
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import com.m.vodovoz.ui.mvi.collectAsState
 import androidx.navigation.fragment.findNavController
 import com.google.android.gms.location.LocationServices
 import com.m.vodovoz.core.android.handleLocationAvailability
-import com.m.vodovoz.core.android.locationPermissions
 import com.m.vodovoz.core.android.locationPermissionGranted
+import com.m.vodovoz.core.android.locationPermissions
 import com.m.vodovoz.core.navigation.navigateToWebView
 import com.m.vodovoz.design_system.VodovozTheme
 import com.m.vodovoz.design_system.effects.LifecycleEffect
 import com.m.vodovoz.design_system.model.toPoint
+import com.m.vodovoz.ui.mvi.collectAsState
 import com.m.vodovoz.ui.yandex_map.VodovozUserLocationListener
 import com.m.vodovoz.ui.yandex_map.YandexMapUi
 import com.m.vodovoz.ui.yandex_map.calculateBounds
@@ -48,6 +47,7 @@ import com.m.vodovoz.util.extensions.dialPhoneNumber
 import com.yandex.mapkit.Animation
 import com.yandex.mapkit.MapKit
 import com.yandex.mapkit.MapKitFactory
+import com.yandex.mapkit.geometry.Geometry
 import com.yandex.mapkit.geometry.Point
 import com.yandex.mapkit.map.CameraPosition
 import com.yandex.mapkit.map.Map
@@ -126,7 +126,7 @@ class TraceOrderFragment : Fragment() {
                     val context = LocalContext.current
 
                     val viewState by viewModel.collectAsState()
-                    
+
 
                     val locationPermissionLauncher = rememberLauncherForActivityResult(
                         contract = ActivityResultContracts.RequestMultiplePermissions()
@@ -210,7 +210,8 @@ class TraceOrderFragment : Fragment() {
                                     }
 
 
-                                    val cameraPositionWithBounds = map.cameraPosition(bounds)
+                                    val cameraPositionWithBounds =
+                                        map.cameraPosition(Geometry.fromBoundingBox(bounds))
 
                                     val cameraPosition = CameraPosition(
                                         cameraPositionWithBounds.target,

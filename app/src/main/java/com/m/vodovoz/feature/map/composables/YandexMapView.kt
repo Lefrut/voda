@@ -39,12 +39,12 @@ fun YandexMapView(
     onCenterChanged: (MapPointUi?) -> Unit,
 ) {
     LaunchedEffect(focusMapHeightPx, focusMapWidthPx) {
-        val mapView = yandexMap.mapView
-        mapView.focusRect = ScreenRect(
+        val mapWindow = yandexMap.mapView.mapWindow
+        mapWindow.focusRect = ScreenRect(
             ScreenPoint(0f, 0f),
             ScreenPoint(focusMapWidthPx, focusMapHeightPx)
         )
-        mapView.focusPoint = ScreenPoint(focusMapWidthPx / 2, focusMapHeightPx / 2)
+        mapWindow.focusPoint = ScreenPoint(focusMapWidthPx / 2, focusMapHeightPx / 2)
     }
 
 

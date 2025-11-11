@@ -141,7 +141,7 @@ dependencies {
     ksp("com.squareup.moshi:moshi-kotlin-codegen:$moshiVersion")
 
     //MapKit
-    implementation("com.yandex.android:maps.mobile:4.0.0-full")
+    implementation("com.yandex.android:maps.mobile:4.6.0-full")
 
     //Paging
     implementation("androidx.paging:paging-runtime-ktx:3.3.6")
