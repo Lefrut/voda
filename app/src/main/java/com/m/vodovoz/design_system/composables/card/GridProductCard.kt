@@ -185,7 +185,10 @@ private fun GridImageSection(
             horizontalArrangement = Arrangement.spacedBy(2.dp)
         ) {
             otherLabels.forEach { label ->
-                VodovozColorChipSmall(backgroundColor = label.backgroundColor, text = label.name)
+                VodovozColorChipSmall(
+                    backgroundColor = label.backgroundColor,
+                    text = label.name
+                )
             }
         }
     }

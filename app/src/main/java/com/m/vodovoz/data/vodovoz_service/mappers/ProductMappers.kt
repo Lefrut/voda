@@ -117,13 +117,12 @@ fun EXTENDED_PRICE_DTO.toDomain(): PriceModel? {
 }
 
 @JvmName("mapLabelToDomain")
-fun List<NALICHIE_MORE_DTO?>.mapToDomain(): List<LabelModel> {
+fun List<NALICHIE_MORE_DTO>.mapToDomain(): List<LabelModel> {
     return mapNotNull { labelDTO ->
-        labelDTO ?: return@mapNotNull null
         LabelModel(
             name = labelDTO.NAME ?: return@mapNotNull null,
-            textColor = labelDTO.CVET ?: "",
-            backgroundColor = labelDTO.BACKGROUND ?: "",
+            textColor = "",
+            backgroundColor = labelDTO.CVET ?: labelDTO.BACKGROUND ?: "",
             backgroundAlpha = 1f
         )
     }

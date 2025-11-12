@@ -36,8 +36,6 @@ import com.m.vodovoz.design_system.VodovozTheme
 import com.m.vodovoz.design_system.composables.blur.AsyncImageBlur
 import com.m.vodovoz.design_system.composables.chip.VodovozColorChipSmall
 import com.m.vodovoz.design_system.model.Button
-import com.m.vodovoz.design_system.model.ColorfulButtonUi
-import com.m.vodovoz.design_system.model.ForAdultsUi
 import com.m.vodovoz.design_system.model.PricePerUnitText
 import com.m.vodovoz.design_system.model.ProductUi
 import com.m.vodovoz.design_system.model.notPercentLabels
@@ -212,7 +210,10 @@ private fun LinearImageSection(
             Spacer(modifier = Modifier.weight(1f))
 
             percentLabels.forEach { label ->
-                VodovozColorChipSmall(backgroundColor = label.backgroundColor, text = label.name)
+                VodovozColorChipSmall(
+                    backgroundColor = label.backgroundColor,
+                    text = label.name
+                )
             }
         }
 
@@ -222,7 +223,10 @@ private fun LinearImageSection(
             horizontalArrangement = Arrangement.spacedBy(2.dp)
         ) {
             otherLabels.forEach { label ->
-                VodovozColorChipSmall(backgroundColor = label.backgroundColor, text = label.name)
+                VodovozColorChipSmall(
+                    backgroundColor = label.backgroundColor,
+                    text = label.name
+                )
             }
         }
     }
@@ -250,7 +254,7 @@ private fun LinearProductCardPreview() {
             isAvailable = true,
             pricePerUnit = null,
             unitOfMeasurement = null,
-            forAdults = ForAdultsUi("eqweq", "dqwdqw", "dwqdwq", ColorfulButtonUi.Empty),
+            forAdults = null,
             button = null,
         )
 
