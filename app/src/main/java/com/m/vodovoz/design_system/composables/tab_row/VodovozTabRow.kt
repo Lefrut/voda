@@ -49,8 +49,6 @@ fun VodovozTabRow(
     selectedTabPosition: Int = 0,
     tabItems: @Composable () -> Unit,
 ) {
-
-
     Surface(
         modifier = modifier,
         color = MaterialTheme.colorScheme.surface,
@@ -64,39 +62,43 @@ fun VodovozTabRow(
             val preMeasured = subcompose("PreCalculate", tabItems).map { measurable ->
                 measurable.measure(constraints.copy(minWidth = 0))
             }
+
             val tabsCount = preMeasured.size
             if (tabsCount == 0) {
                 layout(constraints.maxWidth, 0) {}
             }
 
             val spacingPx = tabSpacing.roundToPx()
-            val tabsWidth = preMeasured.map { placeable -> placeable.width }
+            val tabsWidth = preMeasured.map { it.width }
             val totalSpacing = if (tabsCount > 1) (tabsCount - 1) * spacingPx else 0
-            val paddingWidth =
-                (constraints.maxWidth - tabsWidth.sum() - totalSpacing) / tabsCount.coerceAtLeast(1)
+            val availableWidth = constraints.maxWidth - totalSpacing
+            val totalTabsWidth = tabsWidth.sum()
+
+            val useEqualWidth = totalTabsWidth <= availableWidth
+            val equalWidth = availableWidth / tabsCount
+
+            val tabWidths = if (useEqualWidth) {
+                List(tabsCount) { equalWidth }
+            } else {
+                tabsWidth
+            }
+
             val maxItemHeight = preMeasured.maxOf { it.height }
 
-
-            val tabPositions = tabsWidth.mapIndexed { index, tabWidth ->
-                val currentTabWidth = tabWidth + paddingWidth
-
-                val x = if (index == 0) 0
-                else tabsWidth.take(index).sum() + (spacingPx + paddingWidth) * index
-
+            val tabPositions = tabWidths.mapIndexed { index, tabWidth ->
+                val x = tabWidths.take(index).sum() + spacingPx * index
                 TabPosition(
                     left = x.toDp(),
-                    width = currentTabWidth.toDp(),
+                    width = tabWidth.toDp(),
                     contentWidth = Dp.Unspecified
                 )
             }
 
             val tabPlaceables = subcompose("Tabs", tabItems).mapIndexed { index, measurable ->
                 measurable.measure(
-                    constraints.copy(
-                        minWidth = tabPositions[index].width.roundToPx(),
-                        maxWidth = tabPositions[index].width.roundToPx(),
-                        minHeight = maxItemHeight,
-                        maxHeight = maxItemHeight
+                    Constraints.fixed(
+                        tabWidths[index],
+                        maxItemHeight
                     )
                 )
             }
@@ -108,7 +110,8 @@ fun VodovozTabRow(
                     Box(
                         Modifier
                             .tabIndicator(
-                                tabPositions.getOrNull(selectedTabPosition) ?: TabPosition.Empty,
+                                tabPositions.getOrNull(selectedTabPosition)
+                                    ?: TabPosition(0.dp, 0.dp, Dp.Unspecified),
                                 tween(durationMillis = 200, easing = LinearEasing)
                             )
                             .fillMaxWidth()
@@ -123,8 +126,8 @@ fun VodovozTabRow(
                 }
 
                 tabPlaceables.forEachIndexed { index, placeable ->
-                    val currentTab = tabPositions[index]
-                    placeable.place(x = currentTab.left.roundToPx(), y = 0)
+                    val pos = tabPositions[index]
+                    placeable.place(x = pos.left.roundToPx(), y = 0)
                 }
             }
         }

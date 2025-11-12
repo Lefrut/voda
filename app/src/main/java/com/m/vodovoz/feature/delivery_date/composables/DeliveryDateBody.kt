@@ -1,8 +1,10 @@
 package com.m.vodovoz.feature.delivery_date.composables
 
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -10,17 +12,25 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.m.vodovoz.R
 import com.m.vodovoz.design_system.composables.button.VodovozRadioButton
@@ -123,6 +133,10 @@ fun DeliveryDateBody(
                     bottom = 24.dp
                 )
         ) {
+            var minIntervalTextWidth by remember {
+                mutableStateOf(0.dp)
+            }
+
             val intervals = selectedTimeSection.items
             when {
                 listIsLoading -> {
@@ -137,7 +151,9 @@ fun DeliveryDateBody(
                             modifier = Modifier.bottomLine(MaterialTheme.colorScheme.surfaceVariant),
                             deliveryTimeInterval = deliveryTimeInterval,
                             selected = deliveryTimeInterval.value == selectedTimeInterval.value,
-                            onClick = onTimeIntervalSelect
+                            onClick = onTimeIntervalSelect,
+                            minIntervalTextWidth = minIntervalTextWidth,
+                            onMeasuredWidth = { width -> minIntervalTextWidth = width },
                         )
                     }
                 }
@@ -157,8 +173,12 @@ private fun DeliveryTimeIntervalItem(
     modifier: Modifier = Modifier,
     deliveryTimeInterval: DeliveryTimeIntervalUi,
     selected: Boolean,
+    minIntervalTextWidth: Dp,
+    onMeasuredWidth: (Dp) -> Unit,
     onClick: (DeliveryTimeIntervalUi) -> Unit,
 ) {
+    val density = LocalDensity.current
+
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -176,20 +196,30 @@ private fun DeliveryTimeIntervalItem(
             onClick = { onClick(deliveryTimeInterval) },
         )
 
-        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
-            Text(
-                modifier = Modifier,
-                text = deliveryTimeInterval.name,
-                color = MaterialTheme.colorScheme.onBackground,
-                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
-            )
+        Row(
+            modifier = Modifier.weight(1f),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier.weight(1f, false),
+            ) {
+                Text(
+                    modifier = Modifier
+                        .animateContentSize()
+                        .widthIn(min = minIntervalTextWidth)
+                        .onSizeChanged { size ->
+                            with(density) { onMeasuredWidth(size.width.toDp()) }
+                        },
+                    text = deliveryTimeInterval.name,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
+                )
+            }
 
             deliveryTimeInterval.label?.let { label ->
                 DeliveryTimeLabel(modifier = Modifier.padding(start = 8.dp), label = label)
             }
         }
-
-
 
 
         Text(
