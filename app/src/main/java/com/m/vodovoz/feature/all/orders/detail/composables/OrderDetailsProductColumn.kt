@@ -16,10 +16,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.m.vodovoz.design_system.VodovozTheme
 import com.m.vodovoz.design_system.composables.card.OrderProductCard
-import com.m.vodovoz.design_system.model.LabelUi
 import com.m.vodovoz.design_system.model.OrderProductPresentUi
 import com.m.vodovoz.design_system.model.OrderProductUi
 import com.m.vodovoz.design_system.model.PriceUi
+import com.m.vodovoz.design_system.model.widgets.LabelUi
 import com.m.vodovoz.feature.cart.model.ProductRestrictionUi
 
 @Suppress("NonSkippableComposable")
@@ -81,7 +81,13 @@ fun OrderDetailsProductColumnPreview() {
                 price = PriceUi(100f, 0f, 1, 1),
                 showcase = false,
                 image = "",
-                labels = listOf(LabelUi("Label", Color.Black, Color.White)),
+                labels = listOf(
+                    LabelUi.from(
+                        name = "Label",
+                        textColor = Color.Black,
+                        backgroundColor = Color.White
+                    )
+                ),
                 pricePerUnit = "50/шт",
                 unitOfMeasurement = "шт.",
                 catalogQuantity = 10,

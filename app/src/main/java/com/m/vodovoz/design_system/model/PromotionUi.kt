@@ -1,6 +1,8 @@
 package com.m.vodovoz.design_system.model
 
 import androidx.compose.runtime.Immutable
+import com.m.vodovoz.design_system.model.widgets.LabelUi
+import com.m.vodovoz.design_system.model.widgets.toUi
 import com.m.vodovoz.domain.general.model.promotion.AboutAdvertisingModel
 import com.m.vodovoz.domain.general.model.promotion.PromotionCategoryModel
 import com.m.vodovoz.domain.general.model.promotion.PromotionDetailsModel

@@ -88,9 +88,9 @@ fun CartItemCard(
             val label = cartItem.label
             if (label != null && isAvailable) {
                 VodovozColorChipSmall(
-                    color = label.background,
+                    backgroundColor = label.backgroundColor,
                     text = label.name,
-                    textColor = label.color
+                    textColor = label.textColor
                 )
             }
         }

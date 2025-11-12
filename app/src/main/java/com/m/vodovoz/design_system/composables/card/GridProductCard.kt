@@ -43,11 +43,11 @@ import com.m.vodovoz.design_system.composables.chip.VodovozColorChipSmall
 import com.m.vodovoz.design_system.model.Button
 import com.m.vodovoz.design_system.model.ColorfulButtonUi
 import com.m.vodovoz.design_system.model.ForAdultsUi
-import com.m.vodovoz.design_system.model.LabelUi
 import com.m.vodovoz.design_system.model.PricePerUnitText
 import com.m.vodovoz.design_system.model.ProductUi
 import com.m.vodovoz.design_system.model.notPercentLabels
 import com.m.vodovoz.design_system.model.percentLabels
+import com.m.vodovoz.design_system.model.widgets.LabelUi
 import com.m.vodovoz.util.extensions.formatRating
 import com.m.vodovoz.util.formatRoundedPrice
 
@@ -138,7 +138,6 @@ fun GridProductCard(
     }
 }
 
-@Suppress("NonSkippableComposable")
 @Composable
 private fun GridImageSection(
     modifier: Modifier = Modifier,
@@ -160,7 +159,7 @@ private fun GridImageSection(
         )
         Row {
             percentLabels.forEach { label ->
-                VodovozColorChipSmall(color = label.color, text = label.name)
+                VodovozColorChipSmall(backgroundColor = label.backgroundColor, text = label.name)
             }
             Spacer(modifier = Modifier
                 .weight(1f)
@@ -186,7 +185,7 @@ private fun GridImageSection(
             horizontalArrangement = Arrangement.spacedBy(2.dp)
         ) {
             otherLabels.forEach { label ->
-                VodovozColorChipSmall(color = label.color, text = label.name)
+                VodovozColorChipSmall(backgroundColor = label.backgroundColor, text = label.name)
             }
         }
     }
@@ -269,8 +268,8 @@ private fun GridProductCardPreview() {
             cartLoading = false,
             image = "https://vodovoz.net/upload/iblock/9ed/ec5cfujet9sztz077mtdzofrzjqzn0zj.jpeg",
             labels = listOf(
-                LabelUi("Новинка", Color.Red),
-                LabelUi("Хит продаж", Color.Green)
+                LabelUi.from("Новинка", Color.Red),
+                LabelUi.from("Хит продаж", Color.Green)
             ),
             isAvailable = false,
             pricePerUnit = null,

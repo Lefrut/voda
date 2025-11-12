@@ -9,7 +9,7 @@ import com.m.vodovoz.data.vodovoz_service.model.PROMOTION_DATA_DTO
 import com.m.vodovoz.data.vodovoz_service.model.PROMOTION_RAZDEL_DTO
 import com.m.vodovoz.data.vodovoz_service.model.PromotionsDTO
 import com.m.vodovoz.domain.general.model.promotion.AboutAdvertisingModel
-import com.m.vodovoz.domain.general.model.promotion.LabelModel
+import com.m.vodovoz.domain.general.model.widgets.LabelModel
 import com.m.vodovoz.domain.general.model.promotion.PromotionCategoryModel
 import com.m.vodovoz.domain.general.model.promotion.PromotionDetailsModel
 import com.m.vodovoz.domain.general.model.promotion.PromotionModel
@@ -75,7 +75,8 @@ fun PROMOTION_DATA_DTO.toDomain(): PromotionModel? {
 fun HIT_DTO.toDomain(): LabelModel? {
     return LabelModel(
         name = TITLE ?: return null,
-        colorHex = BACKGROUND ?: return null
+        backgroundColor = BACKGROUND ?: return null,
+        textColor = "",
     )
 }
 

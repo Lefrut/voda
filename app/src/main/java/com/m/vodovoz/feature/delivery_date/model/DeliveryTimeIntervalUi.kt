@@ -2,6 +2,8 @@ package com.m.vodovoz.feature.delivery_date.model
 
 import android.os.Parcelable
 import androidx.compose.runtime.Immutable
+import com.m.vodovoz.design_system.model.widgets.LabelUi
+import com.m.vodovoz.design_system.model.widgets.toUi
 import com.m.vodovoz.domain.general.model.order.DeliveryTimeIntervalModel
 import kotlinx.parcelize.Parcelize
 
@@ -13,9 +15,17 @@ data class DeliveryTimeIntervalUi(
     val code: String,
     val blocked: Boolean,
     val priceText: String,
-): Parcelable {
-    companion object{
-        val Empty = DeliveryTimeIntervalUi("", "", "" , false, "")
+    val label: LabelUi?,
+) : Parcelable {
+    companion object {
+        val Empty = DeliveryTimeIntervalUi(
+            name = "",
+            value = "",
+            code = "",
+            blocked = false,
+            priceText = "",
+            label = null
+        )
     }
 }
 
@@ -25,6 +35,6 @@ fun List<DeliveryTimeIntervalModel>.mapToUi(): List<DeliveryTimeIntervalUi> {
 
 fun DeliveryTimeIntervalModel.toUi(): DeliveryTimeIntervalUi {
     return DeliveryTimeIntervalUi(
-        name, value, code, blocked, priceText
+        name, value, code, blocked, priceText, label?.toUi()
     )
 }

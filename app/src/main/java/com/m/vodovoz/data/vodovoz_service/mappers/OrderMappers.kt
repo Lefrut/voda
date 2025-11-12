@@ -198,7 +198,8 @@ fun DATE_INTERVAL_DTO.toDomain(): DeliveryTimeIntervalModel? {
         value = VALUE ?: return null,
         code = CODE ?: return null,
         blocked = VodovozBoolean.True equalsTo BLOCK,
-        priceText = MONEY ?: ""
+        priceText = MONEY ?: "",
+        label = TEXTOPIS?.toDomain()
     )
 }
 

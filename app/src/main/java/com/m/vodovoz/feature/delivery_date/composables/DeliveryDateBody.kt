@@ -1,6 +1,8 @@
 package com.m.vodovoz.feature.delivery_date.composables
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -29,12 +31,12 @@ import com.m.vodovoz.design_system.composables.tab_row.VodovozScrollableTabRow
 import com.m.vodovoz.design_system.composables.tab_row.VodovozTab
 import com.m.vodovoz.design_system.composables.tab_row.VodovozTabRow
 import com.m.vodovoz.design_system.model.SectionUi
+import com.m.vodovoz.design_system.model.widgets.LabelUi
 import com.m.vodovoz.design_system.modifiers.bottomLine
 import com.m.vodovoz.feature.delivery_date.model.DeliveryDateOptionUi
 import com.m.vodovoz.feature.delivery_date.model.DeliveryTimeIntervalUi
 import com.m.vodovoz.util.extensions.indexOfOrNull
 
-@Suppress("NonSkippableComposable")
 @Composable
 fun DeliveryDateBody(
     modifier: Modifier = Modifier,
@@ -174,18 +176,49 @@ private fun DeliveryTimeIntervalItem(
             onClick = { onClick(deliveryTimeInterval) },
         )
 
-        Text(
-            modifier = Modifier.weight(1f),
-            text = deliveryTimeInterval.name,
-            color = MaterialTheme.colorScheme.onBackground,
-            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
-        )
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
+            Text(
+                modifier = Modifier,
+                text = deliveryTimeInterval.name,
+                color = MaterialTheme.colorScheme.onBackground,
+                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
+            )
+
+            deliveryTimeInterval.label?.let { label ->
+                DeliveryTimeLabel(modifier = Modifier.padding(start = 8.dp), label = label)
+            }
+        }
+
+
+
 
         Text(
             modifier = Modifier.padding(start = 4.dp),
             text = deliveryTimeInterval.priceText,
             color = MaterialTheme.colorScheme.surfaceTint,
             style = MaterialTheme.typography.bodyMedium
+        )
+
+
+    }
+}
+
+@Composable
+private fun DeliveryTimeLabel(modifier: Modifier = Modifier, label: LabelUi) {
+    Row(
+        modifier = modifier
+            .background(
+                color = label.backgroundColor,
+                shape = MaterialTheme.shapes.medium
+            )
+            .padding(end = 8.dp, start = 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        Text(
+            text = label.name,
+            color = label.textColor,
+            style = MaterialTheme.typography.labelMedium
         )
     }
 }

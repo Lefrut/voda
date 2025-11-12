@@ -4,6 +4,7 @@ import com.m.vodovoz.design_system.model.PromotionUi
 import com.m.vodovoz.design_system.model.SectionUi
 import com.m.vodovoz.design_system.model.toUi
 import com.m.vodovoz.domain.general.model.product.ButtonModel
+import com.m.vodovoz.domain.general.model.widgets.LabelModel
 import java.time.ZonedDateTime
 
 
@@ -55,16 +56,6 @@ data class PromotionDetailsModel(
     val advertising: AboutAdvertisingModel?,
     val label: LabelModel?,
 )
-
-data class LabelModel(
-    val name: String,
-    val colorHex: String,
-    val backgroundHex: String = "",
-) {
-    companion object {
-        val Empty = LabelModel("", "")
-    }
-}
 
 data class AboutAdvertisingModel(
     val name: String,

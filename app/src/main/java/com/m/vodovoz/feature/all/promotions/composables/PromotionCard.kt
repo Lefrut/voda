@@ -63,7 +63,10 @@ fun PromotionCard(
             val label = promotion.label
 
             label?.let {
-                VodovozColorChip(color = label.color, text = label.name)
+                VodovozColorChip(
+                    backgroundColor = label.backgroundColor,
+                    text = label.name
+                )
             }
 
             promotion.timeLeft?.let {

@@ -3,7 +3,7 @@ package com.m.vodovoz.domain.general.model.product
 import com.m.vodovoz.domain.general.model.promotion.ColorfulButtonModel
 import com.m.vodovoz.domain.general.model.widgets.ContentBlockModel
 import com.m.vodovoz.domain.general.model.user.ForAdultsModel
-import com.m.vodovoz.domain.general.model.promotion.LabelModel
+import com.m.vodovoz.domain.general.model.widgets.LabelModel
 
 
 data class ProductDetailsScreenModel(

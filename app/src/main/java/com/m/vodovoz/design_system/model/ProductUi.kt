@@ -19,15 +19,15 @@ import com.m.vodovoz.design_system.ExtendedTheme
 import com.m.vodovoz.design_system.composables.button.QuantityButtonSmall
 import com.m.vodovoz.design_system.composables.button.VodovozButtonDefaults
 import com.m.vodovoz.design_system.composables.button.VodovozButtonSmall
+import com.m.vodovoz.design_system.model.widgets.LabelUi
+import com.m.vodovoz.design_system.model.widgets.toUi
 import com.m.vodovoz.domain.general.model.product.ButtonModel
 import com.m.vodovoz.domain.general.model.product.CategoryWithProductsModel
 import com.m.vodovoz.domain.general.model.product.PopularCategoryModel
 import com.m.vodovoz.domain.general.model.product.ProductModel
 import com.m.vodovoz.domain.general.model.product.SectionModel
-import com.m.vodovoz.domain.general.model.promotion.LabelModel
 import com.m.vodovoz.feature.home.model.PopularCategoryUi
 import com.m.vodovoz.feature.home.model.toUi
-import com.m.vodovoz.ui.graphics.fromHexOrUnspecified
 
 
 fun <T : VodovozItemUi<T>> Iterable<T>.withCanViewForAdults(canView: Boolean): List<T> {
@@ -448,27 +448,5 @@ fun ProductModel.toUi(): ProductUi {
         unitOfMeasurement = unitOfMeasurement,
         forAdults = forAdults?.toUi(),
         button = analogButton?.toUi()
-    )
-}
-
-
-@Immutable
-data class LabelUi(
-    val name: String,
-    val color: Color,
-    val background: Color = Color.Unspecified,
-)
-
-fun List<LabelModel>.toUi(): List<LabelUi> {
-    return mapNotNull { labelModel ->
-        labelModel.toUi()
-    }
-}
-
-fun LabelModel.toUi(): LabelUi {
-    return LabelUi(
-        name,
-        Color.fromHexOrUnspecified(colorHex),
-        Color.fromHexOrUnspecified(backgroundHex)
     )
 }

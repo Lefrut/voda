@@ -2,9 +2,10 @@ package com.m.vodovoz.feature.cart.model
 
 import androidx.compose.runtime.Immutable
 import com.m.vodovoz.design_system.model.ForAdultsUi
-import com.m.vodovoz.design_system.model.LabelUi
+import com.m.vodovoz.design_system.model.widgets.LabelUi
 import com.m.vodovoz.design_system.model.VodovozItemUi
 import com.m.vodovoz.design_system.model.toUi
+import com.m.vodovoz.design_system.model.widgets.toUi
 import com.m.vodovoz.domain.general.model.cart.CartItemModel
 
 @Immutable
