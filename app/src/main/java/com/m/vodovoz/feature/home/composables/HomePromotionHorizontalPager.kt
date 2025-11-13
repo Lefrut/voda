@@ -99,7 +99,7 @@ fun rememberAutoScrollPagerState(initialIndex: Int = 0, itemsCount: Int): PagerS
         return rememberPagerState(0) { 0 }
     }
 
-    val pageCount = itemsCount * 100
+    val pageCount = if (itemsCount == 1) 1 else itemsCount * 100
     val halfOfPageCount = pageCount / 2
 
     val initialPage = halfOfPageCount - (halfOfPageCount % itemsCount) + initialIndex

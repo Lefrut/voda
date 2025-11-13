@@ -342,17 +342,18 @@ class HomeFragment : Fragment() {
                 if (pushData == null) return@collect
                 debugLog { "PushFromSiteState: $pushData" }
 
+                val navController = findNavController()
                 when (pushData.path) {
                     "AKCII" -> {
                         val promotionId = pushData.id
                         if (promotionId.isNullOrEmpty()) {
-                            findNavController().navigateToPromotions()
+                            navController.navigateToPromotions()
                             return@collect
                         }
 
                         val eventParameters = "\"ID_AKCII\": \"$promotionId\""
                         accountManager.reportEvent("Зашел в акцию (push)", eventParameters)
-                        findNavController().navigateToPromotionDetails(promotionId.toLong())
+                        navController.navigateToPromotionDetails(promotionId.toLong())
 
                     }
 
@@ -366,7 +367,7 @@ class HomeFragment : Fragment() {
                             )
 
 
-                            findNavController().navigateToProductDetails(productId.toLong())
+                            navController.navigateToProductDetails(productId.toLong())
                         }
                     }
 
@@ -383,11 +384,15 @@ class HomeFragment : Fragment() {
                         )
 
                         if (!blockId.isNullOrEmpty()) {
-                            findNavController().navigateToBannerProductList(
+                            navController.navigateToBannerProductList(
                                 bannerId = sectionId.toLongOrDefault(-1),
                                 blockId = blockId.toLongOrDefault(-1)
                             )
-                        } else findNavController().navigateToCategoryProductList(sectionId.toLong())
+                        } else {
+                            navController.navigateToCategoryProductList(
+                                categoryId = sectionId.toLong()
+                            )
+                        }
 
                     }
 
@@ -396,7 +401,7 @@ class HomeFragment : Fragment() {
                         val blockId = pushData.blockId
 
                         if (!sectionId.isNullOrBlank() && !blockId.isNullOrBlank()) {
-                            findNavController().navigateToBannerProductList(
+                            navController.navigateToBannerProductList(
                                 bannerId = sectionId.toLongOrDefault(-1),
                                 blockId = blockId.toLongOrDefault(-1)
                             )
@@ -413,42 +418,42 @@ class HomeFragment : Fragment() {
                             eventParameters
                         )
 
-                        findNavController().navigateToOrderDetails(orderId.toLong())
+                        navController.navigateToOrderDetails(orderId.toLong())
 
                     }
 
                     "vsenovinki" -> {
-                        findNavController().navigateToNewProducts()
+                        navController.navigateToNewProducts()
                     }
 
                     "vseskidki" -> {
-                        findNavController().navigateToHurryBuyUpProducts()
+                        navController.navigateToHurryBuyUpProducts()
                     }
 
                     "BRAND" -> {
                         val brandId = pushData.id
                         if (!brandId.isNullOrEmpty()) {
-                            findNavController().navigateToBrandProductList(brandId.toLong())
+                            navController.navigateToBrandProductList(brandId.toLong())
                         } else {
-                            findNavController().navigateToAllBrands()
+                            navController.navigateToAllBrands()
                         }
                     }
 
                     "BRANDY" -> {
-                        findNavController().navigateToAllBrands()
+                        navController.navigateToAllBrands()
                     }
 
                     "about" -> {
                         val section = pushData.section ?: return@collect
                         if (section == getString(R.string.about_store)) {
-                            findNavController().navigateToWebView(
+                            navController.navigateToWebView(
                                 VodovozWebConfig.ABOUT_SHOP_URL,
                                 getString(R.string.about_store)
                             )
                         }
                         if (section == getString(R.string.contact_us)) {
                             tabManager.apply {
-                                setAuthRedirect(findNavController().graph.id)
+                                setAuthRedirect(navController.graph.id)
                                 selectTab(R.id.graph_profile)
                             }
                         }
@@ -456,33 +461,33 @@ class HomeFragment : Fragment() {
 
                     "dostavka" -> {
                         with(GlobalAppLinks.aboutDelivery) {
-                            findNavController().navigateToWebView(
+                            navController.navigateToWebView(
                                 url, title
                             )
                         }
                     }
 
                     "service" -> {
-                        findNavController().navigateToAllServices()
+                        navController.navigateToAllServices()
                     }
 
                     "remont_kulerov" -> {
-                        findNavController().navigateToServiceDetails(98886)
+                        navController.navigateToServiceDetails(98886)
                     }
 
                     "feedback" -> {
                         tabManager.apply {
-                            setAuthRedirect(findNavController().graph.id)
+                            setAuthRedirect(navController.graph.id)
                             selectTab(R.id.graph_profile)
                         }
                     }
 
                     "ACTIONS" -> {
-                        findNavController().navigateToPromotions()
+                        navController.navigateToPromotions()
                     }
 
                     "vseakcii" -> {
-                        findNavController().navigateToPromotions()
+                        navController.navigateToPromotions()
                     }
 
                     "URL" -> {
@@ -494,18 +499,18 @@ class HomeFragment : Fragment() {
                     "trekervodi" -> {
                         val eventName = "trekervodi_push"
                         accountManager.reportEvent(eventName)
-                        findNavController().navigateToWaterApp()
+                        navController.navigateToWaterApp()
                     }
 
                     "profil" -> {
                         tabManager.apply {
-                            setAuthRedirect(findNavController().graph.id)
+                            setAuthRedirect(navController.graph.id)
                             selectTab(R.id.graph_profile)
                         }
                     }
 
                     "pokypkasertificat" -> {
-                        findNavController().navigateToBuyCertificate()
+                        navController.navigateToBuyCertificate()
                     }
 
                 }
