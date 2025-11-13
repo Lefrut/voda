@@ -37,8 +37,8 @@ private val serviceHtml = """
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
         p, h3, h2, h1, blockquote, ul, ol, table {
-            margin-top: 32px;    
-            margin-bottom: 32px;
+            margin-top: 16px;    
+            margin-bottom: 16px;
         }
 
        @font-face {
@@ -47,7 +47,7 @@ private val serviceHtml = """
         }
         
         body {
-            font-size: 2.5em;
+            font-size: 1em;
             font-family: 'Roboto';
             line-height: 1.5;
         }
