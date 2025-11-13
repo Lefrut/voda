@@ -318,7 +318,7 @@ class WaterAppViewModel @Inject constructor(
         updateDailyGoal { currentDailyGoal }
         waterAppRepository.saveDailyGoal(currentDailyGoal)
 
-        if (!dailyGoal.wasCompleted && currentDailyGoal.currentMl == currentDailyGoal.totalMl) {
+        if (dailyGoal.wasCompleted && currentDailyGoal.currentMl >= currentDailyGoal.totalMl) {
             updateState { s -> s.copy(uiState = WaterAppUiState.GoalCompleted) }
         }
     }

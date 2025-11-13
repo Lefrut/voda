@@ -5,6 +5,7 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.text.style.URLSpan
+import androidx.annotation.Keep
 import androidx.core.text.HtmlCompat
 import java.text.DecimalFormat
 
@@ -31,13 +32,13 @@ fun Context.shareText(text: String) {
     startActivity(shareIntent)
 }
 
-
-fun String.prepareServiceHtml(): String {
-    return """
-<style>
+@Keep
+private val serviceHtml = """
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
         p, h3, h2, h1, blockquote, ul, ol, table {
-            margin-top: 24px;    
-            margin-bottom: 24px;
+            margin-top: 32px;    
+            margin-bottom: 32px;
         }
 
        @font-face {
@@ -46,11 +47,8 @@ fun String.prepareServiceHtml(): String {
         }
         
         body {
+            font-size: 2.5em;
             font-family: 'Roboto';
-            overflow-x: hidden !important;
-            max-width: 100% !important;
-            box-sizing: border-box;
-            font-size: 14px;
             line-height: 1.5;
         }
     
@@ -59,16 +57,11 @@ fun String.prepareServiceHtml(): String {
             padding: 0px 20px 0px 41px;
             border: none;
             font-weight: normal;
-            font-size: 1.2em;
             line-height: calc(1em + 10px);
             margin: 48px 0px;
             border-left: 5px solid #05A4FF;
         }
         
-        h3 {
-           font-size: 1.5em;
-            line-height: calc(1em + 10px);
-        }
         
         img {
             display: inline;
@@ -88,7 +81,7 @@ fun String.prepareServiceHtml(): String {
             border-collapse: collapse;
         }
         .colored_table {
-            font-size: 2.5em;
+            font-size: 1em;
             line-height: inherit;
         }
         .colored_table th,
@@ -97,8 +90,13 @@ fun String.prepareServiceHtml(): String {
             border: 1px solid #ccc;
             text-align: left;
         }
-    </style>$this
+    </style>
 """
+
+
+@Keep
+fun String.prepareServiceHtml(): String {
+    return serviceHtml + this
 }
 
 
