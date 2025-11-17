@@ -25,7 +25,6 @@
 -keepnames class * extends android.os.Parcelable
 -keepnames class * extends java.io.Serializable
 
-#todo - can delete some lines
 -keep class com.m.vodovoz.common.water_app.** { *; }
 -keepclassmembers class com.m.vodovoz.common.water_app.** {
     @com.squareup.moshi.* <fields>;
