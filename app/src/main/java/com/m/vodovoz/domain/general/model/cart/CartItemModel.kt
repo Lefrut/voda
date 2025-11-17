@@ -1,5 +1,6 @@
 package com.m.vodovoz.domain.general.model.cart
 
+import com.m.vodovoz.domain.general.model.promotion.ColorfulButtonModel
 import com.m.vodovoz.domain.general.model.user.ForAdultsModel
 import com.m.vodovoz.domain.general.model.widgets.LabelModel
 

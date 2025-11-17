@@ -69,6 +69,7 @@ import kotlinx.coroutines.flow.onSubscription
 import kotlinx.coroutines.launch
 import okhttp3.internal.toLongOrDefault
 import javax.inject.Inject
+import androidx.core.net.toUri
 
 @AndroidEntryPoint
 class HomeFragment : Fragment() {
@@ -267,11 +268,11 @@ class HomeFragment : Fragment() {
                         startActivity(
                             Intent(
                                 Intent.ACTION_VIEW,
-                                Uri.parse("market://details?id=${context.packageName}")
+                                "market://details?id=${context.packageName}".toUri()
                             )
                         )
                     } catch (e: ActivityNotFoundException) {
-                        startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(event.url)))
+                        startActivity(Intent(Intent.ACTION_VIEW, event.url.toUri()))
                     } finally {
                     }
 

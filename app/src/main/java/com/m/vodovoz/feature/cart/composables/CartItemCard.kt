@@ -144,24 +144,6 @@ fun CartItemCard(
                             style = ExtendedTheme.typography.labelSmallVariant
                         )
                     }
-
-                    val additionalProductsText = cartItem.additionalProductsText
-                    if (additionalProductsText != null) {
-                        Text(
-                            modifier = Modifier
-                                .padding(top = 4.dp)
-                                .clickable(
-                                    onClick = { onRecommendationsClick(additionalProductsText) },
-                                    indication = null,
-                                    interactionSource = null
-                                ),
-                            text = additionalProductsText.text.replaceFirstChar {
-                                it.uppercase()
-                            },
-                            color = MaterialTheme.colorScheme.primary,
-                            style = ExtendedTheme.typography.labelSmallVariant
-                        )
-                    }
                 }
                 if (
                     !cartItem.canBuy &&
@@ -237,6 +219,24 @@ fun CartItemCard(
                         )
                     }
                 }
+            }
+
+            val additionalProductsText = cartItem.additionalProductsText
+            if (additionalProductsText != null) {
+                Text(
+                    modifier = Modifier
+                        .padding(top = 16.dp)
+                        .clickable(
+                            onClick = { onRecommendationsClick(additionalProductsText) },
+                            indication = null,
+                            interactionSource = null
+                        ),
+                    text = additionalProductsText.text.replaceFirstChar {
+                        it.uppercase()
+                    },
+                    color = MaterialTheme.colorScheme.primary,
+                    style = MaterialTheme.typography.bodySmall
+                )
             }
         }
     }

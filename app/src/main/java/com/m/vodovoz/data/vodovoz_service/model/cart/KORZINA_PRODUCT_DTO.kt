@@ -2,6 +2,7 @@ package com.m.vodovoz.data.vodovoz_service.model.cart
 
 
 import androidx.annotation.Keep
+import com.m.vodovoz.data.vodovoz_service.model.KNOPKA_ORDER_DTO
 import com.m.vodovoz.data.vodovoz_service.model.TOVAR_18_DTO
 import com.squareup.moshi.Json
 
@@ -52,5 +53,5 @@ data class KORZINA_PRODUCT_DTO(
     @Json(name = "DOPTOVARY")
     val DOPTOVARY: DOPTOVARY_TEXT_DTO?,
     @Json(name = "TOVAR18")
-    val TOVAR18: TOVAR_18_DTO?,
+    val TOVAR18: TOVAR_18_DTO?
 )

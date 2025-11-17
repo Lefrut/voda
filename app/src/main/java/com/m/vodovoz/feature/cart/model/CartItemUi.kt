@@ -1,6 +1,7 @@
 package com.m.vodovoz.feature.cart.model
 
 import androidx.compose.runtime.Immutable
+import com.m.vodovoz.design_system.model.ColorfulButtonUi
 import com.m.vodovoz.design_system.model.ForAdultsUi
 import com.m.vodovoz.design_system.model.widgets.LabelUi
 import com.m.vodovoz.design_system.model.VodovozItemUi
@@ -75,6 +76,6 @@ fun CartItemModel.toUi(): CartItemUi {
         showcase = showcase,
         cartLoading = false,
         forAdults = forAdults?.toUi(),
-        additionalProductsText = additionalProductsText?.toUi()
+        additionalProductsText = additionalProductsText?.toUi(),
     )
 }

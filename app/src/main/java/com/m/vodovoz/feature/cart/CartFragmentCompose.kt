@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
@@ -33,6 +34,7 @@ import com.m.vodovoz.core.navigation.navigateToOrdering
 import com.m.vodovoz.core.navigation.navigateToProductAnalogs
 import com.m.vodovoz.core.navigation.navigateToProductDetails
 import com.m.vodovoz.design_system.VodovozTheme
+import com.m.vodovoz.design_system.composables.placeholders.ForAdultsPlaceholder
 import com.m.vodovoz.design_system.composables.placeholders.LoadingPlaceholder
 import com.m.vodovoz.design_system.composables.placeholders.NetworkErrorPlaceholder
 import com.m.vodovoz.design_system.composables.placeholders.VodovozPlaceholder
@@ -87,7 +89,19 @@ class CartFragment : Fragment() {
 
                     when (val uiState = viewState.uiState) {
                         CartFlowViewModel.CartUiState.Cart -> {
-                            CartScreen(
+                            val forAdultsUi = viewState.forAdultsUi
+                            if (forAdultsUi != null) {
+                                ForAdultsPlaceholder(
+                                    forAdults = forAdultsUi,
+                                    onBackClick = viewModel::closeForAdultsPlaceholder,
+                                    onApplyClick = viewModel::setCanViewForAdults
+                                )
+
+                                BackHandler {
+                                    viewModel.closeForAdultsPlaceholder()
+                                }
+
+                            } else CartScreen(
                                 viewModel = viewModel,
                                 viewState = viewState
                             )

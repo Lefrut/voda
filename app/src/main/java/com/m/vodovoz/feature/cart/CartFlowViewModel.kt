@@ -9,6 +9,7 @@ import com.m.vodovoz.common.account.AccountManager
 import com.m.vodovoz.common.cart.CartManager
 import com.m.vodovoz.common.like.LikeManager
 import com.m.vodovoz.common.tab.TabManager
+import com.m.vodovoz.design_system.model.ForAdultsUi
 import com.m.vodovoz.design_system.model.ProductUi
 import com.m.vodovoz.design_system.model.VodovozPlaceholderUi
 import com.m.vodovoz.design_system.model.order.OrderSummaryItemUi
@@ -40,7 +41,6 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -52,7 +52,7 @@ class CartFlowViewModel @Inject constructor(
     private val accountManager: AccountManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val tabManager: TabManager,
-    userPreferencesRepository: UserPreferencesRepository,
+    private val userPreferencesRepository: UserPreferencesRepository,
 ) : PagingProductsMviViewModel2<CartItemUi, ProductUi, CartFlowViewModel.CartState, CartFlowViewModel.CartEvents>(
     state = CartState(),
     blockedProductsFlow = cartManager.blockedProductsFlow,
@@ -60,7 +60,6 @@ class CartFlowViewModel @Inject constructor(
     cartFlow = cartManager.observeCarts(),
     canViewAdultProducts = userPreferencesRepository.canViewAdultProducts
 ) {
-
     init {
         viewModelScope.launch { listenCartUpdates() }
     }
@@ -148,7 +147,8 @@ class CartFlowViewModel @Inject constructor(
         updateState { s ->
             s.copy(
                 showAdditionalProductsBS = false,
-                additionalProductsBS = null
+                additionalProductsBS = null,
+                items2 = emptyList()
             )
         }
     }
@@ -159,10 +159,7 @@ class CartFlowViewModel @Inject constructor(
             productsArticle = additionalProductsText.articleNumber
         ).onStart {
             updateState { s ->
-                s.copy(
-                    showAdditionalProductsBS = true,
-                    additionalProductsBS = null
-                )
+                s.copy(showAdditionalProductsBS = true)
             }
         }.map { bsResult ->
             bsResult.mapCatching { bSModel -> bSModel.toUi() }
@@ -175,7 +172,10 @@ class CartFlowViewModel @Inject constructor(
                     productsId = additionalProductsText.productsId,
                     productsArticle = additionalProductsText.articleNumber
                 ).map { data ->
-                    data.map { it.toUi() }
+                    data.map {
+                        val ui = it.toUi()
+                        ui
+                    }
                 }.collectPagingData2()
             }.onFailure {
                 closeRecommendationsBS()
@@ -211,8 +211,15 @@ class CartFlowViewModel @Inject constructor(
         sendEvent(CartEvents.GoToProductDetails(productId = product.id))
     }
 
-    fun navigateToProductAnalogs(product: ProductUi) = viewModelScope.launch {
-        sendEvent(CartEvents.GoToAnalogs(product.id))
+    fun navigateToAnalogsOrShow18(product: ProductUi) = viewModelScope.launch {
+        if (product.forAdults != null) {
+            updateState { s ->
+                s.copy(
+                    forAdultsUi = product.forAdults
+                )
+            }
+        } else sendEvent(CartEvents.GoToAnalogs(product.id))
+
     }
 
     fun incrementProduct(product: ProductUi) = viewModelScope.launch {
@@ -415,6 +422,17 @@ class CartFlowViewModel @Inject constructor(
         }
     }
 
+    fun closeForAdultsPlaceholder() {
+        updateState { state -> state.copy(forAdultsUi = null) }
+    }
+
+    fun setCanViewForAdults() = viewModelScope.launch {
+        userPreferencesRepository.setCanViewAdultProducts(true)
+        updateState { s ->
+            s.copy(forAdultsUi = null)
+        }
+    }
+
     @Immutable
     data class CartState(
         val title: String = "",
@@ -439,6 +457,7 @@ class CartFlowViewModel @Inject constructor(
         val showAdditionalProductsBS: Boolean = false,
         override val loadStates1: CombinedLoadStates = emptyCombinedLoadStates,
         override val loadStates2: CombinedLoadStates = emptyCombinedLoadStates,
+        val forAdultsUi: ForAdultsUi? = null,
     ) : PagingState2<CartItemUi, ProductUi, CartState>() {
 
 
@@ -488,6 +507,6 @@ class CartFlowViewModel @Inject constructor(
         data class GoToAllBottles(val bottles: List<BottleUi>) : CartEvents()
 
         data class GoToProductDetails(val productId: Long) : CartEvents()
-        data class GoToAnalogs(val productId: Long): CartEvents()
+        data class GoToAnalogs(val productId: Long) : CartEvents()
     }
 }

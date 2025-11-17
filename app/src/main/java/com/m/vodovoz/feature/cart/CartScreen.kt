@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -18,6 +19,7 @@ import com.m.vodovoz.design_system.composables.placeholders.NetworkErrorPlacehol
 import com.m.vodovoz.design_system.composables.placeholders.VodovozPlaceholder
 import com.m.vodovoz.design_system.composables.pull_to_refresh.VodovozPullToRefreshBox
 import com.m.vodovoz.design_system.composables.scaffold.VodovozScaffold
+import com.m.vodovoz.design_system.model.ColorfulButtonUi
 import com.m.vodovoz.feature.cart.composables.CartBody
 import com.m.vodovoz.feature.cart.composables.CartTopBar
 import com.m.vodovoz.feature.cart.composables.PromotionCodeBottomSheet
@@ -108,17 +110,33 @@ fun CartScreen(viewModel: CartFlowViewModel, viewState: CartFlowViewModel.CartSt
                         )
                     }
 
-                    val additionalProductsBS = viewState.additionalProductsBS
-                    val items2 = viewState.items2
-                    if (viewState.showAdditionalProductsBS && additionalProductsBS != null) {
+                    val followString = stringResource(R.string.follow)
+                    val buttonBackgroundColor = MaterialTheme.colorScheme.primaryContainer.value
+                    val buttonTextColor = MaterialTheme.colorScheme.primary.value
+                    val recommendedProducts = viewState.items2.map { product ->
+                        product.copy(
+                            button = product.forAdults?.let {
+                                ColorfulButtonUi(
+                                    name = followString,
+                                    backgroundColorValue = buttonBackgroundColor,
+                                    textColorValue = buttonTextColor,
+                                )
+                            }
+                        )
+                    }
+                    val additionalProductsBS = viewState.additionalProductsBS?.copy(
+                        products = recommendedProducts,
+                        loadStates = viewState.loadStates2
+                    )
+                    if (viewState.showAdditionalProductsBS
+                        && additionalProductsBS != null
+                        && additionalProductsBS.products.isNotEmpty()
+                    ) {
                         RecommendationsBottomSheet(
-                            additionalProductsBS = additionalProductsBS.copy(
-                                products = items2,
-                                loadStates = viewState.loadStates2
-                            ),
+                            additionalProductsBS = additionalProductsBS,
                             onDismissRequest = viewModel::closeRecommendationsBS,
                             onProductSee = viewModel::notifyPaging2,
-                            onProductAnalogsClick = viewModel::navigateToProductAnalogs,
+                            onProductAnalogsClick = viewModel::navigateToAnalogsOrShow18,
                             onProductClick = viewModel::navigateToProductDetails,
                             onProductDecrementToCart = viewModel::decrementProduct,
                             onProductIncrementToCart = viewModel::incrementProduct,

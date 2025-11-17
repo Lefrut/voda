@@ -34,5 +34,5 @@ data class TOVAR_DATA_DTO(
     @Json(name = "TOVAR18")
     val TOVAR18: TOVAR_18_DTO?,
     @Json(name = "KNOPKI")
-    val KNOPKI: KNOPKA_AUTH_DTO?
+    val KNOPKI: KNOPKA_AUTH_DTO?,
 )

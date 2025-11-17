@@ -133,12 +133,12 @@ private abstract class AbstractAppCart(
         quantity: Int,
     ) = writeOperation(
         type = OperationType.Add,
-        item = newItem(id, quantity)
+        item = Item.from(id, quantity)
     )
 
     override suspend fun addProducts(idsAndQuantities: Map<Long, Int>) = writeOperation(
         type = OperationType.MultiAdd,
-        items = newItems(idsAndQuantities)
+        items = Item.from(idsAndQuantities)
     )
 
 
@@ -150,7 +150,7 @@ private abstract class AbstractAppCart(
 
     override suspend fun changeProduct(id: Long, quantity: Int) = writeOperation(
         type = OperationType.Change,
-        item = newItem(id, quantity)
+        item = Item.from(id, quantity)
     )
 
     override suspend fun clear() = writeOperation(
@@ -218,17 +218,22 @@ private abstract class AbstractAppCart(
         val id: Long,
         val isLoading: Boolean,
         val quantity: Int,
-    )
+    ) {
 
-    fun newItem(id: Long, quantity: Int): Item {
-        return Item(id, false, quantity)
-    }
 
-    fun newItems(idsAndQuantities: Map<Long, Int>): List<Item> {
-        return idsAndQuantities.map { (id, quantity) ->
-            newItem(id, quantity)
+        companion object {
+            fun from(id: Long, quantity: Int): Item {
+                return Item(id, false, quantity)
+            }
+
+            fun from(idsAndQuantities: Map<Long, Int>): List<Item> {
+                return idsAndQuantities.map { (id, quantity) ->
+                    from(id, quantity)
+                }
+            }
         }
     }
+
 
 }
 
@@ -245,34 +250,27 @@ private fun createOperationCanceler(
 }
 
 
-private interface OperationStrategy :
-    LocalUpdatableOperation,
-    OnlineUpdatableOperation,
-    CancelableOperation {
-
-    override suspend fun updateLocal(operation: OperationInfo)
-
-    override suspend fun updateOnline(operation: OperationInfo): Result<Unit>
-
-    override suspend fun cancel(operation: OperationInfo)
-
-}
-
-private fun interface LocalUpdatableOperation {
+private interface CartOperationStrategy {
 
     suspend fun updateLocal(operation: OperationInfo)
 
-}
-
-private fun interface OnlineUpdatableOperation {
-
     suspend fun updateOnline(operation: OperationInfo): Result<Unit>
 
-}
-
-private fun interface CancelableOperation {
-
     suspend fun cancel(operation: OperationInfo)
+
+    fun create(
+        onUpdateLocal: (OperationInfo) -> Unit,
+        onUpdateOnline: (OperationInfo) -> Result<Unit>,
+        onCancel: (OperationInfo) -> Unit,
+    ) = object : CartOperationStrategy {
+        override suspend fun updateLocal(operation: OperationInfo) = onUpdateLocal(operation)
+
+        override suspend fun updateOnline(operation: OperationInfo): Result<Unit> =
+            onUpdateOnline(operation)
+
+        override suspend fun cancel(operation: OperationInfo) = onCancel(operation)
+
+    }
 
 }
 
