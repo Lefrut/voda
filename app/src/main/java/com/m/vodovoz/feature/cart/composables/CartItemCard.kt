@@ -231,9 +231,7 @@ fun CartItemCard(
                             indication = null,
                             interactionSource = null
                         ),
-                    text = additionalProductsText.text.replaceFirstChar {
-                        it.uppercase()
-                    },
+                    text = additionalProductsText.text,
                     color = MaterialTheme.colorScheme.primary,
                     style = MaterialTheme.typography.bodySmall
                 )
