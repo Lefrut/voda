@@ -504,9 +504,7 @@ interface VodovozServiceRepository {
         categoryId: Int?,
     ): Flow<PagingData<PromotionModel>>
 
-    fun getOrderMenu(
-        userId: Long? = null,
-    ): Flow<Result<OrderWithMenuModel>>
+    fun getOrderMenu(): Flow<Result<OrderWithMenuModel>>
 
     fun getPopularCategories(): Flow<Result<SectionModel<PopularCategoryModel>>>
 

@@ -39,6 +39,7 @@ import com.m.vodovoz.feature.questionnaires.model.ComponentOptionUi
 import com.m.vodovoz.feature.questionnaires.model.ConditionUi
 import com.m.vodovoz.feature.questionnaires.model.ConditionsCheckboxListUi
 import com.m.vodovoz.feature.questionnaires.model.FieldComponentUi
+import com.m.vodovoz.feature.questionnaires.model.OptionComponentUi
 import com.m.vodovoz.feature.questionnaires.model.QuestionnaireComponentUi
 import com.m.vodovoz.feature.questionnaires.model.SwitchUi
 import com.m.vodovoz.feature.questionnaires.model.ToggleListUi
@@ -90,7 +91,7 @@ fun QuestionnairesBody(
                                 field = component.ui,
                                 onFieldChange = { _, updatedField ->
                                     onFieldChange(component, updatedField)
-                                }
+                                },
                             )
                         }
 

@@ -39,11 +39,7 @@ fun CartDetailsDTO.toDomain(): CartDetailsModel {
         countText = COUNT ?: "",
         items = KORZINA?.mapToDomain()
             ?: throw IllegalArgumentException("Cart items can't be null"),
-        present = PODAROK?.toDomain(
-            orderPrice = orderSummary.getOrElse(1) {
-                OrderSummaryItemModel.Empty
-            }.value.replace(" ", "").takeWhile { c -> c.isDigit() }.toIntOrNull() ?: 0
-        ),
+        present = PODAROK?.toDomain(),
         bottlesButton = KNOPKI?.BYTYLI?.toDomain(),
         promotionalCodeButton = KNOPKI?.PROMOKOD?.toDomain(),
         presentButton = KNOPKI?.PODARKI?.toDomain(),
@@ -108,7 +104,7 @@ fun CART_KNOPKA_DTO.toDomain(): CartButtonModel {
     )
 }
 
-fun PODAROK_DTO.toDomain(orderPrice: Int): CartPresentModel {
+fun PODAROK_DTO.toDomain(): CartPresentModel {
     return CartPresentModel(
         id = ID ?: -1,
         title = TITLE ?: "",
@@ -116,16 +112,16 @@ fun PODAROK_DTO.toDomain(orderPrice: Int): CartPresentModel {
         image = KARTINKA?.toVodovozUrl() ?: "",
         leftToGift = MAXSYMMA ?: OPIS?.filter { it.isDigit() }?.toIntOrNull() ?: 0,
         button = KNOPKA?.toDomain(),
-        popupWindow = KNOPKA?.OKNOPODAROK?.toDomain(orderPrice),
-        currentGift = orderPrice
+        popupWindow = KNOPKA?.OKNOPODAROK?.toDomain(),
+        currentGift = SUMKORZINA ?: 0
     )
 }
 
-fun OKNO_PODAROK_DTO.toDomain(orderPrice: Int): CartPresentPopupWindowModel {
+fun OKNO_PODAROK_DTO.toDomain(): CartPresentPopupWindowModel {
     return CartPresentPopupWindowModel(
         items = PODAROK?.mapToDomain() ?: emptyList(),
         button = KNOPKA?.toDomain() ?: ColorfulButtonModel.Empty,
-        present = PODAROK_BANNER?.toDomain(orderPrice)
+        present = PODAROK_BANNER?.toDomain()
     )
 }
 

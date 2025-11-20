@@ -92,8 +92,20 @@ class GiftsViewModel @Inject constructor(
         navigateToCart()
     }
 
-    private suspend fun navigateToCart(){
+    private suspend fun navigateToCart() {
         sendEvent(GiftsEvent.GoToCart(stateSnapshot.currentGift))
+    }
+
+    fun showPreviewImageDialog(image: String) {
+        updateState { s ->
+            s.copy(previewImage = image)
+        }
+    }
+
+    fun closePreviewImageDialog() {
+        updateState { state ->
+            state.copy(previewImage = null)
+        }
     }
 
 

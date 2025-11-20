@@ -49,6 +49,8 @@ fun VodovozTabRow(
     selectedTabPosition: Int = 0,
     tabItems: @Composable () -> Unit,
 ) {
+
+
     Surface(
         modifier = modifier,
         color = MaterialTheme.colorScheme.surface,
@@ -62,43 +64,47 @@ fun VodovozTabRow(
             val preMeasured = subcompose("PreCalculate", tabItems).map { measurable ->
                 measurable.measure(constraints.copy(minWidth = 0))
             }
-
             val tabsCount = preMeasured.size
             if (tabsCount == 0) {
                 layout(constraints.maxWidth, 0) {}
             }
 
             val spacingPx = tabSpacing.roundToPx()
-            val tabsWidth = preMeasured.map { it.width }
             val totalSpacing = if (tabsCount > 1) (tabsCount - 1) * spacingPx else 0
-            val availableWidth = constraints.maxWidth - totalSpacing
-            val totalTabsWidth = tabsWidth.sum()
-
-            val useEqualWidth = totalTabsWidth <= availableWidth
-            val equalWidth = availableWidth / tabsCount
-
-            val tabWidths = if (useEqualWidth) {
-                List(tabsCount) { equalWidth }
-            } else {
-                tabsWidth
+            val tabsWidth = preMeasured.map { placeable ->
+                if(tabsCount == 2){
+                    (constraints.maxWidth - totalSpacing) / tabsCount
+                }
+                else {
+                    placeable.width
+                }
             }
 
+            val paddingWidth =
+                (constraints.maxWidth - tabsWidth.sum() - totalSpacing) / tabsCount.coerceAtLeast(1)
             val maxItemHeight = preMeasured.maxOf { it.height }
 
-            val tabPositions = tabWidths.mapIndexed { index, tabWidth ->
-                val x = tabWidths.take(index).sum() + spacingPx * index
+
+            val tabPositions = tabsWidth.mapIndexed { index, tabWidth ->
+                val currentTabWidth = tabWidth + paddingWidth
+
+                val x = if (index == 0) 0
+                else tabsWidth.take(index).sum() + (spacingPx + paddingWidth) * index
+
                 TabPosition(
                     left = x.toDp(),
-                    width = tabWidth.toDp(),
+                    width = currentTabWidth.toDp(),
                     contentWidth = Dp.Unspecified
                 )
             }
 
             val tabPlaceables = subcompose("Tabs", tabItems).mapIndexed { index, measurable ->
                 measurable.measure(
-                    Constraints.fixed(
-                        tabWidths[index],
-                        maxItemHeight
+                    constraints.copy(
+                        minWidth = tabPositions[index].width.roundToPx(),
+                        maxWidth = tabPositions[index].width.roundToPx(),
+                        minHeight = maxItemHeight,
+                        maxHeight = maxItemHeight
                     )
                 )
             }
@@ -110,8 +116,7 @@ fun VodovozTabRow(
                     Box(
                         Modifier
                             .tabIndicator(
-                                tabPositions.getOrNull(selectedTabPosition)
-                                    ?: TabPosition(0.dp, 0.dp, Dp.Unspecified),
+                                tabPositions.getOrNull(selectedTabPosition) ?: TabPosition.Empty,
                                 tween(durationMillis = 200, easing = LinearEasing)
                             )
                             .fillMaxWidth()
@@ -126,8 +131,8 @@ fun VodovozTabRow(
                 }
 
                 tabPlaceables.forEachIndexed { index, placeable ->
-                    val pos = tabPositions[index]
-                    placeable.place(x = pos.left.roundToPx(), y = 0)
+                    val currentTab = tabPositions[index]
+                    placeable.place(x = currentTab.left.roundToPx(), y = 0)
                 }
             }
         }
@@ -195,7 +200,7 @@ private fun TabView() {
         var selectedTabPosition by remember { mutableIntStateOf(1) }
 
         val items = listOf(
-            "Описание", "Апельсинки", "Водичка",
+            "Описание", "Апельсинки3213213",
         )
 
         VodovozTabRow(

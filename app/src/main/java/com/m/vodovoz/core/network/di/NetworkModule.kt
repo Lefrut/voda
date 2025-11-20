@@ -6,6 +6,7 @@ import com.m.vodovoz.core.network.interceptor.BaseUrlInterceptor
 import com.m.vodovoz.core.network.interceptor.BlockAppInterceptor
 import com.m.vodovoz.core.network.interceptor.CookieHandlerInterceptor
 import com.m.vodovoz.core.network.interceptor.LastErrorInterceptor
+import com.m.vodovoz.core.network.interceptor.UserInterceptor
 import com.m.vodovoz.core.network.interceptor.VersionQueryInterceptor
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
@@ -35,6 +36,15 @@ annotation class VodovozQualifier
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class NetworkModule {
+
+
+    @Binds
+    @Singleton
+    @IntoSet
+    @VodovozInterceptorDI
+    abstract fun provideUserInterceptor(
+        userInterceptor: UserInterceptor,
+    ): Interceptor
 
 
     @Binds

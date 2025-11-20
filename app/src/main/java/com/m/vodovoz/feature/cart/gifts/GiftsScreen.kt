@@ -45,9 +45,7 @@ fun GiftsScreen(viewModel: GiftsViewModel, viewState: GiftsState) {
             .background(MaterialTheme.colorScheme.background)
     ) {
         VodovozTopBar(
-            onBack = {
-                viewModel.navigateBack()
-            },
+            onBack = viewModel::navigateBack,
             title = stringResource(id = R.string.choose_present)
         )
         Column(
@@ -72,10 +70,10 @@ fun GiftsScreen(viewModel: GiftsViewModel, viewState: GiftsState) {
                     Column {
                         GiftItem(
                             item = gift,
-                            selected = viewState.currentGift == gift
-                        ) { presentItem ->
-                            viewModel.selectGift(presentItem)
-                        }
+                            selected = viewState.currentGift == gift,
+                            onClick = viewModel::selectGift,
+                            onImageClick = viewModel::showPreviewImageDialog
+                        )
 
                         if (viewState.items.lastIndex != index) {
                             HorizontalDivider(
@@ -110,6 +108,7 @@ private fun GiftItem(
     item: CartPresentItemUi,
     selected: Boolean,
     onClick: (CartPresentItemUi) -> Unit,
+    onImageClick: (String) -> Unit,
 ) {
     Row(
         modifier = modifier
@@ -132,7 +131,9 @@ private fun GiftItem(
             AsyncImage(
                 model = item.image,
                 contentDescription = null,
-                modifier = Modifier.size(50.dp),
+                modifier = Modifier
+                    .size(50.dp)
+                    .clickable { onImageClick(item.image) },
                 contentScale = ContentScale.FillBounds
             )
         }

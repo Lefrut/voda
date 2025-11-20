@@ -16,7 +16,9 @@ data class GiftsState(
     val present: CartPresentUi? = null,
     val showForAdultsDialog: Boolean = false,
     val forAdultsDialog: ForAdultsUi = ForAdultsUi.Empty,
+    val previewImage: String? = null,
 ) : ItemsState<CartPresentItemUi, GiftsState>() {
+
 
     override fun withItems(newItems: List<CartPresentItemUi>): GiftsState {
         return copy(items = newItems)

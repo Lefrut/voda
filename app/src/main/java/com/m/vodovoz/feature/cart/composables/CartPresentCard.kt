@@ -34,6 +34,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.fromHtml
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.coerceAtMost
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -41,6 +42,7 @@ import androidx.compose.ui.zIndex
 import coil3.compose.AsyncImage
 import com.m.vodovoz.R
 import com.m.vodovoz.design_system.ExtendedTheme
+import com.m.vodovoz.design_system.VodovozTheme
 import com.m.vodovoz.design_system.composables.button.VodovozButtonSmall
 import com.m.vodovoz.feature.cart.model.CartPresentUi
 
@@ -56,7 +58,10 @@ fun CartPresentCard(
         mutableStateOf(0.dp)
     }
 
-    BoxWithConstraints(modifier = modifier) {
+    BoxWithConstraints(
+        modifier = modifier,
+        propagateMinConstraints = true
+    ) {
         val maxWidth = maxWidth
         val horizontalPadding = 16.dp
         val verticalPadding = 10.dp
@@ -183,11 +188,11 @@ fun CartPresentCard(
                         else Alignment.Bottom
                     )
                     .then(
-                        if (button == null) Modifier.padding(end = 25.dp, top = 10.dp)
+                        if (button == null) Modifier.padding(end = 24.dp, top = 10.dp)
                         else Modifier.padding(end = 10.dp, top = imageTopPaddingDp)
                     )
                     .then(
-                        if (button == null) Modifier.size(80.dp, 65.dp)
+                        if (button == null) Modifier.size(width = 70.dp, height = 64.dp)
                         else Modifier
                             .width(82.dp)
                             .height((contentHeight - imageTopPaddingDp).coerceAtMost(110.dp))
@@ -199,5 +204,23 @@ fun CartPresentCard(
                 contentScale = ContentScale.FillBounds
             )
         }
+    }
+}
+
+@Preview
+@Composable
+private fun CartPresentCardPreview() {
+    val cartPresent = CartPresentUi(
+        id = 1,
+        title = "123".repeat(10) ,
+        description = "123",
+        image = "",
+        currentPresentPrice = 10,
+        maxPresentPrice = 100,
+        button = null,
+        popupWindow = null
+    )
+    VodovozTheme {
+        CartPresentCard(present = cartPresent) { }
     }
 }

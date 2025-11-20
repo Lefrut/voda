@@ -9,14 +9,15 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.res.stringResource
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import com.m.vodovoz.ui.mvi.collectAsState
 import androidx.navigation.fragment.findNavController
 import com.m.vodovoz.R
 import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.design_system.VodovozTheme
 import com.m.vodovoz.design_system.composables.dialogs.VodovozDialog
 import com.m.vodovoz.design_system.effects.LifecycleEffect
+import com.m.vodovoz.feature.cart.composables.ImagePreviewDialog
 import com.m.vodovoz.feature.cart.gifts.model.GiftsEvent
+import com.m.vodovoz.ui.mvi.collectAsState
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -51,8 +52,16 @@ class GiftsFragment : Fragment() {
 
                     GiftsScreen(viewModel = viewModel, viewState = viewState)
 
-                    if(viewState.showForAdultsDialog){
-                        with(viewState.forAdultsDialog){
+                    val previewImage = viewState.previewImage
+                    if (previewImage != null) {
+                        ImagePreviewDialog(
+                            image = previewImage,
+                            onDismissRequest = viewModel::closePreviewImageDialog
+                        )
+                    }
+
+                    if (viewState.showForAdultsDialog) {
+                        with(viewState.forAdultsDialog) {
                             VodovozDialog(
                                 title = title,
                                 description = description,

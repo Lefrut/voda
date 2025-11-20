@@ -63,6 +63,7 @@ android {
         getByName("debug") {
             isDebuggable = true
             isMinifyEnabled = false
+            isShrinkResources = false
         }
     }
 
