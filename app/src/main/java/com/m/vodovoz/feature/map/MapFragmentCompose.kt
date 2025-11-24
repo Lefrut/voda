@@ -50,6 +50,9 @@ import com.m.vodovoz.ui.yandex_map.plusZoom
 import com.yandex.mapkit.MapKit
 import com.yandex.mapkit.MapKitFactory
 import com.yandex.mapkit.geometry.Point
+import com.yandex.mapkit.logo.Alignment
+import com.yandex.mapkit.logo.HorizontalAlignment
+import com.yandex.mapkit.logo.VerticalAlignment
 import com.yandex.mapkit.map.CameraPosition
 import com.yandex.mapkit.map.Map
 import com.yandex.mapkit.map.MapWindow
@@ -81,6 +84,9 @@ class MapFragment : Fragment() {
                 layoutParams = ViewGroup.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT,
                     ViewGroup.LayoutParams.MATCH_PARENT
+                )
+                mapWindow.map.logo.setAlignment(
+                    Alignment(HorizontalAlignment.LEFT, VerticalAlignment.TOP)
                 )
             }
         )

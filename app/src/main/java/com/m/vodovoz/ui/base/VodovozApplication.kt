@@ -12,8 +12,6 @@ import coil3.request.CachePolicy
 import coil3.request.crossfade
 import coil3.svg.SvgDecoder
 import com.m.vodovoz.BuildConfig
-import com.m.vodovoz.common.constants.AppKeys.MAPKIT_API_KEY
-import com.m.vodovoz.common.constants.AppKeys.YANDEX_METRICA_KEY
 import com.m.vodovoz.common.notification.NotificationChannels
 import com.m.vodovoz.core.network.VodovozWebConfig
 import com.yandex.mapkit.MapKitFactory
@@ -41,7 +39,7 @@ class VodovozApplication : Application(), Configuration.Provider, SingletonImage
         AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags("ru"))
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
 
-        MapKitFactory.setApiKey(MAPKIT_API_KEY)
+        MapKitFactory.setApiKey(BuildConfig.MAPKIT_API_KEY)
         MapKitFactory.initialize(this)
 
         if (BuildConfig.DEBUG) {
@@ -53,7 +51,7 @@ class VodovozApplication : Application(), Configuration.Provider, SingletonImage
 
     private fun initAppMetrica() {
         if (!BuildConfig.DEBUG) {
-            val config: AppMetricaConfig = AppMetricaConfig.newConfigBuilder(YANDEX_METRICA_KEY)
+            val config: AppMetricaConfig = AppMetricaConfig.newConfigBuilder(BuildConfig.YANDEX_METRICA_KEY)
                 .withNativeCrashReporting(false)
                 .withLocationTracking(false)
                 .withAppVersion(BuildConfig.VERSION_NAME)

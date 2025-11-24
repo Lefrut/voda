@@ -1,6 +1,5 @@
 package com.m.vodovoz.data.maps
 
-import com.m.vodovoz.common.constants.AppKeys
 import com.m.vodovoz.data.maps.model.YandexGeoResponseDTO
 import retrofit2.Response
 import retrofit2.http.GET

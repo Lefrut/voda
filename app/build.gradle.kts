@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -33,6 +35,29 @@ android {
             abiFilters += listOf("arm64-v8a", "armeabi-v7a", "x86_64", "x86")
         }
 
+        data class AppKey(
+            val buildConfigName: String,
+            val propertyName: String,
+        ) {
+            constructor(name: String) : this(name, name)
+        }
+
+
+        val properties = Properties()
+        properties.load(project.rootProject.file("local.properties").inputStream())
+
+        listOf(
+            AppKey("YOUTUBE_API_KEY"),
+            AppKey("MAPKIT_API_KEY"),
+            AppKey("GEOCODER"),
+            AppKey("YANDEX_METRICA_KEY")
+        ).forEach { (buildConfigName, propertyName) ->
+            buildConfigField(
+                type = "String",
+                name = buildConfigName,
+                value = properties.getProperty(propertyName)
+            )
+        }
     }
 
 
