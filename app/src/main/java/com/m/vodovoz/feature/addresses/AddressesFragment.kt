@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
@@ -50,6 +51,11 @@ class AddressesFragment : Fragment() {
         super.onStop()
     }
 
+    override fun onResume() {
+        super.onResume()
+        viewModel.refresh()
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -61,16 +67,15 @@ class AddressesFragment : Fragment() {
             setContent {
                 val viewState by viewModel.collectAsState()
                 
-
                 VodovozTheme {
                     AddressesScreen(
                         viewModel = viewModel,
                         viewState = viewState
                     )
-                }
 
-                LaunchedEffect(Unit) {
-                    viewModel.refresh()
+                    BackHandler {
+                        viewModel.navigateBack()
+                    }
                 }
 
                 LifecycleEffect {
@@ -84,8 +89,11 @@ class AddressesFragment : Fragment() {
     private suspend fun observeEvents() {
         viewModel.events.collect { event ->
             when (event) {
-                AddressesFlowViewModel.AddressesEvents.GoBack -> {
-                    findNavController().popBackStack()
+                is AddressesFlowViewModel.AddressesEvents.GoBack -> {
+                    with(findNavController()) {
+                        previousBackStackEntry?.savedStateHandle?.set("back_address", event.address)
+                        popBackStack()
+                    }
                 }
 
                 AddressesFlowViewModel.AddressesEvents.GoToMap -> {

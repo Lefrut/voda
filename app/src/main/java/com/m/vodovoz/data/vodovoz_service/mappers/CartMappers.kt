@@ -6,6 +6,7 @@ import com.m.vodovoz.common.model.from
 import com.m.vodovoz.data.vodovoz_service.di.toVodovozUrl
 import com.m.vodovoz.data.vodovoz_service.model.cart.CART_KNOPKA_DTO
 import com.m.vodovoz.data.vodovoz_service.model.cart.CartDetailsDTO
+import com.m.vodovoz.data.vodovoz_service.model.cart.DOPTOVARY_TEXT_DTO
 import com.m.vodovoz.data.vodovoz_service.model.cart.ITOG_ITEM_DTO
 import com.m.vodovoz.data.vodovoz_service.model.cart.KNOPKA_PROMOKOD_DTO
 import com.m.vodovoz.data.vodovoz_service.model.cart.KORZINA_PRODUCT_DTO
@@ -14,6 +15,9 @@ import com.m.vodovoz.data.vodovoz_service.model.cart.OKNO_PROMOKOD_DTO
 import com.m.vodovoz.data.vodovoz_service.model.cart.PODAROK_DTO
 import com.m.vodovoz.data.vodovoz_service.model.cart.PODAROK_KNOPKA_DTO
 import com.m.vodovoz.data.vodovoz_service.model.cart.PRODUCT_PODAROK_DTO
+import com.m.vodovoz.data.vodovoz_service.model.cart.RecommendationsDTO
+import com.m.vodovoz.domain.general.model.cart.AdditionalProductsBSModel
+import com.m.vodovoz.domain.general.model.cart.AdditionalProductsTextModel
 import com.m.vodovoz.domain.general.model.cart.CartButtonModel
 import com.m.vodovoz.domain.general.model.cart.CartDetailsModel
 import com.m.vodovoz.domain.general.model.cart.CartItemModel
@@ -35,15 +39,20 @@ fun CartDetailsDTO.toDomain(): CartDetailsModel {
         countText = COUNT ?: "",
         items = KORZINA?.mapToDomain()
             ?: throw IllegalArgumentException("Cart items can't be null"),
-        present = PODAROK?.toDomain(
-            orderPrice = orderSummary.getOrElse(1) {
-                OrderSummaryItemModel.Empty
-            }.value.replace(" ", "").takeWhile { c -> c.isDigit() }.toIntOrNull() ?: 0
-        ),
+        present = PODAROK?.toDomain(),
         bottlesButton = KNOPKI?.BYTYLI?.toDomain(),
         promotionalCodeButton = KNOPKI?.PROMOKOD?.toDomain(),
         presentButton = KNOPKI?.PODARKI?.toDomain(),
         orderSummary = orderSummary
+    )
+}
+
+fun RecommendationsDTO.toDomain(): AdditionalProductsBSModel {
+    return AdditionalProductsBSModel(
+        title = title ?: "",
+        description = description ?: "",
+        products = products?.mapToDomain() ?: emptyList(),
+        button = button?.toDomain()
     )
 }
 
@@ -95,7 +104,7 @@ fun CART_KNOPKA_DTO.toDomain(): CartButtonModel {
     )
 }
 
-fun PODAROK_DTO.toDomain(orderPrice: Int): CartPresentModel {
+fun PODAROK_DTO.toDomain(): CartPresentModel {
     return CartPresentModel(
         id = ID ?: -1,
         title = TITLE ?: "",
@@ -103,16 +112,16 @@ fun PODAROK_DTO.toDomain(orderPrice: Int): CartPresentModel {
         image = KARTINKA?.toVodovozUrl() ?: "",
         leftToGift = MAXSYMMA ?: OPIS?.filter { it.isDigit() }?.toIntOrNull() ?: 0,
         button = KNOPKA?.toDomain(),
-        popupWindow = KNOPKA?.OKNOPODAROK?.toDomain(orderPrice),
-        currentGift = orderPrice
+        popupWindow = KNOPKA?.OKNOPODAROK?.toDomain(),
+        currentGift = SUMKORZINA ?: 0
     )
 }
 
-fun OKNO_PODAROK_DTO.toDomain(orderPrice: Int): CartPresentPopupWindowModel {
+fun OKNO_PODAROK_DTO.toDomain(): CartPresentPopupWindowModel {
     return CartPresentPopupWindowModel(
         items = PODAROK?.mapToDomain() ?: emptyList(),
         button = KNOPKA?.toDomain() ?: ColorfulButtonModel.Empty,
-        present = PODAROK_BANNER?.toDomain(orderPrice)
+        present = PODAROK_BANNER?.toDomain()
     )
 }
 
@@ -127,7 +136,8 @@ fun PRODUCT_PODAROK_DTO.toDomain(): CartPresentItemModel? {
         name = NAME ?: "",
         image = DETAIL_PICTURE?.toVodovozUrl() ?: "",
         price = EXTENDED_PRICE?.PRICE,
-        oldPrice = EXTENDED_PRICE?.OLD_PRICE
+        oldPrice = EXTENDED_PRICE?.OLD_PRICE,
+        forAdults = TOVAR18?.toDomain()
     )
 }
 
@@ -161,7 +171,16 @@ fun KORZINA_PRODUCT_DTO.toDomain(): CartItemModel? {
         hasDiscount = DISCOUNTS_APPLY ?: false,
         restrictionsCode = PODROBNO.ZAPRET_FISHKAM ?: 0,
         showcase = PODROBNO.URL == true,
-        forAdults = (TOVAR18 ?: PODROBNO.TOVAR18)?.toDomain()
+        forAdults = (TOVAR18 ?: PODROBNO.TOVAR18)?.toDomain(),
+        additionalProductsText = DOPTOVARY?.toDomain(),
+    )
+}
+
+fun DOPTOVARY_TEXT_DTO.toDomain(): AdditionalProductsTextModel? {
+    return AdditionalProductsTextModel(
+        text = TEXT ?: return null,
+        articleNumber = ARTICLE ?: "",
+        productsId = TOVARY_ID ?: return null
     )
 }
 

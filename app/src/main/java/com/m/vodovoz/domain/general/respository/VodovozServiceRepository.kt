@@ -2,11 +2,14 @@ package com.m.vodovoz.domain.general.respository
 
 import androidx.paging.PagingData
 import com.m.vodovoz.common.model.AppConfig
+import com.m.vodovoz.design_system.model.ProductUi
 import com.m.vodovoz.design_system.model.widgets.FieldUi
+import com.m.vodovoz.domain.general.model.cart.AdditionalProductsBSModel
 import com.m.vodovoz.domain.general.model.cart.BottomCartModel
 import com.m.vodovoz.domain.general.model.cart.CartDetailsModel
 import com.m.vodovoz.domain.general.model.exceptions.VodovozPlaceholderModel
 import com.m.vodovoz.domain.general.model.location.AddAddressDetailsModel
+import com.m.vodovoz.domain.general.model.location.AddressLabelsModel
 import com.m.vodovoz.domain.general.model.location.AddressModel
 import com.m.vodovoz.domain.general.model.location.MapAddressModel
 import com.m.vodovoz.domain.general.model.location.MapZonesModel
@@ -80,6 +83,15 @@ interface VodovozServiceRepository {
 
     fun getAddAddressDetails(addressId: Long?): Flow<Result<AddAddressDetailsModel>>
 
+    fun getAddressLabels(): Flow<Result<AddressLabelsModel>>
+
+    fun addAddressLabel(label: String): Flow<Result<String>>
+
+    fun deleteAddressLabel(label: String): Flow<Result<String>>
+
+    fun deleteAllAddressLabels(): Flow<Result<String>>
+
+
     fun updateAddress(
         addressId: Long,
         address: MapAddressModel?,
@@ -106,7 +118,7 @@ interface VodovozServiceRepository {
 
     fun sendOrderRecipient(
         addressId: Long,
-        fields: List<FieldModel>,
+        params: Map<String, String>,
     ): Flow<Result<String>>
 
     fun getOrderCallYouDetails(
@@ -123,8 +135,11 @@ interface VodovozServiceRepository {
         addressId: Long,
         deliveryDate: String,
         deliveryTimeInterval: String,
-        phone: String,
+        userFIO: String,
+        userPhone: String,
+        userEmail: String?,
         paymentMethodId: Long,
+        paymentChange: String?,
         callYouId: Long? = null,
         coupon: String?,
         balance: String?,
@@ -395,6 +410,17 @@ interface VodovozServiceRepository {
         coupon: String? = null,
     ): Flow<Result<CartDetailsModel>>
 
+    fun getAdditionalProductsBS(
+        productsId: Long,
+        productsArticle: String,
+    ): Flow<Result<AdditionalProductsBSModel>>
+
+    fun getAdditionalProductsPaged(
+        productsId: Long,
+        productsArticle: String,
+    ): Flow<PagingData<ProductModel>>
+
+
     suspend fun addProductToCart(
         productId: Long,
         quantity: Int,
@@ -405,7 +431,7 @@ interface VodovozServiceRepository {
     ): Flow<Result<String>>
 
     suspend fun updateMultipleProductsToCart(
-        cartProducts: CartProductsModel
+        cartProducts: CartProductsModel,
     ): Flow<Result<String>>
 
     suspend fun removeProductFromCart(
@@ -478,9 +504,7 @@ interface VodovozServiceRepository {
         categoryId: Int?,
     ): Flow<PagingData<PromotionModel>>
 
-    fun getOrderMenu(
-        userId: Long? = null,
-    ): Flow<Result<OrderWithMenuModel>>
+    fun getOrderMenu(): Flow<Result<OrderWithMenuModel>>
 
     fun getPopularCategories(): Flow<Result<SectionModel<PopularCategoryModel>>>
 

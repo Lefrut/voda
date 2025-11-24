@@ -52,6 +52,7 @@ data class FieldUi(
     val hint: String = "",
     val type: FieldTypeUi,
     val isValueVisible: Boolean,
+    val isVisible: Boolean = true
 ) : WidgetUi(id) {
     companion object {
         val Empty = FieldUi(
@@ -64,7 +65,7 @@ data class FieldUi(
             readOnly = false,
             supportingText = "",
             type = FieldTypeUi.Text,
-            isValueVisible = true
+            isValueVisible = true,
         )
     }
 
@@ -85,6 +86,7 @@ val vodovozValidators
         EmailValidator,
         MessageValidator,
         NameValidator,
+        INNValidator,
         EmptyTextValidator
     )
 
@@ -275,7 +277,7 @@ fun FieldModel.toUi(): FieldUi {
 
     val keyboardType = when (id.lowercase()) {
         "email", "emaildryg", "dr125", "dr51", "dr176" -> KeyboardType.Email
-        "tel", "dr124", "phone", "dr50", "dr171" -> KeyboardType.Phone
+        "tel", "dr124", "phone", "dr50", "dr171", "dopphone" -> KeyboardType.Phone
         "pass", "parol" -> KeyboardType.Password
         "data", "date" -> KeyboardType.Unspecified
         "oplata", "inn" -> KeyboardType.Number
@@ -308,7 +310,8 @@ fun FieldModel.toUi(): FieldUi {
             options = values.map { option ->
                 DropDownOptionUi(option.id, option.value)
             }
-        ) else FieldTypeUi.Text
+        ) else FieldTypeUi.Text,
+        isVisible = isVisible
     )
 }
 

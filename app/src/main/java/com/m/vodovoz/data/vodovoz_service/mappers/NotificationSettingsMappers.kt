@@ -35,7 +35,6 @@ fun NOTIFICATION_SECTION_DTO.toDomain(): SectionModel<NotificationSectionItemMod
 }
 
 fun NOTIFICATION_SECTION_ITEM_DTO.toDomain(): NotificationSectionItemModel? {
-    if(FIELD_TYPE == "hidden") return null
     return NotificationSectionItemModel(
         id = ID ?: -1,
         message = MESSAGE ?: "",
@@ -43,7 +42,7 @@ fun NOTIFICATION_SECTION_ITEM_DTO.toDomain(): NotificationSectionItemModel? {
         type = FIELD_TYPE ?: "",
         readOnly = VodovozBoolean.True equalsTo ZAPRETREDAK,
         value = VALUE ?: "",
-        isVisible = true
+        isVisible = FIELD_TYPE != "hidden"
     )
 }
 

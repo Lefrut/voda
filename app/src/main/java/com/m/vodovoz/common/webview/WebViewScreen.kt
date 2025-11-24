@@ -112,7 +112,7 @@ private fun WebView(
                 "utf-8",
                 null
             )
-        } else {
+        } else if (webView.url.isNullOrEmpty() || webView.url != url) {
             webView.loadUrl(url)
         }
     }

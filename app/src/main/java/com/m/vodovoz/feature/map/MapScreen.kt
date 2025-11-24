@@ -82,6 +82,7 @@ fun MapScreen(
                 addressName = viewState.currentMapAddress?.name ?: "",
                 addressIsLoading = viewState.addressIsLoading,
                 addressIsError = viewState.addressIsError,
+                routeToAddress = viewState.routeToAddress,
                 screenType = viewState.screenType,
                 deliveryButton = viewState.deliveryButton,
                 yandexMap = yandexMap,

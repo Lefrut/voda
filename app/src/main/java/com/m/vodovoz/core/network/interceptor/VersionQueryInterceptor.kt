@@ -21,3 +21,14 @@ class VersionQueryInterceptor @Inject constructor() : Interceptor {
         return chain.proceed(newRequest)
     }
 }
+
+/**
+ * ViewModel содержит Products. ViewModel агрегирует список объектов с интерфейсом ProductsChanger, что возвращает
+ * измененный Products.
+ * ViewModel содержит observeProductUpdates(), который обходит список ProductsChanger и вызывает его метод: change()
+ * чей результат используется для изменения поля Products во ViewModel.
+ * Обход в observeProductUpdates() случается когда любой из потоков уведомляет о новом значении, список потоков
+ * ProductsFlows, что передается параметром во ViewModel.
+ *
+ *
+ * */

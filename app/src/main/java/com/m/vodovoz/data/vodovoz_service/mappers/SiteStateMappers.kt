@@ -1,6 +1,6 @@
 package com.m.vodovoz.data.vodovoz_service.mappers
 
-import com.m.vodovoz.common.constants.AppKeys
+import com.m.vodovoz.BuildConfig
 import com.m.vodovoz.common.model.Agreement
 import com.m.vodovoz.common.model.AppConfig
 import com.m.vodovoz.common.model.AppLink
@@ -40,8 +40,8 @@ fun SiteStateResponseDTO.toDomain(): AppConfig {
         takePhotos = COMMENTFILES ?: false,
         callPhoneNumber = CALL ?: "",
         data = DATA?.toDomain(),
-        mapkitKey = AppKeys.MAPKIT_API_KEY,
-        geocoderKey = mapKeysAndroid?.GEOKODER ?: AppKeys.GEOCODER,
+        mapkitKey = BuildConfig.MAPKIT_API_KEY,
+        geocoderKey = mapKeysAndroid?.GEOKODER ?: BuildConfig.GEOCODER,
         appLinks = DANNYESSILKI?.toDomain() ?: AppLinks.Empty
     )
 }

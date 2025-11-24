@@ -70,8 +70,16 @@ fun VodovozTabRow(
             }
 
             val spacingPx = tabSpacing.roundToPx()
-            val tabsWidth = preMeasured.map { placeable -> placeable.width }
             val totalSpacing = if (tabsCount > 1) (tabsCount - 1) * spacingPx else 0
+            val tabsWidth = preMeasured.map { placeable ->
+                if(tabsCount == 2){
+                    (constraints.maxWidth - totalSpacing) / tabsCount
+                }
+                else {
+                    placeable.width
+                }
+            }
+
             val paddingWidth =
                 (constraints.maxWidth - tabsWidth.sum() - totalSpacing) / tabsCount.coerceAtLeast(1)
             val maxItemHeight = preMeasured.maxOf { it.height }
@@ -192,7 +200,7 @@ private fun TabView() {
         var selectedTabPosition by remember { mutableIntStateOf(1) }
 
         val items = listOf(
-            "Описание", "Апельсинки", "Водичка",
+            "Описание", "Апельсинки3213213",
         )
 
         VodovozTabRow(

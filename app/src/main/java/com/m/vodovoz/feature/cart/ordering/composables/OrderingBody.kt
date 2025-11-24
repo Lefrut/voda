@@ -2,21 +2,19 @@ package com.m.vodovoz.feature.cart.ordering.composables
 
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.m.vodovoz.design_system.composables.button.VodovozButton
 import com.m.vodovoz.design_system.composables.decoration.OrderSummaryColumn
 import com.m.vodovoz.design_system.composables.decoration.VodovozHorizontalDivider
-import com.m.vodovoz.design_system.model.ColorfulButtonUi
 import com.m.vodovoz.design_system.model.SectionUi
 import com.m.vodovoz.design_system.model.order.OrderSummaryItemUi
 import com.m.vodovoz.design_system.model.widgets.FieldUi
 import com.m.vodovoz.feature.cart.ordering.model.OrderNotifyItemUi
+import com.m.vodovoz.feature.cart.ordering.model.OrderNotifySectionUi
 import com.m.vodovoz.feature.cart.ordering.model.OrderingMenuItemUi
 
 @Suppress("NonSkippableComposable")
@@ -26,13 +24,14 @@ fun OrderingBody(
     scrollState: ScrollState,
     comment: FieldUi?,
     paymentSection: SectionUi<OrderingMenuItemUi>,
-    notifySection: SectionUi<OrderNotifyItemUi>,
-    selectedNotifyItem: OrderNotifyItemUi,
+    notifySection: OrderNotifySectionUi,
+    selectedNotifyItem: OrderNotifyItemUi?,
     recipientSection: SectionUi<OrderingMenuItemUi>,
     totals: List<OrderSummaryItemUi>,
     onRecipientItemClick: (OrderingMenuItemUi) -> Unit,
     onCommentChange: (FieldUi, FieldUi) -> Unit,
     onNotifyItemSelect: (OrderNotifyItemUi) -> Unit,
+    onPhoneFieldChange: (FieldUi, FieldUi) -> Unit,
     onPaymentButtonClick: (OrderingMenuItemUi) -> Unit,
 ) {
     Column(
@@ -60,13 +59,13 @@ fun OrderingBody(
         }
 
 
-        if (recipientSection.items.isNotEmpty()) {
+        if (recipientSection.items.isNotEmpty() && notifySection.options.isNotEmpty()) {
             OrderingNotifyChips(
                 modifier = Modifier.padding(top = 24.dp),
-                title = notifySection.title,
-                notifyOptions = notifySection.items,
+                notifySection = notifySection,
                 selectedNotifyOption = selectedNotifyItem,
-                onNotifyOptionSelect = onNotifyItemSelect
+                onPhoneFieldChange = onPhoneFieldChange,
+                onNotifyOptionSelect = onNotifyItemSelect,
             )
         }
 

@@ -14,7 +14,7 @@ import com.m.vodovoz.R
 private val baseTextStyle = TextStyle(
     lineHeightStyle = LineHeightStyle(
         LineHeightStyle.Alignment.Center,
-        LineHeightStyle.Trim.None
+        LineHeightStyle.Trim.None,
     ),
     platformStyle = PlatformTextStyle(
         includeFontPadding = false

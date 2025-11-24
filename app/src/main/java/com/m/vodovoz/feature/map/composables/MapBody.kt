@@ -31,9 +31,7 @@ import androidx.compose.material3.SheetValue.PartiallyExpanded
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.Stable
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -44,12 +42,9 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.valentinilk.shimmer.ShimmerBounds
-import com.valentinilk.shimmer.rememberShimmer
 import com.m.vodovoz.R
 import com.m.vodovoz.design_system.composables.bottom_sheet.VodovozDragHandle
 import com.m.vodovoz.design_system.composables.button.VodovozButton
@@ -61,18 +56,12 @@ import com.m.vodovoz.feature.home.composables.dropShadow
 import com.m.vodovoz.feature.map.MapFlowViewModel
 import com.m.vodovoz.feature.map.model.MapAreaUi
 import com.m.vodovoz.ui.yandex_map.YandexMapUi
+import com.valentinilk.shimmer.ShimmerBounds
+import com.valentinilk.shimmer.rememberShimmer
 import kotlin.math.roundToInt
 
-private val Dp.Companion.Saver: Saver<Dp, Float>
-    @Stable
-    get() {
-        return Saver(
-            save = { it.value },
-            restore = { it.dp }
-        )
-    }
 
-@Suppress("NonSkippableComposable")
+@SuppressLint("UnusedBoxWithConstraintsScope")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MapBody(
@@ -86,6 +75,7 @@ fun MapBody(
     anchoredDraggableState: AnchoredDraggableState<SheetValue>,
     screenType: MapFlowViewModel.MapScreenTypeUi,
     areas: List<MapAreaUi>,
+    routeToAddress: List<MapPointUi>,
     onInputStart: () -> Unit,
     onInputEnd: () -> Unit,
     onZoomPlusClick: () -> Unit,
@@ -93,7 +83,7 @@ fun MapBody(
     onGeoClick: () -> Unit,
     onCenterChanged: (MapPointUi?) -> Unit,
     onBottomSheetButtonClick: () -> Unit,
-    onDeliveryButtonClick: () -> Unit
+    onDeliveryButtonClick: () -> Unit,
 ) {
     val density = LocalDensity.current
 
@@ -106,6 +96,7 @@ fun MapBody(
             modifier = Modifier.size(focusMapWidth, mapHeight),
             yandexMap = yandexMap,
             areas = areas,
+            route = routeToAddress,
             focusMapWidthPx = with(density) { focusMapWidth.toPx() },
             focusMapHeightPx = with(density) { focusMapHeight.toPx() },
             onInputStart = onInputStart,

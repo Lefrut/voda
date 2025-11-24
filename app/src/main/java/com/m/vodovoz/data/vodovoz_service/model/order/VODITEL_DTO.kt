@@ -8,6 +8,8 @@ import com.squareup.moshi.Json
 data class VODITEL_DTO(
     @Json(name = "TITLE")
     val TITLE: String?,
+    @Json(name = "OPISANIE")
+    val OPISANIE: String?,
     @Json(name = "TOCHKA")
     val TOCHKA: TOCHKA_DTO?,
     @Json(name = "DANNYE")

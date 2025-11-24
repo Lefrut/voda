@@ -4,5 +4,6 @@ data class AddressModel(
     val id: Long,
     val personTypeId: Int,
     val description: String,
-    val address: String
+    val address: String,
+    val otherInfo: String,
 )

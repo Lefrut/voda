@@ -2,6 +2,8 @@ package com.m.vodovoz.design_system.model
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
+import com.m.vodovoz.design_system.model.widgets.LabelUi
+import com.m.vodovoz.design_system.model.widgets.toUi
 import com.m.vodovoz.domain.general.model.order.OrderProductModel
 import com.m.vodovoz.domain.general.model.order.OrderProductPresentModel
 import com.m.vodovoz.feature.cart.model.ProductRestrictionUi

@@ -67,7 +67,7 @@ fun OrderProductCard(
             if (product.quantity > 1) {
                 VodovozColorChip(
                     modifier = Modifier.align(Alignment.BottomEnd),
-                    color = MaterialTheme.colorScheme.secondary,
+                    backgroundColor = MaterialTheme.colorScheme.secondary,
                     text = stringResource(id = R.string.quanitity_x, product.quantity)
                 )
             }

@@ -15,5 +15,7 @@ data class ADDRESS_ITEM_DTO(
     @Json(name = "OPISANIE")
     val OPISANIE: String?,
     @Json(name = "ADRESS")
-    val ADRESS: String?
+    val ADRESS: String?,
+    @Json(name = "PODADRESS")
+    val PODADRESS: String?
 )

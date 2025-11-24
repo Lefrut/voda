@@ -124,13 +124,13 @@ fun PromoProductCard(product: PromoProductUi) {
                 contentScale = ContentScale.FillBounds,
                 alignment = Alignment.Center
             )
-            if (product.quantity != 0) {
-                VodovozColorChip(
-                    modifier = Modifier.align(Alignment.BottomEnd),
-                    color = MaterialTheme.colorScheme.secondary,
-                    text = product.quantity.toString()
-                )
-            }
+//            if (product.quantity != 0) {
+//                VodovozColorChip(
+//                    modifier = Modifier.align(Alignment.BottomEnd),
+//                    color = MaterialTheme.colorScheme.secondary,
+//                    text = product.quantity.toString()
+//                )
+//            }
         }
         Column(modifier = Modifier.padding(start = 16.dp)) {
             Text(

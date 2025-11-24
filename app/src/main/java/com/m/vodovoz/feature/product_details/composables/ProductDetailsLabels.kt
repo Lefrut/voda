@@ -13,10 +13,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.m.vodovoz.design_system.model.LabelUi
+import com.m.vodovoz.design_system.model.widgets.LabelUi
 
 
-@Suppress("NonSkippableComposable")
 @Composable
 fun ProductDetailsLabels(
     modifier: Modifier = Modifier,
@@ -33,7 +32,7 @@ fun ProductDetailsLabels(
         labels.forEach { labelWithColor ->
             Surface(
                 contentColor = MaterialTheme.colorScheme.background,
-                color = labelWithColor.color,
+                color = labelWithColor.backgroundColor,
                 shape = MaterialTheme.shapes.medium
             ) {
                 Text(

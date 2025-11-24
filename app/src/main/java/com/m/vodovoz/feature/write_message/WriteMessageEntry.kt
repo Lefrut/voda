@@ -11,11 +11,9 @@ import com.m.vodovoz.feature.write_message.model.WriteMessageEvent
 import com.m.vodovoz.ui.mvi.collectAsState
 
 @Composable
-fun WriteMessageEntry(
-) = NavigationEntry { viewModel: WriteMessageViewModel, navController ->
+fun WriteMessageEntry() = NavigationEntry<WriteMessageViewModel> {
     val viewState by viewModel.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
-
 
     WriteMessageScreen(
         viewModel = viewModel,

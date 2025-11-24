@@ -1,5 +1,10 @@
 package com.m.vodovoz.feature.cart.ordering.composables
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
@@ -12,18 +17,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.m.vodovoz.design_system.composables.chip.VodovozChip
 import com.m.vodovoz.design_system.composables.tab_row.VodovozScrollableTabRow
+import com.m.vodovoz.design_system.composables.text_fields.VodovozTextField
+import com.m.vodovoz.design_system.model.widgets.FieldUi
 import com.m.vodovoz.feature.cart.ordering.model.OrderNotifyItemUi
+import com.m.vodovoz.feature.cart.ordering.model.OrderNotifySectionUi
 import com.m.vodovoz.util.extensions.indexOfOrNull
 
-@Suppress("NonSkippableComposable")
 @Composable
 fun OrderingNotifyChips(
     modifier: Modifier = Modifier,
-    title: String,
-    notifyOptions: List<OrderNotifyItemUi>,
-    selectedNotifyOption: OrderNotifyItemUi,
+    notifySection: OrderNotifySectionUi,
+    selectedNotifyOption: OrderNotifyItemUi?,
     onNotifyOptionSelect: (OrderNotifyItemUi) -> Unit,
-) {
+    onPhoneFieldChange: (FieldUi, FieldUi) -> Unit,
+) = with(notifySection) {
     Column(modifier = modifier) {
         if (title.isNotEmpty()) {
             Text(
@@ -35,11 +42,11 @@ fun OrderingNotifyChips(
         }
 
         VodovozScrollableTabRow(
-            selectedTabIndex = notifyOptions.indexOfOrNull(selectedNotifyOption) ?: 0,
+            selectedTabIndex = options.indexOfOrNull(selectedNotifyOption) ?: 0,
             edgePadding = 16.dp,
             spacing = 8.dp
         ) {
-            notifyOptions.forEach { option ->
+            options.forEach { option ->
                 val selected = selectedNotifyOption == option
                 key(option.value) {
                     VodovozChip(
@@ -53,6 +60,20 @@ fun OrderingNotifyChips(
                         borderStroke = null
                     )
                 }
+            }
+        }
+
+        AnimatedVisibility(
+            visible = selectedNotifyOption != options.firstOrNull() && selectedNotifyOption != null,
+            enter = fadeIn() + expandVertically(),
+            exit = fadeOut() + shrinkVertically()
+        ) {
+            extraPhoneField?.let {
+                VodovozTextField(
+                    modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp),
+                    field = extraPhoneField,
+                    onFieldChange = onPhoneFieldChange,
+                )
             }
         }
     }

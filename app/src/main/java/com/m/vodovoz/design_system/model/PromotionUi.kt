@@ -1,6 +1,8 @@
 package com.m.vodovoz.design_system.model
 
 import androidx.compose.runtime.Immutable
+import com.m.vodovoz.design_system.model.widgets.LabelUi
+import com.m.vodovoz.design_system.model.widgets.toUi
 import com.m.vodovoz.domain.general.model.promotion.AboutAdvertisingModel
 import com.m.vodovoz.domain.general.model.promotion.PromotionCategoryModel
 import com.m.vodovoz.domain.general.model.promotion.PromotionDetailsModel
@@ -18,10 +20,11 @@ data class SpecialPromotionUi(
     val text: String,
     val picture: String,
     val actionWithButton: ActionWithButtonUi?,
+    val aboutAdvertising: AboutAdvertisingUi?
 ) {
 
     companion object {
-        val Empty = SpecialPromotionUi(-1, "", "", "", ActionWithButtonUi.Empty)
+        val Empty = SpecialPromotionUi(-1, "", "", "", null, null)
     }
 
 }
@@ -33,7 +36,8 @@ fun SpecialPromotionModel.toUi(): SpecialPromotionUi {
         name = name,
         text = text,
         picture = picture,
-        actionWithButton = actionWithButton?.toUi()
+        actionWithButton = actionWithButton?.toUi(),
+        aboutAdvertising = aboutAdvertising?.toUi()
     )
 }
 

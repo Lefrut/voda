@@ -19,7 +19,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -34,23 +33,21 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImagePainter
-import coil3.compose.rememberAsyncImagePainter
 import com.m.vodovoz.R
 import com.m.vodovoz.design_system.ExtendedTheme
 import com.m.vodovoz.design_system.VodovozTheme
 import com.m.vodovoz.design_system.composables.blur.AsyncImageBlur
-import com.m.vodovoz.design_system.composables.blur.VodovozBlur
 import com.m.vodovoz.design_system.composables.chip.VodovozColorChipSmall
 import com.m.vodovoz.design_system.model.Button
 import com.m.vodovoz.design_system.model.ColorfulButtonUi
 import com.m.vodovoz.design_system.model.ForAdultsUi
-import com.m.vodovoz.design_system.model.LabelUi
 import com.m.vodovoz.design_system.model.PricePerUnitText
 import com.m.vodovoz.design_system.model.ProductUi
 import com.m.vodovoz.design_system.model.notPercentLabels
 import com.m.vodovoz.design_system.model.percentLabels
+import com.m.vodovoz.design_system.model.widgets.LabelUi
 import com.m.vodovoz.util.extensions.formatRating
 import com.m.vodovoz.util.formatRoundedPrice
 
@@ -92,7 +89,7 @@ fun GridProductCard(
             modifier = Modifier.clip(MaterialTheme.shapes.small),
             model = product.image,
             showBlur = forAdults != null,
-            text = forAdults?.textBlur ?: ""
+            placeholderText = forAdults?.textBlur ?: ""
         ) { imagePainter ->
             GridImageSection(
                 imagePainter = imagePainter,
@@ -106,13 +103,14 @@ fun GridProductCard(
         Column(modifier = Modifier) {
             PriceAndRating(product = product)
 
-            product.PricePerUnitText()
+            product.PricePerUnitText(modifier = Modifier.height(12.dp))
 
             val labelSmallVariant = ExtendedTheme.typography.labelSmallVariant.copy(
                 lineHeightStyle = LineHeightStyle(
                     LineHeightStyle.Alignment.Top,
-                    LineHeightStyle.Trim.FirstLineTop
-                )
+                    LineHeightStyle.Trim.None,
+                ),
+                fontSize = 11.sp,
             )
 
             Text(
@@ -140,7 +138,6 @@ fun GridProductCard(
     }
 }
 
-@Suppress("NonSkippableComposable")
 @Composable
 private fun GridImageSection(
     modifier: Modifier = Modifier,
@@ -162,7 +159,7 @@ private fun GridImageSection(
         )
         Row {
             percentLabels.forEach { label ->
-                VodovozColorChipSmall(color = label.color, text = label.name)
+                VodovozColorChipSmall(backgroundColor = label.backgroundColor, text = label.name)
             }
             Spacer(modifier = Modifier
                 .weight(1f)
@@ -188,7 +185,10 @@ private fun GridImageSection(
             horizontalArrangement = Arrangement.spacedBy(2.dp)
         ) {
             otherLabels.forEach { label ->
-                VodovozColorChipSmall(color = label.color, text = label.name)
+                VodovozColorChipSmall(
+                    backgroundColor = label.backgroundColor,
+                    text = label.name
+                )
             }
         }
     }
@@ -271,8 +271,8 @@ private fun GridProductCardPreview() {
             cartLoading = false,
             image = "https://vodovoz.net/upload/iblock/9ed/ec5cfujet9sztz077mtdzofrzjqzn0zj.jpeg",
             labels = listOf(
-                LabelUi("Новинка", Color.Red),
-                LabelUi("Хит продаж", Color.Green)
+                LabelUi.from("Новинка", Color.Red),
+                LabelUi.from("Хит продаж", Color.Green)
             ),
             isAvailable = false,
             pricePerUnit = null,
@@ -284,7 +284,7 @@ private fun GridProductCardPreview() {
         GridProductCard(
             product = sampleProduct,
             onClick = {},
-            modifier = Modifier.width(160.dp),
+            modifier = Modifier.width(160.dp).height(255.dp),
             onLike = {},
             onAnalogsClick = {},
             onDecrementToCart = {},

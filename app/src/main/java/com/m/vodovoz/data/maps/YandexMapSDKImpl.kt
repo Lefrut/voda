@@ -1,13 +1,13 @@
 package com.m.vodovoz.data.maps
 
 import android.location.Location
-import com.m.vodovoz.design_system.model.distanceKm
 import com.yandex.mapkit.RequestPoint
 import com.yandex.mapkit.RequestPointType
 import com.yandex.mapkit.directions.DirectionsFactory
 import com.yandex.mapkit.directions.driving.DrivingOptions
 import com.yandex.mapkit.directions.driving.DrivingRoute
 import com.yandex.mapkit.directions.driving.DrivingRouter
+import com.yandex.mapkit.directions.driving.DrivingRouterType
 import com.yandex.mapkit.directions.driving.DrivingSession
 import com.yandex.mapkit.directions.driving.VehicleOptions
 import com.yandex.mapkit.geometry.BoundingBox
@@ -21,6 +21,7 @@ import com.yandex.mapkit.search.SearchOptions
 import com.yandex.mapkit.search.Session
 import com.yandex.mapkit.search.SuggestItem
 import com.yandex.mapkit.search.SuggestOptions
+import com.yandex.mapkit.search.SuggestResponse
 import com.yandex.mapkit.search.SuggestSession
 import com.yandex.mapkit.search.SuggestSession.SuggestListener
 import com.yandex.mapkit.search.SuggestType
@@ -49,7 +50,7 @@ class YandexMapSDKImpl @Inject constructor() : YandexMapSDK {
     }
 
     private val drivingRouter: DrivingRouter by lazy {
-        DirectionsFactory.getInstance().createDrivingRouter()
+        DirectionsFactory.getInstance().createDrivingRouter(DrivingRouterType.COMBINED)
     }
 
     private val searchManager: SearchManager by lazy {
@@ -71,8 +72,8 @@ class YandexMapSDKImpl @Inject constructor() : YandexMapSDK {
                 moscowBoundingBox,
                 suggestOptions,
                 object : SuggestListener {
-                    override fun onResponse(items: MutableList<SuggestItem>) {
-                        if (cont.isActive) cont.resume(items) { _, _, _ -> }
+                    override fun onResponse(p0: SuggestResponse) {
+                        if (cont.isActive) cont.resume(p0.items) { _, _, _ -> }
                     }
 
                     override fun onError(error: Error) {
@@ -111,8 +112,8 @@ class YandexMapSDKImpl @Inject constructor() : YandexMapSDK {
     override suspend fun getRoutes(start: Point, end: Point): List<Point> {
         return suspendCancellableCoroutine { cont ->
             val requestPoints = listOf(
-                RequestPoint(start, RequestPointType.WAYPOINT, null),
-                RequestPoint(end, RequestPointType.WAYPOINT, null)
+                RequestPoint(start, RequestPointType.WAYPOINT, null, null, null),
+                RequestPoint(end, RequestPointType.WAYPOINT, null, null, null)
             )
 
             drivingRouter.requestRoutes(

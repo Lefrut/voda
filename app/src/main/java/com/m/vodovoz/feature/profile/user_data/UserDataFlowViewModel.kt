@@ -8,10 +8,12 @@ import com.m.vodovoz.common.account.LogoutManager
 import com.m.vodovoz.common.media.MediaManager
 import com.m.vodovoz.common.resources.ResourcesProvider
 import com.m.vodovoz.design_system.model.widgets.FieldUi
+import com.m.vodovoz.design_system.model.widgets.NameValidator
 import com.m.vodovoz.design_system.model.widgets.checkFields
 import com.m.vodovoz.design_system.model.widgets.mapToDomain
 import com.m.vodovoz.design_system.model.widgets.mapToUi
 import com.m.vodovoz.design_system.model.widgets.updateFieldAndResetError
+import com.m.vodovoz.design_system.model.widgets.vodovozValidators
 import com.m.vodovoz.domain.general.model.exceptions.UserNotLoginException
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
 import com.m.vodovoz.ui.mvi.Event
@@ -227,7 +229,7 @@ class UserDataFlowViewModel @Inject constructor(
             s.copy(
                 fields = updatedFields,
                 showDatePicker = false,
-                buttonEnabled = updatedFields.checkFields()
+                buttonEnabled = updatedFields.checkFields(validators = vodovozValidators - NameValidator)
             )
         }
     }
@@ -235,11 +237,14 @@ class UserDataFlowViewModel @Inject constructor(
     fun changeField(field: FieldUi, updatedField: FieldUi) = viewModelScope.launch {
         val updatedFields = stateSnapshot.fields.updateFieldAndResetError(field, updatedField)
 
-        updatedFields.checkFields(false) { fields, _ ->
+        updatedFields.checkFields(
+            putErrors = false,
+            validators = vodovozValidators - NameValidator
+        ) { fields, isValid ->
             updateState { s ->
                 s.copy(
                     fields = fields,
-                    buttonEnabled = fields.checkFields()
+                    buttonEnabled = isValid
                 )
             }
         }

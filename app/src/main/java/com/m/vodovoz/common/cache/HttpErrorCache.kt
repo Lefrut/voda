@@ -15,7 +15,7 @@ abstract class HttpErrorCache(
     private val _lastErrorData: MutableStateFlow<String?> = MutableStateFlow(null)
 
     val lastHttpError: StateFlow<HttpError?> = _lastErrorData.map { s ->
-        with(mappers) { s?.toHttpError() }
+        with(mappers) { runCatching { s?.toHttpError() }.getOrNull() }
     }.stateIn(
         scope = CoroutineScope(SupervisorJob() + Dispatchers.Default),
         started = SharingStarted.Eagerly,

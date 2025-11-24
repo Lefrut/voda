@@ -1,5 +1,6 @@
 package com.m.vodovoz.domain.general.model.product
 
+import com.m.vodovoz.common.cart.AbstractCartManager
 import okhttp3.internal.toLongOrDefault
 
 @JvmInline
@@ -9,10 +10,6 @@ value class CartProductsModel(
 
 fun <T : Number, T2 : Number> Map<T, T2>.toCartProducts(): CartProductsModel {
     return CartProductsModel(entries.joinToString(";") { "${it.key}-${it.value}" })
-}
-
-fun String.toCartProducts(): CartProductsModel {
-    return CartProductsModel(this)
 }
 
 fun CartProductsModel.toMap(): Map<Long, Int> {

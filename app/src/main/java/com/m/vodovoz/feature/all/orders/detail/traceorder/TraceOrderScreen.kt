@@ -125,7 +125,7 @@ fun TraceOrderScreen(
                 val screenWidthPx = with(density) { maxWidth.toPx() }
                 val screenHeightPx = with(density) { maxHeight.toPx() - sheetHeightPx }
 
-                yandexMap.mapView.focusRect = ScreenRect(
+                yandexMap.mapView.mapWindow.focusRect = ScreenRect(
                     ScreenPoint(0f, 0f),
                     ScreenPoint(
                         screenWidthPx,

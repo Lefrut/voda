@@ -1,22 +1,12 @@
 package com.m.vodovoz.feature.cart
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.awaitEachGesture
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.input.pointer.PointerEventPass
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.m.vodovoz.R
@@ -24,13 +14,16 @@ import com.m.vodovoz.design_system.composables.button.VodovozButton
 import com.m.vodovoz.design_system.composables.dialogs.VodovozDialog
 import com.m.vodovoz.design_system.composables.floating.BottomFloatingContainer
 import com.m.vodovoz.design_system.composables.placeholders.LoadingPlaceholder
+import com.m.vodovoz.design_system.composables.placeholders.LockPlaceholder
 import com.m.vodovoz.design_system.composables.placeholders.NetworkErrorPlaceholder
 import com.m.vodovoz.design_system.composables.placeholders.VodovozPlaceholder
 import com.m.vodovoz.design_system.composables.pull_to_refresh.VodovozPullToRefreshBox
 import com.m.vodovoz.design_system.composables.scaffold.VodovozScaffold
+import com.m.vodovoz.design_system.model.ColorfulButtonUi
 import com.m.vodovoz.feature.cart.composables.CartBody
 import com.m.vodovoz.feature.cart.composables.CartTopBar
 import com.m.vodovoz.feature.cart.composables.PromotionCodeBottomSheet
+import com.m.vodovoz.feature.cart.composables.RecommendationsBottomSheet
 import okhttp3.internal.toLongOrDefault
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -54,7 +47,7 @@ fun CartScreen(viewModel: CartFlowViewModel, viewState: CartFlowViewModel.CartSt
                     modifier = Modifier.padding(horizontal = 16.dp),
                     text = stringResource(id = R.string.place_order),
                     onClick = {
-                        if (!viewState.blockOrderButton) {
+                        if (!viewState.lockOrderButton) {
                             viewModel.navigateToOrder()
                         }
                     },
@@ -78,8 +71,9 @@ fun CartScreen(viewModel: CartFlowViewModel, viewState: CartFlowViewModel.CartSt
                         onRefresh = { viewModel.refresh() },
                     ) {
                         CartBody(
-                            cartItems = viewState.items,
+                            cartItems = viewState.items1,
                             cartPresent = viewState.present,
+                            removableItemId = viewState.currentRemoveItem?.itemId,
                             countCartItemsText = viewState.countText,
                             bottlesButton = viewState.bottlesButton,
                             presentButton = viewState.presentButton,
@@ -111,7 +105,42 @@ fun CartScreen(viewModel: CartFlowViewModel, viewState: CartFlowViewModel.CartSt
                             },
                             onPromotionCodeButtonClick = {
                                 viewModel.showPromotionCodeBottomSheet()
+                            },
+                            onRecommendationsClick = viewModel::fetchAndShowRecommendationsBS
+                        )
+                    }
+
+                    val followString = stringResource(R.string.follow)
+                    val buttonBackgroundColor = MaterialTheme.colorScheme.primaryContainer.value
+                    val buttonTextColor = MaterialTheme.colorScheme.primary.value
+                    val recommendedProducts = viewState.items2.map { product ->
+                        product.copy(
+                            button = product.forAdults?.let {
+                                ColorfulButtonUi(
+                                    name = followString,
+                                    backgroundColorValue = buttonBackgroundColor,
+                                    textColorValue = buttonTextColor,
+                                )
                             }
+                        )
+                    }
+                    val additionalProductsBS = viewState.additionalProductsBS?.copy(
+                        products = recommendedProducts,
+                        loadStates = viewState.loadStates2
+                    )
+                    if (viewState.showAdditionalProductsBS
+                        && additionalProductsBS != null
+                        && additionalProductsBS.products.isNotEmpty()
+                    ) {
+                        RecommendationsBottomSheet(
+                            additionalProductsBS = additionalProductsBS,
+                            onDismissRequest = viewModel::closeRecommendationsBS,
+                            onProductSee = viewModel::notifyPaging2,
+                            onProductAnalogsClick = viewModel::navigateToAnalogsOrShow18,
+                            onProductClick = viewModel::navigateToProductDetails,
+                            onProductDecrementToCart = viewModel::decrementProduct,
+                            onProductIncrementToCart = viewModel::incrementProduct,
+                            onProductLike = viewModel::changeFavorite
                         )
                     }
                 }
@@ -135,30 +164,8 @@ fun CartScreen(viewModel: CartFlowViewModel, viewState: CartFlowViewModel.CartSt
     }
 
 
-    if (viewState.blockCart) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background.copy(0.4f))
-                .pointerInput(Unit) {
-                    awaitEachGesture {
-                        awaitPointerEvent(PointerEventPass.Initial)
-                            .changes
-                            .forEach { change ->
-                                change.consume()
-                            }
-                    }
-                },
-            contentAlignment = Alignment.Center
-        ) {
-            CircularProgressIndicator(
-                modifier = Modifier.size(32.dp),
-                trackColor = Color.Transparent,
-                color = MaterialTheme.colorScheme.primary,
-                strokeCap = StrokeCap.Round,
-                strokeWidth = 4.dp
-            )
-        }
+    if (viewState.lockCart) {
+        LockPlaceholder()
     }
 
     if (viewState.showPromotionCodeBottomSheet && viewState.promotionalCodeButton != null) {

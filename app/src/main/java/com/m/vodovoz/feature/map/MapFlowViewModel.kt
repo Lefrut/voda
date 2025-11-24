@@ -41,6 +41,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.retryWhen
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 import javax.inject.Inject
 import kotlin.math.floor
 
@@ -161,10 +162,20 @@ class MapFlowViewModel @Inject constructor(
         }
 
         val nearestPoints = coreMapArea.findNearestPointsTo(addressPoint)
-        val routes = nearestPoints.map { nearestPoint ->
-            coroutineScope { async { nearestPoint.routeTo(addressPoint) } }
-        }.awaitAll()
-        val fromMoscowToPoint = routes.minOf { route -> route?.distanceKm() ?: Float.MAX_VALUE }
+        val routes = nearestPoints
+            .map { nearestPoint ->
+                coroutineScope {
+                    async { nearestPoint.routeTo(addressPoint) }
+                }
+            }.awaitAll()
+            .mapNotNull { route -> route?.drop(10) }
+
+        val fromMoscowToPoint = routes
+            .minBy { route ->
+                route.distanceKm()
+            }.also { route ->
+                updateState { s -> s.copy(routeToAddress = route) }
+            }.distanceKm()
 
         return fromMoscowToPoint
     }
@@ -224,7 +235,7 @@ class MapFlowViewModel @Inject constructor(
 
     fun searchAddress(point: MapPointUi?) = searchThenUpdateAddress(
         datasource = {
-            delay(350L)
+            delay(650L)
             point?.let {
                 mapServiceRepository.getAddressByGeo(point.lat, point.lon)
             } ?: emptyFlow()
@@ -305,9 +316,9 @@ class MapFlowViewModel @Inject constructor(
         updateState { s ->
             s.copy(buttonIsLoading = true)
         }
-        val fromMoscowToPoint = getDistanceFromAreaBoundToAddress(
-            mapAddress.point
-        ) ?: return@launch
+        val fromMoscowToPoint = withTimeoutOrNull(9500) {
+            getDistanceFromAreaBoundToAddress(mapAddress.point)
+        } ?: return@launch
 
         val updatedMapAddress = mapAddress.copy(
             fromMoscowToPoint = floor(fromMoscowToPoint).toInt()
@@ -359,7 +370,9 @@ class MapFlowViewModel @Inject constructor(
         val mode: MapUiMode = MapUiMode.OnlyMap,
         val recommendedAddresses: List<String> = emptyList(),
         val screenType: MapScreenTypeUi = MapScreenTypeUi.Add,
-    ) : State
+        val routeToAddress: List<MapPointUi> = emptyList(),
+    ) : State {
+    }
 
 
     @Stable

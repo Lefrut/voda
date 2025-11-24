@@ -29,6 +29,8 @@ import com.m.vodovoz.core.navigation.activate
 import com.m.vodovoz.core.navigation.mainFragment
 import com.m.vodovoz.core.navigation.navigateToLogin
 import com.m.vodovoz.core.navigation.navigateToLoginByEmail
+import com.m.vodovoz.core.navigation.navigateToOrderDetails
+import com.m.vodovoz.core.navigation.navigateToOrdersHistory
 import com.m.vodovoz.core.navigation.navigateToUserData
 import com.m.vodovoz.core.navigation.navigateToWaitFeedbackProducts
 import com.m.vodovoz.core.navigation.navigateToWaterApp
@@ -38,6 +40,7 @@ import com.m.vodovoz.design_system.composables.placeholders.LoadingPlaceholder
 import com.m.vodovoz.design_system.composables.placeholders.NetworkErrorPlaceholder
 import com.m.vodovoz.design_system.composables.placeholders.VodovozPlaceholder
 import com.m.vodovoz.design_system.composables.snackbar.VodovozSnackBarVisuals
+import com.m.vodovoz.design_system.effects.LifecycleEffect
 import com.m.vodovoz.feature.profile.navigation.ProfileChatsNavigator
 import com.m.vodovoz.ui.insets.InsetsVisibilityState
 import com.m.vodovoz.ui.mvi.collectAsState
@@ -45,7 +48,6 @@ import com.m.vodovoz.ui.snackbar.snackBarHostState
 import com.m.vodovoz.util.extensions.copyText
 import com.m.vodovoz.util.extensions.openUrl
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -100,6 +102,10 @@ class ProfileFragment : Fragment() {
                                 viewModel = viewModel,
                                 viewState = viewState,
                             )
+
+                            LifecycleEffect {
+                                viewModel.pendingDeeplinkFlow.collect {}
+                            }
                         }
 
                         is ProfileFlowViewModel.ProfileUiState.UserNotFound -> {
@@ -203,6 +209,15 @@ class ProfileFragment : Fragment() {
 
                         is ProfileFlowViewModel.ProfileEvents.OpenUrl -> {
                             requireContext().openUrl(events.url)
+                        }
+
+                        ProfileFlowViewModel.ProfileEvents.DoNothing -> {}
+                        is ProfileFlowViewModel.ProfileEvents.GoToOrderDetails -> {
+                            findNavController().navigateToOrderDetails(events.orderId)
+                        }
+
+                        ProfileFlowViewModel.ProfileEvents.GoToOrders -> {
+                            findNavController().navigateToOrdersHistory()
                         }
                     }
                 }

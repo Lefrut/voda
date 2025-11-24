@@ -148,10 +148,6 @@ class SplashFragment : Fragment() {
             when (appState) {
                 AppState.App -> {
                     fetchDataForScreens().join()
-                    MapKitFactory.setApiKey(
-                        siteStateManager.siteStateSnapshot.mapkitKey
-                    )
-                    MapKitFactory.initialize(requireActivity())
                     navController.navigateToScreen(
                         screenId = R.id.mainFragment,
                         hideAndroidSplash = false

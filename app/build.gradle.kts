@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -11,22 +13,59 @@ plugins {
 }
 
 android {
+    buildToolsVersion = "36.1.0"
     namespace = "com.m.vodovoz"
-    compileSdk = 35
+    compileSdk = 36
+    ndkVersion = "29.0.14206865"
+
+    packaging {
+        jniLibs { useLegacyPackaging = true }
+    }
 
     defaultConfig {
         applicationId = "com.m.vodovoz"
-        minSdk = 21
+        minSdk = 26
         targetSdk = 35
-        versionCode = 2020
-        versionName = "2.0.2"
-
+        versionCode = 2160
+        //todo
+        versionName = "2.1.6"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        ndk {
+            abiFilters += listOf("arm64-v8a", "armeabi-v7a", "x86_64", "x86")
+        }
+
+        data class AppKey(
+            val buildConfigName: String,
+            val propertyName: String,
+        ) {
+            constructor(name: String) : this(name, name)
+        }
+
+
+        val properties = Properties()
+        properties.load(project.rootProject.file("local.properties").inputStream())
+
+        listOf(
+            AppKey("YOUTUBE_API_KEY"),
+            AppKey("MAPKIT_API_KEY"),
+            AppKey("GEOCODER"),
+            AppKey("YANDEX_METRICA_KEY")
+        ).forEach { (buildConfigName, propertyName) ->
+            buildConfigField(
+                type = "String",
+                name = buildConfigName,
+                value = properties.getProperty(propertyName)
+            )
+        }
     }
 
+
     signingConfigs {
+        //todo
         create("release") {
-            storeFile = file("/home/VODOVOZ/rk_sotin/Projects/VodovozJava/VodovozVersion1.jks")
+            storeFile =
+                file("/home/VODOVOZ/rk_krutov/Рабочий стол/Боевая котлин/VodovozKotlinCurrentDevelopment/VodovozKotlin/lalalala.jks")
             keyAlias = "zinou"
             storePassword = "zinou123"
             keyPassword = "zinou123"
@@ -34,6 +73,7 @@ android {
     }
 
     buildTypes {
+        //todo
         getByName("release") {
             isDebuggable = false
             isMinifyEnabled = true
@@ -48,6 +88,7 @@ android {
         getByName("debug") {
             isDebuggable = true
             isMinifyEnabled = false
+            isShrinkResources = false
         }
     }
 
@@ -64,8 +105,10 @@ android {
     kotlinOptions {
         jvmTarget = "17"
         freeCompilerArgs += listOf(
-            "-P", "plugin:androidx.compose.compiler.plugins.kotlin:metricsDestination=$rootDir/composeMetrics",
-            "-P", "plugin:androidx.compose.compiler.plugins.kotlin:reportsDestination=$rootDir/composeReports"
+            "-P",
+            "plugin:androidx.compose.compiler.plugins.kotlin:metricsDestination=$rootDir/composeMetrics",
+            "-P",
+            "plugin:androidx.compose.compiler.plugins.kotlin:reportsDestination=$rootDir/composeReports"
         )
     }
 
@@ -128,7 +171,7 @@ dependencies {
     ksp("com.squareup.moshi:moshi-kotlin-codegen:$moshiVersion")
 
     //MapKit
-    implementation("com.yandex.android:maps.mobile:4.0.0-full")
+    implementation("com.yandex.android:maps.mobile:4.19.0-full")
 
     //Paging
     implementation("androidx.paging:paging-runtime-ktx:3.3.6")
@@ -151,8 +194,7 @@ dependencies {
     implementation("androidx.work:work-runtime:2.10.3")
 
     //Yandex Metrica
-    implementation("com.yandex.android:mobmetricalib-ndk-crashes:1.1.0")
-    implementation("com.yandex.android:mobmetricalib:5.3.0")
+    implementation("io.appmetrica.analytics:analytics:7.13.0")
 
     // Biometric
     implementation("androidx.biometric:biometric-ktx:1.2.0-alpha05")
@@ -161,7 +203,7 @@ dependencies {
     //debugImplementation("com.squareup.leakcanary:leakcanary-android:2.14")
     implementation("androidx.core:core-splashscreen:1.0.1")
 
-    implementation("androidx.datastore:datastore-preferences:1.1.7")
+    implementation("androidx.datastore:datastore-preferences:1.1.1")
 
     //Compose
     implementation("androidx.activity:activity-compose:1.9.1")
@@ -175,10 +217,10 @@ dependencies {
 
 
     //Cam
-    implementation("androidx.camera:camera-camera2:1.4.2")
-    implementation("androidx.camera:camera-lifecycle:1.4.2")
-    implementation("androidx.camera:camera-view:1.4.2")
-    implementation("com.google.mlkit:barcode-scanning:17.3.0")
+    implementation("androidx.camera:camera-camera2:1.5.0")
+    implementation("androidx.camera:camera-lifecycle:1.5.0")
+    implementation("androidx.camera:camera-view:1.5.0")
+    implementation("com.google.android.gms:play-services-mlkit-barcode-scanning:18.3.1")
 
     //Coil
     implementation("io.coil-kt.coil3:coil-compose:3.0.4")

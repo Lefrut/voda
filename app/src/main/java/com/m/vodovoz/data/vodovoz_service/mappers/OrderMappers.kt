@@ -58,6 +58,7 @@ import com.m.vodovoz.domain.general.model.order.OrderDetailsButtonModel
 import com.m.vodovoz.domain.general.model.order.OrderDetailsModel
 import com.m.vodovoz.domain.general.model.order.OrderFilterModel
 import com.m.vodovoz.domain.general.model.order.OrderNotifyItemModel
+import com.m.vodovoz.domain.general.model.order.OrderNotifySectionModel
 import com.m.vodovoz.domain.general.model.order.OrderProductModel
 import com.m.vodovoz.domain.general.model.order.OrderProductPresentModel
 import com.m.vodovoz.domain.general.model.order.OrderStatusModel
@@ -113,7 +114,8 @@ fun RecipientDetailsDTO.toDomain(): RecipientDetailsModel {
         fields = POLYA?.mapToDomain()
             ?: throw IllegalArgumentException("RecipientDetails fields can't be null"),
         button = KNOPKA?.toDomain()
-            ?: throw IllegalArgumentException("RecipientDetails button can't be null")
+            ?: throw IllegalArgumentException("RecipientDetails button can't be null"),
+        checkboxes = CHECKBOX?.mapToDomain() ?: emptyList()
     )
 }
 
@@ -196,7 +198,8 @@ fun DATE_INTERVAL_DTO.toDomain(): DeliveryTimeIntervalModel? {
         value = VALUE ?: return null,
         code = CODE ?: return null,
         blocked = VodovozBoolean.True equalsTo BLOCK,
-        priceText = MONEY ?: ""
+        priceText = MONEY ?: "",
+        label = TEXTOPIS?.toDomain()
     )
 }
 
@@ -220,7 +223,7 @@ fun OrderingDetailsDTO.toDomain(): OrderingDetailsModel {
         commentField = KOMMENT?.KOMMENTARY?.toDomain(),
         recipientSection = POLYSHATEL?.toDomain()
             ?: throw IllegalArgumentException("Ordering recipient can't be null"),
-        notifySection = KOMMENT?.PREDYP?.toDomain() ?: SectionModel.empty(),
+        notifySection = KOMMENT?.PREDYP?.toDomain() ?: OrderNotifySectionModel.Empty,
         paymentSection = OPLATA?.toDomain()
             ?: throw IllegalArgumentException("Ordering payment can't be null"),
         totals = ITOG?.mapToDomain() ?: emptyList(),
@@ -228,6 +231,8 @@ fun OrderingDetailsDTO.toDomain(): OrderingDetailsModel {
             ?: throw IllegalArgumentException("Ordering button can't be null"),
     )
 }
+
+
 
 
 fun ORDER_OPLATA_DTO.toDomain(): SectionModel<OrderingMenuItemModel> {
@@ -278,11 +283,11 @@ fun ORDER_POLYSHATEL_ITEM_DTO.toDomain(): OrderingMenuItemModel? {
     )
 }
 
-fun ORDER_PREDYP_DTO.toDomain(): SectionModel<OrderNotifyItemModel> {
-    return SectionModel(
+fun ORDER_PREDYP_DTO.toDomain(): OrderNotifySectionModel {
+    return OrderNotifySectionModel(
         title = NAME ?: "",
-        items = DANNYE?.mapToDomain() ?: emptyList(),
-        button = null
+        notifyItems = DANNYE?.mapToDomain() ?: emptyList(),
+        field = POLE?.toDomain(),
     )
 }
 
@@ -475,7 +480,7 @@ fun ORDER_STATUS_DTO.toDomain(): OrderStatusModel? {
         background = BACKGROUND ?: "",
         image = IMAGE?.toVodovozUrl() ?: "",
         color = COLOR ?: "",
-        backgroundAlpha = BACKGROUNDOPACITY ?: 0.05f
+        backgroundAlpha = BACKGROUNDOPACITY ?: 1f
     )
 }
 

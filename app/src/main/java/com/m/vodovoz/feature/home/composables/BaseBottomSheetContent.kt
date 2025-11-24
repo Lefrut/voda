@@ -12,6 +12,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
@@ -22,7 +23,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImagePainter
 import coil3.compose.rememberAsyncImagePainter
 import com.m.vodovoz.design_system.composables.button.VodovozButtonsColumn
+import com.m.vodovoz.design_system.composables.decoration.AdvertisingChip
 import com.m.vodovoz.design_system.composables.decoration.SkeletonBox
+import com.m.vodovoz.design_system.model.AboutAdvertisingUi
 import com.m.vodovoz.design_system.model.ColorfulButtonUi
 import com.m.vodovoz.design_system.vodovozTextLinkStyle
 import com.valentinilk.shimmer.ShimmerBounds
@@ -36,6 +39,8 @@ fun BaseBottomSheetContent(
     description: String,
     button: ColorfulButtonUi?,
     onButtonClick: (ColorfulButtonUi) -> Unit,
+    aboutAdvertising: AboutAdvertisingUi? = null,
+    onAboutAdvertisingClick: (AboutAdvertisingUi) -> Unit = {},
 ) {
     Column(modifier = modifier.padding(horizontal = 16.dp)) {
         Text(
@@ -75,6 +80,11 @@ fun BaseBottomSheetContent(
                                 .clip(MaterialTheme.shapes.large),
                             contentScale = ContentScale.FillWidth
                         )
+                        aboutAdvertising?.let { it ->
+                            AdvertisingChip(modifier = Modifier.align(Alignment.TopEnd)) {
+                                onAboutAdvertisingClick(aboutAdvertising)
+                            }
+                        }
                     }
 
                     is AsyncImagePainter.State.Error -> {

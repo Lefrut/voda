@@ -136,11 +136,11 @@ fun VodovozClosableChip(
 }
 
 @Composable
-fun VodovozColorChip(modifier: Modifier = Modifier, color: Color, text: String) {
+fun VodovozColorChip(modifier: Modifier = Modifier, backgroundColor: Color, text: String) {
     Box(
         modifier = modifier
             .clip(MaterialTheme.shapes.medium)
-            .background(color)
+            .background(backgroundColor)
             .widthIn(39.dp),
         contentAlignment = Alignment.Center
     ) {
@@ -157,7 +157,7 @@ fun VodovozColorChip(modifier: Modifier = Modifier, color: Color, text: String) 
 @Composable
 fun VodovozColorChipSmall(
     modifier: Modifier = Modifier,
-    color: Color,
+    backgroundColor: Color,
     text: String,
     textColor: Color = Color.Unspecified,
 ) {
@@ -166,7 +166,7 @@ fun VodovozColorChipSmall(
             .widthIn(30.dp)
             .height(16.dp)
             .clip(MaterialTheme.shapes.extraSmall)
-            .background(color),
+            .background(backgroundColor),
         contentAlignment = Alignment.Center
     ) {
 

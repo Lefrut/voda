@@ -4,17 +4,11 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.viewModelScope
 import com.m.vodovoz.R
-import com.m.vodovoz.common.model.VodovozBoolean
-import com.m.vodovoz.common.model.from
 import com.m.vodovoz.common.resources.ResourcesProvider
-import com.m.vodovoz.design_system.model.ColorfulButtonUi
 import com.m.vodovoz.design_system.model.SectionUi
-import com.m.vodovoz.design_system.model.toUi
-import com.m.vodovoz.design_system.model.widgets.FieldUi
-import com.m.vodovoz.design_system.model.widgets.SwitchUi
 import com.m.vodovoz.design_system.model.widgets.WidgetUi
 import com.m.vodovoz.design_system.model.widgets.WidgetUpdaterKeeperFactory
-import com.m.vodovoz.design_system.model.widgets.checkFields
+import com.m.vodovoz.design_system.model.widgets.toQueryMap
 import com.m.vodovoz.design_system.model.widgets.toUi
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
 import com.m.vodovoz.ui.mvi.Event
@@ -22,7 +16,14 @@ import com.m.vodovoz.ui.mvi.MviViewModel
 import com.m.vodovoz.ui.mvi.State
 import com.m.vodovoz.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -35,9 +36,23 @@ class NotificationSettingsViewModel @Inject constructor(
     NotSettingsState()
 ) {
 
+    private val widgetsChangesHandlerJob = state.map { s ->
+        s.sections.flatMap { sectionUi -> sectionUi.items }
+    }.distinctUntilChanged().drop(2).onEach {
+        changeScreenLock(true)
+        saveNotificationSettings()
+        changeScreenLock(false)
+    }.launchIn(viewModelScope)
+
     init {
         viewModelScope.launch { delay(200) }.invokeOnCompletion {
             fetchNotificationSettingsDetails()
+        }
+    }
+
+    private fun changeScreenLock(lockScreen: Boolean) {
+        updateState { s ->
+            s.copy(lockScreen = lockScreen)
         }
     }
 
@@ -60,7 +75,6 @@ class NotificationSettingsViewModel @Inject constructor(
                     sections = notificationSettingDetails.sections.map { section ->
                         section.toUi()
                     },
-                    button = notificationSettingDetails.button.toUi()
                 )
             }
 
@@ -105,53 +119,27 @@ class NotificationSettingsViewModel @Inject constructor(
         }
     }
 
-    fun saveNotificationSettings() = viewModelScope.launch {
 
-        updateState { s ->
-            s.copy(button = s.button.copy(loading = true))
-        }
-
+    private suspend fun saveNotificationSettings() {
         val widgets = stateSnapshot.sections.map { sectionUi ->
             sectionUi.items
         }.flatten()
-
-        if (!widgets.mapNotNull { it as? FieldUi }.checkFields(true)) {
-            sendEvent(
-                NotSettingsEvents.ShowToast(
-                    resourcesProvider.getString(R.string.notification_settings_validation_error)
-                )
-            )
-            updateState { s ->
-                s.copy(button = s.button.copy(loading = false))
-            }
-        }
-
-
-        val queriesMap = widgets.mapNotNull { widget ->
-            when (widget) {
-                is FieldUi -> widget.id to widget.value()
-
-                is SwitchUi -> widget.id to VodovozBoolean.from(widget.value).value
-
-                else -> null
-            }
-        }.associate { it.first to it.second }
-
-
-        val result =
-            vodovozServiceRepository.updateNotificationSettings(queriesMap).singleResult()
+        val queriesMap = widgets.toQueryMap()
+        val result = vodovozServiceRepository.updateNotificationSettings(
+            queriesMap
+        ).singleResult()
 
         result.onFailure {
+            fetchNotificationSettingsDetails().join()
             sendEvent(
                 NotSettingsEvents.ShowToast(
                     resourcesProvider.getString(R.string.notification_settings_save_error)
                 )
             )
-            fetchNotificationSettingsDetails()
-        }
-
-        updateState { s ->
-            s.copy(button = s.button.copy(loading = false))
+        }.onSuccess { message ->
+            sendEvent(
+                NotSettingsEvents.ShowToast(message)
+            )
         }
     }
 
@@ -161,7 +149,7 @@ class NotificationSettingsViewModel @Inject constructor(
         val title: String = "",
         val uiState: NotSettingsUiState = NotSettingsUiState.Loading,
         val sections: List<SectionUi<WidgetUi>> = emptyList(),
-        val button: ColorfulButtonUi = ColorfulButtonUi.Empty,
+        val lockScreen: Boolean = false
     ) : State
 
     sealed class NotSettingsEvents : Event {

@@ -79,7 +79,7 @@ fun AutoScrollImagePager(
         snapshotFlow { isDraggedState.value }
             .collectLatest { isDragged ->
                 if (!isDragged) {
-                    while (true) {
+                    while (images.size > 1) {
                         delay(3_750L)
                         runCatching {
                             val targetPage = pagerState.currentPage.inc() % pagerState.pageCount
@@ -94,11 +94,16 @@ fun AutoScrollImagePager(
 }
 
 @Composable
-fun rememberAutoScrollPagerState(initialIndex: Int = 0, itemsCount: Int): PagerState{
-    val pageCount = itemsCount * 100
+fun rememberAutoScrollPagerState(initialIndex: Int = 0, itemsCount: Int): PagerState {
+    if (itemsCount <= 0) {
+        return rememberPagerState(0) { 0 }
+    }
+
+    val pageCount = if (itemsCount == 1) 1 else itemsCount * 100
     val halfOfPageCount = pageCount / 2
 
-     return rememberPagerState(halfOfPageCount - (halfOfPageCount % itemsCount) + initialIndex) { pageCount }
+    val initialPage = halfOfPageCount - (halfOfPageCount % itemsCount) + initialIndex
 
+    return rememberPagerState(initialPage) { pageCount }
 }
 

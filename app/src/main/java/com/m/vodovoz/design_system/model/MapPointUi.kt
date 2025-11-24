@@ -1,6 +1,5 @@
 package com.m.vodovoz.design_system.model
 
-import android.location.Location
 import android.os.Parcelable
 import androidx.compose.animation.core.AnimationVector2D
 import androidx.compose.animation.core.TwoWayConverter
@@ -10,7 +9,6 @@ import com.m.vodovoz.feature.map.model.MapAreaUi
 import com.m.vodovoz.ui.yandex_map.distanceBetween
 import com.yandex.mapkit.geometry.Point
 import kotlinx.parcelize.Parcelize
-import kotlin.math.floor
 
 @Parcelize
 @Immutable
@@ -77,4 +75,8 @@ fun MapPointUi.toDomain(): MapPointModel {
 
 fun MapPointUi.toPoint(): Point {
     return Point(lat, lon)
+}
+
+fun List<MapPointUi>.mapToPoints(): List<Point> {
+    return map { Point(it.lat, it.lon) }
 }

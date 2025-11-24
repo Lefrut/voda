@@ -10,8 +10,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import com.m.vodovoz.design_system.effects.LifecycleEffect
 import com.m.vodovoz.ui.paging.ItemsMviViewModel
+import com.m.vodovoz.ui.paging.ItemsMviViewModel2
 import com.m.vodovoz.ui.paging.ItemsState
+import com.m.vodovoz.ui.paging.ItemsState2
 import com.m.vodovoz.ui.paging.VodovozItemsListeners
+import com.m.vodovoz.ui.paging.VodovozItemsListeners2
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -87,4 +90,24 @@ fun <T, ITEM, S, E> T.collectAsState(
     LifecycleEffect { listenCart() }
     return (this as MviViewModel<S, E>).collectAsState(lifecycleState)
 }
+
+@Composable
+@Stable
+fun <T, ITEM1, ITEM2, S, E> T.collectAsState(
+    lifecycleState: Lifecycle.State = Lifecycle.State.STARTED,
+): State<S>
+        where T : ItemsMviViewModel2<ITEM1, ITEM2, S, E>,
+              T : VodovozItemsListeners2<ITEM1, ITEM2>,
+              S : ItemsState2<ITEM1, ITEM2, S> {
+    LifecycleEffect { listenCanViewAdult1() }
+    LifecycleEffect { listenProductLoadings1() }
+    LifecycleEffect { listenFavorites1() }
+    LifecycleEffect { listenCart1() }
+    LifecycleEffect { listenCanViewAdult2() }
+    LifecycleEffect { listenProductLoadings2() }
+    LifecycleEffect { listenFavorites2() }
+    LifecycleEffect { listenCart2() }
+    return (this as MviViewModel<S, E>).collectAsState(lifecycleState)
+}
+
 

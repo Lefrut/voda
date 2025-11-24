@@ -19,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
@@ -28,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.m.vodovoz.R
 import com.m.vodovoz.design_system.ExtendedTheme
+import com.m.vodovoz.design_system.composables.blur.VodovozBlur
 import com.m.vodovoz.design_system.composables.button.VodovozButton
 import com.m.vodovoz.design_system.composables.button.VodovozRadioButton
 import com.m.vodovoz.design_system.composables.top_bar.VodovozTopBar
@@ -43,9 +45,7 @@ fun GiftsScreen(viewModel: GiftsViewModel, viewState: GiftsState) {
             .background(MaterialTheme.colorScheme.background)
     ) {
         VodovozTopBar(
-            onBack = {
-                viewModel.navigateBack()
-            },
+            onBack = viewModel::navigateBack,
             title = stringResource(id = R.string.choose_present)
         )
         Column(
@@ -65,17 +65,17 @@ fun GiftsScreen(viewModel: GiftsViewModel, viewState: GiftsState) {
                 )
             }
 
-            viewState.gifts.forEachIndexed { index, gift ->
+            viewState.items.forEachIndexed { index, gift ->
                 key(gift.name + gift.id) {
                     Column {
                         GiftItem(
                             item = gift,
-                            selected = viewState.currentGift == gift
-                        ) { presentItem ->
-                            viewModel.selectGift(presentItem)
-                        }
+                            selected = viewState.currentGift == gift,
+                            onClick = viewModel::selectGift,
+                            onImageClick = viewModel::showPreviewImageDialog
+                        )
 
-                        if (viewState.gifts.lastIndex != index) {
+                        if (viewState.items.lastIndex != index) {
                             HorizontalDivider(
                                 modifier = Modifier.padding(vertical = 16.dp),
                                 thickness = 1.dp,
@@ -96,7 +96,7 @@ fun GiftsScreen(viewModel: GiftsViewModel, viewState: GiftsState) {
                 contentColor = button.textColor.takeOrElse { MaterialTheme.colorScheme.background }
             ),
             onClick = {
-                viewModel.chooseGift()
+                viewModel.tryToChooseGift()
             }
         )
     }
@@ -108,6 +108,7 @@ private fun GiftItem(
     item: CartPresentItemUi,
     selected: Boolean,
     onClick: (CartPresentItemUi) -> Unit,
+    onImageClick: (String) -> Unit,
 ) {
     Row(
         modifier = modifier
@@ -120,12 +121,22 @@ private fun GiftItem(
             .padding(horizontal = 16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        AsyncImage(
-            model = item.image,
-            contentDescription = null,
-            modifier = Modifier.size(50.dp),
-            contentScale = ContentScale.FillBounds
-        )
+        val forAdults = item.forAdults
+        VodovozBlur(
+            modifier = Modifier.clip(MaterialTheme.shapes.extraSmall),
+            showBlur = forAdults != null,
+            placeholderText = "",
+            placeholderImage = null
+        ) {
+            AsyncImage(
+                model = item.image,
+                contentDescription = null,
+                modifier = Modifier
+                    .size(50.dp)
+                    .clickable { onImageClick(item.image) },
+                contentScale = ContentScale.FillBounds
+            )
+        }
         Column(
             modifier = Modifier
                 .weight(1f)

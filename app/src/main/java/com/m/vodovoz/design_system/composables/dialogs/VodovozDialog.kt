@@ -92,7 +92,8 @@ fun VodovozDialog(
                     Text(
                         text = cancelButtonText,
                         color = MaterialTheme.colorScheme.primary,
-                        style = ExtendedTheme.typography.buttonSmall
+                        style = ExtendedTheme.typography.buttonSmall,
+                        maxLines = 1
                     )
                 }
 
@@ -107,7 +108,8 @@ fun VodovozDialog(
                     Text(
                         text = acceptButtonText,
                         color = MaterialTheme.colorScheme.primary,
-                        style = ExtendedTheme.typography.buttonSmall
+                        style = ExtendedTheme.typography.buttonSmall,
+                        maxLines = 1
                     )
                 }
 

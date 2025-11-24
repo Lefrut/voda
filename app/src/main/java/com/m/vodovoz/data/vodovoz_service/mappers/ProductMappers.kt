@@ -14,8 +14,8 @@ import com.m.vodovoz.domain.general.model.product.PriceModel
 import com.m.vodovoz.domain.general.model.product.ProductModel
 import com.m.vodovoz.domain.general.model.product.ProductsSectionModel
 import com.m.vodovoz.domain.general.model.product.ShareModel
-import com.m.vodovoz.domain.general.model.promotion.LabelModel
 import com.m.vodovoz.domain.general.model.user.ForAdultsModel
+import com.m.vodovoz.domain.general.model.widgets.LabelModel
 
 fun ProductsSectionDTO.toDomain(): ProductsSectionModel {
 
@@ -117,13 +117,13 @@ fun EXTENDED_PRICE_DTO.toDomain(): PriceModel? {
 }
 
 @JvmName("mapLabelToDomain")
-fun List<NALICHIE_MORE_DTO?>.mapToDomain(): List<LabelModel> {
+fun List<NALICHIE_MORE_DTO>.mapToDomain(): List<LabelModel> {
     return mapNotNull { labelDTO ->
-        labelDTO ?: return@mapNotNull null
         LabelModel(
             name = labelDTO.NAME ?: return@mapNotNull null,
-            colorHex = labelDTO.CVET ?: "",
-            backgroundHex = labelDTO.BACKGROUND ?: ""
+            textColor = "",
+            backgroundColor = labelDTO.CVET ?: labelDTO.BACKGROUND ?: "",
+            backgroundAlpha = 1f
         )
     }
 }
@@ -131,8 +131,8 @@ fun List<NALICHIE_MORE_DTO?>.mapToDomain(): List<LabelModel> {
 fun NALICHIE_MORE_DTO.toDomain(): LabelModel {
     return LabelModel(
         name = NAME ?: "",
-        colorHex = CVET ?: "",
-        backgroundHex = BACKGROUND ?: ""
+        textColor = CVET ?: "",
+        backgroundColor = BACKGROUND ?: ""
     )
 
 }

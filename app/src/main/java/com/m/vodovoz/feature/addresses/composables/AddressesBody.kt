@@ -27,9 +27,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.m.vodovoz.R
+import com.m.vodovoz.design_system.ExtendedTheme
 import com.m.vodovoz.design_system.composables.button.VodovozRadioButton
+import com.m.vodovoz.design_system.composables.decoration.RemovableItem
 import com.m.vodovoz.design_system.composables.decoration.VodovozHorizontalDivider
-import com.m.vodovoz.design_system.composables.decoration.VodovozSwipeToDismiss
 import com.m.vodovoz.design_system.model.SectionUi
 import com.m.vodovoz.design_system.modifiers.bottomLine
 import com.m.vodovoz.feature.addresses.model.AddressScreenTypeUi
@@ -40,6 +41,7 @@ import com.m.vodovoz.feature.addresses.model.AddressUi
 fun AddressesBody(
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues,
+    removableAddressId: Long?,
     addressSections: List<SectionUi<AddressUi>>,
     screenTypeUi: AddressScreenTypeUi,
     selectedAddress: AddressUi,
@@ -52,7 +54,7 @@ fun AddressesBody(
         contentPadding = contentPadding
     ) {
         addressSections.forEachIndexed { index, addressSection ->
-            if (screenTypeUi == AddressScreenTypeUi.Choose && addressSection.items.isNotEmpty()) {
+            if (addressSection.items.isNotEmpty()) {
                 item {
                     Text(
                         modifier = Modifier.padding(
@@ -70,10 +72,10 @@ fun AddressesBody(
                 items = addressSection.items,
                 key = { _, address -> address.id }
             ) { i, address ->
-
-                VodovozSwipeToDismiss(
+                RemovableItem(
                     modifier = Modifier.animateItem(fadeInSpec = null, fadeOutSpec = null),
-                    onRemove = { onRemoveAddressSwipe(address) }
+                    isRevealed = removableAddressId == address.id,
+                    onExpanded = { onRemoveAddressSwipe(address) }
                 ) {
                     AddressItemCard(
                         modifier = if (i != addressSection.items.lastIndex) Modifier.bottomLine(
@@ -85,11 +87,10 @@ fun AddressesBody(
                         onClick = onAddressSelect,
                         onEditClick = onEditAddressClick
                     )
-
                 }
             }
 
-            if (index != addressSections.lastIndex && screenTypeUi != AddressScreenTypeUi.Add && addressSection.items.isNotEmpty()) {
+            if (index != addressSections.lastIndex && addressSection.items.isNotEmpty()) {
                 item {
                     VodovozHorizontalDivider()
                 }
@@ -137,7 +138,7 @@ private fun AddressItemCard(
                 .weight(1f),
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-            if (address.description.isNotEmpty() && screenTypeUi != AddressScreenTypeUi.Choose) {
+            if (address.description.isNotEmpty()) {
                 Text(
                     text = address.description,
                     style = MaterialTheme.typography.bodyMedium.copy(
@@ -155,6 +156,18 @@ private fun AddressItemCard(
                 style = MaterialTheme.typography.bodyMedium.copy(letterSpacing = 0.sp),
                 color = MaterialTheme.colorScheme.onBackground
             )
+
+            if (address.otherInfo.isNotEmpty()) {
+                val buttonSmallStyle = ExtendedTheme.typography.buttonSmall
+                Text(
+                    text = address.otherInfo,
+                    style = buttonSmallStyle.copy(
+                        letterSpacing = 0.sp,
+                        lineHeight = buttonSmallStyle.fontSize
+                    ),
+                    color = MaterialTheme.colorScheme.surfaceTint
+                )
+            }
         }
 
         Icon(

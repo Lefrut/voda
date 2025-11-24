@@ -19,6 +19,7 @@ import com.m.vodovoz.design_system.composables.pull_to_refresh.VodovozPullToRefr
 import com.m.vodovoz.design_system.composables.top_bar.VodovozTopBar
 import com.m.vodovoz.feature.addresses.composables.AddressesBody
 import com.m.vodovoz.feature.addresses.model.AddressScreenTypeUi
+import com.m.vodovoz.feature.addresses.model.AddressUi
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -66,7 +67,8 @@ fun AddressesScreen(
                             }
                         }
                     },
-                    isLoading = viewState.buttonLoading
+                    isLoading = viewState.buttonLoading,
+                    enabled = viewState.buttonEnabled && viewState.selectedAddress != AddressUi.Empty
                 )
             }
 
@@ -103,6 +105,7 @@ fun AddressesScreen(
                     AddressesBody(
                         contentPadding = PaddingValues(bottom = paddingValues.calculateBottomPadding() + 24.dp),
                         screenTypeUi = viewState.screenType,
+                        removableAddressId = viewState.currentRemoveAddress?.id,
                         addressSections = viewState.addressSections,
                         selectedAddress = viewState.selectedAddress,
                         onEditAddressClick = { address ->

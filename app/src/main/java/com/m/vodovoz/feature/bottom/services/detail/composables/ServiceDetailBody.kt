@@ -33,6 +33,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -95,8 +96,10 @@ fun ServiceDetailBody(
                 model = image,
                 contentDescription = null,
                 modifier = Modifier
+                    .padding(horizontal = 16.dp)
                     .fillMaxWidth()
-                    .height(180.dp),
+                    .height(180.dp)
+                    .clip(MaterialTheme.shapes.medium),
                 contentScale = ContentScale.Crop,
             )
 
@@ -166,6 +169,7 @@ fun ServiceDetailsWebView(
     }
 
     Box(modifier = modifier) {
+        @Suppress("COMPOSE_APPLIER_CALL_MISMATCH")
         AndroidView(
             factory = {
                 webView.apply {
@@ -183,6 +187,8 @@ fun ServiceDetailsWebView(
                         useWideViewPort = true
                         loadWithOverviewMode = true
                         layoutAlgorithm = WebSettings.LayoutAlgorithm.TEXT_AUTOSIZING
+                        allowFileAccess = true
+                        allowContentAccess = true
                     }
 
                     webChromeClient = object : WebChromeClient() {

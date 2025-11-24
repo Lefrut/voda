@@ -87,7 +87,7 @@ fun PromotionDetailsBody(
                     val label = promotionDetails.label
 
                     if (label != null) {
-                        VodovozColorChip(color = label.color, text = label.name)
+                        VodovozColorChip(backgroundColor = label.backgroundColor, text = label.name)
                     }
 
                     if (!promotionDetails.timeLeft.isNullOrBlank()) {

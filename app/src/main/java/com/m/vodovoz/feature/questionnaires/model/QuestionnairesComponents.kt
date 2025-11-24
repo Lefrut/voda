@@ -54,6 +54,16 @@ data class ConditionUi(
 )
 
 @Immutable
+data class ToggleListUi(
+    override val id: String,
+    val label: String,
+    override val options: List<ComponentOptionUi>,
+    val isRequired: Boolean,
+    override val error: Boolean = false,
+) : QuestionnaireComponentUi(id, error), OptionComponentUi
+
+
+@Immutable
 data class CheckboxListUi(
     override val id: String,
     val label: String,
@@ -78,21 +88,15 @@ fun ConditionsCheckboxListUi.update(option: ComponentOptionUi): ConditionsCheckb
     return copy(options = updatedOptions, error = false)
 }
 
-@Immutable
-data class ToggleListUi(
-    override val id: String,
-    val label: String,
-    override val options: List<ComponentOptionUi>,
-    val isRequired: Boolean,
-    override val error: Boolean = false,
-) : QuestionnaireComponentUi(id, error), OptionComponentUi
-
 fun ToggleListUi.update(option: ComponentOptionUi): ToggleListUi {
     val updatedOptions = options.map { opt ->
         opt.copy(value = (opt.label == option.label))
     }
     return copy(options = updatedOptions, error = false)
 }
+
+
+
 
 @Immutable
 data class ComponentOptionUi(
@@ -155,6 +159,28 @@ fun QuestionnairesItemModel.toUi(): QuestionnaireComponentUi? {
     }
 }
 
+fun List<QuestionnaireComponentUi>.applyOtherVisibilityRules(): List<QuestionnaireComponentUi> =
+    mapIndexed { index, component ->
+        if (component is FieldComponentUi && component.id.contains("DRUGOE", ignoreCase = true)) {
+
+            val isOtherOptionSelected = runCatching {
+                val prev = getOrElse(index - 1) { component } as OptionComponentUi
+                prev.options.any {
+                    it.value && it.label.contains("другое", ignoreCase = true)
+                }
+            }.getOrElse { true }
+
+            component.copy(
+                ui = component.ui.copy(
+                    isVisible = isOtherOptionSelected
+                )
+            )
+        } else {
+            component
+        }
+    }
+
+
 fun QuestionnaireComponentUi.errorIfInvalid(
     getString: (Int) -> String,
 ): QuestionnaireComponentUi {
@@ -197,7 +223,7 @@ fun QuestionnaireComponentUi.errorIfInvalid(
 
 inline fun <reified T : QuestionnaireComponentUi> QuestionnaireComponentUi.updateIfSame(
     id: String,
-    onSame: T.() -> QuestionnaireComponentUi,
+    onSame: T.() -> T,
 ): QuestionnaireComponentUi {
     return if (this is T && this.id == id) {
         onSame()
@@ -206,8 +232,8 @@ inline fun <reified T : QuestionnaireComponentUi> QuestionnaireComponentUi.updat
 
 inline fun <reified T : QuestionnaireComponentUi, reified T2 : QuestionnaireComponentUi> QuestionnaireComponentUi.updateIfSame(
     id: String,
-    onSame1: T.() -> QuestionnaireComponentUi,
-    onSame2: T2.() -> QuestionnaireComponentUi,
+    onSame1: T.() -> T,
+    onSame2: T2.() -> T2,
 ): QuestionnaireComponentUi {
     val initial = this
 
@@ -222,9 +248,9 @@ inline fun <reified T : QuestionnaireComponentUi, reified T2 : QuestionnaireComp
 
 inline fun <reified T : QuestionnaireComponentUi, reified T2 : QuestionnaireComponentUi, reified T3 : QuestionnaireComponentUi> QuestionnaireComponentUi.updateIfSame(
     id: String,
-    onSame1: T.() -> QuestionnaireComponentUi,
-    onSame2: T2.() -> QuestionnaireComponentUi,
-    onSame3: T3.() -> QuestionnaireComponentUi,
+    onSame1: T.() -> T,
+    onSame2: T2.() -> T2,
+    onSame3: T3.() -> T3,
 ): QuestionnaireComponentUi {
     val initial = this
 

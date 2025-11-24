@@ -1,7 +1,7 @@
 package com.m.vodovoz.common.water_app
 
 import androidx.annotation.Keep
-import androidx.compose.runtime.Stable
+import com.squareup.moshi.JsonClass
 import java.math.BigDecimal
 import java.math.RoundingMode
 import java.time.LocalDate
@@ -40,26 +40,15 @@ data object WaterApp {
     }
 
 
-    @Keep
-    @Stable
-    data class NotificationSettings(
-        val enableNotifications: Boolean,
-        val notificationsDelay: Duration,
-        val wakeUpTime: LocalTime,
-        val sleepTime: LocalTime,
-    ) {
-        companion object {
-            val Default = NotificationSettings(
-                enableNotifications = false,
-                notificationsDelay = 2.hours,
-                wakeUpTime = LocalTime.of(9, 0, 0),
-                sleepTime = LocalTime.of(23, 0, 0),
-            )
-        }
-    }
+    val DefaultNotificationSettings = NotificationSettings(
+        enableNotifications = false,
+        notificationsDelay = 2.hours,
+        wakeUpTime = LocalTime.of(9, 0, 0),
+        sleepTime = LocalTime.of(23, 0, 0),
+    )
+
 
     @Keep
-    @Stable
     data class UserInfo(
         val gender: Gender,
         val height: Float,
@@ -75,7 +64,6 @@ data object WaterApp {
     }
 
     @Keep
-    @Stable
     enum class Gender {
         Man, Girl;
 
@@ -119,6 +107,13 @@ data object WaterApp {
             return withMl(currentMl + ml)
         }
 
+        fun withTotalMl(ml: Int): DailyGoal {
+            return copy(
+                totalMl = ml,
+                currentMl = currentMl.coerceAtMost(ml),
+            )
+        }
+
 
         companion object {
             fun create(totalMl: Int) = DailyGoal(
@@ -137,3 +132,13 @@ data object WaterApp {
     value class Stage(val name: String)
 
 }
+
+
+@Keep
+@JsonClass(generateAdapter = true)
+data class NotificationSettings(
+    val enableNotifications: Boolean,
+    val notificationsDelay: Duration,
+    val wakeUpTime: LocalTime,
+    val sleepTime: LocalTime,
+)

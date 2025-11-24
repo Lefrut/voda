@@ -10,7 +10,6 @@ import android.view.ViewGroup
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
@@ -65,7 +64,7 @@ class WaterAppFragment : Fragment() {
                     context,
                     permission
                 ) == PackageManager.PERMISSION_GRANTED
-            } ?: false
+            } == true
         } else {
             true
         }
@@ -122,7 +121,9 @@ class WaterAppFragment : Fragment() {
                             if (targetState == WaterAppUiState.GoalCompleted){
                                 goalCompletedTransition()
                             }
-                            else waterAppTransition()
+                            else {
+                                waterAppTransition()
+                            }
                         },
                         contentKey = { targetState ->
                             val key: Any = if (targetState is WaterAppUiState.UserData) {
@@ -142,9 +143,9 @@ class WaterAppFragment : Fragment() {
                             }
 
                             WaterAppUiState.Main -> {
+                                val dailyGoal = viewState.dailyGoal
                                 WaterAppBottleScreen(
-                                    maxLevel = viewState.dailyGoal.totalMl,
-                                    currentLevel = viewState.dailyGoal.currentMl,
+                                    dailyGoal = dailyGoal,
                                     changeWaterStep = viewState.changeWaterStep,
                                     onBackClick = {
                                         viewModel.navigateBack()
@@ -187,6 +188,9 @@ class WaterAppFragment : Fragment() {
                                     },
                                     onEditUserData = { stage ->
                                         viewModel.goToUserDataStage(stage)
+                                    },
+                                    onClearClick = {
+                                        viewModel.showClearDialog()
                                     }
                                 )
 
@@ -204,6 +208,22 @@ class WaterAppFragment : Fragment() {
                                         }
                                     )
                                 }
+
+                                if (viewState.showClearDialog) {
+                                    VodovozDialog(
+                                        title = stringResource(R.string.reset_data),
+                                        description = stringResource(R.string.you_sure_delete_data),
+                                        acceptButtonText = stringResource(R.string.delete),
+                                        cancelButtonText = stringResource(R.string.notification_dialog_cancel),
+                                        onDismiss = {
+                                            viewModel.closeClearDialog()
+                                        },
+                                        onAccept = {
+                                            viewModel.clearWaterAppData()
+                                        }
+                                    )
+                                }
+
                             }
 
                             is WaterAppUiState.UserData -> {
@@ -272,12 +292,6 @@ class WaterAppFragment : Fragment() {
 
                     }
 
-                    LifecycleEffect {
-                        viewModel.listenNotificationSettings()
-                    }
-                    LifecycleEffect {
-                        viewModel.listenUserInfo()
-                    }
                     LifecycleEffect {
                         viewModel.listenDailyGoal()
                     }

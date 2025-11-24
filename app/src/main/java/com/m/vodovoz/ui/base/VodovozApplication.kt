@@ -12,14 +12,12 @@ import coil3.request.CachePolicy
 import coil3.request.crossfade
 import coil3.svg.SvgDecoder
 import com.m.vodovoz.BuildConfig
-import com.m.vodovoz.common.constants.AppKeys
-import com.m.vodovoz.common.constants.AppKeys.YANDEX_METRICA_KEY
 import com.m.vodovoz.common.notification.NotificationChannels
 import com.m.vodovoz.core.network.VodovozWebConfig
 import com.yandex.mapkit.MapKitFactory
-import com.yandex.metrica.YandexMetrica
-import com.yandex.metrica.YandexMetricaConfig
 import dagger.hilt.android.HiltAndroidApp
+import io.appmetrica.analytics.AppMetrica
+import io.appmetrica.analytics.AppMetricaConfig
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -41,23 +39,28 @@ class VodovozApplication : Application(), Configuration.Provider, SingletonImage
         AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags("ru"))
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
 
-        initYandexMetrica()
-        Timber.plant(Timber.DebugTree())
+        MapKitFactory.setApiKey(BuildConfig.MAPKIT_API_KEY)
+        MapKitFactory.initialize(this)
+
+        if (BuildConfig.DEBUG) {
+            Timber.plant(Timber.DebugTree())
+        }
+        initAppMetrica()
         NotificationChannels.create(this)
     }
 
-    private fun initYandexMetrica() {
+    private fun initAppMetrica() {
         if (!BuildConfig.DEBUG) {
-            val config: YandexMetricaConfig =
-                YandexMetricaConfig.newConfigBuilder(YANDEX_METRICA_KEY)
-                    .withNativeCrashReporting(false)
-                    .withLocationTracking(false)
-                    .withAppVersion(BuildConfig.VERSION_NAME)
-                    .withUserProfileID(VodovozWebConfig.VODOVOZ_URL)
-                    .withLogs()
-                    .build()
-            YandexMetrica.activate(this, config)
-            YandexMetrica.enableActivityAutoTracking(this)
+            val config: AppMetricaConfig = AppMetricaConfig.newConfigBuilder(BuildConfig.YANDEX_METRICA_KEY)
+                .withNativeCrashReporting(false)
+                .withLocationTracking(false)
+                .withAppVersion(BuildConfig.VERSION_NAME)
+                .withUserProfileID(VodovozWebConfig.VODOVOZ_URL)
+                .withLogs()
+                .build()
+
+            AppMetrica.activate(applicationContext, config)
+            AppMetrica.enableActivityAutoTracking(this)
         }
     }
 

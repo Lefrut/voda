@@ -1,7 +1,9 @@
 package com.m.vodovoz.data.water_app.datastore
 
+import androidx.annotation.Keep
 import kotlinx.coroutines.flow.Flow
 
+@Keep
 interface WaterAppStorage {
     val stageFlow: Flow<String>
     val userInfoFlow: Flow<String>

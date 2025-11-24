@@ -21,7 +21,6 @@ fun List<NotificationSectionItemModel>.mapToUi(): List<WidgetUi> {
 
 fun NotificationSectionItemModel.toUi(): WidgetUi? {
     return when {
-        !isVisible -> return null
         type == "checkbox" -> SwitchUi(
             id = code,
             name = message,
@@ -38,6 +37,7 @@ fun NotificationSectionItemModel.toUi(): WidgetUi? {
             readOnly = readOnly,
             supportingText = "",
             hint = "",
+            isVisible = isVisible
         ).toUi()
     }
 }

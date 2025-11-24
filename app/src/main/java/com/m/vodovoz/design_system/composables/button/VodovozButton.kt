@@ -138,7 +138,7 @@ fun VodovozButtonSmall(
         colors = colors,
         contentPadding = PaddingValues(horizontal = 16.dp)
     ) {
-        Text(text = text, style = textStyle, maxLines = 1)
+        Text(text = text, style = textStyle, maxLines = 1, overflow = TextOverflow.Ellipsis)
     }
 }
 

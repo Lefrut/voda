@@ -2,24 +2,29 @@ package com.m.vodovoz.feature.profile.waterapp.composables
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.LineHeightStyle
@@ -27,9 +32,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.m.vodovoz.R
+import com.m.vodovoz.design_system.modifiers.radialGradientBackground
 import com.m.vodovoz.design_system.robotoFontFamily
 import com.m.vodovoz.feature.profile.waterapp.WaterAppHelper
-import com.m.vodovoz.design_system.modifiers.radialGradientBackground
 
 @Composable
 fun WaterAppGoalCompletedScreen(goal: Int, onCloseClick: () -> Unit) {
@@ -48,7 +53,23 @@ fun WaterAppGoalCompletedScreen(goal: Int, onCloseClick: () -> Unit) {
             .clickable(onClick = onCloseClick),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(Modifier.weight(0.5f))
+        Box(
+            Modifier.weight(0.5f).fillMaxWidth()
+        ) {
+
+            IconButton(
+                modifier = Modifier.align(Alignment.TopEnd).padding(16.dp),
+                onClick = onCloseClick
+            ) {
+                Icon(
+                    imageVector = ImageVector.vectorResource(R.drawable.ic_close),
+                    contentDescription = null,
+                    modifier = Modifier.size(24.dp),
+                    tint = MaterialTheme.colorScheme.background
+                )
+
+            }
+        }
         Text(
             modifier = Modifier,
             text = stringResource(R.string.congratulations),

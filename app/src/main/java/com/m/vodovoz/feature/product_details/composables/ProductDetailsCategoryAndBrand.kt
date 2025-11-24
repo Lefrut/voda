@@ -74,7 +74,7 @@ private fun CategoryOrBrandItem(
             model = brandCategoryItemUi.data.detailPicture,
             contentDescription = null,
             modifier = Modifier.size(40.dp),
-            contentScale = ContentScale.FillBounds
+            contentScale = ContentScale.FillWidth
         )
         Column(
             modifier = Modifier

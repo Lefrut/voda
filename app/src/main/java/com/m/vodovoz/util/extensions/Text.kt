@@ -5,6 +5,7 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.text.style.URLSpan
+import androidx.annotation.Keep
 import androidx.core.text.HtmlCompat
 import java.text.DecimalFormat
 
@@ -31,37 +32,71 @@ fun Context.shareText(text: String) {
     startActivity(shareIntent)
 }
 
+@Keep
+private val serviceHtml = """
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        p, h3, h2, h1, blockquote, ul, ol, table {
+            margin-top: 16px;    
+            margin-bottom: 16px;
+        }
 
+       @font-face {
+            font-family: 'Roboto';
+            src: url('file:///android_asset/fonts/roboto_regular.ttf');
+        }
+        
+        body {
+            font-size: 1em;
+            font-family: 'Roboto';
+            line-height: 1.5;
+        }
+    
+        blockquote {
+            position: relative;
+            padding: 0px 20px 0px 41px;
+            border: none;
+            font-weight: normal;
+            line-height: calc(1em + 10px);
+            margin: 48px 0px;
+            border-left: 5px solid #05A4FF;
+        }
+        
+        
+        img {
+            display: inline;
+            height: auto;
+            max-width: 100%;
+        }
+        .ordered-block,
+        .order_sale {
+            display: none;
+        }
+        .tables-responsive {
+            overflow-x: auto;
+            width: 100%;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .colored_table {
+            font-size: 1em;
+            line-height: inherit;
+        }
+        .colored_table th,
+        .colored_table td {
+            padding: 8px;
+            border: 1px solid #ccc;
+            text-align: left;
+        }
+    </style>
+"""
+
+
+@Keep
 fun String.prepareServiceHtml(): String {
-    return "<style>\n" +
-            "    img {\n" +
-            "        display: inline;\n" +
-            "        height: auto;\n" +
-            "        max-width: 100%;\n" +
-            "    }\n" +
-            "    .ordered-block,\n" +
-            "    .order_sale {\n" +
-            "        display: none;\n" +
-            "    }\n" +
-            "    .tables-responsive {\n" +
-            "        overflow-x: auto;\n" +
-            "        width: 100%;\n" +
-            "    }\n" +
-            "    table {\n" +
-            "        width: 100%;\n" +
-            "        border-collapse: collapse;\n" +
-            "    }\n" +
-            "    .colored_table {\n" +
-            "        font-size: 2.5em;\n" +
-            "        line-height: inherit;\n" +
-            "    }\n" +
-            "    .colored_table th,\n" +
-            "    .colored_table td {\n" +
-            "        padding: 8px;\n" +
-            "        border: 1px solid #ccc;\n" +
-            "        text-align: left;\n" +
-            "    }" +
-            "</style>$this"
+    return serviceHtml + this
 }
 
 
@@ -75,7 +110,7 @@ fun String.decodeUnicodeEscapes(): String {
     val regex = Regex("""\\u([0-9a-fA-F]{4})""")
     return regex.replace(this) { matchResult ->
         replacements.forEach { (unicode, new) ->
-            if(unicode == matchResult.value) return@replace new
+            if (unicode == matchResult.value) return@replace new
         }
         return@replace matchResult.value
     }

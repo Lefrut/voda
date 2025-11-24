@@ -1,22 +1,27 @@
 package com.m.vodovoz.data.water_app.datastore
 
 import android.content.Context
+import androidx.annotation.Keep
+import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
-import com.m.vodovoz.core.datastore.get
-import com.m.vodovoz.core.datastore.set
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import javax.inject.Inject
 import javax.inject.Singleton
 
 private val Context.waterAppDataStore by preferencesDataStore(
-    "water_app.pb"
+    "water_app"
 )
 
 
 @Singleton
+@Keep
 class WaterAppDataStoreImpl @Inject constructor(
     @ApplicationContext
     private val context: Context,
@@ -24,64 +29,65 @@ class WaterAppDataStoreImpl @Inject constructor(
 
     private val dataStore get() = context.waterAppDataStore
 
-    private fun getDataFlow(key: String) = dataStore.data.map {
+    @Keep
+    private fun getDataFlow(key: Preferences.Key<String>) = dataStore.data.map {
         it[key] ?: ""
     }
 
-    private suspend fun editData(key: String, value: String) {
+    private suspend fun<T> editData(key: Preferences.Key<T>, value: T) {
         dataStore.edit { mutablePreferences ->
             mutablePreferences[key] = value
         }
     }
 
     override val stageFlow: Flow<String>
-        get() = getDataFlow(STAGE)
+        get() = getDataFlow(stageKey)
 
     override val userInfoFlow: Flow<String>
-        get() = getDataFlow(USER_INFO_KEY)
+        get() = getDataFlow(userInfoKey)
 
     override val notificationSettingsFlow: Flow<String>
-        get() = getDataFlow(NOTIFICATION_SETTINGS_KEY)
+        get() = getDataFlow(notificationSettingsKey)
     override val dailyGoalFlow: Flow<String>
-        get() = getDataFlow(DAILY_GOAL)
+        get() = getDataFlow(dailyGoalKey)
 
 
     override suspend fun clearNotificationSettings() {
-        editData(NOTIFICATION_SETTINGS_KEY, "")
+        editData(userInfoKey, "")
     }
 
     override suspend fun clearStage() {
-        editData(STAGE, "")
+        editData(stageKey, "")
     }
 
     override suspend fun saveNotificationSettings(notificationSettings: String) {
-        editData(NOTIFICATION_SETTINGS_KEY, notificationSettings)
+        editData(notificationSettingsKey, notificationSettings)
     }
 
     override suspend fun saveUserInfo(userInfo: String) {
-        editData(USER_INFO_KEY, userInfo)
+        editData(userInfoKey, userInfo)
     }
 
     override suspend fun saveDailyGoal(dailyGoal: String) {
-        editData(DAILY_GOAL, dailyGoal)
+        editData(dailyGoalKey, dailyGoal)
     }
 
     override suspend fun saveStage(stage: String) {
-        editData(STAGE, stage)
+        editData(stageKey, stage)
     }
 
     override suspend fun clearUserInfo() {
-        editData(USER_INFO_KEY, "")
+        editData(userInfoKey, "")
     }
 
     override suspend fun clearDailyGoal() {
-        editData(DAILY_GOAL, "")
+        editData(stageKey, "")
     }
 
     companion object {
-        private const val NOTIFICATION_SETTINGS_KEY = "NOTIFICATION_SETTINGS_KEY"
-        private const val USER_INFO_KEY = "USER_INFO_KEY"
-        private const val DAILY_GOAL = "DAILY_GOAL"
-        private const val STAGE = "STAGE"
+        private val notificationSettingsKey = stringPreferencesKey("NOTIFICATION_SETTINGS")
+        private val userInfoKey = stringPreferencesKey("USER_INFO")
+        private val dailyGoalKey = stringPreferencesKey("DAILY_GOAL")
+        private val stageKey = stringPreferencesKey("STAGE")
     }
 }

@@ -19,9 +19,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.m.vodovoz.R
 import com.m.vodovoz.design_system.composables.decoration.OrderSummaryColumn
-import com.m.vodovoz.design_system.composables.decoration.VodovozSwipeToDismiss
+import com.m.vodovoz.design_system.composables.decoration.RemovableItem
 import com.m.vodovoz.design_system.model.order.OrderSummaryItemUi
 import com.m.vodovoz.design_system.modifiers.bottomLine
+import com.m.vodovoz.feature.cart.model.AdditionalProductsTextUi
 import com.m.vodovoz.feature.cart.model.CartButtonUi
 import com.m.vodovoz.feature.cart.model.CartItemUi
 import com.m.vodovoz.feature.cart.model.CartPresentUi
@@ -33,6 +34,7 @@ import com.m.vodovoz.feature.cart.model.ProductRestrictionUi
 fun CartBody(
     modifier: Modifier = Modifier,
     countCartItemsText: String,
+    removableItemId: Long?,
     cartItems: List<CartItemUi>,
     cartPresent: CartPresentUi?,
     cartOrderSummary: List<OrderSummaryItemUi>,
@@ -48,6 +50,7 @@ fun CartBody(
     onPromotionCodeButtonClick: (CartPromoButtonUi) -> Unit,
     onPresentButtonClick: () -> Unit,
     onBottlesButtonClick: () -> Unit,
+    onRecommendationsClick: (AdditionalProductsTextUi) -> Unit
 ) {
     LazyColumn(
         modifier = modifier.fillMaxSize(),
@@ -102,15 +105,14 @@ fun CartBody(
 
             }
 
-
             val restriction = cartItem.restriction
             val notHaveDeleteRestriction = restriction != ProductRestrictionUi.FULL_RESTRICTION
                     && restriction != ProductRestrictionUi.NO_DELETE
 
-            VodovozSwipeToDismiss(
-                enableDismissFromEndToStart = notHaveDeleteRestriction,
+            RemovableItem(
+                isRevealed = cartItem.itemId == removableItemId,
                 gesturesEnabled = notHaveDeleteRestriction,
-                onRemove = { onRemoveCartItem(cartItem) }
+                onExpanded = { onRemoveCartItem(cartItem) }
             ) {
                 CartItemCard(
                     modifier = Modifier
@@ -123,7 +125,8 @@ fun CartBody(
                     onLikeClick = onLikeCartItem,
                     onDecrement = onDecrementCartItem,
                     onIncrement = onIncrementCartItem,
-                    onRemove = onRemoveCartItem
+                    onRemove = onRemoveCartItem,
+                    onRecommendationsClick = onRecommendationsClick
                 )
             }
         }

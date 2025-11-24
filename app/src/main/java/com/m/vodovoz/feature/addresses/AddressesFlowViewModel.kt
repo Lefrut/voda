@@ -87,7 +87,7 @@ class AddressesFlowViewModel @Inject constructor(
             }
 
             val selectedAddress = addressSections.flatMap { it.items }.find {
-                it.id == selectedAddressId
+                it.id == selectedAddressId || it.id == stateSnapshot.selectedAddress.id
             } ?: addressSections.firstOrNull()?.items?.firstOrNull() ?: AddressUi.Empty
 
 
@@ -116,7 +116,7 @@ class AddressesFlowViewModel @Inject constructor(
     }
 
     fun navigateBack() = viewModelScope.launch {
-        sendEvent(AddressesEvents.GoBack)
+        sendEvent(AddressesEvents.GoBack(stateSnapshot.selectedAddress))
     }
 
     fun addAddress() = viewModelScope.launch {
@@ -128,14 +128,19 @@ class AddressesFlowViewModel @Inject constructor(
             s.copy(buttonLoading = true)
         }
 
-
         val selectedAddress = stateSnapshot.selectedAddress
         val addressDetails = vodovozServiceRepository.getAddAddressDetails(
-            selectedAddress.id
+            addressId = selectedAddress.id
         ).singleGetOrNull() ?: return@launch
+        val fromMoscowRingToAddress = addressDetails.formMoscowRingToAddressKm
+
+        if (fromMoscowRingToAddress != null) {
+            sendEvent(AddressesEvents.GoBackToOrdering(selectedAddress))
+            return@launch
+        }
 
         val mapAddress = mapServiceRepository.searchAddressInMoscow(
-            selectedAddress.address
+            address = selectedAddress.address
         ).singleGetOrNull()?.toUi() ?: return@launch
         val addressPoint = mapAddress.point
 
@@ -146,7 +151,7 @@ class AddressesFlowViewModel @Inject constructor(
             area.id == MapAreaModel.CORE_AREA_ID && area.isMoscowRingRow
         } ?: return@launch
 
-        val fromMoscowToPoint = if (coreMapArea.contains(addressPoint)) {
+        val updatedFromMoscowRingToAddress = if (coreMapArea.contains(addressPoint)) {
             0f
         } else {
             val nearestPoints = coreMapArea.findNearestPointsTo(addressPoint)
@@ -166,13 +171,16 @@ class AddressesFlowViewModel @Inject constructor(
                 w.id to w.value()
             } + gridFields.mapToUi().associate { w ->
                 w.id to w.value()
-            } + with(addressField.toUi()) { id to mapAddress.name }
+            } + with(addressField.toUi()) {
+                id to mapAddress.name
+            } + mapOf(label.id to label.name)
         }
 
         vodovozServiceRepository.updateAddress(
             addressId = selectedAddress.id,
-            address = mapAddress.copy(fromMoscowToPoint = floor(fromMoscowToPoint).toInt())
-                .toDomain(),
+            address = mapAddress.copy(
+                fromMoscowToPoint = floor(updatedFromMoscowRingToAddress).toInt()
+            ).toDomain(),
             params = addressParams
         ).singleResult().onSuccess {
             sendEvent(AddressesEvents.GoBackToOrdering(selectedAddress))
@@ -225,27 +233,34 @@ class AddressesFlowViewModel @Inject constructor(
                     section.copy(items = section.items.filter { it.id != currentRemoveAddress.id })
                 },
                 showRemoveAddressDialog = false,
-                currentRemoveAddress = null
+                currentRemoveAddress = null,
+                selectedAddress = AddressUi.Empty
             )
         }
         vodovozServiceRepository.removeAddress(currentRemoveAddress.id.toInt()).singleResult()
-        refresh()
+        refresh().join()
     }
 
     fun refresh() = viewModelScope.launch {
         updateState {
-            it.copy(showRefreshIndicator = true)
+            it.copy(
+                showRefreshIndicator = true,
+                buttonEnabled = false
+            )
         }
 
         fetchAddresses().join()
 
         updateState {
-            it.copy(showRefreshIndicator = false)
+            it.copy(
+                showRefreshIndicator = false,
+                buttonEnabled = true
+            )
         }
     }
 
     sealed class AddressesEvents : Event {
-        data object GoBack : AddressesEvents()
+        data class GoBack(val address: AddressUi) : AddressesEvents()
         data object GoToMap : AddressesEvents()
         data class GoToEditAddress(val addressId: Long, val addressName: String) : AddressesEvents()
         data class GoBackToOrdering(val address: AddressUi) : AddressesEvents()
@@ -262,6 +277,7 @@ class AddressesFlowViewModel @Inject constructor(
         val showRefreshIndicator: Boolean = false,
         val mapAreas: List<MapAreaUi> = emptyList(),
         val buttonLoading: Boolean = false,
+        val buttonEnabled: Boolean = false,
     ) : State {
     }
 

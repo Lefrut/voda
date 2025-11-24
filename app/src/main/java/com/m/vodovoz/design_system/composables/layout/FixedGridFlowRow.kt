@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import kotlin.math.floor
+import kotlin.math.min
 
 @Composable
 fun FixedGridFlowRow(
@@ -36,6 +37,7 @@ fun FixedGridFlowRow(
 
 private fun calcItemWidth(totalWidth: Dp, spacing: Dp, itemsInRow: Int): Dp {
     val totalSpacing = spacing * (itemsInRow - 1)
-    val rawWidth = (totalWidth - totalSpacing) / itemsInRow
-    return Dp(floor(rawWidth.value))
+    val raw = (totalWidth - totalSpacing) / itemsInRow
+    val w = floor(raw.value)
+    return Dp(min(w, raw.value))
 }

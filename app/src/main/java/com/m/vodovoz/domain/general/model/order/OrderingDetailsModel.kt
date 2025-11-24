@@ -9,7 +9,7 @@ data class OrderingDetailsModel(
     val title: String,
     val commentField: FieldModel?,
     val recipientSection: SectionModel<OrderingMenuItemModel>,
-    val notifySection: SectionModel<OrderNotifyItemModel>,
+    val notifySection: OrderNotifySectionModel,
     val paymentSection: SectionModel<OrderingMenuItemModel>,
     val totals: List<OrderSummaryItemModel>,
     val button: ColorfulButtonModel

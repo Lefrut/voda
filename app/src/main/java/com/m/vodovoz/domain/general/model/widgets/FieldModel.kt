@@ -9,7 +9,8 @@ data class FieldModel(
     val readOnly: Boolean,
     val supportingText: String,
     val hint: String,
-    val values: List<FieldOptionModel> = emptyList()
+    val values: List<FieldOptionModel> = emptyList(),
+    val isVisible: Boolean = true
 )
 
 data class FieldOptionModel(

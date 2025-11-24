@@ -1,7 +1,7 @@
 package com.m.vodovoz.domain.general.model.order
 
-import com.m.vodovoz.domain.general.model.promotion.LabelModel
 import com.m.vodovoz.domain.general.model.product.PriceModel
+import com.m.vodovoz.domain.general.model.widgets.LabelModel
 
 data class OrderProductModel(
     val id: Long,

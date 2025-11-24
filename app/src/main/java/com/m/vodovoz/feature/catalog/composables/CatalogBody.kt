@@ -54,7 +54,7 @@ fun CatalogBody(
         val pictures = banners.map { it.detailPicture }
         val pagerState = rememberAutoScrollPagerState(itemsCount = pictures.size)
 
-        if (banners.size > 1) {
+        if (banners.isNotEmpty()) {
             AutoScrollImagePager(
                 modifier = Modifier
                     .padding(top = 8.dp)

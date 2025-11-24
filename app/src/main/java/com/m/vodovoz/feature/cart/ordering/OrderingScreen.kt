@@ -94,7 +94,8 @@ fun OrderingScreen(
                         },
                         onPaymentButtonClick = { orderPaymentItem ->
                             viewModel.navigateByPaymentItem(orderPaymentItem)
-                        }
+                        },
+                        onPhoneFieldChange = viewModel::changeExtraPhoneField
                     )
 
                 }

@@ -25,12 +25,14 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.fromHtml
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.m.vodovoz.R
 import com.m.vodovoz.design_system.ExtendedTheme
 import com.m.vodovoz.design_system.composables.blur.AsyncImageBlur
 import com.m.vodovoz.design_system.composables.button.CartCounterButton
 import com.m.vodovoz.design_system.composables.chip.VodovozColorChipSmall
+import com.m.vodovoz.feature.cart.model.AdditionalProductsTextUi
 import com.m.vodovoz.feature.cart.model.CartItemUi
 import com.m.vodovoz.feature.cart.model.ProductRestrictionUi
 import com.m.vodovoz.util.formatRoundedPrice
@@ -44,6 +46,7 @@ fun CartItemCard(
     onIncrement: (CartItemUi) -> Unit,
     onDecrement: (CartItemUi) -> Unit,
     onRemove: (CartItemUi) -> Unit,
+    onRecommendationsClick: (AdditionalProductsTextUi) -> Unit,
 ) {
 
     val isPresent = cartItem.label?.name?.contains("подарок", true) == true
@@ -70,7 +73,7 @@ fun CartItemCard(
             AsyncImageBlur(
                 model = cartItem.image,
                 showBlur = forAdults != null,
-                text = forAdults?.textBlur ?: ""
+                placeholderText = forAdults?.textBlur ?: ""
             ) { asyncImagePainter ->
                 Image(
                     painter = asyncImagePainter,
@@ -85,9 +88,9 @@ fun CartItemCard(
             val label = cartItem.label
             if (label != null && isAvailable) {
                 VodovozColorChipSmall(
-                    color = label.background,
+                    backgroundColor = label.backgroundColor,
                     text = label.name,
-                    textColor = label.color
+                    textColor = label.textColor
                 )
             }
         }
@@ -164,7 +167,8 @@ fun CartItemCard(
                             modifier = Modifier.alignByBaseline(),
                             text = cartItem.priceText,
                             color = MaterialTheme.colorScheme.onBackground,
-                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
+                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
+                            maxLines = 1
                         )
                         if (cartItem.hasDiscount) {
                             val discountText = stringResource(
@@ -180,6 +184,8 @@ fun CartItemCard(
                                 style = ExtendedTheme.typography.labelExtraSmallVariant.copy(
                                     textDecoration = TextDecoration.LineThrough
                                 ),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
                             )
                         }
                     }
@@ -213,6 +219,22 @@ fun CartItemCard(
                         )
                     }
                 }
+            }
+
+            val additionalProductsText = cartItem.additionalProductsText
+            if (additionalProductsText != null) {
+                Text(
+                    modifier = Modifier
+                        .padding(top = 16.dp)
+                        .clickable(
+                            onClick = { onRecommendationsClick(additionalProductsText) },
+                            indication = null,
+                            interactionSource = null
+                        ),
+                    text = additionalProductsText.text,
+                    color = MaterialTheme.colorScheme.primary,
+                    style = MaterialTheme.typography.bodySmall
+                )
             }
         }
     }

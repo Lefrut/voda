@@ -22,7 +22,7 @@ data class TOVAR_DATA_DTO(
     @Json(name = "KOFFICIENT")
     val KOFFICIENT: Int?,
     @Json(name = "NALICHIE_MORE")
-    val NALICHIE_MORE: List<NALICHIE_MORE_DTO?>?,
+    val NALICHIE_MORE: List<NALICHIE_MORE_DTO>?,
     @Json(name = "NAME")
     val NAME: String?,
     @Json(name = "PROPERTY_RATING_VALUE")
@@ -34,5 +34,5 @@ data class TOVAR_DATA_DTO(
     @Json(name = "TOVAR18")
     val TOVAR18: TOVAR_18_DTO?,
     @Json(name = "KNOPKI")
-    val KNOPKI: KNOPKA_AUTH_DTO?
+    val KNOPKI: KNOPKA_AUTH_DTO?,
 )

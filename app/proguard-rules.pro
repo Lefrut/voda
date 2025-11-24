@@ -21,5 +21,17 @@
 #-renamesourcefileattribute SourceFile
 #-dontobfuscate
 
+
 -keepnames class * extends android.os.Parcelable
 -keepnames class * extends java.io.Serializable
+
+-keep class com.m.vodovoz.common.water_app.** { *; }
+-keepclassmembers class com.m.vodovoz.common.water_app.** {
+    @com.squareup.moshi.* <fields>;
+    @com.squareup.moshi.* <methods>;
+}
+-keepclassmembers class * {
+    @com.squareup.moshi.* <fields>;
+    @com.squareup.moshi.* <methods>;
+}
+-keepnames class kotlin.Metadata { *; }

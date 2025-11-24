@@ -1,17 +1,23 @@
 package com.m.vodovoz.data.vodovoz_service.model.address
 
 
-import com.squareup.moshi.Json
 import androidx.annotation.Keep
 import com.m.vodovoz.data.vodovoz_service.model.KNOPKA_ORDER_DTO
 import com.m.vodovoz.data.vodovoz_service.model.user_data.POLE_DTO
+import com.squareup.moshi.Json
 
 @Keep
 data class AddAddressDetailsDTO(
     @Json(name = "TIP")
-    val TIP: Long?,
+    val id: Long?,
+    @Json(name = "METKA")
+    val label: ADD_ADDRESS_LABEL_DTO?,
     @Json(name = "addressField")
     val addressField: POLE_DTO?,
+    @Json(name = "coordinate")
+    val coordinates: COORDINATES_DTO?,
+    @Json(name = "distance")
+    val fromMKADToAddressKm: Int?,
     @Json(name = "gridFields")
     val gridFields: List<POLE_DTO>?,
     @Json(name = "switchFields")
@@ -19,5 +25,5 @@ data class AddAddressDetailsDTO(
     @Json(name = "linearFields")
     val linearFields: List<POLE_DTO>?,
     @Json(name = "KNOPKA")
-    val KNOPKA: KNOPKA_ORDER_DTO?
+    val KNOPKA: KNOPKA_ORDER_DTO?,
 )

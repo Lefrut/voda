@@ -131,6 +131,7 @@ class QuestionnairesFlowFragment : Fragment() {
                                 viewModel.closeCancelDialog()
                             },
                             onAccept = {
+                                viewModel.closeCancelDialog()
                                 viewModel.fetchWelcomeDetails()
                             }
                         )

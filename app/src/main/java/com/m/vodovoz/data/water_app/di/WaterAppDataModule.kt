@@ -8,6 +8,7 @@ import com.m.vodovoz.common.moshi.adapter.LocalTimeJsonAdapter
 import com.m.vodovoz.common.water_app.WaterApp
 import com.m.vodovoz.data.water_app.datastore.WaterAppStorage
 import com.m.vodovoz.data.water_app.datastore.WaterAppDataStoreImpl
+import com.m.vodovoz.data.water_app.datastore.WaterAppPreferencesStorage
 import com.m.vodovoz.data.water_app.moshi.WaterAppStageJsonAdapter
 import com.m.vodovoz.data.water_app.repository.WaterAppRepositoryImpl
 import com.m.vodovoz.domain.general.respository.WaterAppRepository
@@ -16,6 +17,7 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import javax.inject.Named
 import javax.inject.Qualifier
 import javax.inject.Singleton
 import kotlin.time.Duration
@@ -38,15 +40,16 @@ abstract class WaterAppDataModule {
 
     companion object {
 
-        @WaterAppMoshiQualifier
+
         @Singleton
         @Provides
+        @Named("water_app")
         fun provideMoshi(): Moshi {
             return Moshi.Builder()
                 .add(LocalTimeJsonAdapter())
                 .add(LocalDateJsonAdapter())
-                .add(WaterApp.Stage::class.java, WaterAppStageJsonAdapter())
-                .add(Duration::class.java, DurationJsonAdapter())
+                .add(WaterApp.Stage::class.java, WaterAppStageJsonAdapter().lenient().nullSafe())
+                .add(Duration::class.java, DurationJsonAdapter().lenient().nullSafe())
                 .add(KotlinJsonAdapterFactory())
                 .build()
         }

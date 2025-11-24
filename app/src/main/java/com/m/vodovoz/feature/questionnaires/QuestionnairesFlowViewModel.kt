@@ -16,10 +16,10 @@ import com.m.vodovoz.feature.questionnaires.model.ComponentOptionUi
 import com.m.vodovoz.feature.questionnaires.model.ConditionUi
 import com.m.vodovoz.feature.questionnaires.model.ConditionsCheckboxListUi
 import com.m.vodovoz.feature.questionnaires.model.FieldComponentUi
-import com.m.vodovoz.feature.questionnaires.model.OptionComponentUi
 import com.m.vodovoz.feature.questionnaires.model.QuestionnaireComponentUi
 import com.m.vodovoz.feature.questionnaires.model.SwitchUi
 import com.m.vodovoz.feature.questionnaires.model.ToggleListUi
+import com.m.vodovoz.feature.questionnaires.model.applyOtherVisibilityRules
 import com.m.vodovoz.feature.questionnaires.model.errorIfInvalid
 import com.m.vodovoz.feature.questionnaires.model.toUi
 import com.m.vodovoz.feature.questionnaires.model.update
@@ -28,7 +28,6 @@ import com.m.vodovoz.ui.mvi.Event
 import com.m.vodovoz.ui.mvi.MviViewModel
 import com.m.vodovoz.ui.mvi.State
 import com.m.vodovoz.util.extensions.handleResultFlow
-import com.m.vodovoz.util.extensions.indexOfOrZero
 import com.m.vodovoz.util.extensions.singleResult
 import com.m.vodovoz.util.formatters.VodovozDateFormatters
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -66,9 +65,9 @@ class QuestionnairesFlowViewModel @Inject constructor(
                     buttons = buttons.mapToUi()
                 )
             },
-            success = {
+            success = { uiState ->
                 updateState { s ->
-                    s.copy(uiState = it)
+                    s.copy(uiState = uiState)
                 }
             },
             failure = {
@@ -90,16 +89,16 @@ class QuestionnairesFlowViewModel @Inject constructor(
 
                 vodovozServiceRepository.getQuestionnairesDetails(currentWho)
             },
-            transform = {
-                stateSnapshot.copy(
-                    button = button.toUi(),
-                    components = items.mapNotNull { it.toUi() },
-                    title = title,
-                    uiState = QuestionnairesUiState.Body
-                )
-            },
-            success = {
-                updateState { it }
+            transform = { toUi() },
+            success = { questionnaireDetails ->
+                updateState {
+                    stateSnapshot.copy(
+                        button = questionnaireDetails.button,
+                        components = questionnaireDetails.items.applyOtherVisibilityRules(),
+                        title = questionnaireDetails.title,
+                        uiState = QuestionnairesUiState.Body
+                    )
+                }
             },
             failure = {
                 delay(250)
@@ -128,25 +127,27 @@ class QuestionnairesFlowViewModel @Inject constructor(
         }
     }
 
-    fun <T : QuestionnaireComponentUi> updateOptions(component: T, option: ComponentOptionUi) =
-        viewModelScope.launch {
-            mapThenUpdateComponents {
-                updateIfSame<CheckboxListUi, ToggleListUi, ConditionsCheckboxListUi>(
-                    id = component.id,
-                    onSame1 = { update(option) },
-                    onSame2 = { update(option) },
-                    onSame3 = { update(option) }
-                )
-            }
+    fun <T : QuestionnaireComponentUi> updateOptions(
+        component: T,
+        option: ComponentOptionUi,
+    ) = viewModelScope.launch {
+        val updatedComponents = stateSnapshot.components.map {
+            it.updateIfSame<CheckboxListUi, ToggleListUi, ConditionsCheckboxListUi>(
+                id = component.id,
+                onSame1 = { update(option) },
+                onSame2 = { update(option) },
+                onSame3 = { update(option) }
+            )
         }
+
+        val updatedComponentsByRules = updatedComponents.applyOtherVisibilityRules()
+        updateState { state ->
+            state.copy(components = updatedComponentsByRules)
+        }
+    }
 
 
     fun checkBirthdayField(component: FieldComponentUi) = viewModelScope.launch {
-        val components = stateSnapshot.components
-        val previousComponent = with(components) {
-            val index = indexOfOrZero(component) - 1
-            get(index.coerceAtLeast(0))
-        }
         val field = component.ui
 
         if (field.id == "DR") {
@@ -154,20 +155,6 @@ class QuestionnairesFlowViewModel @Inject constructor(
                 s.copy(
                     showDatePicker = true,
                     currentDateField = component
-                )
-            }
-        }
-
-        if (field.label.contains("Другое", true) && previousComponent is OptionComponentUi) {
-            val updatedOption = previousComponent.options.lastOrNull()?.copy(
-                value = true
-            ) ?: return@launch
-
-            mapThenUpdateComponents {
-                updateIfSame<ToggleListUi, CheckboxListUi>(
-                    id = previousComponent.id,
-                    onSame1 = { update(updatedOption) },
-                    onSame2 = { update(updatedOption) }
                 )
             }
         }
@@ -194,10 +181,7 @@ class QuestionnairesFlowViewModel @Inject constructor(
 
     fun navigateBack() = viewModelScope.launch {
         val uiState = stateSnapshot.uiState
-        if (uiState is QuestionnairesUiState.Body
-            || stateSnapshot.currentWho != null
-            && uiState !is QuestionnairesUiState.Success
-        ) {
+        if (uiState is QuestionnairesUiState.Body) {
             showCancelDialog()
         } else {
             sendEvent(QuestionnaireEvents.GoBack)

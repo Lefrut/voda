@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.m.vodovoz.design_system.ExtendedTheme
 import com.m.vodovoz.design_system.VodovozTheme
 import com.m.vodovoz.design_system.model.widgets.SwitchUi
 
@@ -28,7 +29,11 @@ fun VodovozSwitch(
 ) {
     Row(
         modifier = modifier
-            .clickable { onSwitchChange(switch, switch.copy(value = !switch.value)) }
+            .clickable {
+                if (switch.enabled) {
+                    onSwitchChange(switch, switch.copy(value = !switch.value))
+                }
+            }
             .heightIn(64.dp)
             .fillMaxWidth()
             .padding(16.dp),
@@ -49,7 +54,8 @@ fun VodovozSwitch(
             onCheckedChange = {
                 onSwitchChange(switch, switch.copy(value = !switch.value))
             },
-            colors = SwitchDefaults.vodovozColors()
+            colors = SwitchDefaults.vodovozColors(),
+            enabled = switch.enabled
         )
     }
 }
@@ -69,5 +75,13 @@ fun SwitchDefaults.vodovozColors() = colors(
     uncheckedThumbColor = MaterialTheme.colorScheme.primary,
     checkedThumbColor = MaterialTheme.colorScheme.background,
     checkedBorderColor = MaterialTheme.colorScheme.primary,
-    uncheckedBorderColor = MaterialTheme.colorScheme.primary
+    uncheckedBorderColor = MaterialTheme.colorScheme.primary,
+    disabledCheckedIconColor = ExtendedTheme.colorScheme.primaryVariant,
+    disabledCheckedBorderColor = ExtendedTheme.colorScheme.primaryVariant,
+    disabledCheckedThumbColor = MaterialTheme.colorScheme.background,
+    disabledCheckedTrackColor = ExtendedTheme.colorScheme.primaryVariant,
+    disabledUncheckedIconColor = ExtendedTheme.colorScheme.primaryVariant,
+    disabledUncheckedBorderColor = ExtendedTheme.colorScheme.primaryVariant,
+    disabledUncheckedThumbColor = MaterialTheme.colorScheme.background,
+    disabledUncheckedTrackColor = ExtendedTheme.colorScheme.primaryVariant
 )

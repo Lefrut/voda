@@ -1,10 +1,12 @@
 package com.m.vodovoz.feature.cart.model
 
 import androidx.compose.runtime.Immutable
+import com.m.vodovoz.design_system.model.ColorfulButtonUi
 import com.m.vodovoz.design_system.model.ForAdultsUi
-import com.m.vodovoz.design_system.model.LabelUi
+import com.m.vodovoz.design_system.model.widgets.LabelUi
 import com.m.vodovoz.design_system.model.VodovozItemUi
 import com.m.vodovoz.design_system.model.toUi
+import com.m.vodovoz.design_system.model.widgets.toUi
 import com.m.vodovoz.domain.general.model.cart.CartItemModel
 
 @Immutable
@@ -30,19 +32,20 @@ data class CartItemUi(
     val hasDiscount: Boolean,
     val restriction: ProductRestrictionUi,
     val showcase: Boolean,
+    val additionalProductsText: AdditionalProductsTextUi?,
 ) : VodovozItemUi<CartItemUi>() {
     override fun copyItem(
         forAdults: ForAdultsUi?,
         cartLoading: Boolean,
         isFavorite: Boolean,
         cartQuantity: Int,
-        items: List<VodovozItemUi<*>>
+        items: List<VodovozItemUi<*>>,
     ): CartItemUi = copy(
-            cartQuantity = cartQuantity,
-            cartLoading = cartLoading,
-            isFavorite = isFavorite,
-            forAdults = forAdults
-        )
+        cartQuantity = cartQuantity,
+        cartLoading = cartLoading,
+        isFavorite = isFavorite,
+        forAdults = forAdults
+    )
 }
 
 
@@ -72,6 +75,7 @@ fun CartItemModel.toUi(): CartItemUi {
         restriction = ProductRestrictionUi.fromCode(restrictionsCode),
         showcase = showcase,
         cartLoading = false,
-        forAdults = forAdults?.toUi()
+        forAdults = forAdults?.toUi(),
+        additionalProductsText = additionalProductsText?.toUi(),
     )
 }

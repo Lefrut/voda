@@ -1,7 +1,8 @@
 package com.m.vodovoz.domain.general.model.cart
 
-import com.m.vodovoz.domain.general.model.promotion.LabelModel
+import com.m.vodovoz.domain.general.model.promotion.ColorfulButtonModel
 import com.m.vodovoz.domain.general.model.user.ForAdultsModel
+import com.m.vodovoz.domain.general.model.widgets.LabelModel
 
 data class CartItemModel(
     val id: Long,
@@ -23,5 +24,6 @@ data class CartItemModel(
     val hasDiscount: Boolean,
     val restrictionsCode: Int,
     val showcase: Boolean,
-    val forAdults: ForAdultsModel?
+    val forAdults: ForAdultsModel?,
+    val additionalProductsText: AdditionalProductsTextModel?,
 )

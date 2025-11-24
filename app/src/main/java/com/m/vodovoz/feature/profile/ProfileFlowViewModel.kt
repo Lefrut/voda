@@ -4,6 +4,7 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.viewModelScope
 import com.m.vodovoz.R
+import com.m.vodovoz.common.account.AccountManager
 import com.m.vodovoz.common.model.VodovozAction
 import com.m.vodovoz.common.resources.ResourcesProvider
 import com.m.vodovoz.design_system.model.AboutAdvertisingUi
@@ -30,6 +31,9 @@ import com.m.vodovoz.ui.mvi.State
 import com.m.vodovoz.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -39,9 +43,19 @@ class ProfileFlowViewModel @Inject constructor(
     private val siteStateManager: SiteStateManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val resourcesProvider: ResourcesProvider,
+    accountManager: AccountManager,
 ) : MviViewModel<ProfileFlowViewModel.ProfileState, ProfileFlowViewModel.ProfileEvents>(
     ProfileState()
 ) {
+    val pendingDeeplinkFlow = accountManager.pendingDeeplinkFlow.onEach { deeplink ->
+        val orderId = deeplink.toLongOrNull()
+        val event = when {
+            deeplink == AccountManager.ORDERS_DEEPLINK -> ProfileEvents.GoToOrders
+            orderId != null -> ProfileEvents.GoToOrderDetails(orderId)
+            else -> ProfileEvents.DoNothing
+        }
+        sendEvent(event)
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "")
 
     fun fetchProfileDetails() = viewModelScope.launch {
         updateState { s ->
@@ -283,6 +297,8 @@ class ProfileFlowViewModel @Inject constructor(
         data object GoToLoginByEmail : ProfileEvents()
         data object GoToWaterApp : ProfileEvents()
         data object GoToWaitFeedbackProducts : ProfileEvents()
+        data object GoToOrders : ProfileEvents()
+        data object DoNothing : ProfileEvents()
 
         data class GoByMenuItemId(val itemId: String) : ProfileEvents()
         data class ActivateVodovozAction(val action: VodovozAction) : ProfileEvents()
@@ -290,6 +306,7 @@ class ProfileFlowViewModel @Inject constructor(
         data class GoByChatItemId(val chatId: String, val data: String) : ProfileEvents()
         data class OpenUrl(val url: String) : ProfileEvents()
         data class GoToWebView(val url: String, val title: String) : ProfileEvents()
+        data class GoToOrderDetails(val orderId: Long) : ProfileEvents()
     }
 
 }

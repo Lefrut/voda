@@ -39,9 +39,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -281,7 +279,7 @@ fun OrdersHistoryProductCard(
         if (ordersHistoryProduct.quantity > 1) {
             VodovozColorChip(
                 modifier = Modifier.align(Alignment.BottomEnd),
-                color = MaterialTheme.colorScheme.secondary,
+                backgroundColor = MaterialTheme.colorScheme.secondary,
                 text = stringResource(id = R.string.quanitity_x, ordersHistoryProduct.quantity)
             )
         }

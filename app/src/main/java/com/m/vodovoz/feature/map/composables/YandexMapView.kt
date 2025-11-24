@@ -4,6 +4,7 @@ import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -14,8 +15,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.m.vodovoz.design_system.model.MapPointUi
+import com.m.vodovoz.design_system.model.mapToPoints
 import com.m.vodovoz.design_system.model.toMapPoint
 import com.m.vodovoz.design_system.model.toPoint
 import com.m.vodovoz.feature.map.model.MapAreaUi
@@ -24,7 +28,9 @@ import com.yandex.mapkit.ScreenPoint
 import com.yandex.mapkit.ScreenRect
 import com.yandex.mapkit.geometry.LinearRing
 import com.yandex.mapkit.geometry.Polygon
+import com.yandex.mapkit.geometry.Polyline
 import com.yandex.mapkit.map.CameraListener
+import com.yandex.mapkit.map.LineStyle
 
 @Suppress("NonSkippableComposable")
 @Composable
@@ -32,6 +38,7 @@ fun YandexMapView(
     modifier: Modifier = Modifier,
     yandexMap: YandexMapUi,
     areas: List<MapAreaUi>,
+    route: List<MapPointUi>,
     focusMapHeightPx: Float,
     focusMapWidthPx: Float,
     onInputStart: () -> Unit,
@@ -39,12 +46,12 @@ fun YandexMapView(
     onCenterChanged: (MapPointUi?) -> Unit,
 ) {
     LaunchedEffect(focusMapHeightPx, focusMapWidthPx) {
-        val mapView = yandexMap.mapView
-        mapView.focusRect = ScreenRect(
+        val mapWindow = yandexMap.mapView.mapWindow
+        mapWindow.focusRect = ScreenRect(
             ScreenPoint(0f, 0f),
             ScreenPoint(focusMapWidthPx, focusMapHeightPx)
         )
-        mapView.focusPoint = ScreenPoint(focusMapWidthPx / 2, focusMapHeightPx / 2)
+        mapWindow.focusPoint = ScreenPoint(focusMapWidthPx / 2, focusMapHeightPx / 2)
     }
 
 
@@ -54,7 +61,7 @@ fun YandexMapView(
 
             val polygon = Polygon(LinearRing(points), listOf())
 
-            yandexMap.mapView.map.mapObjects.addPolygon(polygon).apply {
+            yandexMap.map.mapObjects.addPolygon(polygon).apply {
                 fillColor = area.color.copy(0.4f).toArgb()
                 strokeColor = area.color.copy(0.7f).toArgb()
                 strokeWidth = 2f
@@ -65,10 +72,9 @@ fun YandexMapView(
     }
 
     DisposableEffect(key1 = polygonMapObjects) {
-        val mapView = yandexMap.mapView
-        val map = mapView.map
+        val map = yandexMap.map
         val cameraListener = CameraListener { _, cameraPosition, _, _ ->
-            val showPolygons = cameraPosition.zoom < 12f
+            val showPolygons = cameraPosition.zoom < 15f
             polygonMapObjects.forEach { mapObject ->
                 mapObject.isVisible = showPolygons
             }
@@ -78,7 +84,27 @@ fun YandexMapView(
         onDispose {
             map.removeCameraListener(cameraListener)
         }
+    }
 
+    val routeColor = MaterialTheme.colorScheme.primary.copy(0.9f)
+    val routeOutlineColor = MaterialTheme.colorScheme.onBackground.copy(0.8f)
+    val routeWidthPx = with(LocalDensity.current) { 2.dp.toPx() }
+
+    DisposableEffect(route) {
+        val mapObjects = yandexMap.map.mapObjects
+
+        val polylineMapObject = mapObjects.addPolyline(
+            Polyline(route.mapToPoints())
+        ).apply {
+            style = LineStyle().apply {
+                strokeWidth = routeWidthPx
+                outlineWidth = routeWidthPx / 2
+                outlineColor = routeOutlineColor.toArgb()
+            }
+            setStrokeColor(routeColor.toArgb())
+        }
+
+        onDispose { mapObjects.remove(polylineMapObject) }
     }
 
     Box(

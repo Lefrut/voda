@@ -40,6 +40,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.m.vodovoz.R
+import com.m.vodovoz.common.water_app.NotificationSettings
 import com.m.vodovoz.common.water_app.WaterApp
 import com.m.vodovoz.feature.profile.waterapp.WaterAppHelper
 import com.m.vodovoz.feature.profile.waterapp.composables.user_data.WaterAppActivityStage
@@ -56,7 +57,7 @@ fun WaterAppUserDataScreen(
     modifier: Modifier = Modifier,
     userDataStage: WaterAppUiState.UserData,
     userInfo: WaterApp.UserInfo,
-    notificationSettings: WaterApp.NotificationSettings,
+    notificationSettings: NotificationSettings,
     hideTopBar: Boolean,
     onGenderSelect: (isMan: Boolean) -> Unit,
     onActivityLevelSelect: (WaterAppActivityLevelUi) -> Unit,
