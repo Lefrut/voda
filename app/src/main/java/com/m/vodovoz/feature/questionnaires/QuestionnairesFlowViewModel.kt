@@ -17,6 +17,7 @@ import com.m.vodovoz.feature.questionnaires.model.ConditionUi
 import com.m.vodovoz.feature.questionnaires.model.ConditionsCheckboxListUi
 import com.m.vodovoz.feature.questionnaires.model.FieldComponentUi
 import com.m.vodovoz.feature.questionnaires.model.QuizComponentUi
+import com.m.vodovoz.feature.questionnaires.model.QuizOptionComponentUi
 import com.m.vodovoz.feature.questionnaires.model.QuizWarningsVisitor
 import com.m.vodovoz.feature.questionnaires.model.SwitchUi
 import com.m.vodovoz.feature.questionnaires.model.ToggleListUi
@@ -127,11 +128,11 @@ class QuestionnairesFlowViewModel @Inject constructor(
         }
     }
 
-    fun <T : QuizComponentUi> updateOptions(
+    fun <T : QuizOptionComponentUi> updateOptions(
         component: T,
         option: ComponentOptionUi,
     ) = viewModelScope.launch {
-        val updatedComponents = stateSnapshot.components.map {
+        val updatedComponents = stateSnapshot.components.map { it ->
             it.updateIfSame<CheckboxListUi, ToggleListUi, ConditionsCheckboxListUi>(
                 id = component.id,
                 onSame1 = { update(option) { options -> copy(options = options, error = false) } },

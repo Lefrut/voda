@@ -9,7 +9,7 @@ import com.m.vodovoz.design_system.model.widgets.vodovozValidators
 import com.m.vodovoz.domain.general.model.user.ConditionModel
 import com.m.vodovoz.domain.general.model.user.QuestionnairesItemModel
 import com.m.vodovoz.domain.general.model.user.toFieldModel
-
+import kotlin.reflect.KClass
 
 
 @Immutable
@@ -23,6 +23,45 @@ sealed interface QuizComponentUi {
     ): QuizComponentUi
 
 }
+
+
+interface QuizComponentsUpdater<T : QuizComponentUi> {
+
+    val clazz: KClass<T>
+    val id: String
+
+    fun updateList(
+        components: List<QuizComponentUi>
+    ): List<QuizComponentUi> {
+        return components.map {
+            if (it.id == id && clazz == it.javaClass) {
+                @Suppress("UNCHECKED_CAST")
+                update(it as T)
+            } else it
+        }
+    }
+
+    fun update(component: T): T
+
+
+}
+
+class CheckListUpdater(
+    override val id: String,
+    private val option: ComponentOptionUi,
+) : QuizComponentsUpdater<CheckboxListUi> {
+
+    override val clazz: KClass<CheckboxListUi> = CheckboxListUi::class
+
+    override fun update(component: CheckboxListUi): CheckboxListUi {
+        val updatedOptions = component.options.map { opt ->
+            if (opt.label == option.label) opt.copy(value = option.value)
+            else opt
+        }
+        return component.copy(options = updatedOptions)
+    }
+}
+
 
 class QuizWarningsVisitor(
     val getString: (Int) -> String,
@@ -131,9 +170,9 @@ data class CheckboxListUi(
     }
 }
 
-fun<T: QuizOptionComponentUi> T.update(
+inline fun <T : QuizOptionComponentUi> T.update(
     option: ComponentOptionUi,
-    copy: (options: List<ComponentOptionUi>) -> T
+    copy: (options: List<ComponentOptionUi>) -> T,
 ): T {
     val updatedOptions = options.map { opt ->
         if (opt.label == option.label) opt.copy(value = option.value)
