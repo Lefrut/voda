@@ -16,11 +16,11 @@ import com.m.vodovoz.feature.questionnaires.model.ComponentOptionUi
 import com.m.vodovoz.feature.questionnaires.model.ConditionUi
 import com.m.vodovoz.feature.questionnaires.model.ConditionsCheckboxListUi
 import com.m.vodovoz.feature.questionnaires.model.FieldComponentUi
-import com.m.vodovoz.feature.questionnaires.model.QuestionnaireComponentUi
+import com.m.vodovoz.feature.questionnaires.model.QuizComponentUi
+import com.m.vodovoz.feature.questionnaires.model.QuizWarningsVisitor
 import com.m.vodovoz.feature.questionnaires.model.SwitchUi
 import com.m.vodovoz.feature.questionnaires.model.ToggleListUi
 import com.m.vodovoz.feature.questionnaires.model.applyOtherVisibilityRules
-import com.m.vodovoz.feature.questionnaires.model.errorIfInvalid
 import com.m.vodovoz.feature.questionnaires.model.toUi
 import com.m.vodovoz.feature.questionnaires.model.update
 import com.m.vodovoz.feature.questionnaires.model.updateIfSame
@@ -127,16 +127,16 @@ class QuestionnairesFlowViewModel @Inject constructor(
         }
     }
 
-    fun <T : QuestionnaireComponentUi> updateOptions(
+    fun <T : QuizComponentUi> updateOptions(
         component: T,
         option: ComponentOptionUi,
     ) = viewModelScope.launch {
         val updatedComponents = stateSnapshot.components.map {
             it.updateIfSame<CheckboxListUi, ToggleListUi, ConditionsCheckboxListUi>(
                 id = component.id,
-                onSame1 = { update(option) },
-                onSame2 = { update(option) },
-                onSame3 = { update(option) }
+                onSame1 = { update(option) { options -> copy(options = options, error = false) } },
+                onSame2 = { update(option) { options -> copy(options = options, error = false) } },
+                onSame3 = { update(option) { options -> copy(options = options, error = false) } }
             )
         }
 
@@ -167,7 +167,7 @@ class QuestionnairesFlowViewModel @Inject constructor(
     }
 
     private fun mapThenUpdateComponents(
-        transform: QuestionnaireComponentUi.() -> QuestionnaireComponentUi,
+        transform: QuizComponentUi.() -> QuizComponentUi,
     ) {
         updateState { s ->
             s.copy(
@@ -211,7 +211,7 @@ class QuestionnairesFlowViewModel @Inject constructor(
     fun sendAnswers() = viewModelScope.launch {
 
         mapThenUpdateComponents {
-            errorIfInvalid { resourcesProvider.getString(it) }
+            updateByValidation(QuizWarningsVisitor(resourcesProvider::getString))
         }
 
         val currentWho = stateSnapshot.currentWho
@@ -258,7 +258,7 @@ class QuestionnairesFlowViewModel @Inject constructor(
         }
     }
 
-    private fun List<QuestionnaireComponentUi>.toAnswerString(): String {
+    private fun List<QuizComponentUi>.toAnswerString(): String {
         return this
             .mapNotNull { comp ->
                 val raw = when (comp) {
@@ -285,7 +285,7 @@ class QuestionnairesFlowViewModel @Inject constructor(
                     .replace(", ", ",")
                     .trim()
 
-                "${comp.id}\$$cleaned"
+                "${comp.id}$$cleaned"
             }
             .joinToString(separator = ";", postfix = ";")
     }
@@ -320,7 +320,7 @@ class QuestionnairesFlowViewModel @Inject constructor(
         val currentWho: String? = null,
         val title: String = "",
         val button: ColorfulButtonUi = ColorfulButtonUi.Empty,
-        val components: List<QuestionnaireComponentUi> = emptyList(),
+        val components: List<QuizComponentUi> = emptyList(),
         val showDatePicker: Boolean = false,
         val currentDateField: FieldComponentUi? = null,
         val showCancelDialog: Boolean = false,

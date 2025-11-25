@@ -39,21 +39,19 @@ import com.m.vodovoz.feature.questionnaires.model.ComponentOptionUi
 import com.m.vodovoz.feature.questionnaires.model.ConditionUi
 import com.m.vodovoz.feature.questionnaires.model.ConditionsCheckboxListUi
 import com.m.vodovoz.feature.questionnaires.model.FieldComponentUi
-import com.m.vodovoz.feature.questionnaires.model.OptionComponentUi
-import com.m.vodovoz.feature.questionnaires.model.QuestionnaireComponentUi
+import com.m.vodovoz.feature.questionnaires.model.QuizComponentUi
 import com.m.vodovoz.feature.questionnaires.model.SwitchUi
 import com.m.vodovoz.feature.questionnaires.model.ToggleListUi
 
-@Suppress("NonSkippableComposable")
 @Composable
 fun QuestionnairesBody(
     modifier: Modifier = Modifier,
-    components: List<QuestionnaireComponentUi>,
+    components: List<QuizComponentUi>,
     button: ColorfulButtonUi,
     onButtonClick: (ColorfulButtonUi) -> Unit,
     onConditionClick: (ConditionUi) -> Unit,
     onFieldChange: (FieldComponentUi, FieldUi) -> Unit,
-    onOptionChange: (QuestionnaireComponentUi, ComponentOptionUi) -> Unit,
+    onOptionChange: (QuizComponentUi, ComponentOptionUi) -> Unit,
     onSwitchChange: (SwitchUi, String) -> Unit,
     onFieldClick: (FieldComponentUi) -> Unit,
 ) {

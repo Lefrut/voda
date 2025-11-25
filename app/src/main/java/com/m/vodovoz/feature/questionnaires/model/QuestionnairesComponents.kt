@@ -10,14 +10,28 @@ import com.m.vodovoz.domain.general.model.user.ConditionModel
 import com.m.vodovoz.domain.general.model.user.QuestionnairesItemModel
 import com.m.vodovoz.domain.general.model.user.toFieldModel
 
+
+
 @Immutable
-sealed class QuestionnaireComponentUi(
-    open val id: String,
-    open val error: Boolean,
-)
+sealed interface QuizComponentUi {
+    val id: String
+    val error: Boolean
+    val label: String
 
-interface OptionComponentUi {
+    fun updateByValidation(
+        warnings: QuizWarningsVisitor,
+    ): QuizComponentUi
 
+}
+
+class QuizWarningsVisitor(
+    val getString: (Int) -> String,
+) {
+    fun fieldWarning(resId: Int) = getString(resId)
+}
+
+@Immutable
+sealed interface QuizOptionComponentUi : QuizComponentUi {
     val options: List<ComponentOptionUi>
 
 }
@@ -25,26 +39,57 @@ interface OptionComponentUi {
 @Immutable
 data class FieldComponentUi(
     val ui: FieldUi,
-) : QuestionnaireComponentUi(ui.id, ui.isError)
+) : QuizComponentUi {
+    override val id: String = ui.id
+    override val error: Boolean = ui.isError
+    override val label: String = ui.label
+
+    override fun updateByValidation(warnings: QuizWarningsVisitor): QuizComponentUi {
+        return if (listOf(ui).checkFields(validators = vodovozValidators)) {
+            this
+        } else copy(
+            ui = ui.copy(
+                isError = true,
+                supportingText = ui.getErrorText {
+                    warnings.fieldWarning(it)
+                }
+            )
+        )
+    }
+}
 
 @Immutable
 data class SwitchUi(
     override val id: String,
-    val label: String,
+    override val label: String,
+    override val error: Boolean = false,
     val options: List<String>,
     val selectedOption: String,
     val isRequired: Boolean,
-    override val error: Boolean = false,
-) : QuestionnaireComponentUi(id, error)
+) : QuizComponentUi {
+    override fun updateByValidation(warnings: QuizWarningsVisitor): QuizComponentUi {
+        return if (selectedOption !in options) {
+            copy(error = true)
+        } else this
+    }
+}
 
 @Immutable
 data class ConditionsCheckboxListUi(
     override val id: String,
-    val label: String,
     override val options: List<ComponentOptionUi>,
-    val conditions: List<ConditionUi>,
     override val error: Boolean = false,
-) : QuestionnaireComponentUi(id, error), OptionComponentUi
+    override val label: String,
+    val conditions: List<ConditionUi>,
+) : QuizOptionComponentUi {
+
+    override fun updateByValidation(warnings: QuizWarningsVisitor): QuizComponentUi {
+        return if (options.any { !it.value }) {
+            copy(error = true)
+        } else this
+
+    }
+}
 
 @Immutable
 data class ConditionUi(
@@ -55,48 +100,47 @@ data class ConditionUi(
 
 @Immutable
 data class ToggleListUi(
-    override val id: String,
-    val label: String,
-    override val options: List<ComponentOptionUi>,
-    val isRequired: Boolean,
     override val error: Boolean = false,
-) : QuestionnaireComponentUi(id, error), OptionComponentUi
+    override val options: List<ComponentOptionUi>,
+    override val id: String,
+    override val label: String,
+    val isRequired: Boolean,
+) : QuizOptionComponentUi {
+
+    override fun updateByValidation(warnings: QuizWarningsVisitor): QuizComponentUi {
+        return if (options.none { it.value }) {
+            copy(error = true)
+        } else this
+    }
+}
 
 
 @Immutable
 data class CheckboxListUi(
     override val id: String,
-    val label: String,
     override val options: List<ComponentOptionUi>,
-    val isRequired: Boolean,
     override val error: Boolean = false,
-) : QuestionnaireComponentUi(id, error), OptionComponentUi
+    override val label: String,
+    val isRequired: Boolean,
+) : QuizOptionComponentUi {
 
-fun CheckboxListUi.update(option: ComponentOptionUi): CheckboxListUi {
+    override fun updateByValidation(warnings: QuizWarningsVisitor): QuizComponentUi {
+        return if (options.none { it.value }) {
+            copy(error = true)
+        } else this
+    }
+}
+
+fun<T: QuizOptionComponentUi> T.update(
+    option: ComponentOptionUi,
+    copy: (options: List<ComponentOptionUi>) -> T
+): T {
     val updatedOptions = options.map { opt ->
         if (opt.label == option.label) opt.copy(value = option.value)
         else opt
     }
-    return copy(options = updatedOptions, error = false)
+    return copy(updatedOptions)
 }
-
-fun ConditionsCheckboxListUi.update(option: ComponentOptionUi): ConditionsCheckboxListUi {
-    val updatedOptions = options.map { opt ->
-        if (opt.label == option.label) opt.copy(value = option.value)
-        else opt
-    }
-    return copy(options = updatedOptions, error = false)
-}
-
-fun ToggleListUi.update(option: ComponentOptionUi): ToggleListUi {
-    val updatedOptions = options.map { opt ->
-        opt.copy(value = (opt.label == option.label))
-    }
-    return copy(options = updatedOptions, error = false)
-}
-
-
-
 
 @Immutable
 data class ComponentOptionUi(
@@ -112,7 +156,7 @@ fun ConditionModel.toUi(): ConditionUi {
     )
 }
 
-fun QuestionnairesItemModel.toUi(): QuestionnaireComponentUi? {
+fun QuestionnairesItemModel.toUi(): QuizComponentUi? {
     return when {
         type.lowercase() == "text" -> {
             FieldComponentUi(toFieldModel().toUi())
@@ -159,12 +203,12 @@ fun QuestionnairesItemModel.toUi(): QuestionnaireComponentUi? {
     }
 }
 
-fun List<QuestionnaireComponentUi>.applyOtherVisibilityRules(): List<QuestionnaireComponentUi> =
+fun List<QuizComponentUi>.applyOtherVisibilityRules(): List<QuizComponentUi> =
     mapIndexed { index, component ->
         if (component is FieldComponentUi && component.id.contains("DRUGOE", ignoreCase = true)) {
 
             val isOtherOptionSelected = runCatching {
-                val prev = getOrElse(index - 1) { component } as OptionComponentUi
+                val prev = getOrElse(index - 1) { component } as QuizOptionComponentUi
                 prev.options.any {
                     it.value && it.label.contains("другое", ignoreCase = true)
                 }
@@ -180,61 +224,20 @@ fun List<QuestionnaireComponentUi>.applyOtherVisibilityRules(): List<Questionnai
         }
     }
 
-
-fun QuestionnaireComponentUi.errorIfInvalid(
-    getString: (Int) -> String,
-): QuestionnaireComponentUi {
-    val isInvalidAndErrorComponent = when (this) {
-        is CheckboxListUi -> {
-            options.none { it.value } to copy(error = true)
-        }
-
-        is ConditionsCheckboxListUi -> {
-            options.any { !it.value } to copy(error = true)
-        }
-
-        is FieldComponentUi -> {
-            !listOf(ui).checkFields(validators = vodovozValidators) to copy(
-                ui = ui.copy(
-                    isError = true,
-                    supportingText = ui.getErrorText {
-                        getString(it)
-                    }
-                )
-
-            )
-
-        }
-
-        is SwitchUi -> {
-            (selectedOption !in options) to copy(error = true)
-        }
-
-        is ToggleListUi -> {
-            options.none { it.value } to copy(error = true)
-        }
-    }
-
-    return if (isInvalidAndErrorComponent.first) {
-        isInvalidAndErrorComponent.second
-    } else this
-}
-
-
-inline fun <reified T : QuestionnaireComponentUi> QuestionnaireComponentUi.updateIfSame(
+inline fun <reified T : QuizComponentUi> QuizComponentUi.updateIfSame(
     id: String,
     onSame: T.() -> T,
-): QuestionnaireComponentUi {
+): QuizComponentUi {
     return if (this is T && this.id == id) {
         onSame()
     } else this
 }
 
-inline fun <reified T : QuestionnaireComponentUi, reified T2 : QuestionnaireComponentUi> QuestionnaireComponentUi.updateIfSame(
+inline fun <reified T : QuizComponentUi, reified T2 : QuizComponentUi> QuizComponentUi.updateIfSame(
     id: String,
     onSame1: T.() -> T,
     onSame2: T2.() -> T2,
-): QuestionnaireComponentUi {
+): QuizComponentUi {
     val initial = this
 
     listOf(
@@ -246,12 +249,12 @@ inline fun <reified T : QuestionnaireComponentUi, reified T2 : QuestionnaireComp
     return initial
 }
 
-inline fun <reified T : QuestionnaireComponentUi, reified T2 : QuestionnaireComponentUi, reified T3 : QuestionnaireComponentUi> QuestionnaireComponentUi.updateIfSame(
+inline fun <reified T : QuizComponentUi, reified T2 : QuizComponentUi, reified T3 : QuizComponentUi> QuizComponentUi.updateIfSame(
     id: String,
     onSame1: T.() -> T,
     onSame2: T2.() -> T2,
     onSame3: T3.() -> T3,
-): QuestionnaireComponentUi {
+): QuizComponentUi {
     val initial = this
 
     listOf(

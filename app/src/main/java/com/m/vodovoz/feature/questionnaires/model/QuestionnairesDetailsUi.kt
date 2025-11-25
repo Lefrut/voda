@@ -7,7 +7,7 @@ import com.m.vodovoz.domain.general.model.user.QuestionnairesDetailsModel
 
 data class QuestionnairesDetailsUi(
     val title: String,
-    val items: List<QuestionnaireComponentUi>,
+    val items: List<QuizComponentUi>,
     val button: ColorfulButtonUi
 )
 
