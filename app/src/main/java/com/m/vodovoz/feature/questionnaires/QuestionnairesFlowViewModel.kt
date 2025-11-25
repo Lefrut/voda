@@ -11,20 +11,12 @@ import com.m.vodovoz.design_system.model.mapToUi
 import com.m.vodovoz.design_system.model.toUi
 import com.m.vodovoz.domain.general.model.exceptions.RequestException
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
-import com.m.vodovoz.feature.questionnaires.model.CheckboxListUi
-import com.m.vodovoz.feature.questionnaires.model.ComponentOptionUi
 import com.m.vodovoz.feature.questionnaires.model.ConditionUi
-import com.m.vodovoz.feature.questionnaires.model.ConditionsCheckboxListUi
 import com.m.vodovoz.feature.questionnaires.model.FieldComponentUi
 import com.m.vodovoz.feature.questionnaires.model.QuizComponentUi
-import com.m.vodovoz.feature.questionnaires.model.QuizOptionComponentUi
 import com.m.vodovoz.feature.questionnaires.model.QuizWarningsVisitor
-import com.m.vodovoz.feature.questionnaires.model.SwitchUi
-import com.m.vodovoz.feature.questionnaires.model.ToggleListUi
 import com.m.vodovoz.feature.questionnaires.model.applyOtherVisibilityRules
 import com.m.vodovoz.feature.questionnaires.model.toUi
-import com.m.vodovoz.feature.questionnaires.model.update
-import com.m.vodovoz.feature.questionnaires.model.updateIfSame
 import com.m.vodovoz.ui.mvi.Event
 import com.m.vodovoz.ui.mvi.MviViewModel
 import com.m.vodovoz.ui.mvi.State
@@ -108,57 +100,24 @@ class QuestionnairesFlowViewModel @Inject constructor(
         )
     }
 
-    fun updateText(id: String, newValue: String) = viewModelScope.launch {
+    fun updateComponent(updatedComponent: QuizComponentUi) {
         mapThenUpdateComponents {
-            updateIfSame<FieldComponentUi>(id) {
-                copy(ui = ui.copy(value = newValue, isError = false))
-            }
+            if (id == updatedComponent.id) updatedComponent
+            else this
         }
     }
 
 
-    fun updateSwitch(id: String, option: String) = viewModelScope.launch {
-        mapThenUpdateComponents {
-            updateIfSame<SwitchUi>(id) {
-                copy(
-                    selectedOption = option,
-                    error = false
-                )
-            }
-        }
-    }
+    fun checkBirthdayField(component: FieldComponentUi) {
+        if (component.ui.id != "DR") return
 
-    fun <T : QuizOptionComponentUi> updateOptions(
-        component: T,
-        option: ComponentOptionUi,
-    ) = viewModelScope.launch {
-        val updatedComponents = stateSnapshot.components.map { it ->
-            it.updateIfSame<CheckboxListUi, ToggleListUi, ConditionsCheckboxListUi>(
-                id = component.id,
-                onSame1 = { update(option) { options -> copy(options = options, error = false) } },
-                onSame2 = { update(option) { options -> copy(options = options, error = false) } },
-                onSame3 = { update(option) { options -> copy(options = options, error = false) } }
+        updateState { s ->
+            s.copy(
+                showDatePicker = true,
+                currentDateField = component
             )
         }
 
-        val updatedComponentsByRules = updatedComponents.applyOtherVisibilityRules()
-        updateState { state ->
-            state.copy(components = updatedComponentsByRules)
-        }
-    }
-
-
-    fun checkBirthdayField(component: FieldComponentUi) = viewModelScope.launch {
-        val field = component.ui
-
-        if (field.id == "DR") {
-            updateState { s ->
-                s.copy(
-                    showDatePicker = true,
-                    currentDateField = component
-                )
-            }
-        }
     }
 
     fun closeDatePicker() = viewModelScope.launch {
@@ -174,18 +133,19 @@ class QuestionnairesFlowViewModel @Inject constructor(
             s.copy(
                 components = stateSnapshot.components.map { component ->
                     transform(component)
-                }
+                }.applyOtherVisibilityRules()
             )
         }
     }
 
 
     fun navigateBack() = viewModelScope.launch {
-        val uiState = stateSnapshot.uiState
-        if (uiState is QuestionnairesUiState.Body) {
-            showCancelDialog()
-        } else {
-            sendEvent(QuestionnaireEvents.GoBack)
+        when (stateSnapshot.uiState) {
+            QuestionnairesUiState.Body -> {
+                showCancelDialog()
+            }
+
+            else -> sendEvent(QuestionnaireEvents.GoBack)
         }
     }
 
@@ -215,25 +175,23 @@ class QuestionnairesFlowViewModel @Inject constructor(
             updateByValidation(QuizWarningsVisitor(resourcesProvider::getString))
         }
 
-        val currentWho = stateSnapshot.currentWho
         val components = stateSnapshot.components
-        if (components.any { component -> component.error } || currentWho == null) {
-            sendEvent(QuestionnaireEvents.ScrollToTop)
-            return@launch
-        }
+        val currentWho = stateSnapshot.currentWho
 
-        val answers = components.toAnswerString()
+
+        if (components.any { component -> component.error } || currentWho == null) {
+            sendEvent(QuestionnaireEvents.ScrollToTop).also { return@launch }
+        }
 
         updateState { s ->
             s.copy(button = s.button.copy(loading = true))
         }
 
-        val sendQuestionnairesResult =
-            vodovozServiceRepository.sendQuestionnairesAnswers(
-                currentWho, answers
-            ).singleResult()
-
-        sendQuestionnairesResult.onSuccess {
+        val formattedAnswer = components.formatToAnswer()
+        vodovozServiceRepository.sendQuestionnairesAnswers(
+            who = currentWho,
+            answers = formattedAnswer
+        ).singleResult().onSuccess {
             val placeholder = it.toUi()
             updateState { s ->
                 s.copy(
@@ -242,53 +200,33 @@ class QuestionnairesFlowViewModel @Inject constructor(
                 )
             }
         }.onFailure { t ->
-            if (t is RequestException) {
-                sendEvent(QuestionnaireEvents.ShowToast(t.message ?: ""))
+            val errorMessage = if (t is RequestException) {
+                t.message
             } else {
-                sendEvent(
-                    QuestionnaireEvents.ShowToast(
-                        resourcesProvider.getString(R.string.questionnaire_failed)
-                    )
-                )
+                resourcesProvider.getString(R.string.questionnaire_failed)
             }
+
+            sendEvent(QuestionnaireEvents.ShowToast(errorMessage.orEmpty()))
 
             updateState { s ->
                 s.copy(button = s.button.copy(loading = false))
             }
-
         }
     }
 
-    private fun List<QuizComponentUi>.toAnswerString(): String {
-        return this
-            .mapNotNull { comp ->
-                val raw = when (comp) {
-                    is FieldComponentUi -> comp.ui.value
-                    is SwitchUi -> comp.selectedOption
-                    is CheckboxListUi -> comp.options
-                        .filter { it.value }
-                        .joinToString(",") { it.label }
+    private fun List<QuizComponentUi>.formatToAnswer(): String {
+        return mapNotNull { comp ->
+            val raw = comp.value()
+            if (raw.isBlank()) return@mapNotNull null
 
-                    is ToggleListUi -> comp.options
-                        .firstOrNull { it.value }
-                        ?.label
-                        .orEmpty()
+            val cleaned = raw
+                .removePrefix("[")
+                .removeSuffix("]")
+                .replace(", ", ",")
+                .trim()
 
-                    is ConditionsCheckboxListUi -> comp.options
-                        .filter { it.value }
-                        .joinToString(",") { it.label }
-                }
-                if (raw.isBlank()) return@mapNotNull null
-
-                val cleaned = raw
-                    .removePrefix("[")
-                    .removeSuffix("]")
-                    .replace(", ", ",")
-                    .trim()
-
-                "${comp.id}$$cleaned"
-            }
-            .joinToString(separator = ";", postfix = ";")
+            "${comp.id}$$cleaned"
+        }.joinToString(separator = ";", postfix = ";")
     }
 
     fun navigateToWebView(condition: ConditionUi) = viewModelScope.launch {
@@ -296,8 +234,9 @@ class QuestionnairesFlowViewModel @Inject constructor(
     }
 
     fun changeDate(selectedDate: LocalDate) = viewModelScope.launch {
-        val value = kotlin.runCatching { selectedDate.format(VodovozDateFormatters.DMY) }
-            .getOrElse { "" }
+        val value = kotlin.runCatching {
+            selectedDate.format(VodovozDateFormatters.DMY)
+        }.getOrElse { "" }
         val currentDateField = stateSnapshot.currentDateField ?: return@launch
         val updatedCurrentDateField = currentDateField.copy(
             ui = currentDateField.ui.copy(value = value, isError = false)

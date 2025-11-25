@@ -58,10 +58,10 @@ suspend inline fun <T, R> handleResultFlow(
 }
 
 
-fun <T> Flow<Result<T>>.onSuccess(action: suspend (T) -> Unit): Flow<Result<T>> = onEach { r ->
+fun <T> Flow<Result<T>>.onEachSuccess(action: suspend (T) -> Unit): Flow<Result<T>> = onEach { r ->
     r.onSuccess { action(it) }
 }
 
-fun <T> Flow<Result<T>>.onFailure(action: suspend (Throwable) -> Unit): Flow<Result<T>> = onEach { r ->
+fun <T> Flow<Result<T>>.onEachFailure(action: suspend (Throwable) -> Unit): Flow<Result<T>> = onEach { r ->
     r.onFailure { action(it) }
 }

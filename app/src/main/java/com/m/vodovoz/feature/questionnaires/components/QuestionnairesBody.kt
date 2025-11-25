@@ -33,7 +33,6 @@ import com.m.vodovoz.design_system.composables.button.VodovozRadioButton
 import com.m.vodovoz.design_system.composables.decoration.VodovozHorizontalDivider
 import com.m.vodovoz.design_system.composables.text_fields.VodovozTextField
 import com.m.vodovoz.design_system.model.ColorfulButtonUi
-import com.m.vodovoz.design_system.model.widgets.FieldUi
 import com.m.vodovoz.feature.questionnaires.model.CheckboxListUi
 import com.m.vodovoz.feature.questionnaires.model.ComponentOptionUi
 import com.m.vodovoz.feature.questionnaires.model.ConditionUi
@@ -42,6 +41,7 @@ import com.m.vodovoz.feature.questionnaires.model.FieldComponentUi
 import com.m.vodovoz.feature.questionnaires.model.QuizComponentUi
 import com.m.vodovoz.feature.questionnaires.model.SwitchUi
 import com.m.vodovoz.feature.questionnaires.model.ToggleListUi
+import com.m.vodovoz.feature.questionnaires.model.withOption
 
 @Composable
 fun QuestionnairesBody(
@@ -49,11 +49,9 @@ fun QuestionnairesBody(
     components: List<QuizComponentUi>,
     button: ColorfulButtonUi,
     onButtonClick: (ColorfulButtonUi) -> Unit,
+    onComponentChange: (QuizComponentUi) -> Unit,
+    onFieldCompClick: (FieldComponentUi) -> Unit,
     onConditionClick: (ConditionUi) -> Unit,
-    onFieldChange: (FieldComponentUi, FieldUi) -> Unit,
-    onOptionChange: (QuizComponentUi, ComponentOptionUi) -> Unit,
-    onSwitchChange: (SwitchUi, String) -> Unit,
-    onFieldClick: (FieldComponentUi) -> Unit,
 ) {
     Column(
         modifier = modifier.fillMaxSize()
@@ -72,7 +70,7 @@ fun QuestionnairesBody(
                         is CheckboxListUi -> {
                             CheckboxListComponent(
                                 ui = component,
-                                onClick = onOptionChange
+                                onClick = onComponentChange
                             )
                         }
 
@@ -83,12 +81,12 @@ fun QuestionnairesBody(
                                     .pointerInput(Unit) {
                                         awaitEachGesture {
                                             awaitPointerEvent(PointerEventPass.Initial)
-                                            onFieldClick(component)
+                                            onFieldCompClick(component)
                                         }
                                     },
                                 field = component.ui,
                                 onFieldChange = { _, updatedField ->
-                                    onFieldChange(component, updatedField)
+                                    onComponentChange(component.copy(ui = updatedField))
                                 },
                             )
                         }
@@ -96,21 +94,21 @@ fun QuestionnairesBody(
                         is SwitchUi -> {
                             SwitchComponent(
                                 ui = component,
-                                onClick = onSwitchChange
+                                onClick = onComponentChange
                             )
                         }
 
                         is ToggleListUi -> {
                             ToggleListComponent(
                                 ui = component,
-                                onClick = onOptionChange
+                                onClick = onComponentChange
                             )
                         }
 
                         is ConditionsCheckboxListUi -> {
                             ConditionCheckboxListComponent(
                                 ui = component,
-                                onClick = onOptionChange,
+                                onClick = onComponentChange,
                                 onConditionClick = onConditionClick
                             )
                         }
@@ -131,7 +129,7 @@ fun QuestionnairesBody(
 private fun ConditionCheckboxListComponent(
     modifier: Modifier = Modifier,
     ui: ConditionsCheckboxListUi,
-    onClick: (ConditionsCheckboxListUi, ComponentOptionUi) -> Unit,
+    onClick: (ConditionsCheckboxListUi) -> Unit,
     onConditionClick: (ConditionUi) -> Unit,
 ) {
     Column(
@@ -162,13 +160,13 @@ private fun ConditionCheckboxListComponent(
 
                 Row(
                     modifier = Modifier
-                        .clickable { onClick(ui, updatedOption) }
+                        .clickable { onClick(ui.withOption(updatedOption)) }
                         .padding(16.dp)) {
                     Checkbox(
                         modifier = Modifier.size(24.dp),
                         checked = option.value,
                         onCheckedChange = {
-                            onClick(ui, updatedOption)
+                            onClick(ui.withOption(updatedOption))
                         },
                         colors = CheckboxDefaults.colors(
                             checkmarkColor = MaterialTheme.colorScheme.background,
@@ -195,7 +193,7 @@ private fun ConditionCheckboxListComponent(
 @Composable
 private fun SwitchComponent(
     modifier: Modifier = Modifier, ui: SwitchUi,
-    onClick: (SwitchUi, String) -> Unit,
+    onClick: (SwitchUi) -> Unit,
 ) {
     Column(modifier = modifier.padding(horizontal = 16.dp)) {
         Text(
@@ -213,7 +211,7 @@ private fun SwitchComponent(
             ui.options.forEach { opt ->
                 Button(
                     modifier = Modifier.requiredHeight(38.dp),
-                    onClick = { onClick(ui, opt) },
+                    onClick = { onClick(ui.copy(selectedOption = opt)) },
                     shape = RoundedCornerShape(20.dp),
                     contentPadding = PaddingValues(horizontal = 24.dp),
                     colors = ButtonDefaults.buttonColors(
@@ -241,7 +239,7 @@ private fun SwitchComponent(
 private fun CheckboxListComponent(
     modifier: Modifier = Modifier,
     ui: CheckboxListUi,
-    onClick: (CheckboxListUi, ComponentOptionUi) -> Unit,
+    onClick: (CheckboxListUi) -> Unit,
 ) {
     Column(modifier = modifier) {
         Text(
@@ -252,11 +250,12 @@ private fun CheckboxListComponent(
         )
         ui.options.forEach { opt ->
             val updatedOption = opt.copy(value = !opt.value)
+            val uiWithOption = ui.withOption(updatedOption)
 
             Row(
                 modifier = Modifier
                     .clickable {
-                        onClick(ui, updatedOption)
+                        onClick(uiWithOption)
                     }
                     .padding(16.dp),
                 verticalAlignment = Alignment.CenterVertically
@@ -272,7 +271,7 @@ private fun CheckboxListComponent(
                     modifier = Modifier.size(24.dp),
                     checked = opt.value,
                     onCheckedChange = {
-                        onClick(ui, updatedOption)
+                        onClick(uiWithOption)
                     },
                     colors = CheckboxDefaults.colors(
                         checkmarkColor = MaterialTheme.colorScheme.background,
@@ -290,8 +289,15 @@ private fun CheckboxListComponent(
 private fun ToggleListComponent(
     modifier: Modifier = Modifier,
     ui: ToggleListUi,
-    onClick: (ToggleListUi, ComponentOptionUi) -> Unit,
+    onClick: (ToggleListUi) -> Unit,
 ) {
+    fun ToggleListUi.withToggleListOption(option: ComponentOptionUi): ToggleListUi {
+        val updatedOptions = options.map {
+            it.copy(value = it.label == option.label)
+        }
+        return withOptions(updatedOptions) as ToggleListUi
+    }
+
     Column(modifier = modifier) {
         Text(
             modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
@@ -300,10 +306,11 @@ private fun ToggleListComponent(
             style = MaterialTheme.typography.headlineSmall
         )
         ui.options.forEach { option ->
+
             Row(
                 modifier = Modifier
                     .clickable {
-                        onClick(ui, option)
+                        onClick(ui.withToggleListOption(option))
                     }
                     .padding(16.dp),
                 verticalAlignment = Alignment.CenterVertically
@@ -319,7 +326,7 @@ private fun ToggleListComponent(
                     modifier = Modifier.padding(start = 16.dp),
                     selected = option.value,
                     onClick = {
-                        onClick(ui, option)
+                        onClick(ui.withToggleListOption(option))
                     }
                 )
             }

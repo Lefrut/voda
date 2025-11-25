@@ -17,8 +17,8 @@ import com.m.vodovoz.ui.mvi.Event
 import com.m.vodovoz.ui.paging.PagingProductsMviViewModel
 import com.m.vodovoz.ui.paging.PagingState
 import com.m.vodovoz.ui.paging.emptyCombinedLoadStates
-import com.m.vodovoz.util.extensions.onFailure
-import com.m.vodovoz.util.extensions.onSuccess
+import com.m.vodovoz.util.extensions.onEachFailure
+import com.m.vodovoz.util.extensions.onEachSuccess
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.launchIn
@@ -68,7 +68,7 @@ class PromotionDetailsViewModel @Inject constructor(
         updateState { s ->
             s.copy(uiState = UiState.Loading)
         }
-    }.onSuccess { titleAndPromotionDetails ->
+    }.onEachSuccess { titleAndPromotionDetails ->
         updateState { s ->
             s.copy(
                 promotionDetails = titleAndPromotionDetails.second.toUi(),
@@ -81,7 +81,7 @@ class PromotionDetailsViewModel @Inject constructor(
         ).map { pagingData ->
             pagingData.map { productModel -> productModel.toUi() }
         }.collectPagingData()
-    }.onFailure {
+    }.onEachFailure {
         updateState { s ->
             s.copy(uiState = UiState.Error)
         }

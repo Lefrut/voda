@@ -32,8 +32,8 @@ import com.m.vodovoz.feature.map.model.toUi
 import com.m.vodovoz.ui.mvi.Event
 import com.m.vodovoz.ui.mvi.MviViewModel
 import com.m.vodovoz.ui.mvi.State
-import com.m.vodovoz.util.extensions.onFailure
-import com.m.vodovoz.util.extensions.onSuccess
+import com.m.vodovoz.util.extensions.onEachFailure
+import com.m.vodovoz.util.extensions.onEachSuccess
 import com.m.vodovoz.util.extensions.singleGetOrNull
 import com.m.vodovoz.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -64,9 +64,9 @@ class AddressesFlowViewModel @Inject constructor(
         fetchMapAreas()
     }
 
-    private fun fetchMapAreas() = vodovozServiceRepository.getMapAreas().onFailure { throwable ->
+    private fun fetchMapAreas() = vodovozServiceRepository.getMapAreas().onEachFailure { throwable ->
         throw throwable
-    }.onSuccess { mapZonesModel ->
+    }.onEachSuccess { mapZonesModel ->
         updateState { s ->
             s.copy(mapAreas = mapZonesModel.areas.mapToUi())
         }

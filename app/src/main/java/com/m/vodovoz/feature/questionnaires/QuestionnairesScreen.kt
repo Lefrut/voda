@@ -44,18 +44,10 @@ fun QuestionnairesScreen(
                 .verticalScroll(scrollState),
             components = viewState.components,
             button = viewState.button,
-            onButtonClick = {
-                viewModel.sendAnswers()
-            },
-            onFieldChange = { field, newValue ->
-                viewModel.updateText(field.id, newValue.value)
-            },
-            onSwitchChange = { switch, option ->
-                viewModel.updateSwitch(switch.id, option)
-            },
-            onOptionChange = viewModel::updateOptions,
-            onConditionClick = viewModel::navigateToWebView,
-            onFieldClick = viewModel::checkBirthdayField
+            onButtonClick = { viewModel.sendAnswers() },
+            onComponentChange = viewModel::updateComponent,
+            onFieldCompClick = viewModel::checkBirthdayField,
+            onConditionClick = viewModel::navigateToWebView
         )
 
         VodovozSnackbarHost(snackbarHostState)
