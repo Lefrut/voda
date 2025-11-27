@@ -28,6 +28,7 @@ import com.m.vodovoz.domain.general.model.cart.CartPromoButtonModel
 import com.m.vodovoz.domain.general.model.cart.CartPromoPopupWindowModel
 import com.m.vodovoz.domain.general.model.cart.OrderSummaryItemModel
 import com.m.vodovoz.domain.general.model.promotion.ColorfulButtonModel
+import kotlin.math.roundToInt
 
 fun CartDetailsDTO.toDomain(): CartDetailsModel {
 
@@ -110,10 +111,10 @@ fun PODAROK_DTO.toDomain(): CartPresentModel {
         title = TITLE ?: "",
         description = OPIS ?: "",
         image = KARTINKA?.toVodovozUrl() ?: "",
-        leftToGift = MAXSYMMA ?: OPIS?.filter { it.isDigit() }?.toIntOrNull() ?: 0,
+        leftToGift = MAXSYMMA?.roundToInt() ?: OPIS?.filter { it.isDigit() }?.toIntOrNull() ?: 0,
         button = KNOPKA?.toDomain(),
         popupWindow = KNOPKA?.OKNOPODAROK?.toDomain(),
-        currentGift = SUMKORZINA ?: 0
+        currentGift = SUMKORZINA?.roundToInt() ?: 0
     )
 }
 

@@ -13,12 +13,11 @@ data class PODAROK_DTO(
     @Json(name = "OPIS")
     val OPIS: String?,
     @Json(name = "SUMKORZINA")
-    val SUMKORZINA: Int?,
+    val SUMKORZINA: Double?,
     @Json(name = "MAXSYMMA")
-    val MAXSYMMA: Int?,
+    val MAXSYMMA: Double?,
     @Json(name = "KARTINKA")
     val KARTINKA: String?,
-
     @Json(name = "KNOPKA")
     val KNOPKA: PODAROK_KNOPKA_DTO?,
 )
