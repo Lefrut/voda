@@ -102,7 +102,7 @@ class QuestionnairesFlowViewModel @Inject constructor(
 
     fun updateComponent(updatedComponent: QuizComponentUi) {
         mapThenUpdateComponents {
-            if (id == updatedComponent.id) updatedComponent
+            if (id == updatedComponent.id) updatedComponent.withError(false)
             else this
         }
     }

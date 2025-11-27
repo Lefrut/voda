@@ -21,7 +21,10 @@ sealed interface QuizComponentUi {
         warnings: QuizWarningsVisitor,
     ): QuizComponentUi
 
+    fun withError(error: Boolean): QuizComponentUi
+
     fun value(): String
+
 }
 
 class QuizWarningsVisitor(
@@ -74,6 +77,10 @@ data class FieldComponentUi(
         )
     }
 
+    override fun withError(error: Boolean): QuizComponentUi {
+        return copy(ui = ui.copy(isError = error))
+    }
+
     override fun value(): String = ui.value
 }
 
@@ -87,9 +94,11 @@ data class SwitchUi(
     val isRequired: Boolean,
 ) : QuizComponentUi {
     override fun updateByValidation(warnings: QuizWarningsVisitor): QuizComponentUi {
-        return if (selectedOption !in options) {
-            copy(error = true)
-        } else this
+        return copy(error = selectedOption !in options)
+    }
+
+    override fun withError(error: Boolean): QuizComponentUi {
+        return copy(error = error)
     }
 
     override fun value(): String = selectedOption
@@ -105,14 +114,15 @@ data class ConditionsCheckboxListUi(
 ) : QuizOptionComponentUi {
 
     override fun updateByValidation(warnings: QuizWarningsVisitor): QuizComponentUi {
-        return if (options.any { !it.value }) {
-            copy(error = true)
-        } else this
+        return copy(error = options.any { !it.value })
+    }
 
+    override fun withError(error: Boolean): QuizComponentUi {
+        return copy(error = error)
     }
 
     override fun withOptions(updatedOptions: List<ComponentOptionUi>): QuizOptionComponentUi {
-        return copy(options = updatedOptions)
+        return copy(options = updatedOptions, error = false)
     }
 }
 
@@ -133,9 +143,11 @@ data class ToggleListUi(
 ) : QuizOptionComponentUi {
 
     override fun updateByValidation(warnings: QuizWarningsVisitor): QuizComponentUi {
-        return if (options.none { it.value }) {
-            copy(error = true)
-        } else this
+        return copy(error = options.none { it.value })
+    }
+
+    override fun withError(error: Boolean): QuizComponentUi {
+        return copy(error = error)
     }
 
     override fun withOptions(updatedOptions: List<ComponentOptionUi>): QuizOptionComponentUi {
@@ -156,6 +168,10 @@ data class CheckboxListUi(
         return if (options.none { it.value }) {
             copy(error = true)
         } else this
+    }
+
+    override fun withError(error: Boolean): QuizComponentUi {
+        return copy(error = error)
     }
 
     override fun withOptions(updatedOptions: List<ComponentOptionUi>): QuizOptionComponentUi {

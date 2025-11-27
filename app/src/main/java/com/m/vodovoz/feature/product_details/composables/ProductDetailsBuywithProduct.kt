@@ -26,7 +26,11 @@ fun ProductDetailsAccessoryProducts(
     onIncrementProductToCart: (ProductUi) -> Unit,
     onDecrementProductToCart: (ProductUi) -> Unit,
 ) {
-    Column(modifier = modifier.padding(horizontal = 16.dp)) {
+    Column(
+        modifier = modifier
+            .padding(horizontal = 16.dp)
+            .fillMaxWidth()
+    ) {
         Text(
             text = productSection.title,
             color = MaterialTheme.colorScheme.onBackground,
@@ -44,7 +48,7 @@ fun ProductDetailsAccessoryProducts(
             productSection.items.forEach { product ->
                 key(product.id) {
                     GridProductCard(
-                        modifier = Modifier.width(itemWidth),
+                        modifier = Modifier.weight(1f),
                         product = product,
                         onClick = onProductClick,
                         onLike = onProductLike,

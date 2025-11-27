@@ -86,7 +86,9 @@ fun QuestionnairesBody(
                                     },
                                 field = component.ui,
                                 onFieldChange = { _, updatedField ->
-                                    onComponentChange(component.copy(ui = updatedField))
+                                    onComponentChange(
+                                        component.copy(ui = updatedField.copy(isError = false))
+                                    )
                                 },
                             )
                         }

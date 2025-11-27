@@ -3,10 +3,13 @@ package com.m.vodovoz.design_system.composables.layout
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.FlowRowScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Stable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import kotlin.math.floor
 import kotlin.math.min
 
@@ -16,15 +19,20 @@ fun FixedGridFlowRow(
     itemsInRow: Int,
     horizontalSpacing: Dp,
     verticalSpacing: Dp,
-    content: @Composable (itemWidth: Dp) -> Unit,
+    content: @Composable FlowRowScope.(itemWidth: Dp) -> Unit,
 ) {
     BoxWithConstraints(
         modifier = modifier.fillMaxWidth()
     ) {
-        val itemWidth = calcItemWidth(maxWidth, horizontalSpacing, itemsInRow)
+        val itemWidth = FixedGridFlowRowDefaults.calcItemWidth(
+            totalWidth = this.maxWidth,
+            spacing = horizontalSpacing,
+            itemsInRow = itemsInRow
+        )
 
+        @Suppress("COMPOSE_APPLIER_CALL_MISMATCH")
         FlowRow(
-            modifier = Modifier,
+            modifier = Modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(verticalSpacing),
             horizontalArrangement = Arrangement.spacedBy(horizontalSpacing),
             maxItemsInEachRow = itemsInRow,
@@ -35,9 +43,16 @@ fun FixedGridFlowRow(
     }
 }
 
-private fun calcItemWidth(totalWidth: Dp, spacing: Dp, itemsInRow: Int): Dp {
-    val totalSpacing = spacing * (itemsInRow - 1)
-    val raw = (totalWidth - totalSpacing) / itemsInRow
-    val w = floor(raw.value)
-    return Dp(min(w, raw.value))
+
+data object FixedGridFlowRowDefaults {
+
+    @Stable
+    fun calcItemWidth(totalWidth: Dp, spacing: Dp, itemsInRow: Int): Dp {
+        val totalSpacing = spacing * (itemsInRow - 1)
+        val raw = (totalWidth - totalSpacing) / itemsInRow
+        val w = floor(raw.value)
+        return Dp(min(w, raw.value)) - 1.dp
+    }
+
 }
+
