@@ -204,10 +204,10 @@ interface VodovozService {
 
     @GET("oformlenie/oformlenie.php?action=glav")
     suspend fun getOrderingDetails(
-
         @Query("adresid") addressId: Long?,
         @Query("date") date: String?,
         @Query("indos") timeInterval: String?,
+        @Query("coupon") coupon: String?,
     ): Response<VodovozResponseDTO<OrderingDetailsDTO>>
 
     @GET("profile/historyorder/voditel.php")
@@ -374,12 +374,12 @@ interface VodovozService {
 
     @GET("profile/index.php?action=glav")
     suspend fun getProfileDetails(
-        
+
     ): Response<VodovozResponseDTO<ProfileDetailsDTO>>
 
     @GET("profile/index.php?action=details")
     suspend fun getUserData(
-        
+
     ): Response<VodovozResponseDTO<UserDataDTO>>
 
     @GET("profile/index.php?action=logout")
@@ -394,7 +394,7 @@ interface VodovozService {
 
     @GET("profile/index.php?action=edit")
     suspend fun updateUserData(
-        
+
         @QueryMap queries: Map<String, String>,
     ): Response<VodovozResponseDTO<String>>
 
@@ -409,7 +409,7 @@ interface VodovozService {
 
     @GET("profile/index.php?action=edit")
     suspend fun updatePassword(
-        
+
         @Query("password") password: String,
     ): Response<VodovozResponseDTO<VodovozPlaceholderDTO>>
 
@@ -453,7 +453,7 @@ interface VodovozService {
 
     @GET("osnova/sertificat/activaciya.php?action=detail")
     suspend fun activateCertificate(
-        
+
         @QueryMap queries: Map<String, String>,
     ): Response<VodovozResponseDTO<String>>
 
@@ -543,7 +543,7 @@ interface VodovozService {
     @Headers("Cookie: ")
     @GET("config/openuserid.php?sandroid=${BuildConfig.VERSION_NAME}")
     suspend fun relogin(
-        
+
         @Query("token") token: String,
     ): Response<VodovozResponseDTO<Boolean>>
 
@@ -567,7 +567,7 @@ interface VodovozService {
      * */
     @GET("osnova/predzakaz.php?action=predzakaz")
     suspend fun getPreOrderDetails(
-        
+
         @Query("tovar") productId: Long?,
     ): Response<VodovozResponseDTO<FormDTO>>
 
@@ -676,7 +676,7 @@ interface VodovozService {
 
     @GET("details/podarki.php?action=podarki")
     suspend fun getPresentInfo(
-        
+
     ): Response<VodovozResponseDTO<PresentDTO>>
 
     /**
@@ -771,7 +771,7 @@ interface VodovozService {
 
     @GET("glavnaya/viewedproduct/index.php?action=viewed")
     suspend fun getViewedProducts(
-        
+
     ): Response<VodovozResponseDTO<RAZDEL_DTO>>
 
     @GET("glavnaya/viewedproduct/index.php?action=details")
@@ -814,7 +814,7 @@ interface VodovozService {
 
     @GET("glavnaya/okno.php?action=okno&android=${BuildConfig.VERSION_NAME}")
     suspend fun getPopupWindowInfo(
-        
+
     ): Response<VodovozResponseDTO<PopupWindowDTO>>
 
     /**
@@ -833,14 +833,14 @@ interface VodovozService {
     @GET("osnova/izbrannoe/adddel.php?action=add")
     suspend fun addToFavorites(
         @Query("id") productId: Long,
-        
-    ): Response<VodovozResponseDTO<String>>
+
+        ): Response<VodovozResponseDTO<String>>
 
     @GET("osnova/izbrannoe/adddel.php?action=del")
     suspend fun removeFromFavorites(
         @Query("id") productId: Long,
-        
-    ): Response<VodovozResponseDTO<String>>
+
+        ): Response<VodovozResponseDTO<String>>
 
     /**
      * Questionnaires screen

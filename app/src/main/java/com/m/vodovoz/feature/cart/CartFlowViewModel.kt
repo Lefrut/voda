@@ -416,7 +416,7 @@ class CartFlowViewModel @Inject constructor(
 
     fun navigateToOrder() = viewModelScope.launch {
         if (accountManager.fetchAccountId() != null) {
-            sendEvent(CartEvents.GoToOrder(""))
+            sendEvent(CartEvents.GoToOrder(stateSnapshot.promoCode))
         } else {
             sendEvent(CartEvents.GoToProfile)
         }

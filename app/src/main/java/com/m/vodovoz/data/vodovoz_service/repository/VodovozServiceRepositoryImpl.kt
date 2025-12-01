@@ -360,14 +360,15 @@ class VodovozServiceRepositoryImpl @Inject constructor(
         addressId: Long?,
         date: String?,
         timeInterval: String?,
+        coupon: String?,
     ): Flow<Result<OrderingDetailsModel>> {
         return executeRequest(
             request = {
                 vodovozService.getOrderingDetails(
-
                     addressId = addressId,
                     date = date,
-                    timeInterval = timeInterval
+                    timeInterval = timeInterval,
+                    coupon = coupon
                 )
             },
             mapper = {

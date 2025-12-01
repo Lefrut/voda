@@ -129,6 +129,7 @@ interface VodovozServiceRepository {
         addressId: Long? = null,
         date: String? = null,
         timeInterval: String? = null,
+        coupon: String? = null,
     ): Flow<Result<OrderingDetailsModel>>
 
     fun doOrder(

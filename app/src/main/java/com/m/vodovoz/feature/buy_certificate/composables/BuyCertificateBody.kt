@@ -19,7 +19,6 @@ import com.m.vodovoz.feature.buy_certificate.model.CertificateUi
 import com.m.vodovoz.feature.buy_certificate.model.FAQUi
 import com.m.vodovoz.design_system.model.widgets.FieldUi
 
-@Suppress("NonSkippableComposable")
 @Composable
 fun BuyCertificateBody(
     modifier: Modifier = Modifier,

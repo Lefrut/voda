@@ -37,6 +37,7 @@ import com.m.vodovoz.ui.mvi.MviViewModel
 import com.m.vodovoz.ui.mvi.State
 import com.m.vodovoz.util.extensions.singleResult
 import com.m.vodovoz.util.formatters.VodovozDateFormatters
+import com.m.vodovoz.util.isValidRussianPhoneNumber
 import com.m.vodovoz.util.toIntRoundOrNull
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -67,7 +68,8 @@ class OrderingFlowViewModel @Inject constructor(
     }
 
     fun fetchOrderingDetails() = viewModelScope.launch {
-        val orderingDetailsResult = vodovozServiceRepository.getOrderingDetails().singleResult()
+        val orderingDetailsResult =
+            vodovozServiceRepository.getOrderingDetails(coupon = coupon).singleResult()
 
         orderingDetailsResult.onSuccess { orderingDetails ->
             updateState { s ->
@@ -300,11 +302,17 @@ class OrderingFlowViewModel @Inject constructor(
             }
 
 
-            val params = with(stateSnapshot){
-                mapOf(earlierDelivery ?: ("" to "")) + totals.associate {
-                    it.id to it.value
-                } + notifySection.extraPhoneField.toQueryMap() + comment.toQueryMap()
+            val params = mapOf(earlierDelivery ?: Pair("", "")) + with(stateSnapshot) {
+                val extraPhoneField = notifySection.extraPhoneField
+                val extraPhoneMap =
+                    if (extraPhoneField != null && extraPhoneField.value.isValidRussianPhoneNumber()) {
+                        extraPhoneField.toQueryMap()
+                    } else emptyMap()
+
+                extraPhoneMap + totals.associate { it.id to it.value } + comment.toQueryMap()
             }
+
+
 
             vodovozServiceRepository.doOrder(
                 addressId = ordering.addressId,
@@ -450,7 +458,8 @@ class OrderingFlowViewModel @Inject constructor(
         }
 
         val orderingDetailsResult = vodovozServiceRepository.getOrderingDetails(
-            addressId = address.id
+            addressId = address.id,
+            coupon = coupon
         ).singleResult()
 
         orderingDetailsResult.onSuccess { orderingDetails ->
@@ -535,7 +544,8 @@ class OrderingFlowViewModel @Inject constructor(
         vodovozServiceRepository.getOrderingDetails(
             addressId = ordering.addressId,
             date = ordering.date,
-            timeInterval = ordering.timeInterval
+            timeInterval = ordering.timeInterval,
+            coupon = coupon
         ).singleResult().onSuccess { orderingDetails ->
             updateState { s ->
                 s.copy(
