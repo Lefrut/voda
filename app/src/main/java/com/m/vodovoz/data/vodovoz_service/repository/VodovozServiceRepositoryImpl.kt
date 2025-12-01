@@ -12,6 +12,7 @@ import com.m.vodovoz.core.network.retrofit.stringBody
 import com.m.vodovoz.core.network.retrofit.stringErrorBody
 import com.m.vodovoz.core.network.serialization.fromJson
 import com.m.vodovoz.data.vodovoz_service.VodovozService
+import com.m.vodovoz.data.vodovoz_service.mappers.RequestFailureStrategy
 import com.m.vodovoz.data.vodovoz_service.mappers.executeRequest
 import com.m.vodovoz.data.vodovoz_service.mappers.mapToDomain
 import com.m.vodovoz.data.vodovoz_service.mappers.toDomain
@@ -113,6 +114,8 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
+import okhttp3.ResponseBody
+import retrofit2.Response
 import java.io.File
 import java.time.LocalDate
 import javax.inject.Inject
@@ -127,14 +130,50 @@ class VodovozServiceRepositoryImpl @Inject constructor(
     private val moshi: Moshi,
 ) : VodovozServiceRepository {
 
+    private data object MessageFailureStrategy : RequestFailureStrategy {
+
+        override fun <R : Any> handleFail(response: Response<ResponseBody>): Result<R> {
+            TODO("Not yet implemented")
+        }
+
+    }
+
+    private data object EmptyFailureStrategy : RequestFailureStrategy {
+
+        override fun <R : Any> handleFail(response: Response<ResponseBody>): Result<R> {
+            TODO("Not yet implemented")
+        }
+
+    }
+
+    private data object AllFailureStrategy : RequestFailureStrategy {
+
+        override fun <R : Any> handleFail(response: Response<ResponseBody>): Result<R> {
+            TODO("Not yet implemented")
+        }
+
+    }
+
+    private data object AuthFailureStrategy : RequestFailureStrategy {
+
+        override fun <R : Any> handleFail(response: Response<ResponseBody>): Result<R> {
+            TODO("Not yet implemented")
+        }
+
+    }
+
+    private data object DefaultFailureStrategy : RequestFailureStrategy {
+
+        override fun <R : Any> handleFail(response: Response<ResponseBody>): Result<R> {
+            val exception = RequestException(response.messageWithCode())
+            return Result.failure(exception)
+        }
+    }
+
     override fun removeAddress(addressId: Int): Flow<Result<String>> {
-        return executeRequest(
-            request = {
-                vodovozService.deleteAddress(addressId)
-            },
-            mapper = {
-                it.data!!
-            }
+        return DefaultFailureStrategy.executeRequest(
+            request = { vodovozService.deleteAddress(addressId) },
+            toResult = { this },
         )
     }
 
@@ -142,7 +181,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
         address: MapAddressModel,
         params: Map<String, String>,
     ): Flow<Result<Long>> {
-        return executeRequest(
+        return DefaultFailureStrategy.executeRequest(
             request = {
                 val point = address.point
                 vodovozService.addAddress(
@@ -154,19 +193,14 @@ class VodovozServiceRepositoryImpl @Inject constructor(
                     queries = params
                 )
             },
-            mapper = {
-                it.data!!
-            }
+            toResult = { this },
         )
     }
 
     override fun getAddAddressDetails(addressId: Long?): Flow<Result<AddAddressDetailsModel>> {
         return executeRequest(
             request = {
-                vodovozService.getAddAddressDetails(
-
-                    addressId
-                )
+                vodovozService.getAddAddressDetails(addressId)
             },
             mapper = {
                 it.data!!.toDomain()

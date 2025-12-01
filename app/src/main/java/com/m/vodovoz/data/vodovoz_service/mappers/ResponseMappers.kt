@@ -47,8 +47,60 @@ val moshiWithJsonAdapter: Moshi =
         .build()
 
 
+interface RequestFailureStrategy {
+
+    fun <R : Any> handleFail(response: Response<ResponseBody>): Result<R>
+
+}
+
 @Keep
-inline fun <reified T : Any, R: Any> executeRequest(
+inline fun <reified T : Any, reified R : Any> RequestFailureStrategy.executeRequest(
+    crossinline request: suspend () -> Response<VodovozResponseDTO<T>>,
+    crossinline response: (Response<VodovozResponseDTO<T>>) -> Unit = {},
+    crossinline toResult: T.() -> R,
+    noinline mapper: (VodovozResponseDTO<T>) -> R = { it.data!!.toResult() },
+    crossinline fail: ((Response<ResponseBody>) -> Result<R>) = ::handleFail,
+    type: Type = typeOf<VodovozResponseDTO<T>>().javaType,
+): Flow<Result<R>> {
+    return flow {
+        val requestResponse = request()
+
+        response(requestResponse)
+
+        val stringBody = requestResponse.stringBody().ifEmpty {
+            requestResponse.stringErrorBody()
+        }.decodeUnicodeEscapes()
+
+        val bodyResult = kotlin.runCatching {
+            moshiWithJsonAdapter.fromJson<VodovozResponseDTO<T>>(stringBody, type)
+        }
+        val responseCode = requestResponse.code()
+
+        val errorCode = responseCode.takeIf { code ->
+            code !in 200..299
+        } ?: 520
+
+        val finalResult = bodyResult.mapCatching { body ->
+            require(responseCode == 200) { "Bad response code: $responseCode" }
+            mapper(body)
+        }.recoverCatching {
+            fail(Response.error(errorCode, stringBody.jsonToResponseBody())).getOrThrow()
+        }
+
+        emit(finalResult)
+    }.catchResult().take(1).onEach { result ->
+        debugLog {
+            result.onFailure { t ->
+                return@debugLog t.stackTraceToString()
+            }
+        }
+
+    }
+}
+
+
+@Keep
+inline fun <reified T : Any, R : Any> executeRequest(
     crossinline request: suspend () -> Response<T>,
     crossinline response: (Response<T>) -> Unit = {},
     crossinline mapper: (T) -> R,
@@ -78,7 +130,7 @@ inline fun <reified T : Any, R: Any> executeRequest(
 
         val finalResult = bodyResult.mapCatching { body ->
             require(responseCode == 200) { "Bad response code: $responseCode" }
-            mapper(body) ?: throw IllegalStateException("Mapper returned null")
+            mapper(body)
         }.recoverCatching {
             fail(Response.error(errorCode, stringBody.jsonToResponseBody())).getOrThrow()
         }
