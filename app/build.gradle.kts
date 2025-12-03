@@ -201,9 +201,9 @@ dependencies {
 
 
     //debugImplementation("com.squareup.leakcanary:leakcanary-android:2.14")
-    implementation("androidx.core:core-splashscreen:1.0.1")
+    implementation("androidx.core:core-splashscreen:1.2.0")
 
-    implementation("androidx.datastore:datastore-preferences:1.1.1")
+    implementation("androidx.datastore:datastore-preferences:1.2.0")
 
     //Compose
     implementation("androidx.activity:activity-compose:1.9.1")
