@@ -218,6 +218,10 @@ data class SectionUi<E>(
     }
 }
 
+fun <E> SectionUi<E>.withItems(transform: (E) -> E): SectionUi<E> {
+    return copy(items = items.map(transform))
+}
+
 
 @Stable
 interface SectionContentUi<E> {

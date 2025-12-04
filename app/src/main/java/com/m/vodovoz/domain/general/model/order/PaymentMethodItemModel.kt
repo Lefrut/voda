@@ -7,5 +7,13 @@ data class PaymentMethodItemModel(
     val image: String,
     val code: String,
     val id: String,
-    val field: FieldModel?
-)
+    val field: FieldModel?,
+    val maxFieldValue: Int?
+){
+
+    companion object {
+
+        const val BONUSES_ID = "bonus"
+        const val BALANCE_ID = "schet"
+    }
+}

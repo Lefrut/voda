@@ -85,7 +85,7 @@ class OrderingFragment : Fragment() {
                         OrderingFlowViewModel.OrderingUiState.Error,
                         OrderingFlowViewModel.OrderingUiState.Loading,
                         OrderingFlowViewModel.OrderingUiState.Order,
-                        -> {
+                            -> {
                             OrderingScreen(
                                 viewModel = viewModel,
                                 viewState = viewState,
@@ -155,13 +155,11 @@ class OrderingFragment : Fragment() {
                     viewModel.setCallYou(callYouItem)
                 }
 
-                remove<PaymentMethodItemNav>("paymentBalance")?.toUi()?.let { paymentBalance ->
-                    viewModel.setPaymentBalance(paymentBalance)
-                }
-
-                remove<PaymentMethodItemNav>("paymentMethod")?.toUi()?.let { paymentMethod ->
-                    viewModel.setPaymentMethod(paymentMethod)
-                }
+                viewModel.setPaymentInfo(
+                    paymentBalance = remove<PaymentMethodItemNav>("paymentBalance")?.toUi(),
+                    paymentBonuses = remove<PaymentMethodItemNav>("paymentBonuses")?.toUi(),
+                    paymentMethod = remove<PaymentMethodItemNav>("paymentMethod")?.toUi()
+                )
 
                 remove<Boolean>("updateRecipient")?.let {
                     viewModel.refreshRecipient()
@@ -193,10 +191,13 @@ class OrderingFragment : Fragment() {
 
                 is OrderingFlowViewModel.OrderingEvents.GoToPaymentMethod -> {
                     findNavController().navigateToPaymentMethod(
-                        event.addressId,
-                        event.date,
-                        event.paymentMethodId,
-                        event.balance
+                        addressId = event.addressId,
+                        date = event.date,
+                        paymentMethodId = event.paymentMethodId,
+                        balance = event.balance,
+                        bonuses = event.bonuses,
+                        bonusesValue = event.bonusesValue,
+                        paymentChange = event.paymentChange
                     )
                 }
 

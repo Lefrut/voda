@@ -6,7 +6,7 @@ import com.m.vodovoz.design_system.model.ParentCategoryUi
 import com.m.vodovoz.feature.sub_categories.model.SubCategoriesEvent
 import com.m.vodovoz.feature.sub_categories.model.SubCategoriesState
 import com.m.vodovoz.ui.mvi.MviViewModel
-import com.m.vodovoz.ui.mvi.viewModelScopeLaunch
+import com.m.vodovoz.ui.mvi.launchInViewModelScope
 import kotlinx.coroutines.launch
 
 class SubCategoriesViewModel(
@@ -59,11 +59,11 @@ class SubCategoriesViewModel(
         updateState { s -> s.copy(searchQuery = query) }
     }
 
-    fun navigateToSpeechRecognizer() = viewModelScopeLaunch {
+    fun navigateToSpeechRecognizer() = launchInViewModelScope {
         sendEvent(SubCategoriesEvent.GoToSpeechRecognizer)
     }
 
-    fun navigateToScanner() = viewModelScopeLaunch {
+    fun navigateToScanner() = launchInViewModelScope {
         sendEvent(SubCategoriesEvent.GoToScanner)
     }
 

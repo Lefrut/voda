@@ -17,38 +17,37 @@ import com.m.vodovoz.data.vodovoz_service.model.delivery_date.DELIVERY_DATE_DTO
 import com.m.vodovoz.data.vodovoz_service.model.delivery_date.DeliveryDateDetailsDTO
 import com.m.vodovoz.data.vodovoz_service.model.order.ABOUT_ORDER_ITEM_DTO
 import com.m.vodovoz.data.vodovoz_service.model.order.ABOUT_ORDER_OKNO_DTO
-import com.m.vodovoz.data.vodovoz_service.model.order.ORDER_DETAILS_KNOPKA_DTO
-import com.m.vodovoz.data.vodovoz_service.model.order.ORDER_DETAILS_TOVAR_DTO
-import com.m.vodovoz.data.vodovoz_service.model.order.ORDER_PRODUCT_PODAROK_DTO
-import com.m.vodovoz.data.vodovoz_service.model.order.ORDER_STATUS_DTO
-import com.m.vodovoz.data.vodovoz_service.model.order.OrderDetailsDTO
+import com.m.vodovoz.data.vodovoz_service.model.order.CallYouItemDTO
 import com.m.vodovoz.data.vodovoz_service.model.order.FILTER_STATYS_DTO
 import com.m.vodovoz.data.vodovoz_service.model.order.ORDERS_HISTORY_ITEM_DTO
 import com.m.vodovoz.data.vodovoz_service.model.order.ORDERS_HISTORY_KNOPKA_DTO
 import com.m.vodovoz.data.vodovoz_service.model.order.ORDERS_HISTORY_PRODUCT_DTO
-import com.m.vodovoz.data.vodovoz_service.model.order.OrdersHistoryDetailsDTO
-import com.m.vodovoz.data.vodovoz_service.model.order.CallYouItemDTO
+import com.m.vodovoz.data.vodovoz_service.model.order.ORDER_DETAILS_KNOPKA_DTO
+import com.m.vodovoz.data.vodovoz_service.model.order.ORDER_DETAILS_TOVAR_DTO
 import com.m.vodovoz.data.vodovoz_service.model.order.ORDER_OPLATA_DTO
 import com.m.vodovoz.data.vodovoz_service.model.order.ORDER_OPLATA_ITEM_DTO
 import com.m.vodovoz.data.vodovoz_service.model.order.ORDER_POLYSHATEL_DTO
 import com.m.vodovoz.data.vodovoz_service.model.order.ORDER_POLYSHATEL_ITEM_DTO
 import com.m.vodovoz.data.vodovoz_service.model.order.ORDER_PREDYP_DTO
 import com.m.vodovoz.data.vodovoz_service.model.order.ORDER_PREDYP_ITEM_DTO
+import com.m.vodovoz.data.vodovoz_service.model.order.ORDER_PRODUCT_PODAROK_DTO
+import com.m.vodovoz.data.vodovoz_service.model.order.ORDER_STATUS_DTO
 import com.m.vodovoz.data.vodovoz_service.model.order.OrderCallYouDetailsDTO
+import com.m.vodovoz.data.vodovoz_service.model.order.OrderDetailsDTO
 import com.m.vodovoz.data.vodovoz_service.model.order.OrderingDetailsDTO
+import com.m.vodovoz.data.vodovoz_service.model.order.OrdersHistoryDetailsDTO
 import com.m.vodovoz.data.vodovoz_service.model.order.RecipientDTO
 import com.m.vodovoz.data.vodovoz_service.model.order.RecipientDetailsDTO
 import com.m.vodovoz.data.vodovoz_service.model.payment_method.PaymentMethodDetailsDTO
 import com.m.vodovoz.data.vodovoz_service.model.payment_method.PaymentMethodItemDTO
 import com.m.vodovoz.data.vodovoz_service.model.payment_method.PaymentMethodSectionDTO
-import com.m.vodovoz.domain.general.model.order.CertificatePaymentInfoModel
-import com.m.vodovoz.domain.general.model.exceptions.VodovozPlaceholderModel
 import com.m.vodovoz.domain.general.model.cart.BottomCartModel
-import com.m.vodovoz.domain.general.model.product.BuyCertificateModel
+import com.m.vodovoz.domain.general.model.exceptions.VodovozPlaceholderModel
 import com.m.vodovoz.domain.general.model.order.AboutOrderItemModel
 import com.m.vodovoz.domain.general.model.order.AboutOrderPopupWindowModel
 import com.m.vodovoz.domain.general.model.order.CallYouItemModel
 import com.m.vodovoz.domain.general.model.order.CancelOrderDetailsModel
+import com.m.vodovoz.domain.general.model.order.CertificatePaymentInfoModel
 import com.m.vodovoz.domain.general.model.order.DeliveryDateDetailsModel
 import com.m.vodovoz.domain.general.model.order.DeliveryDateOptionModel
 import com.m.vodovoz.domain.general.model.order.DeliveryTimeIntervalModel
@@ -72,8 +71,10 @@ import com.m.vodovoz.domain.general.model.order.PaymentMethodDetailsModel
 import com.m.vodovoz.domain.general.model.order.PaymentMethodItemModel
 import com.m.vodovoz.domain.general.model.order.RecipientDetailsModel
 import com.m.vodovoz.domain.general.model.order.RecipientModel
+import com.m.vodovoz.domain.general.model.product.BuyCertificateModel
 import com.m.vodovoz.domain.general.model.product.SectionModel
 import com.m.vodovoz.domain.general.model.promotion.ColorfulButtonModel
+import com.m.vodovoz.util.toRoundIntOrNull
 import kotlin.math.roundToInt
 
 fun OrderCallYouDetailsDTO.toDomain(): OrderCallYouDetailsModel {
@@ -140,7 +141,6 @@ fun PaymentMethodSectionDTO.toDomain(): SectionModel<PaymentMethodItemModel> {
     return SectionModel(
         title = ZAGALOVOK ?: "",
         items = OPLATA?.mapToDomain() ?: emptyList(),
-        button = null
     )
 }
 
@@ -151,12 +151,14 @@ fun List<PaymentMethodItemDTO>.mapToDomain(): List<PaymentMethodItemModel> {
 
 
 fun PaymentMethodItemDTO.toDomain(): PaymentMethodItemModel {
+    val field = POLE?.toDomain()
     return PaymentMethodItemModel(
         title = NAME ?: "",
         image = KARTINKA?.toVodovozUrl() ?: "",
         code = CODE ?: "",
         id = ID ?: "",
-        field = POLE?.toDomain()
+        field = field,
+        maxFieldValue = field?.value?.toRoundIntOrNull()
     )
 }
 
@@ -231,8 +233,6 @@ fun OrderingDetailsDTO.toDomain(): OrderingDetailsModel {
             ?: throw IllegalArgumentException("Ordering button can't be null"),
     )
 }
-
-
 
 
 fun ORDER_OPLATA_DTO.toDomain(): SectionModel<OrderingMenuItemModel> {

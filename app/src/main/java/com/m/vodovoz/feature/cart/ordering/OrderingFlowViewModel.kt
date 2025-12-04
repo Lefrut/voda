@@ -19,6 +19,7 @@ import com.m.vodovoz.design_system.model.widgets.CheckboxUi
 import com.m.vodovoz.design_system.model.widgets.FieldUi
 import com.m.vodovoz.design_system.model.widgets.toQueryMap
 import com.m.vodovoz.design_system.model.widgets.toUi
+import com.m.vodovoz.domain.general.model.order.OrderingDetailsModel
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
 import com.m.vodovoz.feature.addresses.model.AddressUi
 import com.m.vodovoz.feature.cart.ordering.model.OrderNotifyItemUi
@@ -32,13 +33,15 @@ import com.m.vodovoz.feature.delivery_date.model.DeliveryTimeIntervalUi
 import com.m.vodovoz.feature.delivery_date.model.displayDate
 import com.m.vodovoz.feature.order_call_you.model.CallYouItemUi
 import com.m.vodovoz.feature.payment_method.model.PaymentMethodItemUi
+import com.m.vodovoz.feature.payment_method.model.intFieldValueOrZero
+import com.m.vodovoz.feature.payment_method.model.noDigitsFieldValue
 import com.m.vodovoz.ui.mvi.Event
 import com.m.vodovoz.ui.mvi.MviViewModel
 import com.m.vodovoz.ui.mvi.State
+import com.m.vodovoz.ui.mvi.launchInViewModelScope
 import com.m.vodovoz.util.extensions.singleResult
 import com.m.vodovoz.util.formatters.VodovozDateFormatters
 import com.m.vodovoz.util.isValidRussianPhoneNumber
-import com.m.vodovoz.util.toIntRoundOrNull
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -61,15 +64,29 @@ class OrderingFlowViewModel @Inject constructor(
         private const val DELIVERY_TIME_MENU_ID = "time"
         private const val PAYMENT_MENU_ID = "oplata"
         private const val CALL_YOU_MENU_ID = "vampozvonit"
+
     }
 
     init {
         fetchOrderingDetails()
     }
 
+    private suspend fun fetchSmartOrderingDetails(): Result<OrderingDetailsModel> {
+        return with(stateSnapshot.ordering) {
+            vodovozServiceRepository.getOrderingDetails(
+                coupon = coupon,
+                addressId = addressId,
+                date = date,
+                timeInterval = timeInterval,
+                useBonuses = paymentBonuses,
+                bonuses = paymentBonusesValue,
+                useBalance = paymentBalance
+            ).singleResult()
+        }
+    }
+
     fun fetchOrderingDetails() = viewModelScope.launch {
-        val orderingDetailsResult =
-            vodovozServiceRepository.getOrderingDetails(coupon = coupon).singleResult()
+        val orderingDetailsResult = fetchSmartOrderingDetails()
 
         orderingDetailsResult.onSuccess { orderingDetails ->
             updateState { s ->
@@ -232,6 +249,9 @@ class OrderingFlowViewModel @Inject constructor(
         val callYouId = ordering.callYouId
         val paymentMethodId = ordering.paymentId
         val balance = ordering.paymentBalance
+        val bonuses = ordering.paymentBonuses
+        val bonusesValue = ordering.paymentBonusesValue
+
 
         when (orderPaymentItem.id) {
             PAYMENT_MENU_ID -> {
@@ -263,7 +283,10 @@ class OrderingFlowViewModel @Inject constructor(
                             addressId = addressId,
                             date = localDate,
                             paymentMethodId = paymentMethodId,
-                            balance = balance
+                            balance = balance,
+                            bonuses = bonuses,
+                            bonusesValue = bonusesValue,
+                            paymentChange = ordering.paymentChange
                         )
                     )
                 }
@@ -313,7 +336,6 @@ class OrderingFlowViewModel @Inject constructor(
             }
 
 
-
             vodovozServiceRepository.doOrder(
                 addressId = ordering.addressId,
                 deliveryDate = ordering.date,
@@ -325,10 +347,12 @@ class OrderingFlowViewModel @Inject constructor(
                 paymentChange = ordering.paymentChange,
                 callYouId = ordering.callYouId.toLongOrNull(),
                 coupon = coupon,
-                balance = VodovozBoolean.from(ordering.paymentBalance).value,
                 deviceInfo = deviceInfo,
                 notifyDriverId = stateSnapshot.selectedNotifyItem?.value,
                 message = stateSnapshot.comment?.value() ?: "",
+                bonuses = ordering.paymentBonusesValue,
+                useBonuses = ordering.paymentBonuses,
+                useBalance = ordering.paymentBalance,
                 params = params
             ).singleResult().onSuccess { placeholder ->
                 updateState { s ->
@@ -457,10 +481,7 @@ class OrderingFlowViewModel @Inject constructor(
             )
         }
 
-        val orderingDetailsResult = vodovozServiceRepository.getOrderingDetails(
-            addressId = address.id,
-            coupon = coupon
-        ).singleResult()
+        val orderingDetailsResult = fetchSmartOrderingDetails()
 
         orderingDetailsResult.onSuccess { orderingDetails ->
             updateState { s ->
@@ -513,7 +534,9 @@ class OrderingFlowViewModel @Inject constructor(
                     date = date.value,
                     paymentBalance = false,
                     paymentChange = null,
-                    paymentId = null
+                    paymentId = null,
+                    paymentBonusesValue = 0,
+                    paymentBonuses = false
                 ),
                 recipientSection = changeOrderingSection(
                     clearErrors = false,
@@ -539,14 +562,7 @@ class OrderingFlowViewModel @Inject constructor(
             )
         }
 
-        val ordering = stateSnapshot.ordering
-
-        vodovozServiceRepository.getOrderingDetails(
-            addressId = ordering.addressId,
-            date = ordering.date,
-            timeInterval = ordering.timeInterval,
-            coupon = coupon
-        ).singleResult().onSuccess { orderingDetails ->
+        fetchSmartOrderingDetails().onSuccess { orderingDetails ->
             updateState { s ->
                 s.copy(
                     paymentSection = s.paymentSection.copy(
@@ -588,40 +604,66 @@ class OrderingFlowViewModel @Inject constructor(
         }
     }
 
-    fun setPaymentBalance(paymentBalance: PaymentMethodItemUi) {
-        updateState { s ->
-            s.copy(
-                ordering = s.ordering.copy(paymentBalance = paymentBalance.value)
-            )
-        }
-    }
+    fun setPaymentInfo(
+        paymentBalance: PaymentMethodItemUi?,
+        paymentBonuses: PaymentMethodItemUi?,
+        paymentMethod: PaymentMethodItemUi?,
+    ) = launchInViewModelScope {
+        if (
+            paymentBalance == null
+            && paymentBonuses == null
+            && paymentMethod == null
+        ) return@launchInViewModelScope
 
-    fun setPaymentMethod(paymentMethod: PaymentMethodItemUi) {
-        updateState { s ->
-            s.copy(
-                ordering = s.ordering.copy(
-                    paymentId = paymentMethod.id,
-                    paymentChange = paymentMethod.field?.value?.filter { char ->
-                        char.isDigit()
-                    }?.toIntRoundOrNull()?.toString()
-                ),
-                paymentSection = changeOrderingSection(
-                    clearErrors = false,
-                    section = s.paymentSection,
-                    menuItemIds = listOf(PAYMENT_MENU_ID),
-                    map = { orderingMenu ->
-                        orderingMenu.copy(
-                            error = false,
-                            image = paymentMethod.image,
-                            name = paymentMethod.name,
-                            description = resourcesProvider.getString(
-                                R.string.payment_method
-                            )
+        val updated = stateSnapshot
+            .let { state ->
+                paymentBalance?.let {
+                    state.copy(
+                        ordering = state.ordering.copy(
+                            paymentBalance = it.value
                         )
-                    }
-                )
-            )
-        }
+                    )
+                } ?: state
+            }
+            .let { state ->
+                paymentBonuses?.let {
+                    state.copy(
+                        ordering = state.ordering.copy(
+                            paymentBonuses = it.value,
+                            paymentBonusesValue = it.intFieldValueOrZero
+                        )
+                    )
+                } ?: state
+            }
+            .let { state ->
+                paymentMethod?.let { method ->
+                    state.copy(
+                        ordering = state.ordering.copy(
+                            paymentId = method.id,
+                            paymentChange = method.noDigitsFieldValue
+                        ),
+                        paymentSection = changeOrderingSection(
+                            clearErrors = false,
+                            section = state.paymentSection,
+                            menuItemIds = listOf(PAYMENT_MENU_ID),
+                            map = { orderingMenu ->
+                                orderingMenu.copy(
+                                    error = false,
+                                    image = method.image,
+                                    name = method.name,
+                                    description = resourcesProvider.getString(
+                                        R.string.payment_method
+                                    )
+                                )
+                            }
+                        )
+                    )
+                } ?: state
+            }
+
+        updateState { updated }
+
+        fetchSmartOrderingDetails()
     }
 
     fun activatePayButton(button: ColorfulButtonUi?) = viewModelScope.launch {
@@ -676,7 +718,9 @@ class OrderingFlowViewModel @Inject constructor(
         val uiState: OrderingUiState = OrderingUiState.Loading,
         val showRefreshIndicator: Boolean = false,
         val ordering: OrderingUi = OrderingUi.Empty,
-    ) : State
+    ) : State {
+
+    }
 
     sealed class OrderingEvents : Event {
         data object GoBack : OrderingEvents()
@@ -699,6 +743,9 @@ class OrderingFlowViewModel @Inject constructor(
             val date: LocalDate,
             val paymentMethodId: String?,
             val balance: Boolean?,
+            val bonuses: Boolean?,
+            val bonusesValue: Int?,
+            val paymentChange: String?,
         ) : OrderingEvents()
 
         data class GoToOrderRecipient(val addressId: Long) : OrderingEvents()

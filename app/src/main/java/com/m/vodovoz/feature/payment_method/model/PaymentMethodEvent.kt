@@ -6,6 +6,7 @@ sealed interface PaymentMethodEvent {
     data class GoBackToOrdering(
         val paymentMethod: PaymentMethodItemUi?,
         val paymentBalance: PaymentMethodItemUi?,
+        val paymentBonuses: PaymentMethodItemUi?,
     ) : PaymentMethodEvent
 
 }

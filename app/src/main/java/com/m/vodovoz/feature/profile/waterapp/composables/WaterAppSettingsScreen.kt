@@ -59,7 +59,7 @@ import com.m.vodovoz.design_system.robotoFontFamily
 import com.m.vodovoz.feature.profile.waterapp.WaterAppHelper
 import com.m.vodovoz.feature.profile.waterapp.model.ReminderIntervalUi
 import com.m.vodovoz.feature.profile.waterapp.model.WaterAppUiState
-import com.m.vodovoz.util.toIntRoundOrNull
+import com.m.vodovoz.util.toRoundIntOrNull
 
 @NonRestartableComposable
 @Composable
@@ -325,7 +325,7 @@ private fun ReminderCard(
 ) {
     val showHours = reminderIntervalUi.shouldDisplayIntervalAsHours()
     val valueString = reminderIntervalUi.format()
-    val valueInt = valueString.toIntRoundOrNull()
+    val valueInt = valueString.toRoundIntOrNull()
 
     val contentColor = if (!selected) {
         MaterialTheme.colorScheme.primary

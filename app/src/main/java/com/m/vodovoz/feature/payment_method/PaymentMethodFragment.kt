@@ -9,13 +9,13 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import com.m.vodovoz.ui.mvi.collectAsState
 import androidx.navigation.fragment.findNavController
 import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.design_system.VodovozTheme
 import com.m.vodovoz.design_system.effects.LifecycleEffect
 import com.m.vodovoz.feature.payment_method.model.PaymentMethodEvent
 import com.m.vodovoz.feature.payment_method.model.toNav
+import com.m.vodovoz.ui.mvi.collectAsState
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -53,15 +53,16 @@ class PaymentMethodFragment : Fragment() {
 
                     LifecycleEffect {
                         viewModel.events.collect { event ->
+                            val navController = findNavController()
                             when (event) {
                                 PaymentMethodEvent.GoBack -> {
-                                    findNavController().popBackStack()
+                                    navController.popBackStack()
                                 }
 
                                 is PaymentMethodEvent.GoBackToOrdering -> {
-                                    val navController = findNavController()
                                     navController.previousBackStackEntry?.savedStateHandle?.apply {
                                         set("paymentBalance", event.paymentBalance?.toNav())
+                                        set("paymentBonuses", event.paymentBonuses?.toNav())
                                         set("paymentMethod", event.paymentMethod?.toNav())
                                     }
                                     navController.popBackStack()

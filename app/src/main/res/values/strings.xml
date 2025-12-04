@@ -48,7 +48,7 @@
 
     //Base
     <string name="russian_phone_code">+7</string>
-    <string name="price_text">%d ₽</string>
+    <string name="price_text">%s ₽</string>
     <string name="subscribe_on_mailing_list">Подписаться на рассылку</string>
     <string name="vasha_norma">Ваша норма</string>
     <string name="vashe_pravilnoe_potreblenie">Ваше правильное ежедневное\nпотребление воды</string>

@@ -20,7 +20,7 @@ fun Float.clearZeros(): String = try {
 }
 
 
-fun String.toIntRoundOrNull(): Int? = try {
+fun String.toRoundIntOrNull(): Int? = try {
     BigDecimal(trim().replace(',', '.')).setScale(0, RoundingMode.HALF_UP).toInt()
 } catch (e: Throwable) {
     null

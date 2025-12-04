@@ -395,6 +395,9 @@ class VodovozServiceRepositoryImpl @Inject constructor(
         date: String?,
         timeInterval: String?,
         coupon: String?,
+        useBonuses: Boolean?,
+        useBalance: Boolean?,
+        bonuses: Int?,
     ): Flow<Result<OrderingDetailsModel>> {
         return executeRequest(
             request = {
@@ -402,7 +405,10 @@ class VodovozServiceRepositoryImpl @Inject constructor(
                     addressId = addressId,
                     date = date,
                     timeInterval = timeInterval,
-                    coupon = coupon
+                    coupon = coupon,
+                    useBalance = VodovozBoolean.from(useBonuses).value,
+                    useBonuses = VodovozBoolean.from(useBalance).value,
+                    bonuses = bonuses
                 )
             },
             mapper = {
@@ -422,9 +428,11 @@ class VodovozServiceRepositoryImpl @Inject constructor(
         paymentChange: String?,
         callYouId: Long?,
         coupon: String?,
-        balance: String?,
         deviceInfo: String?,
         notifyDriverId: String?,
+        useBonuses: Boolean?,
+        useBalance: Boolean?,
+        bonuses: Int?,
         message: String?,
         params: Map<String, String>?,
     ): Flow<Result<VodovozPlaceholderModel>> {
@@ -432,7 +440,6 @@ class VodovozServiceRepositoryImpl @Inject constructor(
             request = {
                 vodovozService.doOrder(
                     addressId = addressId,
-
                     deliveryDate = deliveryDate,
                     deliveryTimeInterval = deliveryTimeInterval,
                     userPhone = userPhone,
@@ -443,10 +450,12 @@ class VodovozServiceRepositoryImpl @Inject constructor(
                     notifyDriverId = notifyDriverId,
                     callYouId = callYouId,
                     coupon = coupon,
-                    balance = balance,
                     deviceInfo = deviceInfo,
                     queries = params,
-                    message = message
+                    message = message,
+                    useBalance = VodovozBoolean.from(useBalance).value,
+                    useBonuses = VodovozBoolean.from(useBonuses).value,
+                    bonuses = bonuses
                 )
             },
             mapper = {

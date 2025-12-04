@@ -52,7 +52,7 @@ data class FieldUi(
     val hint: String = "",
     val type: FieldTypeUi,
     val isValueVisible: Boolean,
-    val isVisible: Boolean = true
+    val isVisible: Boolean = true,
 ) : WidgetUi(id) {
     companion object {
         val Empty = FieldUi(
@@ -280,7 +280,7 @@ fun FieldModel.toUi(): FieldUi {
         "tel", "dr124", "phone", "dr50", "dr171", "dopphone" -> KeyboardType.Phone
         "pass", "parol" -> KeyboardType.Password
         "data", "date" -> KeyboardType.Unspecified
-        "oplata", "inn" -> KeyboardType.Number
+        "inn", FieldModel.BONUS_ID, FieldModel.CHANGE_ID -> KeyboardType.Number
         else -> when (valueType.lowercase()) {
             "text" -> KeyboardType.Text
             "phone" -> KeyboardType.Phone

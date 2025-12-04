@@ -11,7 +11,12 @@ data class FieldModel(
     val hint: String,
     val values: List<FieldOptionModel> = emptyList(),
     val isVisible: Boolean = true
-)
+){
+    companion object{
+        const val CHANGE_ID = "oplata"
+        const val BONUS_ID = "bonusoplata"
+    }
+}
 
 data class FieldOptionModel(
     val id: String,

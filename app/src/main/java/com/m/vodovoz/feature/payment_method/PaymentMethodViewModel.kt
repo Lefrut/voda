@@ -7,6 +7,9 @@ import com.m.vodovoz.R
 import com.m.vodovoz.common.resources.ResourcesProvider
 import com.m.vodovoz.design_system.model.toUi
 import com.m.vodovoz.design_system.model.widgets.FieldUi
+import com.m.vodovoz.design_system.model.withItems
+import com.m.vodovoz.domain.general.model.order.PaymentMethodItemModel
+import com.m.vodovoz.domain.general.model.widgets.FieldModel
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
 import com.m.vodovoz.feature.payment_method.model.PaymentMethodEvent
 import com.m.vodovoz.feature.payment_method.model.PaymentMethodItemUi
@@ -15,6 +18,7 @@ import com.m.vodovoz.feature.payment_method.model.PaymentMethodUiState
 import com.m.vodovoz.feature.payment_method.model.mapToUi
 import com.m.vodovoz.ui.mvi.MviViewModel
 import com.m.vodovoz.util.extensions.singleResult
+import com.m.vodovoz.util.toRoundIntOrNull
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -28,12 +32,15 @@ class PaymentMethodViewModel @Inject constructor(
     private val resourcesProvider: ResourcesProvider,
 ) : MviViewModel<PaymentMethodState, PaymentMethodEvent>(PaymentMethodState()) {
 
-    private val addressId = savedStateHandle.get<Long>("addressId") ?: navigateBack().let { -1 }
+    private val addressId = savedStateHandle.get<Long>("addressId") ?: -1
     private val orderDate = savedStateHandle.get<Long>("date")?.let { days ->
         LocalDate.ofEpochDay(days)
-    } ?: navigateBack().let { LocalDate.now() }
-    private val paymentMethodId = savedStateHandle.get<String>("paymentMethodId")
-    private val balance = savedStateHandle.get<Boolean>("balance")
+    } ?: LocalDate.now()
+    private val paymentMethodId: String? = savedStateHandle["paymentMethodId"]
+    private val paymentChange: String = savedStateHandle["paymentChange"] ?: ""
+    private val useBalance: Boolean? = savedStateHandle["balance"]
+    private val useBonuses: Boolean? = savedStateHandle["bonuses"]
+    private val bonusesValue: Int? = savedStateHandle["bonusesValue"]
 
     fun navigateBack() = viewModelScope.launch {
         sendEvent(PaymentMethodEvent.GoBack)
@@ -45,13 +52,26 @@ class PaymentMethodViewModel @Inject constructor(
 
     fun fetchPaymentMethodDetails() = viewModelScope.launch {
         val paymentDetailsResult = vodovozServiceRepository.getPaymentMethodDetails(
-            addressId, orderDate
+            addressId = addressId, date = orderDate
         ).singleResult()
 
         paymentDetailsResult.onSuccess { paymentDetails ->
 
             val paymentSections = paymentDetails.items.map { section ->
-                section.toUi { items -> items.mapToUi() }
+                section.toUi { items ->
+                    items.mapToUi().map { item ->
+                        val field = item.field
+                        if (field != null && field.id == FieldModel.CHANGE_ID && paymentChange.isNotBlank())
+                            item.copy(
+                                field = field.copy(
+                                    value = resourcesProvider.getString(
+                                        R.string.price_text, paymentChange
+                                    )
+                                )
+                            )
+                        else item
+                    }
+                }
             }
 
             updateState { s ->
@@ -65,27 +85,44 @@ class PaymentMethodViewModel @Inject constructor(
 
             }
 
-            val paymentMethodItemUi = paymentSections.flatMap {
-                it.items
-            }.firstOrNull { it.id == paymentMethodId }
+            val paymentMethodItemUi = paymentSections.flatMap { section ->
+                section.items
+            }.firstOrNull { item ->
+                item.id == paymentMethodId
+            }
 
             if (paymentMethodItemUi != null) {
                 changePaymentMethodItem(paymentMethodItemUi).join()
             }
-            if (balance != null) {
+
+
+            if (useBalance == true || useBonuses == true) {
                 updateState { s ->
                     s.copy(
                         paymentSections = s.paymentSections.map { section ->
-                            section.copy(
-                                title = section.title,
-                                items = section.items.map { paymentItem ->
-                                    if (paymentItem.id == "schet") {
-                                        paymentItem.copy(value = balance)
-                                    } else {
-                                        paymentItem
+                            section.withItems { paymentItem ->
+                                when (paymentItem.id) {
+                                    PaymentMethodItemModel.BONUSES_ID -> {
+                                        val field = paymentItem.field
+                                        paymentItem.copy(
+                                            value = useBonuses == true,
+                                            field = bonusesValue?.let {
+                                                field?.copy(
+                                                    value = bonusesValue.toString()
+                                                )
+                                            } ?: field
+                                        )
                                     }
+
+                                    PaymentMethodItemModel.BALANCE_ID -> {
+                                        paymentItem.copy(
+                                            value = useBalance == true
+                                        )
+                                    }
+
+                                    else -> paymentItem
                                 }
-                            )
+                            }
                         }
 
                     )
@@ -101,15 +138,29 @@ class PaymentMethodViewModel @Inject constructor(
     }
 
     fun choosePaymentMethod() = viewModelScope.launch {
-        val paymentSections = stateSnapshot.paymentSections
-        val paymentBalance = paymentSections
-            .flatMap { it.items }
-            .firstOrNull { it -> it.isSwitch }
+        val paymentSectionsItems = stateSnapshot.paymentSections.flatMap {
+            it.items
+        }
 
-        val paymentMethod = paymentSections
-            .flatMap { it.items }
-            .firstOrNull { !it.isSwitch && it.value } ?: return@launch
-        sendEvent(PaymentMethodEvent.GoBackToOrdering(paymentMethod, paymentBalance))
+        val paymentBalance = paymentSectionsItems.firstOrNull { item ->
+            item.id == PaymentMethodItemModel.BALANCE_ID
+        }
+        val paymentBonuses = paymentSectionsItems
+            .firstOrNull { item ->
+                item.id == PaymentMethodItemModel.BONUSES_ID
+            }
+
+        val paymentMethod = paymentSectionsItems
+            .firstOrNull { item ->
+                !item.isSwitch && item.value
+            } ?: return@launch
+        sendEvent(
+            PaymentMethodEvent.GoBackToOrdering(
+                paymentMethod = paymentMethod,
+                paymentBalance = paymentBalance,
+                paymentBonuses = paymentBonuses
+            )
+        )
     }
 
     fun changePaymentMethodItem(paymentMethod: PaymentMethodItemUi) = viewModelScope.launch {
@@ -117,12 +168,21 @@ class PaymentMethodViewModel @Inject constructor(
             val sections = s.paymentSections.map { section ->
                 section.copy(
                     title = section.title,
-                    items = section.items.map { it ->
+                    items = section.items.map { item ->
                         when {
-                            it.id == paymentMethod.id && it.isSwitch -> it.copy(value = !it.value)
-                            it.id == paymentMethod.id && !it.isSwitch -> it.copy(value = true)
-                            !paymentMethod.isSwitch && !it.isSwitch -> it.copy(value = false)
-                            else -> it
+                            item.id == paymentMethod.id && item.isSwitch -> {
+                                item.copy(value = !item.value)
+                            }
+
+                            item.id == paymentMethod.id && !item.isSwitch -> {
+                                item.copy(value = true)
+                            }
+
+                            !paymentMethod.isSwitch && !item.isSwitch -> {
+                                item.copy(value = false)
+                            }
+
+                            else -> item
                         }
                     }
 
@@ -140,36 +200,42 @@ class PaymentMethodViewModel @Inject constructor(
     }
 
     fun changeField(item: PaymentMethodItemUi, field: FieldUi, updatedField: FieldUi) {
+
         updateState { s ->
             s.copy(
                 paymentSections = s.paymentSections.map { section ->
-                    section.copy(
-                        items = section.items.map { sectionItem ->
-                            if (sectionItem.id == item.id) {
-                                sectionItem.copy(
-                                    field = when (field.id) {
-                                        "oplata" -> {
-                                            val number = updatedField.value.filter { c ->
-                                                c.isDigit()
-                                            }.toIntOrNull()
-                                            val value = number?.takeIf { it > 0 }?.let { price ->
-                                                resourcesProvider.getString(
-                                                    R.string.price_text,
-                                                    price
-                                                )
-                                            } ?: ""
+                    section.withItems { sectionItem ->
+                        if (sectionItem.id == item.id) {
+                            val updatedFieldValue = updatedField.value
+                            val updatedFieldIntValue =
+                                updatedFieldValue.filter { it.isDigit() }.toRoundIntOrNull()
+                                    .takeIf { price -> price != null && price > 0 }
 
-                                            updatedField.copy(value = value)
+                            sectionItem.copy(
+                                field = field.copy(
+                                    value = when (field.id) {
+                                        FieldModel.CHANGE_ID -> updatedFieldIntValue?.let { price ->
+                                            resourcesProvider.getString(
+                                                R.string.price_text,
+                                                price
+                                            )
                                         }
 
-                                        else -> {
-                                            updatedField
+                                        FieldModel.BONUS_ID -> updatedFieldIntValue?.let { intValue ->
+                                            val maxFieldValue = sectionItem.maxFieldValue
+                                            val finishIntValue =
+                                                if (maxFieldValue != null && maxFieldValue < intValue) {
+                                                    maxFieldValue
+                                                } else intValue
+                                            finishIntValue.toString()
                                         }
-                                    }
+
+                                        else -> updatedFieldValue
+                                    } ?: ""
                                 )
-                            } else sectionItem
-                        }
-                    )
+                            )
+                        } else sectionItem
+                    }
                 }
             )
         }

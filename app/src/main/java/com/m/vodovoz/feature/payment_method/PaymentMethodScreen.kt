@@ -2,6 +2,7 @@ package com.m.vodovoz.feature.payment_method
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -28,18 +29,19 @@ fun PaymentMethodScreen(viewModel: PaymentMethodViewModel, viewState: PaymentMet
             )
         },
         bottomBar = bottomBar@{
-            if (uiState !is PaymentMethodUiState.Success) return@bottomBar
+            if (uiState is PaymentMethodUiState.Success) {
+                VodovozButtonsColumn(
+                    modifier = Modifier.padding(bottom = 24.dp, start = 16.dp, end = 16.dp),
+                    buttons = listOf(viewState.button),
+                    onButtonClick = {
+                        viewModel.choosePaymentMethod()
+                    }
+                )
+            }
 
-            VodovozButtonsColumn(
-                modifier = Modifier.padding(bottom = 24.dp, start = 16.dp, end = 16.dp),
-                buttons = listOf(viewState.button),
-                onButtonClick = {
-                    viewModel.choosePaymentMethod()
-                }
-            )
         }
     ) { paddingValues ->
-        Box(modifier = Modifier.padding(top = paddingValues.calculateTopPadding())) {
+        Box(modifier = Modifier.fillMaxSize().padding(top = paddingValues.calculateTopPadding())) {
             when (uiState) {
                 PaymentMethodUiState.Error -> {
                     NetworkErrorPlaceholder {

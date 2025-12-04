@@ -289,7 +289,10 @@ fun NavController.navigateToPaymentMethod(
     addressId: Long,
     date: LocalDate,
     paymentMethodId: String? = null,
+    paymentChange: String?,
     balance: Boolean? = null,
+    bonuses: Boolean?,
+    bonusesValue: Int?,
 ) {
     navigate(
         R.id.paymentMethodFragment,
@@ -297,7 +300,10 @@ fun NavController.navigateToPaymentMethod(
             "addressId" to addressId,
             "date" to date.toEpochDay(),
             "paymentMethodId" to paymentMethodId,
-            "balance" to balance
+            "paymentChange" to paymentChange,
+            "balance" to balance,
+            "bonuses" to bonuses,
+            "bonusesValue" to bonusesValue
         ),
         navOptions {
             slideAnim()

@@ -65,6 +65,8 @@ import com.m.vodovoz.data.vodovoz_service.model.services.ServiceDetailsDTO
 import com.m.vodovoz.data.vodovoz_service.model.services.ServiceOrderDetailsDTO
 import com.m.vodovoz.data.vodovoz_service.model.unrated_products.UnratedProductsSectionDTO
 import com.m.vodovoz.data.vodovoz_service.model.user_data.UserDataDTO
+import com.m.vodovoz.domain.general.model.order.PaymentMethodItemModel
+import com.m.vodovoz.domain.general.model.widgets.FieldModel
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import retrofit2.Response
@@ -149,10 +151,12 @@ interface VodovozService {
         @Query("sdacha") paymentChange: String?,
         @Query("nettovar") callYouId: Long?,
         @Query("kupon") coupon: String?,
-        @Query("schet") balance: String?,
         @Query("device", encoded = true) deviceInfo: String?,
         @Query("driver") notifyDriverId: String?,
         @Query("comment") message: String?,
+        @Query(PaymentMethodItemModel.BALANCE_ID) useBalance: String?,
+        @Query(PaymentMethodItemModel.BONUSES_ID) useBonuses: String?,
+        @Query(FieldModel.BONUS_ID) bonuses: Int?,
         @QueryMap queries: Map<String, String>? = null,
     ): Response<VodovozResponseDTO<VodovozPlaceholderDTO>>
 
@@ -208,6 +212,9 @@ interface VodovozService {
         @Query("date") date: String?,
         @Query("indos") timeInterval: String?,
         @Query("coupon") coupon: String?,
+        @Query(PaymentMethodItemModel.BALANCE_ID) useBalance: String?,
+        @Query(PaymentMethodItemModel.BONUSES_ID) useBonuses: String?,
+        @Query(FieldModel.BONUS_ID) bonuses: Int?,
     ): Response<VodovozResponseDTO<OrderingDetailsDTO>>
 
     @GET("profile/historyorder/voditel.php")

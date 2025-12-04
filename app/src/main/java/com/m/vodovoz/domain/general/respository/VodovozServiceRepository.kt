@@ -132,6 +132,9 @@ interface VodovozServiceRepository {
         date: String? = null,
         timeInterval: String? = null,
         coupon: String? = null,
+        useBonuses: Boolean? = false,
+        useBalance: Boolean? = false,
+        bonuses: Int? = null
     ): FlowResult<OrderingDetailsModel>
 
     fun doOrder(
@@ -145,9 +148,11 @@ interface VodovozServiceRepository {
         paymentChange: String?,
         callYouId: Long? = null,
         coupon: String?,
-        balance: String?,
         deviceInfo: String?,
         notifyDriverId: String? = null,
+        useBonuses: Boolean?,
+        useBalance: Boolean?,
+        bonuses: Int?,
         message: String? = null,
         params: Map<String, String>?,
     ): FlowResult<VodovozPlaceholderModel>

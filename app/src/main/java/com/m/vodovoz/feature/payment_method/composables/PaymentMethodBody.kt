@@ -30,7 +30,6 @@ import com.m.vodovoz.design_system.model.SectionUi
 import com.m.vodovoz.design_system.model.widgets.FieldUi
 import com.m.vodovoz.feature.payment_method.model.PaymentMethodItemUi
 
-@Suppress("NonSkippableComposable")
 @Composable
 fun PaymentMethodBody(
     modifier: Modifier = Modifier,
