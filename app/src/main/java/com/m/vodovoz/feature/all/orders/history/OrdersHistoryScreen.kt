@@ -5,11 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.pulltorefresh.PullToRefreshBox
-import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.Indicator
-import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.paging.LoadState
 import com.m.vodovoz.design_system.composables.placeholders.LoadingPlaceholder
@@ -69,26 +65,33 @@ fun OrdersHistoryScreen(
                     onRefresh = { viewModel.refresh() },
                 ) {
                     OrdersHistoryBody(
+                        searchMode = viewState.searchMode,
+                        currentFilters = viewState.currentFilters,
                         items = viewState.items,
                         itemsLoading = viewState.loadStates.refresh is LoadState.Loading,
                         appendItems = viewState.loadStates.append is LoadState.Loading,
-                        searchMode = viewState.searchMode,
-                        currentFilters = viewState.currentFilters,
                         filters = viewState.filters,
+                        banners = viewState.banners,
+                        onProductSee = { i ->
+                            viewModel.notifyPaging(i)
+                        },
                         onFilterSelect = { filter ->
                             viewModel.selectFilter(filter)
                         },
                         onAllFiltersSelect = {
                             viewModel.selectAllFilters()
                         },
-                        onProductSee = { i ->
-                            viewModel.notifyPaging(i)
+                        onItemClick = { item ->
+                            viewModel.navigateToOrderDetails(item)
+                        },
+                        onBannerClick = { it ->
+                            viewModel.activateBanner(it)
+                        },
+                        onAboutAdvertisingClick = {
+                            viewModel.showAboutAdvertisingBS(it)
                         },
                         onItemButtonClick = { ordersHistoryItem ->
                             viewModel.activateOrderItemButton(ordersHistoryItem)
-                        },
-                        onItemClick = { item ->
-                            viewModel.navigateToOrderDetails(item)
                         }
                     )
                 }

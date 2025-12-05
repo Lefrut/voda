@@ -9,15 +9,17 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import com.m.vodovoz.ui.mvi.collectAsState
 import androidx.navigation.fragment.findNavController
 import com.m.vodovoz.R
 import com.m.vodovoz.common.account.AccountManager
+import com.m.vodovoz.common.cookie.CookieManager
 import com.m.vodovoz.common.tab.TabManager
+import com.m.vodovoz.core.navigation.activate
 import com.m.vodovoz.core.navigation.navigateToOrderDetails
 import com.m.vodovoz.core.navigation.navigateToWebView
 import com.m.vodovoz.design_system.VodovozTheme
 import com.m.vodovoz.design_system.effects.LifecycleEffect
+import com.m.vodovoz.ui.mvi.collectAsState
 import com.m.vodovoz.util.extensions.openUrl
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.filter
@@ -34,6 +36,9 @@ class OrdersHistoryFragment : Fragment() {
     @Inject
     lateinit var tabManager: TabManager
 
+    @Inject
+    lateinit var cookieManager: CookieManager
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -45,7 +50,7 @@ class OrdersHistoryFragment : Fragment() {
             setContent {
                 VodovozTheme {
                     val viewState by viewModel.collectAsState()
-                    
+
 
                     OrdersHistoryScreen(
                         viewModel = viewModel,
@@ -74,6 +79,9 @@ class OrdersHistoryFragment : Fragment() {
 
     private suspend fun observeEvents() {
         viewModel.events.collect { event ->
+            val navController = findNavController()
+            val context = requireContext()
+
             when (event) {
                 is OrdersHistoryViewModel.AllOrdersEvent.GoToCart -> {
                     tabManager.selectTab(R.id.graph_cart)
@@ -101,7 +109,16 @@ class OrdersHistoryFragment : Fragment() {
                 }
 
                 is OrdersHistoryViewModel.AllOrdersEvent.OpenUrl -> {
-                    requireContext().openUrl(event.url)
+                    context.openUrl(event.url)
+                }
+
+                is OrdersHistoryViewModel.AllOrdersEvent.ActivateBanner -> {
+                    event.banner.action.activate(
+                        navController = navController,
+                        context = context,
+                        cookie = cookieManager.fetchCookieSessionId() ?: "",
+                        tabManager = tabManager
+                    )
                 }
             }
         }

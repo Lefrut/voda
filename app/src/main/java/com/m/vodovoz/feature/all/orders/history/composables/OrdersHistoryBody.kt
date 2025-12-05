@@ -53,8 +53,11 @@ import com.m.vodovoz.design_system.ExtendedTheme
 import com.m.vodovoz.design_system.composables.chip.OrderStatusChip
 import com.m.vodovoz.design_system.composables.chip.VodovozChip
 import com.m.vodovoz.design_system.composables.chip.VodovozColorChip
+import com.m.vodovoz.design_system.composables.decoration.SmallBannerPager
 import com.m.vodovoz.design_system.composables.placeholders.LoadingPlaceholder
 import com.m.vodovoz.design_system.composables.tab_row.VodovozScrollableTabRow
+import com.m.vodovoz.design_system.model.AboutAdvertisingUi
+import com.m.vodovoz.design_system.model.BannerUi
 import com.m.vodovoz.feature.all.orders.history.model.OrderFilterUi
 import com.m.vodovoz.feature.all.orders.history.model.OrdersHistoryButtonUi
 import com.m.vodovoz.feature.all.orders.history.model.OrdersHistoryItemUi
@@ -62,7 +65,6 @@ import com.m.vodovoz.feature.all.orders.history.model.OrdersHistoryProductUi
 import com.m.vodovoz.feature.home.composables.dropShadow
 import com.m.vodovoz.util.extensions.indexOfOrNull
 
-@Suppress("NonSkippableComposable")
 @Composable
 fun OrdersHistoryBody(
     modifier: Modifier = Modifier,
@@ -72,17 +74,19 @@ fun OrdersHistoryBody(
     itemsLoading: Boolean,
     appendItems: Boolean,
     filters: List<OrderFilterUi>,
+    banners: List<BannerUi>,
     onProductSee: (Int) -> Unit,
     onFilterSelect: (OrderFilterUi) -> Unit,
     onAllFiltersSelect: () -> Unit,
     onItemClick: (OrdersHistoryItemUi) -> Unit,
     onItemButtonClick: (OrdersHistoryItemUi) -> Unit,
+    onBannerClick: (BannerUi) -> Unit,
+    onAboutAdvertisingClick: (AboutAdvertisingUi) -> Unit,
 ) {
     LazyColumn(
         modifier = modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.surface),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         contentPadding = PaddingValues(bottom = 8.dp)
     ) {
@@ -105,13 +109,7 @@ fun OrdersHistoryBody(
                             blur = 20.dp,
                             offsetY = 2.dp
                         )
-                        .background(
-                            MaterialTheme.colorScheme.background,
-                            shape = MaterialTheme.shapes.large.copy(
-                                topStart = CornerSize(0.dp),
-                                topEnd = CornerSize(0.dp)
-                            )
-                        )
+                        .background(MaterialTheme.colorScheme.background)
 
                         .padding(bottom = 20.dp, top = 8.dp)
                         .fillParentMaxWidth(),
@@ -137,6 +135,29 @@ fun OrdersHistoryBody(
             }
         }
 
+        if (banners.isNotEmpty()) {
+            item(key = "SmallBannerPager") {
+                Box(
+                    Modifier
+                        .fillMaxWidth()
+                        .background(
+                            MaterialTheme.colorScheme.background,
+                            MaterialTheme.shapes.large.copy(
+                                topStart = CornerSize(0.dp),
+                                topEnd = CornerSize(0.dp)
+                            )
+                        )
+                        .padding(vertical = 12.dp)
+                ) {
+                    SmallBannerPager(
+                        banners = banners,
+                        onBannerClick = onBannerClick,
+                        onAboutAdvertisingClick = onAboutAdvertisingClick
+                    )
+                }
+            }
+        }
+
         if (itemsLoading) {
             item {
                 LoadingPlaceholder(modifier = Modifier.fillParentMaxSize())
@@ -146,12 +167,12 @@ fun OrdersHistoryBody(
                 items = items,
                 key = { _, ordersHistoryItemUi -> ordersHistoryItemUi.id }
             ) { index, item ->
-
                 LaunchedEffect(index) {
                     onProductSee(index)
                 }
 
                 OrdersHistoryItemCard(
+                    modifier = Modifier.padding(top = 8.dp),
                     orderHistoryItem = item,
                     onClick = onItemClick,
                     onButtonClick = onItemButtonClick

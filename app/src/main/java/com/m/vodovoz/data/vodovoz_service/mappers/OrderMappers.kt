@@ -489,6 +489,7 @@ fun OrdersHistoryDetailsDTO.toDomain(): OrdersHistoryDetailsModel {
     return OrdersHistoryDetailsModel(
         title = TITLE ?: "",
         filters = FILTERSTATYS?.mapNotNull { it.toDomain() } ?: emptyList(),
+        banners = BANNER?.mapToDomain() ?: emptyList(),
         items = DANNYE?.mapToDomain()
             ?: throw IllegalArgumentException("OrderHistory items can't be null")
     )

@@ -6,7 +6,10 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.CombinedLoadStates
 import androidx.paging.map
 import com.m.vodovoz.common.cart.CartManager
+import com.m.vodovoz.design_system.model.AboutAdvertisingUi
+import com.m.vodovoz.design_system.model.BannerUi
 import com.m.vodovoz.design_system.model.VodovozPlaceholderUi
+import com.m.vodovoz.design_system.model.mapToUi
 import com.m.vodovoz.design_system.model.toUi
 import com.m.vodovoz.domain.general.model.exceptions.EmptyResultException
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
@@ -24,7 +27,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
@@ -74,6 +76,7 @@ class OrdersHistoryViewModel @Inject constructor(
                 s.copy(
                     title = ordersHistoryDetails.title,
                     filters = ordersHistoryDetails.filters.mapToUi(),
+                    banners = ordersHistoryDetails.banners.mapToUi(),
                     uiState = AllOrdersUiState.Body,
                     showRefreshIndicator = false
                 )
@@ -202,6 +205,26 @@ class OrdersHistoryViewModel @Inject constructor(
         }
     }
 
+    fun activateBanner(banner: BannerUi) = viewModelScope.launch {
+        sendEvent(AllOrdersEvent.ActivateBanner(banner))
+    }
+
+    fun showAboutAdvertisingBS(aboutAdvertisingUi: AboutAdvertisingUi) {
+        updateState { s ->
+            s.copy(
+                aboutAdvertisingBS = aboutAdvertisingUi
+            )
+        }
+    }
+
+    fun closeAboutAdvertisingBS() {
+        updateState { s ->
+            s.copy(
+                aboutAdvertisingBS = null
+            )
+        }
+    }
+
     @Immutable
     data class AllOrdersState(
         val title: String = "",
@@ -210,9 +233,11 @@ class OrdersHistoryViewModel @Inject constructor(
         val searchMode: Boolean = false,
         val currentFilters: List<OrderFilterUi> = emptyList(),
         val filters: List<OrderFilterUi> = emptyList(),
+        val banners: List<BannerUi> = emptyList(),
         override val items: List<OrdersHistoryItemUi> = emptyList(),
         override val loadStates: CombinedLoadStates = emptyCombinedLoadStates,
         val showRefreshIndicator: Boolean = false,
+        val aboutAdvertisingBS: AboutAdvertisingUi? = null,
     ) : PagingState<OrdersHistoryItemUi, AllOrdersState>() {
 
         override fun copyPagingState(
@@ -230,6 +255,7 @@ class OrdersHistoryViewModel @Inject constructor(
         data class GoToOrderDetails(val id: Long) : AllOrdersEvent()
         data class OpenUrl(val url: String) : AllOrdersEvent()
         data class GoToWebView(val url: String) : AllOrdersEvent()
+        data class ActivateBanner(val banner: BannerUi) : AllOrdersEvent()
     }
 
     @Stable

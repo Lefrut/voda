@@ -717,7 +717,7 @@ interface VodovozService {
     /**
      * Home screen
      */
-    @GET("glavnaya/slayders/index.php?action=slayder&android=${BuildConfig.VERSION_NAME}")
+    @GET("glavnaya/slayders/index.php?action=slayder")
     suspend fun getBanners(
     ): Response<VodovozResponseDTO<List<BannerDTO>>>
 
