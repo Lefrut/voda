@@ -100,9 +100,11 @@ private fun PaymentMethodItemRow(
     onFieldChange: (FieldUi, FieldUi) -> Unit,
 ) {
     Column(
-        Modifier.background(
-            MaterialTheme.colorScheme.background
-        ).animateContentSize()
+        Modifier
+            .background(
+                MaterialTheme.colorScheme.background
+            )
+            .animateContentSize()
     ) {
         Row(
             modifier = modifier
@@ -117,14 +119,24 @@ private fun PaymentMethodItemRow(
                 modifier = Modifier.size(40.dp)
             )
 
-            Text(
+            Column(
                 modifier = Modifier
                     .weight(1f)
-                    .padding(horizontal = 16.dp),
-                text = item.name,
-                color = MaterialTheme.colorScheme.onBackground,
-                style = MaterialTheme.typography.bodyMedium
-            )
+                    .padding(horizontal = 16.dp)
+            ) {
+                Text(
+                    text = item.name,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                if (item.description.isNotBlank()) {
+                    Text(
+                        text = item.description,
+                        color = MaterialTheme.colorScheme.surfaceTint,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+            }
 
             when (item.isSwitch) {
                 true -> {

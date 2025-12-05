@@ -11,6 +11,8 @@ data class PaymentMethodItemDTO(
     val KARTINKA: String?,
     @Json(name = "NAME")
     val NAME: String?,
+    @Json(name = "OPISANIE")
+    val OPISANIE: String?,
     @Json(name = "ID")
     val ID: String?,
     @Json(name = "CODE")

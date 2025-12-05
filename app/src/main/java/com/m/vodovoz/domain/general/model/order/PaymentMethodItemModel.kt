@@ -8,8 +8,9 @@ data class PaymentMethodItemModel(
     val code: String,
     val id: String,
     val field: FieldModel?,
-    val maxFieldValue: Int?
-){
+    val maxFieldValue: Int?,
+    val description: String,
+) {
 
     companion object {
 

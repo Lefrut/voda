@@ -16,6 +16,7 @@ data class PaymentMethodItemUi(
     val code: String,
     val name: String,
     val image: String,
+    val description: String,
     val value: Boolean,
     val isSwitch: Boolean,
     val maxFieldValue: Int?,
@@ -36,6 +37,7 @@ data class PaymentMethodItemNav(
     val code: String,
     val name: String,
     val image: String,
+    val description: String,
     val value: Boolean,
     val isSwitch: Boolean,
     val filedId: String,
@@ -53,7 +55,8 @@ fun PaymentMethodItemNav.toUi(): PaymentMethodItemUi {
         value = value,
         isSwitch = isSwitch,
         field = FieldUi.Empty.copy(id = filedId, value = fieldValue),
-        maxFieldValue = maxFieldValue
+        maxFieldValue = maxFieldValue,
+        description = description
     )
 }
 
@@ -67,7 +70,8 @@ fun PaymentMethodItemUi.toNav(): PaymentMethodItemNav {
         isSwitch = isSwitch,
         filedId = field?.id.orEmpty(),
         fieldValue = field?.value.orEmpty(),
-        maxFieldValue = maxFieldValue
+        maxFieldValue = maxFieldValue,
+        description = description
     )
 }
 
@@ -85,6 +89,7 @@ fun PaymentMethodItemModel.toUi(): PaymentMethodItemUi {
         field = field?.toUi(),
         value = false,
         isSwitch = id == BALANCE_ID || id == BONUSES_ID,
-        maxFieldValue = maxFieldValue
+        maxFieldValue = maxFieldValue,
+        description = description
     )
 }

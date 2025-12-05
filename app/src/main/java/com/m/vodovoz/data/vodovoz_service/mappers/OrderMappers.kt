@@ -158,7 +158,8 @@ fun PaymentMethodItemDTO.toDomain(): PaymentMethodItemModel {
         code = CODE ?: "",
         id = ID ?: "",
         field = field,
-        maxFieldValue = field?.value?.toRoundIntOrNull()
+        maxFieldValue = field?.value?.toRoundIntOrNull(),
+        description = OPISANIE ?: ""
     )
 }
 
