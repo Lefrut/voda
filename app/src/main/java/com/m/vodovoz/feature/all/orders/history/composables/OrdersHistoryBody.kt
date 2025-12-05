@@ -100,63 +100,57 @@ fun OrdersHistoryBody(
                     (filters.indexOfOrNull(currentFilters.getOrNull(currentFilters.size / 2))
                         ?.plus(1)) ?: 0
 
-                VodovozScrollableTabRow(
-                    modifier = Modifier
-//                        .dropShadow(
-//                            shape = MaterialTheme.shapes.large,
-//                            color = Color.Black.copy(0.1f),
-//                            blur = 20.dp,
-//                            offsetY = 2.dp
-//                        )
-                        .background(MaterialTheme.colorScheme.background)
+                Column {
+                    VodovozScrollableTabRow(
+                        modifier = Modifier
+                            .background(MaterialTheme.colorScheme.background)
 
-                        .padding(bottom = 20.dp, top = 8.dp)
-                        .fillParentMaxWidth(),
-                    selectedTabIndex = middleTabIndex,
-                    edgePadding = 16.dp,
-                    spacing = 8.dp,
-                ) {
-                    VodovozChip(
-                        text = stringResource(id = R.string.all),
-                        selected = currentFilters.isEmpty(),
-                        onSelect = { onAllFiltersSelect() }
-                    )
-
-
-                    filters.forEach { filter ->
+                            .padding(bottom = 20.dp, top = 8.dp)
+                            .fillParentMaxWidth(),
+                        selectedTabIndex = middleTabIndex,
+                        edgePadding = 16.dp,
+                        spacing = 8.dp,
+                    ) {
                         VodovozChip(
-                            text = filter.name,
-                            selected = currentFilters.contains(filter),
-                            onSelect = { onFilterSelect(filter) }
+                            text = stringResource(id = R.string.all),
+                            selected = currentFilters.isEmpty(),
+                            onSelect = { onAllFiltersSelect() }
                         )
+
+
+                        filters.forEach { filter ->
+                            VodovozChip(
+                                text = filter.name,
+                                selected = currentFilters.contains(filter),
+                                onSelect = { onFilterSelect(filter) }
+                            )
+                        }
+                    }
+
+                    if (banners.isNotEmpty()) {
+                        Box(
+                            Modifier
+                                .fillMaxWidth()
+                                .background(
+                                    MaterialTheme.colorScheme.background,
+                                    MaterialTheme.shapes.large.copy(
+                                        topStart = CornerSize(0.dp),
+                                        topEnd = CornerSize(0.dp)
+                                    )
+                                )
+                                .padding(bottom = 12.dp)
+                        ) {
+                            SmallBannerPager(
+                                banners = banners,
+                                onBannerClick = onBannerClick,
+                                onAboutAdvertisingClick = onAboutAdvertisingClick
+                            )
+                        }
                     }
                 }
+
             }
         }
-
-        if (banners.isNotEmpty()) {
-            item(key = "SmallBannerPager") {
-                Box(
-                    Modifier
-                        .fillMaxWidth()
-                        .background(
-                            MaterialTheme.colorScheme.background,
-                            MaterialTheme.shapes.large.copy(
-                                topStart = CornerSize(0.dp),
-                                topEnd = CornerSize(0.dp)
-                            )
-                        )
-                        .padding(bottom = 12.dp)
-                ) {
-                    SmallBannerPager(
-                        banners = banners,
-                        onBannerClick = onBannerClick,
-                        onAboutAdvertisingClick = onAboutAdvertisingClick
-                    )
-                }
-            }
-        }
-
         if (itemsLoading) {
             item {
                 LoadingPlaceholder(
