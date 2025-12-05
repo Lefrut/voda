@@ -1,13 +1,11 @@
 package com.m.vodovoz.feature.product_details.composables
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -27,10 +25,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import coil3.compose.AsyncImage
 import com.m.vodovoz.R
 import com.m.vodovoz.design_system.composables.bottom_sheet.InfoBottomSheet
 import com.m.vodovoz.design_system.model.DepositUi
 import com.m.vodovoz.design_system.model.PriceUi
+import com.m.vodovoz.feature.product_details.model.ProductBonusesUi
 import com.m.vodovoz.util.formatRoundedPrice
 import kotlin.math.roundToInt
 
@@ -40,6 +40,7 @@ fun ProductDetailsPriceInfo(
     firstPrice: PriceUi,
     deposit: DepositUi?,
     pricePerUnit: String,
+    bonuses: ProductBonusesUi?,
 ) {
     val price = firstPrice.price
     val oldPrice = firstPrice.oldPrice
@@ -50,22 +51,39 @@ fun ProductDetailsPriceInfo(
     Column(
         modifier = modifier.padding(horizontal = 16.dp)
     ) {
-        Row(verticalAlignment = Alignment.Bottom, modifier = Modifier) {
-            Text(
-                text = stringResource(R.string.price, price.formatRoundedPrice()),
-                color = MaterialTheme.colorScheme.onBackground,
-                style = MaterialTheme.typography.titleLarge,
-            )
-
-            if (oldPrice > price) {
+        Row(verticalAlignment = Alignment.Bottom) {
+            Row(verticalAlignment = Alignment.Bottom, modifier = Modifier.weight(1f)) {
                 Text(
-                    text = stringResource(R.string.price, oldPrice.formatRoundedPrice()),
-                    color = MaterialTheme.colorScheme.surfaceTint,
-                    style = MaterialTheme.typography.labelLarge.copy(
-                        textDecoration = TextDecoration.LineThrough,
-                    ),
-                    modifier = Modifier.padding(start = 8.dp)
+                    text = stringResource(R.string.price, price.formatRoundedPrice()),
+                    color = MaterialTheme.colorScheme.onBackground,
+                    style = MaterialTheme.typography.titleLarge,
                 )
+
+                if (oldPrice > price) {
+                    Text(
+                        text = stringResource(R.string.price, oldPrice.formatRoundedPrice()),
+                        color = MaterialTheme.colorScheme.surfaceTint,
+                        style = MaterialTheme.typography.labelLarge.copy(
+                            textDecoration = TextDecoration.LineThrough,
+                        ),
+                        modifier = Modifier.padding(start = 8.dp)
+                    )
+                }
+            }
+            if (bonuses != null) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    AsyncImage(
+                        model = bonuses.image,
+                        contentDescription = null,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Text(
+                        modifier = Modifier.padding(start = 4.dp),
+                        text = bonuses.bonuses,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+                }
             }
         }
 

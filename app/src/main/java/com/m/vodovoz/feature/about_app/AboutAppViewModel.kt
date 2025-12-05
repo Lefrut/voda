@@ -79,12 +79,15 @@ class AboutAppViewModel @Inject constructor(
 
     fun changeMode(appMode: AppMode) = viewModelScope.launch {
         val testUrl = siteStateManager.siteStateSnapshot.testUrl
+
         when (appMode) {
             AppMode.Test -> {
+                VodovozWebConfig.setTestUrl(testUrl)
                 baseUrlInterceptor.updateBaseUrl(testUrl)
             }
 
             AppMode.Prod -> {
+                VodovozWebConfig.setProdUrl()
                 baseUrlInterceptor.updateBaseUrl(VodovozWebConfig.VODOVOZ_URL)
             }
         }

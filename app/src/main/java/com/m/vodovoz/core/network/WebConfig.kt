@@ -17,9 +17,24 @@ data object VodovozWebConfig {
     private const val VODOVOZ_PROTOCOL = "https://"
 
     //todo - m.vodovoz.ru/
-    private const val VODOVOZ_DOMAIN = "m.vodovoz.ru/"
+    private const val VODOVOZ_PROD_DOMAIN = "m.vodovoz.ru/"
+    private const val VODOVOZ_TEST_DOMAIN = "vodovoz.net/"
 
-    var VODOVOZ_URL = "$VODOVOZ_PROTOCOL$VODOVOZ_DOMAIN"
+
+    var VODOVOZ_URL = "$VODOVOZ_PROTOCOL$VODOVOZ_PROD_DOMAIN"
+        private set
+
+    fun setTestUrl(url: String): String{
+        VODOVOZ_URL = url
+        return VODOVOZ_URL
+    }
+
+    fun setProdUrl(): String{
+        VODOVOZ_URL = "$VODOVOZ_PROTOCOL$VODOVOZ_PROD_DOMAIN"
+        return VODOVOZ_URL
+    }
+
+
     const val VODOVOZ_PATH = "newmobile_new/"
     private val VODOVOZ_URL_PATH = "$VODOVOZ_URL$VODOVOZ_PATH"
     private val VODOVOZ_INFO_URL = "${VODOVOZ_URL_PATH}informatsiya/"

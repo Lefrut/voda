@@ -1,6 +1,7 @@
 package com.m.vodovoz.design_system.model.widgets
 
 import androidx.compose.runtime.Immutable
+import androidx.compose.ui.autofill.ContentType
 import androidx.compose.ui.text.input.KeyboardType
 import com.m.vodovoz.R
 import com.m.vodovoz.domain.general.model.widgets.FieldModel
@@ -53,6 +54,7 @@ data class FieldUi(
     val type: FieldTypeUi,
     val isValueVisible: Boolean,
     val isVisible: Boolean = true,
+    val contentType: ContentType? = null
 ) : WidgetUi(id) {
     companion object {
         val Empty = FieldUi(
@@ -275,6 +277,11 @@ fun List<FieldModel>.mapToUi(): List<FieldUi> {
 
 fun FieldModel.toUi(): FieldUi {
 
+    val contentType = when(id.lowercase()){
+        "email" -> ContentType.Username
+        "pass" -> ContentType.Password
+        else -> null
+    }
     val keyboardType = when (id.lowercase()) {
         "email", "emaildryg", "dr125", "dr51", "dr176" -> KeyboardType.Email
         "tel", "dr124", "phone", "dr50", "dr171", "dopphone" -> KeyboardType.Phone
@@ -311,7 +318,8 @@ fun FieldModel.toUi(): FieldUi {
                 DropDownOptionUi(option.id, option.value)
             }
         ) else FieldTypeUi.Text,
-        isVisible = isVisible
+        isVisible = isVisible,
+        contentType = contentType
     )
 }
 

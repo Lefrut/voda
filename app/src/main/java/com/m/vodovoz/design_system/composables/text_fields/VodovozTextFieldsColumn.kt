@@ -17,7 +17,6 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import com.m.vodovoz.design_system.model.widgets.FieldUi
 
-@Suppress("NonSkippableComposable")
 @Composable
 fun VodovozTextFieldsColumn(
     modifier: Modifier = Modifier,

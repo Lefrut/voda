@@ -35,6 +35,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentType
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
@@ -100,7 +102,11 @@ fun VodovozTextField(
 
             FieldTypeUi.Text -> {
                 VodovozTextField(
-                    modifier = modifier,
+                    modifier = modifier.semantics{
+                        field.contentType?.let {
+                            contentType = it
+                        }
+                    },
                     value = field.value,
                     onValueChange = { newValue ->
                         onFieldChange(field, field.copy(value = newValue))

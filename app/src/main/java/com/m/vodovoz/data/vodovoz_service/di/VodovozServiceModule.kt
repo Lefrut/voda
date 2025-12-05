@@ -1,6 +1,5 @@
 package com.m.vodovoz.data.vodovoz_service.di
 
-import com.squareup.moshi.Moshi
 import com.m.vodovoz.core.network.VodovozWebConfig
 import com.m.vodovoz.core.network.di.VodovozQualifier
 import com.m.vodovoz.core.network.retrofit.NoOpCallAdapterFactory
@@ -14,6 +13,7 @@ import com.m.vodovoz.data.vodovoz_service.repository.UserPreferencesRepositoryIm
 import com.m.vodovoz.data.vodovoz_service.repository.VodovozServiceRepositoryImpl
 import com.m.vodovoz.domain.general.respository.UserPreferencesRepository
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
+import com.squareup.moshi.Moshi
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -31,7 +31,7 @@ abstract class VodovozServiceModule {
     @Binds
     @Singleton
     abstract fun bindVodovozServiceRepository(
-        vodovozServiceRepository: VodovozServiceRepositoryImpl
+        vodovozServiceRepository: VodovozServiceRepositoryImpl,
     ): VodovozServiceRepository
 
     @Binds
@@ -80,5 +80,5 @@ abstract class VodovozServiceModule {
 }
 
 fun String.toVodovozUrl(): String {
-    return VodovozWebConfig.VODOVOZ_URL.removeSuffix("\"") + this
+    return VodovozWebConfig.VODOVOZ_URL.removeSuffix("\\") + this
 }

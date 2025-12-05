@@ -18,7 +18,7 @@ import com.m.vodovoz.design_system.model.ProductDetailsUi
 import com.m.vodovoz.design_system.model.ProductMediaUi
 import com.m.vodovoz.design_system.model.ProductUi
 import com.m.vodovoz.design_system.model.SectionContentUi
-import com.m.vodovoz.design_system.model.SectionUi
+import com.m.vodovoz.feature.product_details.model.ProductBonusesUi
 
 @Composable
 fun ProductDetailsBody(
@@ -26,6 +26,7 @@ fun ProductDetailsBody(
     mediaPagerState: PagerState,
     productDetails: ProductDetailsUi,
     comments: List<CommentUi>,
+    productBonuses: ProductBonusesUi?,
     moreProductSections: List<SectionContentUi<ProductUi>>,
     buttons: ProductDetailsButtonsUi,
     totalPrice: Int,
@@ -96,7 +97,8 @@ fun ProductDetailsBody(
             modifier = Modifier.padding(top = 24.dp),
             deposit = productDetails.deposit,
             firstPrice = productDetails.firstPrice,
-            pricePerUnit = productDetails.pricePerUnit ?: ""
+            pricePerUnit = productDetails.pricePerUnit ?: "",
+            bonuses = productBonuses,
         )
 
 

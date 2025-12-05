@@ -111,6 +111,7 @@ fun ProductDetailsScreen(
                     showDetailText = viewState.showDetailText,
                     buttons = viewState.buttons,
                     totalPrice = viewState.totalPrice,
+                    productBonuses = viewState.productBonuses,
                     onFloatingButtonChange = { isVisible ->
                         viewModel.changeFloatingButton(isVisible)
                     },
