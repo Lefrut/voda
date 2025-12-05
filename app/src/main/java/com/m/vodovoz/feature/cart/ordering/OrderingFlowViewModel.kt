@@ -666,7 +666,8 @@ class OrderingFlowViewModel @Inject constructor(
         fetchSmartOrderingDetails().onSuccess { orderingDetailsModel ->
             updateState { state ->
                 state.copy(
-                    totals = orderingDetailsModel.totals.mapToUi()
+                    totals = orderingDetailsModel.totals.mapToUi(),
+                    button = orderingDetailsModel.button.toUi()
                 )
             }
         }
