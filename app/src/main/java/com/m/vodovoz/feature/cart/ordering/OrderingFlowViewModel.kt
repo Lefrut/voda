@@ -663,7 +663,13 @@ class OrderingFlowViewModel @Inject constructor(
 
         updateState { updated }
 
-        fetchSmartOrderingDetails()
+        fetchSmartOrderingDetails().onSuccess { orderingDetailsModel ->
+            updateState { state ->
+                state.copy(
+                    totals = orderingDetailsModel.totals.mapToUi()
+                )
+            }
+        }
     }
 
     fun activatePayButton(button: ColorfulButtonUi?) = viewModelScope.launch {
