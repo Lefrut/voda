@@ -12,6 +12,7 @@ import com.m.vodovoz.data.vodovoz_service.model.product_details.BLOCK_TOVAR_DTO
 import com.m.vodovoz.data.vodovoz_service.model.product_details.BLOCK_U_BLOCK_KNOPKA_DIZAIN_DTO
 import com.m.vodovoz.data.vodovoz_service.model.product_details.BLOK_KNOPKA_DIZAIN_DTO
 import com.m.vodovoz.data.vodovoz_service.model.product_details.BLOK_KNOPKA_DTO
+import com.m.vodovoz.data.vodovoz_service.model.product_details.BONUSCENA_DTO
 import com.m.vodovoz.data.vodovoz_service.model.product_details.DETAILTEXT_DTO
 import com.m.vodovoz.data.vodovoz_service.model.product_details.DOCUMENTS_DTO
 import com.m.vodovoz.data.vodovoz_service.model.product_details.DOCUMENT_DTO
@@ -44,6 +45,7 @@ import com.m.vodovoz.domain.general.model.product.DepositModel
 import com.m.vodovoz.domain.general.model.product.DesignBlockModel
 import com.m.vodovoz.domain.general.model.product.DocumentModel
 import com.m.vodovoz.domain.general.model.product.OldNewPriceModel
+import com.m.vodovoz.domain.general.model.product.ProductBonusesModel
 import com.m.vodovoz.domain.general.model.product.ProductDetailsButtonsModel
 import com.m.vodovoz.domain.general.model.product.ProductDetailsModel
 import com.m.vodovoz.domain.general.model.product.ProductDetailsScreenModel
@@ -118,9 +120,18 @@ private fun TOVAR_DETAIL_DTO.toDomain(
             ?: throw IllegalArgumentException("First extended price cannot be null"),
         prices = EXTENDEDPRICE.mapNotNull { extendedPriceDto -> extendedPriceDto.toDomain() },
         commentsCount = commentsCount,
-        forAdultsModel = TOVAR18?.toDomain()
+        forAdultsModel = TOVAR18?.toDomain(),
+        bonuses = BONUS_CENA?.toDomain()
     )
 }
+
+fun BONUSCENA_DTO.toDomain(): ProductBonusesModel {
+    return ProductBonusesModel(
+        image = IKONKA?.toVodovozUrl() ?: "",
+        bonuses = BONUS ?: ""
+    )
+}
+
 
 fun RUTUBEVIDEO_DTO.toDomain(): ProductVideoModel? {
     return ProductVideoModel(

@@ -26,6 +26,7 @@ import com.m.vodovoz.design_system.model.toVodovozSectionUi
 import com.m.vodovoz.domain.general.respository.UserPreferencesRepository
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
 import com.m.vodovoz.feature.product_details.model.PresentInfoUi
+import com.m.vodovoz.feature.product_details.model.ProductBonusesUi
 import com.m.vodovoz.feature.product_details.model.toUi
 import com.m.vodovoz.ui.mvi.Event
 import com.m.vodovoz.ui.paging.ItemsState
@@ -120,39 +121,42 @@ class ProductDetailsFlowViewModel @Inject constructor(
         }
     }.collect()
 
-    fun fetchProductDetails() =
-        vodovozServiceRepository.getProductDetails(stateSnapshot.productDetails.id)
-            .combine(vodovozServiceRepository.getPresentInfo()) { p1, p2 ->
-                p1 to p2
-            }
-            .onEach { (productDetailsScreenResult, presentInfoResult) ->
-                productDetailsScreenResult.onSuccess { productDetailsScreenModel ->
-                    val moreProducts = productDetailsScreenModel.moreProducts
-                    val canViewAdultProducts = userPreferencesRepository.getCanViewAdultProducts()
-                    val forAdults = productDetailsScreenModel.details.forAdultsModel?.toUi()
+    fun fetchProductDetails() = vodovozServiceRepository.getProductDetails(
+        productId = stateSnapshot.productDetails.id
+    )
+        .combine(vodovozServiceRepository.getPresentInfo()) { p1, p2 ->
+            p1 to p2
+        }
+        .onEach { (productDetailsScreenResult, presentInfoResult) ->
+            productDetailsScreenResult.onSuccess { productDetailsScreenModel ->
+                val moreProducts = productDetailsScreenModel.moreProducts
+                val canViewAdultProducts = userPreferencesRepository.getCanViewAdultProducts()
+                val forAdults = productDetailsScreenModel.details.forAdultsModel?.toUi()
 
-                    updateState { s ->
-                        s.copy(
-                            comments = productDetailsScreenModel.comments.mapToUi(),
-                            productDetails = productDetailsScreenModel.details.toUi(),
-                            items = moreProducts.map { section ->
-                                section.toVodovozSectionUi()
-                            },
-                            buttons = productDetailsScreenModel.buttons.toUi(),
-                            tabs = productDetailsScreenModel.tabs.map { it.toUi() },
-                            uiState = if (forAdults != null && !canViewAdultProducts) ProductDetailsUiState.ForAdults(
-                                forAdults
-                            ) else ProductDetailsUiState.Success,
-                            presentInfo = presentInfoResult.getOrNull()?.toUi() ?: s.presentInfo
-                        )
-                    }
+                updateState { s ->
+                    s.copy(
+                        comments = productDetailsScreenModel.comments.mapToUi(),
+                        productDetails = productDetailsScreenModel.details.toUi(),
+                        items = moreProducts.map { section ->
+                            section.toVodovozSectionUi()
+                        },
+                        buttons = productDetailsScreenModel.buttons.toUi(),
+                        tabs = productDetailsScreenModel.tabs.map { it.toUi() },
+                        uiState = if (forAdults != null && !canViewAdultProducts) ProductDetailsUiState.ForAdults(
+                            forAdults
+                        ) else ProductDetailsUiState.Success,
+                        presentInfo = presentInfoResult.getOrNull()?.toUi() ?: s.presentInfo,
+                        productBonuses = productDetailsScreenModel.details.bonuses?.toUi()
 
-                }.onFailure {
-                    updateState { s ->
-                        s.copy(uiState = ProductDetailsUiState.Error)
-                    }
+                    )
                 }
-            }.launchIn(viewModelScope)
+
+            }.onFailure {
+                updateState { s ->
+                    s.copy(uiState = ProductDetailsUiState.Error)
+                }
+            }
+        }.launchIn(viewModelScope)
 
     fun incrementCart() = viewModelScope.launch {
         val productDetails = stateSnapshot.productDetails
@@ -488,6 +492,7 @@ class ProductDetailsFlowViewModel @Inject constructor(
         val showPresentBottomSheet: Boolean = false,
         val showPresentBlockBottomSheet: Boolean = false,
         val presentInfo: PresentInfoUi = PresentInfoUi.Empty,
+        val productBonuses: ProductBonusesUi? = null,
         val multiProductQuantity: Int = 1,
         val multiProductTotalPrice: Int = productDetails.firstPrice.price.toInt(),
     ) : ItemsState<VodovozSectionUi<ProductUi>, ProductDetailsState>() {

@@ -61,4 +61,6 @@ data class TOVAR_DETAIL_DTO(
     val ZALOG: ZALOG_DTO?,
     @Json(name = "TOVAR18")
     val TOVAR18: TOVAR_18_DTO?,
+    @Json(name = "BONUSCENA")
+    val BONUS_CENA: BONUSCENA_DTO?,
 )

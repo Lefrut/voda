@@ -20,7 +20,6 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.unit.dp
 import com.m.vodovoz.feature.order_call_you.model.CallYouItemUi
 
-@Suppress("NonSkippableComposable")
 @Composable
 fun OrderCallYouBody(
     modifier: Modifier = Modifier,

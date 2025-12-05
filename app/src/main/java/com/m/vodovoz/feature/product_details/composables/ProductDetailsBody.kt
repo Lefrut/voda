@@ -20,7 +20,6 @@ import com.m.vodovoz.design_system.model.ProductUi
 import com.m.vodovoz.design_system.model.SectionContentUi
 import com.m.vodovoz.design_system.model.SectionUi
 
-@Suppress("NonSkippableComposable")
 @Composable
 fun ProductDetailsBody(
     modifier: Modifier = Modifier,

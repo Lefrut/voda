@@ -11,6 +11,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.m.vodovoz.R
 import com.m.vodovoz.design_system.composables.button.VodovozButtonsColumn
+import com.m.vodovoz.design_system.composables.floating.BottomFloatingContainer
 import com.m.vodovoz.design_system.composables.placeholders.LoadingPlaceholder
 import com.m.vodovoz.design_system.composables.placeholders.NetworkErrorPlaceholder
 import com.m.vodovoz.design_system.composables.top_bar.VodovozTopBar
@@ -30,18 +31,22 @@ fun PaymentMethodScreen(viewModel: PaymentMethodViewModel, viewState: PaymentMet
         },
         bottomBar = bottomBar@{
             if (uiState is PaymentMethodUiState.Success) {
-                VodovozButtonsColumn(
-                    modifier = Modifier.padding(bottom = 24.dp, start = 16.dp, end = 16.dp),
-                    buttons = listOf(viewState.button),
-                    onButtonClick = {
-                        viewModel.choosePaymentMethod()
-                    }
-                )
+                BottomFloatingContainer {
+                    VodovozButtonsColumn(
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        buttons = listOf(viewState.button),
+                        onButtonClick = {
+                            viewModel.choosePaymentMethod()
+                        }
+                    )
+                }
             }
 
         }
     ) { paddingValues ->
-        Box(modifier = Modifier.fillMaxSize().padding(top = paddingValues.calculateTopPadding())) {
+        Box(modifier = Modifier
+            .fillMaxSize()
+            .padding(top = paddingValues.calculateTopPadding())) {
             when (uiState) {
                 PaymentMethodUiState.Error -> {
                     NetworkErrorPlaceholder {
@@ -62,7 +67,7 @@ fun PaymentMethodScreen(viewModel: PaymentMethodViewModel, viewState: PaymentMet
                         onPaymentItemClick = { paymentMethod ->
                             viewModel.changePaymentMethodItem(paymentMethod)
                         },
-                        onFieldChange = { item ,field, updatedField ->
+                        onFieldChange = { item, field, updatedField ->
                             viewModel.changeField(item, field, updatedField)
                         }
                     )

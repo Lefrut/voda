@@ -12,6 +12,7 @@ import androidx.compose.ui.unit.dp
 import com.m.vodovoz.R
 import com.m.vodovoz.design_system.composables.button.VodovozButton
 import com.m.vodovoz.design_system.composables.dialogs.VodovozDialog
+import com.m.vodovoz.design_system.composables.floating.BottomFloatingContainer
 import com.m.vodovoz.design_system.composables.placeholders.LoadingPlaceholder
 import com.m.vodovoz.design_system.composables.placeholders.NetworkErrorPlaceholder
 import com.m.vodovoz.design_system.composables.placeholders.VodovozPlaceholder
@@ -50,26 +51,28 @@ fun AddressesScreen(
         },
         bottomBar = {
             if (uiState is AddressesFlowViewModel.AddressesUiState.Success) {
-                VodovozButton(
-                    modifier = Modifier.padding(bottom = 24.dp, start = 16.dp, end = 16.dp),
-                    text = when (viewState.screenType) {
-                        AddressScreenTypeUi.Add -> stringResource(R.string.add_address)
-                        AddressScreenTypeUi.Choose -> stringResource(R.string.choose)
-                    },
-                    onClick = {
-                        when (viewState.screenType) {
-                            AddressScreenTypeUi.Add -> {
-                                viewModel.addAddress()
-                            }
+                BottomFloatingContainer {
+                    VodovozButton(
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        text = when (viewState.screenType) {
+                            AddressScreenTypeUi.Add -> stringResource(R.string.add_address)
+                            AddressScreenTypeUi.Choose -> stringResource(R.string.choose)
+                        },
+                        onClick = {
+                            when (viewState.screenType) {
+                                AddressScreenTypeUi.Add -> {
+                                    viewModel.addAddress()
+                                }
 
-                            AddressScreenTypeUi.Choose -> {
-                                viewModel.searchThenNavigateToOrdering()
+                                AddressScreenTypeUi.Choose -> {
+                                    viewModel.searchThenNavigateToOrdering()
+                                }
                             }
-                        }
-                    },
-                    isLoading = viewState.buttonLoading,
-                    enabled = viewState.buttonEnabled && viewState.selectedAddress != AddressUi.Empty
-                )
+                        },
+                        isLoading = viewState.buttonLoading,
+                        enabled = viewState.buttonEnabled && viewState.selectedAddress != AddressUi.Empty
+                    )
+                }
             }
 
         },

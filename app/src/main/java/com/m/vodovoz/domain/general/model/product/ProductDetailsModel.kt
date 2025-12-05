@@ -64,12 +64,18 @@ data class ProductDetailsModel(
     val prices: List<PriceModel>,
 
     val commentsCount: Int,
-    val forAdultsModel: ForAdultsModel?
+    val forAdultsModel: ForAdultsModel?,
+    val bonuses: ProductBonusesModel?
 )
 
 data class ProductVideoModel(
     val previewImage: String,
     val code: String
+)
+
+data class ProductBonusesModel(
+    val image: String,
+    val bonuses: String
 )
 
 data class DocumentModel(

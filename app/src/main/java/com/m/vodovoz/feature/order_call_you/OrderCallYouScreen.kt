@@ -10,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.m.vodovoz.design_system.composables.button.VodovozButtonsColumn
+import com.m.vodovoz.design_system.composables.floating.BottomFloatingContainer
 import com.m.vodovoz.design_system.composables.placeholders.LoadingPlaceholder
 import com.m.vodovoz.design_system.composables.placeholders.NetworkErrorPlaceholder
 import com.m.vodovoz.design_system.composables.top_bar.VodovozTopBar
@@ -34,13 +35,15 @@ fun OrderCallYouScreen(
         },
         bottomBar = {
             if (uiState is OrderCallYouUiState.CallYou) {
-                VodovozButtonsColumn(
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 26.dp),
-                    buttons = listOf(viewState.button),
-                    onButtonClick = { button ->
-                        viewModel.chooseOrderingCallYou(button)
-                    }
-                )
+                BottomFloatingContainer {
+                    VodovozButtonsColumn(
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        buttons = listOf(viewState.button),
+                        onButtonClick = { button ->
+                            viewModel.chooseOrderingCallYou(button)
+                        }
+                    )
+                }
             }
         },
         contentWindowInsets = WindowInsets(0.dp)

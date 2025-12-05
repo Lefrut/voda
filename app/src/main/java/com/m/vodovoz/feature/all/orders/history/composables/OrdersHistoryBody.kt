@@ -62,7 +62,6 @@ import com.m.vodovoz.feature.all.orders.history.model.OrderFilterUi
 import com.m.vodovoz.feature.all.orders.history.model.OrdersHistoryButtonUi
 import com.m.vodovoz.feature.all.orders.history.model.OrdersHistoryItemUi
 import com.m.vodovoz.feature.all.orders.history.model.OrdersHistoryProductUi
-import com.m.vodovoz.feature.home.composables.dropShadow
 import com.m.vodovoz.util.extensions.indexOfOrNull
 
 @Composable
@@ -103,12 +102,12 @@ fun OrdersHistoryBody(
 
                 VodovozScrollableTabRow(
                     modifier = Modifier
-                        .dropShadow(
-                            shape = MaterialTheme.shapes.large,
-                            color = Color.Black.copy(0.1f),
-                            blur = 20.dp,
-                            offsetY = 2.dp
-                        )
+//                        .dropShadow(
+//                            shape = MaterialTheme.shapes.large,
+//                            color = Color.Black.copy(0.1f),
+//                            blur = 20.dp,
+//                            offsetY = 2.dp
+//                        )
                         .background(MaterialTheme.colorScheme.background)
 
                         .padding(bottom = 20.dp, top = 8.dp)
@@ -147,7 +146,7 @@ fun OrdersHistoryBody(
                                 topEnd = CornerSize(0.dp)
                             )
                         )
-                        .padding(vertical = 12.dp)
+                        .padding(bottom = 12.dp)
                 ) {
                     SmallBannerPager(
                         banners = banners,
@@ -160,7 +159,10 @@ fun OrdersHistoryBody(
 
         if (itemsLoading) {
             item {
-                LoadingPlaceholder(modifier = Modifier.fillParentMaxSize())
+                LoadingPlaceholder(
+                    modifier = Modifier.padding(top = 32.dp),
+                    containerColor = Color.Transparent
+                )
             }
         } else {
             itemsIndexed(

@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.m.vodovoz.design_system.composables.button.VodovozButtonsColumn
 import com.m.vodovoz.design_system.composables.checkbox.VodovozCheckbox
+import com.m.vodovoz.design_system.composables.floating.BottomFloatingContainer
 import com.m.vodovoz.design_system.composables.text_fields.VodovozTextFieldsColumn
 import com.m.vodovoz.design_system.model.ColorfulButtonUi
 import com.m.vodovoz.design_system.model.widgets.CheckboxUi
@@ -63,15 +64,12 @@ fun OrderRecipientBody(
 
         Spacer(modifier = Modifier.weight(1f))
 
-        VodovozButtonsColumn(
-            modifier = Modifier.padding(
-                bottom = 32.dp,
-                top = 24.dp,
-                start = 16.dp,
-                end = 16.dp
-            ),
-            buttons = listOf(button),
-            onButtonClick = onButtonClick
-        )
+        BottomFloatingContainer {
+            VodovozButtonsColumn(
+                modifier = Modifier.padding(start = 16.dp, end = 16.dp),
+                buttons = listOf(button),
+                onButtonClick = onButtonClick
+            )
+        }
     }
 }
