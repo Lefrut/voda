@@ -16,6 +16,7 @@ import com.m.vodovoz.feature.payment_method.model.PaymentMethodItemUi
 import com.m.vodovoz.feature.payment_method.model.PaymentMethodState
 import com.m.vodovoz.feature.payment_method.model.PaymentMethodUiState
 import com.m.vodovoz.feature.payment_method.model.mapToUi
+import com.m.vodovoz.feature.payment_method.model.updateFieldValueIf
 import com.m.vodovoz.ui.mvi.MviViewModel
 import com.m.vodovoz.util.extensions.singleResult
 import com.m.vodovoz.util.toRoundIntOrNull
@@ -154,11 +155,12 @@ class PaymentMethodViewModel @Inject constructor(
             .firstOrNull { item ->
                 !item.isSwitch && item.value
             } ?: return@launch
+
         sendEvent(
             PaymentMethodEvent.GoBackToOrdering(
                 paymentMethod = paymentMethod,
-                paymentBalance = paymentBalance,
-                paymentBonuses = paymentBonuses
+                paymentBalance = paymentBalance?.updateFieldValueIf(paymentBalance.value),
+                paymentBonuses = paymentBonuses?.updateFieldValueIf(paymentBonuses.value)
             )
         )
     }

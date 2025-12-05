@@ -23,6 +23,14 @@ data class PaymentMethodItemUi(
     val field: FieldUi?,
 )
 
+fun PaymentMethodItemUi.updateFieldValueIf(condition: Boolean): PaymentMethodItemUi =
+    copy(
+        field = field?.copy(
+            value = field.value.takeIf { condition } ?: ""
+        )
+    )
+
+
 val PaymentMethodItemUi.intFieldValueOrZero: Int
     get() = field?.value?.toRoundIntOrNull() ?: 0
 
