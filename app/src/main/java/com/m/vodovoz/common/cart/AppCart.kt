@@ -2,33 +2,29 @@ package com.m.vodovoz.common.cart
 
 import com.m.vodovoz.domain.general.model.product.toCartProducts
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
-import com.m.vodovoz.util.extensions.singleResult
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.single
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.util.UUID
 import java.util.concurrent.atomic.AtomicInteger
-import kotlin.collections.map
-import kotlin.collections.plus
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
+import kotlin.time.Duration.Companion.milliseconds
 
 
 /** Задача:
@@ -41,20 +37,27 @@ private suspend fun clientMethod() {
 }
 
 private abstract class AbstractAppCart(
-    private val vodovozServiceRepository: VodovozServiceRepository,
-    private val cartStrategyFactory: VodovozCartStrategyFactory = VodovozCartStrategyFactory(
-        vodovozServiceRepository
-    ),
+    private val cartStrategyFactory: VodovozCartStrategyFactory,
     dispatcher: CoroutineDispatcher = Dispatchers.Default,
 ) : AppCart {
 
 
     private val updatingMutex = Mutex()
-    private val scope = CoroutineScope(dispatcher)
+    private val scope = CoroutineScope(SupervisorJob() + dispatcher)
     private var version by AtomicIntDelegate(0)
 
-    private val _items = MutableStateFlow<Map<Long, CartItem>>(emptyMap())
-    override val items = _items.asStateFlow()
+    private val _itemsState = MutableStateFlow<Map<Long, CartItem>>(emptyMap())
+    override val itemsState = _itemsState.asStateFlow()
+    private val items
+        get() = _itemsState.value
+
+    protected suspend fun updateItems(
+        block: Map<Long, CartItem>.() -> Map<Long, CartItem>,
+    ): Map<Long, CartItem> = updatingMutex.withLock {
+        val updatedItems = block(items)
+        _itemsState.value = updatedItems
+        return updatedItems
+    }
 
     private val _operationsByVersionFlow =
         MutableStateFlow<Map<Int, List<OperationInfo>>>(emptyMap())
@@ -68,90 +71,53 @@ private abstract class AbstractAppCart(
         .map { getOperationsByVersion(version) }
         .filter { it.isNotEmpty() }
         .distinctUntilChanged()
-        .debounce(350)
+        .debounce { 375.milliseconds }
         .onEach { operationInfos ->
 
         }
         .launchIn(scope)
 
-    private val _itemsSharedFlow = MutableSharedFlow<Map<Long, CartItem>>(1)
 
-    protected suspend fun updateItems(
-        block: Map<Long, CartItem>.() -> Map<Long, CartItem>,
-    ): Map<Long, CartItem> = updatingMutex.withLock {
-        val items = _itemsSharedFlow.firstOrNull() ?: return emptyMap()
-        val updatedItems = block(items)
-        _itemsSharedFlow.emit(updatedItems)
-        return updatedItems
+    override suspend fun incrementProduct(id: Long, quantity: Int) {
+        val type =
+            if (items[id] != null) OperationApplyType.Change
+            else OperationApplyType.Add
+
+
     }
 
-    override suspend fun addProduct(
-        id: Long,
-        quantity: Int,
-    ) = putOperation(
-        type = OperationType.Add,
-        item = CartItem.from(id, quantity)
-    )
-
-    override suspend fun addProducts(
-        idsAndQuantities: Map<Long, Int>
-    ) = idsAndQuantities.forEach { (id, quantity) ->
-        putOperation(
-            type = OperationType.Add,
-            item = CartItem.from(id, quantity)
-        )
+    override suspend fun decrementProduct(id: Long, quantity: Int) {
+        TODO("Not yet implemented")
     }
-
-    override suspend fun changeProducts(
-        idsAndQuantities: Map<Long, Int>,
-    ) = idsAndQuantities.forEach { (id, quantity) ->
-        putOperation(
-            type = OperationType.Change,
-            item = CartItem.from(id, quantity)
-        )
-    }
-
-    override suspend fun changeProduct(id: Long, quantity: Int) = putOperation(
-        type = OperationType.Change,
-        item = CartItem.from(id, quantity)
-    )
 
     override suspend fun clear() = putOperation(
-        type = OperationType.Clear,
+        type = OperationApplyType.Clear,
         incomingItems = emptyList()
     )
 
     protected suspend fun putOperation(
-        type: OperationType,
+        type: OperationApplyType,
         item: CartItem,
     ) = putOperation(type = type, incomingItems = listOf(item))
 
     protected suspend fun putOperation(
-        type: OperationType,
+        type: OperationApplyType,
         incomingItems: List<CartItem>,
     ) {
         val noLoadingIncommingItems = incomingItems.filter { item ->
-            items.value[item.id]?.isLoading == false
+            itemsState.value[item.id]?.isLoading == false
         }
         if (noLoadingIncommingItems.isEmpty()) return
 
         val operationInfo = OperationInfo(
-            incommingItems = incomingItems,
+            incomingItems = incomingItems,
             type = type,
         )
 
-        updatingMutex.withLock {
-            val currentVersion = version
-            val updatedOperations = getOperationsByVersion(
-                currentVersion
-            ).plus(operationInfo)
-            _operationsByVersionFlow.update { operationsByVersion ->
-                operationsByVersion.mapValues { (version, operations) ->
-                    if (currentVersion == version) updatedOperations
-                    else operations
-                }
-            }
-        }
+        val currentVersion = version
+        val updatedOperations = getOperationsByVersion(
+            currentVersion
+        ).plus(operationInfo)
     }
 }
 
@@ -178,78 +144,62 @@ private interface CartStrategy {
 
     suspend fun apply(
         items: List<CartItem>,
-        incomingItems: List<CartItem>
+        incomingItems: List<CartItem>,
     ): List<CartItem>
 
     suspend fun sync(
-        items: List<CartItem>
+        items: List<CartItem>,
     ): Result<Unit>
 }
 
 private class VodovozCartStrategyFactory(
-    private val vodovozServiceRepository: VodovozServiceRepository
+    private val vodovozServiceRepository: VodovozServiceRepository,
 ) {
-    fun createCartStrategy(
-        onApply: (items: List<CartItem>, incomingItems: List<CartItem>) -> List<CartItem>,
-        onSync: suspend (List<CartItem>) -> Result<Unit>,
-    ) = object : CartStrategy {
-        override suspend fun apply(
-            items: List<CartItem>,
-            incomingItems: List<CartItem>
-        ): List<CartItem> = onApply(items, incomingItems)
 
-        override suspend fun sync(items: List<CartItem>): Result<Unit> = onSync(items)
-    }
-
-    private val cartStrategyMap = mapOf<OperationType, CartStrategy>(
-        OperationType.Add to createCartStrategy(
+    private val cartStrategyMap = mapOf<OperationApplyType, CartStrategy>(
+        OperationApplyType.Add to createCartStrategy(
             onApply = { items, incomingItems ->
                 combine(items, incomingItems) { quantity1, quantity2 ->
                     quantity1 + quantity2
                 }
             },
-            onSync = { items ->
-                val firstItems = items.first()
+            onSync = { item ->
                 vodovozServiceRepository.addProductToCart(
-                    firstItems.id,
-                    firstItems.quantity
-                ).singleUnitResult()
+                    item.id,
+                    item.quantity
+                )
             }
         ),
-        OperationType.Change to createCartStrategy(
+        OperationApplyType.Change to createCartStrategy(
             onApply = { items, incomingItems ->
                 combine(items, incomingItems) { _, q2 -> q2 }
             },
-            onSync = { items ->
-                val firstItems = items.first()
+            onSync = { item ->
                 vodovozServiceRepository.updateProductInCart(
-                    firstItems.id,
-                    firstItems.quantity
-                ).singleUnitResult()
+                    item.id,
+                    item.quantity
+                )
             }
         ),
-        OperationType.Clear to createCartStrategy(
+        OperationApplyType.Clear to createCartStrategy(
             onApply = { _, _ -> emptyList() },
             onSync = {
-                vodovozServiceRepository.clearCart().singleUnitResult()
+                vodovozServiceRepository.clearCart()
             }
         )
 
     )
 
 
-    operator fun get(operationType: OperationType): CartStrategy {
+    operator fun get(operationType: OperationApplyType): CartStrategy {
         return cartStrategyMap[operationType]!!
     }
 
-    suspend fun <T> Flow<Result<T>>.singleUnitResult(): Result<Unit> {
-        return singleResult().mapCatching { Unit }
-    }
 
     private fun combine(
         existingItems: List<CartItem>,
         incomingItems: List<CartItem>,
-        transformQuantities: (Int, Int) -> Int
+        transformQuantities: (Int, Int) -> Int,
     ): List<CartItem> {
         val existingMap = existingItems.associateBy { it.id }
         val incomingMap = incomingItems.associateBy { it.id }
@@ -271,6 +221,21 @@ private class VodovozCartStrategyFactory(
         }
     }
 
+
+    private fun <T : Any> createCartStrategy(
+        onApply: (items: List<CartItem>, incomingItems: List<CartItem>) -> List<CartItem>,
+        onSync: suspend (CartItem) -> Flow<T>,
+    ) = object : CartStrategy {
+        override suspend fun apply(
+            items: List<CartItem>,
+            incomingItems: List<CartItem>,
+        ): List<CartItem> = onApply(items, incomingItems)
+
+        override suspend fun sync(items: List<CartItem>): Result<Unit> {
+            return runCatching { onSync(items.first()).single() }
+        }
+    }
+
 }
 
 private fun List<CartItem>.format(): String {
@@ -278,23 +243,28 @@ private fun List<CartItem>.format(): String {
 }
 
 private data class OperationInfo(
-    val incommingItems: List<CartItem>,
+    val incomingItems: List<CartItem>,
     val id: String = UUID.randomUUID().toString(),
-    val type: OperationType,
+    val type: OperationApplyType,
     val state: OperationState = OperationState.Loading,
 
     ) {
     init {
-        check(incommingItems.isNotEmpty()) { "OperationInfo items can't be empty" }
+        check(incomingItems.isNotEmpty()) { "OperationInfo items can't be empty" }
     }
 
-    val firstItem by lazy { incommingItems.first() }
+    val firstItem by lazy { incomingItems.first() }
 
 }
 
-enum class OperationType {
+enum class OperationApplyType {
     Add, Change, Clear;
 }
+
+enum class OperationRequestType {
+    Add, AddMultiple, Change, ReplaceBottles, Clear;
+}
+
 
 enum class OperationState {
     Loading,
@@ -305,15 +275,13 @@ enum class OperationState {
 
 private interface AppCart {
 
-    val items: StateFlow<Map<Long, CartItem>>
+    val itemsState: StateFlow<Map<Long, CartItem>>
 
-    suspend fun addProduct(id: Long, quantity: Int)
+    suspend fun incrementProduct(id: Long, quantity: Int = 1)
 
-    suspend fun addProducts(idsAndQuantities: Map<Long, Int>)
+    suspend fun decrementProduct(id: Long, quantity: Int = 1)
 
-    suspend fun changeProduct(id: Long, quantity: Int)
-
-    suspend fun changeProducts(idsAndQuantities: Map<Long, Int>)
+    suspend fun incrementProducts(itemsMap: Map<Long, Int>)
 
     suspend fun clear()
 }
@@ -332,7 +300,7 @@ class AtomicIntDelegate(initial: Int = 0) : ReadWriteProperty<Any?, Int> {
     override inline fun setValue(
         thisRef: Any?,
         property: KProperty<*>,
-        value: Int
+        value: Int,
     ) {
         atomic.set(value)
     }

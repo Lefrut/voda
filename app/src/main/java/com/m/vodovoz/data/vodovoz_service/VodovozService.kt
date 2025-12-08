@@ -617,7 +617,7 @@ interface VodovozService {
     ): Response<VodovozResponseDTO<String>>
 
     @GET("korzina/function/add/index.php?action=addtoqua&ydaltara=Y")
-    suspend fun updateMultipleProductsToCart(
+    suspend fun replaceMultipleBottlesToCart(
         @Query("idquanit") productIdsWithQuantity: String,
     ): Response<VodovozResponseDTO<String>>
 

@@ -1922,10 +1922,10 @@ class VodovozServiceRepositoryImpl @Inject constructor(
             mapper = { response -> response.data ?: "" }
         )
 
-    override suspend fun updateMultipleProductsToCart(cartProducts: CartProductsModel): Flow<Result<String>> {
+    override suspend fun replaceMultipleBottlesToCart(cartProducts: CartProductsModel): Flow<Result<String>> {
         return executeRequest(
             request = {
-                vodovozService.updateMultipleProductsToCart(cartProducts.productsIdsWithQuantity)
+                vodovozService.replaceMultipleBottlesToCart(cartProducts.productsIdsWithQuantity)
             },
             mapper = { it.data ?: "" }
         )

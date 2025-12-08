@@ -438,7 +438,7 @@ interface VodovozServiceRepository {
         productIdsWithQuantity: String,
     ): FlowResult<String>
 
-    suspend fun updateMultipleProductsToCart(
+    suspend fun replaceMultipleBottlesToCart(
         cartProducts: CartProductsModel,
     ): FlowResult<String>
 

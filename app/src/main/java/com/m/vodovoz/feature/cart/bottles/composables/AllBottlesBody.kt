@@ -31,7 +31,6 @@ import com.m.vodovoz.design_system.composables.button.CartCounterButton
 import com.m.vodovoz.feature.cart.bottles.model.BottleUi
 import com.m.vodovoz.util.TransliterationUtils
 
-@Suppress("NonSkippableComposable")
 @Composable
 fun AllBottlesBody(
     modifier: Modifier = Modifier,

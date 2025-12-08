@@ -177,15 +177,14 @@ class AllBottlesFlowViewModel @Inject constructor(
 
         val bottlesMap = bottles.toMap()
 
-        val updateBottlesResult =
-            if (bottlesMap != cartBottles.toMap())
-                vodovozServiceRepository.updateMultipleProductsToCart(
-                    bottlesMap.toCartProducts()
-                ).singleResult()
-            else {
-                navigateBack()
-                return@launch
-            }
+        val updateBottlesResult = if (bottlesMap != cartBottles.toMap())
+            vodovozServiceRepository.replaceMultipleBottlesToCart(
+                bottlesMap.toCartProducts()
+            ).singleResult()
+        else {
+            navigateBack()
+            return@launch
+        }
 
         updateBottlesResult.onSuccess {
             cartManager.updateRefreshCart(true)
