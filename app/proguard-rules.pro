@@ -35,3 +35,7 @@
     @com.squareup.moshi.* <methods>;
 }
 -keepnames class kotlin.Metadata { *; }
+
+-keepclassmembers class com.rajat.pdfviewer.PdfRendererView {
+    private android.widget.TextView pageNo;
+}

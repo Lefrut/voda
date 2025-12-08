@@ -26,9 +26,9 @@ android {
         applicationId = "com.m.vodovoz"
         minSdk = 26
         targetSdk = 35
-        versionCode = 2190
+        versionCode = 2200
         //todo
-        versionName = "2.1.9"
+        versionName = "2.2.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         ndk {
@@ -99,7 +99,6 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
-        isCoreLibraryDesugaringEnabled = true
     }
 
     kotlinOptions {
@@ -137,9 +136,7 @@ dependencies {
     //Utils
     implementation("com.googlecode.libphonenumber:libphonenumber:8.12.38")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
-    implementation("io.github.afreakyelf:Pdf-Viewer:2.1.1")
-
-    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
+    implementation("io.github.afreakyelf:Pdf-Viewer:2.3.7")
 
     //Android
     implementation("androidx.core:core-ktx:1.13.1")
