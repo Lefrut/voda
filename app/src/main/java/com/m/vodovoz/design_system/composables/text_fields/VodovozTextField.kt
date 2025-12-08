@@ -149,7 +149,7 @@ fun VodovozTextField(
 }
 
 @Composable
-fun BaseVodovozTextField(
+private fun BaseVodovozTextField(
     value: TextFieldValue,
     onValueChange: (TextFieldValue) -> Unit,
     modifier: Modifier = Modifier,
@@ -228,7 +228,7 @@ fun BaseVodovozTextField(
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxWidth(),
-                    contentAlignment = Alignment.TopStart
+                    contentAlignment = Alignment.BottomStart
                 ) {
                     if (value.text.isEmpty()) {
                         Text(

@@ -203,7 +203,7 @@ dependencies {
     implementation("androidx.datastore:datastore-preferences:1.2.0")
 
     //Compose
-    implementation("androidx.activity:activity-compose:1.9.1")
+    implementation("androidx.activity:activity-compose:1.10.1")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
     implementation("androidx.compose.ui:ui:1.8.2")
     implementation("androidx.compose.ui:ui-tooling-preview:1.8.2")
