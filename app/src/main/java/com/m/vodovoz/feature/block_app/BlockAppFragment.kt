@@ -134,8 +134,8 @@ class BlockAppFragment : Fragment() {
     }
 
     private fun observeSiteState() = viewLifecycleOwner.lifecycleScope.launch {
+        siteStateManager.requestSiteState()
         delay(1000L)
-
         repeatOnLifecycle(Lifecycle.State.STARTED) {
             siteStateManager.siteStateFlow.collect { siteState ->
 

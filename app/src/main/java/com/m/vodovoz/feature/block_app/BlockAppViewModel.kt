@@ -31,7 +31,7 @@ class BlockAppViewModel @Inject constructor(
     suspend fun listenSiteState() =
         siteStateManager.siteStateFlow.mapNotNull { siteState ->
             siteState?.data
-        }.debounce(500L).collect { data ->
+        }.debounce(350L).collect { data ->
             updateStateBySiteState(data)
         }
 
