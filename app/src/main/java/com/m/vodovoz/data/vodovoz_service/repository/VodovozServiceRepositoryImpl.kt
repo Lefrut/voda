@@ -21,6 +21,7 @@ import com.m.vodovoz.data.vodovoz_service.model.ProductCommentsDTO
 import com.m.vodovoz.data.vodovoz_service.model.ProductsSectionDTO
 import com.m.vodovoz.data.vodovoz_service.model.PromotionDetailsDTO
 import com.m.vodovoz.data.vodovoz_service.model.PromotionsDTO
+import com.m.vodovoz.data.vodovoz_service.model.SiteStateResponseDTO
 import com.m.vodovoz.data.vodovoz_service.model.VodovozErrorResponseDTO
 import com.m.vodovoz.data.vodovoz_service.model.VodovozPlaceholderDTO
 import com.m.vodovoz.data.vodovoz_service.model.VodovozResponseDTO
@@ -1708,10 +1709,12 @@ class VodovozServiceRepositoryImpl @Inject constructor(
                 siteState
             },
             fail = onFail@{ response ->
-                val code = response.code()
-                return@onFail when (code) {
-                    402, 403 -> Result.success(AppConfig.Blocked)
-                    else -> Result.failure(RequestException(response.messageWithCode()))
+                runCatching {
+                    moshi.fromJson<SiteStateResponseDTO>(
+                        response.stringErrorBody()
+                    ).toDomain()
+                }.recoverCatching {
+                    throw RequestException(response.messageWithCode())
                 }
             }
         )
