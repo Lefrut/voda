@@ -1,13 +1,13 @@
 package com.m.vodovoz.common.cart
 
+import android.R
 import com.m.vodovoz.domain.general.model.product.toCartProducts
-import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -15,9 +15,9 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.single
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.util.UUID
@@ -36,12 +36,9 @@ private suspend fun clientMethod() {
 
 }
 
-private abstract class AbstractAppCart(
-    private val cartStrategyFactory: VodovozCartStrategyFactory,
+open class AbstractAppCart(
     dispatcher: CoroutineDispatcher = Dispatchers.Default,
 ) : AppCart {
-
-
     private val updatingMutex = Mutex()
     private val scope = CoroutineScope(SupervisorJob() + dispatcher)
     private var version by AtomicIntDelegate(0)
@@ -51,6 +48,14 @@ private abstract class AbstractAppCart(
     private val items
         get() = _itemsState.value
 
+    private var _startPolicyState = MutableStateFlow(AppCart.StartPolicy.IMMEDIATE)
+
+    override val startPolicy: AppCart.StartPolicy get() = _startPolicyState.value
+
+    override fun setStartPolicy(policy: AppCart.StartPolicy) {
+        _startPolicyState.update { policy }
+    }
+
     protected suspend fun updateItems(
         block: Map<Long, CartItem>.() -> Map<Long, CartItem>,
     ): Map<Long, CartItem> = updatingMutex.withLock {
@@ -59,17 +64,13 @@ private abstract class AbstractAppCart(
         return updatedItems
     }
 
-    private val _operationsByVersionFlow =
-        MutableStateFlow<Map<Int, List<OperationInfo>>>(emptyMap())
+    private val _operationsFlow =
+        MutableStateFlow<List<OperationInfo>>(emptyList())
 
-    private fun getOperationsByVersion(version: Int): List<OperationInfo> {
-        return _operationsByVersionFlow.value[version] ?: emptyList()
-    }
 
     @OptIn(FlowPreview::class)
-    private val operationsExecutor = _operationsByVersionFlow
-        .map { getOperationsByVersion(version) }
-        .filter { it.isNotEmpty() }
+    private val operationsExecutor = _operationsFlow
+        .filter { infos -> infos.isNotEmpty() }
         .distinctUntilChanged()
         .debounce { 375.milliseconds }
         .onEach { operationInfos ->
@@ -78,51 +79,79 @@ private abstract class AbstractAppCart(
         .launchIn(scope)
 
 
-    override suspend fun incrementProduct(id: Long, quantity: Int) {
-        val type =
-            if (items[id] != null) OperationApplyType.Change
-            else OperationApplyType.Add
+    private var itemsSnaphot: Map<Long, CartItem>? = null
 
+    override fun incrementProduct(id: Long, quantity: Int): Job = scope.launch {
+        if (itemsSnaphot == null) itemsSnaphot = items.toMap()
+
+        val type = if (itemsSnaphot?.get(id) != null) {
+            OperationType.Change
+        } else {
+            OperationType.Add
+        }
+
+        val operationInfo = OperationInfo(
+            items = listOf(CartItem.from(id, quantity)).associateBy { item ->
+                item.id
+            },
+            type = type
+        )
+
+        val mutableOperationsList = _operationsFlow.value.toMutableList()
+        type.merge(
+            queue = mutableOperationsList,
+            incoming = operationInfo
+        )
+
+        when (startPolicy) {
+            AppCart.StartPolicy.QUEUED -> {
+                _operationsFlow.value = mutableOperationsList
+            }
+
+            AppCart.StartPolicy.IMMEDIATE -> {
+
+            }
+        }
+
+
+        /**
+         * ## Операции
+         * Удаление или изменение предыдущих операций, которые имеют содержат
+         * те же товары, что и новая операция. Операция может изменять или добавлять
+         * один или более товаров, зависит от наличия в локальной корзине. Если новая
+         * операция добавляет товар, который уже в очереди, то суммирует к нынешнему кол-ву или
+         * отнимает если опреция убавляет продукт или просто удаляет если операци ничего не делает.
+         * Если изменяет, то все предыдущии товары на изменение удаляются вне зависимости от операции.
+         *
+         * Иначе говоря, действие операции, которое знает о нынешней операции и выполняет преобразование нынешних
+         * операций, которые содержат те же товары (обязательно, не должно быть дубликатов)
+         * и над всеми товарами по своим критериям.
+         *
+         *
+         * Алгоритм "объеденения" товаров:
+         * 1.
+         * 2.
+         * 3.
+         *
+         * */
 
     }
 
-    override suspend fun decrementProduct(id: Long, quantity: Int) {
+    override fun decrementProduct(id: Long, quantity: Int): Job {
         TODO("Not yet implemented")
     }
 
-    override suspend fun clear() = putOperation(
-        type = OperationApplyType.Clear,
-        incomingItems = emptyList()
-    )
+    override fun incrementProducts(itemsMap: Map<Long, Int>): Job {
+        TODO("Not yet implemented")
+    }
 
-    protected suspend fun putOperation(
-        type: OperationApplyType,
-        item: CartItem,
-    ) = putOperation(type = type, incomingItems = listOf(item))
-
-    protected suspend fun putOperation(
-        type: OperationApplyType,
-        incomingItems: List<CartItem>,
-    ) {
-        val noLoadingIncommingItems = incomingItems.filter { item ->
-            itemsState.value[item.id]?.isLoading == false
-        }
-        if (noLoadingIncommingItems.isEmpty()) return
-
-        val operationInfo = OperationInfo(
-            incomingItems = incomingItems,
-            type = type,
-        )
-
-        val currentVersion = version
-        val updatedOperations = getOperationsByVersion(
-            currentVersion
-        ).plus(operationInfo)
+    override fun clear(): Job {
+        TODO("Not yet implemented")
     }
 }
 
 
-private data class CartItem(
+data class CartItem(
     val id: Long,
     val isLoading: Boolean,
     val quantity: Int,
@@ -140,125 +169,117 @@ private data class CartItem(
     }
 }
 
-private interface CartStrategy {
-
-    suspend fun apply(
-        items: List<CartItem>,
-        incomingItems: List<CartItem>,
-    ): List<CartItem>
-
-    suspend fun sync(
-        items: List<CartItem>,
-    ): Result<Unit>
-}
-
-private class VodovozCartStrategyFactory(
-    private val vodovozServiceRepository: VodovozServiceRepository,
-) {
-
-    private val cartStrategyMap = mapOf<OperationApplyType, CartStrategy>(
-        OperationApplyType.Add to createCartStrategy(
-            onApply = { items, incomingItems ->
-                combine(items, incomingItems) { quantity1, quantity2 ->
-                    quantity1 + quantity2
-                }
-            },
-            onSync = { item ->
-                vodovozServiceRepository.addProductToCart(
-                    item.id,
-                    item.quantity
-                )
-            }
-        ),
-        OperationApplyType.Change to createCartStrategy(
-            onApply = { items, incomingItems ->
-                combine(items, incomingItems) { _, q2 -> q2 }
-            },
-            onSync = { item ->
-                vodovozServiceRepository.updateProductInCart(
-                    item.id,
-                    item.quantity
-                )
-            }
-        ),
-        OperationApplyType.Clear to createCartStrategy(
-            onApply = { _, _ -> emptyList() },
-            onSync = {
-                vodovozServiceRepository.clearCart()
-            }
-        )
-
-    )
-
-
-    operator fun get(operationType: OperationApplyType): CartStrategy {
-        return cartStrategyMap[operationType]!!
-    }
-
-
-    private fun combine(
-        existingItems: List<CartItem>,
-        incomingItems: List<CartItem>,
-        transformQuantities: (Int, Int) -> Int,
-    ): List<CartItem> {
-        val existingMap = existingItems.associateBy { it.id }
-        val incomingMap = incomingItems.associateBy { it.id }
-
-        val allIds = (existingMap.keys + incomingMap.keys)
-
-        return allIds.mapNotNull { id ->
-            val existing = existingMap[id]
-            val incoming = incomingMap[id]
-
-            val q1 = existing?.quantity ?: 0
-            val q2 = incoming?.quantity ?: 0
-
-            val finalQuantity = transformQuantities(q1, q2)
-
-            existing?.copy(
-                quantity = finalQuantity
-            ) ?: incoming?.copy(quantity = finalQuantity)
-        }
-    }
-
-
-    private fun <T : Any> createCartStrategy(
-        onApply: (items: List<CartItem>, incomingItems: List<CartItem>) -> List<CartItem>,
-        onSync: suspend (CartItem) -> Flow<T>,
-    ) = object : CartStrategy {
-        override suspend fun apply(
-            items: List<CartItem>,
-            incomingItems: List<CartItem>,
-        ): List<CartItem> = onApply(items, incomingItems)
-
-        override suspend fun sync(items: List<CartItem>): Result<Unit> {
-            return runCatching { onSync(items.first()).single() }
-        }
-    }
-
-}
 
 private fun List<CartItem>.format(): String {
     return associate { it.id to it.quantity }.toCartProducts().productsIdsWithQuantity
 }
 
-private data class OperationInfo(
-    val incomingItems: List<CartItem>,
+data class OperationInfo(
+    val items: Map<Long, CartItem>,
     val id: String = UUID.randomUUID().toString(),
-    val type: OperationApplyType,
+    val type: OperationType,
     val state: OperationState = OperationState.Loading,
 
     ) {
     init {
-        check(incomingItems.isNotEmpty()) { "OperationInfo items can't be empty" }
+        check(items.isNotEmpty()) { "OperationInfo items can't be empty" }
     }
 
-    val firstItem by lazy { incomingItems.first() }
+    val firstItem by lazy { items.getValue(0) }
 
 }
 
-enum class OperationApplyType {
-    Add, Change, Clear;
+
+sealed interface OperationType {
+
+    fun merge(queue: MutableList<OperationInfo>, incoming: OperationInfo)
+
+
+    data object Add : OperationType {
+        override fun merge(queue: MutableList<OperationInfo>, incoming: OperationInfo) {
+            queue.mergeDeltaLike(incoming) { oldQ, incQ -> oldQ + incQ }
+        }
+    }
+
+    data object Change : OperationType {
+        override fun merge(queue: MutableList<OperationInfo>, incoming: OperationInfo) {
+            val ids = incoming.items.keys
+            queue.dropIdsFromTail(ids)
+            val idx = queue.lastIndexFromTailUntilClear { it.type == Change }
+            if (idx != null) {
+                val op = queue[idx]
+                queue[idx] = op.copy(items = op.items + incoming.items)
+            } else {
+                queue.add(incoming)
+            }
+        }
+    }
+
+    data object Clear : OperationType {
+        override fun merge(queue: MutableList<OperationInfo>, incoming: OperationInfo) {
+            queue.clear()
+            queue.add(incoming)
+        }
+    }
+
+}
+
+
+private fun MutableList<OperationInfo>.dropIdsFromTail(ids: Set<Long>) {
+    reversed().forEachIndexed { i, op ->
+        val newItems = op.items - ids
+        if (newItems.size != op.items.size) setOrRemove(i, op, newItems)
+    }
+}
+
+private inline fun List<OperationInfo>.lastIndexFromTailUntilClear(
+    predicate: (OperationInfo) -> Boolean
+): Int? {
+    for (i in indices.reversed()) {
+        val op = this[i]
+        if (op.type == OperationType.Clear) break
+        if (predicate(op)) return i
+    }
+    return null
+}
+
+private fun MutableList<OperationInfo>.mergeDeltaLike(
+    incoming: OperationInfo,
+    qtyMerge: (old: Int, inc: Int) -> Int
+) {
+    val inc = incoming.items.toMutableMap()
+
+    reversed().forEachIndexed { i, op ->
+        if (inc.isEmpty()) return
+
+        // берём только те id, которые реально есть в op
+        val touchedIds = inc.keys.filter { it in op.items }
+        if (touchedIds.isEmpty()) return@forEachIndexed
+
+        val newItems = op.items.toMutableMap()
+
+        for (id in touchedIds) {
+            val oldItem = newItems.getValue(id)
+            val incItem = inc.getValue(id)
+
+            val q = qtyMerge(oldItem.quantity, incItem.quantity)
+            if (q == 0) newItems.remove(id) else newItems[id] = oldItem.copy(quantity = q)
+
+            inc.remove(id)
+        }
+
+        setOrRemove(i, op, newItems)
+    }
+
+    if (inc.isNotEmpty()) add(incoming.copy(items = inc))
+}
+
+private fun MutableList<OperationInfo>.setOrRemove(
+    index: Int,
+    op: OperationInfo,
+    newItems: Map<Long, CartItem>
+) {
+    if (newItems.isEmpty()) removeAt(index) else set(index, op.copy(items = newItems))
 }
 
 enum class OperationRequestType {
@@ -273,17 +294,36 @@ enum class OperationState {
 }
 
 
-private interface AppCart {
+private suspend fun AppCart.withPolicy(
+    policy: AppCart.StartPolicy = AppCart.StartPolicy.IMMEDIATE,
+    block: AppCart.() -> Job
+) {
+    val policySnapshot = startPolicy
+    setStartPolicy(policy)
+    block().join()
+    setStartPolicy(policySnapshot)
+}
+
+
+interface AppCart {
+
+    enum class StartPolicy {
+        QUEUED, IMMEDIATE;
+    }
+
+    val startPolicy: StartPolicy
+
+    fun setStartPolicy(policy: StartPolicy)
 
     val itemsState: StateFlow<Map<Long, CartItem>>
 
-    suspend fun incrementProduct(id: Long, quantity: Int = 1)
+    fun incrementProduct(id: Long, quantity: Int = 1): Job
 
-    suspend fun decrementProduct(id: Long, quantity: Int = 1)
+    fun decrementProduct(id: Long, quantity: Int = 1): Job
 
-    suspend fun incrementProducts(itemsMap: Map<Long, Int>)
+    fun incrementProducts(itemsMap: Map<Long, Int>): Job
 
-    suspend fun clear()
+    fun clear(): Job
 }
 
 
