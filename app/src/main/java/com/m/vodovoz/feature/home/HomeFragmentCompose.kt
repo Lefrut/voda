@@ -3,7 +3,6 @@ package com.m.vodovoz.feature.home
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -70,6 +69,7 @@ import kotlinx.coroutines.launch
 import okhttp3.internal.toLongOrDefault
 import javax.inject.Inject
 import androidx.core.net.toUri
+import com.m.vodovoz.common.model.VodovozAction
 
 @AndroidEntryPoint
 class HomeFragment : Fragment() {
@@ -285,7 +285,7 @@ class HomeFragment : Fragment() {
                         cookie = cookieManager.fetchCookieSessionId() ?: "",
                         tabManager = tabManager
                     ) { action ->
-                        if (action.action.lowercase() == "close") {
+                        if (action.actionName == VodovozAction.Name.CLOSE) {
                             viewModel.closeSpecialPromotionBottomSheet()
                         }
                     }

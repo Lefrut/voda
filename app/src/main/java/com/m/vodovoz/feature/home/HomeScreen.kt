@@ -3,6 +3,8 @@ package com.m.vodovoz.feature.home
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.SheetValue
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -15,6 +17,7 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.zIndex
 import com.m.vodovoz.R
+import com.m.vodovoz.common.model.VodovozAction
 import com.m.vodovoz.design_system.composables.dialogs.VodovozDialog
 import com.m.vodovoz.design_system.composables.placeholders.NetworkErrorPlaceholder
 import com.m.vodovoz.design_system.composables.pull_to_refresh.VodovozPullToRefreshBox
@@ -151,13 +154,18 @@ fun HomeScreen(
 
 
     if (viewState.showSpecialPromotionBS) {
+        val specialPromotionActionName = viewState.specialPromotion.action.actionName
+
         SpecialPromotionBottomSheet(
+            state = rememberModalBottomSheetState(true) { sheetValue ->
+                specialPromotionActionName != VodovozAction.Name.CLOSE || sheetValue != SheetValue.Hidden
+            },
             specialPromotionUi = viewState.specialPromotion,
-            onDismissRequest = { viewModel.closeSpecialPromotionBottomSheet() },
+            onDismissRequest = { _ ->
+                viewModel.closeSpecialPromotionBottomSheet()
+            },
             onButtonClick = { specialPromotion ->
-                val action = specialPromotion.actionWithButton?.action
-                    ?: return@SpecialPromotionBottomSheet
-                viewModel.activateSpecialPromotionAction(action)
+                viewModel.activateSpecialPromotionAction(specialPromotion.action)
             },
             onAboutAdvertisingClick = viewModel::showAdvertisingBottomSheet
         )

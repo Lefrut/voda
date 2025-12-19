@@ -20,14 +20,14 @@ import com.m.vodovoz.design_system.model.SpecialPromotionUi
 fun SpecialPromotionBottomSheet(
     specialPromotionUi: SpecialPromotionUi,
     state: SheetState = rememberModalBottomSheetState(true),
-    onDismissRequest: () -> Unit,
+    onDismissRequest: (SpecialPromotionUi) -> Unit,
     onButtonClick: (SpecialPromotionUi) -> Unit,
     onAboutAdvertisingClick: (AboutAdvertisingUi) -> Unit,
 ) {
     ModalBottomSheet(
         modifier = Modifier,
         sheetState = state,
-        onDismissRequest = onDismissRequest,
+        onDismissRequest = { onDismissRequest(specialPromotionUi) },
         dragHandle = {
             VodovozDragHandle()
         },

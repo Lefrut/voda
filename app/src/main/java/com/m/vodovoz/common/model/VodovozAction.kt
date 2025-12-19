@@ -9,6 +9,9 @@ sealed interface BaseVodovozAction
 
 @Parcelize
 sealed interface VodovozAction : Parcelable, BaseVodovozAction {
+
+    val actionName: String get() = ""
+
     @Parcelize
     data class Product(val id: Long) : VodovozAction
 
@@ -34,7 +37,17 @@ sealed interface VodovozAction : Parcelable, BaseVodovozAction {
     data class UrlWithCookie(val url: String) : VodovozAction
 
     @Parcelize
-    data class Unknown(val action: String, val id: String?) : VodovozAction
+    data class Unknown(val action: String, val id: String?) : VodovozAction {
+
+        override val actionName: String get() = action.lowercase()
+
+    }
+
+    data object Name {
+
+        const val CLOSE = "close"
+
+    }
 
 }
 
@@ -53,6 +66,10 @@ enum class DataAllAction : VodovozAction, ButtonAction {
     CoolerRepair,
     SanitaryMaintenance,
     Unknown;
+
+    override val actionName: String
+        get() = name
+
 }
 
 

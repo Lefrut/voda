@@ -65,7 +65,7 @@ android {
         //todo
         create("release") {
             storeFile =
-                file("/home/VODOVOZ/rk_krutov/Рабочий стол/Боевая котлин/VodovozKotlinCurrentDevelopment/VodovozKotlin/lalalala.jks")
+                file("/Users/kirill/StudioProjects/Vodovoz/lalalala.jks")
             keyAlias = "zinou"
             storePassword = "zinou123"
             keyPassword = "zinou123"
