@@ -21,6 +21,7 @@ fun BaseVodovozAction.activate(
     context: Context? = null,
     cookie: String = "",
     tabManager: TabManager? = null,
+    onUnknownAction: (VodovozAction.Unknown) -> Unit = {},
 ) {
 
     when (this) {
@@ -112,7 +113,7 @@ fun BaseVodovozAction.activate(
         }
 
         is VodovozAction.Unknown -> {
-
+            onUnknownAction(this)
         }
 
         is VodovozAction.Url -> runCatching {

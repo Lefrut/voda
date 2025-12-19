@@ -284,7 +284,11 @@ class HomeFragment : Fragment() {
                         context = requireActivity(),
                         cookie = cookieManager.fetchCookieSessionId() ?: "",
                         tabManager = tabManager
-                    )
+                    ) { action ->
+                        if (action.action.lowercase() == "close") {
+                            viewModel.closeSpecialPromotionBottomSheet()
+                        }
+                    }
                 }
             }
         }

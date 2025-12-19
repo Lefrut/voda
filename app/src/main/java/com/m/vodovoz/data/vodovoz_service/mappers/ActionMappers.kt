@@ -6,7 +6,7 @@ import com.m.vodovoz.common.model.VodovozAction
 
 
 fun ACTION_DTO.toAction(blockId: Long): VodovozAction? {
-    val id = ID ?: return null
+    val id = ID ?: ""
     val action = ACTION ?: return null
 
     return when (action.uppercase()) {
