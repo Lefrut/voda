@@ -82,37 +82,28 @@ open class AbstractAppCart(
     private var itemsSnaphot: Map<Long, CartItem>? = null
 
     override fun incrementProduct(id: Long, quantity: Int): Job = scope.launch {
-        if (itemsSnaphot == null) itemsSnaphot = items.toMap()
-
-        val type = if (itemsSnaphot?.get(id) != null) {
-            OperationType.Change
-        } else {
-            OperationType.Add
+        val type = updatingMutex.withLock {
+            val snaphot = itemsSnaphot ?: items.also { itemsSnaphot = it.toMap() }
+            if (snaphot[id] != null) OperationType.Change
+            else OperationType.Add
         }
 
+
         val operationInfo = OperationInfo(
-            items = listOf(CartItem.from(id, quantity)).associateBy { item ->
+            items = CartItem.from(mapOf(id to quantity)).associateBy { item ->
                 item.id
             },
             type = type
         )
 
-        val mutableOperationsList = _operationsFlow.value.toMutableList()
-        type.merge(
-            queue = mutableOperationsList,
-            incoming = operationInfo
-        )
-
-        when (startPolicy) {
-            AppCart.StartPolicy.QUEUED -> {
-                _operationsFlow.value = mutableOperationsList
-            }
-
-            AppCart.StartPolicy.IMMEDIATE -> {
-
-            }
+        updatingMutex.withLock {
+            val mutableOperationsList = _operationsFlow.value.toMutableList()
+            type.merge(
+                queue = mutableOperationsList,
+                incoming = operationInfo
+            )
+            _operationsFlow.value = mutableOperationsList
         }
-
 
         /**
          * ## Операции
