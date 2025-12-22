@@ -18,6 +18,13 @@ android {
     compileSdk = 36
     ndkVersion = "29.0.14206865"
 
+
+    bundle {
+        language {
+            @Suppress("UnstableApiUsage")
+            enableSplit = false
+        }
+    }
     packaging {
         jniLibs { useLegacyPackaging = true }
     }
