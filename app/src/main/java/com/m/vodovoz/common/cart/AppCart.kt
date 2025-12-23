@@ -1,20 +1,26 @@
 package com.m.vodovoz.common.cart
 
-import android.R
 import com.m.vodovoz.domain.general.model.product.toCartProducts
+import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
+import com.m.vodovoz.util.extensions.singleResult
+import com.m.vodovoz.util.set
+import com.m.vodovoz.util.setIfPresent
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.buffer
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -22,6 +28,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.util.UUID
 import java.util.concurrent.atomic.AtomicInteger
+import kotlin.collections.filter
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 import kotlin.time.Duration.Companion.milliseconds
@@ -37,6 +44,7 @@ private suspend fun clientMethod() {
 }
 
 open class AbstractAppCart(
+    private val vodovozServiceRepository: VodovozServiceRepository,
     dispatcher: CoroutineDispatcher = Dispatchers.Default,
 ) : AppCart {
     private val updatingMutex = Mutex()
@@ -45,6 +53,7 @@ open class AbstractAppCart(
 
     private val _itemsState = MutableStateFlow<Map<Long, CartItem>>(emptyMap())
     override val itemsState = _itemsState.asStateFlow()
+
     private val items
         get() = _itemsState.value
 
@@ -56,76 +65,173 @@ open class AbstractAppCart(
         _startPolicyState.update { policy }
     }
 
-    protected suspend fun updateItems(
-        block: Map<Long, CartItem>.() -> Map<Long, CartItem>,
-    ): Map<Long, CartItem> = updatingMutex.withLock {
-        val updatedItems = block(items)
-        _itemsState.value = updatedItems
-        return updatedItems
-    }
-
     private val _operationsFlow =
         MutableStateFlow<List<OperationInfo>>(emptyList())
+
+    private val operations = _operationsFlow.value
+
+    //todo
+    private val addingRules = listOf<(OperationInfo) -> Boolean> { info ->
+        info.items.isNotEmpty()
+    }
+
+    //todo
+    private val passingRules = listOf<(OperationInfo, OperationInfo) -> Boolean> { p1, p2 ->
+        p1.items.containsKey(p2.items.keys.first())
+    }
 
 
     @OptIn(FlowPreview::class)
     private val operationsExecutor = _operationsFlow
-        .filter { infos -> infos.isNotEmpty() }
+        .filter { operations.isNotEmpty() }
         .distinctUntilChanged()
-        .debounce { 375.milliseconds }
-        .onEach { operationInfos ->
+        .debounce {
+            val isImmediate = operations.any { op ->
+                op.startPolicy == AppCart.StartPolicy.IMMEDIATE
+            }
 
+            if (isImmediate) {
+                0.milliseconds
+            } else {
+                375.milliseconds
+            }
+        }
+        .map {
+            updatingMutex.withLock {
+                val currentOperations = operations
+                val ids = currentOperations.flatMap { op ->
+                    op.items.keys
+                }
+                itemsSnaphot = null
+                _operationsFlow.value = emptyList()
+                _itemsState.value = items.mapValues { entry ->
+                    val item = entry.value
+                    item.copy(
+                        isLoading = ids.any { id -> id == item.id }
+                    )
+                }
+
+                currentOperations
+            }
+        }
+        .map { operationInfos ->
+            operationInfos.map { opInfo ->
+                val (id, quantity) = with(opInfo.firstItem) {
+                    productId to targetQty
+                }
+                scope.async {
+                    opInfo to when (opInfo.requestType) {
+                        OperationRequestType.Add -> vodovozServiceRepository.addProductToCart(
+                            productId = id,
+                            quantity = quantity
+                        )
+                        //todo
+                        OperationRequestType.AddMultiple -> vodovozServiceRepository.addProductToCart(
+                            productId = id,
+                            quantity = quantity
+                        )
+
+                        OperationRequestType.Change -> vodovozServiceRepository.updateProductInCart(
+                            productId = id,
+                            quantity = quantity
+                        )
+                        //todo
+                        OperationRequestType.ReplaceBottles -> vodovozServiceRepository.addProductToCart(
+                            productId = id,
+                            quantity = quantity
+                        )
+
+                        OperationRequestType.Clear -> vodovozServiceRepository.clearCart()
+                    }.singleResult()
+                }
+            }
+        }
+        .onEach { deferreds ->
+            deferreds.map { deffered ->
+                scope.launch {
+                    val (operationInfo, result) = deffered.await()
+                    val changes = operationInfo.items.values
+
+                    updatingMutex.withLock {
+                        val mutaleItems = items.toMutableMap()
+                        val actualItems = changes.associate { change ->
+                            val item = mutaleItems.getOrDefault(
+                                key = change.productId,
+                                defaultValue = CartItem.from(change.productId)
+                            )
+                            item.id to item.copy(
+                                isLoading = false,
+                                quantity = if (result.isSuccess) {
+                                    item.quantity
+                                } else {
+                                    change.baseQty
+                                }
+                            )
+                        }
+                        mutaleItems.putAll(actualItems)
+                        _itemsState.value = mutaleItems
+                    }
+                }
+            }
         }
         .launchIn(scope)
 
 
     private var itemsSnaphot: Map<Long, CartItem>? = null
 
-    override fun incrementProduct(id: Long, quantity: Int): Job = scope.launch {
-        val type = updatingMutex.withLock {
-            val snaphot = itemsSnaphot ?: items.also { itemsSnaphot = it.toMap() }
-            if (snaphot[id] != null) OperationType.Change
-            else OperationType.Add
-        }
 
-
-        val operationInfo = OperationInfo(
-            items = CartItem.from(mapOf(id to quantity)).associateBy { item ->
-                item.id
-            },
-            type = type
-        )
-
+    private fun doOperation(
+        block: () -> Unit
+    ) = scope.launch {
         updatingMutex.withLock {
-            val mutableOperationsList = _operationsFlow.value.toMutableList()
-            type.merge(
-                queue = mutableOperationsList,
+            if (itemsSnaphot == null) {
+                itemsSnaphot = items.toMap()
+            }
+        }
+    }
+
+    override fun incrementProduct(id: Long, quantity: Int): Job = scope.launch {
+        updatingMutex.withLock {
+            if (itemsSnaphot == null) {
+                itemsSnaphot = items.toMap()
+            }
+
+            //todo - can create func
+            val (currentCartItem, baseQuantity, targetQuantity) = items.getOrDefault(
+                key = id, defaultValue = CartItem.from(id)
+            ).let { item ->
+                val targetQuantity = quantity + item.quantity
+                Triple(
+                    first = item.copy(quantity = targetQuantity),
+                    second = item.quantity,
+                    third = targetQuantity
+                )
+            }
+            if (currentCartItem.isLoading) return@launch
+
+            _itemsState.set(id, currentCartItem)
+
+            val requestType = if (itemsSnaphot?.get(id) == null) {
+                OperationRequestType.Add
+            } else OperationRequestType.ReplaceBottles
+
+            val operationInfo = OperationInfo(
+                items = PendingItemChange(
+                    productId = id,
+                    baseQty = baseQuantity,
+                    targetQty = targetQuantity
+                ).toMap(),
+                requestType = requestType,
+                startPolicy = startPolicy
+            )
+
+            val mutableOperations = operations.toMutableList()
+            OperationMergeType.Replace.merge(
+                queue = mutableOperations,
                 incoming = operationInfo
             )
-            _operationsFlow.value = mutableOperationsList
+            _operationsFlow.value = mutableOperations
         }
-
-        /**
-         * ## Операции
-         * Удаление или изменение предыдущих операций, которые имеют содержат
-         * те же товары, что и новая операция. Операция может изменять или добавлять
-         * один или более товаров, зависит от наличия в локальной корзине. Если новая
-         * операция добавляет товар, который уже в очереди, то суммирует к нынешнему кол-ву или
-         * отнимает если опреция убавляет продукт или просто удаляет если операци ничего не делает.
-         * Если изменяет, то все предыдущии товары на изменение удаляются вне зависимости от операции.
-         *
-         * Иначе говоря, действие операции, которое знает о нынешней операции и выполняет преобразование нынешних
-         * операций, которые содержат те же товары (обязательно, не должно быть дубликатов)
-         * и над всеми товарами по своим критериям.
-         *
-         *
-         * Алгоритм "объеденения" товаров:
-         * 1.
-         * 2.
-         * 3.
-         *
-         * */
-
     }
 
     override fun decrementProduct(id: Long, quantity: Int): Job {
@@ -152,10 +258,15 @@ data class CartItem(
             return CartItem(id, false, quantity)
         }
 
-        fun from(idsAndQuantities: Map<Long, Int>): List<CartItem> {
+        fun from(id: Long): CartItem {
+            return CartItem(id, false, 0)
+        }
+
+
+        fun from(idsAndQuantities: Map<Long, Int>): Map<Long, CartItem> {
             return idsAndQuantities.map { (id, quantity) ->
                 from(id, quantity)
-            }
+            }.associateBy { it.id }
         }
     }
 }
@@ -165,13 +276,31 @@ private fun List<CartItem>.format(): String {
     return associate { it.id to it.quantity }.toCartProducts().productsIdsWithQuantity
 }
 
-data class OperationInfo(
-    val items: Map<Long, CartItem>,
-    val id: String = UUID.randomUUID().toString(),
-    val type: OperationType,
-    val state: OperationState = OperationState.Loading,
 
-    ) {
+data class PendingItemChange(
+    val productId: Long,
+    val baseQty: Int,
+    val targetQty: Int,
+) {
+    val delta: Int get() = targetQty - baseQty
+}
+
+
+private fun PendingItemChange.toMap(): Map<Long, PendingItemChange> {
+    return listOf(this).toMap()
+}
+
+private fun List<PendingItemChange>.toMap(): Map<Long, PendingItemChange> {
+    return associateBy { it.productId }
+}
+
+
+data class OperationInfo(
+    val items: Map<Long, PendingItemChange>,
+    val requestType: OperationRequestType,
+    val startPolicy: AppCart.StartPolicy,
+    val id: String = UUID.randomUUID().toString(),
+) {
     init {
         check(items.isNotEmpty()) { "OperationInfo items can't be empty" }
     }
@@ -181,32 +310,15 @@ data class OperationInfo(
 }
 
 
-sealed interface OperationType {
+sealed interface OperationMergeType {
 
-    fun merge(queue: MutableList<OperationInfo>, incoming: OperationInfo)
-
-
-    data object Add : OperationType {
-        override fun merge(queue: MutableList<OperationInfo>, incoming: OperationInfo) {
-            queue.mergeDeltaLike(incoming) { oldQ, incQ -> oldQ + incQ }
-        }
+    fun merge(queue: MutableList<OperationInfo>, incoming: OperationInfo) {
+        queue.defaultMerge(incoming)
     }
 
-    data object Change : OperationType {
-        override fun merge(queue: MutableList<OperationInfo>, incoming: OperationInfo) {
-            val ids = incoming.items.keys
-            queue.dropIdsFromTail(ids)
-            val idx = queue.lastIndexFromTailUntilClear { it.type == Change }
-            if (idx != null) {
-                val op = queue[idx]
-                queue[idx] = op.copy(items = op.items + incoming.items)
-            } else {
-                queue.add(incoming)
-            }
-        }
-    }
+    data object Replace : OperationMergeType
 
-    data object Clear : OperationType {
+    data object Clear : OperationMergeType {
         override fun merge(queue: MutableList<OperationInfo>, incoming: OperationInfo) {
             queue.clear()
             queue.add(incoming)
@@ -215,73 +327,21 @@ sealed interface OperationType {
 
 }
 
-
-private fun MutableList<OperationInfo>.dropIdsFromTail(ids: Set<Long>) {
-    reversed().forEachIndexed { i, op ->
-        val newItems = op.items - ids
-        if (newItems.size != op.items.size) setOrRemove(i, op, newItems)
+private fun MutableList<OperationInfo>.defaultMerge(incoming: OperationInfo) {
+    clear()
+    val list = map { operation ->
+        operation.copy(
+            items = operation.items.filter { entry ->
+                !incoming.items.containsKey(entry.key)
+            }
+        )
     }
-}
-
-private inline fun List<OperationInfo>.lastIndexFromTailUntilClear(
-    predicate: (OperationInfo) -> Boolean
-): Int? {
-    for (i in indices.reversed()) {
-        val op = this[i]
-        if (op.type == OperationType.Clear) break
-        if (predicate(op)) return i
-    }
-    return null
-}
-
-private fun MutableList<OperationInfo>.mergeDeltaLike(
-    incoming: OperationInfo,
-    qtyMerge: (old: Int, inc: Int) -> Int
-) {
-    val inc = incoming.items.toMutableMap()
-
-    reversed().forEachIndexed { i, op ->
-        if (inc.isEmpty()) return
-
-        // берём только те id, которые реально есть в op
-        val touchedIds = inc.keys.filter { it in op.items }
-        if (touchedIds.isEmpty()) return@forEachIndexed
-
-        val newItems = op.items.toMutableMap()
-
-        for (id in touchedIds) {
-            val oldItem = newItems.getValue(id)
-            val incItem = inc.getValue(id)
-
-            val q = qtyMerge(oldItem.quantity, incItem.quantity)
-            if (q == 0) newItems.remove(id) else newItems[id] = oldItem.copy(quantity = q)
-
-            inc.remove(id)
-        }
-
-        setOrRemove(i, op, newItems)
-    }
-
-    if (inc.isNotEmpty()) add(incoming.copy(items = inc))
-}
-
-private fun MutableList<OperationInfo>.setOrRemove(
-    index: Int,
-    op: OperationInfo,
-    newItems: Map<Long, CartItem>
-) {
-    if (newItems.isEmpty()) removeAt(index) else set(index, op.copy(items = newItems))
+    addAll(list)
+    add(incoming)
 }
 
 enum class OperationRequestType {
     Add, AddMultiple, Change, ReplaceBottles, Clear;
-}
-
-
-enum class OperationState {
-    Loading,
-    Success,
-    Error,
 }
 
 
