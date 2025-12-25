@@ -10,11 +10,19 @@ inline fun <K, V> MutableMap<K, V>.setIfPresent(key: K, value: (V) -> V): Unit {
 }
 
 
-
-
 @Suppress("NOTHING_TO_INLINE")
-inline fun <K, V> MutableStateFlow<Map<K,V>>.set(key: K, value: V){
+inline fun <K, V> MutableStateFlow<Map<K, V>>.set(key: K, value: V) {
     update {
         it.toMutableMap().apply { set(key, value) }
     }
 }
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun <K, V> MutableStateFlow<Map<K, V>>.setAll(map: Map<K, V>) {
+    update {
+        it.toMutableMap().apply {
+            map.forEach { entry -> set(entry.key, entry.value) }
+        }
+    }
+}
+

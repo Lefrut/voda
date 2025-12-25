@@ -24,6 +24,11 @@ android {
             @Suppress("UnstableApiUsage")
             enableSplit = false
         }
+
+        density {
+            @Suppress("UnstableApiUsage")
+            enableSplit = false
+        }
     }
     packaging {
         jniLibs { useLegacyPackaging = true }
