@@ -121,42 +121,51 @@ class ProductDetailsFlowViewModel @Inject constructor(
         }
     }.collect()
 
-    fun fetchProductDetails() = vodovozServiceRepository.getProductDetails(
-        productId = stateSnapshot.productDetails.id
-    )
-        .combine(vodovozServiceRepository.getPresentInfo()) { p1, p2 ->
-            p1 to p2
-        }
-        .onEach { (productDetailsScreenResult, presentInfoResult) ->
-            productDetailsScreenResult.onSuccess { productDetailsScreenModel ->
-                val moreProducts = productDetailsScreenModel.moreProducts
-                val canViewAdultProducts = userPreferencesRepository.getCanViewAdultProducts()
-                val forAdults = productDetailsScreenModel.details.forAdultsModel?.toUi()
+    fun fetchProductDetails() = combine(
+        vodovozServiceRepository.getProductDetails(
+            productId = stateSnapshot.productDetails.id
+        ),
+        vodovozServiceRepository.getPresentInfo(),
+        vodovozServiceRepository.getViewedProducts()
+    ) { p1, p2, p3 ->
+        Triple(p1, p2, p3)
+    }.onEach { (productDetailsScreenResult, presentInfoResult, viewedProductsResult) ->
+        productDetailsScreenResult.onSuccess { productDetailsScreenModel ->
+            val moreProducts = productDetailsScreenModel.moreProducts
+            val canViewAdultProducts = userPreferencesRepository.getCanViewAdultProducts()
+            val forAdults = productDetailsScreenModel.details.forAdultsModel?.toUi()
 
-                updateState { s ->
-                    s.copy(
-                        comments = productDetailsScreenModel.comments.mapToUi(),
-                        productDetails = productDetailsScreenModel.details.toUi(),
-                        items = moreProducts.map { section ->
-                            section.toVodovozSectionUi()
-                        },
-                        buttons = productDetailsScreenModel.buttons.toUi(),
-                        tabs = productDetailsScreenModel.tabs.map { it.toUi() },
-                        uiState = if (forAdults != null && !canViewAdultProducts) ProductDetailsUiState.ForAdults(
-                            forAdults
-                        ) else ProductDetailsUiState.Success,
-                        presentInfo = presentInfoResult.getOrNull()?.toUi() ?: s.presentInfo,
-                        productBonuses = productDetailsScreenModel.details.bonuses?.toUi()
+            val productDetailsItems = buildList {
+                addAll(
+                    moreProducts.map { section ->
+                        section.toVodovozSectionUi()
+                    }
+                )
+                add(viewedProductsResult.mapCatching { it.toVodovozSectionUi() }.getOrNull())
+            }.mapNotNull { section -> section }
 
-                    )
-                }
+            updateState { s ->
+                s.copy(
+                    comments = productDetailsScreenModel.comments.mapToUi(),
+                    productDetails = productDetailsScreenModel.details.toUi(),
+                    items = productDetailsItems,
+                    buttons = productDetailsScreenModel.buttons.toUi(),
+                    tabs = productDetailsScreenModel.tabs.map { it.toUi() },
+                    uiState = if (forAdults != null && !canViewAdultProducts) ProductDetailsUiState.ForAdults(
+                        forAdults
+                    ) else ProductDetailsUiState.Success,
+                    presentInfo = presentInfoResult.getOrNull()?.toUi() ?: s.presentInfo,
+                    productBonuses = productDetailsScreenModel.details.bonuses?.toUi()
 
-            }.onFailure {
-                updateState { s ->
-                    s.copy(uiState = ProductDetailsUiState.Error)
-                }
+                )
             }
-        }.launchIn(viewModelScope)
+
+        }.onFailure {
+            updateState { s ->
+                s.copy(uiState = ProductDetailsUiState.Error)
+            }
+        }
+    }.launchIn(viewModelScope)
 
     fun incrementCart() = viewModelScope.launch {
         val productDetails = stateSnapshot.productDetails

@@ -1,5 +1,6 @@
 package com.m.vodovoz.ui.paging
 
+import androidx.compose.runtime.Stable
 import androidx.paging.CombinedLoadStates
 import androidx.paging.ItemSnapshotList
 import androidx.paging.LoadState
@@ -38,6 +39,7 @@ class PagingDataPresenterWrapper<T : Any>(
 
 }
 
+@Stable
 val emptyCombinedLoadStates = CombinedLoadStates(
     refresh = LoadState.NotLoading(endOfPaginationReached = false),
     prepend = LoadState.NotLoading(endOfPaginationReached = false),

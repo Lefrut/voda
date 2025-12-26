@@ -22,13 +22,16 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.rememberAsyncImagePainter
 import com.m.vodovoz.R
 import com.m.vodovoz.design_system.composables.button.VodovozButton
+import com.m.vodovoz.design_system.composables.grid.ProductSectionGrid
+import com.m.vodovoz.design_system.model.ProductUi
 import com.m.vodovoz.design_system.model.VodovozPlaceholderUi
+
 
 @Composable
 fun VodovozPlaceholder(
     modifier: Modifier = Modifier,
     data: VodovozPlaceholderUi,
-    onButtonClick: () -> Unit = {}
+    onButtonClick: () -> Unit = {},
 ) {
     Column(
         modifier = modifier
@@ -57,8 +60,12 @@ fun VodovozPlaceholder(
 
             Text(
                 modifier = Modifier.padding(top = 24.dp),
-                text = AnnotatedString.fromHtml(data.descriptionHtml.replace("\n",
-                    stringResource(R.string.html_br))),
+                text = AnnotatedString.fromHtml(
+                    data.descriptionHtml.replace(
+                        "\n",
+                        stringResource(R.string.html_br)
+                    )
+                ),
                 color = MaterialTheme.colorScheme.surfaceTint,
                 style = MaterialTheme.typography.bodyMedium.copy(textAlign = TextAlign.Center)
             )

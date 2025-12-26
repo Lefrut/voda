@@ -11,6 +11,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.m.vodovoz.design_system.composables.grid.ProductSectionGrid
 import com.m.vodovoz.design_system.model.BrandCategoryItemUi
 import com.m.vodovoz.design_system.model.CommentUi
 import com.m.vodovoz.design_system.model.ProductDetailsButtonsUi
@@ -160,7 +161,7 @@ fun ProductDetailsBody(
 
         if(moreProductSections.isNotEmpty()){
             moreProductSections.forEach { section ->
-                ProductDetailsAccessoryProducts(
+                ProductSectionGrid(
                     modifier = Modifier.padding(top = 32.dp),
                     productSection = section,
                     onProductLike = onProductLikeClick,

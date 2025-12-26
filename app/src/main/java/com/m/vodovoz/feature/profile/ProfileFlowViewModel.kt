@@ -223,6 +223,10 @@ class ProfileFlowViewModel @Inject constructor(
                 sendEvent(ProfileEvents.GoToWaterApp)
             }
 
+            "anketa" -> {
+                sendEvent(ProfileEvents.GoToQuestionnaires)
+            }
+
             "" -> {
                 showTextBottomSheet(profileCard.popupWindow ?: return@launch)
             }
@@ -305,6 +309,7 @@ class ProfileFlowViewModel @Inject constructor(
         data object GoToWaitFeedbackProducts : ProfileEvents()
         data object GoToOrders : ProfileEvents()
         data object DoNothing : ProfileEvents()
+        data object GoToQuestionnaires : ProfileEvents()
 
         data class GoByMenuItemId(val itemId: String) : ProfileEvents()
         data class ActivateVodovozAction(val action: VodovozAction) : ProfileEvents()

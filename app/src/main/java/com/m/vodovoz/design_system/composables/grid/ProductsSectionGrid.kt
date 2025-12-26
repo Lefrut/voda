@@ -1,4 +1,4 @@
-package com.m.vodovoz.feature.product_details.composables
+package com.m.vodovoz.design_system.composables.grid
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -17,7 +17,7 @@ import com.m.vodovoz.design_system.model.ProductUi
 import com.m.vodovoz.design_system.model.SectionContentUi
 
 @Composable
-fun ProductDetailsAccessoryProducts(
+fun ProductSectionGrid(
     modifier: Modifier = Modifier,
     productSection: SectionContentUi<ProductUi>,
     onProductLike: (ProductUi) -> Unit,

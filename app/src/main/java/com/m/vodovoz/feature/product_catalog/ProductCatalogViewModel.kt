@@ -250,6 +250,23 @@ class ProductCatalogViewModel @Inject constructor(
                 )
             }
 
+            DataSource.PastPurchases -> {
+                fetchProductsData(
+                    fetchProductsSection = {
+                        vodovozServiceRepository.getPastPurchasesDetails(
+                            sort = sortModel,
+                            categoryId = categoryId
+                        ).singleResult()
+                    },
+                    fetchPagedProductsFlow = {
+                        vodovozServiceRepository.getPastPurchasesPaged(
+                            sort = sortModel,
+                            categoryId = categoryId
+                        )
+                    }
+                )
+
+            }
 
             DataSource.Missing -> {
                 navigateBack()

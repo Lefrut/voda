@@ -177,6 +177,9 @@ class ProductCatalogFragment : Fragment() {
         data object ViewedProducts : DataSource()
 
         @Parcelize
+        data object PastPurchases : DataSource()
+
+        @Parcelize
         @Immutable
         data class ButtonProducts(val buttonId: Int) : DataSource()
 
