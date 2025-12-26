@@ -12,7 +12,9 @@ import coil3.request.CachePolicy
 import coil3.request.crossfade
 import coil3.svg.SvgDecoder
 import com.m.vodovoz.BuildConfig
+import com.m.vodovoz.common.account.AccountManager
 import com.m.vodovoz.common.notification.NotificationChannels
+import com.m.vodovoz.core.analytics.Analytics
 import com.m.vodovoz.core.network.VodovozWebConfig
 import com.yandex.mapkit.MapKitFactory
 import dagger.hilt.android.HiltAndroidApp
@@ -24,6 +26,8 @@ import javax.inject.Inject
 @HiltAndroidApp
 class VodovozApplication : Application(), Configuration.Provider, SingletonImageLoader.Factory {
 
+    @Inject
+    lateinit var accountManager: AccountManager
     @Inject
     lateinit var workerFactory: HiltWorkerFactory
 
@@ -46,6 +50,7 @@ class VodovozApplication : Application(), Configuration.Provider, SingletonImage
             Timber.plant(Timber.DebugTree())
         }
         initAppMetrica()
+        Analytics.setUserInstance(accountManager.observeAccountId())
         NotificationChannels.create(this)
     }
 
