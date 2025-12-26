@@ -57,8 +57,10 @@ interface RequestFailureStrategy {
 inline fun <reified T : Any, reified R : Any> RequestFailureStrategy.executeRequest(
     crossinline request: suspend () -> Response<VodovozResponseDTO<T>>,
     crossinline response: (Response<VodovozResponseDTO<T>>) -> Unit = {},
-    crossinline toResult: T.() -> R,
-    noinline mapper: (VodovozResponseDTO<T>) -> R = { it.data!!.toResult() },
+    crossinline toResult: T.() -> R = { this as R },
+    noinline mapper: (VodovozResponseDTO<T>) -> R = { vodovozResponse ->
+        toResult(vodovozResponse.data!!)
+    },
     crossinline fail: ((Response<ResponseBody>) -> Result<R>) = ::handleFail,
     type: Type = typeOf<VodovozResponseDTO<T>>().javaType,
 ): Flow<Result<R>> {

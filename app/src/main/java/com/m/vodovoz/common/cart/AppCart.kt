@@ -39,9 +39,6 @@ import kotlin.time.Duration.Companion.milliseconds
  *
  * */
 
-private suspend fun clientMethod() {
-
-}
 
 open class AbstractAppCart(
     private val cartRepository: CartRepository,

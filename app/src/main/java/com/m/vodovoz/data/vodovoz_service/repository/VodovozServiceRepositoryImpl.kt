@@ -11,7 +11,9 @@ import com.m.vodovoz.core.network.retrofit.messageWithCode
 import com.m.vodovoz.core.network.retrofit.stringBody
 import com.m.vodovoz.core.network.retrofit.stringErrorBody
 import com.m.vodovoz.core.network.serialization.fromJson
+import com.m.vodovoz.data.vodovoz_service.RequestExecutor
 import com.m.vodovoz.data.vodovoz_service.VodovozService
+import com.m.vodovoz.data.vodovoz_service.executeRequest
 import com.m.vodovoz.data.vodovoz_service.mappers.RequestFailureStrategy
 import com.m.vodovoz.data.vodovoz_service.mappers.executeRequest
 import com.m.vodovoz.data.vodovoz_service.mappers.mapToDomain
@@ -131,12 +133,10 @@ class VodovozServiceRepositoryImpl @Inject constructor(
     private val moshi: Moshi,
 ) : VodovozServiceRepository {
 
-    private data object MessageFailureStrategy : RequestFailureStrategy {
-
-        override fun <R : Any> handleFail(response: Response<ResponseBody>): Result<R> {
-            TODO("Not yet implemented")
-        }
-
+   private val defaultExecutor = object : RequestExecutor(moshi) {
+       override fun <R : Any> onFail(response: Response<ResponseBody>): Result<R> {
+           return Result.failure(RequestException(response.messageWithCode()))
+       }
     }
 
     private data object EmptyFailureStrategy : RequestFailureStrategy {
@@ -173,8 +173,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
 
     override fun removeAddress(addressId: Int): Flow<Result<String>> {
         return DefaultFailureStrategy.executeRequest(
-            request = { vodovozService.deleteAddress(addressId) },
-            toResult = { this },
+            request = { vodovozService.deleteAddress(addressId) }
         )
     }
 
@@ -182,11 +181,10 @@ class VodovozServiceRepositoryImpl @Inject constructor(
         address: MapAddressModel,
         params: Map<String, String>,
     ): Flow<Result<Long>> {
-        return DefaultFailureStrategy.executeRequest(
+        return defaultExecutor.executeRequest(
             request = {
                 val point = address.point
                 vodovozService.addAddress(
-
                     geo = "${point.lat},${point.lon}",
                     city = address.city,
                     street = address.street,
@@ -194,7 +192,9 @@ class VodovozServiceRepositoryImpl @Inject constructor(
                     queries = params
                 )
             },
-            toResult = { this },
+            mapper = {
+                it.data!!
+            },
         )
     }
 
