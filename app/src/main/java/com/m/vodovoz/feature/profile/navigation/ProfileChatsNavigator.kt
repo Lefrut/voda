@@ -43,7 +43,9 @@ object ProfileChatsNavigator {
                 }
 
                 else -> {
-                    navController.navigateToWriteMessage()
+                    openUrl(data).onFailure {
+                        navController.navigateToWriteMessage()
+                    }
                 }
             }
 
