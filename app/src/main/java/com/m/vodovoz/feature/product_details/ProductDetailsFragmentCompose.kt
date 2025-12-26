@@ -27,6 +27,7 @@ import com.m.vodovoz.core.navigation.navigateToProductComments
 import com.m.vodovoz.core.navigation.navigateToProductDetails
 import com.m.vodovoz.core.navigation.navigateToSearch
 import com.m.vodovoz.core.navigation.navigateToSearchProductList
+import com.m.vodovoz.core.navigation.navigateToViewedProductList
 import com.m.vodovoz.core.navigation.navigateToWriteComment
 import com.m.vodovoz.design_system.VodovozTheme
 import com.m.vodovoz.design_system.composables.placeholders.ForAdultsPlaceholder
@@ -177,7 +178,7 @@ class ProductDetailsFragment : Fragment() {
                 }
 
                 is ProductDetailsFlowViewModel.ProductDetailsEvents.Share -> {
-                    kotlin.runCatching { requireContext().shareText(event.text) }
+                    runCatching { requireContext().shareText(event.text) }
                 }
 
                 is ProductDetailsFlowViewModel.ProductDetailsEvents.GoToSearchProductList -> {
@@ -212,6 +213,10 @@ class ProductDetailsFragment : Fragment() {
 
                 is ProductDetailsFlowViewModel.ProductDetailsEvents.ScrollToMediaPage -> {
                     mediaPagerState.scrollToPage(event.page)
+                }
+
+                ProductDetailsFlowViewModel.ProductDetailsEvents.GoToViewedProduct -> {
+                    findNavController().navigateToViewedProductList()
                 }
             }
         }

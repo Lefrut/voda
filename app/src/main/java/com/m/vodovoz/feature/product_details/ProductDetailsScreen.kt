@@ -181,6 +181,9 @@ fun ProductDetailsScreen(
                     },
                     onWriteCommentClick = {
                         viewModel.navigateToWriteComment()
+                    },
+                    onShowAllViewedProducts = {
+                        viewModel.navigateToViewedProducts()
                     }
                 )
 

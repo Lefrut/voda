@@ -440,6 +440,10 @@ class ProductDetailsFlowViewModel @Inject constructor(
         sendEvent(ProductDetailsEvents.ScrollToMediaPage(page))
     }
 
+    fun navigateToViewedProducts() = viewModelScope.launch {
+        sendEvent(ProductDetailsEvents.GoToViewedProduct)
+    }
+
 
     sealed class ProductDetailsEvents : Event {
         data class GoToPreOrder(val id: Long) : ProductDetailsEvents()
@@ -455,6 +459,8 @@ class ProductDetailsFlowViewModel @Inject constructor(
         ) : ProductDetailsEvents()
 
         data object GoBack : ProductDetailsEvents()
+        data object GoToViewedProduct : ProductDetailsEvents()
+
         data class Share(val text: String) : ProductDetailsEvents()
 
         data class GoToProductComments(

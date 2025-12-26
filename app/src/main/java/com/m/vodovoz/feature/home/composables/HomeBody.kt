@@ -99,7 +99,7 @@ fun HomeBody(
                         )
                     },
                     productsSection = {
-                        HomeProductsRow(
+                        ProductSectionRow(
                             modifier = Modifier.padding(top = 32.dp),
                             sectionProducts = value,
                             onProductClick = onProductCardClick,
