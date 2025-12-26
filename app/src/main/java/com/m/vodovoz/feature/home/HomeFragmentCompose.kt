@@ -325,7 +325,7 @@ class HomeFragment : Fragment() {
                             navController.navigateToWaterApp()
                         }
 
-                        path == AccountManager.ORDERS_DEEPLINK -> {
+                        path == AccountManager.ORDERS_DEEPLINK_ID -> {
                             navController.navigateToOrdersHistory()
                         }
 

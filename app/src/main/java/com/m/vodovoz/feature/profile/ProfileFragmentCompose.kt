@@ -187,6 +187,7 @@ class ProfileFragment : Fragment() {
                         }
 
                         is ProfileFlowViewModel.ProfileEvents.GoByChatItemId -> {
+                            viewModel.closeSupportingBottomSheet()
                             ProfileChatsNavigator.navigate(
                                 chatId = events.chatId,
                                 data = events.data,

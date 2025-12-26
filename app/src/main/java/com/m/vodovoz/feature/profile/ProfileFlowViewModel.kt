@@ -50,7 +50,7 @@ class ProfileFlowViewModel @Inject constructor(
     val pendingDeeplinkFlow = accountManager.pendingDeeplinkFlow.onEach { deeplink ->
         val orderId = deeplink.toLongOrNull()
         val event = when {
-            deeplink == AccountManager.ORDERS_DEEPLINK -> ProfileEvents.GoToOrders
+            deeplink == AccountManager.ORDERS_DEEPLINK_ID -> ProfileEvents.GoToOrders
             orderId != null -> ProfileEvents.GoToOrderDetails(orderId)
             else -> ProfileEvents.DoNothing
         }
@@ -173,7 +173,7 @@ class ProfileFlowViewModel @Inject constructor(
     }
 
     fun navigateByChatItem(chatItem: ProfileChatItemUi) = viewModelScope.launch {
-        if (chatItem.id == "") closeSupportingBottomSheet()
+
         sendEvent(ProfileEvents.GoByChatItemId(chatItem.id, chatItem.navigationData))
     }
 

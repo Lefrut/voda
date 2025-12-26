@@ -6,6 +6,7 @@ import com.m.vodovoz.common.jivochat.JivoChatController
 import com.m.vodovoz.core.navigation.navigateToWebView
 import com.m.vodovoz.core.navigation.navigateToWriteMessage
 import com.m.vodovoz.util.extensions.dialPhoneNumber
+import com.m.vodovoz.util.extensions.openUrl
 import com.m.vodovoz.util.extensions.startTelegram
 import com.m.vodovoz.util.extensions.startViber
 import com.m.vodovoz.util.extensions.startWhatsUp
@@ -13,32 +14,39 @@ import com.m.vodovoz.util.extensions.startWhatsUp
 object ProfileChatsNavigator {
 
     fun navigate(chatId: String, data: String, navController: NavController, context: Context) {
-        when (chatId) {
-            "chat" -> {
-                navController.navigateToWebView(
-                    JivoChatController.getLink(), ""
-                )
+        with(context){
+            when (chatId) {
+                "chat" -> {
+                    navController.navigateToWebView(
+                        JivoChatController.getLink(), ""
+                    )
+                }
+
+                "viber" -> {
+                    startViber(data)
+                }
+
+                "telega" -> {
+                    startTelegram(data)
+                }
+
+                "watsup" -> {
+                    startWhatsUp(data)
+                }
+
+                "telefon" -> {
+                    dialPhoneNumber(data)
+                }
+
+                "vk" -> {
+                    openUrl(data)
+                }
+
+                else -> {
+                    navController.navigateToWriteMessage()
+                }
             }
 
-            "viber" -> {
-                context.startViber(data)
-            }
-
-            "telega" -> {
-                context.startTelegram(data)
-            }
-
-            "watsup" -> {
-                context.startWhatsUp(data)
-            }
-
-            "telefon" -> {
-                context.dialPhoneNumber(data)
-            }
-
-            else -> {
-                navController.navigateToWriteMessage()
-            }
         }
     }
 

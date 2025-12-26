@@ -112,7 +112,7 @@ class AccountManager @Inject constructor(
         private const val USE_BIO = "USE_BIO"
 
         private const val PENDING_DEEPLINK_KEY = "pending_deeplink"
-        const val ORDERS_DEEPLINK = "orders"
+        const val ORDERS_DEEPLINK_ID = "orders"
     }
 
 }

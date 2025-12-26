@@ -220,8 +220,8 @@ fun Activity.disableFullScreen() {
 }
 
 
-fun Context.openUrl(url: String) {
-    kotlin.runCatching {
+fun Context.openUrl(url: String): Result<Unit> {
+    return kotlin.runCatching {
         val intent = Intent(Intent.ACTION_VIEW, url.toUri())
         startActivity(intent)
     }
