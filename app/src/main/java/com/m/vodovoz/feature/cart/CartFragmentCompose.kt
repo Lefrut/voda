@@ -116,9 +116,15 @@ class CartFragment : Fragment() {
                                     style = MaterialTheme.typography.headlineSmall,
                                     modifier = Modifier.padding(16.dp)
                                 )
+
                                 VodovozPlaceholder(
                                     data = placeholder,
-                                    onButtonClick = { viewModel.navigateToCatalog() }
+                                    onButtonClick = { viewModel.navigateToCatalog() },
+                                    onProductLike = viewModel::changeFavorite,
+                                    onProductClick = viewModel::navigateToProductDetails,
+                                    onDecrementToCart = viewModel::decrementProduct,
+                                    onIncrementToCart = viewModel::incrementProduct,
+                                    onAnalogsClick = viewModel::navigateToAnalogsOrShow18
                                 )
                             }
                         }

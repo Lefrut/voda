@@ -14,7 +14,7 @@ data class TOVAR_DATA_DTO(
     @Json(name = "EDINICAIZMERENIYA")
     val EDINICAIZMERENIYA: String?,
     @Json(name = "EXTENDED_PRICE")
-    val EXTENDED_PRICE: List<EXTENDED_PRICE_DTO?>?,
+    val EXTENDED_PRICE: List<EXTENDED_PRICE_DTO>?,
     @Json(name = "FAVORITE")
     val FAVORITE: Boolean?,
     @Json(name = "ID")

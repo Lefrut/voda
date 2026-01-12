@@ -20,6 +20,11 @@ data class TOVAR_DTO(
 data class TOVARY_DTO(
     @Json(name = "NAME")
     val NAME: String?,
+    @Json(name = "TITLE")
+    val TITLE: String?,
     @Json(name = "TOVARY")
     val TOVARY: List<TOVAR_DATA_DTO>?,
+    @Json(name = "DATA")
+    val DATA: List<TOVAR_DATA_DTO>?,
+
 )

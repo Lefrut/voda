@@ -119,7 +119,9 @@ fun ProductCatalogBody(
 
         val refreshLoadState = productsLoadStates.refresh
         if (refreshLoadState is LoadState.Error && refreshLoadState.error is EmptyResultException) {
-            item(span = { GridItemSpan(2) }) {
+            item(
+                span = { GridItemSpan(2) }
+            ) {
                 val placeholder =
                     (refreshLoadState.error as? EmptyResultException)?.placeholder?.toUi()
                         ?: return@item

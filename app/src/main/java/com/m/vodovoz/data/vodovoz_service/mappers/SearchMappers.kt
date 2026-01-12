@@ -33,8 +33,8 @@ fun TOVAR_SECTION_DTO.toDomain(): SectionModel<ProductModel> {
 
 fun TOVARY_DTO.toDomain(): SectionModel<ProductModel> {
     return SectionModel(
-        title = NAME ?: "",
-        items = TOVARY?.mapToDomain() ?: emptyList(),
+        title = NAME ?: TITLE ?: "",
+        items = (TOVARY ?: DATA)?.mapToDomain() ?: emptyList(),
         button = null
     )
 }

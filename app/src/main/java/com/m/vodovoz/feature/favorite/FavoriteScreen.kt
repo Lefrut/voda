@@ -47,7 +47,10 @@ fun FavoriteScreen(
 
             when (val uiState = viewState.uiState) {
                 is FavoriteFlowViewModel.FavoriteUiState.Empty -> {
-                    VodovozPlaceholder(data = uiState.placeholder, onButtonClick = { viewModel.navigateToCatalog() })
+                    VodovozPlaceholder(
+                        data = uiState.placeholder,
+                        onButtonClick = { viewModel.navigateToCatalog() }
+                    )
                 }
 
                 FavoriteFlowViewModel.FavoriteUiState.Loading -> {
