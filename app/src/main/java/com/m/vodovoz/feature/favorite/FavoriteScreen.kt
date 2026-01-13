@@ -49,7 +49,12 @@ fun FavoriteScreen(
                 is FavoriteFlowViewModel.FavoriteUiState.Empty -> {
                     VodovozPlaceholder(
                         data = uiState.placeholder,
-                        onButtonClick = { viewModel.navigateToCatalog() }
+                        onButtonClick = { viewModel.navigateToCatalog() },
+                        onAnalogsClick = viewModel::navigateToProductAnalogs,
+                        onProductLike = viewModel::changeFavorite,
+                        onProductClick = viewModel::navigateToProductDetails,
+                        onIncrementToCart = viewModel::incrementProductToCart,
+                        onDecrementToCart = viewModel::decrementProductToCart
                     )
                 }
 

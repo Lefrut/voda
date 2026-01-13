@@ -98,7 +98,6 @@ fun VodovozPlaceholder(
             )
         }
 
-        //TODO("need design")
         Spacer(modifier = Modifier.weight(1.2f))
         if (productsSection != null && productsSection.items.isNotEmpty()) {
             ProductSectionRow(

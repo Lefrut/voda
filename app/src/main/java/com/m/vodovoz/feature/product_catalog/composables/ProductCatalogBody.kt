@@ -59,6 +59,7 @@ fun ProductCatalogBody(
     onProductAnalogsClick: (ProductUi) -> Unit,
     onIncrementProductToCart: (ProductUi) -> Unit,
     onDecrementProductToCart: (ProductUi) -> Unit,
+    onPlacholderButtonClick: () -> Unit
 ) {
     val shimmer = rememberShimmer(shimmerBounds = ShimmerBounds.View)
 
@@ -126,7 +127,15 @@ fun ProductCatalogBody(
                     (refreshLoadState.error as? EmptyResultException)?.placeholder?.toUi()
                         ?: return@item
 
-                VodovozPlaceholder(data = placeholder)
+                VodovozPlaceholder(
+                    data = placeholder,
+                    onProductClick = onProductClick,
+                    onProductLike = onProductLike,
+                    onAnalogsClick = onProductAnalogsClick,
+                    onDecrementToCart = onDecrementProductToCart,
+                    onIncrementToCart = onIncrementProductToCart,
+                    onButtonClick = onPlacholderButtonClick
+                )
             }
         } else {
             linearOrGridProducts(

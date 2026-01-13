@@ -129,7 +129,6 @@ inline fun <reified T : Any, R : Any> executeRequest(
         } ?: 520
 
         val finalResult = bodyResult.mapCatching { body ->
-            require(responseCode == 200) { "Bad response code: $responseCode" }
             mapper(body)
         }.recoverCatching {
             fail(Response.error(errorCode, stringBody.jsonToResponseBody())).getOrThrow()

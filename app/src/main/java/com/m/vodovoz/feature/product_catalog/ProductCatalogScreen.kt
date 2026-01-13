@@ -115,6 +115,9 @@ fun ProductCatalogScreen(
                         onProductAnalogsClick = { product ->
                             viewModel.navigateToProductAnalogs(product)
                         },
+                        onPlacholderButtonClick = {
+                            viewModel.navigateBack()
+                        }
                     )
 
                 }
