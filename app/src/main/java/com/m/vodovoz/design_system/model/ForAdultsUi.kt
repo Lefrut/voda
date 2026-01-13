@@ -19,6 +19,15 @@ data class ForAdultsUi(
     }
 }
 
+fun ForAdultsUi.toDomain(): ForAdultsModel {
+    return ForAdultsModel(
+        title = title,
+        description = description,
+        textBlur = textBlur,
+        button = button.toDomain()
+    )
+}
+
 fun ForAdultsModel.toUi(): ForAdultsUi {
     return ForAdultsUi(
         title, description, textBlur, button.toUi()

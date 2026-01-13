@@ -464,6 +464,7 @@ class CartFlowViewModel @Inject constructor(
     ) : PagingState2<CartItemUi, ProductUi, CartState>() {
 
 
+        //todo - mb refactor
         override fun copyPagingState(
             items1: List<CartItemUi>,
             items2: List<ProductUi>,

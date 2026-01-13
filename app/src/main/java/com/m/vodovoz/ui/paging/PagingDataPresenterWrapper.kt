@@ -61,3 +61,6 @@ fun CombinedLoadStates.copy(
 ): CombinedLoadStates {
     return CombinedLoadStates(refresh, prepend, append, source, mediator)
 }
+
+val LoadState.errorOrNull
+    get() = this as? LoadState.Error

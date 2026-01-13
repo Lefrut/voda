@@ -16,6 +16,8 @@ import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
+import com.m.vodovoz.R
+import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.core.navigation.ContentSearchNavigator
 import com.m.vodovoz.core.navigation.navigateToCategories
 import com.m.vodovoz.core.navigation.navigateToProductAnalogs
@@ -37,6 +39,10 @@ import javax.inject.Inject
 class ProductCatalogFragment : Fragment() {
 
     internal val viewModel: ProductCatalogViewModel by viewModels()
+
+
+    @Inject
+    lateinit var tabManager: TabManager
 
     @Inject
     lateinit var navigatorFactory: ContentSearchNavigator.Factory
@@ -77,7 +83,7 @@ class ProductCatalogFragment : Fragment() {
             setContent {
                 VodovozTheme {
                     val viewState by viewModel.collectAsState()
-                    
+
                     val lazyGridState = rememberLazyGridState()
                     val context = LocalContext.current
 
@@ -151,6 +157,11 @@ class ProductCatalogFragment : Fragment() {
 
                                 ProductCatalogViewModel.ProductCatalogEvent.GoToSpeech -> {
                                     searchNavigator.navigateToVoiceSearch()
+                                }
+
+                                ProductCatalogViewModel.ProductCatalogEvent.GoToCatalog -> {
+                                    findNavController().popBackStack()
+                                    tabManager.selectTab(R.id.graph_catalog)
                                 }
                             }
                         }

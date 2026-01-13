@@ -12,6 +12,7 @@ import com.m.vodovoz.design_system.composables.bottom_sheet.SortOptionsBottomShe
 import com.m.vodovoz.design_system.composables.placeholders.EmptyResultPlaceholder
 import com.m.vodovoz.design_system.composables.placeholders.LoadingPlaceholder
 import com.m.vodovoz.design_system.composables.placeholders.NetworkErrorPlaceholder
+import com.m.vodovoz.design_system.composables.placeholders.VodovozPlaceholder
 import com.m.vodovoz.design_system.composables.pull_to_refresh.VodovozPullToRefreshBox
 import com.m.vodovoz.design_system.composables.top_bar.VodovozSearchTopBar
 import com.m.vodovoz.feature.product_catalog.composables.CategoriesBottomSheet
@@ -124,10 +125,12 @@ fun ProductCatalogScreen(
 
                 is ProductCatalogViewModel.ProductCatalogUiState.Empty -> {
                     val placeholder = uiState.placeholder
-                    EmptyResultPlaceholder(
-                        title = placeholder.headerHtml,
-                        description = placeholder.descriptionHtml,
-                        imagePainter = rememberAsyncImagePainter(placeholder.imageUrl)
+
+                    VodovozPlaceholder(
+                        data = placeholder,
+                        onButtonClick = {
+                            viewModel.navigateToCatalog()
+                        }
                     )
                 }
 

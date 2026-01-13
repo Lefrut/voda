@@ -11,7 +11,7 @@ data class ProfileDetailsModel(
     val banners: List<BannerModel>,
     val smallMenu: List<ProfileMenuItemModel>,
     val normalMenu: List<ProfileMenuItemModel>,
-    val sectionProducts: SectionModel<ProductModel>,
+    //val sectionProducts: SectionModel<ProductModel>,
 )
 
 data class ProfileMenuItemModel(

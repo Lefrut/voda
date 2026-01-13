@@ -22,13 +22,17 @@ import com.m.vodovoz.design_system.model.filters.FiltersUi
 import com.m.vodovoz.design_system.model.filters.toDomain
 import com.m.vodovoz.design_system.model.findParentOfOnlyLeaf
 import com.m.vodovoz.design_system.model.getChildrenOrSiblings
+import com.m.vodovoz.design_system.model.mapToDomain
 import com.m.vodovoz.design_system.model.toCategory
 import com.m.vodovoz.design_system.model.toUi
 import com.m.vodovoz.domain.general.model.exceptions.EmptyResultException
+import com.m.vodovoz.domain.general.model.exceptions.VodovozPlaceholderModel
 import com.m.vodovoz.domain.general.model.product.FiltersModel
+import com.m.vodovoz.domain.general.model.product.PriceModel
 import com.m.vodovoz.domain.general.model.product.ProductModel
 import com.m.vodovoz.domain.general.model.product.ProductsSectionModel
 import com.m.vodovoz.domain.general.model.product.ProductsSectionUi
+import com.m.vodovoz.domain.general.model.product.SectionModel
 import com.m.vodovoz.domain.general.model.product.toUi
 import com.m.vodovoz.domain.general.respository.UserPreferencesRepository
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
@@ -42,6 +46,7 @@ import com.m.vodovoz.ui.paging.PagingProductsMviViewModel
 import com.m.vodovoz.ui.paging.PagingState
 import com.m.vodovoz.ui.paging.copy
 import com.m.vodovoz.ui.paging.emptyCombinedLoadStates
+import com.m.vodovoz.ui.paging.errorOrNull
 import com.m.vodovoz.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
@@ -342,7 +347,6 @@ class ProductCatalogViewModel @Inject constructor(
                 productsSectionModel.toUi()
             }
 
-
         productsSectionResult.onSuccess { productsSection ->
 
             categoriesTreeJob.join()
@@ -388,19 +392,23 @@ class ProductCatalogViewModel @Inject constructor(
             }
 
         }.onFailure { t ->
-            val uiState = when (t) {
-                is EmptyResultException -> ProductCatalogUiState.Empty(
-                    t.placeholder?.toUi() ?: VodovozPlaceholderUi.Empty
-                )
+            val (uiState, extraItems) = when (t) {
+                is EmptyResultException -> t.placeholder?.let {
+                    val placeholder = it.toUi()
+                    ProductCatalogUiState.Empty(placeholder) to (placeholder.productsSection?.items
+                        ?: emptyList())
+                } ?: (ProductCatalogUiState.Error to emptyList())
 
-
-                else -> ProductCatalogUiState.Error
+                else -> ProductCatalogUiState.Error to emptyList()
             }
 
 
             if (uiState is ProductCatalogUiState.Empty && stateSnapshot.productsSection == ProductsSectionUi.Empty) {
                 updateState { s ->
-                    s.copy(uiState = uiState)
+                    s.copy(
+                        uiState = uiState,
+                        items = extraItems
+                    )
                 }
             } else if (stateSnapshot.productsSection != ProductsSectionUi.Empty) {
                 updateState { s ->
@@ -411,7 +419,8 @@ class ProductCatalogViewModel @Inject constructor(
                         uiState = ProductCatalogUiState.Body,
                         productsSection = s.productsSection.copy(
                             productsQuantityText = ""
-                        )
+                        ),
+                        items = extraItems
                     )
                 }
             } else {
@@ -599,6 +608,10 @@ class ProductCatalogViewModel @Inject constructor(
         userPreferencesRepository.setCanViewAdultProducts(true)
     }
 
+    fun navigateToCatalog() = viewModelScope.launch {
+        sendEvent(ProductCatalogEvent.GoToCatalog)
+    }
+
     @Immutable
     data class ProductCatalogState(
         @Stable
@@ -624,8 +637,39 @@ class ProductCatalogViewModel @Inject constructor(
         override fun copyPagingState(
             items: List<ProductUi>,
             loadStates: CombinedLoadStates,
-        ): ProductCatalogState = copy(items = items, loadStates = loadStates)
+        ): ProductCatalogState {
 
+            val refreshLocalState = (loadStates.refresh.errorOrNull)?.let {
+                val error = (it.error as? EmptyResultException)?.placeholder?.let { placeholder ->
+                    EmptyResultException(
+                        placeholder = placeholder.copy(
+                            productsSection = placeholder.productsSection?.copy(
+                                items = items.mapToDomain()
+                            )
+                        )
+                    )
+                } ?: IllegalStateException("failed load products at catalog")
+                LoadState.Error(error)
+            } ?: loadStates.refresh
+
+
+
+            return copy(
+                items = items,
+                loadStates = loadStates.copy(
+                    refresh = refreshLocalState
+                ),
+                uiState = if (uiState is ProductCatalogUiState.Empty) with(uiState) {
+                    copy(
+                        placeholder = placeholder.copy(
+                            productsSection = placeholder.productsSection?.copy(items = items)
+                        )
+                    )
+                } else uiState
+
+
+            )
+        }
     }
 
     @Stable
@@ -642,6 +686,7 @@ class ProductCatalogViewModel @Inject constructor(
         data object ScrollToTop : ProductCatalogEvent()
         data object GoToSpeech : ProductCatalogEvent()
         data object GoToQrCode : ProductCatalogEvent()
+        data object GoToCatalog : ProductCatalogEvent()
 
         data class GoToSearch(val query: String) : ProductCatalogEvent()
         data class GoToCategories(

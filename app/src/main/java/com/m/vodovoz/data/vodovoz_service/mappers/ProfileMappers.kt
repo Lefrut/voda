@@ -40,7 +40,7 @@ fun ProfileDetailsDTO.toDomain(): ProfileDetailsModel {
         banners = BANNER?.mapToDomain() ?: emptyList(),
         smallMenu = MENU?.MINI?.map { it.toDomain() } ?: emptyList(),
         normalMenu = MENU?.NORMAL?.map { it.toDomain() } ?: emptyList(),
-        sectionProducts = TOVARY?.toDomain() ?: SectionModel.empty()
+        //sectionProducts = TOVARY?.toDomain() ?: SectionModel.empty()
     )
 }
 
