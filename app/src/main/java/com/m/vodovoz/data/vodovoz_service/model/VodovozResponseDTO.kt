@@ -15,6 +15,9 @@ data class VodovozResponseDTO<T>(
     val data: T?,
 )
 
+val <T> VodovozResponseDTO<T>.messageOrEmpty: String
+    get() = message ?: ""
+
 @Keep
 data class VodovozPlaceholderDTO(
     @Json(name = "TITLE") val title: String?,

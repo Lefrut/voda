@@ -583,7 +583,7 @@ interface VodovozService {
 
         @Query("tovar") productId: Long,
         @QueryMap queries: Map<String, String>,
-    ): Response<VodovozErrorResponseDTO>
+    ): Response<VodovozResponseDTO<Unit?>>
 
     /**
      * Cart requests

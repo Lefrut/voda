@@ -5,28 +5,42 @@ import com.m.vodovoz.data.maps.YandexMapSDK
 import com.m.vodovoz.data.maps.mappers.mapToDomain
 import com.m.vodovoz.data.maps.mappers.toData
 import com.m.vodovoz.data.maps.mappers.toDomain
-import com.m.vodovoz.data.vodovoz_service.mappers.executeRequest
+import com.m.vodovoz.data.maps.model.YandexGeoResponseDTO
+import com.m.vodovoz.data.vodovoz_service.BaseRequestExecutor
+import com.m.vodovoz.data.vodovoz_service.RequestExecutor
+import com.m.vodovoz.data.vodovoz_service.executeRequest
 import com.m.vodovoz.domain.general.model.location.MapAddressModel
 import com.m.vodovoz.domain.general.model.location.MapPointModel
 import com.m.vodovoz.domain.general.respository.MapServiceRepository
 import com.m.vodovoz.feature.sitestate.SiteStateManager
 import com.m.vodovoz.util.extensions.catchResult
+import com.squareup.moshi.Moshi
 import com.yandex.mapkit.search.Address
 import com.yandex.mapkit.search.ToponymObjectMetadata
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import okhttp3.ResponseBody
+import retrofit2.Response
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.reflect.typeOf
 
 @Singleton
 class MapServiceRepositoryImpl @Inject constructor(
     private val mapApi: YandexMapAPI,
     private val mapSDK: YandexMapSDK,
     private val siteStateManager: SiteStateManager,
+    moshi: Moshi
 ) : MapServiceRepository {
 
+    private val mapExecutor = object : BaseRequestExecutor(moshi) {
+        override fun <R : Any> onFail(response: Response<ResponseBody>): Result<R> {
+            throw IllegalStateException("failed request to map service")
+        }
+    }
+
     override fun getAddressByGeo(lat: Double, lon: Double): Flow<Result<MapAddressModel>> {
-        return executeRequest(
+        return mapExecutor.executeRequest(
             request = {
                 mapApi.getAddressByGeo(
                     geocode = "$lon, $lat",
@@ -34,13 +48,14 @@ class MapServiceRepositoryImpl @Inject constructor(
                 )
             },
             mapper = { yandexGeoResponseDTO ->
-                yandexGeoResponseDTO.toDomain()
-                    ?: throw IllegalArgumentException("Address can't be null")
-            }
+                yandexGeoResponseDTO.toDomain()!!
+            },
         )
     }
 
-    override fun getAddressesInMoscowByQuery(query: String): Flow<Result<List<String>>> =
+    override fun getAddressesInMoscowByQuery(
+        query: String
+    ): Flow<Result<List<String>>> =
         flow {
             emit(Result.success(mapSDK.getSuggestsInMoscow(query).mapToDomain()))
         }.catchResult()
