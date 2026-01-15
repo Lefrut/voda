@@ -40,23 +40,15 @@ fun WebViewScreen(viewModel: WebViewViewModel, viewState: WebViewState) {
             )
         }
         Box {
-            when (viewState.uiState) {
-                WebViewUiState.Error -> {
-                    NetworkErrorPlaceholder { viewModel.setUiState(WebViewUiState.Loading) }
-                }
+            WebView(
+                url = viewState.url,
+                onLoadingFinished = { viewModel.setUiState(WebViewUiState.NotLoading) },
+                onError = { viewModel.setUiState(WebViewUiState.Error) },
+                onBackClick = { viewModel.navigateBack() }
+            )
 
-                else -> {
-                    WebView(
-                        url = viewState.url,
-                        onLoadingFinished = { viewModel.setUiState(WebViewUiState.NotLoading) },
-                        onError = { viewModel.setUiState(WebViewUiState.Error) },
-                        onBackClick = { viewModel.navigateBack() }
-                    )
-
-                    if (viewState.uiState is WebViewUiState.Loading) {
-                        LoadingPlaceholder()
-                    }
-                }
+            if (viewState.uiState is WebViewUiState.Loading) {
+                LoadingPlaceholder()
             }
         }
     }
