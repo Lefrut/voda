@@ -10,7 +10,6 @@ import com.m.vodovoz.common.model.from
 import com.m.vodovoz.core.network.retrofit.messageWithCode
 import com.m.vodovoz.core.network.retrofit.stringErrorBody
 import com.m.vodovoz.core.network.serialization.fromJson
-import com.m.vodovoz.data.vodovoz_service.RequestExecutor
 import com.m.vodovoz.data.vodovoz_service.VodovozRequestExecutor
 import com.m.vodovoz.data.vodovoz_service.VodovozService
 import com.m.vodovoz.data.vodovoz_service.executeRequest
@@ -22,7 +21,6 @@ import com.m.vodovoz.data.vodovoz_service.model.ProductsSectionDTO
 import com.m.vodovoz.data.vodovoz_service.model.PromotionDetailsDTO
 import com.m.vodovoz.data.vodovoz_service.model.PromotionsDTO
 import com.m.vodovoz.data.vodovoz_service.model.SiteStateResponseDTO
-import com.m.vodovoz.data.vodovoz_service.model.VodovozErrorResponseDTO
 import com.m.vodovoz.data.vodovoz_service.model.VodovozPlaceholderDTO
 import com.m.vodovoz.data.vodovoz_service.model.VodovozResponseDTO
 import com.m.vodovoz.data.vodovoz_service.model.WaitFeedbackProductsDTO
@@ -523,7 +521,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
     ): Flow<PagingData<OrdersHistoryItemModel>> {
         return VodovozPagerFactory.getFlow(
             executor = defaultExecutor,
-            clazz = OrdersHistoryDetailsDTO::class,
+
             request = { page, _ ->
                 vodovozService.getOrdersHistoryDetails(
 
@@ -561,11 +559,8 @@ class VodovozServiceRepositoryImpl @Inject constructor(
     override fun getWaitFeedbackProductsPaged(): Flow<PagingData<WaitFeedbackProductModel>> {
         return VodovozPagerFactory.getFlow(
             executor = defaultExecutor,
-            clazz = WaitFeedbackProductsDTO::class,
             request = { page, _ ->
-                vodovozService.getWaitFeedbackProducts(
-                    page
-                )
+                vodovozService.getWaitFeedbackProducts(page)
             },
             mapper = { dto ->
                 dto.products!!.mapToDomain()
@@ -834,7 +829,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
     ): Flow<PagingData<ProductModel>> {
         return VodovozPagerFactory.getFlow(
             executor = canBeEmptyExecutor,
-            clazz = ProductsSectionDTO::class,
+
             request = { page, _ ->
                 vodovozService.getPastPurchasesDetails(
                     page = page,
@@ -869,7 +864,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
     ): Flow<PagingData<BrandModel>> {
         return VodovozPagerFactory.getFlow(
             executor = canBeEmptyExecutor,
-            clazz = BrandSectionDTO::class,
+
             request = { page, _ ->
                 if (page > 1 && searchQuery.isNotBlank()) {
                     throw EmptyResultException()
@@ -914,7 +909,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
     ): Flow<PagingData<ProductModel>> {
         return VodovozPagerFactory.getFlow(
             executor = canBeEmptyExecutor,
-            clazz = ProductsSectionDTO::class,
+
             request = { page, _ ->
                 vodovozService.getBrandProducts(
                     brandId = brandId,
@@ -957,7 +952,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
     ): Flow<PagingData<PromotionModel>> {
         return VodovozPagerFactory.getFlow(
             executor = canBeEmptyExecutor,
-            clazz = PromotionsDTO::class,
+
             request = { page, _ ->
                 vodovozService.getBannerPromotions(
                     bannerId = bannerId,
@@ -1002,7 +997,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
     ): Flow<PagingData<ProductModel>> {
         return VodovozPagerFactory.getFlow(
             executor = canBeEmptyExecutor,
-            clazz = ProductsSectionDTO::class,
+
             request = { page, _ ->
                 vodovozService.getBannerProducts(
                     bannerId = bannerId,
@@ -1345,7 +1340,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
 
         return VodovozPagerFactory.getFlow(
             executor = defaultExecutor,
-            clazz = ProductsSectionDTO::class,
+
             request = { page, _ ->
                 vodovozService.getCategoryProducts(
                     page = page,
@@ -1374,7 +1369,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
     ): Flow<PagingData<ProductModel>> {
         return VodovozPagerFactory.getFlow(
             executor = canBeEmptyExecutor,
-            clazz = ProductsSectionDTO::class,
+
             request = { page, _ ->
                 vodovozService.getSearchProducts(
                     query = query,
@@ -1523,7 +1518,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
     ): Flow<PagingData<ProductModel>> {
         return VodovozPagerFactory.getFlow(
             executor = defaultExecutor,
-            clazz = ProductsSectionDTO::class,
+
             request = { page, _ ->
                 vodovozService.getFavoriteProducts(
                     page = page,
@@ -1615,7 +1610,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
     ): Flow<PagingData<ProductModel>> {
         return VodovozPagerFactory.getFlow(
             executor = defaultExecutor,
-            clazz = RecommendationsDTO::class,
+
             request = { page, _ ->
                 vodovozService.getAdditionalProducts(
                     page = page,
@@ -1759,7 +1754,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
     ): Flow<PagingData<CommentModel>> {
         return VodovozPagerFactory.getFlow(
             executor = defaultExecutor,
-            clazz = ProductCommentsDTO::class,
+
             request = { page, _ ->
                 vodovozService.getComments(
                     productId = productId,
@@ -1845,7 +1840,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
     ): Flow<PagingData<ProductModel>> {
         return VodovozPagerFactory.getFlow(
             executor = defaultExecutor,
-            clazz = PromotionDetailsDTO::class,
+
             request = { page, limit ->
                 vodovozService.getPromotionDetails(promotionId, page, limit)
             },
@@ -1874,7 +1869,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
     ): Flow<PagingData<PromotionModel>> {
         return VodovozPagerFactory.getFlow(
             executor = defaultExecutor,
-            clazz = PromotionsDTO::class,
+
             request = { page, limit ->
                 vodovozService.getAllPromotions(
                     page = page,
@@ -1932,7 +1927,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
     ): Flow<PagingData<ProductModel>> {
         return VodovozPagerFactory.getFlow(
             executor = defaultExecutor,
-            clazz = ProductsSectionDTO::class,
+
             request = { page, _ ->
                 vodovozService.getAllNewProducts(
                     page = page,
@@ -1978,7 +1973,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
     ): Flow<PagingData<ProductModel>> {
         return VodovozPagerFactory.getFlow(
             executor = defaultExecutor,
-            clazz = ProductsSectionDTO::class,
+
             request = { page, _ ->
                 vodovozService.getAllHurryUpBuyProducts(
                     page = page,
@@ -2031,7 +2026,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
     ): Flow<PagingData<ProductModel>> {
         return VodovozPagerFactory.getFlow(
             executor = canBeEmptyExecutor,
-            clazz = ProductsSectionDTO::class,
+
             request = { page, _ ->
                 vodovozService.getAllSuperTop(
                     id = buttonId.toLong(),
@@ -2078,7 +2073,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
     ): Flow<PagingData<ProductModel>> {
         return VodovozPagerFactory.getFlow(
             executor = canBeEmptyExecutor,
-            clazz = ProductsSectionDTO::class,
+
             request = { page, _ ->
                 vodovozService.getAllViewedProducts(
                     page = page,

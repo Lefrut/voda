@@ -56,7 +56,8 @@ abstract class RequestExecutor(
             val finalResult = bodyResult.mapCatching { body ->
                 require(responseCode == 200) { "Bad response code: $responseCode" }
                 mapper(body)
-            }.recoverCatching {
+            }.recoverCatching { throwable ->
+                debugLog { throwable.stackTraceToString() }
                 fail(Response.error(errorCode, stringBody.jsonToResponseBody())).getOrThrow()
             }
 

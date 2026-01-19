@@ -7,16 +7,17 @@ import com.m.vodovoz.data.vodovoz_service.model.VodovozResponseDTO
 import com.m.vodovoz.util.extensions.debugLog
 import kotlinx.coroutines.flow.singleOrNull
 import retrofit2.Response
-import kotlin.reflect.KClass
+import kotlin.reflect.KType
+import kotlin.reflect.javaType
 
-//todo - need to refactoring
 class VodovozPagingSource<T : Any, R : Any>(
     private val executor: VodovozRequestExecutor,
-    private val clazz: KClass<T>,
+    private val type: KType,
     private val request: suspend (page: Int, limit: Int) -> Response<VodovozResponseDTO<T>>,
     private val mapper: (T) -> List<R>,
 ) : PagingSource<Int, R>() {
 
+    @OptIn(ExperimentalStdlibApi::class)
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, R> {
         val page = params.key ?: 1
 
@@ -25,7 +26,7 @@ class VodovozPagingSource<T : Any, R : Any>(
             mapper = {
                 mapper(it.data!!)
             },
-            type = clazz.java
+            type = type.javaType
         ).singleOrNull()
 
         if (result == null) {
