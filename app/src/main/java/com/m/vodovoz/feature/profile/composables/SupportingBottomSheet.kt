@@ -103,7 +103,6 @@ private fun SupportingBottomSheetTitle(
     }
 }
 
-@Suppress("NonSkippableComposable")
 @Composable
 private fun SupportingBottomSheetBody(
     modifier: Modifier = Modifier,

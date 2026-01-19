@@ -3,7 +3,10 @@ package com.m.vodovoz.feature.product_catalog.composables
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
@@ -11,7 +14,11 @@ import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.paging.CombinedLoadStates
 import androidx.paging.LoadState
@@ -59,8 +66,27 @@ fun ProductCatalogBody(
     onProductAnalogsClick: (ProductUi) -> Unit,
     onIncrementProductToCart: (ProductUi) -> Unit,
     onDecrementProductToCart: (ProductUi) -> Unit,
+    onPlacholderButtonClick: () -> Unit
 ) {
     val shimmer = rememberShimmer(shimmerBounds = ShimmerBounds.View)
+
+    val density = LocalDensity.current
+
+    val placeholderHeight by remember(lazyGridState, density) {
+        derivedStateOf {
+            val li = lazyGridState.layoutInfo
+
+            val viewportPx = (li.viewportEndOffset - li.viewportStartOffset)
+                .takeIf { it > 0 } ?: li.viewportSize.height
+
+            val headersPx = li.visibleItemsInfo
+                .filter { it.key in ProductGridKeys.HEADER_KEYS }
+                .sumOf { it.size.height }
+
+            val remainingPx = (viewportPx - headersPx).coerceAtLeast(0)
+            with(density) { remainingPx.toDp() }
+        }
+    }
 
     LazyVerticalGrid(
         state = lazyGridState,
@@ -69,7 +95,7 @@ fun ProductCatalogBody(
         contentPadding = PaddingValues(vertical = 16.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        item(span = { GridItemSpan(maxLineSpan) }, key = "ProductListTitle") {
+        item(span = { GridItemSpan(maxLineSpan) }, key = ProductGridKeys.TITLE) {
             ProductListTitle(
                 modifier = Modifier.padding(bottom = 16.dp),
                 productsQuantity = productsQuantity,
@@ -79,7 +105,7 @@ fun ProductCatalogBody(
             )
         }
 
-        item(span = { GridItemSpan(maxLineSpan) }, key = "ProductListCategoriesRow") {
+        item(span = { GridItemSpan(maxLineSpan) }, key = ProductGridKeys.CATEGORIES) {
             if (categories.isNotEmpty()) {
                 ProductListCategoriesRow(
                     modifier = Modifier.padding(bottom = 16.dp),
@@ -98,7 +124,7 @@ fun ProductCatalogBody(
         }
 
         stickyHeader(
-            key = "ProductListOptionsRow"
+            key = ProductGridKeys.OPTIONS
         ) {
             ProductListOptionsRow(
                 modifier = Modifier
@@ -119,12 +145,29 @@ fun ProductCatalogBody(
 
         val refreshLoadState = productsLoadStates.refresh
         if (refreshLoadState is LoadState.Error && refreshLoadState.error is EmptyResultException) {
-            item(span = { GridItemSpan(2) }) {
+            item(
+                span = { GridItemSpan(maxLineSpan) },
+                key = ProductGridKeys.EMPTY_PLACEHOLDER
+            ) {
                 val placeholder =
                     (refreshLoadState.error as? EmptyResultException)?.placeholder?.toUi()
                         ?: return@item
 
-                VodovozPlaceholder(data = placeholder)
+                VodovozPlaceholder(
+
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(
+                            placeholderHeight.coerceAtLeast(1.dp)
+                        ),
+                    data = placeholder,
+                    onProductClick = onProductClick,
+                    onProductLike = onProductLike,
+                    onAnalogsClick = onProductAnalogsClick,
+                    onDecrementToCart = onDecrementProductToCart,
+                    onIncrementToCart = onIncrementProductToCart,
+                    onButtonClick = onPlacholderButtonClick
+                )
             }
         } else {
             linearOrGridProducts(
@@ -141,4 +184,13 @@ fun ProductCatalogBody(
             )
         }
     }
+}
+
+private object ProductGridKeys {
+    const val TITLE = "ProductListTitle"
+    const val CATEGORIES = "ProductListCategoriesRow"
+    const val OPTIONS = "ProductListOptionsRow"
+    const val EMPTY_PLACEHOLDER = "EmptyPlaceholder"
+
+    val HEADER_KEYS = setOf(TITLE, CATEGORIES, OPTIONS)
 }

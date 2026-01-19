@@ -17,9 +17,10 @@ class UserInterceptor @Inject constructor(
 
         val userId = accountManager.fetchAccountId()
 
-        val newUrl = originalUrl.newBuilder()
+        val newUrl = if (userId != null) originalUrl.newBuilder()
             .addQueryParameter("userid", userId.toString())
             .build()
+        else originalUrl
 
         val newRequest = originalRequest.newBuilder()
             .url(newUrl)

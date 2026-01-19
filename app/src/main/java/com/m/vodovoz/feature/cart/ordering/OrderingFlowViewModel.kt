@@ -681,7 +681,7 @@ class OrderingFlowViewModel @Inject constructor(
 
         sendEvent(OrderingEvents.RefreshCart)
 
-        if (button.browser == true) {
+        if (button.browser == false) {
             sendEvent(OrderingEvents.GoToWebView(button.url))
         } else {
             sendEvent(OrderingEvents.OpenUrl(button.url))

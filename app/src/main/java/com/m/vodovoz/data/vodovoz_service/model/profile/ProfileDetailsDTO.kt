@@ -20,6 +20,4 @@ data class ProfileDetailsDTO(
     val BANNER: List<BannerDTO>?,
     @Json(name = "MENU")
     val MENU: PROFILE_MENU_DTO?,
-    @Json(name = "TOVARY")
-    val TOVARY: TOVARY_DTO?
 )

@@ -13,13 +13,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.m.vodovoz.design_system.composables.card.GridProductCard
 import com.m.vodovoz.design_system.model.ProductUi
-import com.m.vodovoz.design_system.model.SectionUi
 import com.m.vodovoz.common.model.ButtonAction
 import com.m.vodovoz.design_system.model.SectionContentUi
 
 
 @Composable
-fun HomeProductsRow(
+fun ProductSectionRow(
     modifier: Modifier = Modifier,
     sectionProducts: SectionContentUi<ProductUi>,
     onShowAllClick: (ButtonAction) -> Unit,

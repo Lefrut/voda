@@ -16,6 +16,7 @@ import com.m.vodovoz.domain.general.model.product.ProductsSectionUi
 import com.m.vodovoz.domain.general.model.product.toUi
 import com.m.vodovoz.domain.general.respository.UserPreferencesRepository
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
+import com.m.vodovoz.feature.cart.CartFlowViewModel.CartUiState
 import com.m.vodovoz.feature.home.model.CategoryUi
 import com.m.vodovoz.feature.product_comments.model.SortUi
 import com.m.vodovoz.feature.product_comments.model.toDomain
@@ -119,11 +120,12 @@ class FavoriteFlowViewModel @Inject constructor(
                     pagingData.map { productModel -> productModel.toUi() }
                 }.collectPagingData()
             }
-
         }.onFailure { t ->
             val uiState = when (t) {
                 is EmptyResultException -> t.placeholder?.run {
-                    FavoriteUiState.Empty(placeholder = toUi())
+                    FavoriteUiState.Empty(
+                        placeholder = toUi(),
+                    )
                 } ?: FavoriteUiState.Error
 
                 else -> FavoriteUiState.Error
@@ -131,12 +133,15 @@ class FavoriteFlowViewModel @Inject constructor(
 
             updateState { s ->
                 val productsSection = s.productsSection
-                val title =
-                    (uiState as? FavoriteUiState.Empty)?.placeholder?.title ?: productsSection.title
+
+                val placeholder = (uiState as? FavoriteUiState.Empty)?.placeholder
+
+                val title = placeholder?.title ?: productsSection.title
                 s.copy(
                     productsSection = productsSection.copy(title = title),
                     uiState = uiState,
-                    showRefreshIndicator = false
+                    showRefreshIndicator = false,
+                    items = placeholder?.productsSection?.items ?: emptyList()
                 )
             }
         }
@@ -256,10 +261,22 @@ class FavoriteFlowViewModel @Inject constructor(
         val lastSavedLikes: Map<Long, Boolean> = emptyMap(),
     ) : PagingState<ProductUi, FavoriteState>() {
 
+        //todo - mb refactor
         override fun copyPagingState(
             items: List<ProductUi>,
             loadStates: CombinedLoadStates,
-        ): FavoriteState = copy(items = items, loadStates = loadStates)
+        ): FavoriteState = copy(
+            items = items,
+            loadStates = loadStates,
+            uiState = if (uiState is FavoriteUiState.Empty) with(uiState) {
+                copy(
+                    placeholder = placeholder.copy(
+                        productsSection = placeholder.productsSection?.copy(items = items)
+                    )
+                )
+            } else uiState
+
+        )
     }
 
     @Stable

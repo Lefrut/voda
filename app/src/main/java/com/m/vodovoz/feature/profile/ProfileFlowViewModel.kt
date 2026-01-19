@@ -7,6 +7,7 @@ import com.m.vodovoz.R
 import com.m.vodovoz.common.account.AccountManager
 import com.m.vodovoz.common.model.VodovozAction
 import com.m.vodovoz.common.resources.ResourcesProvider
+import com.m.vodovoz.core.analytics.Analytics
 import com.m.vodovoz.design_system.model.AboutAdvertisingUi
 import com.m.vodovoz.design_system.model.BannerUi
 import com.m.vodovoz.design_system.model.VodovozPlaceholderUi
@@ -14,6 +15,7 @@ import com.m.vodovoz.design_system.model.mapToUi
 import com.m.vodovoz.design_system.model.toUi
 import com.m.vodovoz.domain.general.model.exceptions.UserNotLoginException
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
+import com.m.vodovoz.feature.profile.analytics.reportProfileEvent
 import com.m.vodovoz.feature.profile.model.BonusesPopupWindowUi
 import com.m.vodovoz.feature.profile.model.ProfileCardUi
 import com.m.vodovoz.feature.profile.model.ProfileChatItemUi
@@ -50,7 +52,7 @@ class ProfileFlowViewModel @Inject constructor(
     val pendingDeeplinkFlow = accountManager.pendingDeeplinkFlow.onEach { deeplink ->
         val orderId = deeplink.toLongOrNull()
         val event = when {
-            deeplink == AccountManager.ORDERS_DEEPLINK -> ProfileEvents.GoToOrders
+            deeplink == AccountManager.ORDERS_DEEPLINK_ID -> ProfileEvents.GoToOrders
             orderId != null -> ProfileEvents.GoToOrderDetails(orderId)
             else -> ProfileEvents.DoNothing
         }
@@ -118,9 +120,11 @@ class ProfileFlowViewModel @Inject constructor(
 
     fun navigateToUserData() = viewModelScope.launch {
         sendEvent(ProfileEvents.GoToUserData)
+        Analytics.reportProfileEvent("переход в редактирование")
     }
 
     fun activateMenuItem(menuItem: ProfileMenuItemUi) = viewModelScope.launch {
+
         val popupWindow = menuItem.popupWindow
 
         if (popupWindow != null) {
@@ -133,6 +137,7 @@ class ProfileFlowViewModel @Inject constructor(
         } else {
             sendEvent(ProfileEvents.GoByMenuItemId(menuItem.id))
         }
+        Analytics.reportProfileEvent(menuItem.text)
     }
 
     fun showAdvertisingBottomSheet(advertising: AboutAdvertisingUi) = viewModelScope.launch {
@@ -173,7 +178,7 @@ class ProfileFlowViewModel @Inject constructor(
     }
 
     fun navigateByChatItem(chatItem: ProfileChatItemUi) = viewModelScope.launch {
-        if (chatItem.id == "") closeSupportingBottomSheet()
+
         sendEvent(ProfileEvents.GoByChatItemId(chatItem.id, chatItem.navigationData))
     }
 
@@ -218,10 +223,15 @@ class ProfileFlowViewModel @Inject constructor(
                 sendEvent(ProfileEvents.GoToWaterApp)
             }
 
+            "anketa" -> {
+                sendEvent(ProfileEvents.GoToQuestionnaires)
+            }
+
             "" -> {
                 showTextBottomSheet(profileCard.popupWindow ?: return@launch)
             }
         }
+        Analytics.reportProfileEvent(profileCard.title)
     }
 
     fun hideBonusesBottomSheet() = viewModelScope.launch {
@@ -299,6 +309,7 @@ class ProfileFlowViewModel @Inject constructor(
         data object GoToWaitFeedbackProducts : ProfileEvents()
         data object GoToOrders : ProfileEvents()
         data object DoNothing : ProfileEvents()
+        data object GoToQuestionnaires : ProfileEvents()
 
         data class GoByMenuItemId(val itemId: String) : ProfileEvents()
         data class ActivateVodovozAction(val action: VodovozAction) : ProfileEvents()

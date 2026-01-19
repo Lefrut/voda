@@ -386,14 +386,6 @@ fun NavController.navigateToQuestionnaires() {
     )
 }
 
-fun NavController.navigateToPastPurchases() {
-    navigate(
-        R.id.pastPurchasesFragment, Bundle.EMPTY, navOptions {
-            slideAnim()
-        }
-    )
-}
-
 fun NavController.navigateToOrdersHistory() {
     navigate(R.id.allOrdersFragment, Bundle.EMPTY, navOptions {
         slideAnim()
@@ -586,6 +578,16 @@ fun NavController.navigateToBrandProductList(brandId: Long) {
                 brandId
             )
         )
+    )
+}
+
+fun NavController.navigateToPastPurchases() {
+    navigate(
+        R.id.productCatalogFragment,
+        bundleOf(
+            "dataSource" to ProductCatalogFragment.DataSource.PastPurchases
+        ),
+        navOptions { slideAnim() }
     )
 }
 

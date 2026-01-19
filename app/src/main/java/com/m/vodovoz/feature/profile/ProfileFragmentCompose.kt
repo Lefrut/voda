@@ -3,6 +3,7 @@ package com.m.vodovoz.feature.profile
 import android.os.Bundle
 import android.view.View
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -11,6 +12,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.text.style.TextOverflow
@@ -31,6 +33,7 @@ import com.m.vodovoz.core.navigation.navigateToLogin
 import com.m.vodovoz.core.navigation.navigateToLoginByEmail
 import com.m.vodovoz.core.navigation.navigateToOrderDetails
 import com.m.vodovoz.core.navigation.navigateToOrdersHistory
+import com.m.vodovoz.core.navigation.navigateToQuestionnaires
 import com.m.vodovoz.core.navigation.navigateToUserData
 import com.m.vodovoz.core.navigation.navigateToWaitFeedbackProducts
 import com.m.vodovoz.core.navigation.navigateToWaterApp
@@ -147,78 +150,86 @@ class ProfileFragment : Fragment() {
         repeatOnLifecycle(Lifecycle.State.STARTED) {
             viewModel.events
                 .collect { events ->
-                    when (events) {
-                        ProfileFlowViewModel.ProfileEvents.GoToLogin -> {
-                            findNavController().navigateToLogin()
-                        }
+                    with(findNavController()) {
+                        when (events) {
+                            ProfileFlowViewModel.ProfileEvents.GoToLogin -> {
+                                navigateToLogin()
+                            }
 
-                        ProfileFlowViewModel.ProfileEvents.GoToUserData -> {
-                            findNavController().navigateToUserData()
-                        }
+                            ProfileFlowViewModel.ProfileEvents.GoToUserData -> {
+                                navigateToUserData()
+                            }
 
-                        is ProfileFlowViewModel.ProfileEvents.GoByMenuItemId -> {
-                            ProfileMainNavigator.navigate(
-                                id = events.itemId,
-                                navController = findNavController(),
-                            )
-                        }
-
-                        is ProfileFlowViewModel.ProfileEvents.ActivateVodovozAction -> {
-                            events.action.activate(
-                                navController = findNavController(),
-                                context = requireActivity(),
-                                cookie = cookieManager.fetchCookieSessionId() ?: "",
-                                tabManager = tabManager
-                            )
-                        }
-
-                        ProfileFlowViewModel.ProfileEvents.GoToLoginByEmail -> {
-                            findNavController().navigateToLoginByEmail()
-                        }
-
-                        is ProfileFlowViewModel.ProfileEvents.Copy -> {
-                            viewLifecycleOwner.lifecycleScope.launch {
-                                requireContext().copyText(events.value)
-                                mainFragment?.snackBarHostState?.showSnackbar(
-                                    VodovozSnackBarVisuals.create(events.snackbarMessage)
+                            is ProfileFlowViewModel.ProfileEvents.GoByMenuItemId -> {
+                                ProfileMainNavigator.navigate(
+                                    id = events.itemId,
+                                    navController = this,
                                 )
                             }
 
+                            is ProfileFlowViewModel.ProfileEvents.ActivateVodovozAction -> {
+                                events.action.activate(
+                                    navController = this,
+                                    context = requireActivity(),
+                                    cookie = cookieManager.fetchCookieSessionId() ?: "",
+                                    tabManager = tabManager
+                                )
+                            }
+
+                            ProfileFlowViewModel.ProfileEvents.GoToLoginByEmail -> {
+                                navigateToLoginByEmail()
+                            }
+
+                            is ProfileFlowViewModel.ProfileEvents.Copy -> {
+                                viewLifecycleOwner.lifecycleScope.launch {
+                                    requireContext().copyText(events.value)
+                                    mainFragment?.snackBarHostState?.showSnackbar(
+                                        VodovozSnackBarVisuals.create(events.snackbarMessage)
+                                    )
+                                }
+
+                            }
+
+                            is ProfileFlowViewModel.ProfileEvents.GoByChatItemId -> {
+                                viewModel.closeSupportingBottomSheet()
+                                ProfileChatsNavigator.navigate(
+                                    chatId = events.chatId,
+                                    data = events.data,
+                                    navController = this,
+                                    context = requireContext()
+                                )
+                            }
+
+                            ProfileFlowViewModel.ProfileEvents.GoToWaterApp -> {
+                                navigateToWaterApp()
+                            }
+
+                            ProfileFlowViewModel.ProfileEvents.GoToWaitFeedbackProducts -> {
+                                navigateToWaitFeedbackProducts()
+                            }
+
+                            is ProfileFlowViewModel.ProfileEvents.GoToWebView -> {
+                                navigateToWebView(events.url, events.title)
+                            }
+
+                            is ProfileFlowViewModel.ProfileEvents.OpenUrl -> {
+                                requireContext().openUrl(events.url)
+                            }
+
+                            ProfileFlowViewModel.ProfileEvents.DoNothing -> {}
+                            is ProfileFlowViewModel.ProfileEvents.GoToOrderDetails -> {
+                                navigateToOrderDetails(events.orderId)
+                            }
+
+                            ProfileFlowViewModel.ProfileEvents.GoToOrders -> {
+                                navigateToOrdersHistory()
+                            }
+
+                            ProfileFlowViewModel.ProfileEvents.GoToQuestionnaires -> {
+                                navigateToQuestionnaires()
+                            }
                         }
 
-                        is ProfileFlowViewModel.ProfileEvents.GoByChatItemId -> {
-                            ProfileChatsNavigator.navigate(
-                                chatId = events.chatId,
-                                data = events.data,
-                                navController = findNavController(),
-                                context = requireContext()
-                            )
-                        }
-
-                        ProfileFlowViewModel.ProfileEvents.GoToWaterApp -> {
-                            findNavController().navigateToWaterApp()
-                        }
-
-                        ProfileFlowViewModel.ProfileEvents.GoToWaitFeedbackProducts -> {
-                            findNavController().navigateToWaitFeedbackProducts()
-                        }
-
-                        is ProfileFlowViewModel.ProfileEvents.GoToWebView -> {
-                            findNavController().navigateToWebView(events.url, events.title)
-                        }
-
-                        is ProfileFlowViewModel.ProfileEvents.OpenUrl -> {
-                            requireContext().openUrl(events.url)
-                        }
-
-                        ProfileFlowViewModel.ProfileEvents.DoNothing -> {}
-                        is ProfileFlowViewModel.ProfileEvents.GoToOrderDetails -> {
-                            findNavController().navigateToOrderDetails(events.orderId)
-                        }
-
-                        ProfileFlowViewModel.ProfileEvents.GoToOrders -> {
-                            findNavController().navigateToOrdersHistory()
-                        }
                     }
                 }
         }

@@ -17,12 +17,12 @@ class AccountManager @Inject constructor(
     private val dataStorePrefs: DataStorePrefs,
 ) {
 
-    private val accountIdListener = MutableStateFlow<Long?>(null)
-    fun observeAccountId() = accountIdListener.asStateFlow()
+    private val _accountIdListener = MutableStateFlow<Long?>(null)
+    fun observeAccountId() = _accountIdListener.asStateFlow()
 
     fun fetchAccountId(): Long? {
-        val id = accountIdListener.value ?: fetchUserId()
-        accountIdListener.value = id
+        val id = _accountIdListener.value ?: fetchUserId()
+        _accountIdListener.value = id
         return id
     }
 
@@ -30,12 +30,12 @@ class AccountManager @Inject constructor(
 
     fun updateUserId(userId: Long) {
         dataStorePrefs.putInt(USER_ID, userId.toInt())
-        accountIdListener.value = userId
+        _accountIdListener.value = userId
     }
 
     fun removeUserId() {
         dataStorePrefs.remove(USER_ID)
-        accountIdListener.value = null
+        _accountIdListener.value = null
     }
 
     fun fetchUserToken() =
@@ -73,17 +73,18 @@ class AccountManager @Inject constructor(
     fun isAlreadyLogin() = fetchUserId() != null
 
     @Keep
-    fun reportEvent(text: String, eventParam: String? = null) {
+    fun reportEvent(text: String, eventParam: String? = null) = runCatching {
         if (!BuildConfig.DEBUG) {
-            val eventParameters = "{\"UserID\":\"${accountIdListener.value ?: "0"}\"" +
+            val eventParameters = "{\"UserID\":\"${_accountIdListener.value ?: "0"}\"" +
                     if (eventParam != null) ",$eventParam}" else "}"
 
             AppMetrica.reportEvent(text, eventParameters)
         }
+
     }
 
     @Keep
-    fun reportError(text: String, throwable: Throwable? = null) {
+    fun reportError(text: String, throwable: Throwable? = null) = runCatching {
         if (!BuildConfig.DEBUG) {
             AppMetrica.reportError(text, throwable)
         }
@@ -112,7 +113,7 @@ class AccountManager @Inject constructor(
         private const val USE_BIO = "USE_BIO"
 
         private const val PENDING_DEEPLINK_KEY = "pending_deeplink"
-        const val ORDERS_DEEPLINK = "orders"
+        const val ORDERS_DEEPLINK_ID = "orders"
     }
 
 }

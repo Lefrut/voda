@@ -1,5 +1,6 @@
 package com.m.vodovoz.feature.product_details.composables
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,6 +12,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.core.graphics.component1
+import com.m.vodovoz.design_system.composables.grid.ProductSectionGrid
 import com.m.vodovoz.design_system.model.BrandCategoryItemUi
 import com.m.vodovoz.design_system.model.CommentUi
 import com.m.vodovoz.design_system.model.ProductDetailsButtonsUi
@@ -18,6 +21,7 @@ import com.m.vodovoz.design_system.model.ProductDetailsUi
 import com.m.vodovoz.design_system.model.ProductMediaUi
 import com.m.vodovoz.design_system.model.ProductUi
 import com.m.vodovoz.design_system.model.SectionContentUi
+import com.m.vodovoz.feature.home.composables.ProductSectionRow
 import com.m.vodovoz.feature.product_details.model.ProductBonusesUi
 
 @Composable
@@ -57,6 +61,7 @@ fun ProductDetailsBody(
     onIncrementProductToCart: (ProductUi) -> Unit,
     onDecrementProductToCart: (ProductUi) -> Unit,
     onWriteCommentClick: () -> Unit,
+    onShowAllViewedProducts: () -> Unit
 ) {
     Column(
         modifier = modifier.fillMaxSize()
@@ -159,16 +164,31 @@ fun ProductDetailsBody(
 
 
         if(moreProductSections.isNotEmpty()){
-            moreProductSections.forEach { section ->
-                ProductDetailsAccessoryProducts(
-                    modifier = Modifier.padding(top = 32.dp),
-                    productSection = section,
-                    onProductLike = onProductLikeClick,
-                    onProductClick = onProductClick,
-                    onIncrementProductToCart = onIncrementProductToCart,
-                    onDecrementProductToCart = onDecrementProductToCart,
-                    onProductAnalogsClick = onProductAnalogsClick
-                )
+            moreProductSections.forEachIndexed { index, section ->
+                Box(modifier = Modifier.padding(top = 32.dp)) {
+                    if(index > 1){
+                        ProductSectionRow(
+                            sectionProducts = section,
+                            onProductLike = onProductLikeClick,
+                            onProductClick = onProductClick,
+                            onIncrementToCart = onIncrementProductToCart,
+                            onAnalogsClick = onProductAnalogsClick,
+                            onDecrementToCart = onDecrementProductToCart,
+                            onShowAllClick = { onShowAllViewedProducts() }
+                        )
+                    }
+                    else{
+                        ProductSectionGrid(
+                            productSection = section,
+                            onProductLike = onProductLikeClick,
+                            onProductClick = onProductClick,
+                            onIncrementProductToCart = onIncrementProductToCart,
+                            onDecrementProductToCart = onDecrementProductToCart,
+                            onProductAnalogsClick = onProductAnalogsClick
+                        )
+                    }
+                }
+
             }
         }
 

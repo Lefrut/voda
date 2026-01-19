@@ -25,6 +25,7 @@ data class VodovozPlaceholderDTO(
     @Json(name = "MESSAGE") val message: String?,
     @Json(name = "IMAGE") val imageUrl: String?,
     @Json(name = "KNOPKA") val button: VodovozButtonDTO?,
+    @Json(name = "DELTOVAR") val productsSection: TOVARY_DTO?,
 )
 
 @Keep

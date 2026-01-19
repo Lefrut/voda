@@ -114,20 +114,23 @@ class CartFlowViewModel @Inject constructor(
 
         }.onFailure { t ->
 
-            val uiState = when (t) {
+            val (uiState, state) = when (t) {
                 is EmptyResultException -> {
                     cartManager.syncCart(emptyMap())
+                    val placeholder = t.placeholder?.toUi() ?: VodovozPlaceholderUi.Empty
+                    val items2 = placeholder.productsSection?.items ?: emptyList()
+
                     CartUiState.Empty(
-                        placeholder = t.placeholder?.toUi() ?: VodovozPlaceholderUi.Empty
-                    )
+                        placeholder = placeholder
+                    ) to stateSnapshot.copy(items2 = items2)
                 }
 
                 else -> {
-                    CartUiState.Error
+                    CartUiState.Error to stateSnapshot
                 }
             }
             updateState { s ->
-                s.copy(uiState = uiState)
+                state.copy(uiState = uiState)
             }
         }
         updateBottomCartJob.join()
@@ -437,9 +440,9 @@ class CartFlowViewModel @Inject constructor(
     data class CartState(
         val title: String = "",
         val countText: String = "",
-        val uiState: CartUiState = CartUiState.Loading,
         override val items1: List<CartItemUi> = emptyList(),
         override val items2: List<ProductUi> = emptyList(),
+        val uiState: CartUiState = CartUiState.Loading,
         val present: CartPresentUi? = null,
         val bottlesButton: CartButtonUi? = null,
         val promotionalCodeButton: CartPromoButtonUi? = null,
@@ -461,6 +464,7 @@ class CartFlowViewModel @Inject constructor(
     ) : PagingState2<CartItemUi, ProductUi, CartState>() {
 
 
+        //todo - mb refactor
         override fun copyPagingState(
             items1: List<CartItemUi>,
             items2: List<ProductUi>,
@@ -471,7 +475,16 @@ class CartFlowViewModel @Inject constructor(
                 items1 = items1,
                 items2 = items2,
                 loadStates1 = loadStates1,
-                loadStates2 = loadStates2
+                loadStates2 = loadStates2,
+                uiState = if (uiState is CartUiState.Empty) with(uiState) {
+                    uiState.copy(
+                        placeholder = placeholder.copy(
+                            productsSection = placeholder.productsSection?.copy(
+                                items = items2
+                            )
+                        )
+                    )
+                } else uiState
             )
         }
 
@@ -481,7 +494,10 @@ class CartFlowViewModel @Inject constructor(
     sealed interface CartUiState {
         data object Loading : CartUiState
         data object Cart : CartUiState
-        data class Empty(val placeholder: VodovozPlaceholderUi) : CartUiState
+        data class Empty(
+            val placeholder: VodovozPlaceholderUi
+        ) : CartUiState
+
         data object Error : CartUiState
 
         val placeholderOrNull: VodovozPlaceholderUi?

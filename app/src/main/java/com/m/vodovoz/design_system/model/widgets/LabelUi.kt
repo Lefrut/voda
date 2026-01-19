@@ -3,6 +3,7 @@ package com.m.vodovoz.design_system.model.widgets
 import android.os.Parcelable
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
+import com.m.vodovoz.design_system.utils.toHexString
 import com.m.vodovoz.domain.general.model.widgets.LabelModel
 import com.m.vodovoz.ui.graphics.fromHexOrUnspecified
 import kotlinx.parcelize.IgnoredOnParcel
@@ -32,6 +33,20 @@ data class LabelUi(
             backgroundColorValue = backgroundColor.value
         )
     }
+}
+
+fun List<LabelUi>.mapToDomain(): List<LabelModel> {
+    return map { it.mapToDomain() }
+}
+
+
+fun LabelUi.mapToDomain(): LabelModel {
+    return LabelModel(
+        name = name,
+        textColor = Color(textColorValue).toHexString(),
+        backgroundColor = Color(backgroundColorValue).toHexString(),
+        backgroundAlpha = Color(backgroundColorValue).alpha
+    )
 }
 
 fun List<LabelModel>.toUi(): List<LabelUi> {

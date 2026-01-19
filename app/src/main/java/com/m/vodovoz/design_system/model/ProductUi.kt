@@ -20,10 +20,12 @@ import com.m.vodovoz.design_system.composables.button.QuantityButtonSmall
 import com.m.vodovoz.design_system.composables.button.VodovozButtonDefaults
 import com.m.vodovoz.design_system.composables.button.VodovozButtonSmall
 import com.m.vodovoz.design_system.model.widgets.LabelUi
+import com.m.vodovoz.design_system.model.widgets.mapToDomain
 import com.m.vodovoz.design_system.model.widgets.toUi
 import com.m.vodovoz.domain.general.model.product.ButtonModel
 import com.m.vodovoz.domain.general.model.product.CategoryWithProductsModel
 import com.m.vodovoz.domain.general.model.product.PopularCategoryModel
+import com.m.vodovoz.domain.general.model.product.PriceModel
 import com.m.vodovoz.domain.general.model.product.ProductModel
 import com.m.vodovoz.domain.general.model.product.SectionModel
 import com.m.vodovoz.feature.home.model.PopularCategoryUi
@@ -430,6 +432,33 @@ fun ProductUi.Button(
     }
 }
 
+fun List<ProductUi>.mapToDomain(): List<ProductModel> {
+    return map { it.toDomain() }
+}
+
+fun ProductUi.toDomain(): ProductModel {
+    val firstPrice = PriceModel(
+        price, oldPrice, 0, 1
+    )
+    return ProductModel(
+        id = id,
+        isFavorite = isFavorite,
+        firstPrice = firstPrice,
+        name = name,
+        cartQuantity = cartQuantity,
+        picture = image,
+        labels = labels.mapToDomain(),
+        quantity = if (isAvailable) Int.MAX_VALUE else 0,
+        pricePerUnit = pricePerUnit,
+        forAdults = forAdults?.toDomain(),
+        analogButton = button?.toDomain(),
+        prices = listOf(firstPrice),
+        coefficient = 1f,
+        unitOfMeasurement = unitOfMeasurement,
+        rating = rating,
+        deposit = 0
+    )
+}
 
 fun List<ProductModel>.mapToUi(): List<ProductUi> {
     return mapNotNull { it.toUi() }

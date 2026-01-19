@@ -1,5 +1,7 @@
 package com.m.vodovoz.domain.general.model.exceptions
 
+import com.m.vodovoz.domain.general.model.product.ProductModel
+import com.m.vodovoz.domain.general.model.product.SectionModel
 import com.m.vodovoz.domain.general.model.promotion.ColorfulButtonModel
 
 
@@ -59,6 +61,7 @@ data class VodovozPlaceholderModel(
     val descriptionHtml: String,
     val imageUrl: String,
     val button: ColorfulButtonModel? = null,
+    val productsSection: SectionModel<ProductModel>? = null
 ) {
     companion object {
         val Empty = VodovozPlaceholderModel(

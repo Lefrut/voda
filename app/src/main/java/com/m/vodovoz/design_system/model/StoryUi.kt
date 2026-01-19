@@ -5,6 +5,7 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.graphics.Color
 import com.m.vodovoz.common.model.VodovozAction
+import com.m.vodovoz.design_system.utils.toHexString
 import com.m.vodovoz.domain.general.model.promotion.ActionWithButtonModel
 import com.m.vodovoz.domain.general.model.promotion.ColorfulButtonModel
 import com.m.vodovoz.domain.general.model.promotion.StoryModel
@@ -92,6 +93,17 @@ fun ActionWithButtonModel.toUi(): ActionWithButtonUi {
         action = action,
         colorfulButton = colorfulButton.toUi(),
         image = image
+    )
+}
+
+fun ColorfulButtonUi.toDomain(): ColorfulButtonModel {
+    return ColorfulButtonModel(
+        name = name,
+        backgroundColor = Color(backgroundColorValue).toHexString(),
+        textColor = Color(textColorValue).toHexString(),
+        id = id,
+        browser = browser,
+        url = url
     )
 }
 

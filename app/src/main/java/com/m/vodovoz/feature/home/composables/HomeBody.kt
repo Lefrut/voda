@@ -26,7 +26,6 @@ import com.m.vodovoz.feature.home.model.HomeOrderUi
 import com.m.vodovoz.feature.home.model.MenuItemUi
 import com.m.vodovoz.feature.home.model.PopularCategoryUi
 
-@Suppress("NonSkippableComposable")
 @Composable
 fun HomeBody(
     modifier: Modifier = Modifier,
@@ -100,7 +99,7 @@ fun HomeBody(
                         )
                     },
                     productsSection = {
-                        HomeProductsRow(
+                        ProductSectionRow(
                             modifier = Modifier.padding(top = 32.dp),
                             sectionProducts = value,
                             onProductClick = onProductCardClick,

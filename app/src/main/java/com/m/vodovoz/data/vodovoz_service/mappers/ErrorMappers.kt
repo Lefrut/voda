@@ -16,7 +16,8 @@ fun VodovozPlaceholderDTO.toDomain(): VodovozPlaceholderModel {
         descriptionHtml = message ?: "",
         imageUrl = imageUrl?.toVodovozUrl() ?: "",
         title = title ?: "",
-        button = button?.toDomain()
+        button = button?.toDomain(),
+        productsSection = productsSection?.toDomain()
     )
 }
 

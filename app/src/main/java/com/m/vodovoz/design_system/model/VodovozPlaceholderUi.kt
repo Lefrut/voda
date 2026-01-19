@@ -10,14 +10,20 @@ data class VodovozPlaceholderUi(
     val descriptionHtml: String,
     val imageUrl: String,
     val button: ColorfulButtonUi? = null,
-){
-    companion object{
-        val Empty = VodovozPlaceholderUi("", "","","")
+    val productsSection: VodovozSectionUi<ProductUi>? = null
+) {
+    companion object {
+        val Empty = VodovozPlaceholderUi("", "", "", "", productsSection = VodovozSectionUi.empty())
     }
 }
 
-fun VodovozPlaceholderModel.toUi(): VodovozPlaceholderUi{
+fun VodovozPlaceholderModel.toUi(): VodovozPlaceholderUi {
     return VodovozPlaceholderUi(
-        title, headerHtml, descriptionHtml, imageUrl, button?.toUi()
+        title = title,
+        headerHtml = headerHtml,
+        descriptionHtml = descriptionHtml,
+        imageUrl = imageUrl,
+        button = button?.toUi(),
+        productsSection = productsSection?.toVodovozSectionUi()
     )
 }
