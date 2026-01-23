@@ -128,7 +128,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
     private val vodovozService: VodovozService,
     private val accountManager: AccountManager,
     private val cookieManager: CookieManager,
-    private val moshi: Moshi,
+    private val moshi: Moshi
 ) : VodovozServiceRepository {
 
     private data object MessageFailureStrategy : RequestFailureStrategy {
@@ -2034,8 +2034,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
                 vodovozService.getComments(productId, 1)
             },
             mapper = { response ->
-                response.data?.toDomain()
-                    ?: throw IllegalArgumentException("ProductCommentsDTO can't be null")
+                response.data?.toDomain() ?: throw IllegalArgumentException("ProductCommentsDTO can't be null")
             }
         )
     }
@@ -2056,7 +2055,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
                 )
             },
             mapper = { dto ->
-                dto.COMMENTS?.mapNotNull { it?.toDomain() } ?: emptyList()
+                dto.COMMENTS?.map { it.toDomain() } ?: emptyList()
             }
         )
     }

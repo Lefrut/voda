@@ -27,6 +27,8 @@ import com.m.vodovoz.domain.general.model.product.ProductDetailsModel
 import com.m.vodovoz.domain.general.model.product.ProductDetailsTabModel
 import com.m.vodovoz.domain.general.model.product.ProductVideoModel
 import com.m.vodovoz.domain.general.model.product.PromoProductModel
+import com.m.vodovoz.feature.product_comments.model.CommentMediaUi
+import com.m.vodovoz.feature.product_comments.model.mapToUi
 import com.m.vodovoz.ui.graphics.fromHexOrUnspecified
 import kotlinx.parcelize.Parcelize
 
@@ -473,7 +475,7 @@ fun BrandCategoryItemDataModel.toUi(): BrandCategoryItemDataUi {
 data class CommentUi(
     val userName: String,
     val userPhoto: String,
-    val images: List<String>,
+    val media: List<CommentMediaUi>,
     val text: String,
     val dateText: String,
     val rating: Int,
@@ -485,6 +487,14 @@ fun List<CommentModel>.mapToUi(): List<CommentUi> {
 }
 
 fun CommentModel.toUi(): CommentUi {
-    return CommentUi(userName, userPhoto, images, text, dateText, rating, purchased)
+    return CommentUi(
+        userName,
+        userPhoto,
+        media.mapToUi(),
+        text,
+        dateText,
+        rating,
+        purchased,
+    )
 }
 

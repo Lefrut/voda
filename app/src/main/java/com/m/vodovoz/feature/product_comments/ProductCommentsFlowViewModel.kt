@@ -12,6 +12,7 @@ import com.m.vodovoz.common.resources.ResourcesProvider
 import com.m.vodovoz.design_system.model.CommentUi
 import com.m.vodovoz.design_system.model.toUi
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
+import com.m.vodovoz.feature.product_comments.model.CommentMediaUi
 import com.m.vodovoz.feature.product_comments.model.ProductCommentsInfoUi
 import com.m.vodovoz.feature.product_comments.model.SortUi
 import com.m.vodovoz.feature.product_comments.model.toDomain
@@ -77,8 +78,7 @@ class ProductCommentsFlowViewModel @Inject constructor(
                 }
                 val currentSort = uiInfo.sorting.firstOrNull() ?: SortUi.Empty
                 s.copy(
-                    productCommentsInfo = uiInfo.copy(
-                    ),
+                    productCommentsInfo = uiInfo,
                     currentSort = uiInfo.sorting.firstOrNull() ?: SortUi.Empty,
                     pagedComments = vodovozServiceRepository.getProductCommentsPaged(
                         productId, currentSort.toDomain()
@@ -125,15 +125,15 @@ class ProductCommentsFlowViewModel @Inject constructor(
         sendEvent(ProductCommentsEvents.GoBack)
     }
 
-    fun setFullScreenImage(image: String) = viewModelScope.launch {
+    fun setFullScreenMedia(media: CommentMediaUi) = viewModelScope.launch {
         updateState { s ->
-            s.copy(fullScreenImage = image)
+            s.copy(commentMedia = media)
         }
     }
 
-    fun resetFullScreenImage() = viewModelScope.launch {
+    fun resetFullScreenMedia() = viewModelScope.launch {
         updateState { s ->
-            s.copy(fullScreenImage = null)
+            s.copy(commentMedia = null)
         }
     }
 
@@ -153,6 +153,7 @@ class ProductCommentsFlowViewModel @Inject constructor(
         val pagedComments: Flow<PagingData<CommentUi>> = emptyFlow(),
         val currentSort: SortUi = SortUi.Empty,
         val showWriteComment: Boolean = false,
-        val fullScreenImage: String? = null,
+        val commentMedia: CommentMediaUi? = null,
     ) : State
+
 }

@@ -38,36 +38,33 @@ import coil3.request.crossfade
 import com.m.vodovoz.R
 import com.m.vodovoz.design_system.composables.zoom.ZoomableContainer
 import com.m.vodovoz.design_system.composables.zoom.rememberZoomableState
+import com.m.vodovoz.feature.product_comments.model.CommentMediaUi
 
 @OptIn(ExperimentalSharedTransitionApi::class)
-@Suppress("NonSkippableComposable")
 @Composable
 fun VerticalImagePager(
     modifier: Modifier = Modifier,
     initialPage: Int,
-    images: List<String>,
+    images: List<CommentMediaUi.Image>,
     sharedTransitionScope: SharedTransitionScope,
     onCloseClick: () -> Unit,
 ) {
     val pagerState = rememberPagerState(initialPage) { images.size }
 
-
     VerticalPager(
         modifier = modifier,
         state = pagerState,
         beyondViewportPageCount = 1,
-        key = { page -> images.getOrNull(page) ?: page }
+        key = { page -> images.getOrNull(page)?.url ?: page }
     ) { page ->
 
-        val image = images.getOrElse(page) { "" }
+        val image = images.getOrElse(page) { CommentMediaUi.Image("") }.url
 
         val asyncImagePainter = rememberAsyncImagePainter(
             model = ImageRequest.Builder(LocalContext.current).data(image)
                 .memoryCacheKey(image)
                 .placeholderMemoryCacheKey(image)
-                .crossfade(true)
                 .build(),
-            contentScale = ContentScale.Crop
         )
         val zoomableState =
             rememberZoomableState(
@@ -75,6 +72,7 @@ fun VerticalImagePager(
                 maxScale = 3f,
                 animationSpec = tween(1000, easing = LinearEasing),
             )
+
 
         Box(
             modifier = Modifier
@@ -86,12 +84,12 @@ fun VerticalImagePager(
                 asyncImagePainter.intrinsicSize.height > asyncImagePainter.intrinsicSize.width
 
             sharedTransitionScope.apply {
-
                 ZoomableContainer(
                     modifier = Modifier.fillMaxSize(),
                     state = zoomableState,
-                    boundClip = true
+                    boundClip = false
                 ) {
+
                     Image(
                         modifier = Modifier
                             .then(
@@ -113,15 +111,10 @@ fun VerticalImagePager(
                                 visible = true,
                                 renderInOverlayDuringTransition = false
                             )
-                            .sharedElementWithCallerManagedVisibility(
-                                sharedContentState = rememberSharedContentState(image + image),
-                                visible = true,
-                                renderInOverlayDuringTransition = false
-                            )
                             .clip(MaterialTheme.shapes.small),
                         painter = asyncImagePainter,
                         contentDescription = null,
-                        contentScale = if (isVerticalImage) ContentScale.Crop else ContentScale.Fit
+                        alignment = Alignment.Center
                     )
                 }
             }

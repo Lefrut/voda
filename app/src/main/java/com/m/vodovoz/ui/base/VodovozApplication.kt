@@ -11,6 +11,7 @@ import coil3.SingletonImageLoader
 import coil3.request.CachePolicy
 import coil3.request.crossfade
 import coil3.svg.SvgDecoder
+import coil3.video.VideoFrameDecoder
 import com.m.vodovoz.BuildConfig
 import com.m.vodovoz.common.account.AccountManager
 import com.m.vodovoz.common.notification.NotificationChannels
@@ -73,6 +74,7 @@ class VodovozApplication : Application(), Configuration.Provider, SingletonImage
         return ImageLoader.Builder(context)
             .components {
                 add(SvgDecoder.Factory())
+                add(VideoFrameDecoder.Factory())
             }
             .memoryCachePolicy(CachePolicy.ENABLED)
             .diskCachePolicy(CachePolicy.DISABLED)

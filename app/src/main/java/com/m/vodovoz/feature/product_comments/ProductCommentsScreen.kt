@@ -3,10 +3,12 @@ package com.m.vodovoz.feature.product_comments
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -29,6 +31,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -42,8 +45,11 @@ import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import coil3.compose.AsyncImage
+import coil3.imageLoader
 import coil3.request.ImageRequest
 import coil3.request.crossfade
+import coil3.size.SizeResolver
+import coil3.video.videoFrameMillis
 import com.m.vodovoz.R
 import com.m.vodovoz.design_system.composables.button.VodovozButton
 import com.m.vodovoz.design_system.composables.card.CommentCard
@@ -52,6 +58,8 @@ import com.m.vodovoz.design_system.composables.floating.BottomFloatingContainer
 import com.m.vodovoz.design_system.composables.placeholders.LoadingPlaceholder
 import com.m.vodovoz.design_system.composables.tab_row.VodovozScrollableTabRow
 import com.m.vodovoz.design_system.composables.top_bar.VodovozTopBar
+import com.m.vodovoz.feature.product_comments.model.CommentImage
+import com.m.vodovoz.feature.product_comments.model.CommentMediaUi
 import com.m.vodovoz.feature.product_comments.model.ProductCommentsInfoUi
 import com.m.vodovoz.util.extensions.indexOfOrNull
 import java.math.RoundingMode
@@ -68,6 +76,8 @@ fun ProductCommentsScreen(
     val aboutComments = viewState.productCommentsInfo
     val lazyPagingComments = viewState.pagedComments.collectAsLazyPagingItems()
     val loadState = lazyPagingComments.loadState
+    val context = LocalContext.current
+    val loader = context.imageLoader
 
     Column(
         modifier = Modifier
@@ -119,8 +129,10 @@ fun ProductCommentsScreen(
                 )
             }
 
+
+
             item {
-                if (aboutComments.images.isNotEmpty()) {
+                if (aboutComments.media.isNotEmpty()) {
                     Row(
                         modifier = Modifier
                             .padding(top = 12.dp)
@@ -128,37 +140,42 @@ fun ProductCommentsScreen(
                             .padding(start = 16.dp, end = 16.dp),
                         horizontalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
-                        aboutComments.images.forEach { image ->
-                            key(image) {
-                                sharedTransitionScope.apply {
-                                    AsyncImage(
-                                        model = ImageRequest.Builder(LocalContext.current)
-                                            .data(image)
-                                            .placeholderMemoryCacheKey(image)
-                                            .memoryCacheKey(image)
-                                            .crossfade(true)
-                                            .build(),
-                                        contentDescription = null,
-                                        modifier = Modifier
-                                            .then(
-                                                with(sharedTransitionScope) {
-                                                    Modifier.sharedElementWithCallerManagedVisibility(
-                                                        sharedContentState = rememberSharedContentState(
-                                                            key = image
-                                                        ),
-                                                        visible = viewState.fullScreenImage == null
-                                                    )
-                                                }
-                                            )
-                                            .height(110.dp)
-                                            .width(80.dp)
-                                            .clip(MaterialTheme.shapes.small)
-                                            .clickable {
-                                                viewModel.setFullScreenImage(image)
-                                            },
-                                        contentScale = ContentScale.Crop
-                                    )
+                        aboutComments.media.forEach { media ->
+
+                            val mediaUrl = media.url
+
+                            LaunchedEffect(Unit) {
+                                when (media) {
+                                    is CommentMediaUi.Image -> {
+                                        loader.execute(
+                                            ImageRequest.Builder(context)
+                                                .data(mediaUrl)
+                                                .size(SizeResolver.ORIGINAL)
+                                                .crossfade(true)
+                                                .placeholderMemoryCacheKey(mediaUrl)
+                                                .memoryCacheKey(mediaUrl)
+                                                .build()
+                                        )
+
+                                    }
+
+                                    is CommentMediaUi.Video -> {
+
+                                    }
                                 }
+                            }
+
+                            key(mediaUrl) {
+                                CommentImage(
+                                    imageWidth = 80.dp,
+                                    imageHeight = 110.dp,
+                                    media = media,
+                                    sharedTransitionScope = sharedTransitionScope,
+                                    transitionKey = "header$mediaUrl",
+                                    onClick = {
+                                        viewModel.setFullScreenMedia(media)
+                                    }
+                                )
                             }
                         }
                     }
@@ -182,9 +199,9 @@ fun ProductCommentsScreen(
                             comment = comment,
                             minLines = 1,
                             sharedTransitionScope = sharedTransitionScope,
-                            sharedElementsIsVisible = viewState.fullScreenImage == null,
-                            onImageClick = { image ->
-                                viewModel.setFullScreenImage(image)
+                            sharedElementsIsVisible = viewState.commentMedia == null,
+                            onMediaClick = { media ->
+                                viewModel.setFullScreenMedia(media)
                             }
                         )
                     }

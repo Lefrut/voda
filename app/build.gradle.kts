@@ -38,9 +38,9 @@ android {
         applicationId = "com.m.vodovoz"
         minSdk = 26
         targetSdk = 35
-        versionCode = 2260
+        versionCode = 2270
         //todo
-        versionName = "2.2.6"
+        versionName = "2.2.7"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         ndk {
@@ -138,6 +138,10 @@ android {
 
 dependencies {
 
+    val media3 = "1.9.0"
+    implementation("androidx.media3:media3-exoplayer:$media3")
+    implementation("androidx.media3:media3-ui-compose-material3:${media3}")
+
     //Tests
     testImplementation("app.cash.turbine:turbine:1.2.1")
     testImplementation("junit:junit:4.13.2")
@@ -234,6 +238,7 @@ dependencies {
     //Coil
     implementation("io.coil-kt.coil3:coil-compose:3.0.4")
     implementation("io.coil-kt.coil3:coil-svg:3.0.4")
+    implementation("io.coil-kt.coil3:coil-video:3.0.4")
     implementation("io.coil-kt.coil3:coil-network-okhttp:3.0.4")
 
     //Decorations
