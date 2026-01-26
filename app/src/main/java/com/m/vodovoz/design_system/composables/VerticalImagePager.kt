@@ -38,6 +38,7 @@ import coil3.compose.rememberAsyncImagePainter
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import com.m.vodovoz.R
+import com.m.vodovoz.design_system.composables.placeholders.LoadingPlaceholder
 import com.m.vodovoz.design_system.composables.zoom.ZoomableContainer
 import com.m.vodovoz.design_system.composables.zoom.rememberZoomableState
 import com.m.vodovoz.feature.product_comments.model.CommentMediaUi
@@ -65,8 +66,6 @@ fun VerticalImagePager(
         val asyncImagePainter = rememberAsyncImagePainter(
             model = ImageRequest.Builder(LocalContext.current)
                 .data(image)
-                .memoryCacheKey(image)
-                .placeholderMemoryCacheKey(image)
                 .build(),
         )
         val zoomableState =
@@ -88,32 +87,39 @@ fun VerticalImagePager(
 
             sharedTransitionScope.apply {
                 ZoomableContainer(
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier,
                     state = zoomableState,
-                    boundClip = false
+                    boundClip = false,
                 ) {
-                    Image(
-                        modifier = Modifier
-                            .then(
-                                if (isVerticalImage) {
-                                    Modifier
-                                        .wrapContentWidth(unbounded = true)
-                                        .wrapContentHeight(unbounded = true)
-                                        .height(
-                                            with(LocalDensity.current) {
-                                                zoomableState.containerHeight.toDp()
-                                            }
-                                        )
-                                } else Modifier
-                                    .fillMaxWidth()
-                                    .heightIn(min = 300.dp)
-                            )
-                            .clip(MaterialTheme.shapes.small),
-                        painter = asyncImagePainter,
-                        contentDescription = null,
-                        alignment = Alignment.Center
-                    )
+                    when(asyncImagePainter.state.value){
 
+                        is AsyncImagePainter.State.Success -> {
+                            Image(
+                                modifier = Modifier
+                                    .then(
+                                        if (isVerticalImage) {
+                                            Modifier
+                                                .wrapContentWidth(unbounded = true)
+                                                .wrapContentHeight(unbounded = true)
+                                                .height(
+                                                    with(LocalDensity.current) {
+                                                        zoomableState.containerHeight.toDp()
+                                                    }
+                                                )
+                                        } else Modifier
+                                            .fillMaxWidth()
+                                            .heightIn(min = 300.dp)
+                                    )
+                                    .clip(MaterialTheme.shapes.small),
+                                painter = asyncImagePainter,
+                                contentDescription = null,
+                                alignment = Alignment.Center
+                            )
+                        }
+                        else -> {
+                            LoadingPlaceholder()
+                        }
+                    }
                 }
             }
 

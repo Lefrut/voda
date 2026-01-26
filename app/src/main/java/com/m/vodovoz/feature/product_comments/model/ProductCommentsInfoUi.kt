@@ -6,6 +6,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.CircularProgressIndicator
@@ -85,32 +86,12 @@ fun CommentImage(
     media: CommentMediaUi,
     sharedTransitionScope: SharedTransitionScope? = null,
     transitionKey: String = media.url,
+    playIconSize: Dp = 16.dp,
     onClick: (CommentMediaUi) -> Unit
 ) {
     val context = LocalContext.current
     var isLoading by remember(media.url) { mutableStateOf(true) }
     val mediaUrl = media.url
-
-
-    LaunchedEffect(Unit) {
-        when (media) {
-            is CommentMediaUi.Image -> {
-                context.imageLoader.execute(
-                    ImageRequest.Builder(context)
-                        .data(mediaUrl)
-                        .size(SizeResolver.ORIGINAL)
-                        .crossfade(false)
-                        .placeholderMemoryCacheKey(transitionKey)
-                        .memoryCacheKey(transitionKey)
-                        .build()
-                )
-            }
-
-            is CommentMediaUi.Video -> {
-
-            }
-        }
-    }
 
 
     Box(modifier = modifier) {
@@ -135,17 +116,6 @@ fun CommentImage(
             modifier = Modifier
                 .height(imageHeight)
                 .width(imageWidth)
-                .then(
-                    sharedTransitionScope?.run {
-                        Modifier.sharedElementWithCallerManagedVisibility(
-                            sharedContentState = rememberSharedContentState(
-                                key = transitionKey
-                            ),
-                            visible = true,
-                            renderInOverlayDuringTransition = false
-                        )
-                    } ?: Modifier
-                )
                 .clip(MaterialTheme.shapes.small)
                 .clickable {
                     onClick(media)
@@ -177,8 +147,9 @@ fun CommentImage(
             Image(
                 painter = painterResource(R.drawable.svg_play_video),
                 modifier = Modifier
-                    .size(28.dp)
-                    .align(Alignment.Center),
+                    .align(Alignment.BottomEnd)
+                    .padding(6.dp)
+                    .size(playIconSize),
                 contentDescription = null,
             )
         }

@@ -70,45 +70,42 @@ class ProductDetailsFlowViewModel @Inject constructor(
     }
 
     fun listenProductDetailsUpdates(scope: CoroutineScope) {
-        cartManager.observeCarts()
-            .onEach { cart ->
-                updateState { s ->
-                    s.copy(
-                        productDetails = s.productDetails.copy(
-                            cartQuantity = cart.getOrDefault(
-                                s.productDetails.id,
-                                s.productDetails.cartQuantity
-                            )
+
+
+        cartManager.observeCarts().onEach { cart ->
+            updateState { s ->
+                val productDetails = s.productDetails
+                s.copy(
+                    productDetails = productDetails.copy(
+                        cartQuantity = cart.getOrDefault(
+                            productDetails.id,
+                            productDetails.cartQuantity
                         )
                     )
-                }
+                )
             }
-            .launchIn(scope)
+        }.launchIn(scope)
 
-        cartManager.blockedProductsFlow
-            .onEach { blocked ->
-                updateState { s ->
-                    s.copy(
-                        buttonIsLoading = s.productDetails.id in blocked
-                    )
-                }
+        cartManager.blockedProductsFlow.onEach { blocked ->
+            updateState { s ->
+                s.copy(
+                    buttonIsLoading = s.productDetails.id in blocked
+                )
             }
-            .launchIn(scope)
+        }.launchIn(scope)
 
-        likeManager.observeLikes()
-            .onEach { likes ->
-                updateState { s ->
-                    s.copy(
-                        productDetails = s.productDetails.copy(
-                            isFavorite = likes.getOrDefault(
-                                s.productDetails.id,
-                                s.productDetails.isFavorite
-                            )
+        likeManager.observeLikes().onEach { likes ->
+            updateState { s ->
+                s.copy(
+                    productDetails = s.productDetails.copy(
+                        isFavorite = likes.getOrDefault(
+                            s.productDetails.id,
+                            s.productDetails.isFavorite
                         )
                     )
-                }
+                )
             }
-            .launchIn(scope)
+        }.launchIn(scope)
     }
 
     suspend fun listenCartUpdates() = cartManager.observeRefreshCart().onEach { update ->
@@ -126,7 +123,7 @@ class ProductDetailsFlowViewModel @Inject constructor(
             productId = stateSnapshot.productDetails.id
         ),
         vodovozServiceRepository.getPresentInfo(),
-        vodovozServiceRepository.getViewedProducts()
+        vodovozServiceRepository.getViewedProducts(),
     ) { p1, p2, p3 ->
         Triple(p1, p2, p3)
     }.onEach { (productDetailsScreenResult, presentInfoResult, viewedProductsResult) ->
@@ -145,6 +142,8 @@ class ProductDetailsFlowViewModel @Inject constructor(
             }.mapNotNull { section -> section }
 
             updateState { s ->
+
+
                 s.copy(
                     comments = productDetailsScreenModel.comments.mapToUi(),
                     productDetails = productDetailsScreenModel.details.toUi(),
@@ -164,6 +163,16 @@ class ProductDetailsFlowViewModel @Inject constructor(
             updateState { s ->
                 s.copy(uiState = ProductDetailsUiState.Error)
             }
+        }
+    }.combine(cartManager.observeCarts()) { _, cart ->
+        updateState { state ->
+            val productDetails = state.productDetails
+
+            state.copy(
+                productDetails = productDetails.copy(
+                    cartQuantity = cart[productDetails.id] ?: 0
+                )
+            )
         }
     }.launchIn(viewModelScope)
 

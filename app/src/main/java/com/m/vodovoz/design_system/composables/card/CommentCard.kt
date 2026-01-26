@@ -112,6 +112,7 @@ fun CommentCard(
                                 imageHeight = 90.dp,
                                 media = media,
                                 sharedTransitionScope = null,
+                                playIconSize = 12.dp,
                                 onClick = {
                                     onMediaClick(media)
                                 }

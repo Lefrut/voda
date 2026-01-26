@@ -37,13 +37,12 @@ import kotlin.math.abs
 import kotlin.math.absoluteValue
 
 
-
-
 @Composable
 fun ZoomableContainer(
     modifier: Modifier = Modifier,
     boundClip: Boolean = true,
     state: ZoomableViewState,
+    contentAlignment: Alignment = Alignment.Center,
     content: @Composable () -> Unit,
 ) {
     val density = LocalDensity.current
@@ -57,7 +56,7 @@ fun ZoomableContainer(
                 }
                 .pointerInput(state) {
                     detectTransformGestures(
-                        onDoubleTap = {  scope.launch { state.resetImmediately() } },
+                        onDoubleTap = { scope.launch { state.resetImmediately() } },
                         gestureStart = {
                             onGestureStart(scope)
                         },
@@ -91,7 +90,8 @@ fun ZoomableContainer(
                         rotationZ = rotation.value
                     }
                     .width(density.run { displayWidth.toDp() })
-                    .height(density.run { displayHeight.toDp() })
+                    .height(density.run { displayHeight.toDp() }),
+                contentAlignment = contentAlignment
             ) {
                 content()
             }
