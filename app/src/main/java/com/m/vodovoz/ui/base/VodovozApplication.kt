@@ -8,6 +8,7 @@ import androidx.work.Configuration
 import coil3.ImageLoader
 import coil3.PlatformContext
 import coil3.SingletonImageLoader
+import coil3.decode.Decoder
 import coil3.request.CachePolicy
 import coil3.request.crossfade
 import coil3.svg.SvgDecoder
@@ -75,6 +76,7 @@ class VodovozApplication : Application(), Configuration.Provider, SingletonImage
             .components {
                 add(SvgDecoder.Factory())
                 add(VideoFrameDecoder.Factory())
+
             }
             .memoryCachePolicy(CachePolicy.ENABLED)
             .diskCachePolicy(CachePolicy.DISABLED)

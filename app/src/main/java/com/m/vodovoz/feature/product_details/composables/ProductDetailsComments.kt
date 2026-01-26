@@ -82,6 +82,7 @@ private fun CommentsPager(
         contentPadding = PaddingValues(horizontal = 16.dp),
         pageSpacing = 8.dp,
         beyondViewportPageCount = comments.size,
+        verticalAlignment = Alignment.Top
     ) { page ->
         CommentCard(
             comment = comments[page],

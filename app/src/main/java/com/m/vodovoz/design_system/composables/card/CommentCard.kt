@@ -111,7 +111,7 @@ fun CommentCard(
                                 imageWidth = 60.dp,
                                 imageHeight = 90.dp,
                                 media = media,
-                                sharedTransitionScope = if (sharedElementsIsVisible) sharedTransitionScope else null,
+                                sharedTransitionScope = null,
                                 onClick = {
                                     onMediaClick(media)
                                 }

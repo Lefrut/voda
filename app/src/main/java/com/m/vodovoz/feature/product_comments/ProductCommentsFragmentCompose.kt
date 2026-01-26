@@ -17,6 +17,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -37,9 +38,12 @@ import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.core.navigation.navigateToWriteComment
 import com.m.vodovoz.design_system.VodovozTheme
 import com.m.vodovoz.design_system.composables.VerticalImagePager
+import com.m.vodovoz.design_system.composables.decoration.LocalShimmer
 import com.m.vodovoz.design_system.effects.LifecycleEffect
 import com.m.vodovoz.feature.product_comments.model.CommentMediaUi
 import com.m.vodovoz.ui.compose.player.MediaComposePlayer
+import com.valentinilk.shimmer.ShimmerBounds
+import com.valentinilk.shimmer.rememberShimmer
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -62,89 +66,83 @@ class ProductCommentsFragment : Fragment() {
 
             setContent {
                 val viewState by viewModel.collectAsState()
-
                 val lazyListState = rememberLazyListState()
 
                 VodovozTheme {
-                    SharedTransitionLayout {
-                        ProductCommentsScreen(
-                            viewModel = viewModel,
-                            viewState = viewState,
-                            lazyListState = lazyListState,
-                            sharedTransitionScope = this
-                        )
+                    CompositionLocalProvider(LocalShimmer provides rememberShimmer(ShimmerBounds.View)) {
+                        SharedTransitionLayout {
+                            ProductCommentsScreen(
+                                viewModel = viewModel,
+                                viewState = viewState,
+                                lazyListState = lazyListState,
+                                sharedTransitionScope = this
+                            )
 
-                        val currentMedia = viewState.commentMedia
+                            val currentMedia = viewState.commentMedia
 
-                        when (currentMedia) {
-                            null -> {
+                            when (currentMedia) {
+                                null -> {
 
-                            }
-
-                            else -> {
-                                DisposableEffect(Unit) {
-                                    tabManager.changeTabVisibility(false)
-                                    onDispose {
-                                        tabManager.changeTabVisibility(true)
-                                    }
                                 }
 
-                                BackHandler {
-                                    viewModel.resetFullScreenMedia()
-                                }
-                            }
-                        }
-
-                        when (currentMedia) {
-                            is CommentMediaUi.Image -> {
-                                val images =
-                                    viewState.productCommentsInfo.media.mapNotNull { image ->
-                                        image as? CommentMediaUi.Image
-                                    }
-                                VerticalImagePager(
-                                    initialPage = images.indexOf(currentMedia),
-                                    images = images,
-                                    sharedTransitionScope = this@SharedTransitionLayout,
-                                    onCloseClick = {
+                                else -> {
+                                    BackHandler {
                                         viewModel.resetFullScreenMedia()
                                     }
-                                )
-
-                            }
-
-                            is CommentMediaUi.Video -> {
-                                Box {
-                                    MediaComposePlayer(
-                                        url = currentMedia.url,
-                                        modifier = Modifier.clickable {}
-                                    )
-
-
-                                    Icon(
-                                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_close),
-                                        contentDescription = null,
-                                        modifier = Modifier
-                                            .align(Alignment.TopEnd)
-                                            .padding(
-                                                end = 16.dp,
-                                                top = 32.dp
-                                            )
-                                            .clip(CircleShape)
-                                            .clickable {
-                                                viewModel.resetFullScreenMedia()
-                                            }
-                                            .background(MaterialTheme.colorScheme.surface)
-                                            .padding(8.dp)
-                                            .size(32.dp)
-                                            .zIndex(Float.MAX_VALUE),
-                                        tint = MaterialTheme.colorScheme.onBackground
-                                    )
-
                                 }
                             }
 
-                            null -> {
+                            when (currentMedia) {
+                                is CommentMediaUi.Image -> {
+                                    val images =
+                                        viewState.productCommentsInfo.media.mapNotNull { image ->
+                                            image as? CommentMediaUi.Image
+                                        }
+                                    VerticalImagePager(
+                                        initialPage = images.indexOf(currentMedia),
+                                        images = images,
+                                        sharedTransitionScope = this@SharedTransitionLayout,
+                                        onCloseClick = {
+                                            viewModel.resetFullScreenMedia()
+                                        }
+                                    )
 
+                                }
+
+                                is CommentMediaUi.Video -> {
+                                    Box {
+                                        MediaComposePlayer(
+                                            url = currentMedia.url,
+                                            modifier = Modifier.clickable {}
+                                        )
+
+
+                                        Icon(
+                                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_close),
+                                            contentDescription = null,
+                                            modifier = Modifier
+                                                .align(Alignment.TopEnd)
+                                                .padding(
+                                                    end = 16.dp,
+                                                    top = 32.dp
+                                                )
+                                                .clip(CircleShape)
+                                                .clickable {
+                                                    viewModel.resetFullScreenMedia()
+                                                }
+                                                .background(MaterialTheme.colorScheme.surface)
+                                                .padding(8.dp)
+                                                .size(32.dp)
+                                                .zIndex(Float.MAX_VALUE),
+                                            tint = MaterialTheme.colorScheme.onBackground
+                                        )
+
+                                    }
+                                }
+
+                                null -> {
+
+                                }
                             }
                         }
                     }

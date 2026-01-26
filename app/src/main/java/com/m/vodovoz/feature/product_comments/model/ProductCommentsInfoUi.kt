@@ -12,6 +12,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -27,13 +28,19 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import coil3.imageLoader
 import coil3.request.ImageRequest
 import coil3.request.crossfade
-import coil3.video.videoFrameMillis
+import coil3.size.SizeResolver
 import com.m.vodovoz.R
+import com.m.vodovoz.design_system.composables.decoration.LocalShimmer
+import com.m.vodovoz.design_system.composables.decoration.SkeletonBox
 import com.m.vodovoz.domain.general.model.product.CommentMediaModel
 import com.m.vodovoz.domain.general.model.product.ProductCommentsInfoModel
 import com.m.vodovoz.domain.general.model.product.SortModel
+import com.m.vodovoz.ui.compose.player.rememberExoVideoFrame
+import com.valentinilk.shimmer.ShimmerBounds
+import com.valentinilk.shimmer.rememberShimmer
 
 
 @Immutable
@@ -82,29 +89,63 @@ fun CommentImage(
 ) {
     val context = LocalContext.current
     var isLoading by remember(media.url) { mutableStateOf(true) }
+    val mediaUrl = media.url
+
+
+    LaunchedEffect(Unit) {
+        when (media) {
+            is CommentMediaUi.Image -> {
+                context.imageLoader.execute(
+                    ImageRequest.Builder(context)
+                        .data(mediaUrl)
+                        .size(SizeResolver.ORIGINAL)
+                        .crossfade(false)
+                        .placeholderMemoryCacheKey(transitionKey)
+                        .memoryCacheKey(transitionKey)
+                        .build()
+                )
+            }
+
+            is CommentMediaUi.Video -> {
+
+            }
+        }
+    }
+
 
     Box(modifier = modifier) {
+
+        val mediaData by rememberExoVideoFrame(
+            url = mediaUrl,
+            frameMs = 1000L,
+            width = imageWidth
+        )
+
+
         AsyncImage(
-            model = ImageRequest.Builder(context)
-                .data(media.url)
-                .videoFrameMillis(1_500)
-                .size(imageWidth.value.toInt(), imageHeight.value.toInt())
-                .crossfade(true)
-                .build(),
+            model = when (media) {
+                is CommentMediaUi.Image -> ImageRequest.Builder(context)
+                    .data(media.url)
+                    .crossfade(true)
+                    .build()
+
+                is CommentMediaUi.Video -> mediaData
+            },
             contentDescription = null,
             modifier = Modifier
+                .height(imageHeight)
+                .width(imageWidth)
                 .then(
                     sharedTransitionScope?.run {
                         Modifier.sharedElementWithCallerManagedVisibility(
                             sharedContentState = rememberSharedContentState(
                                 key = transitionKey
                             ),
-                            visible = true
+                            visible = true,
+                            renderInOverlayDuringTransition = false
                         )
                     } ?: Modifier
                 )
-                .height(imageHeight)
-                .width(imageWidth)
                 .clip(MaterialTheme.shapes.small)
                 .clickable {
                     onClick(media)
@@ -118,18 +159,19 @@ fun CommentImage(
             },
             onError = {
                 isLoading = false
-            }
+            },
         )
 
+        val videoIsLoading = mediaData == null && media is CommentMediaUi.Video
 
-        if (isLoading) {
-            CircularProgressIndicator(
+
+
+        if (isLoading || videoIsLoading) {
+            SkeletonBox(
+                shimmerState = LocalShimmer.current,
                 modifier = Modifier
-                    .size(18.dp)
-                    .align(Alignment.Center),
-                color = MaterialTheme.colorScheme.onBackground,
-                strokeWidth = 2.dp,
-                trackColor = Color.Transparent
+                    .matchParentSize()
+                    .clip(MaterialTheme.shapes.small)
             )
         } else if (media is CommentMediaUi.Video) {
             Image(

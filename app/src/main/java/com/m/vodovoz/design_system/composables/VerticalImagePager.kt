@@ -32,6 +32,8 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import coil3.compose.AsyncImage
+import coil3.compose.AsyncImagePainter
 import coil3.compose.rememberAsyncImagePainter
 import coil3.request.ImageRequest
 import coil3.request.crossfade
@@ -61,7 +63,8 @@ fun VerticalImagePager(
         val image = images.getOrElse(page) { CommentMediaUi.Image("") }.url
 
         val asyncImagePainter = rememberAsyncImagePainter(
-            model = ImageRequest.Builder(LocalContext.current).data(image)
+            model = ImageRequest.Builder(LocalContext.current)
+                .data(image)
                 .memoryCacheKey(image)
                 .placeholderMemoryCacheKey(image)
                 .build(),
@@ -89,7 +92,6 @@ fun VerticalImagePager(
                     state = zoomableState,
                     boundClip = false
                 ) {
-
                     Image(
                         modifier = Modifier
                             .then(
@@ -106,16 +108,12 @@ fun VerticalImagePager(
                                     .fillMaxWidth()
                                     .heightIn(min = 300.dp)
                             )
-                            .sharedElementWithCallerManagedVisibility(
-                                sharedContentState = rememberSharedContentState(image),
-                                visible = true,
-                                renderInOverlayDuringTransition = false
-                            )
                             .clip(MaterialTheme.shapes.small),
                         painter = asyncImagePainter,
                         contentDescription = null,
                         alignment = Alignment.Center
                     )
+
                 }
             }
 

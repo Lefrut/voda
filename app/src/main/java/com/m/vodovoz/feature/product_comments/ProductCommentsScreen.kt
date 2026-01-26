@@ -76,8 +76,6 @@ fun ProductCommentsScreen(
     val aboutComments = viewState.productCommentsInfo
     val lazyPagingComments = viewState.pagedComments.collectAsLazyPagingItems()
     val loadState = lazyPagingComments.loadState
-    val context = LocalContext.current
-    val loader = context.imageLoader
 
     Column(
         modifier = Modifier
@@ -144,34 +142,12 @@ fun ProductCommentsScreen(
 
                             val mediaUrl = media.url
 
-                            LaunchedEffect(Unit) {
-                                when (media) {
-                                    is CommentMediaUi.Image -> {
-                                        loader.execute(
-                                            ImageRequest.Builder(context)
-                                                .data(mediaUrl)
-                                                .size(SizeResolver.ORIGINAL)
-                                                .crossfade(true)
-                                                .placeholderMemoryCacheKey(mediaUrl)
-                                                .memoryCacheKey(mediaUrl)
-                                                .build()
-                                        )
-
-                                    }
-
-                                    is CommentMediaUi.Video -> {
-
-                                    }
-                                }
-                            }
-
                             key(mediaUrl) {
                                 CommentImage(
                                     imageWidth = 80.dp,
                                     imageHeight = 110.dp,
                                     media = media,
-                                    sharedTransitionScope = sharedTransitionScope,
-                                    transitionKey = "header$mediaUrl",
+                                    sharedTransitionScope = if (viewState.commentMedia == null) sharedTransitionScope else null,
                                     onClick = {
                                         viewModel.setFullScreenMedia(media)
                                     }
@@ -199,7 +175,6 @@ fun ProductCommentsScreen(
                             comment = comment,
                             minLines = 1,
                             sharedTransitionScope = sharedTransitionScope,
-                            sharedElementsIsVisible = viewState.commentMedia == null,
                             onMediaClick = { media ->
                                 viewModel.setFullScreenMedia(media)
                             }

@@ -1,5 +1,6 @@
 package com.m.vodovoz.ui.compose.player
 
+import android.annotation.SuppressLint
 import android.media.AudioAttributes.CONTENT_TYPE_MOVIE
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -26,6 +27,7 @@ import androidx.media3.common.C.USAGE_MEDIA
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.common.VideoSize
+import androidx.media3.common.util.UnstableApi
 import androidx.media3.common.util.Util.getStringForTime
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.compose.PlayerSurface
@@ -36,6 +38,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlin.math.max
 
+@SuppressLint("UnusedBoxWithConstraintsScope")
+@androidx.annotation.OptIn(UnstableApi::class)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MediaComposePlayer(

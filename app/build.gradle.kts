@@ -141,6 +141,7 @@ dependencies {
     val media3 = "1.9.0"
     implementation("androidx.media3:media3-exoplayer:$media3")
     implementation("androidx.media3:media3-ui-compose-material3:${media3}")
+    implementation("androidx.media3:media3-ui:$media3")
 
     //Tests
     testImplementation("app.cash.turbine:turbine:1.2.1")
