@@ -19,9 +19,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C.USAGE_MEDIA
 import androidx.media3.common.MediaItem
@@ -45,6 +48,7 @@ import kotlin.math.max
 fun MediaComposePlayer(
     url: String,
     modifier: Modifier = Modifier,
+    onCloseClick: () -> Unit
 ) {
     val context = LocalContext.current
 
@@ -116,124 +120,148 @@ fun MediaComposePlayer(
         }
     }
 
-    // --- UI
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background),
-    ) {
-
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f)
-                .padding(bottom = 12.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            @Suppress("COMPOSE_APPLIER_CALL_MISMATCH")
-            BoxWithConstraints(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                val isPortraitVideo = videoAspectRatio < 1f
-
-                val videoModifier = if (isPortraitVideo) {
-
-                    Modifier
-                        .fillMaxHeight(1f)
-                        .aspectRatio(videoAspectRatio)
-                } else {
-
-                    Modifier
-                        .fillMaxWidth()
-                        .aspectRatio(videoAspectRatio)
-                }
-
-                Box(videoModifier) {
-                    TappablePlayerSurface(
-                        player = player,
-                        modifier = Modifier.fillMaxSize()
-                    )
-                }
-            }
-        }
-        // Контролы снизу
+    Box(modifier = modifier) {
         Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 12.dp, vertical = 8.dp)
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background),
         ) {
-            Row(
-                Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                TimeText(player) {
-                    Text(
-                        text = getStringForTime(this.currentPositionMs),
-                        color = MaterialTheme.colorScheme.onBackground,
-                        style = MaterialTheme.typography.bodySmall
-                    )
 
-                }
-
-                TimeText(player) {
-                    Text(
-                        text = getStringForTime(this.durationMs),
-                        color = MaterialTheme.colorScheme.onBackground,
-                        style = MaterialTheme.typography.bodySmall
-                    )
-                }
-
-            }
-
-            val safeDur = durationMs.coerceAtLeast(1L)
-            val fraction =
-                if (isScrubbing) scrubFraction
-                else (positionMs.toFloat() / safeDur.toFloat()).coerceIn(0f, 1f)
-
-            val colors = SliderDefaults.colors(
-                thumbColor = Color.Transparent,
-                activeTrackColor = MaterialTheme.colorScheme.onBackground,
-                inactiveTrackColor = MaterialTheme.colorScheme.surfaceVariant,
-                activeTickColor = Color.Transparent,
-                inactiveTickColor = Color.Transparent,
-            )
-
-            Slider(
-                value = fraction,
-                onValueChange = { v ->
-                    isScrubbing = true
-                    scrubFraction = v
-                },
-                onValueChangeFinished = {
-                    player.seekTo((scrubFraction * safeDur).toLong())
-                    isScrubbing = false
-                },
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .requiredHeight(48.dp),
-                thumb = {
+                    .weight(1f)
+                    .padding(bottom = 12.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                @Suppress("COMPOSE_APPLIER_CALL_MISMATCH")
+                BoxWithConstraints(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    val isPortraitVideo = videoAspectRatio < 1f
 
-                },
-                colors = colors,
-                track = { sliderState ->
-                    SliderDefaults.Track(
-                        modifier = Modifier.requiredHeight(12.dp),
-                        colors = colors,
-                        enabled = true,
-                        sliderState = sliderState,
-                        drawStopIndicator = {
+                    val videoModifier = if (isPortraitVideo) {
 
-                        },
-                        drawTick = { _, _ ->
+                        Modifier
+                            .fillMaxHeight(1f)
+                            .aspectRatio(videoAspectRatio)
+                    } else {
 
-                        },
-                        thumbTrackGapSize = 0.dp
-                    )
+                        Modifier
+                            .fillMaxWidth()
+                            .aspectRatio(videoAspectRatio)
+                    }
+
+                    Box(videoModifier) {
+                        TappablePlayerSurface(
+                            player = player,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    }
                 }
-            )
+            }
+            // Контролы снизу
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 12.dp, vertical = 8.dp)
+            ) {
+                Row(
+                    Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    TimeText(player) {
+                        Text(
+                            text = getStringForTime(this.currentPositionMs),
+                            color = MaterialTheme.colorScheme.onBackground,
+                            style = MaterialTheme.typography.bodySmall
+                        )
 
+                    }
+
+                    TimeText(player) {
+                        Text(
+                            text = getStringForTime(this.durationMs),
+                            color = MaterialTheme.colorScheme.onBackground,
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
+
+                }
+
+                val safeDur = durationMs.coerceAtLeast(1L)
+                val fraction =
+                    if (isScrubbing) scrubFraction
+                    else (positionMs.toFloat() / safeDur.toFloat()).coerceIn(0f, 1f)
+
+                val colors = SliderDefaults.colors(
+                    thumbColor = Color.Transparent,
+                    activeTrackColor = MaterialTheme.colorScheme.onBackground,
+                    inactiveTrackColor = MaterialTheme.colorScheme.surfaceVariant,
+                    activeTickColor = Color.Transparent,
+                    inactiveTickColor = Color.Transparent,
+                )
+
+                Slider(
+                    value = fraction,
+                    onValueChange = { v ->
+                        isScrubbing = true
+                        scrubFraction = v
+                    },
+                    onValueChangeFinished = {
+                        player.seekTo((scrubFraction * safeDur).toLong())
+                        isScrubbing = false
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .requiredHeight(48.dp),
+                    thumb = {
+
+                    },
+                    colors = colors,
+                    track = { sliderState ->
+                        SliderDefaults.Track(
+                            modifier = Modifier.requiredHeight(12.dp),
+                            colors = colors,
+                            enabled = true,
+                            sliderState = sliderState,
+                            drawStopIndicator = {
+
+                            },
+                            drawTick = { _, _ ->
+
+                            },
+                            thumbTrackGapSize = 0.dp
+                        )
+                    }
+                )
+
+            }
         }
+
+
+        Icon(
+            imageVector = ImageVector.vectorResource(id = R.drawable.ic_close),
+            contentDescription = null,
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(
+                    end = 16.dp,
+                    top = 32.dp
+                )
+                .clip(CircleShape)
+                .clickable {
+                    onCloseClick()
+                }
+                .background(MaterialTheme.colorScheme.surface)
+                .padding(8.dp)
+                .size(32.dp)
+                .zIndex(Float.MAX_VALUE),
+            tint = MaterialTheme.colorScheme.onBackground
+        )
+
+
     }
 }
 
@@ -289,8 +317,8 @@ private fun TappablePlayerSurface(
         PlayerSurface(
             player = player,
             modifier = Modifier.fillMaxSize()
-
         )
+
 
         if (showSpinner) {
             CircularProgressIndicator(

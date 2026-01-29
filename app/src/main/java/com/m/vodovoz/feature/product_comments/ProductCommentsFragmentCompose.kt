@@ -5,36 +5,34 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
-import androidx.compose.ui.res.vectorResource
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.zIndex
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.m.vodovoz.ui.mvi.collectAsState
 import androidx.navigation.fragment.findNavController
-import com.m.vodovoz.R
+import androidx.paging.compose.collectAsLazyPagingItems
 import com.m.vodovoz.common.tab.TabManager
+import com.m.vodovoz.common.tab.hideTab
+import com.m.vodovoz.common.tab.showTab
 import com.m.vodovoz.core.navigation.navigateToWriteComment
 import com.m.vodovoz.design_system.VodovozTheme
 import com.m.vodovoz.design_system.composables.VerticalImagePager
@@ -42,6 +40,7 @@ import com.m.vodovoz.design_system.composables.decoration.LocalShimmer
 import com.m.vodovoz.design_system.effects.LifecycleEffect
 import com.m.vodovoz.feature.product_comments.model.CommentMediaUi
 import com.m.vodovoz.ui.compose.player.MediaComposePlayer
+import com.m.vodovoz.ui.insets.InsetsVisibilityState
 import com.valentinilk.shimmer.ShimmerBounds
 import com.valentinilk.shimmer.rememberShimmer
 import dagger.hilt.android.AndroidEntryPoint
@@ -51,6 +50,10 @@ import javax.inject.Inject
 class ProductCommentsFragment : Fragment() {
 
     private val viewModel: ProductCommentsFlowViewModel by viewModels()
+
+
+    @Inject
+    lateinit var insetsVisibilityState: InsetsVisibilityState
 
     @Inject
     lateinit var tabManager: TabManager
@@ -66,83 +69,88 @@ class ProductCommentsFragment : Fragment() {
 
             setContent {
                 val viewState by viewModel.collectAsState()
-                val lazyListState = rememberLazyListState()
+                val lazyCommentColumnState = rememberLazyListState()
+                val lazyMediaRowState = rememberLazyListState()
+
+                val lazyPagingComments = viewState.pagedComments.collectAsLazyPagingItems()
 
                 VodovozTheme {
                     CompositionLocalProvider(LocalShimmer provides rememberShimmer(ShimmerBounds.View)) {
                         SharedTransitionLayout {
-                            ProductCommentsScreen(
-                                viewModel = viewModel,
-                                viewState = viewState,
-                                lazyListState = lazyListState,
-                                sharedTransitionScope = this
-                            )
-
-                            val currentMedia = viewState.commentMedia
-
-                            when (currentMedia) {
-                                null -> {
-
+                            AnimatedContent(
+                                targetState = viewState.commentMedia,
+                                transitionSpec = {
+                                    EnterTransition.None togetherWith ExitTransition.None
                                 }
+                            ) { currentMedia ->
 
-                                else -> {
+
+                                if (currentMedia != null) {
                                     BackHandler {
                                         viewModel.resetFullScreenMedia()
                                     }
                                 }
-                            }
 
-                            when (currentMedia) {
-                                is CommentMediaUi.Image -> {
-                                    val images =
-                                        viewState.productCommentsInfo.media.mapNotNull { image ->
-                                            image as? CommentMediaUi.Image
+
+                                when (currentMedia) {
+                                    is CommentMediaUi.Image -> {
+                                        val images =
+                                            viewState.productCommentsInfo.media.mapNotNull { image ->
+                                                image as? CommentMediaUi.Image
+                                            }
+
+
+
+                                        DisposableEffect(Unit) {
+                                            tabManager.hideTab()
+                                            insetsVisibilityState.consumeStatusBarInsets(false)
+
+                                            onDispose {
+                                                insetsVisibilityState.consumeStatusBarInsets(true)
+                                                tabManager.showTab()
+                                            }
                                         }
-                                    VerticalImagePager(
-                                        initialPage = images.indexOf(currentMedia),
-                                        images = images,
-                                        sharedTransitionScope = this@SharedTransitionLayout,
-                                        onCloseClick = {
-                                            viewModel.resetFullScreenMedia()
-                                        }
-                                    )
 
-                                }
+                                        VerticalImagePager(
+                                            modifier = Modifier
+                                                .background(MaterialTheme.colorScheme.onBackground)
+                                                .fillMaxSize()
+                                                .windowInsetsPadding(WindowInsets.systemBars),
+                                            initialPage = images.indexOf(currentMedia),
+                                            images = images,
+                                            sharedTransitionScope = this@SharedTransitionLayout,
+                                            animatedContentScope = this,
+                                            onCloseClick = {
+                                                viewModel.resetFullScreenMedia()
+                                            }
+                                        )
+                                    }
 
-                                is CommentMediaUi.Video -> {
-                                    Box {
+                                    is CommentMediaUi.Video -> {
                                         MediaComposePlayer(
                                             url = currentMedia.url,
-                                            modifier = Modifier.clickable {}
+                                            modifier = Modifier.clickable {},
+                                            onCloseClick = {
+                                                viewModel.resetFullScreenMedia()
+                                            }
                                         )
 
+                                    }
 
-                                        Icon(
-                                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_close),
-                                            contentDescription = null,
-                                            modifier = Modifier
-                                                .align(Alignment.TopEnd)
-                                                .padding(
-                                                    end = 16.dp,
-                                                    top = 32.dp
-                                                )
-                                                .clip(CircleShape)
-                                                .clickable {
-                                                    viewModel.resetFullScreenMedia()
-                                                }
-                                                .background(MaterialTheme.colorScheme.surface)
-                                                .padding(8.dp)
-                                                .size(32.dp)
-                                                .zIndex(Float.MAX_VALUE),
-                                            tint = MaterialTheme.colorScheme.onBackground
+                                    null -> {
+                                        ProductCommentsScreen(
+                                            viewModel = viewModel,
+                                            viewState = viewState,
+                                            lazyCommentsListState = lazyCommentColumnState,
+                                            sharedTransitionScope = this@SharedTransitionLayout,
+                                            animatedContentScope = this,
+                                            lazyPagingComments = lazyPagingComments,
+                                            lazyMediaListState = lazyMediaRowState
                                         )
 
                                     }
                                 }
 
-                                null -> {
-
-                                }
                             }
                         }
                     }
@@ -153,7 +161,7 @@ class ProductCommentsFragment : Fragment() {
                         viewModel.events.collect { event ->
                             when (event) {
                                 ProductCommentsFlowViewModel.ProductCommentsEvents.ScrollToTop -> {
-                                    lazyListState.animateScrollToItem(0)
+                                    lazyCommentColumnState.animateScrollToItem(0)
                                 }
 
 
