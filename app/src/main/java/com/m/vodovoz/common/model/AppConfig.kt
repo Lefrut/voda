@@ -4,6 +4,7 @@ import kotlin.reflect.KProperty
 
 data class AppConfig(
     val isActive: Boolean,
+    val prodUrl: String,
     val testUrl: String,
     val smsUrl: String,
     val isSmsEnabled: Boolean,
@@ -22,6 +23,7 @@ data class AppConfig(
     companion object {
         val Empty = AppConfig(
             isActive = true,
+            prodUrl = "",
             testUrl = "",
             smsUrl = "",
             isSmsEnabled = false,

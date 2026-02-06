@@ -5,6 +5,7 @@ import com.m.vodovoz.common.jivochat.JivoChatController
 import com.m.vodovoz.common.model.AppConfig
 import com.m.vodovoz.common.model.GlobalAppExtraAgreement
 import com.m.vodovoz.common.model.GlobalAppLinks
+import com.m.vodovoz.core.network.VodovozWebConfig
 import com.m.vodovoz.data.parser.common.safeString
 import com.m.vodovoz.data.vodovoz_service.model.ACTION_DTO
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
@@ -24,7 +25,7 @@ class SiteStateManager @Inject constructor(
     private val _siteStateFlow = MutableStateFlow<AppConfig?>(null)
     val siteStateFlow = _siteStateFlow.asStateFlow()
 
-    val siteStateSnapshot get() = siteStateFlow.value ?: AppConfig.Empty
+    val siteStateSnapshot get() = siteStateFlow.value ?: AppConfig.Blocked
 
     private val deepLinkPathListener = MutableStateFlow<String?>(null)
     fun observeDeepLinkPath() = deepLinkPathListener.asStateFlow()

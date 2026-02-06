@@ -27,7 +27,7 @@ fun BuyCertificateTabs(
     onTabClick: (BuyCertificateTabUi) -> Unit,
 ) {
 
-    val currentTabIndex = tabs.indexOfFirst { it.id == currentTab.id }.takeIf { it != -1 } ?: 0
+    val currentTabIndex = tabs.indexOfFirst { it.id == currentTab.id }
 
     VodovozTabRow(
         modifier = modifier

@@ -26,8 +26,10 @@ import com.m.vodovoz.feature.cart.ordering.model.OrderNotifyItemUi
 import com.m.vodovoz.feature.cart.ordering.model.OrderNotifySectionUi
 import com.m.vodovoz.feature.cart.ordering.model.OrderingMenuItemUi
 import com.m.vodovoz.feature.cart.ordering.model.OrderingUi
+import com.m.vodovoz.feature.cart.ordering.model.clearItemErrors
 import com.m.vodovoz.feature.cart.ordering.model.mapToUi
 import com.m.vodovoz.feature.cart.ordering.model.toUi
+import com.m.vodovoz.feature.cart.ordering.model.updateItemsByIds
 import com.m.vodovoz.feature.delivery_date.model.DeliveryDateOptionUi
 import com.m.vodovoz.feature.delivery_date.model.DeliveryTimeIntervalUi
 import com.m.vodovoz.feature.delivery_date.model.displayDate
@@ -71,7 +73,7 @@ class OrderingFlowViewModel @Inject constructor(
         fetchOrderingDetails()
     }
 
-    private suspend fun fetchSmartOrderingDetails(): Result<OrderingDetailsModel> {
+    private suspend fun fetchOrderingDetailsByState(): Result<OrderingDetailsModel> {
         return with(stateSnapshot.ordering) {
             vodovozServiceRepository.getOrderingDetails(
                 coupon = coupon,
@@ -86,7 +88,7 @@ class OrderingFlowViewModel @Inject constructor(
     }
 
     fun fetchOrderingDetails() = viewModelScope.launch {
-        val orderingDetailsResult = fetchSmartOrderingDetails()
+        val orderingDetailsResult = fetchOrderingDetailsByState()
 
         orderingDetailsResult.onSuccess { orderingDetails ->
             updateState { s ->
@@ -101,11 +103,11 @@ class OrderingFlowViewModel @Inject constructor(
                     },
                     recipientSection = orderingDetails.recipientSection.toUi { items ->
                         items.mapToUi().map { menuItemUi ->
-                            if (menuItemUi.id == CALL_YOU_MENU_ID && menuItemUi.defaultValue != null) {
+                            if (menuItemUi.id == CALL_YOU_MENU_ID && menuItemUi.value != null) {
                                 updateState { s ->
                                     s.copy(
                                         ordering = s.ordering.copy(
-                                            callYouId = menuItemUi.defaultValue
+                                            callYouId = menuItemUi.value
                                         )
                                     )
                                 }
@@ -124,9 +126,7 @@ class OrderingFlowViewModel @Inject constructor(
             }
         }.onFailure {
             updateState { s ->
-                s.copy(
-                    uiState = OrderingUiState.Error
-                )
+                s.copy(uiState = OrderingUiState.Error)
             }
         }
     }
@@ -140,35 +140,21 @@ class OrderingFlowViewModel @Inject constructor(
         sendEvent(OrderingEvents.GoToHome)
     }
 
-    private fun changeOrderingSection(
-        clearErrors: Boolean = true,
-        section: SectionUi<OrderingMenuItemUi>,
-        menuItemIds: List<String>,
-        map: (OrderingMenuItemUi) -> OrderingMenuItemUi,
-    ): SectionUi<OrderingMenuItemUi> {
-        val updatedItems = section.items.map { item ->
-            if (menuItemIds.contains(item.id)) map(item) else item.copy(error = if (clearErrors) false else item.error)
-        }
-        return section.copy(items = updatedItems)
-    }
-
     private fun updateRecipientSection(
         ids: List<String>,
         map: (OrderingMenuItemUi) -> OrderingMenuItemUi,
     ) {
         updateState { state ->
-            state.copy(
-                recipientSection = changeOrderingSection(
-                    section = state.recipientSection,
-                    menuItemIds = ids,
-                    map = map
-                ),
-                paymentSection = changeOrderingSection(
-                    section = state.paymentSection,
-                    menuItemIds = emptyList(),
-                    map = { it }
+            with(state) {
+                copy(
+                    recipientSection = recipientSection.updateItemsByIds(
+                        resetUntouchedErrors = true,
+                        itemsIdsToTransform = ids,
+                        transform = map
+                    ),
+                    paymentSection = paymentSection.clearItemErrors()
                 )
-            )
+            }
         }
     }
 
@@ -232,9 +218,9 @@ class OrderingFlowViewModel @Inject constructor(
 
     fun changeComment(field: FieldUi, updatedField: FieldUi) = viewModelScope.launch {
         updateState { s ->
-            if (s.comment == null) s
-            else s.copy(
-                comment = s.comment.copy(
+            val comment = s.comment
+            s.copy(
+                comment = comment?.copy(
                     value = updatedField.value
                 )
             )
@@ -387,20 +373,20 @@ class OrderingFlowViewModel @Inject constructor(
 
         updateState { s ->
             s.copy(
-                recipientSection = changeOrderingSection(
-                    section = s.recipientSection,
-                    menuItemIds = recipientErrors,
-                    map = { menuItem ->
+                recipientSection = s.recipientSection.updateItemsByIds(
+                    itemsIdsToTransform = recipientErrors,
+                    resetUntouchedErrors = true,
+                    transform = { menuItem ->
                         menuItem.copy(
                             error = true,
                             description = resourcesProvider.getString(R.string.data_not_filled_error)
                         )
                     }
                 ),
-                paymentSection = changeOrderingSection(
-                    section = s.paymentSection,
-                    menuItemIds = paymentErrors,
-                    map = { menuItem ->
+                paymentSection = s.paymentSection.updateItemsByIds(
+                    itemsIdsToTransform = paymentErrors,
+                    resetUntouchedErrors = true,
+                    transform = { menuItem ->
                         menuItem.copy(
                             error = true,
                             description = resourcesProvider.getString(R.string.data_not_filled_error)
@@ -445,17 +431,17 @@ class OrderingFlowViewModel @Inject constructor(
 
                 s.copy(
                     ordering = updatedOrdering,
-                    recipientSection = changeOrderingSection(
-                        clearErrors = true,
-                        section = s.recipientSection,
-                        menuItemIds = listOf(RECIPIENT_MENU_ID)
-                    ) {
-                        it.copy(
-                            name = recipientModel.fio,
-                            description = recipientModel.phone,
-                            error = false,
-                        )
-                    }
+                    recipientSection = s.recipientSection.updateItemsByIds(
+                        resetUntouchedErrors = true,
+                        itemsIdsToTransform = listOf(RECIPIENT_MENU_ID),
+                        transform = {
+                            it.copy(
+                                name = recipientModel.fio,
+                                description = recipientModel.phone,
+                                error = false,
+                            )
+                        }
+                    )
                 )
             }
         }.onFailure {}
@@ -465,12 +451,11 @@ class OrderingFlowViewModel @Inject constructor(
         updateState { s ->
             s.copy(
                 ordering = OrderingUi.Empty.copy(addressId = address.id),
-                recipientSection = changeOrderingSection(
-                    clearErrors = false,
-                    section = s.recipientSection,
-                    menuItemIds = listOf(ADDRESS_MENU_ID),
-                    map = { itemUi ->
-                        itemUi.copy(
+                recipientSection = s.recipientSection.updateItemsByIds(
+                    resetUntouchedErrors = false,
+                    itemsIdsToTransform = listOf(ADDRESS_MENU_ID),
+                    transform = {
+                        it.copy(
                             error = false,
                             name = address.address,
                             description = address.description
@@ -481,7 +466,7 @@ class OrderingFlowViewModel @Inject constructor(
             )
         }
 
-        val orderingDetailsResult = fetchSmartOrderingDetails()
+        val orderingDetailsResult = fetchOrderingDetailsByState()
 
         orderingDetailsResult.onSuccess { orderingDetails ->
             updateState { s ->
@@ -497,7 +482,7 @@ class OrderingFlowViewModel @Inject constructor(
                                     updateState { s ->
                                         s.copy(
                                             ordering = s.ordering.copy(
-                                                callYouId = menuItemUi.defaultValue
+                                                callYouId = menuItemUi.value
                                             )
                                         )
                                     }
@@ -538,12 +523,10 @@ class OrderingFlowViewModel @Inject constructor(
                     paymentBonusesValue = 0,
                     paymentBonuses = false
                 ),
-                recipientSection = changeOrderingSection(
-                    clearErrors = false,
-                    section = s.recipientSection,
-                    menuItemIds = listOf(DELIVERY_TIME_MENU_ID),
-                    map = { itemUi ->
-
+                recipientSection = s.recipientSection.updateItemsByIds(
+                    resetUntouchedErrors = false,
+                    itemsIdsToTransform = listOf(DELIVERY_TIME_MENU_ID),
+                    transform = { itemUi ->
                         val displayDate = date.displayDate(
                             resourcesProvider.getString(R.string.today),
                             resourcesProvider.getString(R.string.tomorrow)
@@ -562,7 +545,7 @@ class OrderingFlowViewModel @Inject constructor(
             )
         }
 
-        fetchSmartOrderingDetails().onSuccess { orderingDetails ->
+        fetchOrderingDetailsByState().onSuccess { orderingDetails ->
             updateState { s ->
                 s.copy(
                     paymentSection = s.paymentSection.copy(
@@ -589,11 +572,10 @@ class OrderingFlowViewModel @Inject constructor(
                 ordering = s.ordering.copy(
                     callYouId = callYouItem.value
                 ),
-                paymentSection = changeOrderingSection(
-                    clearErrors = false,
-                    section = s.paymentSection,
-                    menuItemIds = listOf(CALL_YOU_MENU_ID),
-                    map = { itemUi ->
+                paymentSection = s.paymentSection.updateItemsByIds(
+                    resetUntouchedErrors = false,
+                    itemsIdsToTransform = listOf(CALL_YOU_MENU_ID),
+                    transform = { itemUi ->
                         itemUi.copy(
                             error = false,
                             description = callYouItem.name
@@ -642,11 +624,10 @@ class OrderingFlowViewModel @Inject constructor(
                             paymentId = method.id,
                             paymentChange = method.noDigitsFieldValue
                         ),
-                        paymentSection = changeOrderingSection(
-                            clearErrors = false,
-                            section = state.paymentSection,
-                            menuItemIds = listOf(PAYMENT_MENU_ID),
-                            map = { orderingMenu ->
+                        paymentSection = state.paymentSection.updateItemsByIds(
+                            resetUntouchedErrors = false,
+                            itemsIdsToTransform = listOf(PAYMENT_MENU_ID),
+                            transform = { orderingMenu ->
                                 orderingMenu.copy(
                                     error = false,
                                     image = method.image,
@@ -663,7 +644,7 @@ class OrderingFlowViewModel @Inject constructor(
 
         updateState { updated }
 
-        fetchSmartOrderingDetails().onSuccess { orderingDetailsModel ->
+        fetchOrderingDetailsByState().onSuccess { orderingDetailsModel ->
             updateState { state ->
                 state.copy(
                     totals = orderingDetailsModel.totals.mapToUi(),
@@ -725,9 +706,7 @@ class OrderingFlowViewModel @Inject constructor(
         val uiState: OrderingUiState = OrderingUiState.Loading,
         val showRefreshIndicator: Boolean = false,
         val ordering: OrderingUi = OrderingUi.Empty,
-    ) : State {
-
-    }
+    ) : State
 
     sealed class OrderingEvents : Event {
         data object GoBack : OrderingEvents()
