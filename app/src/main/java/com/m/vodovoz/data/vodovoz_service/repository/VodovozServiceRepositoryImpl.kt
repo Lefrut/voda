@@ -434,7 +434,6 @@ class VodovozServiceRepositoryImpl @Inject constructor(
         useBonuses: Boolean?,
         useBalance: Boolean?,
         bonuses: Int?,
-        message: String?,
         params: Map<String, String>?,
     ): Flow<Result<VodovozPlaceholderModel>> {
         return executeRequest(
@@ -453,7 +452,6 @@ class VodovozServiceRepositoryImpl @Inject constructor(
                     coupon = coupon,
                     deviceInfo = deviceInfo,
                     queries = params,
-                    message = message,
                     useBalance = VodovozBoolean.from(useBalance).value,
                     useBonuses = VodovozBoolean.from(useBonuses).value,
                     bonuses = bonuses

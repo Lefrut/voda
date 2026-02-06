@@ -153,7 +153,6 @@ interface VodovozServiceRepository {
         useBonuses: Boolean?,
         useBalance: Boolean?,
         bonuses: Int?,
-        message: String? = null,
         params: Map<String, String>?,
     ): FlowResult<VodovozPlaceholderModel>
 

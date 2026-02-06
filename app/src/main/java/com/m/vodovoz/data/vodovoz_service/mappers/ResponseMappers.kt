@@ -131,6 +131,7 @@ inline fun <reified T : Any, R : Any> executeRequest(
         val finalResult = bodyResult.mapCatching { body ->
             mapper(body)
         }.recoverCatching {
+            debugLog { it.stackTraceToString() }
             fail(Response.error(errorCode, stringBody.jsonToResponseBody())).getOrThrow()
         }
 

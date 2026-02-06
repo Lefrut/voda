@@ -153,7 +153,6 @@ interface VodovozService {
         @Query("kupon") coupon: String?,
         @Query("device", encoded = true) deviceInfo: String?,
         @Query("driver") notifyDriverId: String?,
-        @Query("comment") message: String?,
         @Query(PaymentMethodItemModel.BALANCE_ID) useBalance: String?,
         @Query(PaymentMethodItemModel.BONUSES_ID) useBonuses: String?,
         @Query(FieldModel.BONUS_ID) bonuses: Int?,

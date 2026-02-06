@@ -11,5 +11,5 @@ data class PROFILE_MENO_OKNO_ID_DTO(
     @Json(name = "OPISANIE")
     val OPISANIE: String?,
     @Json(name = "MENU")
-    val MENU: List<CHAT_MENU_DTO?>?
+    val MENU: List<CHAT_MENU_DTO>?
 )

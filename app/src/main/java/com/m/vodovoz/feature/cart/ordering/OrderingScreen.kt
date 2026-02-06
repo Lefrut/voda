@@ -7,6 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.m.vodovoz.design_system.composables.bottom_sheet.FieldBottomSheet
 import com.m.vodovoz.design_system.composables.button.VodovozButton
 import com.m.vodovoz.design_system.composables.floating.BottomFloatingContainer
 import com.m.vodovoz.design_system.composables.placeholders.LoadingPlaceholder
@@ -39,7 +40,7 @@ fun OrderingScreen(
         bottomBar = {
             val button = viewState.button
 
-            if(uiState == OrderingFlowViewModel.OrderingUiState.Order){
+            if (uiState == OrderingFlowViewModel.OrderingUiState.Order) {
                 BottomFloatingContainer {
                     VodovozButton(
                         modifier = Modifier.padding(horizontal = 16.dp),
@@ -77,26 +78,32 @@ fun OrderingScreen(
                 OrderingFlowViewModel.OrderingUiState.Order -> {
                     OrderingBody(
                         scrollState = scrollState,
-                        comment = viewState.comment,
                         paymentSection = viewState.paymentSection,
                         notifySection = viewState.notifySection,
                         selectedNotifyItem = viewState.selectedNotifyItem,
                         recipientSection = viewState.recipientSection,
                         totals = viewState.totals,
                         onRecipientItemClick = { orderRecipientItem ->
-                            viewModel.navigateByRecipientItem(orderRecipientItem)
+                            viewModel.handleRecipientItemClick(orderRecipientItem)
                         },
                         onNotifyItemSelect = { notifyItem ->
                             viewModel.selectNotifyItem(notifyItem)
-                        },
-                        onCommentChange = { field, updatedField ->
-                            viewModel.changeComment(field, updatedField)
                         },
                         onPaymentButtonClick = { orderPaymentItem ->
                             viewModel.navigateByPaymentItem(orderPaymentItem)
                         },
                         onPhoneFieldChange = viewModel::changeExtraPhoneField
                     )
+
+                    val commentPopupWindow = viewState.commentPopupWindow
+                    if (viewState.showCommentBottomSheet && commentPopupWindow != null) {
+                        FieldBottomSheet(
+                            data = commentPopupWindow,
+                            onDismissRequest = viewModel::hideCommentBottomSheet,
+                            onFieldChange = viewModel::changeComment,
+                            onButtonClick = viewModel::setPopupWindowCommentInMenu
+                        )
+                    }
 
                 }
 

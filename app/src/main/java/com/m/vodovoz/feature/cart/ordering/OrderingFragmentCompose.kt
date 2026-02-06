@@ -133,7 +133,7 @@ class OrderingFragment : Fragment() {
 
             backEntrySavedStateHandle?.apply {
                 remove<AddressUi>("back_address")?.let { address ->
-                    viewModel.refreshOrderIfEmptyAddress(address)
+                    viewModel.resetOrderIfEmptyAddress(address)
                 }
 
                 remove<AddressUi>("address")?.let { address ->

@@ -15,6 +15,8 @@ data class FieldModel(
     companion object{
         const val CHANGE_ID = "oplata"
         const val BONUS_ID = "bonusoplata"
+
+        const val COMMENT_ID = "comment"
     }
 }
 
