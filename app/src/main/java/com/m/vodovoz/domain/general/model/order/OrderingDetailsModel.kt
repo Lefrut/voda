@@ -21,7 +21,7 @@ data class OrderingDetailsModel(
         const val PAYMENT_MENU = "oplata"
         const val CALL_YOU_MENU = "vampozvonit"
 
-        const val COMMENT_MENU = "komment"
+        const val COMMENT_MENU = "comment"
 
         const val DOOR_MENU = "dveri"
     }

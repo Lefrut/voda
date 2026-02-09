@@ -103,7 +103,7 @@ private fun OrderRecipientItem(
                     text = item.description,
                     color = if (item.error) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.surfaceTint,
                     style = MaterialTheme.typography.labelSmall,
-                    maxLines = 1,
+                    maxLines = 3,
                     overflow = TextOverflow.Ellipsis
                 )
             }

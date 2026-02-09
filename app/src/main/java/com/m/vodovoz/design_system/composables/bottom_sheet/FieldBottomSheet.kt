@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.sp
 import com.m.vodovoz.R
 import com.m.vodovoz.design_system.composables.button.VodovozButton
 import com.m.vodovoz.design_system.composables.button.VodovozButtonDefaults
+import com.m.vodovoz.design_system.composables.button.VodovozButtonsColumn
 import com.m.vodovoz.design_system.composables.text_fields.VodovozTextField
 import com.m.vodovoz.design_system.model.widgets.FieldPopupWindowUi
 import com.m.vodovoz.design_system.model.widgets.FieldUi
@@ -57,7 +58,7 @@ fun FieldBottomSheet(
                 )
             }
 
-            if(description.isNotEmpty()){
+            if (description.isNotEmpty()) {
                 Text(
                     modifier = Modifier.padding(top = 8.dp),
                     text = description,
@@ -74,13 +75,15 @@ fun FieldBottomSheet(
                 onFieldChange = onFieldChange
             )
 
-            VodovozButton(
-                modifier = Modifier.padding(top = 20.dp),
-                text = stringResource(id = R.string.save),
-                onClick = onButtonClick,
-                colors = VodovozButtonDefaults.secondaryColors()
-            )
 
+
+            VodovozButtonsColumn(
+                buttons = listOf(data.button),
+                modifier = Modifier.padding(top = 20.dp),
+                onButtonClick = {
+                    onButtonClick()
+                }
+            )
 
             Spacer(modifier = Modifier.height(16.dp))
         }

@@ -93,9 +93,6 @@ class OrderingFlowViewModel @Inject constructor(
                 s.copy(
                     title = orderingDetails.title,
                     paymentSection = orderingDetails.paymentSection.toUi { items ->
-                        items.mapToUi()
-                    },
-                    recipientSection = orderingDetails.recipientSection.toUi { items ->
                         items.mapToUi().map { menuItemUi ->
                             if (menuItemUi.id == OrderingDetailsModel.CALL_YOU_MENU && menuItemUi.value != null) {
                                 updateState { s ->
@@ -105,8 +102,13 @@ class OrderingFlowViewModel @Inject constructor(
                                         )
                                     )
                                 }
-                                menuItemUi
-                            } else if (menuItemUi.id == OrderingDetailsModel.ADDRESS_MENU && addressMenuItem != null) {
+                            }
+                            menuItemUi
+                        }
+                    },
+                    recipientSection = orderingDetails.recipientSection.toUi { items ->
+                        items.mapToUi().map { menuItemUi ->
+                            if (menuItemUi.id == OrderingDetailsModel.ADDRESS_MENU && addressMenuItem != null) {
                                 addressMenuItem
                             } else menuItemUi
                         }
