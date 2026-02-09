@@ -5,6 +5,7 @@ import androidx.compose.runtime.Stable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.m.vodovoz.R
+import com.m.vodovoz.common.cart.CartManager
 import com.m.vodovoz.common.model.VodovozBoolean
 import com.m.vodovoz.common.model.boolean
 import com.m.vodovoz.common.model.from
@@ -58,6 +59,7 @@ class OrderingFlowViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val resourcesProvider: ResourcesProvider,
+    private val cartManager: CartManager
 ) : MviViewModel<OrderingFlowViewModel.OrderingState, OrderingFlowViewModel.OrderingEvents>(
     OrderingState()
 ) {
@@ -359,6 +361,7 @@ class OrderingFlowViewModel @Inject constructor(
                 updateState { s ->
                     s.copy(uiState = OrderingUiState.Success(placeholder.toUi()))
                 }
+                cartManager.clearCart()
                 sendEvent(OrderingEvents.UpdateBottomCart)
             }
 
