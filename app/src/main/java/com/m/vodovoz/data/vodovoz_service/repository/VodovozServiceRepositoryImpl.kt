@@ -299,13 +299,14 @@ class VodovozServiceRepositoryImpl @Inject constructor(
     override fun getPaymentMethodDetails(
         addressId: Long,
         date: LocalDate,
+        queryParams: Map<String, String>,
     ): Flow<Result<PaymentMethodDetailsModel>> {
         return executeRequest(
             request = {
                 vodovozService.getPaymentMethodDetails(
-
                     addressId = addressId,
-                    date = VodovozDateFormatters.DMY.format(date)
+                    date = VodovozDateFormatters.DMY.format(date),
+                    queryParams = queryParams
                 )
             },
             mapper = {
@@ -317,13 +318,14 @@ class VodovozServiceRepositoryImpl @Inject constructor(
     override fun getDeliveryDateDetails(
         addressId: Long,
         date: LocalDate?,
+        queryParams: Map<String, String>,
     ): Flow<Result<DeliveryDateDetailsModel>> {
         return executeRequest(
             request = {
                 vodovozService.getDeliveryDateDetails(
-
                     addressId = addressId,
-                    date = date?.format(VodovozDateFormatters.DMY)
+                    date = date?.format(VodovozDateFormatters.DMY),
+                    queryParams = queryParams
                 )
             },
             mapper = {
@@ -380,10 +382,10 @@ class VodovozServiceRepositoryImpl @Inject constructor(
         )
     }
 
-    override fun getOrderCallYouDetails(addressId: Long): Flow<Result<OrderCallYouDetailsModel>> {
+    override fun getOrderCallYouDetails(addressId: Long, queryParams: Map<String, String>): Flow<Result<OrderCallYouDetailsModel>> {
         return executeRequest(
             request = {
-                vodovozService.getOrderCallYouDetails(addressId)
+                vodovozService.getOrderCallYouDetails(addressId, queryParams)
             },
             mapper = {
                 it.data!!.toDomain()
@@ -399,6 +401,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
         useBonuses: Boolean?,
         useBalance: Boolean?,
         bonuses: Int?,
+        queryParams: Map<String, String>,
     ): Flow<Result<OrderingDetailsModel>> {
         return executeRequest(
             request = {
@@ -409,7 +412,8 @@ class VodovozServiceRepositoryImpl @Inject constructor(
                     coupon = coupon,
                     useBalance = VodovozBoolean.from(useBonuses).value,
                     useBonuses = VodovozBoolean.from(useBalance).value,
-                    bonuses = bonuses
+                    bonuses = bonuses,
+                    queryParams = queryParams
                 )
             },
             mapper = {
@@ -427,7 +431,6 @@ class VodovozServiceRepositoryImpl @Inject constructor(
         userEmail: String?,
         paymentMethodId: Long,
         paymentChange: String?,
-        callYouId: Long?,
         coupon: String?,
         deviceInfo: String?,
         notifyDriverId: String?,
@@ -448,7 +451,6 @@ class VodovozServiceRepositoryImpl @Inject constructor(
                     paymentMethodId = paymentMethodId,
                     paymentChange = paymentChange,
                     notifyDriverId = notifyDriverId,
-                    callYouId = callYouId,
                     coupon = coupon,
                     deviceInfo = deviceInfo,
                     queries = params,

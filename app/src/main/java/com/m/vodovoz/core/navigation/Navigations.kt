@@ -3,6 +3,7 @@ package com.m.vodovoz.core.navigation
 import android.os.Bundle
 import android.view.View
 import androidx.core.os.bundleOf
+import androidx.lifecycle.SavedStateHandle
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
 import androidx.navigation.NavOptionsBuilder
@@ -22,6 +23,7 @@ import com.m.vodovoz.feature.buy_certificate.model.FAQUi
 import com.m.vodovoz.feature.cart.bottles.model.BottleUi
 import com.m.vodovoz.feature.cart.model.CartPresentPopupWindowUi
 import com.m.vodovoz.feature.cart.model.CartPresentUi
+import com.m.vodovoz.feature.cart.ordering.OrderingFlowViewModel
 import com.m.vodovoz.feature.home.model.CategoryUi
 import com.m.vodovoz.feature.map.model.MapAddressUi
 import com.m.vodovoz.feature.product_catalog.ProductCatalogFragment
@@ -270,6 +272,7 @@ fun NavController.navigateToDeliveryDate(
     date: String? = null,
     timeInterval: String? = null,
     navOptions: NavOptions? = null,
+    queryParams: Map<String, String>
 ) {
     navigate(
         R.id.deliveryDateFragment,
@@ -277,7 +280,8 @@ fun NavController.navigateToDeliveryDate(
             "addressId" to addressId,
             "date" to date,
             "timeInterval" to timeInterval,
-            "earlierDelivery" to earlierDelivery
+            "earlierDelivery" to earlierDelivery,
+            CommonArgs.queryParamsTo(queryParams)
         ),
         navOptions ?: navOptions {
             slideAnim()
@@ -293,6 +297,7 @@ fun NavController.navigateToPaymentMethod(
     balance: Boolean? = null,
     bonuses: Boolean?,
     bonusesValue: Int?,
+    queryParams: Map<String, String>,
 ) {
     navigate(
         R.id.paymentMethodFragment,
@@ -303,7 +308,8 @@ fun NavController.navigateToPaymentMethod(
             "paymentChange" to paymentChange,
             "balance" to balance,
             "bonuses" to bonuses,
-            "bonusesValue" to bonusesValue
+            "bonusesValue" to bonusesValue,
+            CommonArgs.queryParamsTo(queryParams)
         ),
         navOptions {
             slideAnim()
@@ -311,12 +317,32 @@ fun NavController.navigateToPaymentMethod(
     )
 }
 
-fun NavController.navigateToOrderCallYou(addressId: Long, callYouId: String? = null) {
+
+data object CommonArgs {
+
+    const val QUERY_PARAMS: String = "queryParams"
+}
+
+
+fun CommonArgs.queryParamsTo(second: Map<String, String>): Pair<String, Map<String, String>> {
+    return QUERY_PARAMS to second
+}
+
+fun SavedStateHandle.getQueryParams(): Map<String, String> {
+    return get<Map<String, String>>(CommonArgs.QUERY_PARAMS).orEmpty()
+}
+
+fun NavController.navigateToOrderCallYou(
+    addressId: Long,
+    callYouId: String? = null,
+    queryParams: Map<String, String>
+) {
     navigate(
         R.id.orderCallYouFragment,
         bundleOf(
             "addressId" to addressId,
-            "callYouId" to callYouId
+            "callYouId" to callYouId,
+            CommonArgs.queryParamsTo(queryParams)
         ),
         navOptions {
             slideAnim()

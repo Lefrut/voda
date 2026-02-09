@@ -103,11 +103,13 @@ interface VodovozServiceRepository {
     fun getPaymentMethodDetails(
         addressId: Long,
         date: LocalDate,
+        queryParams: Map<String, String>,
     ): FlowResult<PaymentMethodDetailsModel>
 
     fun getDeliveryDateDetails(
         addressId: Long,
         date: LocalDate? = null,
+        queryParams: Map<String, String>,
     ): FlowResult<DeliveryDateDetailsModel>
 
     fun getOrderRecipientDetails(
@@ -125,6 +127,7 @@ interface VodovozServiceRepository {
 
     fun getOrderCallYouDetails(
         addressId: Long,
+        queryParams: Map<String, String>,
     ): FlowResult<OrderCallYouDetailsModel>
 
     fun getOrderingDetails(
@@ -134,7 +137,8 @@ interface VodovozServiceRepository {
         coupon: String? = null,
         useBonuses: Boolean? = false,
         useBalance: Boolean? = false,
-        bonuses: Int? = null
+        bonuses: Int? = null,
+        queryParams: Map<String, String>
     ): FlowResult<OrderingDetailsModel>
 
     fun doOrder(
@@ -146,7 +150,6 @@ interface VodovozServiceRepository {
         userEmail: String?,
         paymentMethodId: Long,
         paymentChange: String?,
-        callYouId: Long? = null,
         coupon: String?,
         deviceInfo: String?,
         notifyDriverId: String? = null,

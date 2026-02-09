@@ -15,7 +15,6 @@ data class OrderingUi(
     val paymentBalance: Boolean = false,
     val paymentBonuses: Boolean = false,
     val paymentBonusesValue: Int = 0,
-    val callYouId: String?,
     val earlierDelivery: Pair<String, String>?,
 ) {
     companion object {
@@ -28,10 +27,19 @@ data class OrderingUi(
             recipientEmail = null,
             paymentId = null,
             paymentChange = null,
-            callYouId = null,
             paymentBalance = false,
             paymentBonuses = false,
             earlierDelivery = null
         )
     }
+}
+
+fun OrderingUi.copyWithoutPayment(): OrderingUi {
+    return copy(
+        paymentBalance = false,
+        paymentChange = null,
+        paymentId = null,
+        paymentBonusesValue = 0,
+        paymentBonuses = false
+    )
 }

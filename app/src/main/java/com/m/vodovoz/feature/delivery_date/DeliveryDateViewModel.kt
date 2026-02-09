@@ -3,6 +3,7 @@ package com.m.vodovoz.feature.delivery_date
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import com.m.vodovoz.core.navigation.getQueryParams
 import com.m.vodovoz.design_system.model.SectionUi
 import com.m.vodovoz.design_system.model.toUi
 import com.m.vodovoz.design_system.model.widgets.CheckboxUi
@@ -38,6 +39,8 @@ class DeliveryDateViewModel @Inject constructor(
 
     private val earlierDelivery = savedStateHandle.get<Boolean>("earlierDelivery")
 
+    private val queryParams = savedStateHandle.getQueryParams()
+
     init {
         if (deliveryDate != null && timeInterval != null) {
             updateState { s ->
@@ -64,7 +67,8 @@ class DeliveryDateViewModel @Inject constructor(
 
         val deliveryDateDetailsResult = vodovozServiceRepository.getDeliveryDateDetails(
             addressId = addressId,
-            date = selectedLocalDate
+            date = selectedLocalDate,
+            queryParams = queryParams
         ).singleResult()
 
         deliveryDateDetailsResult.onSuccess { deliveryDateDetails ->

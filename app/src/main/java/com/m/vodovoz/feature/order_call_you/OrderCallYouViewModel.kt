@@ -3,6 +3,7 @@ package com.m.vodovoz.feature.order_call_you
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import com.m.vodovoz.core.navigation.getQueryParams
 import com.m.vodovoz.design_system.model.ColorfulButtonUi
 import com.m.vodovoz.design_system.model.toUi
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
@@ -28,6 +29,8 @@ class OrderCallYouViewModel @Inject constructor(
 
     private val callYouId: String? = savedStateHandle.get<String>("callYouId")
 
+    private val queryParams: Map<String, String> = savedStateHandle.getQueryParams()
+
     init {
         fetchOrderCallYouDetails()
     }
@@ -42,7 +45,7 @@ class OrderCallYouViewModel @Inject constructor(
         }
 
         val callYouDetailsResult =
-            vodovozServiceRepository.getOrderCallYouDetails(addressId).singleResult()
+            vodovozServiceRepository.getOrderCallYouDetails(addressId, queryParams).singleResult()
 
         callYouDetailsResult.onSuccess { callYouDetails ->
 

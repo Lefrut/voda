@@ -5,6 +5,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.m.vodovoz.R
 import com.m.vodovoz.common.resources.ResourcesProvider
+import com.m.vodovoz.core.navigation.getQueryParams
 import com.m.vodovoz.design_system.model.toUi
 import com.m.vodovoz.design_system.model.widgets.FieldUi
 import com.m.vodovoz.design_system.model.withItems
@@ -43,6 +44,8 @@ class PaymentMethodViewModel @Inject constructor(
     private val useBonuses: Boolean? = savedStateHandle["bonuses"]
     private val bonusesValue: Int? = savedStateHandle["bonusesValue"]
 
+    private val queryParams = savedStateHandle.getQueryParams()
+
     fun navigateBack() = viewModelScope.launch {
         sendEvent(PaymentMethodEvent.GoBack)
     }
@@ -53,7 +56,7 @@ class PaymentMethodViewModel @Inject constructor(
 
     fun fetchPaymentMethodDetails() = viewModelScope.launch {
         val paymentDetailsResult = vodovozServiceRepository.getPaymentMethodDetails(
-            addressId = addressId, date = orderDate
+            addressId = addressId, date = orderDate, queryParams = queryParams
         ).singleResult()
 
         paymentDetailsResult.onSuccess { paymentDetails ->
