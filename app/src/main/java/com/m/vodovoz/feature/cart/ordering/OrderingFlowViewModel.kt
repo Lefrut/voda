@@ -208,9 +208,20 @@ class OrderingFlowViewModel @Inject constructor(
                 }
 
                 fetchOrderingDetailsByState().onSuccess { orderingDetails ->
+                    val callYouMenuItem =
+                        stateSnapshot.getMenuById(OrderingDetailsModel.CALL_YOU_MENU)
+
                     updateState { s ->
                         s.copy(
-                            paymentSection = orderingDetails.paymentSection.toUi { it.mapToUi() },
+                            paymentSection = orderingDetails.paymentSection.toUi {
+                                it.mapToUi().map { itemUi ->
+                                    if (callYouMenuItem != null && itemUi.id == callYouMenuItem.id) {
+                                        callYouMenuItem
+                                    } else {
+                                        itemUi
+                                    }
+                                }
+                            },
                         )
                     }
                 }
