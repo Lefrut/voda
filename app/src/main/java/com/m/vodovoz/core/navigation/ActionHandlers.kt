@@ -121,10 +121,7 @@ fun BaseVodovozAction.activate(
         }
 
         is VodovozAction.UrlWithCookie -> {
-            val webCookieManager = CookieManager.getInstance()
-            webCookieManager.acceptCookie()
-            webCookieManager.setCookie(VodovozWebConfig.VODOVOZ_URL, cookie)
-            navController.navigateToWebView(url, " ")
+            context?.openUrl(url)
         }
     }
 }
