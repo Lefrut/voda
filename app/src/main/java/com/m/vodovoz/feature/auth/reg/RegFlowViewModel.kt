@@ -6,7 +6,6 @@ import androidx.lifecycle.viewModelScope
 import com.m.vodovoz.R
 import com.m.vodovoz.common.account.AccountManager
 import com.m.vodovoz.common.account.LoginManager
-import com.m.vodovoz.common.agreement.AgreementController
 import com.m.vodovoz.common.resources.ResourcesProvider
 import com.m.vodovoz.design_system.model.ColorfulButtonUi
 import com.m.vodovoz.design_system.model.mapToUi
@@ -81,7 +80,7 @@ class RegFlowViewModel @Inject constructor(
             getSupportingText = { field -> field.getErrorText { id -> resourceProvider.getString(id) } }
         ) { updatedFields, _ ->
             updateState { s ->
-                s.copy(
+                s.withAuthDetails(
                     authDetails = s.authDetails.copy(
                         fields = updatedFields,
                         buttons = s.buttons.updateButton(REGISTER_BUTTON) { btn ->
@@ -97,7 +96,7 @@ class RegFlowViewModel @Inject constructor(
 
 
         updateState { s ->
-            s.copy(
+            s.withAuthDetails(
                 authDetails = s.authDetails.copy(
                     buttons = s.buttons.updateButton(REGISTER_BUTTON) { btn ->
                         btn.copy(loading = true)
@@ -130,7 +129,7 @@ class RegFlowViewModel @Inject constructor(
             )
 
             updateState { s ->
-                s.copy(
+                s.withAuthDetails(
                     authDetails = s.authDetails.copy(
                         buttons = s.buttons.updateButton(REGISTER_BUTTON) { btn ->
                             btn.copy(loading = false, enabled = false)
@@ -150,7 +149,7 @@ class RegFlowViewModel @Inject constructor(
             }
 
             updateState { s ->
-                s.copy(
+                s.withAuthDetails(
                     authDetails = s.authDetails.copy(
                         buttons = s.buttons.updateButton(REGISTER_BUTTON) { btn ->
                             btn.copy(loading = false, enabled = t !is ValidationException)
@@ -179,7 +178,7 @@ class RegFlowViewModel @Inject constructor(
             validators = listOf(PhoneNumberValidator, EmptyTextValidator)
         ) { fields, isValid ->
             updateState { s ->
-                s.copy(
+                s.withAuthDetails(
                     authDetails = s.authDetails.copy(
                         fields = fields,
                         buttons = s.buttons.updateButton(REGISTER_BUTTON) { btn ->
@@ -222,7 +221,7 @@ class RegFlowViewModel @Inject constructor(
                 checkbox, updatedCheckbox
             )
 
-            s.copy(
+            s.withAuthDetails(
                 authDetails = authDetails.copy(
                     checkboxes = updatedCheckboxes,
                     buttons = authDetails.buttons.updateButton(REGISTER_BUTTON) { button ->
@@ -255,7 +254,11 @@ class RegFlowViewModel @Inject constructor(
     data class RegState(
         val uiState: RegUiState = RegUiState.Loading,
         override val authDetails: AuthDetailsUi = AuthDetailsUi.Empty,
-    ) : AuthState(authDetails)
+    ) : AuthState<RegState>(authDetails) {
+        override fun withAuthDetails(authDetails: AuthDetailsUi): RegState =
+            copy(authDetails = authDetails)
+
+    }
 
     @Stable
     sealed interface RegUiState {

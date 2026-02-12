@@ -1,7 +1,9 @@
 package com.m.vodovoz.feature.auth.model
 
+import androidx.annotation.StringRes
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
+import com.m.vodovoz.R
 import com.m.vodovoz.design_system.model.ColorfulButtonUi
 import com.m.vodovoz.design_system.model.mapToUi
 import com.m.vodovoz.design_system.model.widgets.CheckboxUi
@@ -11,6 +13,7 @@ import com.m.vodovoz.design_system.model.widgets.FieldUi
 import com.m.vodovoz.design_system.model.widgets.NameValidator
 import com.m.vodovoz.design_system.model.widgets.NoRequiredValidator
 import com.m.vodovoz.design_system.model.widgets.PhoneNumberValidator
+import com.m.vodovoz.design_system.model.widgets.SwitchUi
 import com.m.vodovoz.design_system.model.widgets.mapToUi
 import com.m.vodovoz.domain.general.model.user.AuthDetailsModel
 import com.m.vodovoz.ui.mvi.State
@@ -24,7 +27,9 @@ data class AuthDetailsUi(
     val agreementCheckboxId: String?,
     val checkboxes: List<CheckboxUi>,
     val warning: String = "",
-    val waringTitles: List<String> = emptyList()
+    val waringTitles: List<String> = emptyList(),
+    val accountTypeSwitches: List<SwitchUi> = emptyList(),
+    val showForgotPassword: Boolean = false
 ) {
 
     companion object {
@@ -41,14 +46,46 @@ data class AuthDetailsUi(
 
 }
 
+enum class AccountTypeSwtichInfo(
+    val id: String,
+    @field:StringRes
+    val nameId: Int,
+    val value: Boolean = false
+) {
+    Individual(
+        id = "1",
+        nameId = R.string.personal
+    ),
+    Commercial(
+        id = "2",
+        nameId = R.string.for_buisnes
+    )
+}
+
+
+fun List<AccountTypeSwtichInfo>.toSwitches(getStringResource: (Int) -> String): List<SwitchUi> {
+    return map {
+        SwitchUi(
+            id = it.id,
+            name = getStringResource(it.nameId),
+            value = it.value,
+            enabled = true
+        )
+    }
+}
+
 @Stable
-abstract class AuthState(
+abstract class AuthState<S : AuthState<S>>(
     open val authDetails: AuthDetailsUi,
 ) : State {
 
     val fields get() = authDetails.fields
     val buttons get() = authDetails.buttons
     val checkboxes get() = authDetails.checkboxes
+
+
+    abstract fun withAuthDetails(authDetails: AuthDetailsUi): S
+
 }
 
 fun AuthDetailsUi.agreementIsCheckedWhenAvailable(): Boolean {

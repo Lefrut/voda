@@ -5,33 +5,31 @@ import androidx.compose.runtime.Stable
 import androidx.lifecycle.viewModelScope
 import com.m.vodovoz.R
 import com.m.vodovoz.common.account.AccountManager
-import com.m.vodovoz.common.agreement.AgreementController
 import com.m.vodovoz.common.model.GlobalAppExtraAgreement
 import com.m.vodovoz.common.resources.ResourcesProvider
 import com.m.vodovoz.design_system.model.ColorfulButtonUi
 import com.m.vodovoz.design_system.model.updateButton
-import com.m.vodovoz.design_system.model.widgets.CheckboxUi
-import com.m.vodovoz.design_system.model.widgets.FieldUi
-import com.m.vodovoz.design_system.model.widgets.checkFields
-import com.m.vodovoz.design_system.model.widgets.updateCheckbox
 import com.m.vodovoz.design_system.model.widgets.updateField
-import com.m.vodovoz.design_system.model.widgets.updateFieldAndResetError
 import com.m.vodovoz.domain.general.model.exceptions.TooManyRequestsException
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
+import com.m.vodovoz.feature.auth.model.AbstractAuthViewModel
+import com.m.vodovoz.feature.auth.model.AccountTypeSwtichInfo
 import com.m.vodovoz.feature.auth.model.AuthDetailsUi
 import com.m.vodovoz.feature.auth.model.AuthState
-import com.m.vodovoz.feature.auth.model.agreementIsCheckedWhenAvailable
-import com.m.vodovoz.feature.auth.model.authValidators
+import com.m.vodovoz.feature.auth.model.toSwitches
 import com.m.vodovoz.feature.auth.model.toUi
 import com.m.vodovoz.feature.sitestate.SiteStateManager
 import com.m.vodovoz.ui.mvi.Event
-import com.m.vodovoz.ui.mvi.MviViewModel
-import com.m.vodovoz.util.extensions.extractLinksFromHtml
+import com.m.vodovoz.ui.mvi.launchInViewModelScope
 import com.m.vodovoz.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+
+
+private const val AUTH_BUTTON = "sms"
+private const val NAVIGATION_BUTTON = "auth"
 
 @HiltViewModel
 @Stable
@@ -39,14 +37,10 @@ class LoginFlowViewModel @Inject constructor(
     private val siteStateManager: SiteStateManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val resourcesProvider: ResourcesProvider,
-) : MviViewModel<LoginFlowViewModel.LoginState, LoginFlowViewModel.LoginEvents>(
-    LoginState()
+) : AbstractAuthViewModel<LoginFlowViewModel.LoginState, LoginFlowViewModel.LoginEvents>(
+    LoginState(), AUTH_BUTTON
 ) {
 
-    companion object {
-        private const val AUTH_BUTTON = "sms"
-        private const val NAVIGATION_BUTTON = "auth"
-    }
 
     init {
         fetchLoginDetails()
@@ -69,7 +63,10 @@ class LoginFlowViewModel @Inject constructor(
                             button.copy(enabled = false)
                         },
                         warning = GlobalAppExtraAgreement.html,
-                        waringTitles = GlobalAppExtraAgreement.titles
+                        waringTitles = GlobalAppExtraAgreement.titles,
+                        accountTypeSwitches = AccountTypeSwtichInfo.entries.toSwitches(
+                            resourcesProvider::getString
+                        )
                     ),
                     uiState = LoginUiState.Success,
                 )
@@ -88,7 +85,7 @@ class LoginFlowViewModel @Inject constructor(
         val phoneField = fields.firstOrNull() ?: return@launch
 
         updateState { s ->
-            s.copy(
+            s.withAuthDetails(
                 authDetails = s.authDetails.copy(
                     buttons = buttons.updateButton(AUTH_BUTTON) { btn ->
                         btn.copy(loading = true)
@@ -102,7 +99,7 @@ class LoginFlowViewModel @Inject constructor(
         } ?: kotlin.run {
             val lastField = fields.lastOrNull()
             updateState { s ->
-                s.copy(
+                s.withAuthDetails(
                     authDetails = s.authDetails.copy(
                         buttons = buttons.updateButton(AUTH_BUTTON) { btn ->
                             btn.copy(loading = false)
@@ -133,7 +130,7 @@ class LoginFlowViewModel @Inject constructor(
         ).singleResult()
 
         updateState { s ->
-            s.copy(
+            s.withAuthDetails(
                 authDetails = s.authDetails.copy(
                     buttons = buttons.updateButton(AUTH_BUTTON) { btn ->
                         btn.copy(loading = false)
@@ -154,20 +151,15 @@ class LoginFlowViewModel @Inject constructor(
                 }
 
                 else -> {
-                    updateState { s ->
-                        s.copy(
-                            authDetails = s.authDetails.copy(
-                                fields = updateFieldsErrorText(
-                                    resourcesProvider.getString(R.string.error_login)
-                                )
-                            )
+                    updateAuthDetails {
+                        copy(
+                            fields = fields.withLastFieldErrorText(resourcesProvider.getString(R.string.error_login))
                         )
                     }
-
                 }
             }
-        }.onSuccess {
-            sendEvent(LoginEvents.GoToLoginByPhone(phoneField.value, it.waitSeconds))
+        }.onSuccess { requestCodeModel ->
+            sendEvent(LoginEvents.GoToLoginByPhone(phoneField.value, requestCodeModel.waitSeconds))
         }
     }
 
@@ -175,59 +167,10 @@ class LoginFlowViewModel @Inject constructor(
         sendEvent(LoginEvents.GoBack)
     }
 
-    fun changeField(field: FieldUi, updatedField: FieldUi) = viewModelScope.launch {
-        updateState { s ->
-            val authDetails = s.authDetails
-            val updatedFields = s.fields.updateFieldAndResetError(field, updatedField)
-            s.copy(
-                authDetails = authDetails.copy(
-                    fields = updatedFields,
-                    buttons = s.buttons.updateButton(AUTH_BUTTON) { button ->
-                        button.copy(
-                            enabled = updatedFields.checkFields()
-                                    && s.checkboxes.agreementIsCheckedWhenAvailable(authDetails.agreementCheckboxId)
-                        )
-                    }
-                )
-            )
-        }
-
-        updateState { s ->
-            s.copy(
-                authDetails = s.authDetails.copy(
-                    fields = updateFieldsErrorText("")
-                )
-            )
-        }
-
-    }
-
-    fun openUrl(url: String, title: String) = viewModelScope.launch {
-        sendEvent(LoginEvents.GoToWebView(url, title))
-    }
-
-    private fun updateFieldsErrorText(errorText: String): List<FieldUi> {
-        val authDetails = stateSnapshot.authDetails
-        val fields = authDetails.fields
-        val lastField = fields.lastOrNull()
-
-        return lastField?.let {
-            fields.updateField(
-                lastField, lastField.copy(
-                    supportingText = errorText,
-                    isError = errorText.isNotBlank()
-                )
-            )
-        } ?: fields
-    }
 
     fun activateButton(button: ColorfulButtonUi) = viewModelScope.launch {
-        updateState { s ->
-            s.copy(
-                authDetails = s.authDetails.copy(
-                    fields = updateFieldsErrorText("")
-                )
-            )
+        updateAuthDetails {
+            copy(fields = fields.withLastFieldErrorText(""))
         }
 
         when (button.id) {
@@ -245,30 +188,37 @@ class LoginFlowViewModel @Inject constructor(
         }
     }
 
-    fun changeCheckbox(checkbox: CheckboxUi, updatedCheckbox: CheckboxUi) {
-        updateState { s ->
-            val authDetails = s.authDetails
-            val updatedCheckboxes = authDetails.checkboxes.updateCheckbox(
-                checkbox, updatedCheckbox
-            )
-
-            s.copy(
-                authDetails = authDetails.copy(
-                    checkboxes = updatedCheckboxes,
-                    buttons = authDetails.buttons.updateButton(AUTH_BUTTON) { button ->
-                        button.copy(
-                            enabled = authDetails.fields.checkFields(
-                                validators = AuthDetailsUi.authValidators()
-                            ) && updatedCheckboxes.agreementIsCheckedWhenAvailable(authDetails.agreementCheckboxId)
-                        )
-                    }
+    override fun clickButton(button: ColorfulButtonUi) {
+        launchInViewModelScope {
+            updateAuthDetails {
+                copy(
+                    fields = fields.withLastFieldErrorText("")
                 )
-            )
+            }
+
+            when (button.id) {
+                NAVIGATION_BUTTON -> {
+                    sendEvent(LoginEvents.GoToLoginByEmail)
+                }
+
+                AUTH_BUTTON -> {
+                    requestCode()
+                }
+
+                else -> {
+
+                }
+            }
+        }
+    }
+
+    override fun clickHyperlink(url: String, title: String) {
+        launchInViewModelScope {
+            sendEvent(LoginEvents.GoToWebView(url, title))
         }
     }
 
     sealed class LoginEvents : Event {
-        data object AuthSuccess : LoginEvents()
         data object GoBack : LoginEvents()
         data object GoToLoginByEmail : LoginEvents()
         data class GoToLoginByPhone(val phone: String, val waitSeconds: Int) : LoginEvents()
@@ -282,7 +232,10 @@ class LoginFlowViewModel @Inject constructor(
         val settings: AccountManager.UserSettings? = null,
         val uiState: LoginUiState = LoginUiState.Loading,
         override val authDetails: AuthDetailsUi = AuthDetailsUi.Empty,
-    ) : AuthState(authDetails)
+    ) : AuthState<LoginState>(authDetails) {
+        override fun withAuthDetails(authDetails: AuthDetailsUi) =
+            copy(authDetails = authDetails)
+    }
 
     @Stable
     sealed interface LoginUiState {

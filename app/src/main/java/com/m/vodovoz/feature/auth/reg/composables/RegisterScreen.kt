@@ -30,7 +30,8 @@ fun RegisterScreen(
             },
             onHyperlinkClick = { url, title ->
                 viewModel.navigateToWebView(url, title)
-            }
+            },
+            onSwichChange = { switch, updatedSwitch -> }
         )
         VodovozSnackbarHost(
             hostState = snackbarHostState,

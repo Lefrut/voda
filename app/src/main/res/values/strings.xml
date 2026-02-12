@@ -320,5 +320,8 @@
     <string name="reset_data">Сброс данных</string>
     <string name="you_sure_delete_data">Вы уверены, что хотите удалить данные?</string>
     <string name="follow">Перейти</string>
+    <string name="choose_account">Выберите аккаунт:</string>
+    <string name="personal">личный</string>
+    <string name="for_buisnes">для бизнеса</string>
 
 </resources>

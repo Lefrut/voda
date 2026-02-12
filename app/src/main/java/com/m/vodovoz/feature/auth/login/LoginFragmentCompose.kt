@@ -145,43 +145,29 @@ class LoginFragment : Fragment() {
 
 
     private suspend fun observeEvents(): Unit = viewModel.events.collect { events ->
+        val navController = findNavController()
         when (events) {
-            LoginFlowViewModel.LoginEvents.AuthSuccess -> {
-                profileViewModel.refresh()
-                flowViewModel.refresh()
-                cartFlowViewModel.refresh()
-                favoriteViewModel.refresh()
-
-                val redirect = tabManager.fetchAuthRedirect()
-                if (redirect == TabManager.DEFAULT_AUTH_REDIRECT) {
-                    findNavController().popBackStack()
-                } else {
-                    tabManager.selectTab(redirect)
-                    tabManager.setDefaultAuthRedirect()
-                }
-            }
-
             LoginFlowViewModel.LoginEvents.GoBack -> {
-                findNavController().popBackStack()
+                navController.popBackStack()
             }
 
             is LoginFlowViewModel.LoginEvents.GoToWebView -> {
-                findNavController().navigateToWebView(
+                navController.navigateToWebView(
                     url = events.url,
                     title = events.title,
                 )
             }
 
             LoginFlowViewModel.LoginEvents.GoToLoginByEmail -> {
-                findNavController().navigateToLoginByEmail()
+                navController.navigateToLoginByEmail()
             }
 
             LoginFlowViewModel.LoginEvents.GoToRegister -> {
-                findNavController().navigateToRegister()
+                navController.navigateToRegister()
             }
 
             is LoginFlowViewModel.LoginEvents.GoToLoginByPhone -> {
-                findNavController().navigateToLoginByPhone(events.phone, events.waitSeconds)
+                navController.navigateToLoginByPhone(events.phone, events.waitSeconds)
             }
         }
 

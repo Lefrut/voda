@@ -20,6 +20,9 @@ fun RecoverPasswordScreen(viewModel: RecoverPasswordViewModel, viewState: Recove
         },
         onHyperlinkClick = { url, title ->
             viewModel.navigateToWebView(url, title)
+        },
+        onSwichChange = { switch, updatedSwitch ->
+
         }
     )
 }

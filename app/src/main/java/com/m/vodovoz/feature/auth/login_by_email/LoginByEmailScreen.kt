@@ -26,6 +26,9 @@ fun LoginByEmailScreen(
         },
         onForgotPasswordClick = {
             viewModel.navigateToRecoveryPassword()
+        },
+        onSwichChange = { switch, updatedSwitch ->
+            viewModel.changeSwitch(switch, updatedSwitch)
         }
     )
 }

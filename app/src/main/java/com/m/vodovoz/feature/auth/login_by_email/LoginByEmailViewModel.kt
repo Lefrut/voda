@@ -10,11 +10,13 @@ import com.m.vodovoz.design_system.model.toUi
 import com.m.vodovoz.design_system.model.updateButton
 import com.m.vodovoz.design_system.model.widgets.CheckboxUi
 import com.m.vodovoz.design_system.model.widgets.FieldUi
+import com.m.vodovoz.design_system.model.widgets.SwitchUi
 import com.m.vodovoz.design_system.model.widgets.checkFields
 import com.m.vodovoz.design_system.model.widgets.updateCheckbox
 import com.m.vodovoz.design_system.model.widgets.updateField
 import com.m.vodovoz.design_system.model.widgets.updateFieldAndResetError
 import com.m.vodovoz.design_system.model.widgets.vodovozValidators
+import com.m.vodovoz.design_system.model.widgets.withUpdatedSwitch
 import com.m.vodovoz.domain.general.model.exceptions.ValidationException
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
 import com.m.vodovoz.feature.auth.login.composables.LoginByEmailUiState
@@ -54,7 +56,7 @@ class LoginByEmailViewModel @Inject constructor(
 
     private fun loginByEmail() = viewModelScope.launch {
         updateState { s ->
-            s.copy(
+            s.withAuthDetails(
                 authDetails = s.authDetails.copy(
                     buttons = s.buttons.updateButton(LOGIN_BY_EMAIL_BUTTON) { btn ->
                         btn.copy(loading = true)
@@ -79,7 +81,7 @@ class LoginByEmailViewModel @Inject constructor(
             )
 
             updateState { s ->
-                s.copy(
+                s.withAuthDetails(
                     authDetails = s.authDetails.copy(
                         buttons = s.buttons.updateButton(LOGIN_BY_EMAIL_BUTTON) { btn ->
                             btn.copy(
@@ -108,7 +110,7 @@ class LoginByEmailViewModel @Inject constructor(
 
                 val lastField = s.fields.lastOrNull()
 
-                s.copy(
+                s.withAuthDetails(
                     authDetails = s.authDetails.copy(
                         buttons = s.buttons.updateButton(LOGIN_BY_EMAIL_BUTTON) { btn ->
                             btn.copy(loading = false)
@@ -158,13 +160,13 @@ class LoginByEmailViewModel @Inject constructor(
             val authDetails = s.authDetails
             val updatedFields = s.fields.updateFieldAndResetError(field, updatedField)
 
-            s.copy(
+            s.withAuthDetails(
                 authDetails = authDetails.copy(
                     fields = updatedFields,
                     buttons = authDetails.buttons.updateButton(LOGIN_BY_EMAIL_BUTTON) { button ->
                         button.copy(
                             enabled = updatedFields.checkFields(
-                                validators = vodovozValidators
+                                validators = AuthDetailsUi.authValidators()
                             ) && s.checkboxes.agreementIsCheckedWhenAvailable(authDetails.agreementCheckboxId)
                         )
                     }
@@ -208,7 +210,7 @@ class LoginByEmailViewModel @Inject constructor(
                 checkbox, updatedCheckbox
             )
 
-            s.copy(
+            s.withAuthDetails(
                 authDetails = authDetails.copy(
                     checkboxes = updatedCheckboxes,
                     buttons = authDetails.buttons.updateButton(LOGIN_BY_EMAIL_BUTTON) { button ->
@@ -218,6 +220,19 @@ class LoginByEmailViewModel @Inject constructor(
                             ) && updatedCheckboxes.agreementIsCheckedWhenAvailable(authDetails.agreementCheckboxId)
                         )
                     }
+                )
+            )
+        }
+    }
+
+    fun changeSwitch(switch: SwitchUi, updatedSwitch: SwitchUi) = viewModelScope.launch {
+        updateState { s ->
+            val authDetails = s.authDetails
+            s.withAuthDetails(
+                authDetails = authDetails.copy(
+                    accountTypeSwitches = authDetails.accountTypeSwitches.withUpdatedSwitch(
+                        updatedSwitch = updatedSwitch
+                    )
                 )
             )
         }

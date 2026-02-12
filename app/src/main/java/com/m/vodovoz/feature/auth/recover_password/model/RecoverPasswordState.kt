@@ -10,4 +10,8 @@ import com.m.vodovoz.feature.auth.model.AuthState
 data class RecoverPasswordState(
     override val authDetails: AuthDetailsUi = AuthDetailsUi.Empty,
     val uiState: RecoverPasswordUiState = RecoverPasswordUiState.Loading
-): AuthState(authDetails)
+) : AuthState<RecoverPasswordState>(authDetails) {
+
+    override fun withAuthDetails(authDetails: AuthDetailsUi): RecoverPasswordState =
+        copy(authDetails = authDetails)
+}

@@ -18,6 +18,18 @@ data class SwitchUi(
     }
 }
 
+
+fun List<SwitchUi>.withUpdatedSwitch(updatedSwitch: SwitchUi): List<SwitchUi> {
+    return map { mapWidget ->
+        if (mapWidget.id == updatedSwitch.id) {
+            updatedSwitch
+        } else {
+            mapWidget
+        }
+    }
+
+}
+
 fun SwitchModel.toUi(): SwitchUi {
     return SwitchUi(
         id = id,
