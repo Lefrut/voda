@@ -163,28 +163,9 @@ class LoginFlowViewModel @Inject constructor(
         }
     }
 
-    fun navigateBack() = viewModelScope.launch {
-        sendEvent(LoginEvents.GoBack)
-    }
-
-
-    fun activateButton(button: ColorfulButtonUi) = viewModelScope.launch {
-        updateAuthDetails {
-            copy(fields = fields.withLastFieldErrorText(""))
-        }
-
-        when (button.id) {
-            NAVIGATION_BUTTON -> {
-                sendEvent(LoginEvents.GoToLoginByEmail)
-            }
-
-            AUTH_BUTTON -> {
-                requestCode()
-            }
-
-            else -> {
-
-            }
+    override fun onBackClick() {
+        launchInViewModelScope {
+            sendEvent(LoginEvents.GoBack)
         }
     }
 

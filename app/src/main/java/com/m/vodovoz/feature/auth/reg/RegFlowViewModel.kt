@@ -10,27 +10,23 @@ import com.m.vodovoz.common.resources.ResourcesProvider
 import com.m.vodovoz.design_system.model.ColorfulButtonUi
 import com.m.vodovoz.design_system.model.mapToUi
 import com.m.vodovoz.design_system.model.updateButton
-import com.m.vodovoz.design_system.model.widgets.CheckboxUi
-import com.m.vodovoz.design_system.model.widgets.EmptyTextValidator
-import com.m.vodovoz.design_system.model.widgets.FieldUi
-import com.m.vodovoz.design_system.model.widgets.PhoneNumberValidator
 import com.m.vodovoz.design_system.model.widgets.checkFields
 import com.m.vodovoz.design_system.model.widgets.getErrorText
-import com.m.vodovoz.design_system.model.widgets.updateCheckbox
-import com.m.vodovoz.design_system.model.widgets.updateFieldAndResetError
 import com.m.vodovoz.domain.general.model.exceptions.ValidationException
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
+import com.m.vodovoz.feature.auth.model.AbstractAuthViewModel
 import com.m.vodovoz.feature.auth.model.AuthDetailsUi
 import com.m.vodovoz.feature.auth.model.AuthState
-import com.m.vodovoz.feature.auth.model.agreementIsCheckedWhenAvailable
-import com.m.vodovoz.feature.auth.model.authValidators
 import com.m.vodovoz.feature.auth.model.toUi
 import com.m.vodovoz.ui.mvi.Event
-import com.m.vodovoz.ui.mvi.MviViewModel
+import com.m.vodovoz.ui.mvi.launchInViewModelScope
 import com.m.vodovoz.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+
+private const val REGISTER_BUTTON = "otpravka"
+private const val NAVIGATION_BUTTON = "auth"
 
 @HiltViewModel
 @Stable
@@ -39,12 +35,10 @@ class RegFlowViewModel @Inject constructor(
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val resourceProvider: ResourcesProvider,
     private val loginManager: LoginManager,
-) : MviViewModel<RegFlowViewModel.RegState, RegFlowViewModel.RegEvents>(RegState()) {
-
-    companion object {
-        const val REGISTER_BUTTON = "otpravka"
-        const val NAVIGATION_BUTTON = "auth"
-    }
+) : AbstractAuthViewModel<RegFlowViewModel.RegState, RegFlowViewModel.RegEvents>(
+    RegState(),
+    REGISTER_BUTTON
+) {
 
     init {
         fetchRegisterDetails()
@@ -165,75 +159,29 @@ class RegFlowViewModel @Inject constructor(
     }
 
 
-    fun navigateBack() = viewModelScope.launch {
-        sendEvent(RegEvents.GoBack)
-    }
-
-
-    fun changeField(field: FieldUi, updatedField: FieldUi) = viewModelScope.launch {
-        val updatedFields = stateSnapshot.fields.updateFieldAndResetError(field, updatedField)
-
-
-        updatedFields.checkFields(
-            validators = listOf(PhoneNumberValidator, EmptyTextValidator)
-        ) { fields, isValid ->
-            updateState { s ->
-                s.withAuthDetails(
-                    authDetails = s.authDetails.copy(
-                        fields = fields,
-                        buttons = s.buttons.updateButton(REGISTER_BUTTON) { btn ->
-                            btn.copy(enabled = isValid && s.authDetails.agreementIsCheckedWhenAvailable())
-                        }
-                    )
-                )
-            }
-        }
-    }
-
-    fun navigateToWebView(url: String, title: String) = viewModelScope.launch {
-        sendEvent(RegEvents.GoToWebView(url, title))
-    }
-
     private fun navigateToLoginByEmail() = viewModelScope.launch {
         sendEvent(RegEvents.GoToLoginByEmail)
     }
 
-    fun activateButton(button: ColorfulButtonUi) = viewModelScope.launch {
-        when (button.id) {
-            REGISTER_BUTTON -> {
-                register()
-            }
+    override fun onBackClick() {
+        launchInViewModelScope {
+            sendEvent(RegEvents.GoBack)
+        }
+    }
 
-            NAVIGATION_BUTTON -> {
-                navigateToLoginByEmail()
-            }
-
-            else -> {
-
+    override fun clickButton(button: ColorfulButtonUi) {
+        launchInViewModelScope {
+            when (button.id) {
+                REGISTER_BUTTON -> register()
+                NAVIGATION_BUTTON -> navigateToLoginByEmail()
+                else -> Unit
             }
         }
     }
 
-    fun changeCheckbox(checkbox: CheckboxUi, updatedCheckbox: CheckboxUi) {
-        updateState { s ->
-            val authDetails = s.authDetails
-            val updatedCheckboxes = authDetails.checkboxes.updateCheckbox(
-                checkbox, updatedCheckbox
-            )
-
-            s.withAuthDetails(
-                authDetails = authDetails.copy(
-                    checkboxes = updatedCheckboxes,
-                    buttons = authDetails.buttons.updateButton(REGISTER_BUTTON) { button ->
-                        button.copy(
-                            enabled = authDetails.fields.checkFields(
-                                validators = AuthDetailsUi.authValidators()
-                            ) && authDetails.copy(checkboxes = updatedCheckboxes)
-                                .agreementIsCheckedWhenAvailable()
-                        )
-                    }
-                )
-            )
+    override fun clickHyperlink(url: String, title: String) {
+        launchInViewModelScope {
+            sendEvent(RegEvents.GoToWebView(url, title))
         }
     }
 

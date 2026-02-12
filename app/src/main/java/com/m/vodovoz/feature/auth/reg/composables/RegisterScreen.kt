@@ -18,20 +18,7 @@ fun RegisterScreen(
         AuthContent(
             modifier = Modifier.weight(1f),
             authDetails = viewState.authDetails,
-            onBackClick = { viewModel.navigateBack() },
-            onFieldChange = { field, updatedField ->
-                viewModel.changeField(field, updatedField)
-            },
-            onCheckboxChange = { checkbox, updatedCheckbox ->
-                viewModel.changeCheckbox(checkbox, updatedCheckbox)
-            },
-            onButtonClick = { button ->
-                viewModel.activateButton(button)
-            },
-            onHyperlinkClick = { url, title ->
-                viewModel.navigateToWebView(url, title)
-            },
-            onSwichChange = { switch, updatedSwitch -> }
+            operations = viewModel,
         )
         VodovozSnackbarHost(
             hostState = snackbarHostState,

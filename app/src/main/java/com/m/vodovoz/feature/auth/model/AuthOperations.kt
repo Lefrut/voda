@@ -11,6 +11,8 @@ interface AuthContentOperations {
 
     suspend fun listenAuthDetailsChanges()
 
+    fun onBackClick() = Unit
+
     fun changeField(field: FieldUi, updatedField: FieldUi)
 
     fun changeCheckbox(checkbox: CheckboxUi, updatedCheckbox: CheckboxUi)

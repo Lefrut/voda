@@ -8,6 +8,5 @@ fun LoginScreen(viewModel: LoginFlowViewModel, viewState: LoginFlowViewModel.Log
     AuthContent(
         authDetails = viewState.authDetails,
         operations = viewModel,
-        onBackClick = { viewModel.navigateBack() }
     )
 }
