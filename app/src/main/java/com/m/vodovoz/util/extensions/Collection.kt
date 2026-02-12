@@ -1,15 +1,11 @@
 package com.m.vodovoz.util.extensions
 
-fun <E> Collection<E>.indexOfOrNull(element: @UnsafeVariance E?): Int? {
-    return try {
-        indexOf(element)
-    } catch (ex: Exception) {
-        null
-    }
+fun <E> Collection<E>.indexOfOrNull(element: E?): Int? {
+    val index = indexOf(element)
+    return if (index >= 0) index else null
 }
 
 fun <E> Collection<E>.indexOfOrZero(element: @UnsafeVariance E?): Int {
-    return try {
-        indexOf(element)
-    } catch (ex: Exception) { 0 }
+    val index = indexOf(element)
+    return if (index >= 0) index else 0
 }

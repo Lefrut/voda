@@ -82,7 +82,7 @@ class AboutAppViewModel @Inject constructor(
 
         when (appMode) {
             AppMode.Test -> {
-                VodovozWebConfig.setTestUrl(testUrl)
+                VodovozWebConfig.setUrl(testUrl)
                 baseUrlInterceptor.updateBaseUrl(testUrl)
             }
 

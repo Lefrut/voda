@@ -3,9 +3,11 @@ package com.m.vodovoz.design_system.composables.card
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -21,6 +23,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -34,8 +37,12 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
+import coil3.video.videoFrameMillis
+import coil3.video.videoFramePercent
 import com.m.vodovoz.R
 import com.m.vodovoz.design_system.model.CommentUi
+import com.m.vodovoz.feature.product_comments.model.CommentImage
+import com.m.vodovoz.feature.product_comments.model.CommentMediaUi
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
@@ -46,7 +53,7 @@ fun CommentCard(
     maxLines: Int = Int.MAX_VALUE,
     sharedTransitionScope: SharedTransitionScope? = null,
     sharedElementsIsVisible: Boolean = true,
-    onImageClick: (String) -> Unit = {},
+    onMediaClick: (CommentMediaUi) -> Unit = {},
 ) {
     OutlinedCard(
         modifier = modifier
@@ -90,42 +97,27 @@ fun CommentCard(
                 )
             }
 
-            if (comment.images.isNotEmpty()) {
+            if (comment.media.isNotEmpty()) {
                 Row(
                     modifier = Modifier
                         .padding(top = 12.dp)
                         .horizontalScroll(rememberScrollState()),
                     horizontalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
-                    comment.images.forEach { image ->
-                        AsyncImage(
-                            model = ImageRequest.Builder(LocalContext.current)
-                                .data(image)
-                                .placeholderMemoryCacheKey(image)
-                                .memoryCacheKey(image)
-                                .crossfade(true)
-                                .build(),
-                            contentDescription = null,
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier
-                                .then(
-                                    sharedTransitionScope?.run {
-                                        Modifier.sharedElementWithCallerManagedVisibility(
-                                            sharedContentState = rememberSharedContentState(
-                                                key = image + image
-                                            ),
-                                            visible = sharedElementsIsVisible
-                                        )
+                    comment.media.forEach { media ->
 
-                                    } ?: Modifier
-                                )
-                                .height(90.dp)
-                                .width(60.dp)
-                                .clip(MaterialTheme.shapes.small)
-                                .clickable {
-                                    onImageClick(image)
+                        key(media) {
+                            CommentImage(
+                                imageWidth = 60.dp,
+                                imageHeight = 90.dp,
+                                media = media,
+                                sharedTransitionScope = null,
+                                playIconSize = 12.dp,
+                                onClick = {
+                                    onMediaClick(media)
                                 }
-                        )
+                            )
+                        }
                     }
                 }
             }

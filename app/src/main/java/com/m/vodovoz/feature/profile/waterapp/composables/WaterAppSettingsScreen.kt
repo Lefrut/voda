@@ -1,5 +1,6 @@
 package com.m.vodovoz.feature.profile.waterapp.composables
 
+import android.annotation.SuppressLint
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
@@ -61,6 +62,7 @@ import com.m.vodovoz.feature.profile.waterapp.model.ReminderIntervalUi
 import com.m.vodovoz.feature.profile.waterapp.model.WaterAppUiState
 import com.m.vodovoz.util.toRoundIntOrNull
 
+@SuppressLint("UnusedBoxWithConstraintsScope")
 @NonRestartableComposable
 @Composable
 fun WaterAppSettingsScreen(

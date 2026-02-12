@@ -67,6 +67,7 @@ import com.m.vodovoz.data.vodovoz_service.model.unrated_products.UnratedProducts
 import com.m.vodovoz.data.vodovoz_service.model.user_data.UserDataDTO
 import com.m.vodovoz.domain.general.model.order.PaymentMethodItemModel
 import com.m.vodovoz.domain.general.model.widgets.FieldModel
+import com.m.vodovoz.feature.cart.ordering.model.OrderingMenuItemUi
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import retrofit2.Response
@@ -149,11 +150,9 @@ interface VodovozService {
         @Query("email_f") userEmail: String?,
         @Query("payment") paymentMethodId: Long,
         @Query("sdacha") paymentChange: String?,
-        @Query("nettovar") callYouId: Long?,
         @Query("kupon") coupon: String?,
         @Query("device", encoded = true) deviceInfo: String?,
         @Query("driver") notifyDriverId: String?,
-        @Query("comment") message: String?,
         @Query(PaymentMethodItemModel.BALANCE_ID) useBalance: String?,
         @Query(PaymentMethodItemModel.BONUSES_ID) useBonuses: String?,
         @Query(FieldModel.BONUS_ID) bonuses: Int?,
@@ -163,6 +162,7 @@ interface VodovozService {
     @GET("oformlenie/zvonok.php?action=vampozvonit")
     suspend fun getOrderCallYouDetails(
         @Query("adresid") addressId: Long,
+        @QueryMap queryParams: Map<String, String>,
 
         ): Response<VodovozResponseDTO<OrderCallYouDetailsDTO>>
 
@@ -197,6 +197,7 @@ interface VodovozService {
 
         @Query("adresid") addressId: Long,
         @Query("date") date: String,
+        @QueryMap queryParams: Map<String, String>,
     ): Response<VodovozResponseDTO<PaymentMethodDetailsDTO>>
 
     @GET("oformlenie/date.php?action=glav")
@@ -204,6 +205,7 @@ interface VodovozService {
 
         @Query("adresid") addressId: Long,
         @Query("date") date: String? = null,
+        @QueryMap queryParams: Map<String, String>,
     ): Response<VodovozResponseDTO<DeliveryDateDetailsDTO>>
 
     @GET("oformlenie/oformlenie.php?action=glav")
@@ -215,6 +217,7 @@ interface VodovozService {
         @Query(PaymentMethodItemModel.BALANCE_ID) useBalance: String?,
         @Query(PaymentMethodItemModel.BONUSES_ID) useBonuses: String?,
         @Query(FieldModel.BONUS_ID) bonuses: Int?,
+        @QueryMap queryParams: Map<String, String>,
     ): Response<VodovozResponseDTO<OrderingDetailsDTO>>
 
     @GET("profile/historyorder/voditel.php")

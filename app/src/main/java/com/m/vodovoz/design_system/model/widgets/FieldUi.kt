@@ -167,7 +167,7 @@ val NameValidator = FieldValidator { field ->
 val MessageValidator = FieldValidator { field ->
     val value = field.value
     when {
-        field.id == "dr127" || field.id.contains("message") || field.id == "dr53" || field.id == "comment" -> {
+        field.id == "dr127" || field.id.contains(FieldModel.COMMENT_ID) || field.id == "dr53" -> {
             FieldValidationResult.from(value.length in 15..1000 && value.isNotBlank())
         }
 

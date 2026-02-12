@@ -19,15 +19,14 @@ import com.m.vodovoz.data.vodovoz_service.model.order.ABOUT_ORDER_ITEM_DTO
 import com.m.vodovoz.data.vodovoz_service.model.order.ABOUT_ORDER_OKNO_DTO
 import com.m.vodovoz.data.vodovoz_service.model.order.CallYouItemDTO
 import com.m.vodovoz.data.vodovoz_service.model.order.FILTER_STATYS_DTO
+import com.m.vodovoz.data.vodovoz_service.model.order.ORDERING_COMMENT_OKNO
 import com.m.vodovoz.data.vodovoz_service.model.order.ORDERS_HISTORY_ITEM_DTO
 import com.m.vodovoz.data.vodovoz_service.model.order.ORDERS_HISTORY_KNOPKA_DTO
 import com.m.vodovoz.data.vodovoz_service.model.order.ORDERS_HISTORY_PRODUCT_DTO
 import com.m.vodovoz.data.vodovoz_service.model.order.ORDER_DETAILS_KNOPKA_DTO
 import com.m.vodovoz.data.vodovoz_service.model.order.ORDER_DETAILS_TOVAR_DTO
-import com.m.vodovoz.data.vodovoz_service.model.order.ORDER_OPLATA_DTO
-import com.m.vodovoz.data.vodovoz_service.model.order.ORDER_OPLATA_ITEM_DTO
-import com.m.vodovoz.data.vodovoz_service.model.order.ORDER_POLYSHATEL_DTO
-import com.m.vodovoz.data.vodovoz_service.model.order.ORDER_POLYSHATEL_ITEM_DTO
+import com.m.vodovoz.data.vodovoz_service.model.order.ORDER_MENU_SECTION_DTO
+import com.m.vodovoz.data.vodovoz_service.model.order.ORDER_MENU_ITEM_DTO
 import com.m.vodovoz.data.vodovoz_service.model.order.ORDER_PREDYP_DTO
 import com.m.vodovoz.data.vodovoz_service.model.order.ORDER_PREDYP_ITEM_DTO
 import com.m.vodovoz.data.vodovoz_service.model.order.ORDER_PRODUCT_PODAROK_DTO
@@ -74,6 +73,8 @@ import com.m.vodovoz.domain.general.model.order.RecipientModel
 import com.m.vodovoz.domain.general.model.product.BuyCertificateModel
 import com.m.vodovoz.domain.general.model.product.SectionModel
 import com.m.vodovoz.domain.general.model.promotion.ColorfulButtonModel
+import com.m.vodovoz.domain.general.model.widgets.FieldModel
+import com.m.vodovoz.domain.general.model.widgets.FieldPopupWindowModel
 import com.m.vodovoz.util.toRoundIntOrNull
 import kotlin.math.roundToInt
 
@@ -221,66 +222,68 @@ fun DELIVERY_DATE_DTO.toDomain(): DeliveryDateOptionModel? {
 }
 
 fun OrderingDetailsDTO.toDomain(): OrderingDetailsModel {
+    var popupWindow: FieldPopupWindowModel? = null
+
     return OrderingDetailsModel(
         title = TITLE ?: "",
-        commentField = KOMMENT?.KOMMENTARY?.toDomain(),
-        recipientSection = POLYSHATEL?.toDomain()
-            ?: throw IllegalArgumentException("Ordering recipient can't be null"),
+        recipientSection = requireNotNull(POLYSHATEL) { "Ordering payment can't be null" }.toDomain {
+            popupWindow = it
+        },
         notifySection = KOMMENT?.PREDYP?.toDomain() ?: OrderNotifySectionModel.Empty,
-        paymentSection = OPLATA?.toDomain()
-            ?: throw IllegalArgumentException("Ordering payment can't be null"),
-        totals = ITOG?.mapToDomain() ?: emptyList(),
-        button = KNOPKA?.toDomain()
-            ?: throw IllegalArgumentException("Ordering button can't be null"),
+        paymentSection = requireNotNull(OPLATA) { "Ordering payment can't be null" }.toDomain(),
+        totals = ITOG.orEmpty().mapToDomain(),
+        button = requireNotNull(KNOPKA) { "Ordering button can't be null" }.toDomain(),
+        commentPopupWindow = popupWindow
     )
 }
 
-
-fun ORDER_OPLATA_DTO.toDomain(): SectionModel<OrderingMenuItemModel> {
+fun ORDER_MENU_SECTION_DTO.toDomain(onPopupWindow: (FieldPopupWindowModel) -> Unit = {}): SectionModel<OrderingMenuItemModel> {
     return SectionModel(
         title = ZAGOLOVOK ?: "",
-        items = DANNYE?.mapToDomain() ?: emptyList(),
-        button = null
-    )
-}
-
-@JvmName("OrderPaymentItemModelList")
-fun List<ORDER_OPLATA_ITEM_DTO>.mapToDomain(): List<OrderingMenuItemModel> {
-    return mapNotNull { it -> it.toDomain() }
-}
-
-
-fun ORDER_OPLATA_ITEM_DTO.toDomain(): OrderingMenuItemModel {
-    return OrderingMenuItemModel(
-        image = KARTINKA?.toVodovozUrl() ?: "",
-        name = NAME ?: "",
-        description = OPISANIE ?: "",
-        id = ID ?: "",
-        defaultValue = DEFAULTVALUE
-    )
-}
-
-
-fun ORDER_POLYSHATEL_DTO.toDomain(): SectionModel<OrderingMenuItemModel> {
-    return SectionModel(
-        title = ZAGOLOVOK ?: "",
-        items = DANNYE?.mapToDomain() ?: emptyList(),
+        items = DANNYE.orEmpty().mapToDomain(onPopupWindow),
         button = null
     )
 }
 
 @JvmName("mapToOrderRecipientItemModelList")
-fun List<ORDER_POLYSHATEL_ITEM_DTO>.mapToDomain(): List<OrderingMenuItemModel> {
-    return mapNotNull { it.toDomain() }
+fun List<ORDER_MENU_ITEM_DTO>.mapToDomain(onPopupWindow: (FieldPopupWindowModel) -> Unit): List<OrderingMenuItemModel> {
+    return mapNotNull { it.toDomain(onPopupWindow) }
 }
 
-fun ORDER_POLYSHATEL_ITEM_DTO.toDomain(): OrderingMenuItemModel? {
+fun ORDER_MENU_ITEM_DTO.toDomain(onPopupWindow: (FieldPopupWindowModel) -> Unit): OrderingMenuItemModel? {
+
+
     return OrderingMenuItemModel(
-        image = KARTINKA?.toVodovozUrl() ?: "",
-        name = NAME ?: "",
-        description = OPISANIE ?: "",
+        image = KARTINKA?.toVodovozUrl().orEmpty(),
+        name = NAME.orEmpty(),
+        description = OPISANIE.orEmpty(),
         id = ID ?: return null,
-        defaultValue = DEFAULTVALUE
+        defaultValue = DEFAULT?.toString() ?: DEFAULTVALUE.orEmpty(),
+        type = TYPE.orEmpty(),
+    ).also {
+        DOPOKNO?.toDomain()?.also {
+            if (ID == OrderingDetailsModel.COMMENT_MENU) {
+                onPopupWindow(it)
+            }
+        }
+    }
+}
+
+fun ORDERING_COMMENT_OKNO.toDomain(): FieldPopupWindowModel? {
+    return FieldPopupWindowModel(
+        title = NAME.orEmpty(),
+        description = OPISANIE.orEmpty(),
+        field = FieldModel(
+            id = FieldModel.COMMENT_ID,
+            label = "",
+            value = VALUE.orEmpty(),
+            valueType = "",
+            isRequired = false,
+            readOnly = false,
+            supportingText = "",
+            hint = HINT.orEmpty(),
+        ),
+        button = (KNOPKA ?: return null).toDomain()
     )
 }
 

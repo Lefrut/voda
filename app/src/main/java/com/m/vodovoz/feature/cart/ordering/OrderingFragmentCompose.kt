@@ -133,7 +133,7 @@ class OrderingFragment : Fragment() {
 
             backEntrySavedStateHandle?.apply {
                 remove<AddressUi>("back_address")?.let { address ->
-                    viewModel.refreshOrderIfEmptyAddress(address)
+                    viewModel.resetOrderIfEmptyAddress(address)
                 }
 
                 remove<AddressUi>("address")?.let { address ->
@@ -168,45 +168,48 @@ class OrderingFragment : Fragment() {
 
 
         }.collect { event ->
+            val navController = findNavController()
             when (event) {
                 OrderingFlowViewModel.OrderingEvents.GoBack -> {
-                    findNavController().popBackStack()
+                    navController.popBackStack()
                 }
 
                 is OrderingFlowViewModel.OrderingEvents.GoToAddresses -> {
-                    findNavController().navigateToAddresses(
+                    navController.navigateToAddresses(
                         AddressScreenTypeUi.Choose,
                         event.addressId
                     )
                 }
 
                 is OrderingFlowViewModel.OrderingEvents.GoToDeliveryDate -> {
-                    findNavController().navigateToDeliveryDate(
+                    navController.navigateToDeliveryDate(
                         earlierDelivery = event.earlierDelivery,
                         addressId = event.addressId,
                         date = event.date,
-                        timeInterval = event.timeInterval
+                        timeInterval = event.timeInterval,
+                        queryParams = event.queryParams
                     )
                 }
 
                 is OrderingFlowViewModel.OrderingEvents.GoToPaymentMethod -> {
-                    findNavController().navigateToPaymentMethod(
+                    navController.navigateToPaymentMethod(
                         addressId = event.addressId,
                         date = event.date,
                         paymentMethodId = event.paymentMethodId,
                         balance = event.balance,
                         bonuses = event.bonuses,
                         bonusesValue = event.bonusesValue,
-                        paymentChange = event.paymentChange
+                        paymentChange = event.paymentChange,
+                        queryParams = event.queryParams
                     )
                 }
 
                 is OrderingFlowViewModel.OrderingEvents.GoToOrderRecipient -> {
-                    findNavController().navigateToOrderRecipient(event.addressId)
+                    navController.navigateToOrderRecipient(event.addressId)
                 }
 
                 is OrderingFlowViewModel.OrderingEvents.GoToCallYou -> {
-                    findNavController().navigateToOrderCallYou(event.addressId, event.callYouId)
+                    navController.navigateToOrderCallYou(event.addressId, event.callYouId, event.queryParams)
                 }
 
                 OrderingFlowViewModel.OrderingEvents.ScrollToTop -> {
@@ -219,7 +222,7 @@ class OrderingFragment : Fragment() {
                 }
 
                 is OrderingFlowViewModel.OrderingEvents.GoToWebView -> {
-                    findNavController().navigateToWebView(
+                    navController.navigateToWebView(
                         title = context?.getString(
                             R.string.space
                         ) ?: "",
@@ -234,11 +237,11 @@ class OrderingFragment : Fragment() {
 
                 is OrderingFlowViewModel.OrderingEvents.OpenUrl -> {
                     context?.openUrl(event.url)
-                    findNavController().popBackStack()
+                    navController.popBackStack()
                 }
 
                 OrderingFlowViewModel.OrderingEvents.GoToHome -> {
-                    findNavController().popBackStack()
+                    navController.popBackStack()
                     tabManager.selectTab(R.id.graph_home)
                 }
 

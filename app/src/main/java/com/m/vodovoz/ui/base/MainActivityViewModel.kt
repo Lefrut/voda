@@ -3,6 +3,7 @@ package com.m.vodovoz.ui.base
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.m.vodovoz.common.cookie.CookieManager
+import com.m.vodovoz.core.network.VodovozWebConfig
 import com.m.vodovoz.domain.general.model.exceptions.UserBlockedException
 import com.m.vodovoz.domain.general.model.exceptions.UserNotLoginException
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository

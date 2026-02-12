@@ -42,7 +42,9 @@ fun SiteStateResponseDTO.toDomain(): AppConfig {
         data = DATA?.toDomain(),
         mapkitKey = BuildConfig.MAPKIT_API_KEY,
         geocoderKey = mapKeysAndroid?.GEOKODER ?: BuildConfig.GEOCODER,
-        appLinks = DANNYESSILKI?.toDomain() ?: AppLinks.Empty
+        appLinks = DANNYESSILKI?.toDomain() ?: AppLinks.Empty,
+        //todo - put prodUrl from dto
+        prodUrl = ""
     )
 }
 

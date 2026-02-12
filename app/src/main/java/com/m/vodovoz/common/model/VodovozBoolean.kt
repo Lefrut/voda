@@ -31,20 +31,35 @@ fun String.toVodovozBoolean(): VodovozBoolean? {
 
 fun VodovozBoolean.Companion.from(value: String?): VodovozBoolean {
     return when (value) {
-        True.value -> { True }
+        True.value -> {
+            True
+        }
 
-        else -> { False }
+        else -> {
+            False
+        }
     }
 }
 
 fun VodovozBoolean.Companion.from(value: Boolean?): VodovozBoolean {
     return when (value) {
-        true -> { True }
+        true -> {
+            True
+        }
 
-        else -> { False }
+        else -> {
+            False
+        }
     }
 }
 
+fun String?.toBoleanByVodovoz(): Boolean {
+    return VodovozBoolean.from(this).boolean
+}
+
+fun Boolean?.toStringByVodovoz(): String {
+    return VodovozBoolean.from(this).value
+}
 
 infix fun VodovozBoolean.equalsTo(boolean: Boolean?): Boolean = toBoolean() == boolean
 

@@ -12,6 +12,7 @@ import com.valentinilk.shimmer.Shimmer
 import com.valentinilk.shimmer.shimmer
 
 
+@Suppress("ParamsComparedByRef")
 @Composable
 fun SkeletonBox(
     modifier: Modifier = Modifier,

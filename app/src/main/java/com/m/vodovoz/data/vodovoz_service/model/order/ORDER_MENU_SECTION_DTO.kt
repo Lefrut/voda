@@ -5,9 +5,9 @@ import com.squareup.moshi.Json
 import androidx.annotation.Keep
 
 @Keep
-data class ORDER_POLYSHATEL_DTO(
+data class ORDER_MENU_SECTION_DTO(
     @Json(name = "ZAGOLOVOK")
     val ZAGOLOVOK: String?,
     @Json(name = "DANNYE")
-    val DANNYE: List<ORDER_POLYSHATEL_ITEM_DTO>?
+    val DANNYE: List<ORDER_MENU_ITEM_DTO>?
 )

@@ -1,10 +1,15 @@
 package com.m.vodovoz.data.vodovoz_service.mappers
 
+import android.graphics.Bitmap
+import android.media.MediaMetadataRetriever
+
 import com.m.vodovoz.data.vodovoz_service.di.toVodovozUrl
+import com.m.vodovoz.data.vodovoz_service.model.CommentMediaDTO
 import com.m.vodovoz.data.vodovoz_service.model.ProductCommentsDTO
 import com.m.vodovoz.data.vodovoz_service.model.SORT_DTO
 import com.m.vodovoz.data.vodovoz_service.model.WaitFeedbackProductDTO
 import com.m.vodovoz.data.vodovoz_service.model.WaitFeedbackProductsDTO
+import com.m.vodovoz.domain.general.model.product.CommentMediaModel
 import com.m.vodovoz.domain.general.model.product.ProductCommentsInfoModel
 import com.m.vodovoz.domain.general.model.product.SectionModel
 import com.m.vodovoz.domain.general.model.product.SortModel
@@ -16,10 +21,31 @@ fun ProductCommentsDTO.toDomain(): ProductCommentsInfoModel {
         ratingText = RAITINGOSNOVA ?: "",
         commentsCount = COMMENT_COUNT ?: 0,
         commentsCountText = COMMENT_COUNT_TEXT ?: "",
-        images = IMAGES?.map { s ->
+        images = IMAGES_OLD?.map { s ->
             s.toVodovozUrl()
-        } ?: emptyList()
+        } ?: emptyList(),
+        media = MEDIA?.mapToDomain() ?: emptyList()
     )
+}
+
+
+@JvmName("mapToCommentMediaModelList")
+fun List<CommentMediaDTO>.mapToDomain(): List<CommentMediaModel> {
+    return mapNotNull { it.toDomain() }
+}
+
+fun CommentMediaDTO.toDomain(): CommentMediaModel? {
+    if (isVideo == null || data == null) return null
+    val data = data.toVodovozUrl()
+
+    return if (!isVideo) {
+        CommentMediaModel.Image(data)
+    } else {
+        CommentMediaModel.Video(
+            url = data
+        )
+    }
+
 }
 
 fun SORT_DTO.toDomain(): SortModel? {

@@ -80,5 +80,5 @@ abstract class VodovozServiceModule {
 }
 
 fun String.toVodovozUrl(): String {
-    return VodovozWebConfig.VODOVOZ_URL.removeSuffix("\\") + this
+    return VodovozWebConfig.VODOVOZ_URL + this
 }

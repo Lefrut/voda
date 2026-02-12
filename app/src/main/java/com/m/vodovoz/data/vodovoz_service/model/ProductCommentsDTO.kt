@@ -11,9 +11,11 @@ data class ProductCommentsDTO(
     @Json(name = "COMMENT_COUNT_TEXT")
     val COMMENT_COUNT_TEXT: String?,
     @Json(name = "IMAGES")
-    val IMAGES: List<String>?,
+    val IMAGES_OLD: List<String>?,
+    @Json(name = "IMAGESNEW")
+    val MEDIA: List<CommentMediaDTO>?,
     @Json(name = "COMMENTS")
-    val COMMENTS: List<COMMENT_DTO?>?,
+    val COMMENTS: List<COMMENT_DTO>?,
     @Json(name = "RAITINGOSNOVA")
     val RAITINGOSNOVA: String?,
     @Json(name = "SORTIROVKA")

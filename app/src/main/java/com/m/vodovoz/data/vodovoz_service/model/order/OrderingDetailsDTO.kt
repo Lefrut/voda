@@ -11,11 +11,11 @@ data class OrderingDetailsDTO(
     @Json(name = "TITLE")
     val TITLE: String?,
     @Json(name = "POLYSHATEL")
-    val POLYSHATEL: ORDER_POLYSHATEL_DTO?,
+    val POLYSHATEL: ORDER_MENU_SECTION_DTO?,
     @Json(name = "KOMMENT")
     val KOMMENT: ORDER_KOMMENT_DTO?,
     @Json(name = "OPLATA")
-    val OPLATA: ORDER_OPLATA_DTO?,
+    val OPLATA: ORDER_MENU_SECTION_DTO?,
     @Json(name = "ITOG")
     val ITOG: List<ITOG_ITEM_DTO>?,
     @Json(name = "KNOPKA")

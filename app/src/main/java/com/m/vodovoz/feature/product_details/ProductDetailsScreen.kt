@@ -23,6 +23,7 @@ import com.m.vodovoz.feature.product_details.composables.PresentBottomSheet
 import com.m.vodovoz.feature.product_details.composables.ProductDetailsBody
 import com.m.vodovoz.feature.product_details.composables.ProductDetailsPlaceholder
 import com.m.vodovoz.feature.product_details.composables.ProductDetailsTopBar
+import com.m.vodovoz.util.extensions.debugLog
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -57,6 +58,8 @@ fun ProductDetailsScreen(
             )
         },
         bottomBar = {
+            debugLog { "Cart quantity: ${productDetails.cartQuantity}" }
+
             ProductBottomFloatingButton(
                 modifier = Modifier.graphicsLayer {
                     viewState.hideFloatingButton

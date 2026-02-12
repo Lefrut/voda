@@ -1,6 +1,7 @@
 package com.m.vodovoz.common.tab
 
 import androidx.compose.runtime.Immutable
+import com.google.android.material.tabs.TabLayout
 import com.m.vodovoz.R
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
 import kotlinx.coroutines.CoroutineScope
@@ -88,4 +89,12 @@ class TabManager @Inject constructor(
         @JvmField
         val DEFAULT_AUTH_REDIRECT = R.id.graph_profile
     }
+}
+
+fun TabManager.showTab(){
+    changeTabVisibility(true)
+}
+
+fun TabManager.hideTab(){
+    changeTabVisibility(false)
 }

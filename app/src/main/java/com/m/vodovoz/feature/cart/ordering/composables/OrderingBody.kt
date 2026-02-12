@@ -22,14 +22,12 @@ import com.m.vodovoz.feature.cart.ordering.model.OrderingMenuItemUi
 fun OrderingBody(
     modifier: Modifier = Modifier,
     scrollState: ScrollState,
-    comment: FieldUi?,
     paymentSection: SectionUi<OrderingMenuItemUi>,
     notifySection: OrderNotifySectionUi,
     selectedNotifyItem: OrderNotifyItemUi?,
     recipientSection: SectionUi<OrderingMenuItemUi>,
     totals: List<OrderSummaryItemUi>,
     onRecipientItemClick: (OrderingMenuItemUi) -> Unit,
-    onCommentChange: (FieldUi, FieldUi) -> Unit,
     onNotifyItemSelect: (OrderNotifyItemUi) -> Unit,
     onPhoneFieldChange: (FieldUi, FieldUi) -> Unit,
     onPaymentButtonClick: (OrderingMenuItemUi) -> Unit,
@@ -50,18 +48,10 @@ fun OrderingBody(
 
         VodovozHorizontalDivider()
 
-        if (comment != null) {
-            OrderingCommentColumn(
-                modifier = Modifier.padding(top = 8.dp),
-                comment = comment,
-                onFieldChange = onCommentChange
-            )
-        }
-
 
         if (recipientSection.items.isNotEmpty() && notifySection.options.isNotEmpty()) {
             OrderingNotifyChips(
-                modifier = Modifier.padding(top = 24.dp),
+                modifier = Modifier.padding(top = 8.dp),
                 notifySection = notifySection,
                 selectedNotifyOption = selectedNotifyItem,
                 onPhoneFieldChange = onPhoneFieldChange,

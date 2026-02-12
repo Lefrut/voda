@@ -342,9 +342,7 @@ fun COMMENT_DTO.toDomain(): CommentModel {
         dateText = DATA ?: "",
         rating = RATING ?: 0,
         purchased = KYPLEN ?: "",
-        images = IMAGES?.map { image ->
-            image.toVodovozUrl()
-        } ?: emptyList()
+        media = MEDIA?.mapToDomain() ?: emptyList()
     )
 }
 

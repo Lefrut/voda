@@ -46,6 +46,7 @@ import com.m.vodovoz.design_system.modifiers.bottomLine
 import com.m.vodovoz.feature.delivery_date.model.DeliveryDateOptionUi
 import com.m.vodovoz.feature.delivery_date.model.DeliveryTimeIntervalUi
 import com.m.vodovoz.util.extensions.indexOfOrNull
+import com.m.vodovoz.util.extensions.indexOfOrZero
 
 @Composable
 fun DeliveryDateBody(
@@ -68,9 +69,7 @@ fun DeliveryDateBody(
     Column(modifier = modifier.fillMaxSize()) {
         VodovozScrollableTabRow(
             modifier = Modifier.padding(vertical = 16.dp),
-            selectedTabIndex = selectedTabOption?.let {
-                options.indexOfOrNull(selectedTabOption)
-            } ?: (options.lastIndex + 1),
+            selectedTabIndex = options.indexOfOrNull(selectedTabOption) ?: (options.lastIndex + 1),
             edgePadding = 16.dp,
             spacing = 12.dp
         ) {
@@ -106,8 +105,9 @@ fun DeliveryDateBody(
         if (timeSections.isNotEmpty()) {
             VodovozTabRow(
                 modifier = Modifier.padding(16.dp),
-                selectedTabPosition = timeSections.indexOfOrNull(selectedTimeSection)
-                    ?: (timeSections.size / 3)
+                selectedTabPosition = timeSections.indexOfFirst {
+                    it.title == selectedTimeSection.title
+                }
             ) {
                 timeSections.forEachIndexed { index, timeSection ->
                     key(timeSection.title) {

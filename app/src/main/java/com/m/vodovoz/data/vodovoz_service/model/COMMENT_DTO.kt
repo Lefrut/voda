@@ -20,4 +20,6 @@ data class COMMENT_DTO(
     val USER_PHOTO: String?,
     @Json(name = "IMAGES")
     val IMAGES: List<String>?,
+    @Json(name = "IMAGESNEW")
+    val MEDIA: List<CommentMediaDTO>?,
 )
