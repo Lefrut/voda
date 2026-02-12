@@ -104,6 +104,7 @@ import com.m.vodovoz.domain.general.model.user.UserAuthInfoModel
 import com.m.vodovoz.domain.general.model.user.UserDataModel
 import com.m.vodovoz.domain.general.model.widgets.FieldModel
 import com.m.vodovoz.domain.general.model.widgets.toQueries
+import com.m.vodovoz.domain.general.respository.FlowResult
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
 import com.m.vodovoz.util.formatters.VodovozDateFormatters
 import com.squareup.moshi.Moshi
@@ -320,31 +321,37 @@ class VodovozServiceRepositoryImpl @Inject constructor(
     override fun getPaymentMethodDetails(
         addressId: Long,
         date: LocalDate,
-    ): Flow<Result<PaymentMethodDetailsModel>> {
+        queryParams: Map<String, String>
+    ): FlowResult<PaymentMethodDetailsModel> {
         return executeDefaultRequest(
             request = {
                 vodovozService.getPaymentMethodDetails(
                     addressId = addressId,
-                    date = VodovozDateFormatters.DMY.format(date)
+                    date = VodovozDateFormatters.DMY.format(date),
+                    queryParams = queryParams
                 )
             },
             toDomain = { toDomain() }
         )
+
     }
 
     override fun getDeliveryDateDetails(
         addressId: Long,
         date: LocalDate?,
-    ): Flow<Result<DeliveryDateDetailsModel>> {
+        queryParams: Map<String, String>
+    ): FlowResult<DeliveryDateDetailsModel> {
         return executeDefaultRequest(
             request = {
                 vodovozService.getDeliveryDateDetails(
                     addressId = addressId,
-                    date = date?.format(VodovozDateFormatters.DMY)
+                    date = VodovozDateFormatters.DMY.format(date),
+                    queryParams = queryParams
                 )
             },
             toDomain = { toDomain() }
         )
+
     }
 
     override fun getOrderRecipientDetails(
@@ -383,13 +390,17 @@ class VodovozServiceRepositoryImpl @Inject constructor(
         )
     }
 
-    override fun getOrderCallYouDetails(addressId: Long): Flow<Result<OrderCallYouDetailsModel>> {
+    override fun getOrderCallYouDetails(
+        addressId: Long,
+        queryParams: Map<String, String>
+    ): FlowResult<OrderCallYouDetailsModel> {
         return executeDefaultRequest(
             request = {
-                vodovozService.getOrderCallYouDetails(addressId)
+                vodovozService.getOrderCallYouDetails(addressId, queryParams)
             },
             toDomain = { toDomain() }
         )
+
     }
 
     override fun getOrderingDetails(
@@ -400,7 +411,8 @@ class VodovozServiceRepositoryImpl @Inject constructor(
         useBonuses: Boolean?,
         useBalance: Boolean?,
         bonuses: Int?,
-    ): Flow<Result<OrderingDetailsModel>> {
+        queryParams: Map<String, String>
+    ): FlowResult<OrderingDetailsModel> {
         return executeDefaultRequest(
             request = {
                 vodovozService.getOrderingDetails(
@@ -410,7 +422,8 @@ class VodovozServiceRepositoryImpl @Inject constructor(
                     coupon = coupon,
                     useBalance = VodovozBoolean.from(useBonuses).value,
                     useBonuses = VodovozBoolean.from(useBalance).value,
-                    bonuses = bonuses
+                    bonuses = bonuses,
+                    queryParams = queryParams
                 )
             },
             toDomain = { toDomain() }
@@ -426,16 +439,14 @@ class VodovozServiceRepositoryImpl @Inject constructor(
         userEmail: String?,
         paymentMethodId: Long,
         paymentChange: String?,
-        callYouId: Long?,
         coupon: String?,
         deviceInfo: String?,
         notifyDriverId: String?,
         useBonuses: Boolean?,
         useBalance: Boolean?,
         bonuses: Int?,
-        message: String?,
-        params: Map<String, String>?,
-    ): Flow<Result<VodovozPlaceholderModel>> {
+        params: Map<String, String>?
+    ): FlowResult<VodovozPlaceholderModel> {
         return executeDefaultRequest(
             request = {
                 vodovozService.doOrder(
@@ -448,11 +459,9 @@ class VodovozServiceRepositoryImpl @Inject constructor(
                     paymentMethodId = paymentMethodId,
                     paymentChange = paymentChange,
                     notifyDriverId = notifyDriverId,
-                    callYouId = callYouId,
                     coupon = coupon,
                     deviceInfo = deviceInfo,
                     queries = params,
-                    message = message,
                     useBalance = VodovozBoolean.from(useBalance).value,
                     useBonuses = VodovozBoolean.from(useBonuses).value,
                     bonuses = bonuses
@@ -460,8 +469,8 @@ class VodovozServiceRepositoryImpl @Inject constructor(
             },
             toDomain = { toDomain() }
         )
-    }
 
+    }
 
     override fun orderService(
         serviceType: String,

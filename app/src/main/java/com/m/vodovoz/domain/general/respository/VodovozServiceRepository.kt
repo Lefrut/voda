@@ -74,7 +74,7 @@ import java.io.File
 import java.time.LocalDate
 
 
-private typealias FlowResult<T> = Flow<Result<T>>
+typealias FlowResult<T> = Flow<Result<T>>
 
 interface VodovozServiceRepository {
 
