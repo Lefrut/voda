@@ -3,13 +3,13 @@ package com.m.vodovoz.feature.auth.recover_password
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.viewModelScope
 import com.m.vodovoz.R
-import com.m.vodovoz.common.agreement.AgreementController
 import com.m.vodovoz.common.resources.ResourcesProvider
 import com.m.vodovoz.design_system.model.ColorfulButtonUi
 import com.m.vodovoz.design_system.model.toUi
 import com.m.vodovoz.design_system.model.updateButton
 import com.m.vodovoz.design_system.model.widgets.CheckboxUi
 import com.m.vodovoz.design_system.model.widgets.FieldUi
+import com.m.vodovoz.design_system.model.widgets.SwitchUi
 import com.m.vodovoz.design_system.model.widgets.checkFields
 import com.m.vodovoz.design_system.model.widgets.mapToDomain
 import com.m.vodovoz.design_system.model.widgets.updateCheckbox
@@ -17,47 +17,47 @@ import com.m.vodovoz.design_system.model.widgets.updateField
 import com.m.vodovoz.design_system.model.widgets.updateFieldAndResetError
 import com.m.vodovoz.domain.general.model.exceptions.RequestException
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
+import com.m.vodovoz.feature.auth.model.AbstractAuthViewModel
 import com.m.vodovoz.feature.auth.model.agreementIsCheckedWhenAvailable
 import com.m.vodovoz.feature.auth.model.toUi
 import com.m.vodovoz.feature.auth.recover_password.model.RecoverPasswordEvent
 import com.m.vodovoz.feature.auth.recover_password.model.RecoverPasswordState
 import com.m.vodovoz.feature.auth.recover_password.model.RecoverPasswordUiState
-import com.m.vodovoz.ui.mvi.MviViewModel
+import com.m.vodovoz.ui.mvi.launchInViewModelScope
 import com.m.vodovoz.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+private const val RECOVER_PASSWORD_BUTTON = "otpravka"
+
 @Stable
 @HiltViewModel
 class RecoverPasswordViewModel @Inject constructor(
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val resourcesProvider: ResourcesProvider,
-) : MviViewModel<RecoverPasswordState, RecoverPasswordEvent>(
-    RecoverPasswordState()
+) : AbstractAuthViewModel<RecoverPasswordState, RecoverPasswordEvent>(
+    RecoverPasswordState(),
+    RECOVER_PASSWORD_BUTTON
 ) {
 
     init {
         fetchRecoverPasswordDetails()
     }
 
-    companion object {
-        private const val RECOVER_PASSWORD_BUTTON = "otpravka"
+    override suspend fun listenAuthDetailsChanges() {
+        // Keep original screen behavior: button state is controlled in change handlers.
     }
 
-    fun navigateBack() = viewModelScope.launch {
-        sendEvent(RecoverPasswordEvent.GoBack)
-    }
+    override fun clickButton(button: ColorfulButtonUi) {
+        launchInViewModelScope {
+            when (button.id) {
+                RECOVER_PASSWORD_BUTTON -> {
+                    recoverPassword()
+                }
 
-    fun activateButton(button: ColorfulButtonUi) = viewModelScope.launch {
-        when (button.id) {
-            RECOVER_PASSWORD_BUTTON -> {
-                recoverPassword()
-            }
-
-            else -> {
-
+                else -> Unit
             }
         }
     }
@@ -72,7 +72,6 @@ class RecoverPasswordViewModel @Inject constructor(
 
 
         val recoverPasswordDetailsResult = recoverPasswordDeferred.await()
-        val agreementText = AgreementController.getText()
 
         recoverPasswordDetailsResult.onSuccess { recoverPasswordDetails ->
             val authDetails = recoverPasswordDetails.toUi()
@@ -157,33 +156,37 @@ class RecoverPasswordViewModel @Inject constructor(
 
     }
 
-    fun changeField(field: FieldUi, updatedField: FieldUi) = viewModelScope.launch {
-        updateState { s ->
-            val updatedFields = s.fields.updateFieldAndResetError(field, updatedField)
-            val authDetails = s.authDetails
+    override fun changeField(field: FieldUi, updatedField: FieldUi) {
+        launchInViewModelScope {
+            updateState { s ->
+                val updatedFields = s.fields.updateFieldAndResetError(field, updatedField)
+                val authDetails = s.authDetails
 
-            s.copy(
-                authDetails = authDetails.copy(
-                    fields = updatedFields,
-                    buttons = s.buttons.updateButton(RECOVER_PASSWORD_BUTTON) { button ->
-                        button.copy(
-                            enabled = updatedFields.checkFields() && s.checkboxes.agreementIsCheckedWhenAvailable(
-                                authDetails.agreementCheckboxId
+                s.copy(
+                    authDetails = authDetails.copy(
+                        fields = updatedFields,
+                        buttons = s.buttons.updateButton(RECOVER_PASSWORD_BUTTON) { button ->
+                            button.copy(
+                                enabled = updatedFields.checkFields() && s.checkboxes.agreementIsCheckedWhenAvailable(
+                                    authDetails.agreementCheckboxId
+                                )
                             )
-                        )
-                    },
-                ),
+                        },
+                    ),
 
-                )
+                    )
+            }
         }
     }
 
-    fun navigateToWebView(url: String, title: String) = viewModelScope.launch {
-        sendEvent(RecoverPasswordEvent.GoToWebView(url, title))
+    override fun clickHyperlink(url: String, title: String) {
+        launchInViewModelScope {
+            sendEvent(RecoverPasswordEvent.GoToWebView(url, title))
+        }
     }
 
-    fun changeCheckbox(checkboxUi: CheckboxUi, updatedCheckbox: CheckboxUi) =
-        viewModelScope.launch {
+    override fun changeCheckbox(checkboxUi: CheckboxUi, updatedCheckbox: CheckboxUi) {
+        launchInViewModelScope {
             updateState { s ->
                 val updatedCheckboxes = s.checkboxes.updateCheckbox(
                     checkboxUi, updatedCheckbox
@@ -204,5 +207,16 @@ class RecoverPasswordViewModel @Inject constructor(
                 )
             }
         }
+    }
+
+    override fun onBackClick() {
+        launchInViewModelScope {
+            sendEvent(RecoverPasswordEvent.GoBack)
+        }
+    }
+
+    fun navigateBack() = onBackClick()
+
+    override fun changeSwitch(switch: SwitchUi, updatedSwitchUi: SwitchUi) = Unit
 
 }

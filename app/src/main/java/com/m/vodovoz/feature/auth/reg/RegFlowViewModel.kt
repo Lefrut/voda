@@ -10,13 +10,21 @@ import com.m.vodovoz.common.resources.ResourcesProvider
 import com.m.vodovoz.design_system.model.ColorfulButtonUi
 import com.m.vodovoz.design_system.model.mapToUi
 import com.m.vodovoz.design_system.model.updateButton
+import com.m.vodovoz.design_system.model.widgets.CheckboxUi
+import com.m.vodovoz.design_system.model.widgets.EmptyTextValidator
+import com.m.vodovoz.design_system.model.widgets.FieldUi
+import com.m.vodovoz.design_system.model.widgets.PhoneNumberValidator
 import com.m.vodovoz.design_system.model.widgets.checkFields
 import com.m.vodovoz.design_system.model.widgets.getErrorText
+import com.m.vodovoz.design_system.model.widgets.updateCheckbox
+import com.m.vodovoz.design_system.model.widgets.updateFieldAndResetError
 import com.m.vodovoz.domain.general.model.exceptions.ValidationException
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
 import com.m.vodovoz.feature.auth.model.AbstractAuthViewModel
 import com.m.vodovoz.feature.auth.model.AuthDetailsUi
 import com.m.vodovoz.feature.auth.model.AuthState
+import com.m.vodovoz.feature.auth.model.agreementIsCheckedWhenAvailable
+import com.m.vodovoz.feature.auth.model.authValidators
 import com.m.vodovoz.feature.auth.model.toUi
 import com.m.vodovoz.ui.mvi.Event
 import com.m.vodovoz.ui.mvi.launchInViewModelScope
@@ -42,6 +50,10 @@ class RegFlowViewModel @Inject constructor(
 
     init {
         fetchRegisterDetails()
+    }
+
+    override suspend fun listenAuthDetailsChanges() {
+        // Keep original screen behavior: button state is controlled in change handlers.
     }
 
     private fun fetchRegisterDetails() = viewModelScope.launch {
@@ -161,6 +173,50 @@ class RegFlowViewModel @Inject constructor(
 
     private fun navigateToLoginByEmail() = viewModelScope.launch {
         sendEvent(RegEvents.GoToLoginByEmail)
+    }
+
+    override fun changeField(field: FieldUi, updatedField: FieldUi) {
+        launchInViewModelScope {
+            val updatedFields = stateSnapshot.fields.updateFieldAndResetError(field, updatedField)
+
+            updatedFields.checkFields(
+                validators = listOf(PhoneNumberValidator, EmptyTextValidator)
+            ) { fields, isValid ->
+                updateState { s ->
+                    s.withAuthDetails(
+                        authDetails = s.authDetails.copy(
+                            fields = fields,
+                            buttons = s.buttons.updateButton(REGISTER_BUTTON) { btn ->
+                                btn.copy(enabled = isValid && s.authDetails.agreementIsCheckedWhenAvailable())
+                            }
+                        )
+                    )
+                }
+            }
+        }
+    }
+
+    override fun changeCheckbox(checkbox: CheckboxUi, updatedCheckbox: CheckboxUi) {
+        updateState { s ->
+            val authDetails = s.authDetails
+            val updatedCheckboxes = authDetails.checkboxes.updateCheckbox(
+                checkbox, updatedCheckbox
+            )
+
+            s.withAuthDetails(
+                authDetails = authDetails.copy(
+                    checkboxes = updatedCheckboxes,
+                    buttons = authDetails.buttons.updateButton(REGISTER_BUTTON) { button ->
+                        button.copy(
+                            enabled = authDetails.fields.checkFields(
+                                validators = AuthDetailsUi.authValidators()
+                            ) && authDetails.copy(checkboxes = updatedCheckboxes)
+                                .agreementIsCheckedWhenAvailable()
+                        )
+                    }
+                )
+            )
+        }
     }
 
     override fun onBackClick() {

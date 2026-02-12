@@ -15,22 +15,25 @@ import com.m.vodovoz.design_system.model.widgets.checkFields
 import com.m.vodovoz.design_system.model.widgets.updateCheckbox
 import com.m.vodovoz.design_system.model.widgets.updateField
 import com.m.vodovoz.design_system.model.widgets.updateFieldAndResetError
-import com.m.vodovoz.design_system.model.widgets.vodovozValidators
 import com.m.vodovoz.design_system.model.widgets.withUpdatedSwitch
 import com.m.vodovoz.domain.general.model.exceptions.ValidationException
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
 import com.m.vodovoz.feature.auth.login.composables.LoginByEmailUiState
 import com.m.vodovoz.feature.auth.login.model.LoginByEmailEvent
 import com.m.vodovoz.feature.auth.login.model.LoginByEmailState
+import com.m.vodovoz.feature.auth.model.AbstractAuthViewModel
 import com.m.vodovoz.feature.auth.model.AuthDetailsUi
 import com.m.vodovoz.feature.auth.model.agreementIsCheckedWhenAvailable
 import com.m.vodovoz.feature.auth.model.authValidators
 import com.m.vodovoz.feature.auth.model.toUi
-import com.m.vodovoz.ui.mvi.MviViewModel
+import com.m.vodovoz.ui.mvi.launchInViewModelScope
 import com.m.vodovoz.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+
+private const val LOGIN_BY_EMAIL_BUTTON = "otpravka"
+private const val NAVIGATION_BUTTON = "registr"
 
 @HiltViewModel
 @Stable
@@ -38,20 +41,18 @@ class LoginByEmailViewModel @Inject constructor(
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val resourcesProvider: ResourcesProvider,
     private val loginManager: LoginManager,
-) : MviViewModel<LoginByEmailState, LoginByEmailEvent>(LoginByEmailState()) {
-
-    companion object {
-        private const val LOGIN_BY_EMAIL_BUTTON = "otpravka"
-        private const val NAVIGATION_BUTTON = "registr"
-    }
+) : AbstractAuthViewModel<LoginByEmailState, LoginByEmailEvent>(
+    LoginByEmailState(),
+    LOGIN_BY_EMAIL_BUTTON
+) {
 
     init {
         fetchLoginByEmailDetails()
     }
 
 
-    fun navigateBack() = viewModelScope.launch {
-        sendEvent(LoginByEmailEvent.GoBack)
+    override suspend fun listenAuthDetailsChanges() {
+        // Keep original screen behavior: button state is controlled in change handlers.
     }
 
     private fun loginByEmail() = viewModelScope.launch {
@@ -154,39 +155,42 @@ class LoginByEmailViewModel @Inject constructor(
         }
     }
 
-    fun changeField(field: FieldUi, updatedField: FieldUi) = viewModelScope.launch {
+    override fun changeField(field: FieldUi, updatedField: FieldUi) {
+        launchInViewModelScope {
 
-        updateState { s ->
-            val authDetails = s.authDetails
-            val updatedFields = s.fields.updateFieldAndResetError(field, updatedField)
+            updateState { s ->
+                val authDetails = s.authDetails
+                val updatedFields = s.fields.updateFieldAndResetError(field, updatedField)
 
-            s.withAuthDetails(
-                authDetails = authDetails.copy(
-                    fields = updatedFields,
-                    buttons = authDetails.buttons.updateButton(LOGIN_BY_EMAIL_BUTTON) { button ->
-                        button.copy(
-                            enabled = updatedFields.checkFields(
-                                validators = AuthDetailsUi.authValidators()
-                            ) && s.checkboxes.agreementIsCheckedWhenAvailable(authDetails.agreementCheckboxId)
-                        )
-                    }
-                ),
-
+                s.withAuthDetails(
+                    authDetails = authDetails.copy(
+                        fields = updatedFields,
+                        buttons = authDetails.buttons.updateButton(LOGIN_BY_EMAIL_BUTTON) { button ->
+                            button.copy(
+                                enabled = updatedFields.checkFields(
+                                    validators = AuthDetailsUi.authValidators()
+                                ) && s.checkboxes.agreementIsCheckedWhenAvailable(authDetails.agreementCheckboxId)
+                            )
+                        }
+                    )
                 )
+            }
         }
     }
 
-    fun activateButton(button: ColorfulButtonUi) = viewModelScope.launch {
-        when (button.id) {
-            LOGIN_BY_EMAIL_BUTTON -> {
-                loginByEmail()
-            }
+    override fun clickButton(button: ColorfulButtonUi) {
+        launchInViewModelScope {
+            when (button.id) {
+                LOGIN_BY_EMAIL_BUTTON -> {
+                    loginByEmail()
+                }
 
-            NAVIGATION_BUTTON -> {
-                navigateToRegister()
-            }
+                NAVIGATION_BUTTON -> {
+                    navigateToRegister()
+                }
 
-            else -> {}
+                else -> {}
+            }
         }
     }
 
@@ -194,16 +198,25 @@ class LoginByEmailViewModel @Inject constructor(
         sendEvent(LoginByEmailEvent.GoToRegister)
     }
 
-    fun openUrl(url: String, title: String) = viewModelScope.launch {
-        sendEvent(LoginByEmailEvent.GoToWebView(url, title))
+    override fun clickHyperlink(url: String, title: String) {
+        launchInViewModelScope {
+            sendEvent(LoginByEmailEvent.GoToWebView(url, title))
+        }
     }
 
-    fun navigateToRecoveryPassword() = viewModelScope.launch {
-        sendEvent(LoginByEmailEvent.GoToRecoverPassword)
+    override fun onBackClick() {
+        launchInViewModelScope {
+            sendEvent(LoginByEmailEvent.GoBack)
+        }
     }
 
+    override fun clickForgotPassword() {
+        launchInViewModelScope {
+            sendEvent(LoginByEmailEvent.GoToRecoverPassword)
+        }
+    }
 
-    fun changeCheckbox(checkbox: CheckboxUi, updatedCheckbox: CheckboxUi) {
+    override fun changeCheckbox(checkbox: CheckboxUi, updatedCheckbox: CheckboxUi) {
         updateState { s ->
             val authDetails = s.authDetails
             val updatedCheckboxes = authDetails.checkboxes.updateCheckbox(
@@ -225,16 +238,18 @@ class LoginByEmailViewModel @Inject constructor(
         }
     }
 
-    fun changeSwitch(switch: SwitchUi, updatedSwitch: SwitchUi) = viewModelScope.launch {
-        updateState { s ->
-            val authDetails = s.authDetails
-            s.withAuthDetails(
-                authDetails = authDetails.copy(
-                    accountTypeSwitches = authDetails.accountTypeSwitches.withUpdatedSwitch(
-                        updatedSwitch = updatedSwitch
+    override fun changeSwitch(switch: SwitchUi, updatedSwitch: SwitchUi) {
+        launchInViewModelScope {
+            updateState { s ->
+                val authDetails = s.authDetails
+                s.withAuthDetails(
+                    authDetails = authDetails.copy(
+                        accountTypeSwitches = authDetails.accountTypeSwitches.withUpdatedSwitch(
+                            updatedSwitch = updatedSwitch
+                        )
                     )
                 )
-            )
+            }
         }
     }
 

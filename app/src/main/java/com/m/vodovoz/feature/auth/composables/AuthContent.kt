@@ -28,32 +28,24 @@ import com.m.vodovoz.design_system.composables.text.LinkedText
 import com.m.vodovoz.design_system.composables.text_fields.VodovozTextFieldsColumn
 import com.m.vodovoz.design_system.composables.top_bar.VodovozTopBar
 import com.m.vodovoz.design_system.effects.LifecycleEffect
-import com.m.vodovoz.design_system.model.ColorfulButtonUi
-import com.m.vodovoz.design_system.model.widgets.CheckboxUi
-import com.m.vodovoz.design_system.model.widgets.FieldUi
-import com.m.vodovoz.design_system.model.widgets.SwitchUi
 import com.m.vodovoz.feature.auth.model.AuthContentOperations
 import com.m.vodovoz.feature.auth.model.AuthDetailsUi
 
 @Composable
 fun AuthContent(
     modifier: Modifier = Modifier,
+    operations: AuthContentOperations,
     authDetails: AuthDetailsUi,
-    onBackClick: () -> Unit,
-    onFieldChange: (FieldUi, FieldUi) -> Unit,
-    onCheckboxChange: (CheckboxUi, CheckboxUi) -> Unit,
-    onButtonClick: (ColorfulButtonUi) -> Unit,
-    onHyperlinkClick: (url: String, title: String) -> Unit,
-    onSwichChange: (SwitchUi, SwitchUi) -> Unit,
-    onForgotPasswordClick: (() -> Unit)? = null,
 ) {
+    LifecycleEffect { operations.listenAuthDetailsChanges() }
+
     Column(
         modifier = modifier
             .background(MaterialTheme.colorScheme.background)
             .fillMaxSize()
     ) {
         VodovozTopBar(
-            onBack = onBackClick,
+            onBack = operations::onBackClick,
             title = authDetails.title
         )
 
@@ -82,7 +74,7 @@ fun AuthContent(
                 accountTypeSwitches.forEach { switchUi ->
                     VodovozSwitch(
                         switch = switchUi,
-                        onSwitchChange = onSwichChange
+                        onSwitchChange = operations::changeSwitch
                     )
                     HorizontalDivider(
                         thickness = 1.dp,
@@ -112,17 +104,17 @@ fun AuthContent(
                 if (authDetails.fields.isNotEmpty()) {
                     VodovozTextFieldsColumn(
                         fields = authDetails.fields,
-                        onFieldChange = onFieldChange,
+                        onFieldChange = operations::changeField,
                     )
                 }
 
-                if (onForgotPasswordClick != null) {
+                if (authDetails.showForgotPassword) {
                     Text(
                         modifier = Modifier
                             .align(Alignment.End)
                             .padding(top = 8.dp)
                             .clip(MaterialTheme.shapes.small)
-                            .clickable(onClick = onForgotPasswordClick),
+                            .clickable(onClick = operations::clickForgotPassword),
                         text = stringResource(id = R.string.forgot_password),
                         color = MaterialTheme.colorScheme.primary,
                         style = MaterialTheme.typography.bodyMedium
@@ -141,8 +133,8 @@ fun AuthContent(
                             key(checkbox.id) {
                                 VodovozCheckbox(
                                     checkbox = checkbox,
-                                    onCheckboxClick = onCheckboxChange,
-                                    onUrlClick = onHyperlinkClick
+                                    onCheckboxClick = operations::changeCheckbox,
+                                    onUrlClick = operations::clickHyperlink
                                 )
                             }
                         }
@@ -160,7 +152,7 @@ fun AuthContent(
                             val title = authDetails.waringTitles.getOrElse(index) {
                                 spaceText
                             }
-                            onHyperlinkClick(url, title)
+                            operations.clickHyperlink(url, title)
                         }
                     )
                 }
@@ -168,35 +160,10 @@ fun AuthContent(
                 VodovozButtonsColumn(
                     modifier = Modifier.padding(vertical = 24.dp),
                     buttons = authDetails.buttons,
-                    onButtonClick = onButtonClick
+                    onButtonClick = operations::clickButton
                 )
             }
         }
     }
-
-}
-
-@Composable
-fun AuthContent(
-    modifier: Modifier = Modifier,
-    operations: AuthContentOperations,
-    authDetails: AuthDetailsUi,
-) {
-    LifecycleEffect { operations.listenAuthDetailsChanges() }
-    AuthContent(
-        modifier = modifier,
-        authDetails = authDetails,
-        onBackClick = operations::onBackClick,
-        onFieldChange = operations::changeField,
-        onCheckboxChange = operations::changeCheckbox,
-        onButtonClick = operations::clickButton,
-        onHyperlinkClick = operations::clickHyperlink,
-        onSwichChange = operations::changeSwitch,
-        onForgotPasswordClick = if (authDetails.showForgotPassword) {
-            operations::clickForgotPassword
-        } else {
-            null
-        }
-    )
 
 }

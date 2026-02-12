@@ -8,21 +8,6 @@ import com.m.vodovoz.feature.auth.recover_password.model.RecoverPasswordState
 fun RecoverPasswordScreen(viewModel: RecoverPasswordViewModel, viewState: RecoverPasswordState) {
     AuthContent(
         authDetails = viewState.authDetails,
-        onBackClick = { viewModel.navigateBack() },
-        onFieldChange = { field, updatedField ->
-            viewModel.changeField(field, updatedField)
-        },
-        onCheckboxChange = { checkboxUi, updatedCheckbox ->
-            viewModel.changeCheckbox(checkboxUi, updatedCheckbox)
-        },
-        onButtonClick = { button ->
-            viewModel.activateButton(button)
-        },
-        onHyperlinkClick = { url, title ->
-            viewModel.navigateToWebView(url, title)
-        },
-        onSwichChange = { switch, updatedSwitch ->
-
-        }
+        operations = viewModel,
     )
 }
