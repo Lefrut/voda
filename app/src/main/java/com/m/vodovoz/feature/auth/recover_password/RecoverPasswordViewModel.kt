@@ -10,7 +10,6 @@ import com.m.vodovoz.design_system.model.updateButton
 import com.m.vodovoz.design_system.model.widgets.CheckboxUi
 import com.m.vodovoz.design_system.model.widgets.FieldUi
 import com.m.vodovoz.design_system.model.widgets.SwitchUi
-import com.m.vodovoz.design_system.model.widgets.checkFields
 import com.m.vodovoz.design_system.model.widgets.mapToDomain
 import com.m.vodovoz.design_system.model.widgets.updateCheckbox
 import com.m.vodovoz.design_system.model.widgets.updateField
@@ -18,7 +17,6 @@ import com.m.vodovoz.design_system.model.widgets.updateFieldAndResetError
 import com.m.vodovoz.domain.general.model.exceptions.RequestException
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
 import com.m.vodovoz.feature.auth.model.AbstractAuthViewModel
-import com.m.vodovoz.feature.auth.model.agreementIsCheckedWhenAvailable
 import com.m.vodovoz.feature.auth.model.toUi
 import com.m.vodovoz.feature.auth.recover_password.model.RecoverPasswordEvent
 import com.m.vodovoz.feature.auth.recover_password.model.RecoverPasswordState
@@ -74,14 +72,13 @@ class RecoverPasswordViewModel @Inject constructor(
         val recoverPasswordDetailsResult = recoverPasswordDeferred.await()
 
         recoverPasswordDetailsResult.onSuccess { recoverPasswordDetails ->
-            val authDetails = recoverPasswordDetails.toUi()
+            val authDetails = recoverPasswordDetails.toUi().withBlockingButton { button ->
+                button.copy(enabled = false)
+            }
             updateState { s ->
                 s.copy(
                     uiState = RecoverPasswordUiState.Body,
                     authDetails = authDetails.copy(
-                        buttons = authDetails.buttons.updateButton(RECOVER_PASSWORD_BUTTON) {
-                            it.copy(enabled = false)
-                        },
                         showForgotPassword = true
                     )
                 )
@@ -94,17 +91,7 @@ class RecoverPasswordViewModel @Inject constructor(
     }
 
     private fun recoverPassword() = viewModelScope.launch {
-
-        updateState { s ->
-            s.copy(
-                authDetails = s.authDetails.copy(
-                    buttons = s.buttons.updateButton(RECOVER_PASSWORD_BUTTON) {
-                        it.copy(loading = true)
-                    }
-                )
-
-            )
-        }
+        setBlockingButtonState(loading = true)
 
 
         val recoverPasswordResult = vodovozServiceRepository.recoverPassword(
@@ -123,20 +110,20 @@ class RecoverPasswordViewModel @Inject constructor(
             }
 
 
-            updateState { s ->
-                val field = s.fields.lastOrNull() ?: return@updateState s
+            updateAuthDetails {
+                val field = fields.lastOrNull() ?: return@updateAuthDetails this
 
-                s.copy(
-                    authDetails = s.authDetails.copy(
-                        fields = s.fields.updateField(
-                            field,
-                            field.copy(
-                                isError = true,
-                                supportingText = errorMessage
-                            )
-                        ),
-                        buttons = s.buttons.updateButton(RECOVER_PASSWORD_BUTTON) { it.copy(loading = false) }
-                    )
+                copy(
+                    fields = fields.updateField(
+                        field,
+                        field.copy(
+                            isError = true,
+                            supportingText = errorMessage
+                        )
+                    ),
+                    buttons = buttons.updateButton(RECOVER_PASSWORD_BUTTON) { button ->
+                        button.copy(loading = false)
+                    }
                 )
             }
 
@@ -145,11 +132,9 @@ class RecoverPasswordViewModel @Inject constructor(
             updateState { s ->
                 s.copy(
                     uiState = RecoverPasswordUiState.Success(placeholder.toUi()),
-                    authDetails = s.authDetails.copy(
-                        buttons = s.buttons.updateButton(RECOVER_PASSWORD_BUTTON) {
-                            it.copy(loading = false)
-                        }
-                    )
+                    authDetails = s.authDetails.withBlockingButton { button ->
+                        button.copy(loading = false)
+                    }
 
                 )
             }
@@ -159,23 +144,17 @@ class RecoverPasswordViewModel @Inject constructor(
 
     override fun changeField(field: FieldUi, updatedField: FieldUi) {
         launchInViewModelScope {
-            updateState { s ->
-                val updatedFields = s.fields.updateFieldAndResetError(field, updatedField)
-                val authDetails = s.authDetails
+            updateAuthDetails {
+                val updatedFields = fields.updateFieldAndResetError(field, updatedField)
 
-                s.copy(
-                    authDetails = authDetails.copy(
-                        fields = updatedFields,
-                        buttons = s.buttons.updateButton(RECOVER_PASSWORD_BUTTON) { button ->
-                            button.copy(
-                                enabled = updatedFields.checkFields() && s.checkboxes.agreementIsCheckedWhenAvailable(
-                                    authDetails.agreementCheckboxId
-                                )
-                            )
-                        },
-                    ),
-
-                    )
+                copy(
+                    fields = updatedFields,
+                    buttons = buttons.updateButton(RECOVER_PASSWORD_BUTTON) { button ->
+                        button.copy(
+                            enabled = isBlockingButtonEnabled(fields = updatedFields)
+                        )
+                    }
+                )
             }
         }
     }
@@ -188,23 +167,18 @@ class RecoverPasswordViewModel @Inject constructor(
 
     override fun changeCheckbox(checkbox: CheckboxUi, updatedCheckbox: CheckboxUi) {
         launchInViewModelScope {
-            updateState { s ->
-                val updatedCheckboxes = s.checkboxes.updateCheckbox(
+            updateAuthDetails {
+                val updatedCheckboxes = checkboxes.updateCheckbox(
                     checkbox, updatedCheckbox
                 )
-                val authDetails = s.authDetails
 
-                s.copy(
-                    authDetails = authDetails.copy(
-                        checkboxes = updatedCheckboxes,
-                        buttons = s.buttons.updateButton(RECOVER_PASSWORD_BUTTON) { button ->
-                            button.copy(
-                                enabled = s.fields.checkFields() && updatedCheckboxes.agreementIsCheckedWhenAvailable(
-                                    authDetails.agreementCheckboxId
-                                )
-                            )
-                        }
-                    ),
+                copy(
+                    checkboxes = updatedCheckboxes,
+                    buttons = buttons.updateButton(RECOVER_PASSWORD_BUTTON) { button ->
+                        button.copy(
+                            enabled = isBlockingButtonEnabled(checkboxes = updatedCheckboxes)
+                        )
+                    }
                 )
             }
         }

@@ -8,7 +8,6 @@ import com.m.vodovoz.common.account.AccountManager
 import com.m.vodovoz.common.account.LoginManager
 import com.m.vodovoz.common.resources.ResourcesProvider
 import com.m.vodovoz.design_system.model.ColorfulButtonUi
-import com.m.vodovoz.design_system.model.mapToUi
 import com.m.vodovoz.design_system.model.updateButton
 import com.m.vodovoz.design_system.model.widgets.CheckboxUi
 import com.m.vodovoz.design_system.model.widgets.EmptyTextValidator
@@ -23,7 +22,6 @@ import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
 import com.m.vodovoz.feature.auth.model.AbstractAuthViewModel
 import com.m.vodovoz.feature.auth.model.AuthDetailsUi
 import com.m.vodovoz.feature.auth.model.AuthState
-import com.m.vodovoz.feature.auth.model.agreementIsCheckedWhenAvailable
 import com.m.vodovoz.feature.auth.model.authValidators
 import com.m.vodovoz.feature.auth.model.toUi
 import com.m.vodovoz.ui.mvi.Event
@@ -35,6 +33,8 @@ import javax.inject.Inject
 
 private const val REGISTER_BUTTON = "otpravka"
 private const val NAVIGATION_BUTTON = "auth"
+private val REGISTER_FIELD_VALIDATORS = listOf(PhoneNumberValidator, EmptyTextValidator)
+private val REGISTER_BUTTON_VALIDATORS = AuthDetailsUi.authValidators()
 
 @HiltViewModel
 @Stable
@@ -63,16 +63,14 @@ class RegFlowViewModel @Inject constructor(
             vodovozServiceRepository.getRegisterDetails().singleResult()
 
         registerFieldsResult.onSuccess { registerDetails ->
+            val authDetails = registerDetails.toUi().withBlockingButton { button ->
+                button.copy(enabled = false)
+            }
+
             updateState { s ->
                 s.copy(
                     uiState = RegUiState.Success,
-                    authDetails = registerDetails.toUi().copy(
-                        buttons = registerDetails.buttons.mapToUi()
-                            .updateButton(REGISTER_BUTTON) { btn ->
-                                btn.copy(enabled = false)
-                            }
-
-                    )
+                    authDetails = authDetails
                 )
             }
         }.onFailure {
@@ -85,32 +83,16 @@ class RegFlowViewModel @Inject constructor(
             putErrors = true,
             getSupportingText = { field -> field.getErrorText { id -> resourceProvider.getString(id) } }
         ) { updatedFields, _ ->
-            updateState { s ->
-                s.withAuthDetails(
-                    authDetails = s.authDetails.copy(
-                        fields = updatedFields,
-                        buttons = s.buttons.updateButton(REGISTER_BUTTON) { btn ->
-                            btn.copy(enabled = false)
-                        }
-                    )
-                )
+            updateAuthDetails {
+                withBlockingButton { button ->
+                    button.copy(enabled = false)
+                }.copy(fields = updatedFields)
             }
         }
 
         if (!isValid) return@launch
 
-
-
-        updateState { s ->
-            s.withAuthDetails(
-                authDetails = s.authDetails.copy(
-                    buttons = s.buttons.updateButton(REGISTER_BUTTON) { btn ->
-                        btn.copy(loading = true)
-                    }
-
-                )
-            )
-        }
+        setBlockingButtonState(loading = true)
 
         val failMessage = resourceProvider.getString(R.string.error_registration)
 
@@ -134,16 +116,7 @@ class RegFlowViewModel @Inject constructor(
                 AccountManager.UserSettings(email, password)
             )
 
-            updateState { s ->
-                s.withAuthDetails(
-                    authDetails = s.authDetails.copy(
-                        buttons = s.buttons.updateButton(REGISTER_BUTTON) { btn ->
-                            btn.copy(loading = false, enabled = false)
-                        }
-
-                    )
-                )
-            }
+            setBlockingButtonState(loading = false, enabled = false)
 
             sendEvent(RegEvents.RefreshAll)
 
@@ -154,16 +127,10 @@ class RegFlowViewModel @Inject constructor(
                 else -> failMessage
             }
 
-            updateState { s ->
-                s.withAuthDetails(
-                    authDetails = s.authDetails.copy(
-                        buttons = s.buttons.updateButton(REGISTER_BUTTON) { btn ->
-                            btn.copy(loading = false, enabled = t !is ValidationException)
-                        }
-
-                    )
-                )
-            }
+            setBlockingButtonState(
+                loading = false,
+                enabled = t !is ValidationException
+            )
 
             sendEvent(RegEvents.ShowSnackbar(message))
         }
@@ -180,16 +147,19 @@ class RegFlowViewModel @Inject constructor(
             val updatedFields = stateSnapshot.fields.updateFieldAndResetError(field, updatedField)
 
             updatedFields.checkFields(
-                validators = listOf(PhoneNumberValidator, EmptyTextValidator)
-            ) { fields, isValid ->
-                updateState { s ->
-                    s.withAuthDetails(
-                        authDetails = s.authDetails.copy(
-                            fields = fields,
-                            buttons = s.buttons.updateButton(REGISTER_BUTTON) { btn ->
-                                btn.copy(enabled = isValid && s.authDetails.agreementIsCheckedWhenAvailable())
-                            }
-                        )
+                validators = REGISTER_FIELD_VALIDATORS
+            ) { checkedFields, _ ->
+                updateAuthDetails {
+                    copy(
+                        fields = checkedFields,
+                        buttons = buttons.updateButton(REGISTER_BUTTON) { button ->
+                            button.copy(
+                                enabled = isBlockingButtonEnabled(
+                                    validators = REGISTER_FIELD_VALIDATORS,
+                                    fields = checkedFields
+                                )
+                            )
+                        }
                     )
                 }
             }
@@ -197,24 +167,21 @@ class RegFlowViewModel @Inject constructor(
     }
 
     override fun changeCheckbox(checkbox: CheckboxUi, updatedCheckbox: CheckboxUi) {
-        updateState { s ->
-            val authDetails = s.authDetails
-            val updatedCheckboxes = authDetails.checkboxes.updateCheckbox(
+        updateAuthDetails {
+            val updatedCheckboxes = checkboxes.updateCheckbox(
                 checkbox, updatedCheckbox
             )
 
-            s.withAuthDetails(
-                authDetails = authDetails.copy(
-                    checkboxes = updatedCheckboxes,
-                    buttons = authDetails.buttons.updateButton(REGISTER_BUTTON) { button ->
-                        button.copy(
-                            enabled = authDetails.fields.checkFields(
-                                validators = AuthDetailsUi.authValidators()
-                            ) && authDetails.copy(checkboxes = updatedCheckboxes)
-                                .agreementIsCheckedWhenAvailable()
+            copy(
+                checkboxes = updatedCheckboxes,
+                buttons = buttons.updateButton(REGISTER_BUTTON) { button ->
+                    button.copy(
+                        enabled = isBlockingButtonEnabled(
+                            validators = REGISTER_BUTTON_VALIDATORS,
+                            checkboxes = updatedCheckboxes
                         )
-                    }
-                )
+                    )
+                }
             )
         }
     }

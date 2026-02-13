@@ -8,8 +8,6 @@ import com.m.vodovoz.common.account.AccountManager
 import com.m.vodovoz.common.model.GlobalAppExtraAgreement
 import com.m.vodovoz.common.resources.ResourcesProvider
 import com.m.vodovoz.design_system.model.ColorfulButtonUi
-import com.m.vodovoz.design_system.model.updateButton
-import com.m.vodovoz.design_system.model.widgets.updateField
 import com.m.vodovoz.domain.general.model.exceptions.TooManyRequestsException
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
 import com.m.vodovoz.feature.auth.model.AbstractAuthViewModel
@@ -55,19 +53,20 @@ class LoginFlowViewModel @Inject constructor(
 
         loginDetailsResult.onSuccess { loginDetails ->
             val authDetails = loginDetails.toUi()
+                .withBlockingButton { button ->
+                    button.copy(enabled = false)
+                }
+                .copy(
+                    warning = GlobalAppExtraAgreement.html,
+                    waringTitles = GlobalAppExtraAgreement.titles,
+                    accountTypeSwitches = AccountTypeSwtichInfo.entries.toSwitches(
+                        resourcesProvider::getString
+                    )
+                )
 
             updateState { s ->
                 s.copy(
-                    authDetails = authDetails.copy(
-                        buttons = authDetails.buttons.updateButton(AUTH_BUTTON) { button ->
-                            button.copy(enabled = false)
-                        },
-                        warning = GlobalAppExtraAgreement.html,
-                        waringTitles = GlobalAppExtraAgreement.titles,
-                        accountTypeSwitches = AccountTypeSwtichInfo.entries.toSwitches(
-                            resourcesProvider::getString
-                        )
-                    ),
+                    authDetails = authDetails,
                     uiState = LoginUiState.Success,
                 )
             }
@@ -80,41 +79,16 @@ class LoginFlowViewModel @Inject constructor(
 
     private fun requestCode() = viewModelScope.launch {
         val fields = stateSnapshot.authDetails.fields
-        val buttons = stateSnapshot.authDetails.buttons
 
         val phoneField = fields.firstOrNull() ?: return@launch
 
-        updateState { s ->
-            s.withAuthDetails(
-                authDetails = s.authDetails.copy(
-                    buttons = buttons.updateButton(AUTH_BUTTON) { btn ->
-                        btn.copy(loading = true)
-                    }
-                ),
-            )
-        }
+        setBlockingButtonState(loading = true)
 
         val requestPhoneCodeUrl = siteStateManager.siteStateFlow.value?.smsUrl?.takeIf { sms ->
             sms.isNotBlank()
         } ?: kotlin.run {
-            val lastField = fields.lastOrNull()
-            updateState { s ->
-                s.withAuthDetails(
-                    authDetails = s.authDetails.copy(
-                        buttons = buttons.updateButton(AUTH_BUTTON) { btn ->
-                            btn.copy(loading = false)
-                        },
-                        fields = lastField?.let {
-                            fields.updateField(
-                                lastField, lastField.copy(
-                                    supportingText = resourcesProvider.getString(R.string.error_site_login),
-                                    isError = true
-                                )
-                            )
-                        } ?: fields
-                    ),
-                )
-            }
+            setBlockingButtonState(loading = false)
+            setLastFieldError(resourcesProvider.getString(R.string.error_site_login))
             return@launch
         }
 
@@ -129,15 +103,7 @@ class LoginFlowViewModel @Inject constructor(
             }
         ).singleResult()
 
-        updateState { s ->
-            s.withAuthDetails(
-                authDetails = s.authDetails.copy(
-                    buttons = buttons.updateButton(AUTH_BUTTON) { btn ->
-                        btn.copy(loading = false)
-                    }
-                )
-            )
-        }
+        setBlockingButtonState(loading = false)
 
         requestPhoneCodeResult.onFailure { t ->
             when (t) {
@@ -151,11 +117,7 @@ class LoginFlowViewModel @Inject constructor(
                 }
 
                 else -> {
-                    updateAuthDetails {
-                        copy(
-                            fields = fields.withLastFieldErrorText(resourcesProvider.getString(R.string.error_login))
-                        )
-                    }
+                    setLastFieldError(resourcesProvider.getString(R.string.error_login))
                 }
             }
         }.onSuccess { requestCodeModel ->
@@ -171,11 +133,7 @@ class LoginFlowViewModel @Inject constructor(
 
     override fun clickButton(button: ColorfulButtonUi) {
         launchInViewModelScope {
-            updateAuthDetails {
-                copy(
-                    fields = fields.withLastFieldErrorText("")
-                )
-            }
+            setLastFieldError("")
 
             when (button.id) {
                 NAVIGATION_BUTTON -> {
