@@ -29,7 +29,7 @@ abstract class AbstractAuthViewModel<State : AuthState<State>, Event>(
                             enabled = fields.checkFields()
                                     && s.checkboxes.agreementIsCheckedWhenAvailable(
                                 agreementCheckboxId
-                            )
+                            ) && (accountTypeSwitches.any { it.value } || accountTypeSwitches.isEmpty())
                         )
                     }
 

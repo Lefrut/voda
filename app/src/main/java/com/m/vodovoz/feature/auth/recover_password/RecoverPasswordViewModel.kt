@@ -81,7 +81,8 @@ class RecoverPasswordViewModel @Inject constructor(
                     authDetails = authDetails.copy(
                         buttons = authDetails.buttons.updateButton(RECOVER_PASSWORD_BUTTON) {
                             it.copy(enabled = false)
-                        }
+                        },
+                        showForgotPassword = true
                     )
                 )
             }
@@ -185,11 +186,11 @@ class RecoverPasswordViewModel @Inject constructor(
         }
     }
 
-    override fun changeCheckbox(checkboxUi: CheckboxUi, updatedCheckbox: CheckboxUi) {
+    override fun changeCheckbox(checkbox: CheckboxUi, updatedCheckbox: CheckboxUi) {
         launchInViewModelScope {
             updateState { s ->
                 val updatedCheckboxes = s.checkboxes.updateCheckbox(
-                    checkboxUi, updatedCheckbox
+                    checkbox, updatedCheckbox
                 )
                 val authDetails = s.authDetails
 
