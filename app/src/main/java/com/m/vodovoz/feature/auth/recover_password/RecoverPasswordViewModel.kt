@@ -7,13 +7,9 @@ import com.m.vodovoz.common.resources.ResourcesProvider
 import com.m.vodovoz.design_system.model.ColorfulButtonUi
 import com.m.vodovoz.design_system.model.toUi
 import com.m.vodovoz.design_system.model.updateButton
-import com.m.vodovoz.design_system.model.widgets.CheckboxUi
-import com.m.vodovoz.design_system.model.widgets.FieldUi
 import com.m.vodovoz.design_system.model.widgets.SwitchUi
 import com.m.vodovoz.design_system.model.widgets.mapToDomain
-import com.m.vodovoz.design_system.model.widgets.updateCheckbox
 import com.m.vodovoz.design_system.model.widgets.updateField
-import com.m.vodovoz.design_system.model.widgets.updateFieldAndResetError
 import com.m.vodovoz.domain.general.model.exceptions.RequestException
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
 import com.m.vodovoz.feature.auth.model.AbstractAuthViewModel
@@ -42,10 +38,6 @@ class RecoverPasswordViewModel @Inject constructor(
 
     init {
         fetchRecoverPasswordDetails()
-    }
-
-    override suspend fun listenAuthDetailsChanges() {
-        // Keep original screen behavior: button state is controlled in change handlers.
     }
 
     override fun clickButton(button: ColorfulButtonUi) {
@@ -142,45 +134,9 @@ class RecoverPasswordViewModel @Inject constructor(
 
     }
 
-    override fun changeField(field: FieldUi, updatedField: FieldUi) {
-        launchInViewModelScope {
-            updateAuthDetails {
-                val updatedFields = fields.updateFieldAndResetError(field, updatedField)
-
-                copy(
-                    fields = updatedFields,
-                    buttons = buttons.updateButton(RECOVER_PASSWORD_BUTTON) { button ->
-                        button.copy(
-                            enabled = isBlockingButtonEnabled(fields = updatedFields)
-                        )
-                    }
-                )
-            }
-        }
-    }
-
     override fun clickHyperlink(url: String, title: String) {
         launchInViewModelScope {
             sendEvent(RecoverPasswordEvent.GoToWebView(url, title))
-        }
-    }
-
-    override fun changeCheckbox(checkbox: CheckboxUi, updatedCheckbox: CheckboxUi) {
-        launchInViewModelScope {
-            updateAuthDetails {
-                val updatedCheckboxes = checkboxes.updateCheckbox(
-                    checkbox, updatedCheckbox
-                )
-
-                copy(
-                    checkboxes = updatedCheckboxes,
-                    buttons = buttons.updateButton(RECOVER_PASSWORD_BUTTON) { button ->
-                        button.copy(
-                            enabled = isBlockingButtonEnabled(checkboxes = updatedCheckboxes)
-                        )
-                    }
-                )
-            }
         }
     }
 
@@ -191,7 +147,5 @@ class RecoverPasswordViewModel @Inject constructor(
     }
 
     fun navigateBack() = onBackClick()
-
-    override fun changeSwitch(switch: SwitchUi, updatedSwitchUi: SwitchUi) = Unit
 
 }

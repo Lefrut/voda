@@ -21,7 +21,7 @@ interface AuthContentOperations {
 
     fun clickHyperlink(url: String, title: String)
 
-    fun changeSwitch(switch: SwitchUi, updatedSwitchUi: SwitchUi)
+    fun changeSwitch(switch: SwitchUi, updatedSwitch: SwitchUi)
 
     fun clickForgotPassword() = Unit
 

@@ -7,12 +7,8 @@ import com.m.vodovoz.common.account.LoginManager
 import com.m.vodovoz.common.resources.ResourcesProvider
 import com.m.vodovoz.design_system.model.ColorfulButtonUi
 import com.m.vodovoz.design_system.model.updateButton
-import com.m.vodovoz.design_system.model.widgets.CheckboxUi
-import com.m.vodovoz.design_system.model.widgets.FieldUi
 import com.m.vodovoz.design_system.model.widgets.SwitchUi
-import com.m.vodovoz.design_system.model.widgets.updateCheckbox
 import com.m.vodovoz.design_system.model.widgets.updateField
-import com.m.vodovoz.design_system.model.widgets.updateFieldAndResetError
 import com.m.vodovoz.design_system.model.widgets.withUpdatedSwitch
 import com.m.vodovoz.domain.general.model.exceptions.ValidationException
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
@@ -20,8 +16,10 @@ import com.m.vodovoz.feature.auth.login.composables.LoginByEmailUiState
 import com.m.vodovoz.feature.auth.login.model.LoginByEmailEvent
 import com.m.vodovoz.feature.auth.login.model.LoginByEmailState
 import com.m.vodovoz.feature.auth.model.AbstractAuthViewModel
+import com.m.vodovoz.feature.auth.model.AccountTypeSwtichInfo
 import com.m.vodovoz.feature.auth.model.AuthDetailsUi
 import com.m.vodovoz.feature.auth.model.authValidators
+import com.m.vodovoz.feature.auth.model.toSwitches
 import com.m.vodovoz.feature.auth.model.toUi
 import com.m.vodovoz.ui.mvi.launchInViewModelScope
 import com.m.vodovoz.util.extensions.singleResult
@@ -44,13 +42,10 @@ class LoginByEmailViewModel @Inject constructor(
     LOGIN_BY_EMAIL_BUTTON
 ) {
 
+    override val blockingButtonValidators = LOGIN_BY_EMAIL_VALIDATORS
+
     init {
         fetchLoginByEmailDetails()
-    }
-
-
-    override suspend fun listenAuthDetailsChanges() {
-        // Keep original screen behavior: button state is controlled in change handlers.
     }
 
     private fun loginByEmail() = viewModelScope.launch {
@@ -113,7 +108,11 @@ class LoginByEmailViewModel @Inject constructor(
         loginByEmailResult.onSuccess { loginDetails ->
             val authDetails = loginDetails.toUi().withBlockingButton { button ->
                 button.copy(enabled = false)
-            }
+            }.copy(
+                accountTypeSwitches = AccountTypeSwtichInfo.entries.toSwitches(
+                    resourcesProvider::getString
+                )
+            )
 
             updateState { s ->
                 s.copy(
@@ -124,27 +123,6 @@ class LoginByEmailViewModel @Inject constructor(
         }.onFailure {
             updateState { s ->
                 s.copy(uiState = LoginByEmailUiState.Error)
-            }
-        }
-    }
-
-    override fun changeField(field: FieldUi, updatedField: FieldUi) {
-        launchInViewModelScope {
-
-            updateAuthDetails {
-                val updatedFields = fields.updateFieldAndResetError(field, updatedField)
-
-                copy(
-                    fields = updatedFields,
-                    buttons = buttons.updateButton(LOGIN_BY_EMAIL_BUTTON) { button ->
-                        button.copy(
-                            enabled = isBlockingButtonEnabled(
-                                validators = LOGIN_BY_EMAIL_VALIDATORS,
-                                fields = updatedFields
-                            )
-                        )
-                    }
-                )
             }
         }
     }
@@ -186,38 +164,5 @@ class LoginByEmailViewModel @Inject constructor(
             sendEvent(LoginByEmailEvent.GoToRecoverPassword)
         }
     }
-
-    override fun changeCheckbox(checkbox: CheckboxUi, updatedCheckbox: CheckboxUi) {
-        updateAuthDetails {
-            val updatedCheckboxes = checkboxes.updateCheckbox(
-                checkbox, updatedCheckbox
-            )
-
-            copy(
-                checkboxes = updatedCheckboxes,
-                buttons = buttons.updateButton(LOGIN_BY_EMAIL_BUTTON) { button ->
-                    button.copy(
-                        enabled = isBlockingButtonEnabled(
-                            validators = LOGIN_BY_EMAIL_VALIDATORS,
-                            checkboxes = updatedCheckboxes
-                        )
-                    )
-                }
-            )
-        }
-    }
-
-    override fun changeSwitch(switch: SwitchUi, updatedSwitch: SwitchUi) {
-        launchInViewModelScope {
-            updateAuthDetails {
-                copy(
-                    accountTypeSwitches = accountTypeSwitches.withUpdatedSwitch(
-                        updatedSwitch = updatedSwitch
-                    )
-                )
-            }
-        }
-    }
-
 
 }

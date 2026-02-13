@@ -8,15 +8,10 @@ import com.m.vodovoz.common.account.AccountManager
 import com.m.vodovoz.common.account.LoginManager
 import com.m.vodovoz.common.resources.ResourcesProvider
 import com.m.vodovoz.design_system.model.ColorfulButtonUi
-import com.m.vodovoz.design_system.model.updateButton
-import com.m.vodovoz.design_system.model.widgets.CheckboxUi
 import com.m.vodovoz.design_system.model.widgets.EmptyTextValidator
-import com.m.vodovoz.design_system.model.widgets.FieldUi
 import com.m.vodovoz.design_system.model.widgets.PhoneNumberValidator
 import com.m.vodovoz.design_system.model.widgets.checkFields
 import com.m.vodovoz.design_system.model.widgets.getErrorText
-import com.m.vodovoz.design_system.model.widgets.updateCheckbox
-import com.m.vodovoz.design_system.model.widgets.updateFieldAndResetError
 import com.m.vodovoz.domain.general.model.exceptions.ValidationException
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
 import com.m.vodovoz.feature.auth.model.AbstractAuthViewModel
@@ -33,6 +28,7 @@ import javax.inject.Inject
 
 private const val REGISTER_BUTTON = "otpravka"
 private const val NAVIGATION_BUTTON = "auth"
+
 private val REGISTER_FIELD_VALIDATORS = listOf(PhoneNumberValidator, EmptyTextValidator)
 private val REGISTER_BUTTON_VALIDATORS = AuthDetailsUi.authValidators()
 
@@ -48,12 +44,10 @@ class RegFlowViewModel @Inject constructor(
     REGISTER_BUTTON
 ) {
 
+    override val blockingButtonValidators = REGISTER_FIELD_VALIDATORS
+
     init {
         fetchRegisterDetails()
-    }
-
-    override suspend fun listenAuthDetailsChanges() {
-        // Keep original screen behavior: button state is controlled in change handlers.
     }
 
     private fun fetchRegisterDetails() = viewModelScope.launch {
@@ -80,6 +74,7 @@ class RegFlowViewModel @Inject constructor(
 
     private fun register() = viewModelScope.launch {
         val isValid = stateSnapshot.fields.checkFields(
+            validators = REGISTER_BUTTON_VALIDATORS,
             putErrors = true,
             getSupportingText = { field -> field.getErrorText { id -> resourceProvider.getString(id) } }
         ) { updatedFields, _ ->
@@ -140,50 +135,6 @@ class RegFlowViewModel @Inject constructor(
 
     private fun navigateToLoginByEmail() = viewModelScope.launch {
         sendEvent(RegEvents.GoToLoginByEmail)
-    }
-
-    override fun changeField(field: FieldUi, updatedField: FieldUi) {
-        launchInViewModelScope {
-            val updatedFields = stateSnapshot.fields.updateFieldAndResetError(field, updatedField)
-
-            updatedFields.checkFields(
-                validators = REGISTER_FIELD_VALIDATORS
-            ) { checkedFields, _ ->
-                updateAuthDetails {
-                    copy(
-                        fields = checkedFields,
-                        buttons = buttons.updateButton(REGISTER_BUTTON) { button ->
-                            button.copy(
-                                enabled = isBlockingButtonEnabled(
-                                    validators = REGISTER_FIELD_VALIDATORS,
-                                    fields = checkedFields
-                                )
-                            )
-                        }
-                    )
-                }
-            }
-        }
-    }
-
-    override fun changeCheckbox(checkbox: CheckboxUi, updatedCheckbox: CheckboxUi) {
-        updateAuthDetails {
-            val updatedCheckboxes = checkboxes.updateCheckbox(
-                checkbox, updatedCheckbox
-            )
-
-            copy(
-                checkboxes = updatedCheckboxes,
-                buttons = buttons.updateButton(REGISTER_BUTTON) { button ->
-                    button.copy(
-                        enabled = isBlockingButtonEnabled(
-                            validators = REGISTER_BUTTON_VALIDATORS,
-                            checkboxes = updatedCheckboxes
-                        )
-                    )
-                }
-            )
-        }
     }
 
     override fun onBackClick() {

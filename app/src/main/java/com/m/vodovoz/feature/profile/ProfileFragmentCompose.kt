@@ -34,6 +34,7 @@ import com.m.vodovoz.core.navigation.navigateToLoginByEmail
 import com.m.vodovoz.core.navigation.navigateToOrderDetails
 import com.m.vodovoz.core.navigation.navigateToOrdersHistory
 import com.m.vodovoz.core.navigation.navigateToQuestionnaires
+import com.m.vodovoz.core.navigation.navigateToRegister
 import com.m.vodovoz.core.navigation.navigateToUserData
 import com.m.vodovoz.core.navigation.navigateToWaitFeedbackProducts
 import com.m.vodovoz.core.navigation.navigateToWaterApp
@@ -154,6 +155,7 @@ class ProfileFragment : Fragment() {
                         when (events) {
                             ProfileFlowViewModel.ProfileEvents.GoToLogin -> {
                                 navigateToLogin()
+
                             }
 
                             ProfileFlowViewModel.ProfileEvents.GoToUserData -> {
