@@ -2,11 +2,13 @@ package com.m.vodovoz.feature.auth.login
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.m.vodovoz.R
 import com.m.vodovoz.common.account.AccountManager
 import com.m.vodovoz.common.model.GlobalAppExtraAgreement
 import com.m.vodovoz.common.resources.ResourcesProvider
+import com.m.vodovoz.core.navigation.AuthArgs
 import com.m.vodovoz.design_system.model.ColorfulButtonUi
 import com.m.vodovoz.domain.general.model.exceptions.TooManyRequestsException
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
@@ -14,20 +16,25 @@ import com.m.vodovoz.feature.auth.model.AbstractAuthViewModel
 import com.m.vodovoz.feature.auth.model.AccountTypeSwtichInfo
 import com.m.vodovoz.feature.auth.model.AuthDetailsUi
 import com.m.vodovoz.feature.auth.model.AuthState
+import com.m.vodovoz.feature.auth.model.selectedAccountTypeId
 import com.m.vodovoz.feature.auth.model.toSwitches
 import com.m.vodovoz.feature.auth.model.toUi
+import com.m.vodovoz.feature.auth.model.withAccountTypeSelection
 import com.m.vodovoz.feature.sitestate.SiteStateManager
 import com.m.vodovoz.ui.mvi.Event
 import com.m.vodovoz.ui.mvi.launchInViewModelScope
 import com.m.vodovoz.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 
 private const val AUTH_BUTTON = "sms"
 private const val NAVIGATION_BUTTON = "auth"
+private const val EMPTY_ACCOUNT_TYPE_ID = ""
 
 @HiltViewModel
 @Stable
@@ -35,6 +42,7 @@ class LoginFlowViewModel @Inject constructor(
     private val siteStateManager: SiteStateManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val resourcesProvider: ResourcesProvider,
+    private val savedStateHandle: SavedStateHandle,
 ) : AbstractAuthViewModel<LoginFlowViewModel.LoginState, LoginFlowViewModel.LoginEvents>(
     LoginState(), AUTH_BUTTON
 ) {
@@ -61,7 +69,7 @@ class LoginFlowViewModel @Inject constructor(
                     waringTitles = GlobalAppExtraAgreement.titles,
                     accountTypeSwitches = AccountTypeSwtichInfo.entries.toSwitches(
                         resourcesProvider::getString
-                    )
+                    ).withAccountTypeSelection(savedStateHandle[AuthArgs.ACCOUNT_TYPE_ID])
                 )
 
             updateState { s ->
@@ -137,7 +145,11 @@ class LoginFlowViewModel @Inject constructor(
 
             when (button.id) {
                 NAVIGATION_BUTTON -> {
-                    sendEvent(LoginEvents.GoToLoginByEmail)
+                    sendEvent(
+                        LoginEvents.GoToLoginByEmail(
+                            selectedAccountTypeId = stateSnapshot.authDetails.selectedAccountTypeId()
+                        )
+                    )
                 }
 
                 AUTH_BUTTON -> {
@@ -157,9 +169,13 @@ class LoginFlowViewModel @Inject constructor(
         }
     }
 
+    fun setAccountTypeById(accountTypeId: String?) {
+        updateAuthDetails { withAccountTypeSelection(accountTypeId) }
+    }
+
     sealed class LoginEvents : Event {
         data object GoBack : LoginEvents()
-        data object GoToLoginByEmail : LoginEvents()
+        data class GoToLoginByEmail(val selectedAccountTypeId: String) : LoginEvents()
         data class GoToLoginByPhone(val phone: String, val waitSeconds: Int) : LoginEvents()
         data object GoToRegister : LoginEvents()
 

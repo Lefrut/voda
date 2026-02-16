@@ -74,6 +74,29 @@ fun List<AccountTypeSwtichInfo>.toSwitches(getStringResource: (Int) -> String): 
     }
 }
 
+fun AuthDetailsUi.selectedAccountTypeId(): String {
+    return accountTypeSwitches.firstOrNull { it.value }?.id.orEmpty()
+}
+
+fun AuthDetailsUi.withAccountTypeSelection(selectedAccountTypeId: String?): AuthDetailsUi {
+    return copy(
+        accountTypeSwitches = accountTypeSwitches.withAccountTypeSelection(selectedAccountTypeId)
+    )
+}
+
+fun List<SwitchUi>.withAccountTypeSelection(selectedAccountTypeId: String?): List<SwitchUi> {
+    return when {
+        selectedAccountTypeId == null -> this
+        selectedAccountTypeId.isBlank() -> map { switch ->
+            switch.copy(value = false)
+        }
+
+        else -> map { switch ->
+            switch.copy(value = switch.id == selectedAccountTypeId)
+        }
+    }
+}
+
 @Stable
 abstract class AuthState<S : AuthState<S>>(
     open val authDetails: AuthDetailsUi,

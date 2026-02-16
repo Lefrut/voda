@@ -1,15 +1,15 @@
 package com.m.vodovoz.feature.auth.login_by_email
 
 import androidx.compose.runtime.Stable
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.m.vodovoz.R
 import com.m.vodovoz.common.account.LoginManager
 import com.m.vodovoz.common.resources.ResourcesProvider
+import com.m.vodovoz.core.navigation.AuthArgs
 import com.m.vodovoz.design_system.model.ColorfulButtonUi
 import com.m.vodovoz.design_system.model.updateButton
-import com.m.vodovoz.design_system.model.widgets.SwitchUi
 import com.m.vodovoz.design_system.model.widgets.updateField
-import com.m.vodovoz.design_system.model.widgets.withUpdatedSwitch
 import com.m.vodovoz.domain.general.model.exceptions.ValidationException
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
 import com.m.vodovoz.feature.auth.login.composables.LoginByEmailUiState
@@ -19,8 +19,10 @@ import com.m.vodovoz.feature.auth.model.AbstractAuthViewModel
 import com.m.vodovoz.feature.auth.model.AccountTypeSwtichInfo
 import com.m.vodovoz.feature.auth.model.AuthDetailsUi
 import com.m.vodovoz.feature.auth.model.authValidators
+import com.m.vodovoz.feature.auth.model.selectedAccountTypeId
 import com.m.vodovoz.feature.auth.model.toSwitches
 import com.m.vodovoz.feature.auth.model.toUi
+import com.m.vodovoz.feature.auth.model.withAccountTypeSelection
 import com.m.vodovoz.ui.mvi.launchInViewModelScope
 import com.m.vodovoz.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -37,6 +39,7 @@ class LoginByEmailViewModel @Inject constructor(
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val resourcesProvider: ResourcesProvider,
     private val loginManager: LoginManager,
+    private val savedStateHandle: SavedStateHandle,
 ) : AbstractAuthViewModel<LoginByEmailState, LoginByEmailEvent>(
     LoginByEmailState(),
     LOGIN_BY_EMAIL_BUTTON
@@ -111,7 +114,7 @@ class LoginByEmailViewModel @Inject constructor(
             }.copy(
                 accountTypeSwitches = AccountTypeSwtichInfo.entries.toSwitches(
                     resourcesProvider::getString
-                )
+                ).withAccountTypeSelection(savedStateHandle[AuthArgs.ACCOUNT_TYPE_ID])
             )
 
             updateState { s ->
@@ -155,7 +158,11 @@ class LoginByEmailViewModel @Inject constructor(
 
     override fun onBackClick() {
         launchInViewModelScope {
-            sendEvent(LoginByEmailEvent.GoBack)
+            sendEvent(
+                LoginByEmailEvent.GoBack(
+                    selectedAccountTypeId = stateSnapshot.authDetails.selectedAccountTypeId()
+                )
+            )
         }
     }
 

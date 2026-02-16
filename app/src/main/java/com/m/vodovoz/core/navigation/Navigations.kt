@@ -323,6 +323,11 @@ data object CommonArgs {
     const val QUERY_PARAMS: String = "queryParams"
 }
 
+data object AuthArgs {
+
+    const val ACCOUNT_TYPE_ID: String = "accountTypeId"
+}
+
 
 fun CommonArgs.queryParamsTo(second: Map<String, String>): Pair<String, Map<String, String>> {
     return QUERY_PARAMS to second
@@ -486,13 +491,23 @@ fun NavController.navigateToUserData() {
     navigate(R.id.userDataFragment)
 }
 
-fun NavController.navigateToLoginByEmail() {
-    navigate(R.id.loginByEmailFragment)
+fun NavController.navigateToLoginByEmail(selectedAccountTypeId: String? = null) {
+    navigate(
+        R.id.loginByEmailFragment,
+        selectedAccountTypeId?.let {
+            bundleOf(AuthArgs.ACCOUNT_TYPE_ID to it)
+        }
+    )
 }
 
 
-fun NavController.navigateToLogin() {
-    navigate(R.id.loginFragment)
+fun NavController.navigateToLogin(selectedAccountTypeId: String? = null) {
+    navigate(
+        R.id.loginFragment,
+        selectedAccountTypeId?.let {
+            bundleOf(AuthArgs.ACCOUNT_TYPE_ID to it)
+        }
+    )
 }
 
 fun NavController.navigateToProductFilterValues(categoryId: Long, filter: FilterUi) {
