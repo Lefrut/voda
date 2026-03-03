@@ -98,7 +98,7 @@ class CartFlowViewModel @Inject constructor(
                     presentButton = cartDetails.presentButton?.toUi(),
                     uiState = CartUiState.Cart,
                     orderSummary = cartDetails.orderSummary.mapToUi(),
-                    promoCode = promoButton?.popupWindow?.value ?: s.promoCode
+                    promoCode = s.promoCode.ifEmpty { promoButton?.popupWindow?.value.orEmpty() }
                 )
             }
 
@@ -332,10 +332,10 @@ class CartFlowViewModel @Inject constructor(
 
             val promoButton = s.promotionalCodeButton
             s.copy(
-                promoCode = newValue,
                 promotionalCodeButton = promoButton?.copy(
                     popupWindow = promoButton.popupWindow.copy(
-                        errorText = null
+                        errorText = null,
+                        value = newValue
                     )
                 )
             )
@@ -344,32 +344,31 @@ class CartFlowViewModel @Inject constructor(
 
     fun closePromoCodeBottomSheet() = viewModelScope.launch {
         updateState { s ->
-            s.copy(showPromotionCodeBottomSheet = false, promoCode = "")
+            s.copy(showPromotionCodeBottomSheet = false)
         }
     }
 
     fun applyPromoCode() = viewModelScope.launch {
         updateState { s ->
-            val promoButton = s.promotionalCodeButton
+            val promoButton = s.promotionalCodeButton ?: return@updateState s
+            val popupWindow = promoButton.popupWindow
             s.copy(
-                promotionalCodeButton = promoButton?.copy(
-                    popupWindow = promoButton.popupWindow.copy(buttonIsLoading = true)
-                )
+                promotionalCodeButton = promoButton.copy(
+                    popupWindow = popupWindow.copy(buttonIsLoading = true)
+                ),
+                promoCode = popupWindow.value
             )
         }
         fetchCartDetails().join()
 
-        val correctCoupon = stateSnapshot.promotionalCodeButton?.coupon
-        if (correctCoupon.isNullOrEmpty()) {
-            return@launch
-        }
-
         updateState { s ->
+            val button = s.promotionalCodeButton ?: return@updateState s
+            val actualCoupon = button.coupon
             s.copy(
-                showPromotionCodeBottomSheet = false,
-                promoCode = correctCoupon,
-                promotionalCodeButton = s.promotionalCodeButton?.copy(
-                    popupWindow = s.promotionalCodeButton.popupWindow.copy(
+                showPromotionCodeBottomSheet = actualCoupon.isBlank(),
+                promoCode = actualCoupon,
+                promotionalCodeButton = button.copy(
+                    popupWindow = button.popupWindow.copy(
                         buttonIsLoading = false
                     )
                 )
@@ -434,6 +433,12 @@ class CartFlowViewModel @Inject constructor(
         updateState { s ->
             s.copy(forAdultsUi = null)
         }
+    }
+
+    fun cancelPromocode() = viewModelScope.launch {
+        changePromoCode("")
+        applyPromoCode()
+        closePromoCodeBottomSheet()
     }
 
     @Immutable

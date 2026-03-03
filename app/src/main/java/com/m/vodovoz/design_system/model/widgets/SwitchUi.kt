@@ -12,6 +12,7 @@ data class SwitchUi(
     val name: String,
     val value: Boolean,
     val enabled: Boolean,
+    val isRequired: Boolean
 ) : WidgetUi(id) {
     override fun value(): String {
         return VodovozBoolean.from(value).value
@@ -35,7 +36,8 @@ fun SwitchModel.toUi(): SwitchUi {
         id = id,
         name = name,
         value = VodovozBoolean.from(value).toBoolean(),
-        enabled = enabled
+        enabled = enabled,
+        isRequired = isRequired
     )
 }
 

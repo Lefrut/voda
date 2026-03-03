@@ -13,11 +13,9 @@ import com.m.vodovoz.design_system.model.ColorfulButtonUi
 import com.m.vodovoz.domain.general.model.exceptions.TooManyRequestsException
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
 import com.m.vodovoz.feature.auth.model.AbstractAuthViewModel
-import com.m.vodovoz.feature.auth.model.AccountTypeSwtichInfo
 import com.m.vodovoz.feature.auth.model.AuthDetailsUi
 import com.m.vodovoz.feature.auth.model.AuthState
 import com.m.vodovoz.feature.auth.model.selectedAccountTypeId
-import com.m.vodovoz.feature.auth.model.toSwitches
 import com.m.vodovoz.feature.auth.model.toUi
 import com.m.vodovoz.feature.auth.model.withAccountTypeSelection
 import com.m.vodovoz.feature.sitestate.SiteStateManager
@@ -34,7 +32,6 @@ import javax.inject.Inject
 
 private const val AUTH_BUTTON = "sms"
 private const val NAVIGATION_BUTTON = "auth"
-private const val EMPTY_ACCOUNT_TYPE_ID = ""
 
 @HiltViewModel
 @Stable
@@ -67,9 +64,9 @@ class LoginFlowViewModel @Inject constructor(
                 .copy(
                     warning = GlobalAppExtraAgreement.html,
                     waringTitles = GlobalAppExtraAgreement.titles,
-                    accountTypeSwitches = AccountTypeSwtichInfo.entries.toSwitches(
-                        resourcesProvider::getString
-                    ).withAccountTypeSelection(savedStateHandle[AuthArgs.ACCOUNT_TYPE_ID])
+                )
+                .withAccountTypeSelection(
+                    selectedAccountTypeId = savedStateHandle[AuthArgs.ACCOUNT_TYPE_ID]
                 )
 
             updateState { s ->
@@ -119,7 +116,8 @@ class LoginFlowViewModel @Inject constructor(
                     sendEvent(
                         LoginEvents.GoToLoginByPhone(
                             phoneField.value,
-                            t.remainingSeconds
+                            t.remainingSeconds,
+                            stateSnapshot.userUrl
                         )
                     )
                 }
@@ -129,7 +127,13 @@ class LoginFlowViewModel @Inject constructor(
                 }
             }
         }.onSuccess { requestCodeModel ->
-            sendEvent(LoginEvents.GoToLoginByPhone(phoneField.value, requestCodeModel.waitSeconds))
+            sendEvent(
+                LoginEvents.GoToLoginByPhone(
+                    phoneField.value,
+                    requestCodeModel.waitSeconds,
+                    stateSnapshot.userUrl
+                )
+            )
         }
     }
 
@@ -176,7 +180,9 @@ class LoginFlowViewModel @Inject constructor(
     sealed class LoginEvents : Event {
         data object GoBack : LoginEvents()
         data class GoToLoginByEmail(val selectedAccountTypeId: String) : LoginEvents()
-        data class GoToLoginByPhone(val phone: String, val waitSeconds: Int) : LoginEvents()
+        data class GoToLoginByPhone(val phone: String, val waitSeconds: Int, val userUrl: String) :
+            LoginEvents()
+
         data object GoToRegister : LoginEvents()
 
         data class GoToWebView(val url: String, val title: String) : LoginEvents()

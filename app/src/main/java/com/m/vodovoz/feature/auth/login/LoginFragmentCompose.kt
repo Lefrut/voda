@@ -56,54 +56,7 @@ class LoginFragment : Fragment() {
     @Inject
     lateinit var accountManager: AccountManager
 
-
-//    private val executor: Executor by lazy { ContextCompat.getMainExecutor(requireContext()) }
-//    private val biometricManager by lazy { BiometricManager.from(requireContext()) }
-//    private val biometricPrompt: BiometricPrompt by lazy {
-//        BiometricPrompt(this, executor,
-//            object : BiometricPrompt.AuthenticationCallback() {
-//                override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
-//                    super.onAuthenticationError(errorCode, errString)
-//                    requireActivity().snack(getString(R.string.biometric_fault))
-//                }
-//
-//                override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
-//                    super.onAuthenticationSucceeded(result)
-//
-//                }
-//
-//                override fun onAuthenticationFailed() {
-//                    super.onAuthenticationFailed()
-//                    requireActivity().snack(getString(R.string.biometric_fault))
-//                }
-//            })
-//    }
-//
-//    private val promptInfo: BiometricPrompt.PromptInfo by lazy {
-//        BiometricPrompt.PromptInfo.Builder()
-//            .setTitle("Biometric login for my app")
-//            .setSubtitle("Log in using your biometric credential")
-//            .setNegativeButtonText("Use account password")
-//            .build()
-//    }
-
-
     private val viewModel: LoginFlowViewModel by viewModels()
-    private val profileViewModel: ProfileFlowViewModel by activityViewModels()
-    private val flowViewModel: HomeFlowViewModel by activityViewModels()
-    private val cartFlowViewModel: CartFlowViewModel by activityViewModels()
-    private val favoriteViewModel: FavoriteFlowViewModel by activityViewModels()
-
-//    private val biometricResultLauncher =
-//        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-//            val resultCode = result.resultCode
-//            if (resultCode == Activity.RESULT_OK) {
-//                biometricPrompt.authenticate(promptInfo)
-//                accountManager.saveUseBio(true)
-//            } else {
-//                accountManager.saveUseBio(false)
-//            }
-//        }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -140,12 +93,6 @@ class LoginFragment : Fragment() {
         }
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        //checkShowFingerPrint()
-    }
-
-
     private suspend fun observeEvents(): Unit = viewModel.events.onStart {
         val nav = findNavController()
         val savedStateHandle = (nav.currentBackStackEntry ?: return@onStart).savedStateHandle
@@ -178,7 +125,11 @@ class LoginFragment : Fragment() {
             }
 
             is LoginFlowViewModel.LoginEvents.GoToLoginByPhone -> {
-                navController.navigateToLoginByPhone(events.phone, events.waitSeconds)
+                navController.navigateToLoginByPhone(
+                    phone = events.phone,
+                    waitSeconds = events.waitSeconds,
+                    userUrl = events.userUrl
+                )
             }
         }
 

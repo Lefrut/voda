@@ -36,7 +36,6 @@ import kotlinx.coroutines.delay
 fun PromotionCodeBottomSheet(
     modifier: Modifier = Modifier,
     info: CartPromoPopupWindowUi,
-    promoCode: String,
     onPromoCodeChange: (String) -> Unit,
     onDismiss: () -> Unit,
     onApplyPromoClick: () -> Unit,
@@ -79,10 +78,10 @@ fun PromotionCodeBottomSheet(
                     .padding(top = 8.dp)
                     .focusable()
                     .focusRequester(requester),
-                value = promoCode,
+                value = info.value,
                 onValueChange = onPromoCodeChange,
                 hint = info.fieldHint,
-                trailingIcon = if (promoCode.isNotEmpty()) {
+                trailingIcon = if (info.value.isNotEmpty()) {
                     @Composable {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_clean),
@@ -103,7 +102,7 @@ fun PromotionCodeBottomSheet(
                     errorColor = info.color,
                     borderColor = info.borderColor,
                     focusedBorderColor = info.borderColor
-                ) else VodovozTextFieldDefaults.colors()
+                ) else VodovozTextFieldDefaults.colors(),
             )
 
 
@@ -111,8 +110,7 @@ fun PromotionCodeBottomSheet(
                 modifier = Modifier.padding(top = 16.dp),
                 text = info.buttonName,
                 isLoading = info.buttonIsLoading,
-                onClick = onApplyPromoClick,
-                enabled = promoCode.isNotBlank(),
+                onClick = onApplyPromoClick
             )
         }
 

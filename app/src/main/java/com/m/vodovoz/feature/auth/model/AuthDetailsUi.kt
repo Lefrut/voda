@@ -5,7 +5,9 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import com.m.vodovoz.R
 import com.m.vodovoz.design_system.model.ColorfulButtonUi
+import com.m.vodovoz.design_system.model.SectionUi
 import com.m.vodovoz.design_system.model.mapToUi
+import com.m.vodovoz.design_system.model.toUi
 import com.m.vodovoz.design_system.model.widgets.CheckboxUi
 import com.m.vodovoz.design_system.model.widgets.EmailValidator
 import com.m.vodovoz.design_system.model.widgets.EmptyTextValidator
@@ -28,9 +30,11 @@ data class AuthDetailsUi(
     val checkboxes: List<CheckboxUi>,
     val warning: String = "",
     val waringTitles: List<String> = emptyList(),
-    val accountTypeSwitches: List<SwitchUi> = emptyList(),
+    val accountTypeSection: SectionUi<SwitchUi>,
     val showForgotPassword: Boolean = false
 ) {
+
+    val accountTypeSwitches: List<SwitchUi> get() = accountTypeSection.items
 
     companion object {
         val Empty = AuthDetailsUi(
@@ -39,40 +43,14 @@ data class AuthDetailsUi(
             fields = emptyList(),
             agreementCheckboxId = null,
             buttons = emptyList(),
-            checkboxes = emptyList()
+            checkboxes = emptyList(),
+            accountTypeSection = SectionUi.empty<SwitchUi>()
         )
     }
 
 
 }
 
-enum class AccountTypeSwtichInfo(
-    val id: String,
-    @field:StringRes
-    val nameId: Int,
-    val value: Boolean = false
-) {
-    Individual(
-        id = "1",
-        nameId = R.string.personal
-    ),
-    Commercial(
-        id = "2",
-        nameId = R.string.for_buisnes
-    )
-}
-
-
-fun List<AccountTypeSwtichInfo>.toSwitches(getStringResource: (Int) -> String): List<SwitchUi> {
-    return map {
-        SwitchUi(
-            id = it.id,
-            name = getStringResource(it.nameId),
-            value = it.value,
-            enabled = true
-        )
-    }
-}
 
 fun AuthDetailsUi.selectedAccountTypeId(): String {
     return accountTypeSwitches.firstOrNull { it.value }?.id.orEmpty()
@@ -80,7 +58,9 @@ fun AuthDetailsUi.selectedAccountTypeId(): String {
 
 fun AuthDetailsUi.withAccountTypeSelection(selectedAccountTypeId: String?): AuthDetailsUi {
     return copy(
-        accountTypeSwitches = accountTypeSwitches.withAccountTypeSelection(selectedAccountTypeId)
+        accountTypeSection = accountTypeSection.copy(
+            items = accountTypeSwitches.withAccountTypeSelection(selectedAccountTypeId)
+        )
     )
 }
 
@@ -103,9 +83,9 @@ abstract class AuthState<S : AuthState<S>>(
 ) : State {
 
     val fields get() = authDetails.fields
-    val buttons get() = authDetails.buttons
     val checkboxes get() = authDetails.checkboxes
 
+    val userUrl: String get() = authDetails.accountTypeSwitches.firstOrNull { it.value }?.id.orEmpty()
 
     abstract fun withAuthDetails(authDetails: AuthDetailsUi): S
 
@@ -138,6 +118,8 @@ fun AuthDetailsModel.toUi(): AuthDetailsUi {
         fields = fields.mapToUi(),
         buttons = buttons.mapToUi(),
         checkboxes = checkboxes.mapToUi(),
-        agreementCheckboxId = agreementCheckboxId
+        agreementCheckboxId = agreementCheckboxId,
+        accountTypeSection = accountTypeSection.toUi { it.mapToUi() }
+
     )
 }

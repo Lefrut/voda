@@ -7,6 +7,7 @@ import com.m.vodovoz.R
 import com.m.vodovoz.common.account.AccountManager
 import com.m.vodovoz.common.account.LoginManager
 import com.m.vodovoz.common.resources.ResourcesProvider
+import com.m.vodovoz.core.network.VodovozWebConfig
 import com.m.vodovoz.design_system.model.ColorfulButtonUi
 import com.m.vodovoz.design_system.model.widgets.EmptyTextValidator
 import com.m.vodovoz.design_system.model.widgets.PhoneNumberValidator
@@ -104,7 +105,8 @@ class RegFlowViewModel @Inject constructor(
 
             loginManager.initializeUserSession(
                 authInfo.userId,
-                authInfo.token
+                authInfo.token,
+                VodovozWebConfig.VODOVOZ_URL
             )
 
             accountManager.updateLastLoginSetting(

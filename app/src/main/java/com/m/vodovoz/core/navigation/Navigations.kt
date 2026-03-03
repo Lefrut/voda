@@ -469,12 +469,20 @@ fun NavController.navigateToRegister() {
     navigate(R.id.registerFragment)
 }
 
-fun NavController.navigateToLoginByPhone(phone: String, waitSeconds: Int) {
+
+data object LoginByPhoneCodeArgs {
+    const val USER_URL = "user_url"
+    const val PHONE = "phoneNumber"
+    const val WAIT_SECONDS = "waitRequestCodeSeconds"
+}
+
+fun NavController.navigateToLoginByPhone(phone: String, waitSeconds: Int, userUrl: String) {
     navigate(
         R.id.loginByPhoneCodeFragment,
         bundleOf(
-            "phoneNumber" to phone,
-            "waitRequestCodeSeconds" to waitSeconds
+            LoginByPhoneCodeArgs.PHONE to phone,
+            LoginByPhoneCodeArgs.WAIT_SECONDS to waitSeconds,
+            LoginByPhoneCodeArgs.USER_URL to userUrl
         )
     )
 }

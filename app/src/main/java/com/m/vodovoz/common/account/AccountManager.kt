@@ -3,11 +3,15 @@ package com.m.vodovoz.common.account
 import androidx.annotation.Keep
 import com.m.vodovoz.BuildConfig
 import com.m.vodovoz.common.datastore.DataStorePrefs
+import com.m.vodovoz.core.network.VodovozWebConfig
+import com.m.vodovoz.core.network.interceptor.BaseUrlInterceptor
 import io.appmetrica.analytics.AppMetrica
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -15,6 +19,7 @@ import javax.inject.Singleton
 @Singleton
 class AccountManager @Inject constructor(
     private val dataStorePrefs: DataStorePrefs,
+    private val baseUrlInterceptor: BaseUrlInterceptor
 ) {
 
     private val _accountIdListener = MutableStateFlow<Long?>(null)
@@ -101,8 +106,23 @@ class AccountManager @Inject constructor(
         !deeplink.isNullOrBlank()
     }.filterNotNull().onEach { setPendingDeeplink("") }
 
-    fun setPendingDeeplink(deeplink: String){
+    fun setPendingDeeplink(deeplink: String) {
         dataStorePrefs.putString(PENDING_DEEPLINK_KEY, deeplink)
+    }
+
+    fun updateUserUrl(url: String) {
+        dataStorePrefs.putString(USER_URL, url)
+    }
+
+    val userUrlFlow
+        get() = dataStorePrefs.getStringFlow(USER_URL).map { url ->
+            url.orEmpty().ifEmpty { VodovozWebConfig.VODOVOZ_BASE_URL }
+        }
+
+    suspend fun getUserUrl(): String {
+        return userUrlFlow.firstOrNull().orEmpty().ifEmpty {
+            VodovozWebConfig.VODOVOZ_BASE_URL
+        }
     }
 
     companion object {
@@ -114,6 +134,8 @@ class AccountManager @Inject constructor(
 
         private const val PENDING_DEEPLINK_KEY = "pending_deeplink"
         const val ORDERS_DEEPLINK_ID = "orders"
+
+        private const val USER_URL = "user_url"
     }
 
 }

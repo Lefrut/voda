@@ -133,8 +133,11 @@ abstract class AbstractAuthViewModel<State : AuthState<State>, Event>(
     override fun changeSwitch(switch: SwitchUi, updatedSwitch: SwitchUi) {
         updateAuthDetails {
             copy(
-                accountTypeSwitches = accountTypeSwitches.map { it.copy(value = false) }
-                    .withUpdatedSwitch(updatedSwitch)
+                accountTypeSection = accountTypeSection.copy(
+                    items = accountTypeSwitches.map { it.copy(value = false) }
+                        .withUpdatedSwitch(updatedSwitch)
+                )
+
             )
         }
     }

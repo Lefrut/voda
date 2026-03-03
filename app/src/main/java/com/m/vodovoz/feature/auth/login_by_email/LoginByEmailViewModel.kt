@@ -16,11 +16,9 @@ import com.m.vodovoz.feature.auth.login.composables.LoginByEmailUiState
 import com.m.vodovoz.feature.auth.login.model.LoginByEmailEvent
 import com.m.vodovoz.feature.auth.login.model.LoginByEmailState
 import com.m.vodovoz.feature.auth.model.AbstractAuthViewModel
-import com.m.vodovoz.feature.auth.model.AccountTypeSwtichInfo
 import com.m.vodovoz.feature.auth.model.AuthDetailsUi
 import com.m.vodovoz.feature.auth.model.authValidators
 import com.m.vodovoz.feature.auth.model.selectedAccountTypeId
-import com.m.vodovoz.feature.auth.model.toSwitches
 import com.m.vodovoz.feature.auth.model.toUi
 import com.m.vodovoz.feature.auth.model.withAccountTypeSelection
 import com.m.vodovoz.ui.mvi.launchInViewModelScope
@@ -65,8 +63,9 @@ class LoginByEmailViewModel @Inject constructor(
         loginByEmailResult.onSuccess { userAuthInfo ->
 
             loginManager.initializeUserSession(
-                userAuthInfo.userId,
-                userAuthInfo.token
+                userId = userAuthInfo.userId,
+                userToken = userAuthInfo.token,
+                userUrl = stateSnapshot.userUrl
             )
 
             setBlockingButtonState(loading = false, enabled = false)
@@ -111,10 +110,8 @@ class LoginByEmailViewModel @Inject constructor(
         loginByEmailResult.onSuccess { loginDetails ->
             val authDetails = loginDetails.toUi().withBlockingButton { button ->
                 button.copy(enabled = false)
-            }.copy(
-                accountTypeSwitches = AccountTypeSwtichInfo.entries.toSwitches(
-                    resourcesProvider::getString
-                ).withAccountTypeSelection(savedStateHandle[AuthArgs.ACCOUNT_TYPE_ID])
+            }.withAccountTypeSelection(
+                savedStateHandle[AuthArgs.ACCOUNT_TYPE_ID]
             )
 
             updateState { s ->

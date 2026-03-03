@@ -12,6 +12,8 @@ data class AuthDetailsDTO(
     val TITLE: String?,
     @Json(name = "OPISANIE")
     val OPISANIE: String?,
+    @Json(name = "BIZNES")
+    val BIZNES: AccountTypeSectionDTO?,
     @Json(name = "DATA")
     val DATA: List<POLE_DTO>?,
     @Json(name = "SOGLASHENIE")

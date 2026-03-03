@@ -7,8 +7,8 @@
     <string name="device_type_phone">Телефон</string>
 
     <string name="enter_code_title">Ввести код</string>
-    <string name="enter_code_description">Введите код из SMS, отправленный на номер %s</string>
-    <string name="resend_sms_hint">Повторно получить SMS с кодом можно через:</string>
+    <string name="enter_code_description">Введите код из СМС, отправленный на номер %s</string>
+    <string name="resend_sms_hint">Повторно получить СМС с кодом можно через:</string>
 
     <string name="error_site_login">Не удалось войти. Попробуйте снова или войдите по почте.</string>
 

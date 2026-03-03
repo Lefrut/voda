@@ -3,6 +3,7 @@ package com.m.vodovoz.data.vodovoz_service.mappers
 import com.m.vodovoz.common.model.VodovozBoolean
 import com.m.vodovoz.common.model.boolean
 import com.m.vodovoz.common.model.from
+import com.m.vodovoz.common.model.toBoleanByVodovoz
 import com.m.vodovoz.data.vodovoz_service.di.toVodovozUrl
 import com.m.vodovoz.data.vodovoz_service.model.address.ADDRESSES_SECTION_DTO
 import com.m.vodovoz.data.vodovoz_service.model.address.ADDRESS_ITEM_DTO
@@ -151,12 +152,20 @@ fun COORDINATES_DTO.toDomain(): MapPointModel? {
     return MapPointModel(lat = latitude ?: return null, lon = longitude ?: return null)
 }
 
+
+@JvmName("mapToSwitchModelList")
+fun List<SWITCH_DTO>.mapToDomain(): List<SwitchModel>{
+    return mapNotNull { it.toDomain() }
+}
+
+//todo
 fun SWITCH_DTO.toDomain(): SwitchModel? {
     return SwitchModel(
-        id = PROP_CODE ?: return null,
-        name = NAME ?: return null,
-        type = TYPE ?: "",
-        value = VALUE ?: false,
-        enabled = !VodovozBoolean.from(ZABLOCKPOLE).boolean
+        id = PROP_CODE ?: ID ?: return null,
+        name = NAME.orEmpty(),
+        type = TYPE.orEmpty(),
+        value = VALUE.toString().toBoleanByVodovoz(),
+        enabled = !VodovozBoolean.from(ZABLOCKPOLE).boolean,
+        isRequired = OBYAZATELNO.toBoleanByVodovoz()
     )
 }

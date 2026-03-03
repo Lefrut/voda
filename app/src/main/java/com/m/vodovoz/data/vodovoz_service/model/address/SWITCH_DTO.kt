@@ -3,17 +3,22 @@ package com.m.vodovoz.data.vodovoz_service.model.address
 
 import com.squareup.moshi.Json
 import androidx.annotation.Keep
+import com.google.gson.annotations.JsonAdapter
 
 @Keep
 data class SWITCH_DTO(
-    @Json(name = "PROP_CODE")
+    @field:Json(name = "PROP_CODE")
     val PROP_CODE: String?,
-    @Json(name = "NAME")
+    @field:Json(name = "ID")
+    val ID: String?,
+    @field:Json(name = "NAME")
     val NAME: String?,
-    @Json(name = "TYPE")
+    @field:Json(name = "TYPE")
     val TYPE: String?,
-    @Json(name = "VALUE")
-    val VALUE: Boolean?,
-    @Json(name = "ZABLOCKPOLE")
+    @field:Json(name = "OBYAZATELNO")
+    val OBYAZATELNO: String?,
+    @field:Json(name = "VALUE")
+    val VALUE: Any?,
+    @field:Json(name = "ZABLOCKPOLE")
     val ZABLOCKPOLE: String?,
 )
