@@ -31,7 +31,7 @@ class LoginByPhoneCodeViewModel @Inject constructor(
     private val loginManager: LoginManager,
     savedStateHandle: SavedStateHandle,
 ) : MviViewModel<LoginByPhoneCodeState, LoginByPhoneCodeEvent>(
-    LoginByPhoneCodeState(phone = formatPhone(savedStateHandle.getString(LoginByPhoneCodeArgs.USER_URL)))
+    LoginByPhoneCodeState(phone = formatPhone(savedStateHandle.getString(LoginByPhoneCodeArgs.PHONE)))
 ) {
 
     private val waitRequestCodeSeconds: Int =

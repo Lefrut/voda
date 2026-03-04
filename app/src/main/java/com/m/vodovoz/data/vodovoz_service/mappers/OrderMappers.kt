@@ -336,14 +336,14 @@ fun OPLATA_DTO.toDomain(): CertificatePaymentInfoModel {
 
 fun OrderPlaceholderDTO.toVodovozPlaceholder(): VodovozPlaceholderModel {
     return VodovozPlaceholderModel(
-        title = title ?: "",
-        headerHtml = header ?: "",
-        descriptionHtml = message ?: "",
-        imageUrl = imageUrl?.toVodovozUrl() ?: "",
+        title = title.orEmpty(),
+        headerHtml = header.orEmpty(),
+        descriptionHtml = message.orEmpty(),
+        imageUrl = imageUrl?.toVodovozUrl().orEmpty(),
         button = ColorfulButtonModel(
-            name = button?.text ?: "",
-            backgroundColor = button?.background ?: "",
-            textColor = button?.color ?: "",
+            name = button?.text.orEmpty(),
+            backgroundColor = button?.background.orEmpty(),
+            textColor = button?.color.orEmpty(),
         )
     )
 }
