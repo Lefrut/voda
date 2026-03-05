@@ -3,6 +3,7 @@ package com.m.vodovoz.feature.wait_feedback_products
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.viewModelScope
 import androidx.paging.map
+import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.design_system.model.toUi
 import com.m.vodovoz.domain.general.model.exceptions.EmptyResultException
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
@@ -22,6 +23,7 @@ import javax.inject.Inject
 @HiltViewModel
 @Stable
 class WaitFeedbackProductsViewModel @Inject constructor(
+    val tabManager: TabManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
 ) : PagingMviViewModel<WaitFeedbackProductUi, WaitFeedbackProductsState, WaitFeedbackProductsEvent>(
     WaitFeedbackProductsState()

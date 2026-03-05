@@ -4,37 +4,13 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
-import com.m.vodovoz.ui.mvi.collectAsState
-import androidx.navigation.fragment.findNavController
-import com.m.vodovoz.R
-import com.m.vodovoz.common.tab.TabManager
-import com.m.vodovoz.core.navigation.navigateToProductDetails
-import com.m.vodovoz.core.navigation.navigateToWriteComment
-import com.m.vodovoz.design_system.VodovozTheme
-import com.m.vodovoz.design_system.effects.LifecycleEffect
-import com.m.vodovoz.feature.wait_feedback_products.model.WaitFeedbackProductsEvent
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class WaitFeedbackProductsFragment : Fragment() {
-
-    private val viewModel by viewModels<WaitFeedbackProductsViewModel>()
-
-    @Inject
-    internal lateinit var tabManager: TabManager
-
-    override fun onResume() {
-        super.onResume()
-        findNavController().currentBackStackEntry?.savedStateHandle?.remove<Long>("ratedProductId")?.let { productId ->
-            viewModel.removeProduct(productId)
-        }
-    }
+class WaitFeedbackProductsFragment @Inject constructor() : Fragment() {
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -42,44 +18,8 @@ class WaitFeedbackProductsFragment : Fragment() {
         savedInstanceState: Bundle?,
     ): View {
         return ComposeView(requireContext()).apply {
-            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
-
             setContent {
-                VodovozTheme {
-                    val viewState by viewModel.collectAsState()
-
-                    WaitFeedbackProductsScreen(
-                        viewModel = viewModel,
-                        viewState = viewState
-                    )
-
-                    LifecycleEffect {
-                        viewModel.events.collect { event ->
-                            when (event) {
-                                WaitFeedbackProductsEvent.GoBack -> {
-                                    findNavController().popBackStack()
-                                }
-
-                                WaitFeedbackProductsEvent.GoToCatalog -> {
-                                    tabManager.selectTab(R.id.graph_catalog)
-                                }
-
-                                is WaitFeedbackProductsEvent.GoToProductsDetails -> {
-                                    findNavController().navigateToProductDetails(event.productId)
-                                }
-
-                                is WaitFeedbackProductsEvent.GoToWriteComment -> {
-                                    findNavController().navigateToWriteComment(
-                                        event.productId,
-                                        event.productName,
-                                        event.productImage,
-                                        event.rating
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
+                WaitFeedbackProductsEntry()
             }
         }
     }
