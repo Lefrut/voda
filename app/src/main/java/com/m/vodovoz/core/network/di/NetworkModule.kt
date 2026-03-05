@@ -111,16 +111,14 @@ abstract class NetworkModule {
         }
 
 
-
         @Provides
         @Singleton
         @IntoSet
         @VodovozInterceptorDI
         fun provideLoggingInterceptor(): Interceptor {
-            return if(BuildConfig.DEBUG){
+            return if (BuildConfig.DEBUG) {
                 HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY)
-            }
-            else Interceptor { chain -> chain.proceed(chain.request()) }
+            } else Interceptor { chain -> chain.proceed(chain.request()) }
         }
 
         @Provides

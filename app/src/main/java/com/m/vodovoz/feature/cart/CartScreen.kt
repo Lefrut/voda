@@ -171,7 +171,6 @@ fun CartScreen(viewModel: CartFlowViewModel, viewState: CartFlowViewModel.CartSt
     if (viewState.showPromotionCodeBottomSheet && viewState.promotionalCodeButton != null) {
         PromotionCodeBottomSheet(
             info = viewState.promotionalCodeButton.popupWindow,
-            promoCode = viewState.promoCode,
             onPromoCodeChange = { newValue ->
                 viewModel.changePromoCode(newValue)
             },
@@ -180,8 +179,7 @@ fun CartScreen(viewModel: CartFlowViewModel, viewState: CartFlowViewModel.CartSt
             },
             onApplyPromoClick = {
                 viewModel.applyPromoCode()
-            }
-        )
+            })
     }
 
     if (viewState.showClearCartDialog) {

@@ -16,6 +16,7 @@ import androidx.navigation.fragment.findNavController
 import com.m.vodovoz.R
 import com.m.vodovoz.common.account.AccountManager
 import com.m.vodovoz.common.tab.TabManager
+import com.m.vodovoz.core.navigation.AuthArgs
 import com.m.vodovoz.core.navigation.navigateToRecoverPassword
 import com.m.vodovoz.core.navigation.navigateToRegister
 import com.m.vodovoz.core.navigation.navigateToWebView
@@ -76,8 +77,12 @@ class LoginByEmailFragment : Fragment() {
                     LifecycleEffect {
                         viewModel.events.collect { event ->
                             when (event) {
-                                LoginByEmailEvent.GoBack -> {
-                                    findNavController().popBackStack()
+                                is LoginByEmailEvent.GoBack -> {
+                                    val navController = findNavController()
+                                    navController.previousBackStackEntry
+                                        ?.savedStateHandle
+                                        ?.set(AuthArgs.ACCOUNT_TYPE_ID, event.selectedAccountTypeId)
+                                    navController.popBackStack()
                                 }
 
                                 LoginByEmailEvent.GoToRegister -> {

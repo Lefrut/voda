@@ -323,6 +323,11 @@ data object CommonArgs {
     const val QUERY_PARAMS: String = "queryParams"
 }
 
+data object AuthArgs {
+
+    const val ACCOUNT_TYPE_ID: String = "accountTypeId"
+}
+
 
 fun CommonArgs.queryParamsTo(second: Map<String, String>): Pair<String, Map<String, String>> {
     return QUERY_PARAMS to second
@@ -464,12 +469,20 @@ fun NavController.navigateToRegister() {
     navigate(R.id.registerFragment)
 }
 
-fun NavController.navigateToLoginByPhone(phone: String, waitSeconds: Int) {
+
+data object LoginByPhoneCodeArgs {
+    const val USER_URL = "user_url"
+    const val PHONE = "phoneNumber"
+    const val WAIT_SECONDS = "waitRequestCodeSeconds"
+}
+
+fun NavController.navigateToLoginByPhone(phone: String, waitSeconds: Int, userUrl: String) {
     navigate(
         R.id.loginByPhoneCodeFragment,
         bundleOf(
-            "phoneNumber" to phone,
-            "waitRequestCodeSeconds" to waitSeconds
+            LoginByPhoneCodeArgs.PHONE to phone,
+            LoginByPhoneCodeArgs.WAIT_SECONDS to waitSeconds,
+            LoginByPhoneCodeArgs.USER_URL to userUrl
         )
     )
 }
@@ -486,13 +499,23 @@ fun NavController.navigateToUserData() {
     navigate(R.id.userDataFragment)
 }
 
-fun NavController.navigateToLoginByEmail() {
-    navigate(R.id.loginByEmailFragment)
+fun NavController.navigateToLoginByEmail(selectedAccountTypeId: String? = null) {
+    navigate(
+        R.id.loginByEmailFragment,
+        selectedAccountTypeId?.let {
+            bundleOf(AuthArgs.ACCOUNT_TYPE_ID to it)
+        }
+    )
 }
 
 
-fun NavController.navigateToLogin() {
-    navigate(R.id.loginFragment)
+fun NavController.navigateToLogin(selectedAccountTypeId: String? = null) {
+    navigate(
+        R.id.loginFragment,
+        selectedAccountTypeId?.let {
+            bundleOf(AuthArgs.ACCOUNT_TYPE_ID to it)
+        }
+    )
 }
 
 fun NavController.navigateToProductFilterValues(categoryId: Long, filter: FilterUi) {

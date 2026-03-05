@@ -2,8 +2,11 @@ package com.m.vodovoz.ui.base
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.m.vodovoz.common.account.AccountManager
 import com.m.vodovoz.common.cookie.CookieManager
+import com.m.vodovoz.core.network.VodovozUrlManager
 import com.m.vodovoz.core.network.VodovozWebConfig
+import com.m.vodovoz.core.network.interceptor.BaseUrlInterceptor
 import com.m.vodovoz.domain.general.model.exceptions.UserBlockedException
 import com.m.vodovoz.domain.general.model.exceptions.UserNotLoginException
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
@@ -24,6 +27,8 @@ class MainActivityViewModel @Inject constructor(
     private val siteStateManager: SiteStateManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val cookieManager: CookieManager,
+    private val accountManager: AccountManager,
+    private val urlManager: VodovozUrlManager
 ) : ViewModel() {
 
     private val _appState = MutableStateFlow<AppState>(AppState.Loading)
@@ -44,6 +49,10 @@ class MainActivityViewModel @Inject constructor(
     fun fetchAppConfig() = viewModelScope.launch {
         _appState.update { AppState.Loading }
 
+        if (siteStateManager.siteStateSnapshot.testUrl != VodovozWebConfig.VODOVOZ_URL) {
+            urlManager.setUrl(accountManager.getUserUrl())
+        }
+
         val siteStateDeferred = async { siteStateManager.requestSiteState() }
         val reloginResultDeferred = async { vodovozServiceRepository.relogin().singleResult() }
 
@@ -60,19 +69,20 @@ class MainActivityViewModel @Inject constructor(
         val reloginResult = reloginResultDeferred.await()
 
         reloginResult.onFailure { t ->
-            when (t) {
+            val state = when (t) {
                 is UserNotLoginException -> {
-                    _appState.update { AppState.App }
+                    AppState.App
                 }
 
                 is UserBlockedException -> {
-                    _appState.update { AppState.UserError }
+                    AppState.UserError
                 }
 
                 else -> {
-                    _appState.update { AppState.ErrorLoading }
+                    AppState.ErrorLoading
                 }
             }
+            _appState.update { state }
         }.onSuccess {
             _appState.update { AppState.App }
         }

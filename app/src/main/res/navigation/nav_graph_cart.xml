@@ -114,7 +114,14 @@
     <fragment
         android:id="@+id/loginFragment"
         android:name="com.m.vodovoz.feature.auth.login.LoginFragment"
-        android:label="LoginFragment"/>
+        android:label="LoginFragment">
+
+        <argument
+            android:name="accountTypeId"
+            app:argType="string"
+            app:nullable="true"
+            android:defaultValue="@null" />
+    </fragment>
 
     <fragment
         android:id="@+id/registerFragment"
@@ -277,5 +284,12 @@
     <fragment
         android:id="@+id/loginByEmailFragment"
         android:name="com.m.vodovoz.feature.auth.login_by_email.LoginByEmailFragment"
-        android:label="LoginByEmailFragment" />
+        android:label="LoginByEmailFragment">
+
+        <argument
+            android:name="accountTypeId"
+            app:argType="string"
+            app:nullable="true"
+            android:defaultValue="@null" />
+    </fragment>
 </navigation>

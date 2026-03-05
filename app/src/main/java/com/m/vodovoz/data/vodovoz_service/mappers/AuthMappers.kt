@@ -4,16 +4,19 @@ import com.m.vodovoz.common.model.VodovozBoolean
 import com.m.vodovoz.common.model.boolean
 import com.m.vodovoz.common.model.from
 import com.m.vodovoz.data.vodovoz_service.model.CHECKBOX_DTO
+import com.m.vodovoz.data.vodovoz_service.model.auth.AccountTypeSectionDTO
 import com.m.vodovoz.data.vodovoz_service.model.auth.AuthDetailsDTO
 import com.m.vodovoz.data.vodovoz_service.model.auth.KNOPKA_AUTH_DTO
 import com.m.vodovoz.data.vodovoz_service.model.auth.LoginByPhoneDTO
 import com.m.vodovoz.data.vodovoz_service.model.auth.RequestCodeDTO
 import com.m.vodovoz.data.vodovoz_service.model.auth.UserAuthInfoDTO
+import com.m.vodovoz.domain.general.model.product.SectionModel
 import com.m.vodovoz.domain.general.model.promotion.ColorfulButtonModel
 import com.m.vodovoz.domain.general.model.user.AuthDetailsModel
 import com.m.vodovoz.domain.general.model.user.RequestCodeModel
 import com.m.vodovoz.domain.general.model.user.UserAuthInfoModel
 import com.m.vodovoz.domain.general.model.widgets.CheckboxModel
+import com.m.vodovoz.domain.general.model.widgets.SwitchModel
 import java.time.Duration
 import java.time.LocalDateTime
 
@@ -23,9 +26,7 @@ fun AuthDetailsDTO.toDomain(): AuthDetailsModel {
     val agreementCheckbox = PODOFERTA?.toDomain()
 
     val checkboxes = buildList {
-        agreementCheckbox?.let {
-            add(agreementCheckbox)
-        }
+        agreementCheckbox?.let { add(agreementCheckbox) }
         addAll(PODPISKA?.mapToDomain() ?: emptyList())
     }
 
@@ -37,7 +38,17 @@ fun AuthDetailsDTO.toDomain(): AuthDetailsModel {
         agreementCheckboxId = agreementCheckbox?.id,
         buttons = KNOPKA?.map { it.toDomain() }
             ?: throw IllegalArgumentException("Auth button can't be null"),
-        checkboxes = checkboxes
+        checkboxes = checkboxes,
+        accountTypeSection = BIZNES.toDomain()
+    )
+}
+
+
+fun AccountTypeSectionDTO?.toDomain(): SectionModel<SwitchModel> {
+    if (this == null) return SectionModel.empty()
+    return SectionModel(
+        title = TITLE.orEmpty(),
+        items = CHEKBOX.orEmpty().mapToDomain()
     )
 }
 

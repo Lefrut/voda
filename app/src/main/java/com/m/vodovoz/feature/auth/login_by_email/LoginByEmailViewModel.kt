@@ -1,34 +1,35 @@
 package com.m.vodovoz.feature.auth.login_by_email
 
 import androidx.compose.runtime.Stable
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.m.vodovoz.R
 import com.m.vodovoz.common.account.LoginManager
 import com.m.vodovoz.common.resources.ResourcesProvider
+import com.m.vodovoz.core.navigation.AuthArgs
 import com.m.vodovoz.design_system.model.ColorfulButtonUi
-import com.m.vodovoz.design_system.model.toUi
 import com.m.vodovoz.design_system.model.updateButton
-import com.m.vodovoz.design_system.model.widgets.CheckboxUi
-import com.m.vodovoz.design_system.model.widgets.FieldUi
-import com.m.vodovoz.design_system.model.widgets.checkFields
-import com.m.vodovoz.design_system.model.widgets.updateCheckbox
 import com.m.vodovoz.design_system.model.widgets.updateField
-import com.m.vodovoz.design_system.model.widgets.updateFieldAndResetError
-import com.m.vodovoz.design_system.model.widgets.vodovozValidators
 import com.m.vodovoz.domain.general.model.exceptions.ValidationException
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
 import com.m.vodovoz.feature.auth.login.composables.LoginByEmailUiState
 import com.m.vodovoz.feature.auth.login.model.LoginByEmailEvent
 import com.m.vodovoz.feature.auth.login.model.LoginByEmailState
+import com.m.vodovoz.feature.auth.model.AbstractAuthViewModel
 import com.m.vodovoz.feature.auth.model.AuthDetailsUi
-import com.m.vodovoz.feature.auth.model.agreementIsCheckedWhenAvailable
 import com.m.vodovoz.feature.auth.model.authValidators
+import com.m.vodovoz.feature.auth.model.selectedAccountTypeId
 import com.m.vodovoz.feature.auth.model.toUi
-import com.m.vodovoz.ui.mvi.MviViewModel
+import com.m.vodovoz.feature.auth.model.withAccountTypeSelection
+import com.m.vodovoz.ui.mvi.launchInViewModelScope
 import com.m.vodovoz.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+
+private const val LOGIN_BY_EMAIL_BUTTON = "otpravka"
+private const val NAVIGATION_BUTTON = "registr"
+private val LOGIN_BY_EMAIL_VALIDATORS = AuthDetailsUi.authValidators()
 
 @HiltViewModel
 @Stable
@@ -36,32 +37,20 @@ class LoginByEmailViewModel @Inject constructor(
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val resourcesProvider: ResourcesProvider,
     private val loginManager: LoginManager,
-) : MviViewModel<LoginByEmailState, LoginByEmailEvent>(LoginByEmailState()) {
+    private val savedStateHandle: SavedStateHandle,
+) : AbstractAuthViewModel<LoginByEmailState, LoginByEmailEvent>(
+    LoginByEmailState(),
+    LOGIN_BY_EMAIL_BUTTON
+) {
 
-    companion object {
-        private const val LOGIN_BY_EMAIL_BUTTON = "otpravka"
-        private const val NAVIGATION_BUTTON = "registr"
-    }
+    override val blockingButtonValidators = LOGIN_BY_EMAIL_VALIDATORS
 
     init {
         fetchLoginByEmailDetails()
     }
 
-
-    fun navigateBack() = viewModelScope.launch {
-        sendEvent(LoginByEmailEvent.GoBack)
-    }
-
     private fun loginByEmail() = viewModelScope.launch {
-        updateState { s ->
-            s.copy(
-                authDetails = s.authDetails.copy(
-                    buttons = s.buttons.updateButton(LOGIN_BY_EMAIL_BUTTON) { btn ->
-                        btn.copy(loading = true)
-                    }
-                ),
-            )
-        }
+        setBlockingButtonState(loading = true)
 
 
         val loginByEmailResult = vodovozServiceRepository.loginByEmail(
@@ -74,23 +63,12 @@ class LoginByEmailViewModel @Inject constructor(
         loginByEmailResult.onSuccess { userAuthInfo ->
 
             loginManager.initializeUserSession(
-                userAuthInfo.userId,
-                userAuthInfo.token
+                userId = userAuthInfo.userId,
+                userToken = userAuthInfo.token,
+                userUrl = stateSnapshot.userUrl
             )
 
-            updateState { s ->
-                s.copy(
-                    authDetails = s.authDetails.copy(
-                        buttons = s.buttons.updateButton(LOGIN_BY_EMAIL_BUTTON) { btn ->
-                            btn.copy(
-                                loading = false,
-                                enabled = false
-                            )
-                        }
-
-                    )
-                )
-            }
+            setBlockingButtonState(loading = false, enabled = false)
 
             sendEvent(LoginByEmailEvent.RefreshAll)
 
@@ -104,28 +82,23 @@ class LoginByEmailViewModel @Inject constructor(
             }
 
 
-            updateState { s ->
+            updateAuthDetails {
+                val currentFields = fields
+                val lastField = currentFields.lastOrNull()
 
-                val lastField = s.fields.lastOrNull()
-
-                s.copy(
-                    authDetails = s.authDetails.copy(
-                        buttons = s.buttons.updateButton(LOGIN_BY_EMAIL_BUTTON) { btn ->
-                            btn.copy(loading = false)
-                        },
-                        fields = lastField?.let { field ->
-                            s.fields.updateField(
-                                field,
-                                field.copy(supportingText = errorMessage, isError = true)
-                            )
-                        } ?: s.fields
-                    )
+                copy(
+                    buttons = buttons.updateButton(LOGIN_BY_EMAIL_BUTTON) { button ->
+                        button.copy(loading = false)
+                    },
+                    fields = lastField?.let { field ->
+                        currentFields.updateField(
+                            field,
+                            field.copy(supportingText = errorMessage, isError = true)
+                        )
+                    } ?: currentFields
                 )
             }
-
         }
-
-
     }
 
     fun fetchLoginByEmailDetails() = viewModelScope.launch {
@@ -135,13 +108,15 @@ class LoginByEmailViewModel @Inject constructor(
 
 
         loginByEmailResult.onSuccess { loginDetails ->
-            val buttons = loginDetails.buttons.map { colorfulButtonModel ->
-                colorfulButtonModel.toUi()
-            }.updateButton(LOGIN_BY_EMAIL_BUTTON) { it.copy(enabled = false) }
+            val authDetails = loginDetails.toUi().withBlockingButton { button ->
+                button.copy(enabled = false)
+            }.withAccountTypeSelection(
+                savedStateHandle[AuthArgs.ACCOUNT_TYPE_ID]
+            )
 
             updateState { s ->
                 s.copy(
-                    authDetails = loginDetails.toUi().copy(buttons = buttons),
+                    authDetails = authDetails,
                     uiState = LoginByEmailUiState.Success,
                 )
             }
@@ -152,39 +127,19 @@ class LoginByEmailViewModel @Inject constructor(
         }
     }
 
-    fun changeField(field: FieldUi, updatedField: FieldUi) = viewModelScope.launch {
+    override fun clickButton(button: ColorfulButtonUi) {
+        launchInViewModelScope {
+            when (button.id) {
+                LOGIN_BY_EMAIL_BUTTON -> {
+                    loginByEmail()
+                }
 
-        updateState { s ->
-            val authDetails = s.authDetails
-            val updatedFields = s.fields.updateFieldAndResetError(field, updatedField)
+                NAVIGATION_BUTTON -> {
+                    navigateToRegister()
+                }
 
-            s.copy(
-                authDetails = authDetails.copy(
-                    fields = updatedFields,
-                    buttons = authDetails.buttons.updateButton(LOGIN_BY_EMAIL_BUTTON) { button ->
-                        button.copy(
-                            enabled = updatedFields.checkFields(
-                                validators = vodovozValidators
-                            ) && s.checkboxes.agreementIsCheckedWhenAvailable(authDetails.agreementCheckboxId)
-                        )
-                    }
-                ),
-
-                )
-        }
-    }
-
-    fun activateButton(button: ColorfulButtonUi) = viewModelScope.launch {
-        when (button.id) {
-            LOGIN_BY_EMAIL_BUTTON -> {
-                loginByEmail()
+                else -> {}
             }
-
-            NAVIGATION_BUTTON -> {
-                navigateToRegister()
-            }
-
-            else -> {}
         }
     }
 
@@ -192,36 +147,26 @@ class LoginByEmailViewModel @Inject constructor(
         sendEvent(LoginByEmailEvent.GoToRegister)
     }
 
-    fun openUrl(url: String, title: String) = viewModelScope.launch {
-        sendEvent(LoginByEmailEvent.GoToWebView(url, title))
+    override fun clickHyperlink(url: String, title: String) {
+        launchInViewModelScope {
+            sendEvent(LoginByEmailEvent.GoToWebView(url, title))
+        }
     }
 
-    fun navigateToRecoveryPassword() = viewModelScope.launch {
-        sendEvent(LoginByEmailEvent.GoToRecoverPassword)
-    }
-
-
-    fun changeCheckbox(checkbox: CheckboxUi, updatedCheckbox: CheckboxUi) {
-        updateState { s ->
-            val authDetails = s.authDetails
-            val updatedCheckboxes = authDetails.checkboxes.updateCheckbox(
-                checkbox, updatedCheckbox
-            )
-
-            s.copy(
-                authDetails = authDetails.copy(
-                    checkboxes = updatedCheckboxes,
-                    buttons = authDetails.buttons.updateButton(LOGIN_BY_EMAIL_BUTTON) { button ->
-                        button.copy(
-                            enabled = authDetails.fields.checkFields(
-                                validators = AuthDetailsUi.authValidators()
-                            ) && updatedCheckboxes.agreementIsCheckedWhenAvailable(authDetails.agreementCheckboxId)
-                        )
-                    }
+    override fun onBackClick() {
+        launchInViewModelScope {
+            sendEvent(
+                LoginByEmailEvent.GoBack(
+                    selectedAccountTypeId = stateSnapshot.authDetails.selectedAccountTypeId()
                 )
             )
         }
     }
 
+    override fun clickForgotPassword() {
+        launchInViewModelScope {
+            sendEvent(LoginByEmailEvent.GoToRecoverPassword)
+        }
+    }
 
 }

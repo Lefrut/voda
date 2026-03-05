@@ -54,7 +54,7 @@ fun VodovozBoolean.Companion.from(value: Boolean?): VodovozBoolean {
 }
 
 fun String?.toBoleanByVodovoz(): Boolean {
-    return VodovozBoolean.from(this).boolean
+    return this?.toBooleanStrictOrNull() ?: VodovozBoolean.from(this).boolean
 }
 
 fun Boolean?.toStringByVodovoz(): String {

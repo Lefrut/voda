@@ -9,6 +9,8 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -26,7 +28,7 @@ import com.m.vodovoz.feature.splash.model.SplashUiState
 
 @Composable
 fun AppSplashScreen(viewModel: SplashViewModel, viewState: SplashState) {
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(modifier = Modifier.fillMaxSize().systemBarsPadding()) {
         when (viewState.uiState) {
             SplashUiState.Error -> {
                 NetworkErrorPlaceholder(
@@ -54,7 +56,7 @@ private fun SplashPlaceholder(modifier: Modifier = Modifier) {
     val infiniteTransition = rememberInfiniteTransition(label = "infiniteTransition")
     val scale by infiniteTransition.animateFloat(
         initialValue = 1f,
-        targetValue = 1.3f,
+        targetValue = 1.1f,
         animationSpec = infiniteRepeatable(
             animation = tween(durationMillis = 5000, easing = LinearEasing),
             repeatMode = RepeatMode.Reverse

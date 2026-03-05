@@ -25,7 +25,8 @@ fun NotificationSectionItemModel.toUi(): WidgetUi? {
             id = code,
             name = message,
             value = VodovozBoolean.True equalsTo value,
-            enabled = !readOnly
+            enabled = !readOnly,
+            isRequired = false
         )
 
         else -> FieldModel(

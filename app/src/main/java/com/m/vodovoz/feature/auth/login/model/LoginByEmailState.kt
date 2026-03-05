@@ -11,4 +11,6 @@ import com.m.vodovoz.feature.auth.model.AuthState
 data class LoginByEmailState(
     val uiState: LoginByEmailUiState = LoginByEmailUiState.Loading,
     override val authDetails: AuthDetailsUi = AuthDetailsUi.Empty,
-) : AuthState(authDetails)
+) : AuthState<LoginByEmailState>(authDetails) {
+    override fun withAuthDetails(authDetails: AuthDetailsUi) = copy(authDetails = authDetails)
+}

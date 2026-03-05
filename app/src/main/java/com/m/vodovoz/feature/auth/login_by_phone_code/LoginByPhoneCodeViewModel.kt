@@ -4,6 +4,8 @@ import androidx.compose.runtime.Stable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.m.vodovoz.common.account.LoginManager
+import com.m.vodovoz.core.android.getString
+import com.m.vodovoz.core.navigation.LoginByPhoneCodeArgs
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
 import com.m.vodovoz.feature.auth.login_by_phone_code.model.LoginByPhoneCodeEvent
 import com.m.vodovoz.feature.auth.login_by_phone_code.model.LoginByPhoneCodeState
@@ -29,10 +31,13 @@ class LoginByPhoneCodeViewModel @Inject constructor(
     private val loginManager: LoginManager,
     savedStateHandle: SavedStateHandle,
 ) : MviViewModel<LoginByPhoneCodeState, LoginByPhoneCodeEvent>(
-    LoginByPhoneCodeState(phone = formatPhone(savedStateHandle["phoneNumber"] ?: ""))
+    LoginByPhoneCodeState(phone = formatPhone(savedStateHandle.getString(LoginByPhoneCodeArgs.PHONE)))
 ) {
 
-    private val waitRequestCodeSeconds: Int = savedStateHandle["waitRequestCodeSeconds"] ?: 60
+    private val waitRequestCodeSeconds: Int =
+        savedStateHandle[LoginByPhoneCodeArgs.WAIT_SECONDS] ?: 60
+
+    private val userUrl = savedStateHandle.getString(LoginByPhoneCodeArgs.USER_URL)
     val smsCodeCount = siteStateManager.siteStateFlow.value?.smsCodeCount ?: 4
 
     init {
@@ -97,7 +102,8 @@ class LoginByPhoneCodeViewModel @Inject constructor(
         loginByPhoneResult.onSuccess { userAuthInfo ->
             loginManager.initializeUserSession(
                 userAuthInfo.userId,
-                userAuthInfo.token
+                userAuthInfo.token,
+                userUrl
             )
 
             updateState { s ->

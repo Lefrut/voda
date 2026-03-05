@@ -26,6 +26,7 @@ import androidx.navigation.fragment.findNavController
 import com.m.vodovoz.R
 import com.m.vodovoz.common.account.AccountManager
 import com.m.vodovoz.common.tab.TabManager
+import com.m.vodovoz.core.navigation.AuthArgs
 import com.m.vodovoz.core.navigation.navigateToLoginByEmail
 import com.m.vodovoz.core.navigation.navigateToLoginByPhone
 import com.m.vodovoz.core.navigation.navigateToRegister
@@ -34,6 +35,7 @@ import com.m.vodovoz.design_system.VodovozTheme
 import com.m.vodovoz.design_system.composables.placeholders.LoadingPlaceholder
 import com.m.vodovoz.design_system.composables.placeholders.NetworkErrorPlaceholder
 import com.m.vodovoz.design_system.effects.LifecycleEffect
+import com.m.vodovoz.feature.auth.model.withAccountTypeSelection
 import com.m.vodovoz.feature.cart.CartFlowViewModel
 import com.m.vodovoz.feature.favorite.FavoriteFlowViewModel
 import com.m.vodovoz.feature.home.HomeFlowViewModel
@@ -41,6 +43,7 @@ import com.m.vodovoz.feature.profile.ProfileFlowViewModel
 import com.m.vodovoz.ui.mvi.collectAsState
 import com.m.vodovoz.util.extensions.snack
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.onStart
 import java.util.concurrent.Executor
 import javax.inject.Inject
 
@@ -53,55 +56,7 @@ class LoginFragment : Fragment() {
     @Inject
     lateinit var accountManager: AccountManager
 
-
-
-//    private val executor: Executor by lazy { ContextCompat.getMainExecutor(requireContext()) }
-//    private val biometricManager by lazy { BiometricManager.from(requireContext()) }
-//    private val biometricPrompt: BiometricPrompt by lazy {
-//        BiometricPrompt(this, executor,
-//            object : BiometricPrompt.AuthenticationCallback() {
-//                override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
-//                    super.onAuthenticationError(errorCode, errString)
-//                    requireActivity().snack(getString(R.string.biometric_fault))
-//                }
-//
-//                override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
-//                    super.onAuthenticationSucceeded(result)
-//
-//                }
-//
-//                override fun onAuthenticationFailed() {
-//                    super.onAuthenticationFailed()
-//                    requireActivity().snack(getString(R.string.biometric_fault))
-//                }
-//            })
-//    }
-//
-//    private val promptInfo: BiometricPrompt.PromptInfo by lazy {
-//        BiometricPrompt.PromptInfo.Builder()
-//            .setTitle("Biometric login for my app")
-//            .setSubtitle("Log in using your biometric credential")
-//            .setNegativeButtonText("Use account password")
-//            .build()
-//    }
-
-
     private val viewModel: LoginFlowViewModel by viewModels()
-    private val profileViewModel: ProfileFlowViewModel by activityViewModels()
-    private val flowViewModel: HomeFlowViewModel by activityViewModels()
-    private val cartFlowViewModel: CartFlowViewModel by activityViewModels()
-    private val favoriteViewModel: FavoriteFlowViewModel by activityViewModels()
-
-//    private val biometricResultLauncher =
-//        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-//            val resultCode = result.resultCode
-//            if (resultCode == Activity.RESULT_OK) {
-//                biometricPrompt.authenticate(promptInfo)
-//                accountManager.saveUseBio(true)
-//            } else {
-//                accountManager.saveUseBio(false)
-//            }
-//        }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -114,7 +69,7 @@ class LoginFragment : Fragment() {
             setContent {
                 VodovozTheme {
                     val viewState by viewModel.collectAsState()
-                    
+
 
                     when (viewState.uiState) {
                         LoginFlowViewModel.LoginUiState.Error -> {
@@ -138,55 +93,47 @@ class LoginFragment : Fragment() {
         }
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        //checkShowFingerPrint()
-    }
+    private suspend fun observeEvents(): Unit = viewModel.events.onStart {
+        val nav = findNavController()
+        val savedStateHandle = (nav.currentBackStackEntry ?: return@onStart).savedStateHandle
 
+        val accountTypeId = savedStateHandle.remove<String>(
+            AuthArgs.ACCOUNT_TYPE_ID
+        )
+        viewModel.setAccountTypeById(accountTypeId)
 
-    private suspend fun observeEvents(): Unit = viewModel.events.collect { events ->
+    }.collect { events ->
+        val navController = findNavController()
         when (events) {
-            LoginFlowViewModel.LoginEvents.AuthSuccess -> {
-                profileViewModel.refresh()
-                flowViewModel.refresh()
-                cartFlowViewModel.refresh()
-                favoriteViewModel.refresh()
-
-                val redirect = tabManager.fetchAuthRedirect()
-                if (redirect == TabManager.DEFAULT_AUTH_REDIRECT) {
-                    findNavController().popBackStack()
-                } else {
-                    tabManager.selectTab(redirect)
-                    tabManager.setDefaultAuthRedirect()
-                }
-            }
-
             LoginFlowViewModel.LoginEvents.GoBack -> {
-                findNavController().popBackStack()
+                navController.popBackStack()
             }
 
             is LoginFlowViewModel.LoginEvents.GoToWebView -> {
-                findNavController().navigateToWebView(
+                navController.navigateToWebView(
                     url = events.url,
                     title = events.title,
                 )
             }
 
-            LoginFlowViewModel.LoginEvents.GoToLoginByEmail -> {
-                findNavController().navigateToLoginByEmail()
+            is LoginFlowViewModel.LoginEvents.GoToLoginByEmail -> {
+                navController.navigateToLoginByEmail(events.selectedAccountTypeId)
             }
 
             LoginFlowViewModel.LoginEvents.GoToRegister -> {
-                findNavController().navigateToRegister()
+                navController.navigateToRegister()
             }
 
             is LoginFlowViewModel.LoginEvents.GoToLoginByPhone -> {
-                findNavController().navigateToLoginByPhone(events.phone, events.waitSeconds)
+                navController.navigateToLoginByPhone(
+                    phone = events.phone,
+                    waitSeconds = events.waitSeconds,
+                    userUrl = events.userUrl
+                )
             }
         }
 
     }
-
 
 
 //    private fun checkShowFingerPrint() {

@@ -4,6 +4,7 @@ import androidx.compose.runtime.Stable
 import androidx.lifecycle.viewModelScope
 import com.m.vodovoz.common.account.AccountManager
 import com.m.vodovoz.common.model.GlobalAppLinks
+import com.m.vodovoz.core.network.VodovozUrlManager
 import com.m.vodovoz.core.network.VodovozWebConfig
 import com.m.vodovoz.core.network.interceptor.BaseUrlInterceptor
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
@@ -15,6 +16,7 @@ import com.m.vodovoz.feature.sitestate.SiteStateManager
 import com.m.vodovoz.ui.mvi.MviViewModel
 import com.m.vodovoz.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -23,7 +25,7 @@ import javax.inject.Inject
 class AboutAppViewModel @Inject constructor(
     private val accountManager: AccountManager,
     private val siteStateManager: SiteStateManager,
-    private val baseUrlInterceptor: BaseUrlInterceptor,
+    private val urlManager: VodovozUrlManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
 ) : MviViewModel<AboutAppState, AboutAppEvent>(AboutAppState()) {
 
@@ -58,7 +60,7 @@ class AboutAppViewModel @Inject constructor(
             }
 
             AboutAppOptionUi.PersonalData -> {
-                with(GlobalAppLinks.personal){
+                with(GlobalAppLinks.personal) {
                     sendEvent(AboutAppEvent.GoToWebView(url, title))
                 }
             }
@@ -79,16 +81,15 @@ class AboutAppViewModel @Inject constructor(
 
     fun changeMode(appMode: AppMode) = viewModelScope.launch {
         val testUrl = siteStateManager.siteStateSnapshot.testUrl
+        val prodUrl = accountManager.getUserUrl()
 
         when (appMode) {
             AppMode.Test -> {
-                VodovozWebConfig.setUrl(testUrl)
-                baseUrlInterceptor.updateBaseUrl(testUrl)
+                urlManager.setUrl(testUrl)
             }
 
             AppMode.Prod -> {
-                VodovozWebConfig.setProdUrl()
-                baseUrlInterceptor.updateBaseUrl(VodovozWebConfig.VODOVOZ_URL)
+                urlManager.setUrl(prodUrl)
             }
         }
         updateState { s ->

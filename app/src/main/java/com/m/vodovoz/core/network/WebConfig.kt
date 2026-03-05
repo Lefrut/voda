@@ -1,5 +1,13 @@
 package com.m.vodovoz.core.network
 
+import javax.inject.Singleton
+
+
+@Singleton
+class UrlMananger(){
+
+}
+
 data object WebConfig {
 
     private const val MAPKIT_PROTOCOL = "https://"
@@ -20,8 +28,10 @@ data object VodovozWebConfig {
     private const val VODOVOZ_CONFIG_DOMAIN = "m.vodovoz.ru/"
     private const val VODOVOZ_TEST_DOMAIN = "vodovoz.net/"
 
+    const val VODOVOZ_BASE_URL = "$VODOVOZ_PROTOCOL$VODOVOZ_CONFIG_DOMAIN"
 
-    var VODOVOZ_URL = "$VODOVOZ_PROTOCOL$VODOVOZ_CONFIG_DOMAIN"
+
+    var VODOVOZ_URL = VODOVOZ_BASE_URL
         private set
 
     fun setUrl(url: String): String{
@@ -29,21 +39,11 @@ data object VodovozWebConfig {
         return VODOVOZ_URL
     }
 
-    fun setProdUrl(): String{
-        VODOVOZ_URL = "$VODOVOZ_PROTOCOL$VODOVOZ_CONFIG_DOMAIN"
-        return VODOVOZ_URL
-    }
-
-
     const val VODOVOZ_PATH = "newmobile_new/"
     private val VODOVOZ_URL_PATH = "$VODOVOZ_URL$VODOVOZ_PATH"
     private val VODOVOZ_INFO_URL = "${VODOVOZ_URL_PATH}informatsiya/"
 
     val ABOUT_SHOP_URL = "${VODOVOZ_INFO_URL}omagazine.php"
-
-    fun toFullUrl(path: String): String {
-        return VODOVOZ_URL.removeSuffix("/") + path
-    }
 
 
 }

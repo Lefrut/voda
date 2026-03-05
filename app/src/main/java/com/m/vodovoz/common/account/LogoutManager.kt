@@ -25,36 +25,19 @@ class LogoutManager @Inject constructor(
 
 
     fun logout(): Flow<Result<Unit>> = flow {
-        val logoutResult = vodovozServiceRepository.logout().singleResult()
+        val logoutResult = vodovozServiceRepository.logout().singleResult().onSuccess {
+            firebaseTokenManager.removeFirebaseToken()
+            cookieManager.removeCookieSessionId()
+            accountManager.removeUserId()
+            accountManager.removeUserToken()
 
-        val operations = listOf(
-            suspend {
-                firebaseTokenManager.removeFirebaseToken()
-            },
-            {
-                cookieManager.removeCookieSessionId()
-            },
-            {
-                accountManager.removeUserId()
-            },
-            {
-                accountManager.removeUserToken()
-            },
-            {
-                waterAppHelper.runOrCancelWorkManager(
-                    WaterApp.DefaultNotificationSettings
-                )
-            },
-            suspend {
-                tabManager.updateBottomNavCartState()
-            },
-        )
+            waterAppHelper.runOrCancelWorkManager(
+                WaterApp.DefaultNotificationSettings
+            )
 
-        logoutResult.onSuccess {
-            operations.forEach { suspendFunction0 ->
-                suspendFunction0()
-            }
+            tabManager.updateBottomNavCartState()
         }
+
 
 
         emit(logoutResult)
