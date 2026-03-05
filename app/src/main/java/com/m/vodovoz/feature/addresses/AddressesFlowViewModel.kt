@@ -64,16 +64,17 @@ class AddressesFlowViewModel @Inject constructor(
         fetchMapAreas()
     }
 
-    private fun fetchMapAreas() = vodovozServiceRepository.getMapAreas().onEachFailure { throwable ->
-        throw throwable
-    }.onEachSuccess { mapZonesModel ->
-        updateState { s ->
-            s.copy(mapAreas = mapZonesModel.areas.mapToUi())
-        }
-    }.retry {
-        delay(350)
-        true
-    }.launchIn(viewModelScope)
+    private fun fetchMapAreas() =
+        vodovozServiceRepository.getMapAreas().onEachFailure { throwable ->
+            throw throwable
+        }.onEachSuccess { mapZonesModel ->
+            updateState { s ->
+                s.copy(mapAreas = mapZonesModel.areas.mapToUi())
+            }
+        }.retry {
+            delay(350)
+            true
+        }.launchIn(viewModelScope)
 
     fun fetchAddresses() = viewModelScope.launch {
         val addressesResult = vodovozServiceRepository.getAddresses().singleResult()
@@ -154,7 +155,7 @@ class AddressesFlowViewModel @Inject constructor(
         val updatedFromMoscowRingToAddress = if (coreMapArea.contains(addressPoint)) {
             0f
         } else {
-            val nearestPoints = coreMapArea.findNearestPointsTo(addressPoint)
+            val nearestPoints = coreMapArea.findNearestPointsTo(target = addressPoint, count = 5)
             val routes = nearestPoints.map { nearestPoint ->
                 async { nearestPoint.routeTo(addressPoint) }
             }.awaitAll()

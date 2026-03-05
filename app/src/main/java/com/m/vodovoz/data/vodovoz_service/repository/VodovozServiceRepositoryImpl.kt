@@ -249,7 +249,8 @@ class VodovozServiceRepositoryImpl @Inject constructor(
         return executeDefaultRequest(
             request = {
                 vodovozService.getAddAddressDetails(addressId)
-            }
+            },
+            toDomain = { toDomain() }
         )
     }
 
@@ -257,7 +258,8 @@ class VodovozServiceRepositoryImpl @Inject constructor(
         return executeDefaultRequest(
             request = {
                 vodovozService.getAddressLabels()
-            }
+            },
+            toDomain = { toDomain() }
         )
     }
 

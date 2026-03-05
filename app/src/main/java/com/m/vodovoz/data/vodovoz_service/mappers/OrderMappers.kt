@@ -4,6 +4,7 @@ import com.m.vodovoz.common.model.VodovozBoolean
 import com.m.vodovoz.common.model.boolean
 import com.m.vodovoz.common.model.equalsTo
 import com.m.vodovoz.common.model.from
+import com.m.vodovoz.common.model.toBoleanByVodovoz
 import com.m.vodovoz.data.vodovoz_service.di.toVodovozUrl
 import com.m.vodovoz.data.vodovoz_service.model.CancelOrderDetailsDTO
 import com.m.vodovoz.data.vodovoz_service.model.KNOPKA_ORDER_DTO
@@ -316,20 +317,19 @@ fun BottomCartDTO.toDomain(): BottomCartModel {
 }
 
 fun OrderPlaceholderDTO.toDomain(): BuyCertificateModel {
-
+    val payment = button?.oplate?.toDomain(redirect)
     return BuyCertificateModel(
         placeholder = toVodovozPlaceholder(),
-        payment = button?.oplate?.toDomain()
-            ?: throw IllegalArgumentException("Payment cannot be null")
+        payment = requireNotNull(payment) { "Payment cannot be null" }
     )
 }
 
-fun OPLATA_DTO.toDomain(): CertificatePaymentInfoModel {
+fun OPLATA_DTO.toDomain(browser: Boolean?): CertificatePaymentInfoModel {
     return CertificatePaymentInfoModel(
-        id = ID ?: throw IllegalArgumentException("Payment ID cannot be null"),
-        name = NAME ?: "",
-        browser = VodovozBoolean.True equalsTo BRAYZER,
-        url = URL ?: throw IllegalArgumentException("Payment URL cannot be null")
+        id = requireNotNull(ID) { "Payment ID cannot be null" },
+        name = NAME.orEmpty(),
+        browser = browser ?: BRAYZER.toBoleanByVodovoz(),
+        url = requireNotNull(URL) { "Payment URL cannot be null" }
     )
 }
 
@@ -353,18 +353,20 @@ fun OrderDetailsDTO.toDomain(): OrderDetailsModel {
     val topButtons = BLOCK?.KNOPKI?.mapToDomain() ?: emptyList()
     val middleButtons = BLOCK?.KNOPKIOPIS?.mapToDomain() ?: emptyList()
 
+
     return OrderDetailsModel(
         title = TITLE?.ZAGOLOVOK ?: "",
         subtitle = TITLE?.OPIS ?: "",
-        currentStatus = BLOCK?.STATUS?.mapToDomain() ?: emptyList(),
+        currentStatus = BLOCK?.STATUS.orEmpty().mapToDomain(),
         header = BLOCK?.GLAV ?: "",
-        statuses = BLOCK?.STATUSY?.mapToDomain() ?: emptyList(),
+        statuses = BLOCK?.STATUSY.orEmpty().mapToDomain(),
         topButtons = topButtons + middleButtons,
-        products = TOVARY?.TOVAR?.mapToDomain() ?: emptyList(),
+        products = TOVARY?.TOVAR.orEmpty().mapToDomain(),
         productsTitle = TOVARY?.TITLE ?: "",
-        bottomButtons = KNOPKI_NIZ?.mapToDomain() ?: emptyList(),
-        orderSummary = ITOG?.mapToDomain()
-            ?: throw IllegalArgumentException("Order details summary can't be null")
+        bottomButtons = KNOPKI_NIZ.orEmpty().mapToDomain(),
+        orderSummary = requireNotNull(ITOG) {
+            "Order details summary can't be null"
+        }.mapToDomain()
     )
 }
 

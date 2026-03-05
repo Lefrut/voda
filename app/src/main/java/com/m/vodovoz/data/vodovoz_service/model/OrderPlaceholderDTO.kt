@@ -8,6 +8,7 @@ data class OrderPlaceholderDTO(
     @Json(name = "TITLE") val title: String?,
     @Json(name = "ZAGALOVOK") val header: String?,
     @Json(name = "MESSAGE") val message: String?,
+    @Json(name = "REDIREKT") val redirect: Boolean?,
     @Json(name = "IMAGE") val imageUrl: String?,
     @Json(name = "KNOPKA") val button: OrderPlaceholderButton?,
 )

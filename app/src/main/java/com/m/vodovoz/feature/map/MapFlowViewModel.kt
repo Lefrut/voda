@@ -161,7 +161,7 @@ class MapFlowViewModel @Inject constructor(
             return 0f
         }
 
-        val nearestPoints = coreMapArea.findNearestPointsTo(addressPoint)
+        val nearestPoints = coreMapArea.findNearestPointsTo(target = addressPoint, count = 5)
         val routes = nearestPoints
             .map { nearestPoint ->
                 coroutineScope {
