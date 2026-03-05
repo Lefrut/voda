@@ -24,9 +24,9 @@ fun ServiceOrderEntry() = NavigationEntry<ServiceOrderViewModel> {
             viewModel.insetsState.consumeNavigationBarInsets(!imeVisible)
             insets
         }
-        view.requestApplyInsets()
         onStopOrDispose {
             ViewCompat.setOnApplyWindowInsetsListener(view, null)
+            viewModel.insetsState.consumeNavigationBarInsets(true)
             viewModel.tabManager.changeTabVisibility(true)
         }
     }
