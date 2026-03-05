@@ -4,6 +4,7 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.common.model.VodovozBoolean
 import com.m.vodovoz.common.model.boolean
 import com.m.vodovoz.common.model.from
@@ -49,6 +50,7 @@ import kotlin.math.floor
 @HiltViewModel
 @Stable
 class AddressesFlowViewModel @Inject constructor(
+    val tabManager: TabManager,
     savedState: SavedStateHandle,
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val mapServiceRepository: MapServiceRepository,

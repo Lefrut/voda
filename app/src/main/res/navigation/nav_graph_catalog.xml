@@ -290,10 +290,6 @@
         android:label="TraceOrderFragment"/>
 
 
-    <fragment
-        android:id="@+id/biometricSettingsFragment"
-        android:name="com.m.vodovoz.feature.profile.biometric.BiometricSettingsFragment"
-        android:label="BiometricSettingsFragment" />
 
     <fragment
         android:id="@+id/buyCertificateFragment"

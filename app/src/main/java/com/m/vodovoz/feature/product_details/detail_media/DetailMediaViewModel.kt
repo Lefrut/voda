@@ -3,9 +3,11 @@ package com.m.vodovoz.feature.product_details.detail_media
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.design_system.model.ProductMediaUi
 import com.m.vodovoz.feature.product_details.detail_media.model.DetailMediaEvent
 import com.m.vodovoz.feature.product_details.detail_media.model.DetailMediaState
+import com.m.vodovoz.ui.insets.InsetsVisibilityState
 import com.m.vodovoz.ui.mvi.MviViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.update
@@ -15,6 +17,8 @@ import javax.inject.Inject
 @HiltViewModel
 @Stable
 class DetailMediaViewModel @Inject constructor(
+    val tabManager: TabManager,
+    val insetsVisibilityState: InsetsVisibilityState,
     savedStateHandle: SavedStateHandle,
 ) : MviViewModel<DetailMediaState, DetailMediaEvent>(
     DetailMediaState(

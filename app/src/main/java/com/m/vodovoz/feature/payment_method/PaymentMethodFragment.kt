@@ -4,38 +4,13 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
-import androidx.navigation.fragment.findNavController
-import com.m.vodovoz.common.tab.TabManager
-import com.m.vodovoz.design_system.VodovozTheme
-import com.m.vodovoz.design_system.effects.LifecycleEffect
-import com.m.vodovoz.feature.payment_method.model.PaymentMethodEvent
-import com.m.vodovoz.feature.payment_method.model.toNav
-import com.m.vodovoz.ui.mvi.collectAsState
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class PaymentMethodFragment : Fragment() {
-
-    private val viewModel by viewModels<PaymentMethodViewModel>()
-
-    @Inject
-    lateinit var tabManager: TabManager
-
-    override fun onStart() {
-        super.onStart()
-        tabManager.changeTabVisibility(false)
-    }
-
-    override fun onPause() {
-        super.onPause()
-        tabManager.changeTabVisibility(true)
-    }
+class PaymentMethodFragment @Inject constructor() : Fragment() {
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -43,34 +18,8 @@ class PaymentMethodFragment : Fragment() {
         savedInstanceState: Bundle?,
     ): View {
         return ComposeView(requireContext()).apply {
-            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
-
             setContent {
-                VodovozTheme {
-                    val viewState by viewModel.collectAsState()
-
-                    PaymentMethodScreen(viewModel = viewModel, viewState = viewState)
-
-                    LifecycleEffect {
-                        viewModel.events.collect { event ->
-                            val navController = findNavController()
-                            when (event) {
-                                PaymentMethodEvent.GoBack -> {
-                                    navController.popBackStack()
-                                }
-
-                                is PaymentMethodEvent.GoBackToOrdering -> {
-                                    navController.previousBackStackEntry?.savedStateHandle?.apply {
-                                        set("paymentBalance", event.paymentBalance?.toNav())
-                                        set("paymentBonuses", event.paymentBonuses?.toNav())
-                                        set("paymentMethod", event.paymentMethod?.toNav())
-                                    }
-                                    navController.popBackStack()
-                                }
-                            }
-                        }
-                    }
-                }
+                PaymentMethodEntry()
             }
         }
     }

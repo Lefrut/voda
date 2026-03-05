@@ -1,0 +1,54 @@
+package com.m.vodovoz.feature.about_product
+
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.core.os.bundleOf
+import androidx.lifecycle.compose.LifecycleStartEffect
+import com.m.vodovoz.R
+import com.m.vodovoz.core.navigation.NavigationEntry
+import com.m.vodovoz.core.navigation.navigateToProductAnalogs
+import com.m.vodovoz.design_system.effects.LifecycleEffect
+import com.m.vodovoz.feature.about_product.model.AboutProductEvent
+import com.m.vodovoz.ui.mvi.collectAsState
+
+@Composable
+fun AboutProductEntry() = NavigationEntry<AboutProductViewModel> {
+    val viewState by viewModel.collectAsState()
+
+    LifecycleStartEffect(Unit) {
+        viewModel.tabManager.changeTabVisibility(false)
+        onStopOrDispose {
+            viewModel.tabManager.changeTabVisibility(true)
+        }
+    }
+
+    AboutProductScreen(
+        viewModel = viewModel,
+        viewState = viewState
+    )
+
+    LifecycleEffect {
+        viewModel.listenCartUpdates()
+    }
+
+    LifecycleEffect {
+        viewModel.events.collect { event ->
+            when (event) {
+                AboutProductEvent.GoBack -> {
+                    navController.popBackStack()
+                }
+
+                is AboutProductEvent.GoToDocumentViewer -> {
+                    navController.navigate(
+                        R.id.documentViewerFragment,
+                        bundleOf("documentId" to event.document)
+                    )
+                }
+
+                is AboutProductEvent.GoToProductAnalogs -> {
+                    navController.navigateToProductAnalogs(event.productId)
+                }
+            }
+        }
+    }
+}

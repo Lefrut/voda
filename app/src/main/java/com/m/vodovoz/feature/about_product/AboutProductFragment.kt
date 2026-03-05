@@ -4,31 +4,13 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.platform.ViewCompositionStrategy
-import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
-import androidx.lifecycle.compose.LifecycleStartEffect
-import androidx.navigation.fragment.findNavController
-import com.m.vodovoz.R
-import com.m.vodovoz.common.tab.TabManager
-import com.m.vodovoz.core.navigation.navigateToProductAnalogs
-import com.m.vodovoz.design_system.VodovozTheme
-import com.m.vodovoz.design_system.effects.LifecycleEffect
-import com.m.vodovoz.feature.about_product.model.AboutProductEvent
-import com.m.vodovoz.ui.mvi.collectAsState
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class AboutProductFragment : Fragment() {
-
-    internal val viewModel: AboutProductViewModel by viewModels()
-
-    @Inject
-    lateinit var tabManager: TabManager
+class AboutProductFragment @Inject constructor() : Fragment() {
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -36,50 +18,8 @@ class AboutProductFragment : Fragment() {
         savedInstanceState: Bundle?,
     ): View {
         return ComposeView(requireContext()).apply {
-            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
-
             setContent {
-                val viewState by viewModel.collectAsState()
-
-                VodovozTheme {
-
-                    LifecycleStartEffect(Unit) {
-                        tabManager.changeTabVisibility(false)
-                        onStopOrDispose {
-                            tabManager.changeTabVisibility(true)
-                        }
-                    }
-
-                    AboutProductScreen(
-                        viewModel = viewModel,
-                        viewState = viewState
-                    )
-
-                    LifecycleEffect {
-                        viewModel.listenCartUpdates()
-                    }
-
-                    LifecycleEffect {
-                        viewModel.events.collect { event ->
-                            when (event) {
-                                AboutProductEvent.GoBack -> {
-                                    findNavController().popBackStack()
-                                }
-
-                                is AboutProductEvent.GoToDocumentViewer -> {
-                                    findNavController().navigate(
-                                        R.id.documentViewerFragment,
-                                        bundleOf("documentId" to event.document)
-                                    )
-                                }
-
-                                is AboutProductEvent.GoToProductAnalogs -> {
-                                    findNavController().navigateToProductAnalogs(event.productId)
-                                }
-                            }
-                        }
-                    }
-                }
+                AboutProductEntry()
             }
         }
     }

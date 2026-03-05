@@ -16,6 +16,7 @@ import com.m.vodovoz.design_system.model.widgets.updateFieldAndResetError
 import com.m.vodovoz.design_system.model.widgets.vodovozValidators
 import com.m.vodovoz.domain.general.model.exceptions.UserNotLoginException
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
+import com.m.vodovoz.ui.insets.InsetsVisibilityState
 import com.m.vodovoz.ui.mvi.Event
 import com.m.vodovoz.ui.mvi.MviViewModel
 import com.m.vodovoz.ui.mvi.State
@@ -30,6 +31,7 @@ import javax.inject.Inject
 @Stable
 @HiltViewModel
 class UserDataFlowViewModel @Inject constructor(
+    val insetsVisibilityState: InsetsVisibilityState,
     private val mediaManager: MediaManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val resourcesProvider: ResourcesProvider,

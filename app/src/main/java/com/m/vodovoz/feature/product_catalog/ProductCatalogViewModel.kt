@@ -12,6 +12,7 @@ import com.m.vodovoz.R
 import com.m.vodovoz.common.cart.CartManager
 import com.m.vodovoz.common.like.LikeManager
 import com.m.vodovoz.common.resources.ResourcesProvider
+import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.design_system.model.ForAdultsUi
 import com.m.vodovoz.design_system.model.ParentCategoryUi
 import com.m.vodovoz.design_system.model.ProductUi
@@ -58,6 +59,7 @@ import javax.inject.Inject
 @HiltViewModel
 @Stable
 class ProductCatalogViewModel @Inject constructor(
+    val tabManager: TabManager,
     savedState: SavedStateHandle,
     private val cartManager: CartManager,
     private val likeManager: LikeManager,

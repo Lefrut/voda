@@ -5,11 +5,13 @@ import androidx.compose.runtime.Stable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.m.vodovoz.R
+import com.m.vodovoz.common.account.AccountManager
 import com.m.vodovoz.common.cart.CartManager
 import com.m.vodovoz.common.model.VodovozBoolean
 import com.m.vodovoz.common.model.boolean
 import com.m.vodovoz.common.model.from
 import com.m.vodovoz.common.resources.ResourcesProvider
+import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.design_system.model.ColorfulButtonUi
 import com.m.vodovoz.design_system.model.SectionUi
 import com.m.vodovoz.design_system.model.VodovozPlaceholderUi
@@ -57,6 +59,8 @@ import javax.inject.Inject
 @Stable
 class OrderingFlowViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
+    val tabManager: TabManager,
+    val accountManager: AccountManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val resourcesProvider: ResourcesProvider,
     private val cartManager: CartManager

@@ -3,6 +3,7 @@ package com.m.vodovoz.feature.cart.gifts
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.design_system.model.ForAdultsUi
 import com.m.vodovoz.domain.general.respository.UserPreferencesRepository
 import com.m.vodovoz.feature.cart.gifts.model.GiftsEvent
@@ -20,6 +21,7 @@ import javax.inject.Inject
 @HiltViewModel
 @Stable
 class GiftsViewModel @Inject constructor(
+    val tabManager: TabManager,
     savedStateHandle: SavedStateHandle,
     private val userPreferencesRepository: UserPreferencesRepository,
 ) : ProductsMviViewModel<CartPresentItemUi, GiftsState, GiftsEvent>(

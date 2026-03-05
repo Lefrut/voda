@@ -2,6 +2,7 @@ package com.m.vodovoz.feature.profile.change_password
 
 import androidx.lifecycle.viewModelScope
 import com.m.vodovoz.R
+import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.common.resources.ResourcesProvider
 import com.m.vodovoz.design_system.model.toUi
 import com.m.vodovoz.design_system.model.widgets.FieldUi
@@ -24,6 +25,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ChangePasswordViewModel @Inject constructor(
+    val tabManager: TabManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val resourcesProvider: ResourcesProvider,
 ) : MviViewModel<ChangePasswordState, ChangePasswordEvent>(

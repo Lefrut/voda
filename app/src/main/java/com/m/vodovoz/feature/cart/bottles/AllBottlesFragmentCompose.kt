@@ -4,31 +4,13 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.compose.animation.Crossfade
-import androidx.compose.foundation.background
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
-import com.m.vodovoz.ui.mvi.collectAsState
-import androidx.navigation.fragment.findNavController
-import com.m.vodovoz.common.tab.TabManager
-import com.m.vodovoz.design_system.VodovozTheme
-import com.m.vodovoz.design_system.composables.placeholders.LoadingPlaceholder
-import com.m.vodovoz.design_system.composables.placeholders.NetworkErrorPlaceholder
-import com.m.vodovoz.design_system.effects.LifecycleEffect
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
-
 @AndroidEntryPoint
-class AllBottlesFlowFragment : Fragment() {
-
-    internal val viewModel: AllBottlesFlowViewModel by viewModels()
+class AllBottlesFlowFragment @Inject constructor() : Fragment() {
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -37,41 +19,8 @@ class AllBottlesFlowFragment : Fragment() {
     ): View {
         return ComposeView(requireContext()).apply {
             setContent {
-                setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
-
-                VodovozTheme {
-                    val viewState by viewModel.collectAsState()
-
-                    Crossfade(
-                        modifier = Modifier.background(MaterialTheme.colorScheme.background),
-                        targetState = viewState.uiState,
-                        label = "all bottles screen crossfade"
-                    ) { state ->
-                        when (state) {
-                            AllBottlesFlowViewModel.BottlesUiState.Error -> NetworkErrorPlaceholder {
-                                viewModel.fetchAllBottlesDetails()
-                            }
-
-                            AllBottlesFlowViewModel.BottlesUiState.Loading -> LoadingPlaceholder()
-                            AllBottlesFlowViewModel.BottlesUiState.Success -> AllBottlesScreen(
-                                viewModel = viewModel,
-                                viewState = viewState
-                            )
-                        }
-                    }
-
-                    LifecycleEffect {
-                        viewModel.events.collect { event ->
-                            when (event) {
-                                AllBottlesFlowViewModel.BottlesEvent.GoBack -> {
-                                    findNavController().popBackStack()
-                                }
-                            }
-                        }
-                    }
-                }
+                AllBottlesEntry()
             }
         }
     }
-
 }

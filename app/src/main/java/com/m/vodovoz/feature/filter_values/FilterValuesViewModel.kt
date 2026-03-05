@@ -3,6 +3,7 @@ package com.m.vodovoz.feature.filter_values
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.ui.mvi.Event
 import com.m.vodovoz.ui.mvi.MviViewModel
 import com.m.vodovoz.ui.mvi.State
@@ -19,6 +20,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class FilterValuesViewModel @Inject constructor(
+    val tabManager: TabManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
     savedStateHandle: SavedStateHandle,
 ) : MviViewModel<FilterValuesViewModel.ConcreteFilterState, FilterValuesViewModel.ConcreteFilterEvent>(

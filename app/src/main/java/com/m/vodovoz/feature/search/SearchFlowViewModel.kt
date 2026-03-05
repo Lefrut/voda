@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.m.vodovoz.common.cart.CartManager
 import com.m.vodovoz.common.like.LikeManager
 import com.m.vodovoz.common.search.SearchManager
+import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.design_system.model.ProductUi
 import com.m.vodovoz.design_system.model.SectionUi
 import com.m.vodovoz.design_system.model.VodovozPlaceholderUi
@@ -15,6 +16,7 @@ import com.m.vodovoz.domain.general.model.exceptions.EmptyResultException
 import com.m.vodovoz.domain.general.respository.UserPreferencesRepository
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
 import com.m.vodovoz.ui.mvi.Event
+import com.m.vodovoz.ui.insets.InsetsVisibilityState
 import com.m.vodovoz.ui.paging.ItemsState
 import com.m.vodovoz.ui.paging.ProductsMviViewModel
 import com.m.vodovoz.util.extensions.debounceWithMax
@@ -34,6 +36,8 @@ import javax.inject.Inject
 @HiltViewModel
 @Stable
 class SearchFlowViewModel @Inject constructor(
+    val tabManager: TabManager,
+    val insetsVisibilityState: InsetsVisibilityState,
     private val cartManager: CartManager,
     private val likeManager: LikeManager,
     private val searchManager: SearchManager,

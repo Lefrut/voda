@@ -7,6 +7,7 @@ import com.m.vodovoz.R
 import com.m.vodovoz.common.account.AccountManager
 import com.m.vodovoz.common.account.LoginManager
 import com.m.vodovoz.common.resources.ResourcesProvider
+import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.core.network.VodovozWebConfig
 import com.m.vodovoz.design_system.model.ColorfulButtonUi
 import com.m.vodovoz.design_system.model.widgets.EmptyTextValidator
@@ -36,6 +37,7 @@ private val REGISTER_BUTTON_VALIDATORS = AuthDetailsUi.authValidators()
 @HiltViewModel
 @Stable
 class RegFlowViewModel @Inject constructor(
+    val tabManager: TabManager,
     private val accountManager: AccountManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val resourceProvider: ResourcesProvider,

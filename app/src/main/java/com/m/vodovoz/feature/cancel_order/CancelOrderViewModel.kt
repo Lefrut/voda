@@ -3,6 +3,7 @@ package com.m.vodovoz.feature.cancel_order
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.design_system.model.ColorfulButtonUi
 import com.m.vodovoz.design_system.model.toUi
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
@@ -22,6 +23,7 @@ import javax.inject.Inject
 @HiltViewModel
 @Stable
 class CancelOrderViewModel @Inject constructor(
+    val tabManager: TabManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
     savedStateHandle: SavedStateHandle,
 ) : MviViewModel<CancelOrderState, CancelOrderEvent>(CancelOrderState()) {

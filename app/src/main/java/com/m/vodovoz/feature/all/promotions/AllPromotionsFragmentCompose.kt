@@ -5,26 +5,15 @@ import android.os.Parcelable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Stable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
-import com.m.vodovoz.ui.mvi.collectAsState
-import androidx.navigation.fragment.findNavController
-import com.m.vodovoz.core.navigation.navigateToPromotionDetails
-import com.m.vodovoz.design_system.VodovozTheme
-import com.m.vodovoz.design_system.effects.LifecycleEffect
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.parcelize.Parcelize
+import javax.inject.Inject
 
 @AndroidEntryPoint
-class AllPromotionsFragment : Fragment() {
-
-    private val viewModel: AllPromotionsFlowViewModel by viewModels()
+class AllPromotionsFragment @Inject constructor() : Fragment() {
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -32,43 +21,8 @@ class AllPromotionsFragment : Fragment() {
         savedInstanceState: Bundle?,
     ): View {
         return ComposeView(requireContext()).apply {
-            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
-
             setContent {
-                VodovozTheme {
-                    val viewState by viewModel.collectAsState()
-                    
-
-                    val lazyListState = rememberLazyListState()
-
-                    AllPromotionsScreen(
-                        viewModel = viewModel,
-                        viewState = viewState,
-                        lazyListState = lazyListState
-                    )
-
-                    LifecycleEffect {
-                        viewModel.events.collect { event ->
-                            val navController = findNavController()
-                            when (event) {
-                                AllPromotionsFlowViewModel.AllPromotionsEvent.ScrollTop -> {
-                                    lazyListState.animateScrollToItem(0)
-                                }
-
-                                is AllPromotionsFlowViewModel.AllPromotionsEvent.GoToProductDetails -> {
-                                    navController.navigateToPromotionDetails(event.promotionId)
-                                }
-
-                                AllPromotionsFlowViewModel.AllPromotionsEvent.GoBack -> {
-                                    navController.popBackStack()
-                                }
-                            }
-                        }
-                    }
-
-                }
-
-
+                AllPromotionsEntry()
             }
         }
     }
@@ -82,5 +36,3 @@ class AllPromotionsFragment : Fragment() {
         data object All : DataSource()
     }
 }
-
-

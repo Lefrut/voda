@@ -3,6 +3,7 @@ package com.m.vodovoz.feature.profile.waterapp
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.viewModelScope
+import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.common.water_app.NotificationSettings
 import com.m.vodovoz.common.water_app.WaterApp
 import com.m.vodovoz.domain.general.respository.WaterAppRepository
@@ -12,6 +13,7 @@ import com.m.vodovoz.feature.profile.waterapp.model.WaterAppActivityLevelUi
 import com.m.vodovoz.feature.profile.waterapp.model.WaterAppUiState
 import com.m.vodovoz.feature.profile.waterapp.model.WaterStepUi
 import com.m.vodovoz.feature.profile.waterapp.model.toStage
+import com.m.vodovoz.ui.insets.InsetsVisibilityState
 import com.m.vodovoz.ui.mvi.Event
 import com.m.vodovoz.ui.mvi.MviViewModel
 import com.m.vodovoz.ui.mvi.State
@@ -34,6 +36,8 @@ import kotlin.time.Duration.Companion.minutes
 @HiltViewModel
 @Stable
 class WaterAppViewModel @Inject constructor(
+    val tabManager: TabManager,
+    val insetsVisibilityState: InsetsVisibilityState,
     private val waterAppRepository: WaterAppRepository,
     private val waterAppHelper: WaterAppHelper,
 ) : MviViewModel<WaterAppViewModel.WaterAppState, WaterAppViewModel.WaterAppEvents>(

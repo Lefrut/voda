@@ -3,7 +3,9 @@ package com.m.vodovoz.feature.catalog
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.viewModelScope
+import com.m.vodovoz.common.cookie.CookieManager
 import com.m.vodovoz.common.model.BaseVodovozAction
+import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.ui.mvi.Event
 import com.m.vodovoz.ui.mvi.MviViewModel
 import com.m.vodovoz.ui.mvi.State
@@ -21,6 +23,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class CatalogFlowViewModel @Inject constructor(
+    val tabManager: TabManager,
+    val cookieManager: CookieManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
 ) : MviViewModel<CatalogFlowViewModel.CatalogState, CatalogFlowViewModel.CatalogEvents>(
     CatalogState()

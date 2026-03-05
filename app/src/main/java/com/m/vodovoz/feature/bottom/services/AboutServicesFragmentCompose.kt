@@ -4,25 +4,13 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
-import com.m.vodovoz.ui.mvi.collectAsState
-import androidx.navigation.fragment.findNavController
-import com.m.vodovoz.core.navigation.navigateToServiceDetails
-import com.m.vodovoz.design_system.VodovozTheme
-import com.m.vodovoz.design_system.composables.placeholders.LoadingPlaceholder
-import com.m.vodovoz.design_system.composables.placeholders.NetworkErrorPlaceholder
-import com.m.vodovoz.design_system.effects.LifecycleEffect
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
-class AboutServicesFragment : Fragment() {
-
-    private val viewModel: AboutServicesFlowViewModel by viewModels()
+class AboutServicesFragment @Inject constructor() : Fragment() {
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -30,44 +18,9 @@ class AboutServicesFragment : Fragment() {
         savedInstanceState: Bundle?,
     ): View {
         return ComposeView(requireContext()).apply {
-            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
-
             setContent {
-                VodovozTheme {
-                    val viewState by viewModel.collectAsState()
-                    
-
-                    when (viewState.uiState) {
-                        AboutServicesFlowViewModel.AboutServicesUiState.Error -> {
-                            NetworkErrorPlaceholder { viewModel.fetchAboutServicesDetails() }
-                        }
-
-                        AboutServicesFlowViewModel.AboutServicesUiState.Loading -> {
-                            LoadingPlaceholder()
-                        }
-
-                        AboutServicesFlowViewModel.AboutServicesUiState.Success -> {
-                            AboutServicesScreen(viewModel = viewModel, viewState = viewState)
-                        }
-                    }
-
-                    LifecycleEffect {
-                        viewModel.events.collect { event ->
-                            when (event) {
-                                AboutServicesFlowViewModel.AboutServicesEvents.GoBack -> {
-                                    findNavController().popBackStack()
-                                }
-
-                                is AboutServicesFlowViewModel.AboutServicesEvents.GoToServiceDetails -> {
-                                    findNavController().navigateToServiceDetails(event.serviceId)
-                                }
-                            }
-
-                        }
-                    }
-                }
+                AboutServicesEntry()
             }
         }
     }
-
 }

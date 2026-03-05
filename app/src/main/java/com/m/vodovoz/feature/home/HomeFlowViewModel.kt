@@ -7,6 +7,7 @@ import com.m.vodovoz.BuildConfig
 import com.m.vodovoz.R
 import com.m.vodovoz.common.account.AccountManager
 import com.m.vodovoz.common.cart.CartManager
+import com.m.vodovoz.common.cookie.CookieManager
 import com.m.vodovoz.common.like.LikeManager
 import com.m.vodovoz.common.model.AppLink
 import com.m.vodovoz.common.model.BaseVodovozAction
@@ -14,6 +15,7 @@ import com.m.vodovoz.common.model.ButtonAction
 import com.m.vodovoz.common.model.GlobalAppLinks
 import com.m.vodovoz.common.model.VodovozAction
 import com.m.vodovoz.common.resources.ResourcesProvider
+import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.design_system.model.AboutAdvertisingUi
 import com.m.vodovoz.design_system.model.BannerUi
 import com.m.vodovoz.design_system.model.CategoryWithProductsUi
@@ -43,6 +45,7 @@ import com.m.vodovoz.feature.home.model.firstValueOrNull
 import com.m.vodovoz.feature.home.model.plusItem
 import com.m.vodovoz.feature.home.model.toUi
 import com.m.vodovoz.feature.home.model.withProducts
+import com.m.vodovoz.feature.sitestate.SiteStateManager
 import com.m.vodovoz.ui.mvi.Event
 import com.m.vodovoz.ui.paging.ItemsState
 import com.m.vodovoz.ui.paging.ProductsMviViewModel
@@ -72,9 +75,12 @@ import kotlin.math.roundToInt
 @HiltViewModel
 @Stable
 class HomeFlowViewModel @Inject constructor(
+    val tabManager: TabManager,
+    val siteStateManager: SiteStateManager,
+    val cookieManager: CookieManager,
     private val cartManager: CartManager,
     private val likeManager: LikeManager,
-    private val accountManager: AccountManager,
+    val accountManager: AccountManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val resourcesProvider: ResourcesProvider,
     private val userPreferencesRepository: UserPreferencesRepository,

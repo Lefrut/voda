@@ -4,29 +4,13 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.ComposeView
-import androidx.core.view.WindowCompat
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
-import com.m.vodovoz.ui.mvi.collectAsState
-import androidx.navigation.fragment.findNavController
-import com.m.vodovoz.common.tab.TabManager
-import com.m.vodovoz.core.navigation.navigateToWebView
-import com.m.vodovoz.design_system.VodovozTheme
-import com.m.vodovoz.design_system.composables.placeholders.LoadingPlaceholder
-import com.m.vodovoz.design_system.composables.placeholders.NetworkErrorPlaceholder
-import com.m.vodovoz.design_system.composables.placeholders.VodovozLongPlaceholder
-import com.m.vodovoz.design_system.effects.LifecycleEffect
-import com.m.vodovoz.feature.auth.recover_password.model.RecoverPasswordEvent
-import com.m.vodovoz.feature.auth.recover_password.model.RecoverPasswordUiState
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class RecoverPasswordFragment : Fragment() {
-    private val viewModel by viewModels<RecoverPasswordViewModel>()
-
+class RecoverPasswordFragment @Inject constructor() : Fragment() {
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -34,54 +18,8 @@ class RecoverPasswordFragment : Fragment() {
         savedInstanceState: Bundle?,
     ): View {
         return ComposeView(requireContext()).apply {
-
             setContent {
-                VodovozTheme {
-                    val viewState by viewModel.collectAsState()
-
-                    when (val uiState = viewState.uiState) {
-                        RecoverPasswordUiState.Body -> {
-                            RecoverPasswordScreen(viewModel = viewModel, viewState = viewState)
-                        }
-
-                        RecoverPasswordUiState.Error -> {
-                            NetworkErrorPlaceholder {
-                                viewModel.fetchRecoverPasswordDetails()
-                            }
-                        }
-
-                        RecoverPasswordUiState.Loading -> {
-                            LoadingPlaceholder()
-                        }
-
-                        is RecoverPasswordUiState.Success -> {
-                            VodovozLongPlaceholder(
-                                data = uiState.placeholder,
-                                onButtonClick = {
-                                    viewModel.navigateBack()
-                                },
-                                onCloseClick = {
-                                    viewModel.navigateBack()
-                                }
-                            )
-                        }
-                    }
-
-
-                    LifecycleEffect {
-                        viewModel.events.collect { event ->
-                            when (event) {
-                                RecoverPasswordEvent.GoBack -> {
-                                    findNavController().popBackStack()
-                                }
-
-                                is RecoverPasswordEvent.GoToWebView -> {
-                                    findNavController().navigateToWebView(event.url, event.title)
-                                }
-                            }
-                        }
-                    }
-                }
+                RecoverPasswordEntry()
             }
         }
     }

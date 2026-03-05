@@ -4,6 +4,7 @@ import androidx.compose.runtime.Stable
 import androidx.lifecycle.viewModelScope
 import com.m.vodovoz.common.account.AccountManager
 import com.m.vodovoz.common.model.GlobalAppLinks
+import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.core.network.VodovozUrlManager
 import com.m.vodovoz.core.network.VodovozWebConfig
 import com.m.vodovoz.core.network.interceptor.BaseUrlInterceptor
@@ -23,6 +24,7 @@ import javax.inject.Inject
 @HiltViewModel
 @Stable
 class AboutAppViewModel @Inject constructor(
+    val tabManager: TabManager,
     private val accountManager: AccountManager,
     private val siteStateManager: SiteStateManager,
     private val urlManager: VodovozUrlManager,

@@ -3,6 +3,7 @@ package com.m.vodovoz.feature.order_recipient
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.common.resources.ResourcesProvider
 import com.m.vodovoz.design_system.model.toUi
 import com.m.vodovoz.design_system.model.widgets.CheckboxUi
@@ -29,6 +30,7 @@ import javax.inject.Inject
 @HiltViewModel
 @Stable
 class OrderRecipientViewModel @Inject constructor(
+    val tabManager: TabManager,
     savedStateHandle: SavedStateHandle,
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val resourcesProvider: ResourcesProvider,

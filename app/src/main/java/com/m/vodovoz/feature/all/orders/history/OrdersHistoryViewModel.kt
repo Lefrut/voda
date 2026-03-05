@@ -2,10 +2,13 @@ package com.m.vodovoz.feature.all.orders.history
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
+import com.m.vodovoz.common.account.AccountManager
 import androidx.lifecycle.viewModelScope
 import androidx.paging.CombinedLoadStates
 import androidx.paging.map
 import com.m.vodovoz.common.cart.CartManager
+import com.m.vodovoz.common.cookie.CookieManager
+import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.design_system.model.AboutAdvertisingUi
 import com.m.vodovoz.design_system.model.BannerUi
 import com.m.vodovoz.design_system.model.VodovozPlaceholderUi
@@ -37,6 +40,9 @@ import javax.inject.Inject
 @HiltViewModel
 @Stable
 class OrdersHistoryViewModel @Inject constructor(
+    val accountManager: AccountManager,
+    val tabManager: TabManager,
+    val cookieManager: CookieManager,
     private val cartManager: CartManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
 ) : PagingMviViewModel<OrdersHistoryItemUi, OrdersHistoryViewModel.AllOrdersState, OrdersHistoryViewModel.AllOrdersEvent>(

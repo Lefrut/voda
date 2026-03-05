@@ -9,6 +9,7 @@ import androidx.paging.map
 import com.m.vodovoz.R
 import com.m.vodovoz.common.account.AccountManager
 import com.m.vodovoz.common.resources.ResourcesProvider
+import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.design_system.model.CommentUi
 import com.m.vodovoz.design_system.model.toUi
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
@@ -17,6 +18,7 @@ import com.m.vodovoz.feature.product_comments.model.ProductCommentsInfoUi
 import com.m.vodovoz.feature.product_comments.model.SortUi
 import com.m.vodovoz.feature.product_comments.model.toDomain
 import com.m.vodovoz.feature.product_comments.model.toUi
+import com.m.vodovoz.ui.insets.InsetsVisibilityState
 import com.m.vodovoz.ui.mvi.Event
 import com.m.vodovoz.ui.mvi.MviViewModel
 import com.m.vodovoz.ui.mvi.State
@@ -33,6 +35,8 @@ import javax.inject.Inject
 @Stable
 class ProductCommentsFlowViewModel @Inject constructor(
     savedState: SavedStateHandle,
+    val tabManager: TabManager,
+    val insetsVisibilityState: InsetsVisibilityState,
     private val accountManager: AccountManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val resourcesProvider: ResourcesProvider,

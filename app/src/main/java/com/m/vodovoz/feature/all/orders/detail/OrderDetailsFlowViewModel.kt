@@ -4,8 +4,10 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import com.m.vodovoz.common.account.AccountManager
 import com.m.vodovoz.common.cart.CartManager
 import com.m.vodovoz.common.like.LikeManager
+import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.design_system.model.ColorfulButtonUi
 import com.m.vodovoz.design_system.model.OrderProductUi
 import com.m.vodovoz.design_system.model.mapToUi
@@ -29,6 +31,8 @@ import javax.inject.Inject
 @Stable
 class OrderDetailsFlowViewModel @Inject constructor(
     savedState: SavedStateHandle,
+    val tabManager: TabManager,
+    val accountManager: AccountManager,
     private val cartManager: CartManager,
     private val likeManager: LikeManager,
     private val vodovozServiceRepository: VodovozServiceRepository,

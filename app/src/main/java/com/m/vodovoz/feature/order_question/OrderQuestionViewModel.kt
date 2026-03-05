@@ -3,6 +3,7 @@ package com.m.vodovoz.feature.order_question
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.m.vodovoz.R
+import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.common.resources.ResourcesProvider
 import com.m.vodovoz.design_system.model.toUi
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
@@ -27,6 +28,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class OrderQuestionViewModel @Inject constructor(
+    val tabManager: TabManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val resourcesProvider: ResourcesProvider,
     savedStateHandle: SavedStateHandle,

@@ -2,6 +2,7 @@ package com.m.vodovoz.feature.faq
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.feature.buy_certificate.model.FAQItemUi
 import com.m.vodovoz.feature.buy_certificate.model.FAQUi
 import com.m.vodovoz.feature.faq.model.FAQEvent
@@ -13,7 +14,10 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class FAQViewModel @Inject constructor(savedStateHandle: SavedStateHandle) :
+class FAQViewModel @Inject constructor(
+    val tabManager: TabManager,
+    savedStateHandle: SavedStateHandle,
+) :
     MviViewModel<FAQState, FAQEvent>(FAQState()) {
 
     private val faq = savedStateHandle.get<FAQUi>("faq") ?: FAQUi.Empty.also {

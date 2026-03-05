@@ -8,6 +8,7 @@ import androidx.paging.LoadState
 import androidx.paging.map
 import com.m.vodovoz.common.cart.CartManager
 import com.m.vodovoz.common.like.LikeManager
+import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.design_system.model.ProductUi
 import com.m.vodovoz.design_system.model.VodovozPlaceholderUi
 import com.m.vodovoz.design_system.model.toUi
@@ -34,6 +35,7 @@ import javax.inject.Inject
 @HiltViewModel
 @Stable
 class FavoriteFlowViewModel @Inject constructor(
+    val tabManager: TabManager,
     private val cartManager: CartManager,
     private val likeManager: LikeManager,
     private val vodovozServiceRepository: VodovozServiceRepository,

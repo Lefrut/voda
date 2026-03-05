@@ -4,6 +4,7 @@ import androidx.compose.runtime.Stable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.m.vodovoz.R
+import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.common.resources.ResourcesProvider
 import com.m.vodovoz.core.navigation.getQueryParams
 import com.m.vodovoz.design_system.model.toUi
@@ -29,6 +30,7 @@ import javax.inject.Inject
 @HiltViewModel
 @Stable
 class PaymentMethodViewModel @Inject constructor(
+    val tabManager: TabManager,
     savedStateHandle: SavedStateHandle,
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val resourcesProvider: ResourcesProvider,

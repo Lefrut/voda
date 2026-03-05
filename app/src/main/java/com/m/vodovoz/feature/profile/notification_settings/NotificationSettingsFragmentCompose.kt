@@ -4,24 +4,13 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
-import androidx.navigation.fragment.findNavController
-import com.m.vodovoz.design_system.VodovozTheme
-import com.m.vodovoz.design_system.effects.LifecycleEffect
-import com.m.vodovoz.ui.mvi.collectAsState
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @AndroidEntryPoint
-class NotificationSettingsFragment : Fragment() {
-
-    private val viewModel: NotificationSettingsViewModel by viewModels()
+class NotificationSettingsFragment @Inject constructor() : Fragment() {
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -29,40 +18,9 @@ class NotificationSettingsFragment : Fragment() {
         savedInstanceState: Bundle?,
     ): View {
         return ComposeView(requireContext()).apply {
-            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
-
             setContent {
-                VodovozTheme {
-                    val viewState by viewModel.collectAsState()
-
-                    val snackbarHostState = remember { SnackbarHostState() }
-
-                    NotificationSettingsScreen(
-                        viewModel = viewModel,
-                        viewState = viewState,
-                        snackbarHostState = snackbarHostState
-                    )
-
-                    LifecycleEffect(snackbarHostState) {
-                        viewModel.events.collect { event ->
-                            when (event) {
-                                is NotificationSettingsViewModel.NotSettingsEvents.ShowToast -> {
-                                    launch {
-                                        snackbarHostState.currentSnackbarData?.dismiss()
-                                        snackbarHostState.showSnackbar(event.message)
-                                    }
-
-                                }
-
-                                NotificationSettingsViewModel.NotSettingsEvents.GoBack -> {
-                                    findNavController().popBackStack()
-                                }
-                            }
-                        }
-                    }
-                }
+                NotificationSettingsEntry()
             }
         }
     }
-
 }

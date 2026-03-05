@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.m.vodovoz.R
 import com.m.vodovoz.common.account.LoginManager
 import com.m.vodovoz.common.resources.ResourcesProvider
+import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.core.navigation.AuthArgs
 import com.m.vodovoz.design_system.model.ColorfulButtonUi
 import com.m.vodovoz.design_system.model.updateButton
@@ -34,6 +35,7 @@ private val LOGIN_BY_EMAIL_VALIDATORS = AuthDetailsUi.authValidators()
 @HiltViewModel
 @Stable
 class LoginByEmailViewModel @Inject constructor(
+    val tabManager: TabManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val resourcesProvider: ResourcesProvider,
     private val loginManager: LoginManager,

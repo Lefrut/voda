@@ -5,6 +5,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.m.vodovoz.common.about_product.AboutProductManager
 import com.m.vodovoz.common.cart.CartManager
+import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.design_system.model.ColorfulButtonUi
 import com.m.vodovoz.design_system.model.DocumentUi
 import com.m.vodovoz.design_system.model.PriceUi
@@ -27,6 +28,7 @@ import javax.inject.Inject
 @HiltViewModel
 @Stable
 class AboutProductViewModel @Inject constructor(
+    val tabManager: TabManager,
     private val aboutProductManager: AboutProductManager,
     private val cartManager: CartManager,
     private val vodovozServiceRepository: VodovozServiceRepository,

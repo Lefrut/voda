@@ -3,6 +3,7 @@ package com.m.vodovoz.feature.order_call_you
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.core.navigation.getQueryParams
 import com.m.vodovoz.design_system.model.ColorfulButtonUi
 import com.m.vodovoz.design_system.model.toUi
@@ -21,6 +22,7 @@ import javax.inject.Inject
 @HiltViewModel
 @Stable
 class OrderCallYouViewModel @Inject constructor(
+    val tabManager: TabManager,
     savedStateHandle: SavedStateHandle,
     private val vodovozServiceRepository: VodovozServiceRepository,
 ) : MviViewModel<OrderCallYouState, OrderCallYouEvent>(OrderCallYouState()) {
