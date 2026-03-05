@@ -8,6 +8,7 @@ import androidx.core.net.toUri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.m.vodovoz.R
+import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.common.resources.ContentProvider
 import com.m.vodovoz.common.resources.ResourcesProvider
 import com.m.vodovoz.design_system.model.toUi
@@ -40,6 +41,7 @@ import kotlin.math.roundToInt
 @Stable
 class WriteCommentViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
+    val tabManager: TabManager,
     private val siteStateManager: SiteStateManager,
     private val resourcesProvider: ResourcesProvider,
     private val contentProvider: ContentProvider,
