@@ -46,6 +46,7 @@ import com.m.vodovoz.design_system.VodovozTheme
 import com.m.vodovoz.design_system.composables.snackbar.VodovozSnackbarHost
 import com.m.vodovoz.ui.insets.InsetsPadding
 import com.m.vodovoz.ui.insets.InsetsVisibilityState
+import com.m.vodovoz.ui.insets.consumeWindowInsets
 import com.m.vodovoz.ui.insets.ime.handleImeInsetIfNeeded
 import com.m.vodovoz.ui.insets.ime.removeImeHandling
 import com.m.vodovoz.ui.insets.plus
@@ -156,10 +157,6 @@ class MainFragment : Fragment(), SnackbarHostStateOwner {
         ) { _, _ ->
             return@setOnApplyWindowInsetsListener CONSUMED
         }
-    }
-
-    private fun WindowInsetsCompat.Builder.consumeWindowInsets(@InsetsType typeMask: Int) {
-        setInsets(typeMask, Insets.NONE)
     }
 
 

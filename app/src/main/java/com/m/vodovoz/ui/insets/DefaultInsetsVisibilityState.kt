@@ -2,7 +2,9 @@ package com.m.vodovoz.ui.insets
 
 import android.os.Build
 import androidx.compose.runtime.Stable
+import androidx.core.graphics.Insets
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsCompat.Type.InsetsType
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -58,4 +60,8 @@ class DefaultInsetsVisibilityState @Inject constructor() : InsetsVisibilityState
             s.copy(consume = consume)
         }
     }
+}
+
+fun WindowInsetsCompat.Builder.consumeWindowInsets(@InsetsType typeMask: Int) {
+    setInsets(typeMask, Insets.NONE)
 }

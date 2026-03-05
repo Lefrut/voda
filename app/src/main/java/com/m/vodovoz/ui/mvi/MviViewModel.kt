@@ -1,5 +1,6 @@
 package com.m.vodovoz.ui.mvi
 
+import android.annotation.SuppressLint
 import androidx.annotation.VisibleForTesting
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
@@ -108,6 +109,17 @@ fun <T, ITEM1, ITEM2, S, E> T.collectAsState(
     LifecycleEffect { listenFavorites2() }
     LifecycleEffect { listenCart2() }
     return (this as MviViewModel<S, E>).collectAsState(lifecycleState)
+}
+
+
+@SuppressLint("ComposableNaming")
+@Composable
+fun <S, E> MviViewModel<S, E>.collectEvents(
+    handler: suspend (E) -> Unit
+) {
+    LifecycleEffect {
+        events.collect { handler(it) }
+    }
 }
 
 
