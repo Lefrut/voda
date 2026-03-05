@@ -4,45 +4,13 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.platform.ViewCompositionStrategy
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
-import androidx.navigation.fragment.findNavController
-import com.m.vodovoz.common.tab.TabManager
-import com.m.vodovoz.core.navigation.navigateToWebView
-import com.m.vodovoz.design_system.VodovozTheme
-import com.m.vodovoz.design_system.effects.LifecycleEffect
-import com.m.vodovoz.ui.insets.InsetsVisibilityState
-import com.m.vodovoz.ui.mvi.collectAsState
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class ServiceOrderFragment : Fragment() {
-
-    private val viewModel: ServiceOrderViewModel by viewModels()
-
-    @Inject
-    lateinit var tabManager: TabManager
-
-    @Inject
-    lateinit var insetsState: InsetsVisibilityState
-
-    override fun onStart() {
-        super.onStart()
-        tabManager.changeTabVisibility(false)
-        insetsState.consumeSystemBarInsets(false)
-    }
-
-    override fun onStop() {
-        super.onStop()
-        insetsState.consumeSystemBarInsets(true)
-        tabManager.changeTabVisibility(true)
-    }
+class ServiceOrderFragment @Inject constructor() : Fragment() {
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -50,47 +18,9 @@ class ServiceOrderFragment : Fragment() {
         savedInstanceState: Bundle?,
     ): View {
         return ComposeView(requireContext()).apply {
-            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
-
             setContent {
-                VodovozTheme {
-                    val viewState by viewModel.collectAsState()
-
-
-
-                    ServiceOrderScreen(
-                        viewModel = viewModel,
-                        viewState = viewState
-                    )
-
-
-                    LifecycleEffect {
-                        viewModel.events.collect { event ->
-                            val navController = findNavController()
-                            when (event) {
-                                ServiceOrderViewModel.ServiceOrderEvent.GoBack -> {
-                                    navController.popBackStack()
-                                }
-
-                                is ServiceOrderViewModel.ServiceOrderEvent.GoToWebView -> {
-                                    navController.navigateToWebView(event.url, event.title)
-                                }
-                            }
-                        }
-                    }
-                }
+                ServiceOrderEntry()
             }
         }
     }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        ViewCompat.setOnApplyWindowInsetsListener(view) { _, insets ->
-            val imeVisible = insets.isVisible(WindowInsetsCompat.Type.ime())
-            insetsState.consumeNavigationBarInsets(!imeVisible)
-            return@setOnApplyWindowInsetsListener insets
-        }
-    }
-
 }

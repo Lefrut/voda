@@ -4,6 +4,7 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.common.resources.ResourcesProvider
 import com.m.vodovoz.design_system.model.VodovozPlaceholderUi
 import com.m.vodovoz.design_system.model.toUi
@@ -14,6 +15,7 @@ import com.m.vodovoz.feature.preorder.model.toUi
 import com.m.vodovoz.ui.mvi.Event
 import com.m.vodovoz.ui.mvi.FormMviViewModel
 import com.m.vodovoz.ui.mvi.FormState
+import com.m.vodovoz.ui.insets.InsetsVisibilityState
 import com.m.vodovoz.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
@@ -23,6 +25,8 @@ import javax.inject.Inject
 @HiltViewModel
 @Stable
 class ServiceOrderViewModel @Inject constructor(
+    val tabManager: TabManager,
+    val insetsState: InsetsVisibilityState,
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val resourceProvider: ResourcesProvider,
     savedStateHandle: SavedStateHandle,

@@ -8,9 +8,12 @@ import com.m.vodovoz.ui.mvi.Event
 import com.m.vodovoz.ui.mvi.MviViewModel
 import com.m.vodovoz.ui.mvi.State
 import kotlinx.coroutines.flow.update
+import com.m.vodovoz.common.cookie.CookieManager
 import com.m.vodovoz.common.model.VodovozAction
+import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.design_system.model.StoryUi
 import com.m.vodovoz.domain.general.respository.UserPreferencesRepository
+import com.m.vodovoz.ui.insets.InsetsVisibilityState
 import com.m.vodovoz.util.extensions.indexOfOrNull
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
@@ -21,6 +24,9 @@ import javax.inject.Inject
 @Stable
 class StoriesViewModel @Inject constructor(
     savedState: SavedStateHandle,
+    val tabManager: TabManager,
+    val cookieManager: CookieManager,
+    val insetsVisibilityState: InsetsVisibilityState,
     private val userPreferencesRepository: UserPreferencesRepository,
 ) : MviViewModel<StoriesViewModel.HistoriesSliderState, StoriesViewModel.StoriesEvents>(
     HistoriesSliderState()

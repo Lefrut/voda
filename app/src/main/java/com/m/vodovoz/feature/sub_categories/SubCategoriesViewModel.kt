@@ -2,14 +2,19 @@ package com.m.vodovoz.feature.sub_categories
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.design_system.model.ParentCategoryUi
 import com.m.vodovoz.feature.sub_categories.model.SubCategoriesEvent
 import com.m.vodovoz.feature.sub_categories.model.SubCategoriesState
 import com.m.vodovoz.ui.mvi.MviViewModel
 import com.m.vodovoz.ui.mvi.launchInViewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.launch
 
-class SubCategoriesViewModel(
+@HiltViewModel
+class SubCategoriesViewModel @Inject constructor(
+    val tabManager: TabManager,
     savedStateHandle: SavedStateHandle,
 ) : MviViewModel<SubCategoriesState, SubCategoriesEvent>(SubCategoriesState()) {
 
