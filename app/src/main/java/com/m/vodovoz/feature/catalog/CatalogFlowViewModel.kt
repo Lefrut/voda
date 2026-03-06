@@ -22,6 +22,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
+@Stable
 class CatalogFlowViewModel @Inject constructor(
     val tabManager: TabManager,
     val cookieManager: CookieManager,
