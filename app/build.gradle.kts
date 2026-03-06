@@ -1,15 +1,15 @@
 import java.util.Properties
 
 plugins {
-    id("com.android.application")
-    id("org.jetbrains.kotlin.android")
-    id("androidx.navigation.safeargs.kotlin")
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.navigation.safeargs)
     id("kotlin-parcelize")
-    id("com.google.dagger.hilt.android")
-    id("com.google.gms.google-services")
-    id("com.google.firebase.crashlytics")
-    id("com.google.devtools.ksp")
-    id("org.jetbrains.kotlin.plugin.compose")
+    alias(libs.plugins.hilt.android)
+    alias(libs.plugins.google.services)
+    alias(libs.plugins.firebase.crashlytics)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.kotlin.compose)
 }
 
 android {
@@ -137,124 +137,123 @@ android {
 }
 
 dependencies {
-
-    val media3 = "1.9.0"
-    implementation("androidx.media3:media3-exoplayer:$media3")
-    implementation("androidx.media3:media3-ui-compose-material3:${media3}")
-    implementation("androidx.media3:media3-ui:$media3")
+    implementation(libs.media3.exoplayer)
+    implementation(libs.media3.ui.compose.material3)
+    implementation(libs.media3.ui)
 
     //Tests
-    testImplementation("app.cash.turbine:turbine:1.2.1")
-    testImplementation("junit:junit:4.13.2")
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
-    testImplementation("io.mockk:mockk:1.12.0")
-    testImplementation("androidx.arch.core:core-testing:2.2.0")
+    testImplementation(libs.turbine)
+    testImplementation(libs.junit4)
+    testImplementation(libs.coroutines.test)
+    testImplementation(libs.mockk)
+    testImplementation(libs.androidx.core.testing)
 
     //Utils
-    implementation("com.googlecode.libphonenumber:libphonenumber:8.12.38")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
-    implementation("io.github.afreakyelf:Pdf-Viewer:2.3.7")
+    implementation(libs.libphonenumber)
+    implementation(libs.coroutines.core)
+    implementation(libs.pdf.viewer)
 
     //Android
-    implementation("androidx.core:core-ktx:1.13.1")
-    implementation("androidx.appcompat:appcompat:1.7.0")
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.appcompat)
 
     //Lifecycle
-    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.8.4")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.4")
+    implementation(libs.androidx.lifecycle.livedata.ktx)
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
 
     //Navigation
-    implementation("androidx.navigation:navigation-fragment-ktx:2.7.7")
-    implementation("androidx.navigation:navigation-ui-ktx:2.7.7")
+    implementation(libs.androidx.navigation.fragment.ktx)
+    implementation(libs.androidx.navigation.ui.ktx)
+    implementation(libs.androidx.navigation3.runtime)
+    implementation(libs.androidx.navigation3.ui)
 
     //Firebase
-    implementation(platform("com.google.firebase:firebase-bom:33.2.0"))
-    implementation("com.google.firebase:firebase-messaging-ktx")
-    implementation("com.google.firebase:firebase-crashlytics-ktx")
-    implementation("com.google.firebase:firebase-database-ktx")
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.messaging.ktx)
+    implementation(libs.firebase.crashlytics.ktx)
+    implementation(libs.firebase.database.ktx)
 
     //Retrofit
-    implementation("com.squareup.retrofit2:retrofit:2.11.0")
-    implementation("com.squareup.retrofit2:converter-moshi:2.11.0")
-    implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.converter.moshi)
+    implementation(libs.okhttp.logging.interceptor)
 
     //Moshi
-    val moshiVersion = "1.15.0"
-    implementation("com.squareup.moshi:moshi:$moshiVersion")
-    implementation("com.squareup.moshi:moshi-kotlin:$moshiVersion")
-    ksp("com.squareup.moshi:moshi-kotlin-codegen:$moshiVersion")
+    implementation(libs.moshi)
+    implementation(libs.moshi.kotlin)
+    ksp(libs.moshi.kotlin.codegen)
 
     //MapKit
-    implementation("com.yandex.android:maps.mobile:4.19.0-full")
+    implementation(libs.yandex.mapkit)
 
     //Paging
-    implementation("androidx.paging:paging-runtime-ktx:3.3.6")
-    implementation("androidx.paging:paging-compose:3.3.6")
+    implementation(libs.androidx.paging.runtime.ktx)
+    implementation(libs.androidx.paging.compose)
 
     //Hilt
-    implementation("com.google.dagger:hilt-android:2.51.1")
-    ksp("com.google.dagger:hilt-compiler:2.51.1")
-    implementation("androidx.hilt:hilt-navigation-fragment:1.0.0")
-    implementation("androidx.hilt:hilt-work:1.2.0")
-    ksp("androidx.hilt:hilt-compiler:1.2.0")
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.compiler)
+    implementation(libs.androidx.hilt.navigation.fragment)
+    implementation(libs.androidx.hilt.work)
+    ksp(libs.androidx.hilt.compiler)
 
     //Logs
-    implementation("com.jakewharton.timber:timber:5.0.1")
+    implementation(libs.timber)
 
     //Lottie
-    implementation("com.airbnb.android:lottie-compose:6.6.0")
+    implementation(libs.lottie.compose)
 
     //Work Manager
-    implementation("androidx.work:work-runtime:2.10.3")
+    implementation(libs.androidx.work.runtime)
 
     //Yandex Metrica
-    implementation("io.appmetrica.analytics:analytics:7.13.0")
+    implementation(libs.appmetrica)
 
     // Biometric
-    implementation("androidx.biometric:biometric-ktx:1.2.0-alpha05")
+    implementation(libs.androidx.biometric.ktx)
 
 
     //debugImplementation("com.squareup.leakcanary:leakcanary-android:2.14")
-    implementation("androidx.core:core-splashscreen:1.2.0")
+    implementation(libs.androidx.core.splashscreen)
 
-    implementation("androidx.datastore:datastore-preferences:1.2.0")
+    implementation(libs.androidx.datastore.preferences)
 
     //Compose
-    implementation("androidx.activity:activity-compose:1.10.1")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
-    implementation("androidx.compose.ui:ui:1.8.2")
-    implementation("androidx.compose.ui:ui-tooling-preview:1.8.2")
-    implementation("androidx.compose.ui:ui-tooling:1.8.2")
-    implementation("androidx.compose.material3:material3:1.3.2")
-    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.7")
-    implementation("androidx.compose.foundation:foundation:1.8.2")
+    implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.compose.ui)
+    implementation(libs.androidx.compose.ui.tooling.preview)
+    implementation(libs.androidx.compose.ui.tooling)
+    implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.lifecycle.runtime.compose)
+    implementation(libs.androidx.compose.foundation)
 
 
     //Cam
-    implementation("androidx.camera:camera-camera2:1.5.0")
-    implementation("androidx.camera:camera-lifecycle:1.5.0")
-    implementation("androidx.camera:camera-view:1.5.0")
-    implementation("com.google.android.gms:play-services-mlkit-barcode-scanning:18.3.1")
+    implementation(libs.androidx.camera.camera2)
+    implementation(libs.androidx.camera.lifecycle)
+    implementation(libs.androidx.camera.view)
+    implementation(libs.mlkit.barcode.scanning)
 
     //Coil
-    implementation("io.coil-kt.coil3:coil-compose:3.0.4")
-    implementation("io.coil-kt.coil3:coil-svg:3.0.4")
-    implementation("io.coil-kt.coil3:coil-video:3.0.4")
-    implementation("io.coil-kt.coil3:coil-network-okhttp:3.0.4")
+    implementation(libs.coil.compose)
+    implementation(libs.coil.svg)
+    implementation(libs.coil.video)
+    implementation(libs.coil.network.okhttp)
 
     //Decorations
-    implementation("com.google.accompanist:accompanist-systemuicontroller:0.27.0")
-    implementation("mx.platacard:compose-pager-indicator:0.0.8")
-    implementation("com.kizitonwose.calendar:compose:2.6.2")
-    implementation("com.valentinilk.shimmer:compose-shimmer:1.0.5")
-    implementation("dev.chrisbanes.haze:haze:1.6.10")
-    implementation("com.github.a914-gowtham:compose-ratingbar:1.3.12")
+    implementation(libs.accompanist.systemuicontroller)
+    implementation(libs.compose.pager.indicator)
+    implementation(libs.calendar.compose)
+    implementation(libs.compose.shimmer)
+    implementation(libs.haze)
+    implementation(libs.compose.ratingbar)
 
-    implementation("com.google.android.play:app-update:2.1.0")
-    implementation("com.google.android.play:app-update-ktx:2.1.0")
+    implementation(libs.play.app.update)
+    implementation(libs.play.app.update.ktx)
 
-    implementation("com.github.TalbotGooday:Android-Oembed-Video:0.2.8")
+    implementation(libs.android.oembed.video)
 
-    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
-    implementation("androidx.navigation:navigation-compose:2.8.9")
+    implementation(libs.androidx.hilt.navigation.compose)
+    implementation(libs.androidx.navigation.compose)
 }
