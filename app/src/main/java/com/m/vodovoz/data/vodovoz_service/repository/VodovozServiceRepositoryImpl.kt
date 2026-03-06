@@ -1642,13 +1642,15 @@ class VodovozServiceRepositoryImpl @Inject constructor(
     ): Flow<Result<String>> = executeDefaultRequest(
         request = {
             vodovozService.addProductToCart(productId, quantity)
-        }
+        },
+        mapper = { it.messageOrEmpty }
     )
 
     override suspend fun addMultipleProductsToCart(
         productIdsWithQuantity: String
     ): Flow<Result<String>> = executeDefaultRequest(
         request = { vodovozService.addMultipleProductsToCart(productIdsWithQuantity) },
+        mapper = { it.data.orEmpty() }
     )
 
     override suspend fun replaceMultipleBottlesToCart(cartProducts: CartProductsModel): Flow<Result<String>> {
@@ -1657,24 +1659,28 @@ class VodovozServiceRepositoryImpl @Inject constructor(
                 vodovozService.replaceMultipleBottlesToCart(
                     cartProducts.productsIdsWithQuantity
                 )
-            }
+            },
+            mapper = { it.data.orEmpty() }
         )
     }
 
     override suspend fun removeProductFromCart(productId: Long): Flow<Result<String>> =
         executeDefaultRequest(
             request = { vodovozService.removeProductFromCart(productId) },
+            mapper = { it.messageOrEmpty }
         )
 
     override suspend fun updateProductInCart(productId: Long, quantity: Int): Flow<Result<String>> =
         executeDefaultRequest(
             request = {
                 vodovozService.updateProductInCart(productId, quantity)
-            }
+            },
+            mapper = { it.messageOrEmpty }
         )
 
     override suspend fun clearCart(): Flow<Result<String>> = executeDefaultRequest(
-        request = { vodovozService.clearCart() }
+        request = { vodovozService.clearCart() },
+        mapper = { it.messageOrEmpty }
     )
 
     override fun getProductAnalogs(
