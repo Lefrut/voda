@@ -1,6 +1,7 @@
 package com.m.vodovoz.common.tab
 
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.Stable
 import com.google.android.material.tabs.TabLayout
 import com.m.vodovoz.R
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
@@ -17,6 +18,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
+@Stable
 class TabManager @Inject constructor(
     private val vodovozServiceRepository: VodovozServiceRepository,
 ) {

@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
 import com.m.vodovoz.feature.home.model.CategoryUi
 import dagger.hilt.android.AndroidEntryPoint
@@ -22,6 +23,7 @@ class ProductCatalogFragment @Inject constructor() : Fragment() {
         savedInstanceState: Bundle?,
     ): View {
         return ComposeView(requireContext()).apply {
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
                 ProductCatalogEntry()
             }

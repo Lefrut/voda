@@ -19,6 +19,7 @@ import com.m.vodovoz.design_system.effects.LifecycleEffect
 import com.m.vodovoz.design_system.model.filters.FiltersUi
 import com.m.vodovoz.feature.home.model.CategoryUi
 import com.m.vodovoz.ui.mvi.collectAsState
+import com.m.vodovoz.ui.mvi.collectEvents
 import com.m.vodovoz.util.extensions.shareText
 
 @Composable
@@ -63,59 +64,58 @@ fun ProductCatalogEntry() = NavigationEntry<ProductCatalogViewModel> {
         }
     }
 
-    LifecycleEffect {
-        viewModel.events.collect { event ->
-            when (event) {
-                ProductCatalogViewModel.ProductCatalogEvent.GoBack -> {
-                    navController.popBackStack()
-                }
 
-                is ProductCatalogViewModel.ProductCatalogEvent.GoToSearch -> {
-                    navController.navigateToSearch(event.query)
-                }
+    viewModel.collectEvents { event ->
+        when (event) {
+            ProductCatalogViewModel.ProductCatalogEvent.GoBack -> {
+                navController.popBackStack()
+            }
 
-                is ProductCatalogViewModel.ProductCatalogEvent.GoToCategories -> {
-                    navController.navigateToCategories(
-                        category = event.currentCategory,
-                        categories = event.categories
-                    )
-                }
+            is ProductCatalogViewModel.ProductCatalogEvent.GoToSearch -> {
+                navController.navigateToSearch(event.query)
+            }
 
-                is ProductCatalogViewModel.ProductCatalogEvent.GoToProductDetails -> {
-                    navController.navigateToProductDetails(event.productId)
-                }
+            is ProductCatalogViewModel.ProductCatalogEvent.GoToCategories -> {
+                navController.navigateToCategories(
+                    category = event.currentCategory,
+                    categories = event.categories
+                )
+            }
 
-                ProductCatalogViewModel.ProductCatalogEvent.ScrollToTop -> {
-                    lazyGridState.animateScrollToItem(0)
-                }
+            is ProductCatalogViewModel.ProductCatalogEvent.GoToProductDetails -> {
+                navController.navigateToProductDetails(event.productId)
+            }
 
-                is ProductCatalogViewModel.ProductCatalogEvent.GoToProductFilters -> {
-                    navController.navigateToProductFilters(
-                        event.categoryId,
-                        event.filters
-                    )
-                }
+            ProductCatalogViewModel.ProductCatalogEvent.ScrollToTop -> {
+                lazyGridState.animateScrollToItem(0)
+            }
 
-                is ProductCatalogViewModel.ProductCatalogEvent.Share -> {
-                    context.shareText(event.text)
-                }
+            is ProductCatalogViewModel.ProductCatalogEvent.GoToProductFilters -> {
+                navController.navigateToProductFilters(
+                    event.categoryId,
+                    event.filters
+                )
+            }
 
-                is ProductCatalogViewModel.ProductCatalogEvent.GoToProductAnalogs -> {
-                    navController.navigateToProductAnalogs(event.productId)
-                }
+            is ProductCatalogViewModel.ProductCatalogEvent.Share -> {
+                context.shareText(event.text)
+            }
 
-                ProductCatalogViewModel.ProductCatalogEvent.GoToQrCode -> {
-                    navController.navigateToQrCode()
-                }
+            is ProductCatalogViewModel.ProductCatalogEvent.GoToProductAnalogs -> {
+                navController.navigateToProductAnalogs(event.productId)
+            }
 
-                ProductCatalogViewModel.ProductCatalogEvent.GoToSpeech -> {
-                    navController.navigateToSpeechDialog()
-                }
+            ProductCatalogViewModel.ProductCatalogEvent.GoToQrCode -> {
+                navController.navigateToQrCode()
+            }
 
-                ProductCatalogViewModel.ProductCatalogEvent.GoToCatalog -> {
-                    navController.popBackStack()
-                    viewModel.tabManager.selectTab(R.id.graph_catalog)
-                }
+            ProductCatalogViewModel.ProductCatalogEvent.GoToSpeech -> {
+                navController.navigateToSpeechDialog()
+            }
+
+            ProductCatalogViewModel.ProductCatalogEvent.GoToCatalog -> {
+                navController.popBackStack()
+                viewModel.tabManager.selectTab(R.id.graph_catalog)
             }
         }
     }
