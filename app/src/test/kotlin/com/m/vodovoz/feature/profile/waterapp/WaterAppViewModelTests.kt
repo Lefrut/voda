@@ -35,7 +35,14 @@ class WaterAppViewModelTests : ViewModelTestBase<WaterAppViewModel>() {
     }
 
     override fun createViewModel(): WaterAppViewModel {
-        return spyk(WaterAppViewModel(waterAppRepository, waterAppHelper))
+        return spyk(
+            WaterAppViewModel(
+                tabManager,
+                insertsVisivilityState,
+                waterAppRepository,
+                waterAppHelper
+            )
+        )
     }
 
     private suspend fun initialStageTemplate(
@@ -44,7 +51,12 @@ class WaterAppViewModelTests : ViewModelTestBase<WaterAppViewModel>() {
         result: () -> WaterApp.Stage,
     ) {
         every { waterAppRepository.stageFlow } returns flowOf(kotlin.runCatching { result() })
-        val viewModel2 = WaterAppViewModel(waterAppRepository, waterAppHelper)
+        val viewModel2 = WaterAppViewModel(
+            tabManager,
+            insertsVisivilityState,
+            waterAppRepository,
+            waterAppHelper
+        )
 
         viewModel2.state.test {
             awaitItem()

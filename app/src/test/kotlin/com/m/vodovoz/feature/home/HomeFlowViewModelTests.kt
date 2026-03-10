@@ -2,6 +2,7 @@ package com.m.vodovoz.feature.home
 
 import ViewModelTestBase
 import app.cash.turbine.test
+import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.design_system.model.CategoryWithProductsUi
 import com.m.vodovoz.design_system.model.SpecialPromotionUi
 import com.m.vodovoz.design_system.model.StoryUi
@@ -34,6 +35,9 @@ class HomeFlowViewModelTests : ViewModelTestBase<HomeFlowViewModel>() {
     override fun createViewModel(): HomeFlowViewModel {
         return spyk(
             HomeFlowViewModel(
+                tabManager,
+                siteStateManager,
+                cookieManager,
                 cartManager,
                 likeManager,
                 accountManager,

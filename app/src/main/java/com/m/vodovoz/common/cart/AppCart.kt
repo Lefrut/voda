@@ -68,10 +68,9 @@ open class AbstractAppCart(
 
     @OptIn(FlowPreview::class)
     private val shedulingOperations = _operationsFlow
-        .filter { operations.isNotEmpty() }
-        .distinctUntilChanged()
+        .filter { it.isNotEmpty() }
         .debounce {
-            val isImmediate = operations.any { op ->
+            val isImmediate = it.any { op ->
                 op.startPolicy == AppCart.StartPolicy.IMMEDIATE
             }
             if (isImmediate) {
@@ -80,9 +79,8 @@ open class AbstractAppCart(
                 375.milliseconds
             }
         }
-        .map {
+        .map { currentOperations ->
             updatingMutex.withLock {
-                val currentOperations = operations
                 val ids = currentOperations.flatMap { op ->
                     op.itemChanges.keys
                 }

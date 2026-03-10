@@ -16,14 +16,19 @@ import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.annotation.VisibleForTesting
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.toMutableStateList
+import androidx.compose.ui.Modifier
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.rememberDecoratedNavEntries
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.scene.SinglePaneSceneStrategy
 import androidx.navigation3.ui.NavDisplay
+import com.m.vodovoz.design_system.VodovozTheme
 import com.m.vodovoz.feature.catalog.CatalogEntry
 import com.m.vodovoz.feature.catalog.CatalogFlowViewModel
 import com.m.vodovoz.feature.favorite.FavoriteEntry
@@ -43,6 +48,7 @@ fun BottmNav(
         startKey = BottomNavKey.Home,
         topLevelKeys = BottomNavKey.values
     )
+
 
     val navigator = remember { Navigator(navigationState) }
 
@@ -204,37 +210,21 @@ class Navigator(val state: NavigationState) {
 }
 
 @Composable
-fun AppNav() {
-
-    var currentBottomKey: BottomNavKey by rememberSaveable {
-        mutableStateOf(BottomNavKey.Home)
-    }
-
-    var showBottomBar: Boolean by rememberSaveable() {
-        mutableStateOf(false)
-    }
-
-    Scaffold(
-        bottomBar = {
-            NavigationBar {
-                BottomNavKey.values.forEach { key ->
-                    NavigationBarItem(
-                        selected = key == currentBottomKey,
-                        label = {
-                            Text(text = key.title)
-                        },
-                        icon = {
-
-                        },
-                        onClick = {
-                            currentBottomKey = key
-                        }
-                    )
-                }
-            }
+fun AppNav(
+    homeViewModel: HomeFlowViewModel,
+    catalogFlowViewModel: CatalogFlowViewModel,
+    favoriteFlowViewModel: FavoriteFlowViewModel
+) {
+    VodovozTheme {
+        Box(
+            modifier = Modifier.background(MaterialTheme.colorScheme.background)
+        ) {
+            BottmNav(
+                homeViewModel = homeViewModel,
+                catalogFlowViewModel = catalogFlowViewModel,
+                favoriteFlowViewModel = favoriteFlowViewModel
+            )
         }
-    ) { padding ->
-        padding
     }
 }
 

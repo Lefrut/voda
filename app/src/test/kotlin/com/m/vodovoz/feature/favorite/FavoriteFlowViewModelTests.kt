@@ -2,6 +2,7 @@ package com.m.vodovoz.feature.favorite
 
 import ViewModelTestBase
 import app.cash.turbine.test
+import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.domain.general.model.product.ProductsSectionModel
 import com.m.vodovoz.feature.home.model.CategoryUi
 import com.m.vodovoz.feature.product_comments.model.SortUi
@@ -24,6 +25,7 @@ class FavoriteFlowViewModelTests : ViewModelTestBase<FavoriteFlowViewModel>() {
     override fun createViewModel(): FavoriteFlowViewModel {
         return spyk(
             FavoriteFlowViewModel(
+                TabManager(vodovozServiceRepository),
                 cartManager,
                 likeManager,
                 vodovozServiceRepository,
@@ -46,7 +48,10 @@ class FavoriteFlowViewModelTests : ViewModelTestBase<FavoriteFlowViewModel>() {
             }.test {
                 assertEquals(FavoriteFlowViewModel.FavoriteUiState.Loading, awaitItem().uiState)
                 val stateAfterSuccess = awaitItem()
-                assertEquals(FavoriteFlowViewModel.FavoriteUiState.Success, stateAfterSuccess.uiState)
+                assertEquals(
+                    FavoriteFlowViewModel.FavoriteUiState.Success,
+                    stateAfterSuccess.uiState
+                )
                 cancelAndIgnoreRemainingEvents()
             }
         }
