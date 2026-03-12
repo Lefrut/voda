@@ -1,9 +1,12 @@
 package com.m.vodovoz.feature.sub_categories.api
 
 import androidx.navigation3.runtime.NavKey
-import kotlinx.serialization.Serializable
+import com.m.vodovoz.design_system.model.ParentCategoryUi
 
-@Serializable
-data object SubCategoriesNavKey : NavKey {
-    const val NAV_NAME: String = "feature/sub_categories/SubCategories"
+data class SubCategoriesNavKey(
+    val category: ParentCategoryUi,
+) : NavKey {
+    companion object {
+        const val NAV_NAME: String = "feature/sub_categories/SubCategories"
+    }
 }

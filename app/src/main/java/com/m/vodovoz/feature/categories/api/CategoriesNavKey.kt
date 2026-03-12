@@ -1,9 +1,13 @@
 package com.m.vodovoz.feature.categories.api
 
 import androidx.navigation3.runtime.NavKey
-import kotlinx.serialization.Serializable
+import com.m.vodovoz.feature.home.model.CategoryUi
 
-@Serializable
-data object CategoriesNavKey : NavKey {
-    const val NAV_NAME: String = "feature/categories/Categories"
+data class CategoriesNavKey(
+    val categoryList: Array<CategoryUi>,
+    val category: CategoryUi,
+) : NavKey {
+    companion object {
+        const val NAV_NAME: String = "feature/categories/Categories"
+    }
 }

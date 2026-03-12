@@ -4,17 +4,9 @@ package com.m.vodovoz.core.navigation
 
 import android.os.Bundle
 
-import android.view.View
-
 import androidx.core.os.bundleOf
 
-import androidx.lifecycle.SavedStateHandle
-
 import androidx.navigation.NavOptions
-
-import androidx.navigation.NavOptionsBuilder
-
-import androidx.navigation.findNavController
 
 import androidx.navigation.navOptions
 
@@ -35,26 +27,79 @@ import com.m.vodovoz.design_system.model.filters.FilterUi
 import com.m.vodovoz.design_system.model.filters.FiltersUi
 
 import com.m.vodovoz.feature.addresses.model.AddressScreenTypeUi
+import com.m.vodovoz.feature.about_app.api.AboutAppNavKey
+import com.m.vodovoz.feature.about_product.api.AboutProductNavKey
+import com.m.vodovoz.feature.all.brands.api.AllBrandsNavKey
+import com.m.vodovoz.feature.all.orders.detail.api.OrderDetailsNavKey
+import com.m.vodovoz.feature.all.orders.detail.traceorder.api.TraceOrderNavKey
+import com.m.vodovoz.feature.all.orders.history.api.OrdersHistoryNavKey
 
 import com.m.vodovoz.feature.all.promotions.AllPromotionsFragment
+import com.m.vodovoz.feature.all.promotions.api.AllPromotionsNavKey
+import com.m.vodovoz.feature.auth.login.api.LoginNavKey
+import com.m.vodovoz.feature.auth.login_by_email.api.LoginByEmailNavKey
+import com.m.vodovoz.feature.auth.login_by_phone_code.api.LoginByPhoneCodeNavKey
+import com.m.vodovoz.feature.auth.recover_password.api.RecoverPasswordNavKey
+import com.m.vodovoz.feature.auth.reg.api.RegisterNavKey
+import com.m.vodovoz.feature.addresses.api.AddressesNavKey
+import com.m.vodovoz.feature.addresses.add.api.AddAddressNavKey
+import com.m.vodovoz.feature.bottom.services.api.AboutServicesNavKey
+import com.m.vodovoz.feature.bottom.services.detail.api.ServiceDetailNavKey
+import com.m.vodovoz.feature.buy_certificate.api.BuyCertificateNavKey
 
 import com.m.vodovoz.feature.buy_certificate.model.FAQUi
 
+import com.m.vodovoz.feature.cancel_order.api.CancelOrderNavKey
 import com.m.vodovoz.feature.cart.bottles.model.BottleUi
+import com.m.vodovoz.feature.cart.bottles.api.AllBottlesNavKey
 
 import com.m.vodovoz.feature.cart.model.CartPresentPopupWindowUi
 
 import com.m.vodovoz.feature.cart.model.CartPresentUi
+import com.m.vodovoz.feature.cart.gifts.api.GiftsNavKey
+import com.m.vodovoz.feature.cart.ordering.api.OrderingNavKey
 
-import com.m.vodovoz.feature.cart.ordering.OrderingFlowViewModel
+import com.m.vodovoz.feature.certificate_activation.api.CertificateActivationNavKey
 
 import com.m.vodovoz.feature.home.model.CategoryUi
+import com.m.vodovoz.feature.categories.api.CategoriesNavKey
 
+import com.m.vodovoz.feature.document_viewer.api.DocumentViewerNavKey
+import com.m.vodovoz.feature.faq.api.FAQNavKey
+import com.m.vodovoz.feature.filter_values.api.FilterValuesNavKey
 import com.m.vodovoz.feature.map.model.MapAddressUi
+import com.m.vodovoz.feature.map.api.MapNavKey
 
 import com.m.vodovoz.feature.main.Navigator
+import com.m.vodovoz.feature.order_call_you.api.OrderCallYouNavKey
+import com.m.vodovoz.feature.order_question.api.OrderQuestionNavKey
+import com.m.vodovoz.feature.order_recipient.api.OrderRecipientNavKey
+import com.m.vodovoz.feature.payment_method.api.PaymentMethodNavKey
+import com.m.vodovoz.feature.preorder.api.PreOrderNavKey
+import com.m.vodovoz.feature.product_analogs.api.ProductAnalogsNavKey
+import com.m.vodovoz.feature.product_comments.api.ProductCommentsNavKey
+import com.m.vodovoz.feature.product_details.api.ProductDetailsNavKey
+import com.m.vodovoz.feature.product_details.detail_media.api.DetailMediaNavKey
+import com.m.vodovoz.feature.product_filters.api.ProductFiltersNavKey
+import com.m.vodovoz.feature.profile.change_password.api.ChangePasswordNavKey
+import com.m.vodovoz.feature.profile.notification_settings.api.NotificationSettingsNavKey
+import com.m.vodovoz.feature.profile.user_data.api.UserDataNavKey
+import com.m.vodovoz.feature.profile.waterapp.api.WaterAppNavKey
 
 import com.m.vodovoz.feature.product_catalog.api.ProductCatalogNavKey
+import com.m.vodovoz.feature.promotion_details.api.PromotionDetailsNavKey
+import com.m.vodovoz.feature.questionnaires.api.QuestionnairesNavKey
+import com.m.vodovoz.feature.search.api.SearchNavKey
+import com.m.vodovoz.feature.search.qrcode.api.QrCodeNavKey
+import com.m.vodovoz.feature.service_order.api.ServiceOrderNavKey
+import com.m.vodovoz.feature.stories_fragment.api.StoriesNavKey
+import com.m.vodovoz.feature.sub_categories.api.SubCategoriesNavKey
+import com.m.vodovoz.feature.delivery_date.api.DeliveryDateNavKey
+import com.m.vodovoz.feature.wait_feedback_products.api.WaitFeedbackProductsNavKey
+import com.m.vodovoz.feature.write_comment.api.WriteCommentNavKey
+import com.m.vodovoz.feature.write_message.api.WriteMessageNavKey
+import com.m.vodovoz.common.webview.api.WebViewNavKey
+import com.m.vodovoz.ui.dialog.api.SpeechDialogNavKey
 
 import java.time.LocalDate
 
@@ -75,13 +120,7 @@ private fun Navigator.navigateLegacy(
 
 
 fun Navigator.navigateToWriteMessage() {
-    navigateLegacy(R.id.writeMessageFragment,
-        Bundle.EMPTY,
-        navOptions {
-            launchSingleTop = true
-            slideAnim()
-        }
-    )
+    navigate(WriteMessageNavKey)
 }
 
 fun Navigator.navigateToAddAddress(
@@ -91,38 +130,20 @@ fun Navigator.navigateToAddAddress(
     addressType: Int? = null,
     navOptions: NavOptions? = null,
 ) {
-
-    navigateLegacy(R.id.addAddressFragment,
-        bundleOf(
-            "mapAddress" to mapAddress,
-            "addressId" to addressId,
-            "addressName" to addressName,
-            "addressType" to addressType
-        ),
-        navOptions ?: navOptions {
-            slideAnim()
-        }
+    navigate(
+        AddAddressNavKey(
+            mapAddress = mapAddress,
+            addressId = addressId,
+            addressName = addressName,
+            addressType = addressType
+        )
     )
 
-    val backStack = try {
-        getBackStackEntry(R.id.addAddressFragment)
-    } catch (_: Throwable) {
-        null
-    }
-
-    if (backStack != null) {
-        backStack.savedStateHandle["mapAddress"] = mapAddress
-    }
-
+    currentBackStackEntry?.savedStateHandle?.set("mapAddress", mapAddress)
 }
 
 fun Navigator.navigateToMap(addressName: String?, navOptions: NavOptions? = null) {
-    navigateLegacy(R.id.mapFragment,
-        bundleOf("addressName" to addressName),
-        navOptions ?: navOptions {
-            slideAnim()
-        }
-    )
+    navigate(MapNavKey(addressName = addressName))
 }
 
 fun Navigator.navigateToAboutProduct(
@@ -131,38 +152,30 @@ fun Navigator.navigateToAboutProduct(
     analogButton: ColorfulButtonUi?,
     isAvailable: Boolean,
 ) {
-    navigateLegacy(R.id.aboutProductFragment,
-        bundleOf(
-            "productId" to productId,
-            "prices" to prices,
-            "analogButton" to analogButton,
-            "isAvailable" to isAvailable
-        ),
-        navOptions {
-            slideAnim()
-        }
+    navigate(
+        AboutProductNavKey(
+            productId = productId,
+            prices = prices,
+            analogButton = analogButton,
+            isAvailable = isAvailable
+        )
     )
 }
 
 fun Navigator.navigateToSpeechDialog() {
-    navigateLegacy(R.id.speechDialogFragment)
+    navigate(SpeechDialogNavKey)
 }
 
 fun Navigator.navigateToQrCode() {
-    navigateLegacy(R.id.qrCodeFragment, null)
+    navigate(QrCodeNavKey)
 }
 
 fun Navigator.navigateToAllBrands() {
-    navigateLegacy(R.id.allBrandsFragment, null)
+    navigate(AllBrandsNavKey)
 }
 
 fun Navigator.navigateToTraceOrder(dividerId: String, orderId: Long) {
-    navigateLegacy(R.id.traceOrderFragment,
-        bundleOf("driverId" to dividerId, "orderId" to orderId),
-        navOptions {
-            slideAnim()
-        }
-    )
+    navigate(TraceOrderNavKey(driverId = dividerId, orderId = orderId))
 }
 
 fun Navigator.navigateToWriteComment(
@@ -171,83 +184,53 @@ fun Navigator.navigateToWriteComment(
     productImage: String,
     rating: Int,
 ) {
-    val args = bundleOf(
-        "product_id" to productId,
-        "product_name" to productName,
-        "product_image" to productImage,
-        "rating" to rating
+    navigate(
+        WriteCommentNavKey(
+            product_id = productId,
+            product_name = productName,
+            product_image = productImage,
+            rating = rating
+        )
     )
-    navigateLegacy(R.id.writeCommentFragment, args)
 }
 
 fun Navigator.navigateToWaitFeedbackProducts() {
-    navigateLegacy(R.id.waitFeedbackProductsFragment,
-        null,
-        navOptions {
-            slideAnim()
-        }
-    )
+    navigate(WaitFeedbackProductsNavKey)
 }
 
 fun Navigator.navigateToServiceOrder(serviceType: String) {
-    navigateLegacy(R.id.serviceOrderFragment, bundleOf("serviceType" to serviceType),
-    )
+    navigate(ServiceOrderNavKey(serviceType = serviceType))
 }
 
 fun Navigator.navigateToServiceDetails(serviceId: Int) {
-    navigateLegacy(R.id.serviceDetailFragment,
-        bundleOf("serviceId" to serviceId),
-        navOptions {
-            slideAnim()
-        }
-    )
+    navigate(ServiceDetailNavKey(serviceId = serviceId))
 }
 
 fun Navigator.navigateToFAQ(faq: FAQUi) {
-    navigateLegacy(R.id.faqFragment,
-        bundleOf("faq" to faq),
-        navOptions {
-            slideAnim()
-        }
-    )
+    navigate(FAQNavKey(faq = faq))
 }
 
 fun Navigator.navigateToCancelOrder(orderId: Long) {
-    navigateLegacy(R.id.cancelOrderFragment,
-        bundleOf("orderId" to orderId),
-        navOptions {
-            expandAnim()
-        }
-    )
+    navigate(CancelOrderNavKey(orderId = orderId))
 }
 
 fun Navigator.navigateToOrderQuestion(orderId: Long) {
-    navigateLegacy(R.id.orderQuestionFragment,
-        bundleOf("orderId" to orderId),
-        navOptions {
-            expandAnim()
-        }
-    )
+    navigate(OrderQuestionNavKey(orderId = orderId))
 }
 
 fun Navigator.navigateToAllBottles(bottles: List<BottleUi>) {
-    navigateLegacy(R.id.allBottlesFragment,
-        bundleOf("bottles" to bottles),
-        navOptions {
-            slideAnim()
-        }
-    )
+    navigate(AllBottlesNavKey(bottles = bottles))
 }
 
 fun Navigator.navigateToGifts(
     present: CartPresentUi? = null,
     popupWindow: CartPresentPopupWindowUi,
 ) {
-    navigateLegacy(R.id.giftsFragment,
-        bundleOf("present" to present, "popupWindow" to popupWindow),
-        navOptions {
-            slideAnim()
-        }
+    navigate(
+        GiftsNavKey(
+            present = present,
+            popupWindow = popupWindow
+        )
     )
 }
 
@@ -255,14 +238,11 @@ fun Navigator.navigateToAddresses(
     addressScreenType: AddressScreenTypeUi,
     addressId: Long? = null,
 ) {
-    navigateLegacy(R.id.addressesFragment,
-        bundleOf(
-            "screenType" to addressScreenType,
-            "addressId" to addressId
-        ),
-        navOptions {
-            slideAnim()
-        }
+    navigate(
+        AddressesNavKey(
+            screenType = addressScreenType,
+            addressId = addressId
+        )
     )
 }
 
@@ -274,17 +254,14 @@ fun Navigator.navigateToDeliveryDate(
     navOptions: NavOptions? = null,
     queryParams: Map<String, String>
 ) {
-    navigateLegacy(R.id.deliveryDateFragment,
-        bundleOf(
-            "addressId" to addressId,
-            "date" to date,
-            "timeInterval" to timeInterval,
-            "earlierDelivery" to earlierDelivery,
-            CommonArgs.queryParamsTo(queryParams)
-        ),
-        navOptions ?: navOptions {
-            slideAnim()
-        }
+    navigate(
+        DeliveryDateNavKey(
+            addressId = addressId,
+            earlierDelivery = earlierDelivery,
+            date = date,
+            timeInterval = timeInterval,
+            queryParams = queryParams
+        )
     )
 }
 
@@ -298,20 +275,17 @@ fun Navigator.navigateToPaymentMethod(
     bonusesValue: Int?,
     queryParams: Map<String, String>,
 ) {
-    navigateLegacy(R.id.paymentMethodFragment,
-        bundleOf(
-            "addressId" to addressId,
-            "date" to date.toEpochDay(),
-            "paymentMethodId" to paymentMethodId,
-            "paymentChange" to paymentChange,
-            "balance" to balance,
-            "bonuses" to bonuses,
-            "bonusesValue" to bonusesValue,
-            CommonArgs.queryParamsTo(queryParams)
-        ),
-        navOptions {
-            slideAnim()
-        }
+    navigate(
+        PaymentMethodNavKey(
+            addressId = addressId,
+            date = date.toEpochDay(),
+            paymentMethodId = paymentMethodId,
+            paymentChange = paymentChange,
+            balance = balance,
+            bonuses = bonuses,
+            bonusesValue = bonusesValue,
+            queryParams = queryParams
+        )
     )
 }
 
@@ -320,34 +294,21 @@ fun Navigator.navigateToOrderCallYou(
     callYouId: String? = null,
     queryParams: Map<String, String>
 ) {
-    navigateLegacy(R.id.orderCallYouFragment,
-        bundleOf(
-            "addressId" to addressId,
-            "callYouId" to callYouId,
-            CommonArgs.queryParamsTo(queryParams)
-        ),
-        navOptions {
-            slideAnim()
-        }
+    navigate(
+        OrderCallYouNavKey(
+            addressId = addressId,
+            callYouId = callYouId,
+            queryParams = queryParams
+        )
     )
 }
 
 fun Navigator.navigateToOrderRecipient(addressId: Long) {
-    navigateLegacy(R.id.orderRecipientFragment,
-        bundleOf("addressId" to addressId),
-        navOptions {
-            slideAnim()
-        }
-    )
+    navigate(OrderRecipientNavKey(addressId = addressId))
 }
 
 fun Navigator.navigateToRecoverPassword() {
-    navigateLegacy(R.id.recoverPasswordFragment,
-        Bundle.EMPTY,
-        navOptions {
-            slideAnim()
-        }
-    )
+    navigate(RecoverPasswordNavKey)
 }
 
 fun Navigator.navigateToButtonProductList(buttonId: Int) {
@@ -355,140 +316,87 @@ fun Navigator.navigateToButtonProductList(buttonId: Int) {
 }
 
 fun Navigator.navigateToAboutApp() {
-    navigateLegacy(R.id.aboutAppFragment,
-        Bundle.EMPTY,
-        navOptions {
-            slideAnim()
-        }
-    )
+    navigate(AboutAppNavKey)
 }
 
 fun Navigator.navigateToNotificationSettings() {
-    navigateLegacy(R.id.notificationSettingsFragment, Bundle.EMPTY,
-        navOptions {
-            slideAnim()
-        }
-    )
+    navigate(NotificationSettingsNavKey)
 }
 
 fun Navigator.navigateToQuestionnaires() {
-    navigateLegacy(R.id.questionnairesFragment,
-        Bundle.EMPTY,
-        navOptions {
-            slideAnim()
-        }
-    )
+    navigate(QuestionnairesNavKey)
 }
 
 fun Navigator.navigateToOrdersHistory() {
-    navigateLegacy(R.id.allOrdersFragment, Bundle.EMPTY, navOptions {
-        slideAnim()
-    })
+    navigate(OrdersHistoryNavKey)
 }
 
 fun Navigator.navigateToOrdering(coupon: String) {
-    navigateLegacy(R.id.orderingFragment, bundleOf("coupon" to coupon), navOptions { expandAnim() })
+    navigate(OrderingNavKey(coupon = coupon))
 }
 
 fun Navigator.navigateToOrderDetails(orderId: Long) {
-    navigateLegacy(R.id.orderDetailsFragment, bundleOf("orderId" to orderId))
+    navigate(OrderDetailsNavKey(orderId = orderId))
 }
 
 fun Navigator.navigateToDetailMedia(media: ProductMediaUi, mediaList: List<ProductMediaUi>) {
-    navigateLegacy(R.id.detailMedia,
-        bundleOf(
-            "media" to media,
-            "mediaList" to mediaList
-        ),
-        navOptions {
-            anim {
-                enter = R.anim.fade_in
-                popExit = R.anim.fade_out
-            }
-        }
+    navigate(
+        DetailMediaNavKey(
+            media = media,
+            mediaList = mediaList
+        )
     )
-
 }
 
 fun Navigator.navigateToStories(storyId: Long, stories: List<StoryUi>) {
-    val bundle = bundleOf(
-        "storyId" to storyId,
-        "stories" to stories
-    )
-    navigateLegacy(R.id.fullScreenHistorySliderFragment,
-        bundle,
-        navOptions {
-            anim {
-                exit = R.anim.fade_out
-                enter = R.anim.scale_in
-            }
-        }
-    )
+    navigate(StoriesNavKey(storyId = storyId, stories = stories))
 }
 
 fun Navigator.navigateToRegister() {
-    navigateLegacy(R.id.registerFragment)
+    navigate(RegisterNavKey)
 }
 
 fun Navigator.navigateToLoginByPhone(phone: String, waitSeconds: Int, userUrl: String) {
-    navigateLegacy(R.id.loginByPhoneCodeFragment,
-        bundleOf(
-            LoginByPhoneCodeArgs.PHONE to phone,
-            LoginByPhoneCodeArgs.WAIT_SECONDS to waitSeconds,
-            LoginByPhoneCodeArgs.USER_URL to userUrl
+    navigate(
+        LoginByPhoneCodeNavKey(
+            phoneNumber = phone,
+            waitRequestCodeSeconds = waitSeconds,
+            user_url = userUrl
         )
     )
 }
 
 fun Navigator.navigateToChangePassword() {
-    navigateLegacy(R.id.changePasswordFragment, bundleOf(), navOptions {
-            slideAnim()
-        })
+    navigate(ChangePasswordNavKey)
 }
 
 fun Navigator.navigateToUserData() {
-    navigateLegacy(R.id.userDataFragment)
+    navigate(UserDataNavKey)
 }
 
 fun Navigator.navigateToLoginByEmail(selectedAccountTypeId: String? = null) {
-    navigateLegacy(R.id.loginByEmailFragment,
-        selectedAccountTypeId?.let {
-            bundleOf(AuthArgs.ACCOUNT_TYPE_ID to it)
-        }
-    )
+    navigate(LoginByEmailNavKey(accountTypeId = selectedAccountTypeId))
 }
 
 fun Navigator.navigateToLogin(selectedAccountTypeId: String? = null) {
-    navigateLegacy(R.id.loginFragment,
-        selectedAccountTypeId?.let {
-            bundleOf(AuthArgs.ACCOUNT_TYPE_ID to it)
-        }
-    )
+    navigate(LoginNavKey(accountTypeId = selectedAccountTypeId))
 }
 
 fun Navigator.navigateToProductFilterValues(categoryId: Long, filter: FilterUi) {
-    navigateLegacy(R.id.concreteFilterFragment,
-        bundleOf("categoryId" to categoryId, "filter" to filter),
-        NavOptions.Builder()
-            .setEnterAnim(R.anim.slide_in_right)
-            .setExitAnim(R.anim.slide_out_left)
-            .setPopEnterAnim(R.anim.slide_in_left)
-            .setPopExitAnim(R.anim.slide_out_right)
-            .build()
+    navigate(
+        FilterValuesNavKey(
+            categoryId = categoryId,
+            filter = filter
+        )
     )
 }
 
 fun Navigator.navigateToProductFilters(categoryId: Long, filters: FiltersUi) {
-    navigateLegacy(R.id.productFiltersFragment,
-        bundleOf(
-            "categoryId" to categoryId,
-            "filters" to filters
-        ),
-        NavOptions.Builder()
-            .setEnterAnim(R.anim.slide_in_bottom)
-            .setExitAnim(R.anim.fade_out)
-            .setPopExitAnim(R.anim.slide_out_bottom)
-            .build()
+    navigate(
+        ProductFiltersNavKey(
+            categoryId = categoryId,
+            filters = filters
+        )
     )
 }
 
@@ -497,65 +405,38 @@ fun Navigator.navigateToProductComments(
     productName: String,
     productImage: String,
 ) {
-    navigateLegacy(R.id.productCommentsFragment,
-        bundleOf(
-            "productId" to productId,
-            "productName" to productName,
-            "productImage" to productImage,
+    navigate(
+        ProductCommentsNavKey(
+            productId = productId,
+            productName = productName,
+            productImage = productImage
         )
     )
-
 }
 
 fun Navigator.navigateToPreOrder(productId: Long) {
-    navigateLegacy(R.id.preOrderFragment,
-        bundleOf("productId" to productId),
-        NavOptions.Builder()
-            .setEnterAnim(R.anim.slide_in_bottom)
-            .setExitAnim(R.anim.slide_out_bottom)
-            .setPopEnterAnim(R.anim.slide_in_bottom)
-            .setPopExitAnim(R.anim.slide_out_bottom)
-            .build()
-    )
-
+    navigate(PreOrderNavKey(productId = productId))
 }
 
 fun Navigator.navigateToProductAnalogs(productId: Long) {
-    navigateLegacy(R.id.productsCollectionFragment,
-        bundleOf("productId" to productId)
-    )
+    navigate(ProductAnalogsNavKey(productId = productId))
 }
 
 fun Navigator.navigateToCertificateActivation() {
-    navigateLegacy(R.id.certificateActivationFragment,
-        Bundle.EMPTY,
-        navOptions {
-            slideAnim()
-        }
-    )
+    navigate(CertificateActivationNavKey)
 }
 
 fun Navigator.navigateToCategories(category: CategoryUi, categories: List<CategoryUi>) {
-    navigateLegacy(R.id.categoriesFragment,
-        bundleOf(
-            "categoryList" to categories.toTypedArray(),
-            "category" to category,
+    navigate(
+        CategoriesNavKey(
+            categoryList = categories.toTypedArray(),
+            category = category
         )
     )
 }
 
 fun Navigator.navigateToSubCategories(category: ParentCategoryUi) {
-    navigateLegacy(R.id.subCategoriesFragment,
-        bundleOf("category" to category),
-        navOptions {
-            anim {
-                enter = R.anim.slide_in_right
-                exit = R.anim.slide_out_left
-                popEnter = R.anim.slide_in_left
-                popExit = R.anim.slide_out_right
-            }
-        }
-    )
+    navigate(SubCategoriesNavKey(category = category))
 }
 
 fun Navigator.navigateToBrandProductList(brandId: Long) {
@@ -591,27 +472,23 @@ fun Navigator.navigateToBannerProductList(bannerId: Long, blockId: Long) {
 }
 
 fun Navigator.navigateToProductDetails(productId: Long) {
-    navigateLegacy(R.id.productDetailFragment,
-        bundleOf("productId" to productId)
-    )
+    navigate(ProductDetailsNavKey(productId = productId))
 }
 
 fun Navigator.navigateToPromotionDetails(promotionId: Long) {
-    navigateLegacy(R.id.promotionDetailFragment,
-        bundleOf("promotionId" to promotionId)
-    )
+    navigate(PromotionDetailsNavKey(promotionId = promotionId))
 }
 
 fun Navigator.navigateToPromotions(blockId: Long, bannerId: Long) {
-    navigateLegacy(R.id.allPromotionsFragment,
-        bundleOf(
-            "dataSource" to AllPromotionsFragment.DataSource.ByBanner(bannerId, blockId)
+    navigate(
+        AllPromotionsNavKey(
+            dataSource = AllPromotionsFragment.DataSource.ByBanner(bannerId, blockId)
         )
     )
 }
 
 fun Navigator.navigateToSearch(query: String = "") {
-    navigateLegacy(R.id.searchFragment, bundleOf("query" to query))
+    navigate(SearchNavKey(query = query))
 }
 
 fun Navigator.navigateToHurryBuyUpProducts() {
@@ -623,22 +500,15 @@ fun Navigator.navigateToNewProducts() {
 }
 
 fun Navigator.navigateToPromotions() {
-    navigateLegacy(R.id.allPromotionsFragment)
+    navigate(AllPromotionsNavKey())
 }
 
 fun Navigator.navigateToWaterApp() {
-    navigateLegacy(R.id.waterAppFragment,
-        null,
-        navOptions {
-            anim {
-                enter = R.anim.water_slide_in
-            }
-        }
-    )
+    navigate(WaterAppNavKey)
 }
 
 fun Navigator.navigateToBuyCertificate() {
-    navigateLegacy(R.id.buyCertificateFragment)
+    navigate(BuyCertificateNavKey)
 }
 
 fun Navigator.navigateToWebView(
@@ -646,13 +516,24 @@ fun Navigator.navigateToWebView(
     title: String = "",
     navOptions: NavOptions? = null,
 ) {
-    navigateLegacy(R.id.webViewFragment, bundleOf("url" to url, "title" to title), navOptions)
-
+    navigate(WebViewNavKey(url = url, title = title))
 }
 
 fun Navigator.navigateToAllServices() {
-    navigateLegacy(R.id.aboutServicesFragment,
-        null,
-        navOptions { slideAnim() }
+    navigate(AboutServicesNavKey)
+}
+
+fun Navigator.navigateToImagePicker() {
+    navigateLegacy(
+        destinationId = R.id.imagePickerFragment,
+        args = Bundle.EMPTY,
+        navOptions = navOptions { slideAnim() }
+    )
+}
+
+fun Navigator.navigateToBlockApp() {
+    navigateLegacy(
+        destinationId = R.id.blockAppFragment,
+        navOptions = navOptions { slideAnim() }
     )
 }

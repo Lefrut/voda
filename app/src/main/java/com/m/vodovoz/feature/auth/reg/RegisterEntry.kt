@@ -4,11 +4,11 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.core.os.bundleOf
-import androidx.navigation.NavOptions
 import com.m.vodovoz.R
 import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.core.navigation.NavigationEntry
+import com.m.vodovoz.core.navigation.navigateToLogin
+import com.m.vodovoz.core.navigation.navigateToLoginByEmail
 import com.m.vodovoz.core.navigation.navigateToWebView
 import com.m.vodovoz.design_system.effects.LifecycleEffect
 import com.m.vodovoz.feature.auth.reg.composables.RegisterScreen
@@ -57,19 +57,13 @@ fun RegisterEntry(
                 }
 
                 RegFlowViewModel.RegEvents.GoToLogin -> {
-                    navigator.navigate(
-                        R.id.loginFragment,
-                        bundleOf(),
-                        NavOptions.Builder().setPopUpTo(R.id.profileFragment, false).build()
-                    )
+                    navigator.popBackStack(R.id.profileFragment, false)
+                    navigator.navigateToLogin()
                 }
 
                 RegFlowViewModel.RegEvents.GoToLoginByEmail -> {
-                    navigator.navigate(
-                        R.id.loginByEmailFragment,
-                        bundleOf(),
-                        NavOptions.Builder().setPopUpTo(R.id.profileFragment, false).build()
-                    )
+                    navigator.popBackStack(R.id.profileFragment, false)
+                    navigator.navigateToLoginByEmail()
                 }
 
                 RegFlowViewModel.RegEvents.RefreshAll -> {

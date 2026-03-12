@@ -8,6 +8,7 @@ import com.m.vodovoz.common.about_product.AboutProductManager
 import com.m.vodovoz.common.account.AccountManager
 import com.m.vodovoz.common.cart.CartManager
 import com.m.vodovoz.common.like.LikeManager
+import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.design_system.model.BrandCategoryItemUi
 import com.m.vodovoz.design_system.model.BuyButtonUi
 import com.m.vodovoz.design_system.model.ColorfulButtonUi
@@ -51,6 +52,7 @@ class ProductDetailsFlowViewModel @Inject constructor(
     private val aboutProductManager: AboutProductManager,
     private val userPreferencesRepository: UserPreferencesRepository,
     private val accountManager: AccountManager,
+    val tabManager: TabManager,
     savedStateHandle: SavedStateHandle,
 ) : ProductsMviViewModel<VodovozSectionUi<ProductUi>, ProductDetailsFlowViewModel.ProductDetailsState, ProductDetailsFlowViewModel.ProductDetailsEvents>(
     state = ProductDetailsState(),

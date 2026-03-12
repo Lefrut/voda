@@ -1,9 +1,13 @@
 package com.m.vodovoz.feature.addresses.api
 
 import androidx.navigation3.runtime.NavKey
-import kotlinx.serialization.Serializable
+import com.m.vodovoz.feature.addresses.model.AddressScreenTypeUi
 
-@Serializable
-data object AddressesNavKey : NavKey {
-    const val NAV_NAME: String = "feature/addresses/Addresses"
+data class AddressesNavKey(
+    val screenType: AddressScreenTypeUi,
+    val addressId: Long? = null,
+) : NavKey {
+    companion object {
+        const val NAV_NAME: String = "feature/addresses/Addresses"
+    }
 }

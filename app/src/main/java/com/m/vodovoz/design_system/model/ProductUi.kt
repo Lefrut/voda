@@ -8,10 +8,8 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.LineHeightStyle
-import androidx.navigation.findNavController
 import com.m.vodovoz.R
 import com.m.vodovoz.common.model.ButtonAction
 import com.m.vodovoz.core.navigation.navigateToPreOrder
@@ -30,6 +28,7 @@ import com.m.vodovoz.domain.general.model.product.ProductModel
 import com.m.vodovoz.domain.general.model.product.SectionModel
 import com.m.vodovoz.feature.home.model.PopularCategoryUi
 import com.m.vodovoz.feature.home.model.toUi
+import com.m.vodovoz.feature.main.AppNavigatorStore
 
 
 fun <T : VodovozItemUi<T>> Iterable<T>.withCanViewForAdults(canView: Boolean): List<T> {
@@ -390,12 +389,13 @@ fun ProductUi.Button(
     onIncrementToCart: (ProductUi) -> Unit,
     onDecrementToCart: (ProductUi) -> Unit,
 
-    ) {
+) {
     val product = this@Button
-    val currentView = LocalView.current
 
     val onAnalogsOrPreOrderClick = { it: ProductUi ->
-        if (it.button?.id == "predzakaz") currentView.findNavController().navigateToPreOrder(it.id)
+        if (it.button?.id == "predzakaz") {
+            AppNavigatorStore.navigator?.navigateToPreOrder(it.id)
+        }
         else onAnalogsClick(it)
     }
 

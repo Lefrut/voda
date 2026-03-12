@@ -1,9 +1,14 @@
 package com.m.vodovoz.feature.write_comment.api
 
 import androidx.navigation3.runtime.NavKey
-import kotlinx.serialization.Serializable
 
-@Serializable
-data object WriteCommentNavKey : NavKey {
-    const val NAV_NAME: String = "feature/write_comment/WriteComment"
+data class WriteCommentNavKey(
+    val product_id: Long,
+    val product_name: String,
+    val product_image: String,
+    val rating: Int,
+) : NavKey {
+    companion object {
+        const val NAV_NAME: String = "feature/write_comment/WriteComment"
+    }
 }

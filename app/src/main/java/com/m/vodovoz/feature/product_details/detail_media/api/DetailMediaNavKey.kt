@@ -1,9 +1,13 @@
 package com.m.vodovoz.feature.product_details.detail_media.api
 
 import androidx.navigation3.runtime.NavKey
-import kotlinx.serialization.Serializable
+import com.m.vodovoz.design_system.model.ProductMediaUi
 
-@Serializable
-data object DetailMediaNavKey : NavKey {
-    const val NAV_NAME: String = "feature/product_details/detail_media/DetailMedia"
+data class DetailMediaNavKey(
+    val media: ProductMediaUi,
+    val mediaList: List<ProductMediaUi>,
+) : NavKey {
+    companion object {
+        const val NAV_NAME: String = "feature/product_details/detail_media/DetailMedia"
+    }
 }

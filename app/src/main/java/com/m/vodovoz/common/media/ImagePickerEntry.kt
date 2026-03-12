@@ -54,6 +54,7 @@ import com.m.vodovoz.ui.mvi.collectAsState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
+import androidx.core.net.toUri
 
 @Composable
 fun ImagePickerEntry() = NavigationEntry<ImagePickerViewModel> {
@@ -76,7 +77,7 @@ fun ImagePickerEntry() = NavigationEntry<ImagePickerViewModel> {
             if (uri != null) {
                 viewModel.setImageUri(uri.toString())
             } else {
-                navController.popBackStack()
+                navigator.goBack()
             }
         }
 
@@ -171,13 +172,13 @@ fun ImagePickerEntry() = NavigationEntry<ImagePickerViewModel> {
         viewModel.events.collect { event ->
             when (event) {
                 ImagePickerEvent.GoBack -> {
-                    navController.popBackStack()
+                    navigator.goBack()
                 }
 
                 is ImagePickerEvent.GetBitmap -> {
                     val bitmap = MediaStore.Images.Media.getBitmap(
                         context.contentResolver,
-                        Uri.parse(event.imageUri)
+                        event.imageUri.toUri()
                     )
                     viewModel.saveBitmapToFile(
                         sourceBitmap = bitmap,

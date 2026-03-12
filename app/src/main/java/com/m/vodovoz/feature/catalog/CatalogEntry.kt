@@ -13,6 +13,7 @@ import com.m.vodovoz.core.navigation.LocalNavigator
 import com.m.vodovoz.core.navigation.activate
 import com.m.vodovoz.core.navigation.navigateToCategoryProductList
 import com.m.vodovoz.core.navigation.navigateToQrCode
+import com.m.vodovoz.core.navigation.navigateToSearch
 import com.m.vodovoz.core.navigation.navigateToSpeechDialog
 import com.m.vodovoz.core.navigation.navigateToSubCategories
 import com.m.vodovoz.design_system.composables.placeholders.NetworkErrorPlaceholder
@@ -70,7 +71,7 @@ fun CatalogEntry(
                 }
 
                 CatalogFlowViewModel.CatalogEvents.GoToSearch -> {
-                    navigator.navigate(R.id.searchFragment)
+                    navigator.navigateToSearch()
                 }
 
                 is CatalogFlowViewModel.CatalogEvents.GoToSubCategories -> {

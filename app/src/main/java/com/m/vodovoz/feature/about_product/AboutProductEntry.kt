@@ -2,10 +2,9 @@ package com.m.vodovoz.feature.about_product
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.core.os.bundleOf
 import androidx.lifecycle.compose.LifecycleStartEffect
-import com.m.vodovoz.R
 import com.m.vodovoz.core.navigation.NavigationEntry
+import com.m.vodovoz.feature.document_viewer.api.DocumentViewerNavKey
 import com.m.vodovoz.core.navigation.navigateToProductAnalogs
 import com.m.vodovoz.design_system.effects.LifecycleEffect
 import com.m.vodovoz.feature.about_product.model.AboutProductEvent
@@ -39,10 +38,7 @@ fun AboutProductEntry() = NavigationEntry<AboutProductViewModel> {
                 }
 
                 is AboutProductEvent.GoToDocumentViewer -> {
-                    navigator.navigate(
-                        R.id.documentViewerFragment,
-                        bundleOf("documentId" to event.document)
-                    )
+                    navigator.navigate(DocumentViewerNavKey(documentId = event.document))
                 }
 
                 is AboutProductEvent.GoToProductAnalogs -> {

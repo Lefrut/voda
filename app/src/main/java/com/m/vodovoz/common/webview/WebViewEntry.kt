@@ -19,7 +19,7 @@ fun WebViewEntry() = NavigationEntry<WebViewViewModel> {
     LifecycleEffect {
         viewModel.events.collect { event ->
             when (event) {
-                WebViewEvents.GoBack -> navController.popBackStack()
+                WebViewEvents.GoBack -> navigator.goBack()
             }
         }
     }

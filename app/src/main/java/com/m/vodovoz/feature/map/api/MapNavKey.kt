@@ -1,9 +1,11 @@
 package com.m.vodovoz.feature.map.api
 
 import androidx.navigation3.runtime.NavKey
-import kotlinx.serialization.Serializable
 
-@Serializable
-data object MapNavKey : NavKey {
-    const val NAV_NAME: String = "feature/map/Map"
+data class MapNavKey(
+    val addressName: String? = null,
+) : NavKey {
+    companion object {
+        const val NAV_NAME: String = "feature/map/Map"
+    }
 }

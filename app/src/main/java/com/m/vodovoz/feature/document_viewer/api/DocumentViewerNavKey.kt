@@ -1,9 +1,12 @@
 package com.m.vodovoz.feature.document_viewer.api
 
 import androidx.navigation3.runtime.NavKey
-import kotlinx.serialization.Serializable
+import com.m.vodovoz.design_system.model.DocumentUi
 
-@Serializable
-data object DocumentViewerNavKey : NavKey {
-    const val NAV_NAME: String = "feature/document_viewer/DocumentViewer"
+data class DocumentViewerNavKey(
+    val documentId: DocumentUi,
+) : NavKey {
+    companion object {
+        const val NAV_NAME: String = "feature/document_viewer/DocumentViewer"
+    }
 }

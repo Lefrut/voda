@@ -1,9 +1,12 @@
 package com.m.vodovoz.feature.all.promotions.api
 
 import androidx.navigation3.runtime.NavKey
-import kotlinx.serialization.Serializable
+import com.m.vodovoz.feature.all.promotions.AllPromotionsFragment
 
-@Serializable
-data object AllPromotionsNavKey : NavKey {
-    const val NAV_NAME: String = "feature/all/promotions/AllPromotions"
+data class AllPromotionsNavKey(
+    val dataSource: AllPromotionsFragment.DataSource = AllPromotionsFragment.DataSource.All,
+) : NavKey {
+    companion object {
+        const val NAV_NAME: String = "feature/all/promotions/AllPromotions"
+    }
 }

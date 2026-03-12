@@ -32,15 +32,18 @@ import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalView
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
-import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import androidx.navigation.NavGraph
 import androidx.navigation.findNavController
+import androidx.lifecycle.SavedStateHandle
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.rememberDecoratedNavEntries
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.scene.SinglePaneSceneStrategy
 import androidx.navigation3.ui.NavDisplay
+import com.m.vodovoz.common.webview.WebViewEntry
+import com.m.vodovoz.common.webview.api.WebViewNavKey
+import com.m.vodovoz.R
 import com.m.vodovoz.core.navigation.LegacyDestinationNavKey
 import com.m.vodovoz.core.navigation.LocalNavigator
 import com.m.vodovoz.design_system.VodovozTheme
@@ -66,6 +69,8 @@ import com.m.vodovoz.feature.auth.login.LoginEntry
 import com.m.vodovoz.feature.auth.login.api.LoginNavKey
 import com.m.vodovoz.feature.auth.login_by_email.LoginByEmailEntry
 import com.m.vodovoz.feature.auth.login_by_email.api.LoginByEmailNavKey
+import com.m.vodovoz.feature.auth.login_by_phone_code.LoginByPhoneCodeEntry
+import com.m.vodovoz.feature.auth.login_by_phone_code.api.LoginByPhoneCodeNavKey
 import com.m.vodovoz.feature.auth.recover_password.RecoverPasswordEntry
 import com.m.vodovoz.feature.auth.recover_password.api.RecoverPasswordNavKey
 import com.m.vodovoz.feature.auth.reg.RegisterEntry
@@ -126,6 +131,8 @@ import com.m.vodovoz.feature.product_catalog.ProductCatalogEntry
 import com.m.vodovoz.feature.product_catalog.api.ProductCatalogNavKey
 import com.m.vodovoz.feature.product_comments.ProductCommentsEntry
 import com.m.vodovoz.feature.product_comments.api.ProductCommentsNavKey
+import com.m.vodovoz.feature.product_details.ProductDetailsEntry
+import com.m.vodovoz.feature.product_details.api.ProductDetailsNavKey
 import com.m.vodovoz.feature.product_details.detail_media.DetailMediaEntry
 import com.m.vodovoz.feature.product_details.detail_media.api.DetailMediaNavKey
 import com.m.vodovoz.feature.product_filters.ProductFiltersEntry
@@ -161,7 +168,10 @@ import com.m.vodovoz.feature.write_comment.WriteCommentEntry
 import com.m.vodovoz.feature.write_comment.api.WriteCommentNavKey
 import com.m.vodovoz.feature.write_message.WriteMessageEntry
 import com.m.vodovoz.feature.write_message.api.WriteMessageNavKey
+import com.m.vodovoz.ui.dialog.SpeechDialogEntry
+import com.m.vodovoz.ui.dialog.api.SpeechDialogNavKey
 import kotlinx.serialization.Serializable
+import java.lang.reflect.Modifier as ReflectModifier
 
 
 @Composable
@@ -258,6 +268,9 @@ fun BottmNav(
             entry<LoginByEmailNavKey> {
                 LoginByEmailEntry(onRefreshAll = {})
             }
+            entry<LoginByPhoneCodeNavKey> {
+                LoginByPhoneCodeEntry()
+            }
             entry<RecoverPasswordNavKey> {
                 RecoverPasswordEntry()
             }
@@ -342,6 +355,9 @@ fun BottmNav(
             entry<ProductCommentsNavKey> {
                 ProductCommentsEntry()
             }
+            entry<ProductDetailsNavKey> {
+                ProductDetailsEntry()
+            }
             entry<DetailMediaNavKey> {
                 DetailMediaEntry()
             }
@@ -372,8 +388,14 @@ fun BottmNav(
             entry<SearchNavKey> {
                 SearchEntry()
             }
+            entry<WebViewNavKey> {
+                WebViewEntry()
+            }
             entry<QrCodeNavKey> {
                 QrCodeEntry()
+            }
+            entry<SpeechDialogNavKey> {
+                SpeechDialogEntry()
             }
             entry<ServiceOrderNavKey> {
                 ServiceOrderEntry()
@@ -467,15 +489,29 @@ fun NavigationState.toEntries(
 
 @Immutable
 class Navigator(val state: NavigationState) {
+
+    @Immutable
+    data class Destination(val id: Int)
+
+    @Immutable
+    data class BackStackEntry(
+        val savedStateHandle: SavedStateHandle,
+        val destination: Destination?,
+    )
+
     private var _navController: NavController? = null
     val navController: NavController
         get() = _navController ?: error("Navigator is not attached to NavController")
 
-    val currentBackStackEntry: NavBackStackEntry?
-        get() = _navController?.currentBackStackEntry
+    private val backStackEntries = mutableMapOf<NavKey, BackStackEntry>()
 
-    val previousBackStackEntry: NavBackStackEntry?
-        get() = _navController?.previousBackStackEntry
+    val currentBackStackEntry: BackStackEntry?
+        get() = state.currentSubStack.lastOrNull()?.let(::entryOf)
+
+    val previousBackStackEntry: BackStackEntry?
+        get() = state.currentSubStack
+            .getOrNull(state.currentSubStack.lastIndex - 1)
+            ?.let(::entryOf)
 
 
     val graph: NavGraph
@@ -485,16 +521,32 @@ class Navigator(val state: NavigationState) {
         _navController = navController
     }
 
-    fun popBackStack(): Boolean = navController.popBackStack()
+    fun popBackStack(): Boolean {
+        val canPop = state.currentKey != state.startKey
+        if (canPop) goBack()
+        return canPop
+    }
 
-    fun popBackStack(destinationId: Int, inclusive: Boolean): Boolean =
-        navController.popBackStack(destinationId, inclusive)
+    fun popBackStack(destinationId: Int, inclusive: Boolean): Boolean {
+        val stack = state.currentSubStack
+        val targetIndex = stack.indexOfLast { key ->
+            destinationId(key) == destinationId
+        }
+        if (targetIndex == -1) return false
+        val removeFrom = if (inclusive) targetIndex else targetIndex + 1
+        if (removeFrom >= stack.size) return false
+        stack.subList(removeFrom, stack.size).clear()
+        return true
+    }
 
     fun popBackStack(destinationId: Int, inclusive: Boolean, saveState: Boolean): Boolean =
-        navController.popBackStack(destinationId, inclusive, saveState)
+        popBackStack(destinationId, inclusive)
 
-    fun getBackStackEntry(destinationId: Int): NavBackStackEntry =
-        navController.getBackStackEntry(destinationId)
+    fun getBackStackEntry(destinationId: Int): BackStackEntry =
+        state.currentSubStack
+            .lastOrNull { key -> destinationId(key) == destinationId }
+            ?.let(::entryOf)
+            ?: error("No back stack entry for destinationId=$destinationId")
 
     fun navigate(resId: Int, args: android.os.Bundle? = null, navOptions: androidx.navigation.NavOptions? = null) {
         navController.navigate(resId, args, navOptions)
@@ -509,6 +561,7 @@ class Navigator(val state: NavigationState) {
             )
             return
         }
+        updateEntryArgs(key)
         when (key) {
             state.currentTopLevelKey -> clearSubStack()
             in state.topLevelKeys -> goToTopLevel(key)
@@ -551,6 +604,97 @@ class Navigator(val state: NavigationState) {
     private fun clearSubStack() {
         state.currentSubStack.run {
             if (size > 1) subList(1, size).clear()
+        }
+    }
+
+    private fun entryOf(key: NavKey): BackStackEntry {
+        return backStackEntries.getOrPut(key) {
+            BackStackEntry(
+                savedStateHandle = SavedStateHandle(),
+                destination = destinationId(key)?.let(::Destination)
+            )
+        }
+    }
+
+    private fun updateEntryArgs(key: NavKey) {
+        val savedStateHandle = entryOf(key).savedStateHandle
+        key.javaClass.declaredFields
+            .asSequence()
+            .filterNot { field ->
+                field.isSynthetic || ReflectModifier.isStatic(field.modifiers)
+            }
+            .forEach { field ->
+                runCatching {
+                    field.isAccessible = true
+                    savedStateHandle[field.name] = field.get(key)
+                }
+            }
+    }
+
+    private fun destinationId(key: NavKey): Int? {
+        return when (key) {
+            is LegacyDestinationNavKey -> key.destinationId
+            is BottomNavKey.Home, is HomeNavKey -> R.id.homeFragment
+            is BottomNavKey.Catalog, is CatalogNavKey -> R.id.catalogFragment
+            is BottomNavKey.Cart, is CartNavKey -> R.id.cartFragment
+            is BottomNavKey.Favorites, is FavoriteNavKey -> R.id.favoriteFragment
+            is BottomNavKey.Profile, is ProfileNavKey -> R.id.profileFragment
+            is AboutAppNavKey -> R.id.aboutAppFragment
+            is AboutProductNavKey -> R.id.aboutProductFragment
+            is AddressesNavKey -> R.id.addressesFragment
+            is AddAddressNavKey -> R.id.addAddressFragment
+            is AllBrandsNavKey -> R.id.allBrandsFragment
+            is OrderDetailsNavKey -> R.id.orderDetailsFragment
+            is TraceOrderNavKey -> R.id.traceOrderFragment
+            is OrdersHistoryNavKey -> R.id.allOrdersFragment
+            is AllPromotionsNavKey -> R.id.allPromotionsFragment
+            is LoginNavKey -> R.id.loginFragment
+            is LoginByEmailNavKey -> R.id.loginByEmailFragment
+            is LoginByPhoneCodeNavKey -> R.id.loginByPhoneCodeFragment
+            is RecoverPasswordNavKey -> R.id.recoverPasswordFragment
+            is RegisterNavKey -> R.id.registerFragment
+            is AboutServicesNavKey -> R.id.aboutServicesFragment
+            is ServiceDetailNavKey -> R.id.serviceDetailFragment
+            is BuyCertificateNavKey -> R.id.buyCertificateFragment
+            is CancelOrderNavKey -> R.id.cancelOrderFragment
+            is AllBottlesNavKey -> R.id.allBottlesFragment
+            is GiftsNavKey -> R.id.giftsFragment
+            is OrderingNavKey -> R.id.orderingFragment
+            is CategoriesNavKey -> R.id.categoriesFragment
+            is CertificateActivationNavKey -> R.id.certificateActivationFragment
+            is DeliveryDateNavKey -> R.id.deliveryDateFragment
+            is DocumentViewerNavKey -> R.id.documentViewerFragment
+            is FAQNavKey -> R.id.faqFragment
+            is FilterValuesNavKey -> R.id.concreteFilterFragment
+            is MapNavKey -> R.id.mapFragment
+            is OrderCallYouNavKey -> R.id.orderCallYouFragment
+            is OrderQuestionNavKey -> R.id.orderQuestionFragment
+            is OrderRecipientNavKey -> R.id.orderRecipientFragment
+            is PaymentMethodNavKey -> R.id.paymentMethodFragment
+            is PreOrderNavKey -> R.id.preOrderFragment
+            is ProductAnalogsNavKey -> R.id.productsCollectionFragment
+            is ProductCatalogNavKey -> R.id.productCatalogFragment
+            is ProductCommentsNavKey -> R.id.productCommentsFragment
+            is ProductDetailsNavKey -> R.id.productDetailFragment
+            is DetailMediaNavKey -> R.id.detailMedia
+            is ProductFiltersNavKey -> R.id.productFiltersFragment
+            is ChangePasswordNavKey -> R.id.changePasswordFragment
+            is NotificationSettingsNavKey -> R.id.notificationSettingsFragment
+            is UserDataNavKey -> R.id.userDataFragment
+            is WaterAppNavKey -> R.id.waterAppFragment
+            is PromotionDetailsNavKey -> R.id.promotionDetailFragment
+            is QuestionnairesNavKey -> R.id.questionnairesFragment
+            is SearchNavKey -> R.id.searchFragment
+            is WebViewNavKey -> R.id.webViewFragment
+            is QrCodeNavKey -> R.id.qrCodeFragment
+            is SpeechDialogNavKey -> R.id.speechDialogFragment
+            is ServiceOrderNavKey -> R.id.serviceOrderFragment
+            is StoriesNavKey -> R.id.fullScreenHistorySliderFragment
+            is SubCategoriesNavKey -> R.id.subCategoriesFragment
+            is WaitFeedbackProductsNavKey -> R.id.waitFeedbackProductsFragment
+            is WriteCommentNavKey -> R.id.writeCommentFragment
+            is WriteMessageNavKey -> R.id.writeMessageFragment
+            else -> null
         }
     }
 }
