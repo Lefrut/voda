@@ -147,7 +147,7 @@ fun TraceOrderEntry() = NavigationEntry<TraceOrderViewModel> {
         viewModel.events.collect { event ->
             when (event) {
                 TraceOrderViewModel.TraceOrderEvents.GoBack -> {
-                    navController.popBackStack()
+                    navigator.goBack()
                 }
 
                 TraceOrderViewModel.TraceOrderEvents.MoveCameraMinus -> {
@@ -263,7 +263,7 @@ fun TraceOrderEntry() = NavigationEntry<TraceOrderViewModel> {
                 }
 
                 is TraceOrderViewModel.TraceOrderEvents.GoToJivoChat -> {
-                    navController.navigateToWebView(event.link)
+                    navigator.navigateToWebView(event.link)
                 }
             }
         }

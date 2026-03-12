@@ -38,7 +38,7 @@ fun AllBottlesEntry() = NavigationEntry<AllBottlesFlowViewModel> {
         viewModel.events.collect { event ->
             when (event) {
                 AllBottlesFlowViewModel.BottlesEvent.GoBack -> {
-                    navController.popBackStack()
+                    navigator.goBack()
                 }
             }
         }

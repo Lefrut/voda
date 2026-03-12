@@ -41,18 +41,18 @@ fun LoginByEmailEntry(
         viewModel.events.collect { event ->
             when (event) {
                 is LoginByEmailEvent.GoBack -> {
-                    navController.previousBackStackEntry
+                    navigator.previousBackStackEntry
                         ?.savedStateHandle
                         ?.set(AuthArgs.ACCOUNT_TYPE_ID, event.selectedAccountTypeId)
-                    navController.popBackStack()
+                    navigator.goBack()
                 }
 
                 LoginByEmailEvent.GoToRegister -> {
-                    navController.navigateToRegister()
+                    navigator.navigateToRegister()
                 }
 
                 is LoginByEmailEvent.GoToWebView -> {
-                    navController.navigateToWebView(event.url, event.title)
+                    navigator.navigateToWebView(event.url, event.title)
                 }
 
                 LoginByEmailEvent.RefreshAll -> {
@@ -62,16 +62,16 @@ fun LoginByEmailEntry(
 
                     val redirect = viewModel.tabManager.fetchAuthRedirect()
                     if (redirect == TabManager.DEFAULT_AUTH_REDIRECT) {
-                        navController.popBackStack(R.id.profileFragment, false)
+                        navigator.popBackStack(R.id.profileFragment, false)
                     } else {
-                        navController.popBackStack(R.id.profileFragment, false)
+                        navigator.popBackStack(R.id.profileFragment, false)
                         viewModel.tabManager.selectTab(redirect)
                         viewModel.tabManager.setDefaultAuthRedirect()
                     }
                 }
 
                 LoginByEmailEvent.GoToRecoverPassword -> {
-                    navController.navigateToRecoverPassword()
+                    navigator.navigateToRecoverPassword()
                 }
             }
         }

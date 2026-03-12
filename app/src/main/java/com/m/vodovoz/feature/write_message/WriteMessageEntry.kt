@@ -25,7 +25,7 @@ fun WriteMessageEntry() = NavigationEntry<WriteMessageViewModel> {
     viewModel.collectEvents { event ->
         when (event) {
             WriteMessageEvent.GoBack -> {
-                navController.popBackStack()
+                navigator.goBack()
             }
 
             is WriteMessageEvent.ShowSnackbar -> {
@@ -33,7 +33,7 @@ fun WriteMessageEntry() = NavigationEntry<WriteMessageViewModel> {
             }
 
             is WriteMessageEvent.GoToWebView -> {
-                navController.navigateToWebView(
+                navigator.navigateToWebView(
                     event.url,
                     event.title
                 )

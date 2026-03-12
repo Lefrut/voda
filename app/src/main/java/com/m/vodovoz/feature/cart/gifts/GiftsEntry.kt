@@ -54,15 +54,15 @@ fun GiftsEntry() = NavigationEntry<GiftsViewModel> {
         viewModel.events.collect { event ->
             when (event) {
                 GiftsEvent.GoBack -> {
-                    navController.popBackStack()
+                    navigator.goBack()
                 }
 
                 is GiftsEvent.GoToCart -> {
-                    navController.previousBackStackEntry?.savedStateHandle?.set(
+                    navigator.previousBackStackEntry?.savedStateHandle?.set(
                         "gift",
                         event.currentGift
                     )
-                    navController.popBackStack()
+                    navigator.goBack()
                 }
             }
         }

@@ -34,15 +34,15 @@ fun FilterValuesEntry() = NavigationEntry<FilterValuesViewModel> {
         viewModel.events.collect { event ->
             when (event) {
                 FilterValuesViewModel.ConcreteFilterEvent.GoBack -> {
-                    navController.popBackStack()
+                    navigator.goBack()
                 }
 
                 is FilterValuesViewModel.ConcreteFilterEvent.GoToProductFilters -> {
-                    navController.previousBackStackEntry?.savedStateHandle?.set(
+                    navigator.previousBackStackEntry?.savedStateHandle?.set(
                         "filter",
                         event.filter
                     )
-                    navController.popBackStack(
+                    navigator.popBackStack(
                         R.id.productFiltersFragment,
                         false
                     )

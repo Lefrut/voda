@@ -39,7 +39,9 @@ import com.m.vodovoz.domain.general.respository.UserPreferencesRepository
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
 import com.m.vodovoz.feature.home.model.CategoryUi
 import com.m.vodovoz.feature.home.model.toParentCategory
+import com.m.vodovoz.feature.main.AppNavigatorStore
 import com.m.vodovoz.feature.product_catalog.ProductCatalogFragment.DataSource
+import com.m.vodovoz.feature.product_catalog.api.ProductCatalogNavKey
 import com.m.vodovoz.feature.product_comments.model.SortUi
 import com.m.vodovoz.feature.product_comments.model.toDomain
 import com.m.vodovoz.ui.mvi.Event
@@ -74,7 +76,11 @@ class ProductCatalogViewModel @Inject constructor(
     canViewAdultProducts = userPreferencesRepository.canViewAdultProducts
 ) {
 
-    val dataSource = savedState.get<DataSource>("dataSource") ?: DataSource.Missing
+    val dataSource: DataSource = (
+        (AppNavigatorStore.navigator?.state?.currentKey as? ProductCatalogNavKey)
+            ?.toLegacy()
+        ) ?: savedState.get<DataSource>("dataSource")
+        ?: DataSource.Missing
 
     init {
         setupScreen().invokeOnCompletion {

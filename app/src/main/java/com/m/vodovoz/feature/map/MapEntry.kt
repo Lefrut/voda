@@ -240,7 +240,7 @@ private suspend fun com.m.vodovoz.core.navigation.NavigationEntryScope<MapFlowVi
             }
 
             MapFlowViewModel.MapFlowEvents.GoBack -> {
-                navController.popBackStack()
+                navigator.goBack()
             }
 
             MapFlowViewModel.MapFlowEvents.HideKeyboard -> {
@@ -255,7 +255,7 @@ private suspend fun com.m.vodovoz.core.navigation.NavigationEntryScope<MapFlowVi
             }
 
             is MapFlowViewModel.MapFlowEvents.GoToAddAddress -> {
-                navController.navigateToAddAddress(
+                navigator.navigateToAddAddress(
                     mapAddress = event.mapAddress,
                     navOptions = androidx.navigation.navOptions {
                         launchSingleTop = true
@@ -266,11 +266,11 @@ private suspend fun com.m.vodovoz.core.navigation.NavigationEntryScope<MapFlowVi
             }
 
             is MapFlowViewModel.MapFlowEvents.BackToAddAddress -> {
-                navController.previousBackStackEntry?.savedStateHandle?.set(
+                navigator.previousBackStackEntry?.savedStateHandle?.set(
                     "mapAddress",
                     event.mapAddress
                 )
-                navController.popBackStack()
+                navigator.goBack()
             }
         }
     }

@@ -1,11 +1,13 @@
 package com.m.vodovoz.ui.insets
 
 import android.view.View
+import androidx.compose.runtime.Stable
 import androidx.core.graphics.Insets
 import androidx.core.view.WindowInsetsCompat.Type.InsetsType
 import androidx.core.view.updatePadding
 import kotlinx.coroutines.flow.StateFlow
 
+@Stable
 interface InsetsVisibilityState {
 
     val statusBarInsets: StateFlow<InsetsState>

@@ -43,11 +43,11 @@ fun ServiceOrderEntry() = NavigationEntry<ServiceOrderViewModel> {
     viewModel.collectEvents { event ->
         when (event) {
             ServiceOrderViewModel.ServiceOrderEvent.GoBack -> {
-                navController.popBackStack()
+                navigator.goBack()
             }
 
             is ServiceOrderViewModel.ServiceOrderEvent.GoToWebView -> {
-                navController.navigateToWebView(event.url, event.title)
+                navigator.navigateToWebView(event.url, event.title)
             }
         }
     }

@@ -87,7 +87,7 @@ private suspend fun com.m.vodovoz.core.navigation.NavigationEntryScope<OrderingF
     onRefreshCart: () -> Unit,
 ) {
     viewModel.events.onSubscription {
-        val backEntrySavedStateHandle = navController.currentBackStackEntry?.savedStateHandle
+        val backEntrySavedStateHandle = navigator.currentBackStackEntry?.savedStateHandle
 
         backEntrySavedStateHandle?.apply {
             remove<AddressUi>("back_address")?.let { address ->
@@ -126,18 +126,18 @@ private suspend fun com.m.vodovoz.core.navigation.NavigationEntryScope<OrderingF
     }.collect { event ->
         when (event) {
             OrderingFlowViewModel.OrderingEvents.GoBack -> {
-                navController.popBackStack()
+                navigator.goBack()
             }
 
             is OrderingFlowViewModel.OrderingEvents.GoToAddresses -> {
-                navController.navigateToAddresses(
+                navigator.navigateToAddresses(
                     AddressScreenTypeUi.Choose,
                     event.addressId
                 )
             }
 
             is OrderingFlowViewModel.OrderingEvents.GoToDeliveryDate -> {
-                navController.navigateToDeliveryDate(
+                navigator.navigateToDeliveryDate(
                     earlierDelivery = event.earlierDelivery,
                     addressId = event.addressId,
                     date = event.date,
@@ -147,7 +147,7 @@ private suspend fun com.m.vodovoz.core.navigation.NavigationEntryScope<OrderingF
             }
 
             is OrderingFlowViewModel.OrderingEvents.GoToPaymentMethod -> {
-                navController.navigateToPaymentMethod(
+                navigator.navigateToPaymentMethod(
                     addressId = event.addressId,
                     date = event.date,
                     paymentMethodId = event.paymentMethodId,
@@ -160,11 +160,11 @@ private suspend fun com.m.vodovoz.core.navigation.NavigationEntryScope<OrderingF
             }
 
             is OrderingFlowViewModel.OrderingEvents.GoToOrderRecipient -> {
-                navController.navigateToOrderRecipient(event.addressId)
+                navigator.navigateToOrderRecipient(event.addressId)
             }
 
             is OrderingFlowViewModel.OrderingEvents.GoToCallYou -> {
-                navController.navigateToOrderCallYou(
+                navigator.navigateToOrderCallYou(
                     event.addressId,
                     event.callYouId,
                     event.queryParams
@@ -181,7 +181,7 @@ private suspend fun com.m.vodovoz.core.navigation.NavigationEntryScope<OrderingF
             }
 
             is OrderingFlowViewModel.OrderingEvents.GoToWebView -> {
-                navController.navigateToWebView(
+                navigator.navigateToWebView(
                     title = context.getString(R.string.space),
                     url = event.url,
                     navOptions = navOptions {
@@ -194,11 +194,11 @@ private suspend fun com.m.vodovoz.core.navigation.NavigationEntryScope<OrderingF
 
             is OrderingFlowViewModel.OrderingEvents.OpenUrl -> {
                 context.openUrl(event.url)
-                navController.popBackStack()
+                navigator.goBack()
             }
 
             OrderingFlowViewModel.OrderingEvents.GoToHome -> {
-                navController.popBackStack()
+                navigator.goBack()
                 viewModel.tabManager.selectTab(R.id.graph_home)
             }
 

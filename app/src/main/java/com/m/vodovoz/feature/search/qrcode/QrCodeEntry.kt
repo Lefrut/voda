@@ -53,19 +53,19 @@ fun QrCodeEntry() = NavigationEntry<QrCodeViewModel> {
         viewModel.events.collect { qrCodeEvents ->
             when (qrCodeEvents) {
                 is QrCodeViewModel.QrCodeEvents.Success -> {
-                    navController.navigateToProductDetails(qrCodeEvents.id.toLong())
+                    navigator.navigateToProductDetails(qrCodeEvents.id.toLong())
                 }
 
                 QrCodeViewModel.QrCodeEvents.GoBack -> {
-                    navController.popBackStack()
+                    navigator.goBack()
                 }
 
                 is QrCodeViewModel.QrCodeEvents.GoToProductDetails -> {
-                    navController.navigateToProductDetails(qrCodeEvents.id)
+                    navigator.navigateToProductDetails(qrCodeEvents.id)
                 }
 
                 is QrCodeViewModel.QrCodeEvents.GoToSearchProducts -> {
-                    navController.navigateToSearchProductList(qrCodeEvents.barCode)
+                    navigator.navigateToSearchProductList(qrCodeEvents.barCode)
                 }
             }
         }

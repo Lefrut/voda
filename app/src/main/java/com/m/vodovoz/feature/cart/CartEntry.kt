@@ -7,15 +7,20 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.navigation.findNavController
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.compose.LifecycleStartEffect
 import com.m.vodovoz.R
+import com.m.vodovoz.common.account.AccountManager
 import com.m.vodovoz.common.tab.TabManager
+import com.m.vodovoz.core.navigation.LocalNavigator
 import com.m.vodovoz.core.navigation.navigateToAllBottles
 import com.m.vodovoz.core.navigation.navigateToGifts
 import com.m.vodovoz.core.navigation.navigateToOrdering
@@ -26,6 +31,7 @@ import com.m.vodovoz.design_system.composables.placeholders.LoadingPlaceholder
 import com.m.vodovoz.design_system.composables.placeholders.NetworkErrorPlaceholder
 import com.m.vodovoz.design_system.composables.placeholders.VodovozPlaceholder
 import com.m.vodovoz.design_system.effects.LifecycleEffect
+import com.m.vodovoz.feature.cart.model.CartPresentItemUi
 import com.m.vodovoz.ui.mvi.collectAsState
 import com.m.vodovoz.ui.mvi.collectEvents
 import kotlinx.coroutines.delay
@@ -33,10 +39,49 @@ import kotlinx.coroutines.delay
 @Composable
 fun CartEntry(
     viewModel: CartFlowViewModel,
-    tabManager: TabManager,
 ) {
     val viewState by viewModel.collectAsState()
-    val navController = LocalView.current.findNavController()
+    val view = LocalView.current
+    val navigator = LocalNavigator.current
+    val tabManager = viewModel.tabManager
+
+    LifecycleEffect(navigator) {
+        navigator.currentBackStackEntry
+            ?.savedStateHandle
+            ?.remove<CartPresentItemUi>("gift")
+            ?.let { gift ->
+                viewModel.addGiftToCart(gift)
+            }
+    }
+
+    LifecycleEffect(tabManager) {
+        tabManager.observeTabReselect().collect { id ->
+            if (id != TabManager.DEFAULT_STATE && id == R.id.cartFragment) {
+                tabManager.setDefaultState()
+            }
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.accountManager.reportEvent("Зашел в корзину")
+    }
+
+    LifecycleStartEffect(Unit) {
+        onStopOrDispose {
+            tabManager.changeTabVisibility(true)
+        }
+    }
+
+    DisposableEffect(view, tabManager) {
+        ViewCompat.setOnApplyWindowInsetsListener(view) { _, insets ->
+            val imeVisible = insets.isVisible(WindowInsetsCompat.Type.ime())
+            tabManager.changeTabVisibility(!imeVisible)
+            insets
+        }
+        onDispose {
+            ViewCompat.setOnApplyWindowInsetsListener(view, null)
+        }
+    }
 
     when (val uiState = viewState.uiState) {
         CartFlowViewModel.CartUiState.Cart -> {
@@ -93,26 +138,26 @@ fun CartEntry(
     viewModel.collectEvents { event ->
         when (event) {
             is CartFlowViewModel.CartEvents.GoToOrder -> {
-                if (navController.currentBackStackEntry?.destination?.id == R.id.orderingFragment) {
-                    navController.popBackStack()
+                if (navigator.currentBackStackEntry?.destination?.id == R.id.orderingFragment) {
+                    navigator.goBack()
                 }
-                navController.navigateToOrdering(event.coupon)
+                navigator.navigateToOrdering(event.coupon)
             }
 
             is CartFlowViewModel.CartEvents.GoToGifts -> {
-                navController.navigateToGifts(
+                navigator.navigateToGifts(
                     event.present,
                     event.popupWindow
                 )
             }
 
             is CartFlowViewModel.CartEvents.GoToProfile -> {
-                tabManager.setAuthRedirect(navController.graph.id)
+                tabManager.setAuthRedirect(navigator.graph.id)
                 tabManager.selectTab(R.id.graph_profile)
             }
 
             is CartFlowViewModel.CartEvents.GoToProductDetails -> {
-                navController.navigateToProductDetails(event.productId)
+                navigator.navigateToProductDetails(event.productId)
             }
 
             CartFlowViewModel.CartEvents.GoToCatalog -> {
@@ -120,11 +165,11 @@ fun CartEntry(
             }
 
             is CartFlowViewModel.CartEvents.GoToAllBottles -> {
-                navController.navigateToAllBottles(event.bottles)
+                navigator.navigateToAllBottles(event.bottles)
             }
 
             is CartFlowViewModel.CartEvents.GoToAnalogs -> {
-                navController.navigateToProductAnalogs(event.productId)
+                navigator.navigateToProductAnalogs(event.productId)
             }
         }
     }

@@ -12,10 +12,16 @@ import android.view.animation.AccelerateInterpolator
 import android.view.animation.LinearInterpolator
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.Insets
@@ -26,12 +32,15 @@ import androidx.core.view.WindowInsetsCompat.Type
 import androidx.core.view.WindowInsetsCompat.Type.InsetsType
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.Navigation
+import androidx.navigationevent.compose.LocalNavigationEventDispatcherOwner
+import androidx.navigationevent.compose.rememberNavigationEventDispatcherOwner
 import com.google.android.material.snackbar.Snackbar
 import com.m.vodovoz.R
 import com.m.vodovoz.common.account.AccountManager
@@ -44,6 +53,11 @@ import com.m.vodovoz.core.navigation.setupWithNavController
 import com.m.vodovoz.databinding.FragmentMainBinding
 import com.m.vodovoz.design_system.VodovozTheme
 import com.m.vodovoz.design_system.composables.snackbar.VodovozSnackbarHost
+import com.m.vodovoz.feature.cart.CartFlowViewModel
+import com.m.vodovoz.feature.catalog.CatalogFlowViewModel
+import com.m.vodovoz.feature.favorite.FavoriteFlowViewModel
+import com.m.vodovoz.feature.home.HomeFlowViewModel
+import com.m.vodovoz.feature.profile.ProfileFlowViewModel
 import com.m.vodovoz.ui.insets.InsetsPadding
 import com.m.vodovoz.ui.insets.InsetsVisibilityState
 import com.m.vodovoz.ui.insets.consumeWindowInsets
@@ -69,6 +83,15 @@ class MainFragment : Fragment(), SnackbarHostStateOwner {
         ActivityResultContracts.RequestMultiplePermissions()
     ) {}
 
+    private val homeFlowViewModel by activityViewModels<HomeFlowViewModel>()
+    private val profileFlowViewModel by activityViewModels<ProfileFlowViewModel>()
+    private val catalogFlowViewModel by activityViewModels<CatalogFlowViewModel>()
+    private val favoriteFlowViewModel by activityViewModels<FavoriteFlowViewModel>()
+
+    private val cartFlowViewModel by activityViewModels<CartFlowViewModel>()
+    private val viewModel: MainViewModel by viewModels()
+
+
     private val notificationPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { _ ->
@@ -92,10 +115,6 @@ class MainFragment : Fragment(), SnackbarHostStateOwner {
         appUpdateFactory.create { popupSnackbarForCompleteUpdate() }
     }
 
-    private val viewModel: MainViewModel by viewModels()
-
-    private var _binding: FragmentMainBinding? = null
-    private val binding get() = _binding!!
 
     override val snackbarHostState = SnackbarHostState()
 
@@ -117,46 +136,37 @@ class MainFragment : Fragment(), SnackbarHostStateOwner {
 
         checkForUpdate()
 
-        observeTabState()
         observeCartState()
         observeTabVisibility()
 
         listenInsetsStates()
         setOnApplyWindowInsets()
 
-        binding.snackbarHost.setContent {
-            VodovozTheme {
-                VodovozSnackbarHost(
-                    modifier = Modifier.padding(top = 32.dp),
-                    hostState = snackbarHostState,
-                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp)
-                )
-            }
-        }
     }
 
-    private fun setOnApplyWindowInsets() {
-        ViewCompat.setOnApplyWindowInsetsListener(
-            binding.fgvContainer
-        ) { _, applyInsets ->
-            return@setOnApplyWindowInsetsListener WindowInsetsCompat.Builder(
-                applyInsets
-            ).apply {
-                insetsVisibilityState.insets.map { flow ->
-                    flow.value
-                }.forEach { insetState ->
-                    if (insetState.consume) {
-                        consumeWindowInsets(insetState.type)
-                    }
-                }
-            }.build()
-        }
 
-        ViewCompat.setOnApplyWindowInsetsListener(
-            binding.nvNavigation
-        ) { _, _ ->
-            return@setOnApplyWindowInsetsListener CONSUMED
-        }
+    private fun setOnApplyWindowInsets() {
+//        ViewCompat.setOnApplyWindowInsetsListener(
+//            binding.fgvContainer
+//        ) { _, applyInsets ->
+//            return@setOnApplyWindowInsetsListener WindowInsetsCompat.Builder(
+//                applyInsets
+//            ).apply {
+//                insetsVisibilityState.insets.map { flow ->
+//                    flow.value
+//                }.forEach { insetState ->
+//                    if (insetState.consume) {
+//                        consumeWindowInsets(insetState.type)
+//                    }
+//                }
+//            }.build()
+//        }
+//
+//        ViewCompat.setOnApplyWindowInsetsListener(
+//            binding.nvNavigation
+//        ) { _, _ ->
+//            return@setOnApplyWindowInsetsListener CONSUMED
+//        }
     }
 
 
@@ -186,32 +196,59 @@ class MainFragment : Fragment(), SnackbarHostStateOwner {
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View {
-        _binding = FragmentMainBinding.inflate(inflater, container, false)
-        return binding.root
+        return ComposeView(requireContext()).apply {
+            setContent {
+                VodovozTheme {
+                    CompositionLocalProvider(
+                        LocalNavigationEventDispatcherOwner provides rememberNavigationEventDispatcherOwner(
+                            parent = null
+                        )
+                    ) {
+                        Box(modifier = Modifier.background(MaterialTheme.colorScheme.background)) {
+                            BottmNav(
+                                homeViewModel = homeFlowViewModel,
+                                catalogFlowViewModel = catalogFlowViewModel,
+                                favoriteFlowViewModel = favoriteFlowViewModel,
+                                profileFlowViewModel = profileFlowViewModel,
+                                cartFlowViewModel = cartFlowViewModel
+                            )
+                            VodovozSnackbarHost(
+                                modifier = Modifier
+                                    .align(Alignment.TopCenter)
+                                    .padding(top = 32.dp),
+                                hostState = snackbarHostState,
+                                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp)
+                            )
+                        }
+                    }
+
+
+                }
+            }
+        }
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         viewModel.isBottomBarInitialized = false
-        _binding = null
     }
 
     private fun observeTabVisibility() = lifecycleScope.launch {
         repeatOnLifecycle(Lifecycle.State.STARTED) {
             tabManager.observeTabVisibility().collect { isVisible ->
-                val bottomNavigationView = binding.nvNavigation
-                if (isVisible) {
-                    bottomNavigationView.apply {
-                        animate().cancel()
-                        alpha = if (visibility == View.VISIBLE) 1f else 0f
-                        visibility = View.VISIBLE
-                        animate().alpha(1f).setInterpolator(
-                            LinearInterpolator()
-                        ).setDuration(300).start()
-                    }
-                } else {
-                    bottomNavigationView.apply { visibility = View.GONE }
-                }
+//                val bottomNavigationView = binding.nvNavigation
+//                if (isVisible) {
+//                    bottomNavigationView.apply {
+//                        animate().cancel()
+//                        alpha = if (isVisible) 1f else 0f
+//                        visibility = View.VISIBLE
+//                        animate().alpha(1f).setInterpolator(
+//                            LinearInterpolator()
+//                        ).setDuration(300).start()
+//                    }
+//                } else {
+//                    bottomNavigationView.apply { visibility = View.GONE }
+//                }
             }
         }
     }
@@ -220,69 +257,57 @@ class MainFragment : Fragment(), SnackbarHostStateOwner {
         insetsVisibilityState.insets
     ) { insetsStates -> insetsStates.toList() }.flowWithLifecycle(lifecycle)
         .onEach { insetsStates ->
-            binding.root.doWhenAttached {
-                var accInsetsPadding = InsetsPadding(0, 0, 0, 0)
-
-                for (insetState in insetsStates) {
-                    if (insetState.type == Type.ime()) {
-                        if (insetState.consume) binding.root.handleImeInsetIfNeeded()
-                        else binding.root.removeImeHandling()
-                        continue
-                    }
-
-                    val insets = ViewCompat.getRootWindowInsets(binding.root)
-                    insets?.getInsetsIgnoringVisibility(insetState.type)?.toInsetsPadding()
-                        ?.takeIf { insetState.consume }
-                        ?.let { insetsPadding ->
-                            accInsetsPadding += insetsPadding
-                        }
-                }
-
-                binding.root.updatePadding(accInsetsPadding)
-                binding.root.requestApplyInsets()
-            }
+//            binding.root.doWhenAttached {
+//                var accInsetsPadding = InsetsPadding(0, 0, 0, 0)
+//
+//                for (insetState in insetsStates) {
+//                    if (insetState.type == Type.ime()) {
+//                        if (insetState.consume) binding.root.handleImeInsetIfNeeded()
+//                        else binding.root.removeImeHandling()
+//                        continue
+//                    }
+//
+//                    val insets = ViewCompat.getRootWindowInsets(binding.root)
+//                    insets?.getInsetsIgnoringVisibility(insetState.type)?.toInsetsPadding()
+//                        ?.takeIf { insetState.consume }
+//                        ?.let { insetsPadding ->
+//                            accInsetsPadding += insetsPadding
+//                        }
+//                }
+//
+//                binding.root.updatePadding(accInsetsPadding)
+//                binding.root.requestApplyInsets()
+//            }
         }.launchIn(viewLifecycleOwner.lifecycleScope)
 
 
-    @SuppressLint("UseKtx")
+    @SuppressLint("UseKtx", "StringFormatMatches")
     private fun observeCartState() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                tabManager.observeBottomNavCartState().collect { state ->
-                    if (state == null || state.count == 0) {
-                        binding.circleAmount.isVisible = false
-                        binding.nvNavigation.menu.getItem(2).title = getString(R.string.cart)
-                    } else {
-                        binding.circleAmount.text = state.count.toString()
-                        binding.circleAmount.isVisible = true
-                        binding.circleAmount
-                            .animate()
-                            .scaleX(1.4f)
-                            .scaleY(1.4f)
-                            .setDuration(300)
-                            .setInterpolator(AccelerateInterpolator())
-                            .withEndAction {
-                                binding.circleAmount.animate()
-                                    .scaleX(1f)
-                                    .scaleY(1f)
-                            }
-                            .start()
-                        binding.nvNavigation.menu.getItem(2).title =
-                            getString(R.string.price_text, state.total)
-                    }
-                }
-            }
-        }
-    }
-
-    private fun observeTabState() {
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                tabManager
-                    .observeTabState()
-                    .collect { tabId ->
-                        binding.nvNavigation.selectedItemId = tabId
-                    }
+//                tabManager.observeBottomNavCartState().collect { state ->
+//                    if (state == null || state.count == 0) {
+//                        binding.circleAmount.isVisible = false
+//                        binding.nvNavigation.menu.getItem(2).title = getString(R.string.cart)
+//                    } else {
+//                        binding.circleAmount.text = state.count.toString()
+//                        binding.circleAmount.isVisible = true
+//                        binding.circleAmount
+//                            .animate()
+//                            .scaleX(1.4f)
+//                            .scaleY(1.4f)
+//                            .setDuration(300)
+//                            .setInterpolator(AccelerateInterpolator())
+//                            .withEndAction {
+//                                binding.circleAmount.animate()
+//                                    .scaleX(1f)
+//                                    .scaleY(1f)
+//                            }
+//                            .start()
+//                        binding.nvNavigation.menu.getItem(2).title =
+//                            getString(R.string.price_text, state.total)
+//                    }
+//                }
             }
         }
     }
@@ -296,31 +321,6 @@ class MainFragment : Fragment(), SnackbarHostStateOwner {
 
     private fun setupBottomNavigationBar() = lifecycleScope.launch {
         viewModel.isBottomBarInitialized = true
-
-        val navGraphIds = listOf(
-            R.navigation.nav_graph_home,
-            R.navigation.nav_graph_catalog,
-            R.navigation.nav_graph_cart,
-            R.navigation.nav_graph_favorite,
-            R.navigation.nav_graph_profile
-        )
-
-        val activity = requireActivity()
-
-        val navControllerLiveData = binding.nvNavigation.setupWithNavController(
-            navGraphIds = navGraphIds,
-            fragmentManager = childFragmentManager,
-            containerId = R.id.fgvContainer,
-            intent = activity.intent,
-            activity = activity,
-            lifecycleOwner = viewLifecycleOwner,
-            recyclerViewToTop = { menuId ->
-                tabManager.reselect(menuId)
-            }
-        )
-        navControllerLiveData.observe(viewLifecycleOwner) { navController ->
-            Navigation.setViewNavController(requireView(), navController)
-        }
     }
 
 

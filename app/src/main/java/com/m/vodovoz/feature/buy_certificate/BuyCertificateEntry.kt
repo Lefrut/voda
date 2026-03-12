@@ -55,22 +55,22 @@ fun BuyCertificateEntry() = NavigationEntry<BuyCertificateViewModel> {
         viewModel.events.collect { event ->
             when (event) {
                 BuyCertificateViewModel.BuyCertificateEvents.GoBack -> {
-                    navController.popBackStack()
+                    navigator.goBack()
                 }
 
                 is BuyCertificateViewModel.BuyCertificateEvents.OpenLink -> Unit
 
                 is BuyCertificateViewModel.BuyCertificateEvents.GoToFAQ -> {
-                    navController.navigateToFAQ(event.faq)
+                    navigator.navigateToFAQ(event.faq)
                 }
 
                 BuyCertificateViewModel.BuyCertificateEvents.GoToProfile -> {
-                    viewModel.tabManager.setAuthRedirect(navController.graph.id)
+                    viewModel.tabManager.setAuthRedirect(navigator.graph.id)
                     viewModel.tabManager.selectTab(R.id.graph_profile)
                 }
 
                 is BuyCertificateViewModel.BuyCertificateEvents.GoToWebView -> {
-                    navController.navigateToWebView(
+                    navigator.navigateToWebView(
                         event.url,
                         context.getString(R.string.space)
                     )

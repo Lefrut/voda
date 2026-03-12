@@ -34,7 +34,7 @@ fun DocumentViewerEntry() = NavigationEntry<DocumentViewerViewModel> {
         viewModel.events.collect { event ->
             when (event) {
                 DocumentViewerEvent.GoBack -> {
-                    navController.popBackStack()
+                    navigator.goBack()
                 }
             }
         }

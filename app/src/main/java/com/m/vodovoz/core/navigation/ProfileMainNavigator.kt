@@ -1,42 +1,42 @@
 package com.m.vodovoz.core.navigation
 
 import android.content.Context
-import androidx.navigation.NavController
 import com.m.vodovoz.common.model.GlobalAppLinks
 import com.m.vodovoz.feature.addresses.model.AddressScreenTypeUi
+import com.m.vodovoz.feature.main.Navigator
 
 data object ProfileMainNavigator {
 
-    fun navigate(id: String, navController: NavController) {
+    fun navigate(id: String, navigator: Navigator) {
         when (id) {
             CHANGE_PASSWORD_ROUTE -> {
-                navController.navigateToChangePassword()
+                navigator.navigateToChangePassword()
             }
 
             CERTIFICATE_ACTIVATION_ROUTE -> {
-                navController.navigateToCertificateActivation()
+                navigator.navigateToCertificateActivation()
             }
 
             ORDER_HISTORY_ROUTE -> {
-                navController.navigateToOrdersHistory()
+                navigator.navigateToOrdersHistory()
             }
 
             PRODUCTS_HISTORY_ROUTE -> {
-                navController.navigateToPastPurchases()
+                navigator.navigateToPastPurchases()
             }
 
             ADDRESSES_ROUTE -> {
-                navController.navigateToAddresses(AddressScreenTypeUi.Add)
+                navigator.navigateToAddresses(AddressScreenTypeUi.Add)
             }
 
             QUESTIONNAIRES_ROUTE -> {
-                navController.navigateToQuestionnaires()
+                navigator.navigateToQuestionnaires()
             }
 
             ABOUT_DELIVERY_ROUTE -> {
 
                 val aboutDeliveryLink = GlobalAppLinks.aboutDelivery
-                navController.navigateToWebView(
+                navigator.navigateToWebView(
                     aboutDeliveryLink.url,
                     aboutDeliveryLink.title
                 )
@@ -44,18 +44,18 @@ data object ProfileMainNavigator {
 
             ABOUT_PAYMENT_ROUTE -> {
                 val aboutPaymentLink = GlobalAppLinks.aboutPayment
-                navController.navigateToWebView(
+                navigator.navigateToWebView(
                     aboutPaymentLink.url,
                     aboutPaymentLink.title
                 )
             }
 
             SETTINGS_NOTIFICATIONS_ROUTE -> {
-                navController.navigateToNotificationSettings()
+                navigator.navigateToNotificationSettings()
             }
 
             ABOUT_APP_ROUTE -> {
-                navController.navigateToAboutApp()
+                navigator.navigateToAboutApp()
             }
 
             else -> {

@@ -49,9 +49,9 @@ import javax.inject.Inject
 class CartFlowViewModel @Inject constructor(
     private val cartManager: CartManager,
     private val likeManager: LikeManager,
-    private val accountManager: AccountManager,
+    val accountManager: AccountManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
-    private val tabManager: TabManager,
+    val tabManager: TabManager,
     private val userPreferencesRepository: UserPreferencesRepository,
 ) : PagingProductsMviViewModel2<CartItemUi, ProductUi, CartFlowViewModel.CartState, CartFlowViewModel.CartEvents>(
     state = CartState(),

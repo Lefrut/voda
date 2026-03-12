@@ -59,44 +59,44 @@ fun SearchEntry() = NavigationEntry<SearchFlowViewModel> {
         viewModel.events.collect { event ->
             when (event) {
                 is SearchFlowViewModel.SearchEvents.GoToPreOrder -> {
-                    navController.navigateToPreOrder(event.productId)
+                    navigator.navigateToPreOrder(event.productId)
                 }
 
                 is SearchFlowViewModel.SearchEvents.GoToProfile -> {
-                    viewModel.tabManager.setAuthRedirect(navController.graph.id)
+                    viewModel.tabManager.setAuthRedirect(navigator.graph.id)
                     viewModel.tabManager.selectTab(R.id.graph_profile)
                 }
 
                 SearchFlowViewModel.SearchEvents.GoToContacts -> Unit
 
                 SearchFlowViewModel.SearchEvents.GoToPromotions -> {
-                    navController.navigateToPromotions()
+                    navigator.navigateToPromotions()
                 }
 
                 is SearchFlowViewModel.SearchEvents.GoToService -> Unit
 
                 is SearchFlowViewModel.SearchEvents.GoToWebView -> {
-                    navController.navigateToWebView(event.url, event.title)
+                    navigator.navigateToWebView(event.url, event.title)
                 }
 
                 SearchFlowViewModel.SearchEvents.GoBack -> {
-                    navController.popBackStack()
+                    navigator.goBack()
                 }
 
                 is SearchFlowViewModel.SearchEvents.GoToSearchProductList -> {
-                    navController.navigateToSearchProductList(event.query)
+                    navigator.navigateToSearchProductList(event.query)
                 }
 
                 SearchFlowViewModel.SearchEvents.GoToScanner -> {
-                    navController.navigateToQrCode()
+                    navigator.navigateToQrCode()
                 }
 
                 is SearchFlowViewModel.SearchEvents.GoToProductDetails -> {
-                    navController.navigateToProductDetails(event.productId)
+                    navigator.navigateToProductDetails(event.productId)
                 }
 
                 is SearchFlowViewModel.SearchEvents.GoToProductAnalogs -> {
-                    navController.navigateToProductAnalogs(event.productId)
+                    navigator.navigateToProductAnalogs(event.productId)
                 }
             }
         }

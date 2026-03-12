@@ -57,14 +57,14 @@ private suspend fun com.m.vodovoz.core.navigation.NavigationEntryScope<AddAddres
     snackbarHostState: SnackbarHostState,
 ) {
     viewModel.events.onSubscription {
-        navController.currentBackStackEntry?.savedStateHandle?.remove<MapAddressUi>("mapAddress")
+        navigator.currentBackStackEntry?.savedStateHandle?.remove<MapAddressUi>("mapAddress")
             ?.let { mapAddress ->
             viewModel.changeMapAddress(mapAddress)
         }
     }.collect { event ->
         when (event) {
             AddAddressEvent.GoBackToMap -> {
-                navController.popBackStack(
+                navigator.popBackStack(
                     destinationId = R.id.mapFragment,
                     inclusive = false,
                     saveState = true
@@ -72,7 +72,7 @@ private suspend fun com.m.vodovoz.core.navigation.NavigationEntryScope<AddAddres
             }
 
             is AddAddressEvent.GoToMap -> {
-                navController.navigateToMap(
+                navigator.navigateToMap(
                     event.addressName,
                     navOptions {
                         slideAnim()
@@ -88,7 +88,7 @@ private suspend fun com.m.vodovoz.core.navigation.NavigationEntryScope<AddAddres
             }
 
             AddAddressEvent.GoBackToAddresses -> {
-                navController.popBackStack(
+                navigator.popBackStack(
                     destinationId = R.id.addressesFragment,
                     inclusive = false,
                     saveState = false

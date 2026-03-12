@@ -42,16 +42,16 @@ fun PaymentMethodEntry() = NavigationEntry<PaymentMethodViewModel> {
     viewModel.collectEvents { event ->
         when (event) {
             PaymentMethodEvent.GoBack -> {
-                navController.popBackStack()
+                navigator.goBack()
             }
 
             is PaymentMethodEvent.GoBackToOrdering -> {
-                navController.previousBackStackEntry?.savedStateHandle?.apply {
+                navigator.previousBackStackEntry?.savedStateHandle?.apply {
                     set("paymentBalance", event.paymentBalance?.toNav())
                     set("paymentBonuses", event.paymentBonuses?.toNav())
                     set("paymentMethod", event.paymentMethod?.toNav())
                 }
-                navController.popBackStack()
+                navigator.goBack()
             }
         }
     }

@@ -13,7 +13,6 @@ import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.fragment.findNavController
 import com.m.vodovoz.R
 import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.core.navigation.mainFragment
@@ -33,6 +32,7 @@ import com.m.vodovoz.design_system.VodovozTheme
 import com.m.vodovoz.design_system.composables.placeholders.ForAdultsPlaceholder
 import com.m.vodovoz.design_system.composables.snackbar.VodovozSnackBarVisuals
 import com.m.vodovoz.design_system.effects.LifecycleEffect
+import com.m.vodovoz.feature.main.AppNavigatorStore
 import com.m.vodovoz.ui.mvi.collectAsState
 import com.m.vodovoz.ui.snackbar.snackBarHostState
 import com.m.vodovoz.util.extensions.copyText
@@ -117,7 +117,8 @@ class ProductDetailsFragment : Fragment() {
 
     private suspend fun observeEvents(mediaPagerState: PagerState): Unit =
         viewModel.events.onSubscription {
-            val mediaIndex = findNavController().currentBackStackEntry
+            val navigator = AppNavigatorStore.navigator ?: return@onSubscription
+            val mediaIndex = navigator.currentBackStackEntry
                 ?.savedStateHandle
                 ?.get<Int>("mediaIndex")
 
@@ -125,23 +126,24 @@ class ProductDetailsFragment : Fragment() {
                 viewModel.setMediaPage(page)
             }
         }.collect { event ->
+            val navigator = AppNavigatorStore.navigator ?: return@collect
             when (event) {
                 is ProductDetailsFlowViewModel.ProductDetailsEvents.GoToPreOrder -> {
-                    findNavController().navigateToPreOrder(event.id)
+                    navigator.navigateToPreOrder(event.id)
                 }
 
                 is ProductDetailsFlowViewModel.ProductDetailsEvents.GoToProfile -> {
-                    tabManager.setAuthRedirect(findNavController().graph.id)
+                    tabManager.setAuthRedirect(navigator.graph.id)
                     tabManager.selectTab(R.id.graph_profile)
                 }
 
                 is ProductDetailsFlowViewModel.ProductDetailsEvents.GoToCart -> {
-                    tabManager.setAuthRedirect(findNavController().graph.id)
+                    tabManager.setAuthRedirect(navigator.graph.id)
                     tabManager.selectTab(R.id.graph_cart)
                 }
 
                 is ProductDetailsFlowViewModel.ProductDetailsEvents.GoToAboutProduct -> {
-                    findNavController().navigateToAboutProduct(
+                    navigator.navigateToAboutProduct(
                         productId = event.productId,
                         prices = event.prices,
                         analogButton = event.analogButton,
@@ -150,7 +152,7 @@ class ProductDetailsFragment : Fragment() {
                 }
 
                 is ProductDetailsFlowViewModel.ProductDetailsEvents.GoToProductComments -> {
-                    findNavController().navigateToProductComments(
+                    navigator.navigateToProductComments(
                         productId = event.productId,
                         productName = event.productName,
                         productImage = event.productImage
@@ -158,23 +160,23 @@ class ProductDetailsFragment : Fragment() {
                 }
 
                 is ProductDetailsFlowViewModel.ProductDetailsEvents.GoToProductAnalogs -> {
-                    findNavController().navigateToProductAnalogs(event.productId)
+                    navigator.navigateToProductAnalogs(event.productId)
                 }
 
                 ProductDetailsFlowViewModel.ProductDetailsEvents.GoBack -> {
-                    findNavController().popBackStack()
+                    navigator.goBack()
                 }
 
                 is ProductDetailsFlowViewModel.ProductDetailsEvents.GoToSearch -> {
-                    findNavController().navigateToSearch(event.query)
+                    navigator.navigateToSearch(event.query)
                 }
 
                 is ProductDetailsFlowViewModel.ProductDetailsEvents.GoToProductDetails -> {
-                    findNavController().navigateToProductDetails(event.productId)
+                    navigator.navigateToProductDetails(event.productId)
                 }
 
                 is ProductDetailsFlowViewModel.ProductDetailsEvents.GoToCategoryProductList -> {
-                    findNavController().navigateToCategoryProductList(event.categoryId)
+                    navigator.navigateToCategoryProductList(event.categoryId)
                 }
 
                 is ProductDetailsFlowViewModel.ProductDetailsEvents.Share -> {
@@ -182,7 +184,7 @@ class ProductDetailsFragment : Fragment() {
                 }
 
                 is ProductDetailsFlowViewModel.ProductDetailsEvents.GoToSearchProductList -> {
-                    findNavController().navigateToSearchProductList(event.query)
+                    navigator.navigateToSearchProductList(event.query)
                 }
 
                 is ProductDetailsFlowViewModel.ProductDetailsEvents.Copy -> {
@@ -195,11 +197,11 @@ class ProductDetailsFragment : Fragment() {
                 }
 
                 is ProductDetailsFlowViewModel.ProductDetailsEvents.GoToBrandProducts -> {
-                    findNavController().navigateToBrandProductList(event.brandId)
+                    navigator.navigateToBrandProductList(event.brandId)
                 }
 
                 is ProductDetailsFlowViewModel.ProductDetailsEvents.GoToWriteComment -> {
-                    findNavController().navigateToWriteComment(
+                    navigator.navigateToWriteComment(
                         event.id,
                         event.name,
                         event.detailPicture,
@@ -208,7 +210,7 @@ class ProductDetailsFragment : Fragment() {
                 }
 
                 is ProductDetailsFlowViewModel.ProductDetailsEvents.GoToDetailMedia -> {
-                    findNavController().navigateToDetailMedia(event.media, event.mediaList)
+                    navigator.navigateToDetailMedia(event.media, event.mediaList)
                 }
 
                 is ProductDetailsFlowViewModel.ProductDetailsEvents.ScrollToMediaPage -> {
@@ -216,7 +218,7 @@ class ProductDetailsFragment : Fragment() {
                 }
 
                 ProductDetailsFlowViewModel.ProductDetailsEvents.GoToViewedProduct -> {
-                    findNavController().navigateToViewedProductList()
+                    navigator.navigateToViewedProductList()
                 }
             }
         }

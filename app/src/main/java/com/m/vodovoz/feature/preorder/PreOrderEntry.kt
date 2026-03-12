@@ -47,7 +47,7 @@ fun PreOrderEntry() = NavigationEntry<PreOrderFlowViewModel> {
         viewModel.events.collect { event ->
             when (event) {
                 PreOrderFlowViewModel.PreOrderEvent.GoBack -> {
-                    navController.popBackStack()
+                    navigator.goBack()
                 }
 
                 PreOrderFlowViewModel.PreOrderEvent.HideKeyboard -> {
@@ -64,7 +64,7 @@ fun PreOrderEntry() = NavigationEntry<PreOrderFlowViewModel> {
                 }
 
                 is PreOrderFlowViewModel.PreOrderEvent.GoToWebView -> {
-                    navController.navigateToWebView(event.url, event.title)
+                    navigator.navigateToWebView(event.url, event.title)
                 }
             }
         }

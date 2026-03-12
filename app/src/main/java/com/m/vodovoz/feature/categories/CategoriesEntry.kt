@@ -25,15 +25,15 @@ fun CategoriesEntry() = NavigationEntry<CategoriesViewModel> {
         viewModel.events.collect { event ->
             when (event) {
                 is CategoriesEvent.GoBackWithArguments -> {
-                    navController.previousBackStackEntry?.savedStateHandle?.set(
+                    navigator.previousBackStackEntry?.savedStateHandle?.set(
                         "category",
                         event.currentCategory
                     )
-                    navController.popBackStack()
+                    navigator.goBack()
                 }
 
                 CategoriesEvent.GoBack -> {
-                    navController.popBackStack()
+                    navigator.goBack()
                 }
             }
         }

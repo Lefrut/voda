@@ -41,23 +41,23 @@ fun RegisterEntry(
                 }
 
                 RegFlowViewModel.RegEvents.GoBack -> {
-                    navController.popBackStack()
+                    navigator.goBack()
                 }
 
                 RegFlowViewModel.RegEvents.GoToProfile -> {
                     onFetchProfile()
-                    navController.popBackStack(
+                    navigator.popBackStack(
                         R.id.profileFragment,
                         false
                     )
                 }
 
                 is RegFlowViewModel.RegEvents.GoToWebView -> {
-                    navController.navigateToWebView(event.url, event.title)
+                    navigator.navigateToWebView(event.url, event.title)
                 }
 
                 RegFlowViewModel.RegEvents.GoToLogin -> {
-                    navController.navigate(
+                    navigator.navigate(
                         R.id.loginFragment,
                         bundleOf(),
                         NavOptions.Builder().setPopUpTo(R.id.profileFragment, false).build()
@@ -65,7 +65,7 @@ fun RegisterEntry(
                 }
 
                 RegFlowViewModel.RegEvents.GoToLoginByEmail -> {
-                    navController.navigate(
+                    navigator.navigate(
                         R.id.loginByEmailFragment,
                         bundleOf(),
                         NavOptions.Builder().setPopUpTo(R.id.profileFragment, false).build()
@@ -79,7 +79,7 @@ fun RegisterEntry(
 
                     val redirect = viewModel.tabManager.fetchAuthRedirect()
                     if (redirect == TabManager.DEFAULT_AUTH_REDIRECT) {
-                        navController.popBackStack(
+                        navigator.popBackStack(
                             R.id.profileFragment,
                             false
                         )

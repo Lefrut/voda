@@ -85,13 +85,13 @@ fun StoriesEntry() = NavigationEntry<StoriesViewModel> {
             }
 
             StoriesViewModel.StoriesEvents.GoBack -> {
-                navController.popBackStack()
+                navigator.goBack()
             }
 
             is StoriesViewModel.StoriesEvents.ActivateAction -> {
                 val cookie = viewModel.cookieManager.fetchCookieSessionId() ?: ""
                 event.action.activate(
-                    navController = navController,
+                    navigator = navigator,
                     context = context,
                     cookie = cookie,
                     tabManager = viewModel.tabManager

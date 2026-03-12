@@ -29,12 +29,12 @@ fun ProductCatalogEntry() = NavigationEntry<ProductCatalogViewModel> {
     val context = LocalContext.current
 
     LifecycleStartEffect(Unit) {
-        navController.currentBackStackEntry?.savedStateHandle?.remove<CategoryUi>("category")
+        navigator.currentBackStackEntry?.savedStateHandle?.remove<CategoryUi>("category")
             ?.let { category ->
                 viewModel.selectCategory(category)
             }
 
-        navController.currentBackStackEntry?.savedStateHandle?.remove<FiltersUi>("filters")
+        navigator.currentBackStackEntry?.savedStateHandle?.remove<FiltersUi>("filters")
             ?.let { filters ->
                 viewModel.changeFilters(filters)
             }
@@ -68,22 +68,22 @@ fun ProductCatalogEntry() = NavigationEntry<ProductCatalogViewModel> {
     viewModel.collectEvents { event ->
         when (event) {
             ProductCatalogViewModel.ProductCatalogEvent.GoBack -> {
-                navController.popBackStack()
+                navigator.goBack()
             }
 
             is ProductCatalogViewModel.ProductCatalogEvent.GoToSearch -> {
-                navController.navigateToSearch(event.query)
+                navigator.navigateToSearch(event.query)
             }
 
             is ProductCatalogViewModel.ProductCatalogEvent.GoToCategories -> {
-                navController.navigateToCategories(
+                navigator.navigateToCategories(
                     category = event.currentCategory,
                     categories = event.categories
                 )
             }
 
             is ProductCatalogViewModel.ProductCatalogEvent.GoToProductDetails -> {
-                navController.navigateToProductDetails(event.productId)
+                navigator.navigateToProductDetails(event.productId)
             }
 
             ProductCatalogViewModel.ProductCatalogEvent.ScrollToTop -> {
@@ -91,7 +91,7 @@ fun ProductCatalogEntry() = NavigationEntry<ProductCatalogViewModel> {
             }
 
             is ProductCatalogViewModel.ProductCatalogEvent.GoToProductFilters -> {
-                navController.navigateToProductFilters(
+                navigator.navigateToProductFilters(
                     event.categoryId,
                     event.filters
                 )
@@ -102,19 +102,19 @@ fun ProductCatalogEntry() = NavigationEntry<ProductCatalogViewModel> {
             }
 
             is ProductCatalogViewModel.ProductCatalogEvent.GoToProductAnalogs -> {
-                navController.navigateToProductAnalogs(event.productId)
+                navigator.navigateToProductAnalogs(event.productId)
             }
 
             ProductCatalogViewModel.ProductCatalogEvent.GoToQrCode -> {
-                navController.navigateToQrCode()
+                navigator.navigateToQrCode()
             }
 
             ProductCatalogViewModel.ProductCatalogEvent.GoToSpeech -> {
-                navController.navigateToSpeechDialog()
+                navigator.navigateToSpeechDialog()
             }
 
             ProductCatalogViewModel.ProductCatalogEvent.GoToCatalog -> {
-                navController.popBackStack()
+                navigator.goBack()
                 viewModel.tabManager.selectTab(R.id.graph_catalog)
             }
         }

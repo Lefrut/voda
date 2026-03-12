@@ -60,7 +60,7 @@ fun ChangePasswordEntry() = NavigationEntry<ChangePasswordViewModel> {
     LifecycleEffect(snackbarHostState) {
         viewModel.events.collect { event ->
             when (event) {
-                ChangePasswordEvent.GoBack -> navController.popBackStack()
+                ChangePasswordEvent.GoBack -> navigator.goBack()
                 is ChangePasswordEvent.ShowSnackbar -> {
                     launch {
                         snackbarHostState.currentSnackbarData?.dismiss()

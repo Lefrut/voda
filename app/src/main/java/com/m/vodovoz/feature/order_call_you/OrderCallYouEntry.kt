@@ -25,15 +25,15 @@ fun OrderCallYouEntry() = NavigationEntry<OrderCallYouViewModel> {
     viewModel.collectEvents { event ->
         when (event) {
             OrderCallYouEvent.GoBack -> {
-                navController.popBackStack()
+                navigator.goBack()
             }
 
             is OrderCallYouEvent.GoBackToOrdering -> {
-                navController.previousBackStackEntry?.savedStateHandle?.set(
+                navigator.previousBackStackEntry?.savedStateHandle?.set(
                     "callYou",
                     event.currentItem
                 )
-                navController.popBackStack()
+                navigator.goBack()
             }
         }
     }

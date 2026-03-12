@@ -59,7 +59,7 @@ fun UserDataEntry(
 
                     delay(200)
 
-                    navController.navigate(
+                    navigator.navigate(
                         resId = R.id.profileFragment,
                         args = Bundle.EMPTY,
                         navOptions = navOptions {
@@ -77,7 +77,7 @@ fun UserDataEntry(
                 }
 
                 UserDataFlowViewModel.UserDataEvents.GoBack -> {
-                    navController.popBackStack()
+                    navigator.goBack()
                 }
 
                 is UserDataFlowViewModel.UserDataEvents.ShowSnackbar -> {

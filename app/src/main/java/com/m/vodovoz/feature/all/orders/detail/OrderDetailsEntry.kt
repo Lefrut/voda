@@ -61,7 +61,7 @@ fun OrderDetailsEntry(
 
     LifecycleEffect {
         viewModel.accountManager.observeAccountId().filter { it == null }.collect {
-            navController.popBackStack()
+            navigator.goBack()
             viewModel.tabManager.selectTab(R.id.graph_profile)
         }
     }
@@ -75,23 +75,23 @@ fun OrderDetailsEntry(
                 }
 
                 OrderDetailsFlowViewModel.OrderDetailsEvent.GoBack -> {
-                    navController.popBackStack()
+                    navigator.goBack()
                 }
 
                 is OrderDetailsFlowViewModel.OrderDetailsEvent.GoToOrderQuestion -> {
-                    navController.navigateToOrderQuestion(event.orderId)
+                    navigator.navigateToOrderQuestion(event.orderId)
                 }
 
                 is OrderDetailsFlowViewModel.OrderDetailsEvent.GoToCancelOrder -> {
-                    navController.navigateToCancelOrder(event.orderId)
+                    navigator.navigateToCancelOrder(event.orderId)
                 }
 
                 is OrderDetailsFlowViewModel.OrderDetailsEvent.GoToProductDetails -> {
-                    navController.navigateToProductDetails(event.productId)
+                    navigator.navigateToProductDetails(event.productId)
                 }
 
                 is OrderDetailsFlowViewModel.OrderDetailsEvent.GoToTraceOrder -> {
-                    navController.navigateToTraceOrder(
+                    navigator.navigateToTraceOrder(
                         event.dividerId,
                         event.orderId
                     )
@@ -99,7 +99,7 @@ fun OrderDetailsEntry(
 
                 is OrderDetailsFlowViewModel.OrderDetailsEvent.GoToWebView -> {
                     val space = context.getString(R.string.space)
-                    navController.navigateToWebView(
+                    navigator.navigateToWebView(
                         event.url,
                         space
                     )

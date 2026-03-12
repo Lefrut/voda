@@ -53,7 +53,7 @@ fun DetailMediaEntry() = NavigationEntry<DetailMediaViewModel> {
                 .distinctUntilChanged()
                 .collectLatest { currentPage ->
                     viewModel.setMediaByIndex(currentPage)
-                    navController.previousBackStackEntry?.savedStateHandle?.set(
+                    navigator.previousBackStackEntry?.savedStateHandle?.set(
                         "mediaIndex",
                         currentPage
                     )
@@ -66,7 +66,7 @@ fun DetailMediaEntry() = NavigationEntry<DetailMediaViewModel> {
             val activity = context as? Activity
             when (event) {
                 DetailMediaEvent.GoBack -> {
-                    navController.popBackStack()
+                    navigator.goBack()
                 }
 
                 DetailMediaEvent.MakeLandscape -> {

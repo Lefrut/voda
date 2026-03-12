@@ -27,11 +27,11 @@ fun AllPromotionsEntry() = NavigationEntry<AllPromotionsFlowViewModel> {
                 }
 
                 is AllPromotionsFlowViewModel.AllPromotionsEvent.GoToProductDetails -> {
-                    navController.navigateToPromotionDetails(event.promotionId)
+                    navigator.navigateToPromotionDetails(event.promotionId)
                 }
 
                 AllPromotionsFlowViewModel.AllPromotionsEvent.GoBack -> {
-                    navController.popBackStack()
+                    navigator.goBack()
                 }
             }
         }

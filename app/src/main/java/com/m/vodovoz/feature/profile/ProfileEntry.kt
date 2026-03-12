@@ -11,13 +11,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentActivity
 import com.m.vodovoz.R
-import com.m.vodovoz.common.cookie.CookieManager
 import com.m.vodovoz.common.tab.TabManager
+import com.m.vodovoz.core.navigation.LocalNavigator
 import com.m.vodovoz.core.navigation.ProfileMainNavigator
 import com.m.vodovoz.core.navigation.activate
 import com.m.vodovoz.core.navigation.navigateToLogin
@@ -35,21 +34,36 @@ import com.m.vodovoz.design_system.composables.placeholders.VodovozPlaceholder
 import com.m.vodovoz.design_system.composables.snackbar.VodovozSnackBarVisuals
 import com.m.vodovoz.design_system.effects.LifecycleEffect
 import com.m.vodovoz.feature.profile.navigation.ProfileChatsNavigator
+import com.m.vodovoz.ui.insets.InsetsVisibilityState
 import com.m.vodovoz.ui.mvi.collectAsState
+import com.m.vodovoz.ui.mvi.collectEvents
 import com.m.vodovoz.ui.snackbar.snackBarHostState
 import com.m.vodovoz.util.extensions.copyText
 import com.m.vodovoz.util.extensions.openUrl
-import androidx.navigation.findNavController
-import com.m.vodovoz.ui.mvi.collectEvents
+import kotlinx.coroutines.delay
 
 @Composable
 fun ProfileEntry(
     viewModel: ProfileFlowViewModel,
-    tabManager: TabManager,
 ) {
     val viewState by viewModel.collectAsState()
     val context = LocalContext.current
-    val navController = LocalView.current.findNavController()
+    val navigator = LocalNavigator.current
+    val tabManager = viewModel.tabManager
+    val insetsVisibilityState = viewModel.insetsVisibilityState
+
+    LifecycleEffect(tabManager) {
+        tabManager.observeTabReselect().collect {
+            if (it != TabManager.DEFAULT_STATE && it == R.id.profileFragment) {
+                tabManager.setDefaultState()
+            }
+        }
+    }
+
+    LifecycleEffect(insetsVisibilityState) {
+        delay(300)
+        insetsVisibilityState.consumeSystemBarInsets(true)
+    }
 
     when (val uiState = viewState.uiState) {
         ProfileFlowViewModel.ProfileUiState.Loading -> {
@@ -99,23 +113,23 @@ fun ProfileEntry(
     viewModel.collectEvents { events ->
         when (events) {
             ProfileFlowViewModel.ProfileEvents.GoToLogin -> {
-                navController.navigateToLogin()
+                navigator.navigateToLogin()
             }
 
             ProfileFlowViewModel.ProfileEvents.GoToUserData -> {
-                navController.navigateToUserData()
+                navigator.navigateToUserData()
             }
 
             is ProfileFlowViewModel.ProfileEvents.GoByMenuItemId -> {
                 ProfileMainNavigator.navigate(
                     id = events.itemId,
-                    navController = navController,
+                    navigator = navigator,
                 )
             }
 
             is ProfileFlowViewModel.ProfileEvents.ActivateVodovozAction -> {
                 events.action.activate(
-                    navController = navController,
+                    navigator = navigator,
                     context = context,
                     cookie = viewModel.cookieManager.fetchCookieSessionId().orEmpty(),
                     tabManager = tabManager
@@ -123,7 +137,7 @@ fun ProfileEntry(
             }
 
             ProfileFlowViewModel.ProfileEvents.GoToLoginByEmail -> {
-                navController.navigateToLoginByEmail()
+                navigator.navigateToLoginByEmail()
             }
 
             is ProfileFlowViewModel.ProfileEvents.Copy -> {
@@ -145,21 +159,21 @@ fun ProfileEntry(
                 ProfileChatsNavigator.navigate(
                     chatId = events.chatId,
                     data = events.data,
-                    navController = navController,
+                    navigator = navigator,
                     context = context
                 )
             }
 
             ProfileFlowViewModel.ProfileEvents.GoToWaterApp -> {
-                navController.navigateToWaterApp()
+                navigator.navigateToWaterApp()
             }
 
             ProfileFlowViewModel.ProfileEvents.GoToWaitFeedbackProducts -> {
-                navController.navigateToWaitFeedbackProducts()
+                navigator.navigateToWaitFeedbackProducts()
             }
 
             is ProfileFlowViewModel.ProfileEvents.GoToWebView -> {
-                navController.navigateToWebView(events.url, events.title)
+                navigator.navigateToWebView(events.url, events.title)
             }
 
             is ProfileFlowViewModel.ProfileEvents.OpenUrl -> {
@@ -168,15 +182,15 @@ fun ProfileEntry(
 
             ProfileFlowViewModel.ProfileEvents.DoNothing -> {}
             is ProfileFlowViewModel.ProfileEvents.GoToOrderDetails -> {
-                navController.navigateToOrderDetails(events.orderId)
+                navigator.navigateToOrderDetails(events.orderId)
             }
 
             ProfileFlowViewModel.ProfileEvents.GoToOrders -> {
-                navController.navigateToOrdersHistory()
+                navigator.navigateToOrdersHistory()
             }
 
             ProfileFlowViewModel.ProfileEvents.GoToQuestionnaires -> {
-                navController.navigateToQuestionnaires()
+                navigator.navigateToQuestionnaires()
             }
         }
     }

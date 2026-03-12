@@ -24,10 +24,10 @@ fun WaitFeedbackProductsEntry() = NavigationEntry<WaitFeedbackProductsViewModel>
         viewState = viewState
     )
 
-    DisposableEffect(lifecycleOwner, navController) {
+    DisposableEffect(lifecycleOwner, navigator) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
-                navController.currentBackStackEntry?.savedStateHandle?.remove<Long>("ratedProductId")
+                navigator.currentBackStackEntry?.savedStateHandle?.remove<Long>("ratedProductId")
                     ?.let { productId ->
                         viewModel.removeProduct(productId)
                     }
@@ -42,7 +42,7 @@ fun WaitFeedbackProductsEntry() = NavigationEntry<WaitFeedbackProductsViewModel>
     viewModel.collectEvents { event ->
         when (event) {
             WaitFeedbackProductsEvent.GoBack -> {
-                navController.popBackStack()
+                navigator.goBack()
             }
 
             WaitFeedbackProductsEvent.GoToCatalog -> {
@@ -50,11 +50,11 @@ fun WaitFeedbackProductsEntry() = NavigationEntry<WaitFeedbackProductsViewModel>
             }
 
             is WaitFeedbackProductsEvent.GoToProductsDetails -> {
-                navController.navigateToProductDetails(event.productId)
+                navigator.navigateToProductDetails(event.productId)
             }
 
             is WaitFeedbackProductsEvent.GoToWriteComment -> {
-                navController.navigateToWriteComment(
+                navigator.navigateToWriteComment(
                     event.productId,
                     event.productName,
                     event.productImage,

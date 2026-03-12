@@ -5,9 +5,8 @@ import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.platform.LocalView
-import androidx.navigation.findNavController
 import com.m.vodovoz.R
+import com.m.vodovoz.core.navigation.LocalNavigator
 import com.m.vodovoz.core.navigation.navigateToCategories
 import com.m.vodovoz.core.navigation.navigateToProductAnalogs
 import com.m.vodovoz.core.navigation.navigateToProductDetails
@@ -23,10 +22,10 @@ fun FavoriteEntry(
 ) {
     val viewState by viewModel.collectAsState()
     val lazyGridState = rememberLazyGridState()
-    val navController = LocalView.current.findNavController()
+    val navigator = LocalNavigator.current
 
     LifecycleEffect(Unit) {
-        navController.currentBackStackEntry?.savedStateHandle?.remove<CategoryUi>("category")
+        navigator.currentBackStackEntry?.savedStateHandle?.remove<CategoryUi>("category")
             ?.let { category -> viewModel.selectCategory(category) }
             ?: viewModel.fetchFavoritesIfChanges()
     }
@@ -56,31 +55,31 @@ fun FavoriteEntry(
     }
 
     LifecycleEffect {
-        observeEvents(viewModel, navController, lazyGridState)
+        observeEvents(viewModel, navigator, lazyGridState)
     }
 }
 
 private suspend fun observeEvents(
     viewModel: FavoriteFlowViewModel,
-    navController: androidx.navigation.NavController,
+    navigator: com.m.vodovoz.feature.main.Navigator,
     lazyGridState: LazyGridState,
 ) {
     viewModel.events.collect { event ->
         when (event) {
             is FavoriteFlowViewModel.FavoriteEvents.GoToProfile -> {
-                viewModel.tabManager.setAuthRedirect(navController.graph.id)
+                viewModel.tabManager.setAuthRedirect(navigator.graph.id)
                 viewModel.tabManager.selectTab(R.id.graph_profile)
             }
 
             is FavoriteFlowViewModel.FavoriteEvents.GoToCategories -> {
-                navController.navigateToCategories(
+                navigator.navigateToCategories(
                     categories = event.categories,
                     category = event.category,
                 )
             }
 
             is FavoriteFlowViewModel.FavoriteEvents.GoToProductDetails -> {
-                navController.navigateToProductDetails(event.productId)
+                navigator.navigateToProductDetails(event.productId)
             }
 
             FavoriteFlowViewModel.FavoriteEvents.ScrollToTop -> {
@@ -88,16 +87,16 @@ private suspend fun observeEvents(
             }
 
             FavoriteFlowViewModel.FavoriteEvents.GoToSearch -> {
-                navController.navigateToSearch()
+                navigator.navigateToSearch()
             }
 
             FavoriteFlowViewModel.FavoriteEvents.GoToCatalog -> {
                 viewModel.tabManager.selectTab(R.id.graph_catalog)
-                navController.popBackStack(R.id.catalogFragment, false)
+                navigator.popBackStack(R.id.catalogFragment, false)
             }
 
             is FavoriteFlowViewModel.FavoriteEvents.GoToProductAnalogs -> {
-                navController.navigateToProductAnalogs(event.productId)
+                navigator.navigateToProductAnalogs(event.productId)
             }
         }
     }

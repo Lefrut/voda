@@ -29,19 +29,19 @@ fun OrderRecipientEntry() = NavigationEntry<OrderRecipientViewModel> {
     viewModel.collectEvents { event ->
         when (event) {
             OrderRecipientEvent.GoBack -> {
-                navController.popBackStack()
+                navigator.goBack()
             }
 
             OrderRecipientEvent.GoBackToOrdering -> {
-                navController.previousBackStackEntry?.savedStateHandle?.set(
+                navigator.previousBackStackEntry?.savedStateHandle?.set(
                     "updateRecipient",
                     true
                 )
-                navController.popBackStack()
+                navigator.goBack()
             }
 
             is OrderRecipientEvent.GoToWebView -> {
-                navController.navigateToWebView(event.url, event.title)
+                navigator.navigateToWebView(event.url, event.title)
             }
         }
     }

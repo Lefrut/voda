@@ -37,15 +37,15 @@ fun ProductAnalogsEntry() = NavigationEntry<ProductAnalogsViewModel> {
         viewModel.events.collect { event ->
             when (event) {
                 ProductAnalogsEvent.GoBack -> {
-                    navController.popBackStack()
+                    navigator.goBack()
                 }
 
                 is ProductAnalogsEvent.GoToProductAnalogs -> {
-                    navController.navigateToProductDetails(event.productId)
+                    navigator.navigateToProductDetails(event.productId)
                 }
 
                 is ProductAnalogsEvent.GoToProductDetails -> {
-                    navController.navigateToProductDetails(event.productId)
+                    navigator.navigateToProductDetails(event.productId)
                 }
             }
         }

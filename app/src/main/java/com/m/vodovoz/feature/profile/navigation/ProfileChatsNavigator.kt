@@ -1,7 +1,7 @@
 package com.m.vodovoz.feature.profile.navigation
 
 import android.content.Context
-import androidx.navigation.NavController
+import com.m.vodovoz.feature.main.Navigator
 import com.m.vodovoz.common.jivochat.JivoChatController
 import com.m.vodovoz.core.navigation.navigateToWebView
 import com.m.vodovoz.core.navigation.navigateToWriteMessage
@@ -13,11 +13,11 @@ import com.m.vodovoz.util.extensions.startWhatsUp
 
 object ProfileChatsNavigator {
 
-    fun navigate(chatId: String, data: String, navController: NavController, context: Context) {
+    fun navigate(chatId: String, data: String, navigator: Navigator, context: Context) {
         with(context){
             when (chatId) {
                 "chat" -> {
-                    navController.navigateToWebView(
+                    navigator.navigateToWebView(
                         JivoChatController.getLink(), ""
                     )
                 }
@@ -44,7 +44,7 @@ object ProfileChatsNavigator {
 
                 else -> {
                     openUrl(data).onFailure {
-                        navController.navigateToWriteMessage()
+                        navigator.navigateToWriteMessage()
                     }
                 }
             }

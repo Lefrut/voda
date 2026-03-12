@@ -25,34 +25,34 @@ fun SubCategoriesEntry() = NavigationEntry<SubCategoriesViewModel> {
     viewModel.collectEvents { event ->
         when (event) {
             is SubCategoriesEvent.GoToProductList -> {
-                navController.navigateToCategoryProductList(event.categoryId)
+                navigator.navigateToCategoryProductList(event.categoryId)
             }
 
             is SubCategoriesEvent.GoToSubCategories -> {
-                navController.navigateToSubCategories(event.category)
+                navigator.navigateToSubCategories(event.category)
             }
 
             SubCategoriesEvent.GoBack -> {
-                navController.popBackStack()
+                navigator.goBack()
             }
 
             SubCategoriesEvent.GoToSearch -> {
-                navController.navigateToSearch()
+                navigator.navigateToSearch()
             }
 
             is SubCategoriesEvent.ActivateDataAllAction -> {
                 event.action.activate(
-                    navController = navController,
+                    navigator = navigator,
                     tabManager = viewModel.tabManager
                 )
             }
 
             SubCategoriesEvent.GoToScanner -> {
-                navController.navigateToQrCode()
+                navigator.navigateToQrCode()
             }
 
             SubCategoriesEvent.GoToSpeechRecognizer -> {
-                navController.navigateToSpeechDialog()
+                navigator.navigateToSpeechDialog()
             }
         }
     }

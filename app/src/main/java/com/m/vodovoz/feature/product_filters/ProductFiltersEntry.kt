@@ -54,7 +54,7 @@ fun ProductFiltersEntry() = NavigationEntry<ProductFiltersFlowViewModel> {
     )
 
     LifecycleStartEffect(Unit) {
-        navController.currentBackStackEntry?.savedStateHandle?.remove<FilterUi>("filter")
+        navigator.currentBackStackEntry?.savedStateHandle?.remove<FilterUi>("filter")
             ?.let { newFilter ->
                 viewModel.changeFilter(newFilter)
             }
@@ -87,22 +87,22 @@ fun ProductFiltersEntry() = NavigationEntry<ProductFiltersFlowViewModel> {
         viewModel.events.collect { event ->
             when (event) {
                 is ProductFiltersFlowViewModel.ProductFiltersEvent.GoBack -> {
-                    navController.popBackStack()
+                    navigator.goBack()
                 }
 
                 is ProductFiltersFlowViewModel.ProductFiltersEvent.GoToFilterValues -> {
-                    navController.navigateToProductFilterValues(
+                    navigator.navigateToProductFilterValues(
                         event.categoryId,
                         event.filter
                     )
                 }
 
                 is ProductFiltersFlowViewModel.ProductFiltersEvent.GoToProductList -> {
-                    navController.previousBackStackEntry?.savedStateHandle?.set(
+                    navigator.previousBackStackEntry?.savedStateHandle?.set(
                         "filters",
                         event.filters
                     ).also {
-                        navController.popBackStack()
+                        navigator.goBack()
                     }
                 }
 

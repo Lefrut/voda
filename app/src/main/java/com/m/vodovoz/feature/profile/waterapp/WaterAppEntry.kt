@@ -243,7 +243,7 @@ fun WaterAppEntry() = NavigationEntry<WaterAppViewModel> {
         viewModel.events.collectLatest { event ->
             when (event) {
                 WaterAppViewModel.WaterAppEvents.GoBack -> {
-                    navController.popBackStack()
+                    navigator.goBack()
                 }
 
                 is WaterAppViewModel.WaterAppEvents.SwitchNotifications -> {

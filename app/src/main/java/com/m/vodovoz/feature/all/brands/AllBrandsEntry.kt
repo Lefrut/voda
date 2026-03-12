@@ -26,11 +26,11 @@ fun AllBrandsEntry() = NavigationEntry<AllBrandsFlowViewModel> {
         viewModel.events.collect { event ->
             when (event) {
                 AllBrandsFlowViewModel.AllBrandsEvents.GoBack -> {
-                    navController.popBackStack()
+                    navigator.goBack()
                 }
 
                 is AllBrandsFlowViewModel.AllBrandsEvents.GoToBrandProducts -> {
-                    navController.navigateToBrandProductList(event.brandId)
+                    navigator.navigateToBrandProductList(event.brandId)
                 }
             }
         }

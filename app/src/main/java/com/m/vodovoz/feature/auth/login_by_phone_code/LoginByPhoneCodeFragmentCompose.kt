@@ -12,7 +12,6 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import com.m.vodovoz.ui.mvi.collectAsState
-import androidx.navigation.fragment.findNavController
 import com.m.vodovoz.R
 import com.m.vodovoz.common.account.AccountManager
 import com.m.vodovoz.common.tab.TabManager
@@ -22,6 +21,7 @@ import com.m.vodovoz.feature.auth.login_by_phone_code.model.LoginByPhoneCodeEven
 import com.m.vodovoz.feature.cart.CartFlowViewModel
 import com.m.vodovoz.feature.favorite.FavoriteFlowViewModel
 import com.m.vodovoz.feature.home.HomeFlowViewModel
+import com.m.vodovoz.feature.main.AppNavigatorStore
 import com.m.vodovoz.feature.profile.ProfileFlowViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
@@ -71,9 +71,10 @@ class LoginByPhoneCodeFragment : Fragment() {
 
                     LifecycleEffect {
                         viewModel.events.collect { event ->
+                            val navigator = AppNavigatorStore.navigator ?: return@collect
                             when (event) {
                                 LoginByPhoneCodeEvent.GoBack -> {
-                                    findNavController().popBackStack()
+                                    navigator.goBack()
                                 }
 
                                 LoginByPhoneCodeEvent.RefreshProfile -> {
@@ -86,11 +87,11 @@ class LoginByPhoneCodeFragment : Fragment() {
 
                                     val redirect = tabManager.fetchAuthRedirect()
                                     if (redirect == TabManager.DEFAULT_AUTH_REDIRECT) {
-                                        findNavController().popBackStack(
+                                        navigator.popBackStack(
                                             R.id.profileFragment, false
                                         )
                                     } else {
-                                        findNavController().popBackStack(
+                                        navigator.popBackStack(
                                             R.id.profileFragment, false
                                         )
                                         tabManager.selectTab(redirect)

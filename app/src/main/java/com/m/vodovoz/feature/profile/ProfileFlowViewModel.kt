@@ -8,6 +8,7 @@ import com.m.vodovoz.common.account.AccountManager
 import com.m.vodovoz.common.cookie.CookieManager
 import com.m.vodovoz.common.model.VodovozAction
 import com.m.vodovoz.common.resources.ResourcesProvider
+import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.core.analytics.Analytics
 import com.m.vodovoz.design_system.model.AboutAdvertisingUi
 import com.m.vodovoz.design_system.model.BannerUi
@@ -28,6 +29,7 @@ import com.m.vodovoz.feature.profile.model.UserInfoBlockUi
 import com.m.vodovoz.feature.profile.model.mapToUi
 import com.m.vodovoz.feature.profile.model.toUi
 import com.m.vodovoz.feature.sitestate.SiteStateManager
+import com.m.vodovoz.ui.insets.InsetsVisibilityState
 import com.m.vodovoz.ui.mvi.Event
 import com.m.vodovoz.ui.mvi.MviViewModel
 import com.m.vodovoz.ui.mvi.State
@@ -48,6 +50,8 @@ class ProfileFlowViewModel @Inject constructor(
     private val resourcesProvider: ResourcesProvider,
     accountManager: AccountManager,
     val cookieManager: CookieManager,
+    val tabManager: TabManager,
+    val insetsVisibilityState: InsetsVisibilityState
 ) : MviViewModel<ProfileFlowViewModel.ProfileState, ProfileFlowViewModel.ProfileEvents>(
     ProfileState()
 ) {

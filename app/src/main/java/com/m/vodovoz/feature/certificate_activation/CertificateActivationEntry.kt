@@ -49,11 +49,11 @@ fun CertificateActivationEntry() = NavigationEntry<CertificateActivationViewMode
         viewModel.events.collect { event ->
             when (event) {
                 CertificateActivationEvent.GoBack -> {
-                    navController.popBackStack()
+                    navigator.goBack()
                 }
 
                 is CertificateActivationEvent.GoToWebView -> {
-                    navController.navigateToWebView(
+                    navigator.navigateToWebView(
                         event.url,
                         context.getString(R.string.space)
                     )

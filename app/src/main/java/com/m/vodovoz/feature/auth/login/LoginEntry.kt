@@ -19,7 +19,7 @@ fun LoginEntry() = NavigationEntry<LoginFlowViewModel> {
     val viewState by viewModel.collectAsState()
 
     LifecycleStartEffect(Unit) {
-        val accountTypeId = navController.currentBackStackEntry
+        val accountTypeId = navigator.currentBackStackEntry
             ?.savedStateHandle
             ?.remove<String>(AuthArgs.ACCOUNT_TYPE_ID)
         viewModel.setAccountTypeById(accountTypeId)
@@ -44,26 +44,26 @@ fun LoginEntry() = NavigationEntry<LoginFlowViewModel> {
         viewModel.events.collect { event ->
             when (event) {
                 LoginFlowViewModel.LoginEvents.GoBack -> {
-                    navController.popBackStack()
+                    navigator.goBack()
                 }
 
                 is LoginFlowViewModel.LoginEvents.GoToWebView -> {
-                    navController.navigateToWebView(
+                    navigator.navigateToWebView(
                         url = event.url,
                         title = event.title,
                     )
                 }
 
                 is LoginFlowViewModel.LoginEvents.GoToLoginByEmail -> {
-                    navController.navigateToLoginByEmail(event.selectedAccountTypeId)
+                    navigator.navigateToLoginByEmail(event.selectedAccountTypeId)
                 }
 
                 LoginFlowViewModel.LoginEvents.GoToRegister -> {
-                    navController.navigateToRegister()
+                    navigator.navigateToRegister()
                 }
 
                 is LoginFlowViewModel.LoginEvents.GoToLoginByPhone -> {
-                    navController.navigateToLoginByPhone(
+                    navigator.navigateToLoginByPhone(
                         phone = event.phone,
                         waitSeconds = event.waitSeconds,
                         userUrl = event.userUrl

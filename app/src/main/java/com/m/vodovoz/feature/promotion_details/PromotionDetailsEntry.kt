@@ -35,7 +35,7 @@ fun PromotionDetailsEntry() = NavigationEntry<PromotionDetailsViewModel> {
         viewModel.events.collect { event ->
             when (event) {
                 PromotionDetailsViewModel.PromotionDetailEvent.GoBack -> {
-                    navController.popBackStack()
+                    navigator.goBack()
                 }
 
                 is PromotionDetailsViewModel.PromotionDetailEvent.OpenUrl -> {
@@ -43,11 +43,11 @@ fun PromotionDetailsEntry() = NavigationEntry<PromotionDetailsViewModel> {
                 }
 
                 is PromotionDetailsViewModel.PromotionDetailEvent.GoToProductAnalogs -> {
-                    navController.navigateToProductAnalogs(event.productId)
+                    navigator.navigateToProductAnalogs(event.productId)
                 }
 
                 is PromotionDetailsViewModel.PromotionDetailEvent.GoToProductDetails -> {
-                    navController.navigateToProductDetails(event.productId)
+                    navigator.navigateToProductDetails(event.productId)
                 }
             }
         }

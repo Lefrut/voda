@@ -31,20 +31,20 @@ fun OrdersHistoryEntry() = NavigationEntry<OrdersHistoryViewModel> {
                 }
 
                 OrdersHistoryViewModel.AllOrdersEvent.GoBack -> {
-                    navController.popBackStack()
+                    navigator.goBack()
                 }
 
                 OrdersHistoryViewModel.AllOrdersEvent.GoToCatalog -> {
-                    navController.popBackStack()
+                    navigator.goBack()
                     viewModel.tabManager.selectTab(R.id.graph_catalog)
                 }
 
                 is OrdersHistoryViewModel.AllOrdersEvent.GoToOrderDetails -> {
-                    navController.navigateToOrderDetails(event.id)
+                    navigator.navigateToOrderDetails(event.id)
                 }
 
                 is OrdersHistoryViewModel.AllOrdersEvent.GoToWebView -> {
-                    navController.navigateToWebView(
+                    navigator.navigateToWebView(
                         url = event.url,
                         title = context.getString(R.string.space)
                     )
@@ -56,7 +56,7 @@ fun OrdersHistoryEntry() = NavigationEntry<OrdersHistoryViewModel> {
 
                 is OrdersHistoryViewModel.AllOrdersEvent.ActivateBanner -> {
                     event.banner.action.activate(
-                        navController = navController,
+                        navigator = navigator,
                         context = context,
                         cookie = viewModel.cookieManager.fetchCookieSessionId() ?: "",
                         tabManager = viewModel.tabManager
@@ -68,7 +68,7 @@ fun OrdersHistoryEntry() = NavigationEntry<OrdersHistoryViewModel> {
 
     LifecycleEffect {
         viewModel.accountManager.observeAccountId().filter { it == null }.collect {
-            navController.popBackStack()
+            navigator.goBack()
             viewModel.tabManager.selectTab(R.id.graph_profile)
         }
     }

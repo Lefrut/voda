@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.webkit.CookieManager
-import androidx.navigation.NavController
 import com.m.vodovoz.R
 import com.m.vodovoz.common.model.BaseVodovozAction
 import com.m.vodovoz.common.model.ButtonAction
@@ -13,11 +12,12 @@ import com.m.vodovoz.common.model.GlobalAppLinks
 import com.m.vodovoz.common.model.VodovozAction
 import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.core.network.VodovozWebConfig
+import com.m.vodovoz.feature.main.Navigator
 import com.m.vodovoz.util.extensions.openUrl
 
 
 fun BaseVodovozAction.activate(
-    navController: NavController,
+    navigator: Navigator,
     context: Context? = null,
     cookie: String = "",
     tabManager: TabManager? = null,
@@ -26,58 +26,58 @@ fun BaseVodovozAction.activate(
 
     when (this) {
         DataAllAction.AllDiscount -> {
-            navController.navigateToHurryBuyUpProducts()
+            navigator.navigateToHurryBuyUpProducts()
         }
 
         DataAllAction.AllNewProducts -> {
-            navController.navigateToNewProducts()
+            navigator.navigateToNewProducts()
         }
 
         DataAllAction.AllPromotions -> {
-            navController.navigateToPromotions()
+            navigator.navigateToPromotions()
         }
 
         DataAllAction.Delivery -> {
             with(GlobalAppLinks.aboutDelivery) {
-                navController.navigateToWebView(url, title)
+                navigator.navigateToWebView(url, title)
             }
         }
 
         DataAllAction.Profile -> {
             tabManager?.apply {
-                setAuthRedirect(navController.graph.id)
+                setAuthRedirect(navigator.graph.id)
                 selectTab(R.id.graph_profile)
             }
 
         }
 
         DataAllAction.WaterTracker -> {
-            navController.navigateToWaterApp()
+            navigator.navigateToWaterApp()
         }
 
         DataAllAction.BuyCertificate -> {
-            navController.navigateToBuyCertificate()
+            navigator.navigateToBuyCertificate()
         }
 
         DataAllAction.AllServices -> {
-            navController.navigateToAllServices()
+            navigator.navigateToAllServices()
         }
 
         DataAllAction.CoolerRental -> {
-            navController.navigateToServiceDetails(98121)
+            navigator.navigateToServiceDetails(98121)
         }
 
         DataAllAction.FreeCoolerRental -> {
-            navController.navigateToServiceDetails(98123)
+            navigator.navigateToServiceDetails(98123)
         }
 
         DataAllAction.CoolerRepair -> {
-            navController.navigateToServiceDetails(98886)
+            navigator.navigateToServiceDetails(98886)
 
         }
 
         DataAllAction.SanitaryMaintenance -> {
-            navController.navigateToServiceDetails(98887)
+            navigator.navigateToServiceDetails(98887)
         }
 
         DataAllAction.Unknown -> {
@@ -85,31 +85,31 @@ fun BaseVodovozAction.activate(
         }
 
         is ButtonAction.Id -> {
-            navController.navigateToButtonProductList(id)
+            navigator.navigateToButtonProductList(id)
         }
 
         is VodovozAction.Brand -> {
-            navController.navigateToBrandProductList(id)
+            navigator.navigateToBrandProductList(id)
         }
 
         is VodovozAction.Category -> {
-            navController.navigateToCategoryProductList(id)
+            navigator.navigateToCategoryProductList(id)
         }
 
         is VodovozAction.Product -> {
-            navController.navigateToProductDetails(id)
+            navigator.navigateToProductDetails(id)
         }
 
         is VodovozAction.Products -> {
-            navController.navigateToBannerProductList(bannerId, blockId)
+            navigator.navigateToBannerProductList(bannerId, blockId)
         }
 
         is VodovozAction.Promotion -> {
-            navController.navigateToPromotionDetails(id)
+            navigator.navigateToPromotionDetails(id)
         }
 
         is VodovozAction.Promotions -> {
-            navController.navigateToPromotions(blockId, bannerId)
+            navigator.navigateToPromotions(blockId, bannerId)
         }
 
         is VodovozAction.Unknown -> {
@@ -174,6 +174,5 @@ inline fun <reified T : DataAllAction> createDataAllActivator(
 ): DataAllActionActivator {
     return DataAllActionActivator(action = action, activate = { activate(action) })
 }
-
 
 

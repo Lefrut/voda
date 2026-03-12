@@ -28,16 +28,16 @@ fun DeliveryDateEntry() = NavigationEntry<DeliveryDateViewModel> {
         viewModel.events.collect { event ->
             when (event) {
                 DeliveryDateEvent.GoBack -> {
-                    navController.popBackStack()
+                    navigator.goBack()
                 }
 
                 is DeliveryDateEvent.GoBackToOrdering -> {
-                    navController.previousBackStackEntry?.savedStateHandle?.apply {
+                    navigator.previousBackStackEntry?.savedStateHandle?.apply {
                         set("timeInterval", event.timeInterval)
                         set("dateOption", event.dateOption)
                         set("earlierCheckbox", event.earlierCheckbox)
                     }
-                    navController.popBackStack()
+                    navigator.goBack()
                 }
             }
         }

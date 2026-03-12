@@ -18,16 +18,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalView
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
-import androidx.navigation.NavController
-import androidx.navigation.findNavController
 import com.m.vodovoz.R
 import com.m.vodovoz.common.account.AccountManager
 import com.m.vodovoz.common.model.GlobalAppLinks
 import com.m.vodovoz.common.model.VodovozAction
 import com.m.vodovoz.common.tab.TabManager
+import com.m.vodovoz.core.navigation.LocalNavigator
 import com.m.vodovoz.core.navigation.activate
 import com.m.vodovoz.core.navigation.navigateToAllBrands
 import com.m.vodovoz.core.navigation.navigateToAllServices
@@ -72,23 +70,23 @@ fun HomeEntry(
     val viewState by viewModel.collectAsState()
     val context = LocalContext.current
     val activity = context as? Activity
-    val navController: NavController = LocalView.current.findNavController()
+    val navigator = LocalNavigator.current
     val snackbarHostState = remember { SnackbarHostState() }
 
     val cameraPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) { granted ->
-        if (granted) navController.navigateToQrCode()
+        if (granted)  navigator.navigateToQrCode()
     }
 
     val audioPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) { granted ->
-        if (granted) navController.navigateToSpeechDialog()
+        if (granted)  navigator.navigateToSpeechDialog()
     }
 
     LifecycleEffect(Unit) {
-        navController.currentBackStackEntry
+        navigator.currentBackStackEntry
             ?.savedStateHandle
             ?.remove<Long>("ratedProductId")
             ?.let { productId ->
@@ -115,7 +113,7 @@ fun HomeEntry(
     LifecycleEffect(snackbarHostState) {
         listenEvents(
             viewModel = viewModel,
-            navController = navController,
+            navigator = navigator,
             snackbarHostState = snackbarHostState,
             mainCoroutineScope = this,
             context = context,
@@ -138,17 +136,17 @@ fun HomeEntry(
     }
 
     LifecycleEffect {
-        observeDeepLinkFromSiteState(viewModel, navController, context)
+        observeDeepLinkFromSiteState(viewModel, navigator, context)
     }
 
     LifecycleEffect {
-        observePushFromSiteState(viewModel, navController, context)
+        observePushFromSiteState(viewModel, navigator, context)
     }
 }
 
 private suspend fun listenEvents(
     viewModel: HomeFlowViewModel,
-    navController: NavController,
+    navigator: com.m.vodovoz.feature.main.Navigator,
     snackbarHostState: SnackbarHostState,
     mainCoroutineScope: CoroutineScope,
     context: android.content.Context,
@@ -164,34 +162,34 @@ private suspend fun listenEvents(
     }.collect { event ->
         when (event) {
             is HomeFlowViewModel.HomeEvents.GoToPreOrder -> {
-                navController.navigateToPreOrder(event.id)
+                 navigator.navigateToPreOrder(event.id)
             }
 
             is HomeFlowViewModel.HomeEvents.GoToProfile -> {
                 viewModel.tabManager.apply {
-                    setAuthRedirect(navController.graph.id)
+                    setAuthRedirect(navigator.graph.id)
                     selectTab(R.id.graph_profile)
                 }
             }
 
             is HomeFlowViewModel.HomeEvents.GoToStories -> {
-                navController.navigateToStories(event.storyId, event.stories)
+                 navigator.navigateToStories(event.storyId, event.stories)
             }
 
             is HomeFlowViewModel.HomeEvents.GoToProductDetails -> {
-                navController.navigateToProductDetails(event.productId)
+                 navigator.navigateToProductDetails(event.productId)
             }
 
             is HomeFlowViewModel.HomeEvents.GoToPromotionDetails -> {
-                navController.navigateToPromotionDetails(event.promotionId)
+                 navigator.navigateToPromotionDetails(event.promotionId)
             }
 
             HomeFlowViewModel.HomeEvents.GoToSearch -> {
-                navController.navigateToSearch()
+                 navigator.navigateToSearch()
             }
 
             is HomeFlowViewModel.HomeEvents.GoToCategoryProductList -> {
-                navController.navigateToCategoryProductList(event.categoryId)
+                 navigator.navigateToCategoryProductList(event.categoryId)
             }
 
             HomeFlowViewModel.HomeEvents.ShowSpeechRecognizer -> {
@@ -201,29 +199,29 @@ private suspend fun listenEvents(
                         Manifest.permission.RECORD_AUDIO
                     ) == PackageManager.PERMISSION_GRANTED
                 ) {
-                    navController.navigateToSpeechDialog()
+                     navigator.navigateToSpeechDialog()
                 } else {
                     audioPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
                 }
             }
 
             HomeFlowViewModel.HomeEvents.GoToOrdersHistory -> {
-                navController.navigateToOrdersHistory()
+                 navigator.navigateToOrdersHistory()
             }
 
             is HomeFlowViewModel.HomeEvents.GoToOrderDetails -> {
-                navController.navigateToOrderDetails(event.orderId)
+                 navigator.navigateToOrderDetails(event.orderId)
             }
 
             is HomeFlowViewModel.HomeEvents.GoToWebView -> {
-                navController.navigateToWebView(
+                 navigator.navigateToWebView(
                     event.url,
                     event.title.ifEmpty { context.getString(R.string.space) }
                 )
             }
 
             is HomeFlowViewModel.HomeEvents.GoToProductAnalogs -> {
-                navController.navigateToProductAnalogs(event.productId)
+                 navigator.navigateToProductAnalogs(event.productId)
             }
 
             HomeFlowViewModel.HomeEvents.GoToQrCode -> {
@@ -233,7 +231,7 @@ private suspend fun listenEvents(
                         Manifest.permission.CAMERA
                     ) == PackageManager.PERMISSION_GRANTED
                 ) {
-                    navController.navigateToQrCode()
+                     navigator.navigateToQrCode()
                 } else {
                     cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
                 }
@@ -247,7 +245,7 @@ private suspend fun listenEvents(
             }
 
             is HomeFlowViewModel.HomeEvents.WriteComment -> {
-                navController.navigateToWriteComment(
+                 navigator.navigateToWriteComment(
                     event.productId,
                     event.productName,
                     event.productImage,
@@ -260,7 +258,7 @@ private suspend fun listenEvents(
             }
 
             HomeFlowViewModel.HomeEvents.GoToViewedProductList -> {
-                navController.navigateToViewedProductList()
+                 navigator.navigateToViewedProductList()
             }
 
             is HomeFlowViewModel.HomeEvents.OpenGooglePlay -> {
@@ -278,7 +276,7 @@ private suspend fun listenEvents(
 
             is HomeFlowViewModel.HomeEvents.ActivateAction -> {
                 event.action.activate(
-                    navController = navController,
+                    navigator = navigator,
                     context = context,
                     cookie = viewModel.cookieManager.fetchCookieSessionId() ?: "",
                     tabManager = viewModel.tabManager
@@ -294,7 +292,7 @@ private suspend fun listenEvents(
 @Keep
 private suspend fun observeDeepLinkFromSiteState(
     viewModel: HomeFlowViewModel,
-    navController: NavController,
+    navigator: com.m.vodovoz.feature.main.Navigator,
     context: android.content.Context,
 ) {
     viewModel.siteStateManager.observeDeepLinkPath().collect { path ->
@@ -309,15 +307,15 @@ private suspend fun observeDeepLinkFromSiteState(
         when {
             path == "kalkulyator_vody" -> {
                 viewModel.accountManager.reportEvent("trekervodi_ssilka")
-                navController.navigateToWaterApp()
+                 navigator.navigateToWaterApp()
             }
 
             path == AccountManager.ORDERS_DEEPLINK_ID -> {
-                navController.navigateToOrdersHistory()
+                 navigator.navigateToOrdersHistory()
             }
 
             orderId != null -> {
-                navController.navigateToOrderDetails(orderId)
+                 navigator.navigateToOrderDetails(orderId)
             }
         }
 
@@ -328,7 +326,7 @@ private suspend fun observeDeepLinkFromSiteState(
 @Keep
 private suspend fun observePushFromSiteState(
     viewModel: HomeFlowViewModel,
-    navController: NavController,
+    navigator: com.m.vodovoz.feature.main.Navigator,
     context: android.content.Context,
 ) {
     viewModel.siteStateManager.observePush().collect { pushData ->
@@ -339,13 +337,13 @@ private suspend fun observePushFromSiteState(
             "AKCII" -> {
                 val promotionId = pushData.id
                 if (promotionId.isNullOrEmpty()) {
-                    navController.navigateToPromotions()
+                     navigator.navigateToPromotions()
                     return@collect
                 }
 
                 val eventParameters = "\"ID_AKCII\": \"$promotionId\""
                 viewModel.accountManager.reportEvent("Зашел в акцию (push)", eventParameters)
-                navController.navigateToPromotionDetails(promotionId.toLong())
+                 navigator.navigateToPromotionDetails(promotionId.toLong())
             }
 
             "TOVAR" -> {
@@ -353,7 +351,7 @@ private suspend fun observePushFromSiteState(
                 if (!productId.isNullOrEmpty()) {
                     val eventParameters = "\"ID_Product\": \"$productId\""
                     viewModel.accountManager.reportEvent("Зашел в товар (push)", eventParameters)
-                    navController.navigateToProductDetails(productId.toLong())
+                     navigator.navigateToProductDetails(productId.toLong())
                 }
             }
 
@@ -367,12 +365,12 @@ private suspend fun observePushFromSiteState(
                 viewModel.accountManager.reportEvent("Зашел в раздел (push)", eventParameters)
 
                 if (!blockId.isNullOrEmpty()) {
-                    navController.navigateToBannerProductList(
+                     navigator.navigateToBannerProductList(
                         bannerId = sectionId.toLongOrDefault(-1),
                         blockId = blockId.toLongOrDefault(-1)
                     )
                 } else {
-                    navController.navigateToCategoryProductList(
+                     navigator.navigateToCategoryProductList(
                         categoryId = sectionId.toLong()
                     )
                 }
@@ -383,7 +381,7 @@ private suspend fun observePushFromSiteState(
                 val blockId = pushData.blockId
 
                 if (!sectionId.isNullOrBlank() && !blockId.isNullOrBlank()) {
-                    navController.navigateToBannerProductList(
+                     navigator.navigateToBannerProductList(
                         bannerId = sectionId.toLongOrDefault(-1),
                         blockId = blockId.toLongOrDefault(-1)
                     )
@@ -400,41 +398,41 @@ private suspend fun observePushFromSiteState(
                     eventParameters
                 )
 
-                navController.navigateToOrderDetails(orderId.toLong())
+                 navigator.navigateToOrderDetails(orderId.toLong())
             }
 
             "vsenovinki" -> {
-                navController.navigateToNewProducts()
+                 navigator.navigateToNewProducts()
             }
 
             "vseskidki" -> {
-                navController.navigateToHurryBuyUpProducts()
+                 navigator.navigateToHurryBuyUpProducts()
             }
 
             "BRAND" -> {
                 val brandId = pushData.id
                 if (!brandId.isNullOrEmpty()) {
-                    navController.navigateToBrandProductList(brandId.toLong())
+                     navigator.navigateToBrandProductList(brandId.toLong())
                 } else {
-                    navController.navigateToAllBrands()
+                     navigator.navigateToAllBrands()
                 }
             }
 
             "BRANDY" -> {
-                navController.navigateToAllBrands()
+                 navigator.navigateToAllBrands()
             }
 
             "about" -> {
                 val section = pushData.section ?: return@collect
                 if (section == context.getString(R.string.about_store)) {
-                    navController.navigateToWebView(
+                     navigator.navigateToWebView(
                         VodovozWebConfig.ABOUT_SHOP_URL,
                         context.getString(R.string.about_store)
                     )
                 }
                 if (section == context.getString(R.string.contact_us)) {
                     viewModel.tabManager.apply {
-                        setAuthRedirect(navController.graph.id)
+                        setAuthRedirect(navigator.graph.id)
                         selectTab(R.id.graph_profile)
                     }
                 }
@@ -442,27 +440,27 @@ private suspend fun observePushFromSiteState(
 
             "dostavka" -> {
                 with(GlobalAppLinks.aboutDelivery) {
-                    navController.navigateToWebView(url, title)
+                     navigator.navigateToWebView(url, title)
                 }
             }
 
             "service" -> {
-                navController.navigateToAllServices()
+                 navigator.navigateToAllServices()
             }
 
             "remont_kulerov" -> {
-                navController.navigateToServiceDetails(98886)
+                 navigator.navigateToServiceDetails(98886)
             }
 
             "feedback" -> {
                 viewModel.tabManager.apply {
-                    setAuthRedirect(navController.graph.id)
+                    setAuthRedirect(navigator.graph.id)
                     selectTab(R.id.graph_profile)
                 }
             }
 
             "ACTIONS", "vseakcii" -> {
-                navController.navigateToPromotions()
+                 navigator.navigateToPromotions()
             }
 
             "URL" -> {
@@ -472,18 +470,18 @@ private suspend fun observePushFromSiteState(
 
             "trekervodi" -> {
                 viewModel.accountManager.reportEvent("trekervodi_push")
-                navController.navigateToWaterApp()
+                 navigator.navigateToWaterApp()
             }
 
             "profil" -> {
                 viewModel.tabManager.apply {
-                    setAuthRedirect(navController.graph.id)
+                    setAuthRedirect(navigator.graph.id)
                     selectTab(R.id.graph_profile)
                 }
             }
 
             "pokypkasertificat" -> {
-                navController.navigateToBuyCertificate()
+                 navigator.navigateToBuyCertificate()
             }
         }
 

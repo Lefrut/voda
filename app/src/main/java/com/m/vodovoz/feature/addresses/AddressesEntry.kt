@@ -61,28 +61,28 @@ fun AddressesEntry() = NavigationEntry<AddressesFlowViewModel> {
         viewModel.events.collect { event ->
             when (event) {
                 is AddressesFlowViewModel.AddressesEvents.GoBack -> {
-                    navController.previousBackStackEntry
+                    navigator.previousBackStackEntry
                         ?.savedStateHandle
                         ?.set("back_address", event.address)
-                    navController.popBackStack()
+                    navigator.goBack()
                 }
 
                 AddressesFlowViewModel.AddressesEvents.GoToMap -> {
-                    navController.navigateToMap(null)
+                    navigator.navigateToMap(null)
                 }
 
                 is AddressesFlowViewModel.AddressesEvents.GoToEditAddress -> {
-                    navController.navigateToAddAddress(
+                    navigator.navigateToAddAddress(
                         addressId = event.addressId,
                         addressName = event.addressName
                     )
                 }
 
                 is AddressesFlowViewModel.AddressesEvents.GoBackToOrdering -> {
-                    navController.previousBackStackEntry
+                    navigator.previousBackStackEntry
                         ?.savedStateHandle
                         ?.set("address", event.address)
-                    navController.popBackStack()
+                    navigator.goBack()
                 }
             }
         }

@@ -51,7 +51,7 @@ fun WriteCommentEntry() = NavigationEntry<WriteCommentViewModel> {
     viewModel.collectEvents { event ->
         when (event) {
             WriteCommentEvent.GoBack -> {
-                navController.popBackStack()
+                navigator.goBack()
             }
 
             WriteCommentEvent.OpenImagePicker -> {
@@ -59,7 +59,7 @@ fun WriteCommentEntry() = NavigationEntry<WriteCommentViewModel> {
             }
 
             is WriteCommentEvent.SetRatedProductResult -> {
-                navController.previousBackStackEntry?.savedStateHandle?.set(
+                navigator.previousBackStackEntry?.savedStateHandle?.set(
                     key = "ratedProductId",
                     value = event.productId
                 )

@@ -24,7 +24,7 @@ fun FAQEntry() = NavigationEntry<FAQViewModel> {
     LifecycleEffect {
         viewModel.events.collect { event ->
             when (event) {
-                FAQEvent.GoBack -> navController.popBackStack()
+                FAQEvent.GoBack -> navigator.goBack()
             }
         }
     }

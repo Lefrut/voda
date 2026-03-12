@@ -31,11 +31,11 @@ fun AboutServicesEntry() = NavigationEntry<AboutServicesFlowViewModel> {
         viewModel.events.collect { event ->
             when (event) {
                 AboutServicesFlowViewModel.AboutServicesEvents.GoBack -> {
-                    navController.popBackStack()
+                    navigator.goBack()
                 }
 
                 is AboutServicesFlowViewModel.AboutServicesEvents.GoToServiceDetails -> {
-                    navController.navigateToServiceDetails(event.serviceId)
+                    navigator.navigateToServiceDetails(event.serviceId)
                 }
             }
         }

@@ -23,19 +23,19 @@ fun ServiceDetailEntry() = NavigationEntry<ServiceDetailsViewModel> {
         viewModel.events.collect { event ->
             when (event) {
                 ServiceDetailsEvent.GoBack -> {
-                    navController.popBackStack()
+                    navigator.goBack()
                 }
 
                 is ServiceDetailsEvent.GoToAnalogs -> {
-                    navController.navigateToProductAnalogs(event.productId)
+                    navigator.navigateToProductAnalogs(event.productId)
                 }
 
                 is ServiceDetailsEvent.GoToProductDetails -> {
-                    navController.navigateToProductDetails(event.productId)
+                    navigator.navigateToProductDetails(event.productId)
                 }
 
                 is ServiceDetailsEvent.GoToServiceOrder -> {
-                    navController.navigateToServiceOrder(event.serviceType)
+                    navigator.navigateToServiceOrder(event.serviceType)
                 }
             }
         }

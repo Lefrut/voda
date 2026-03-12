@@ -45,7 +45,7 @@ fun AboutAppEntry(
         viewModel.events.collect { event ->
             when (event) {
                 AboutAppEvent.GoBack -> {
-                    navController.popBackStack()
+                    navigator.goBack()
                 }
 
                 AboutAppEvent.Share -> {
@@ -57,7 +57,7 @@ fun AboutAppEntry(
                 }
 
                 is AboutAppEvent.GoToWebView -> {
-                    navController.navigateToWebView(event.url, event.title)
+                    navigator.navigateToWebView(event.url, event.title)
                 }
 
                 is AboutAppEvent.WriteToDevelopers -> {

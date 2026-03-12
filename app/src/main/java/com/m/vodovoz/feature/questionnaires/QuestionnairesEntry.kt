@@ -97,11 +97,11 @@ fun QuestionnairesEntry() = NavigationEntry<QuestionnairesFlowViewModel> {
         viewModel.events.collect { event ->
             when (event) {
                 QuestionnairesFlowViewModel.QuestionnaireEvents.GoBack -> {
-                    navController.popBackStack()
+                    navigator.goBack()
                 }
 
                 is QuestionnairesFlowViewModel.QuestionnaireEvents.GoToWebView -> {
-                    navController.navigateToWebView(
+                    navigator.navigateToWebView(
                         event.url,
                         context.getString(R.string.space)
                     )

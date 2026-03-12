@@ -35,18 +35,18 @@ fun AboutProductEntry() = NavigationEntry<AboutProductViewModel> {
         viewModel.events.collect { event ->
             when (event) {
                 AboutProductEvent.GoBack -> {
-                    navController.popBackStack()
+                    navigator.goBack()
                 }
 
                 is AboutProductEvent.GoToDocumentViewer -> {
-                    navController.navigate(
+                    navigator.navigate(
                         R.id.documentViewerFragment,
                         bundleOf("documentId" to event.document)
                     )
                 }
 
                 is AboutProductEvent.GoToProductAnalogs -> {
-                    navController.navigateToProductAnalogs(event.productId)
+                    navigator.navigateToProductAnalogs(event.productId)
                 }
             }
         }

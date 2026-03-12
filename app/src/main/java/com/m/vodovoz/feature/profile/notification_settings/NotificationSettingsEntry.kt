@@ -31,7 +31,7 @@ fun NotificationSettingsEntry() = NavigationEntry<NotificationSettingsViewModel>
                 }
 
                 NotificationSettingsViewModel.NotSettingsEvents.GoBack -> {
-                    navController.popBackStack()
+                    navigator.goBack()
                 }
             }
         }

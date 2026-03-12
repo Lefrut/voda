@@ -122,11 +122,11 @@ fun ProductCommentsEntry() = NavigationEntry<ProductCommentsFlowViewModel> {
                 }
 
                 ProductCommentsFlowViewModel.ProductCommentsEvents.GoBack -> {
-                    navController.popBackStack()
+                    navigator.goBack()
                 }
 
                 is ProductCommentsFlowViewModel.ProductCommentsEvents.GoToWriteComment -> {
-                    navController.navigateToWriteComment(
+                    navigator.navigateToWriteComment(
                         productId = event.productId,
                         productImage = event.productImage,
                         productName = event.productName,

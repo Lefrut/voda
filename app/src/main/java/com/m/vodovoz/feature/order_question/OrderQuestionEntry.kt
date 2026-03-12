@@ -61,7 +61,7 @@ fun OrderQuestionEntry() = NavigationEntry<OrderQuestionViewModel> {
     viewModel.collectEvents { event ->
         when (event) {
             OrderQuestionEvent.GoBack -> {
-                navController.popBackStack()
+                navigator.goBack()
             }
 
             is OrderQuestionEvent.ShowToast -> {

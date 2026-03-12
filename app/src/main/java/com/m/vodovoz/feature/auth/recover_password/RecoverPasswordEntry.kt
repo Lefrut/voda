@@ -48,11 +48,11 @@ fun RecoverPasswordEntry() = NavigationEntry<RecoverPasswordViewModel> {
         viewModel.events.collect { event ->
             when (event) {
                 RecoverPasswordEvent.GoBack -> {
-                    navController.popBackStack()
+                    navigator.goBack()
                 }
 
                 is RecoverPasswordEvent.GoToWebView -> {
-                    navController.navigateToWebView(event.url, event.title)
+                    navigator.navigateToWebView(event.url, event.title)
                 }
             }
         }

@@ -44,7 +44,7 @@ fun CancelOrderEntry() = NavigationEntry<CancelOrderViewModel> {
     viewModel.collectEvents { event ->
         when (event) {
             CancelOrderEvent.GoBack -> {
-                navController.popBackStack()
+                navigator.goBack()
             }
         }
     }
