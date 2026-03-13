@@ -14,6 +14,7 @@ import com.m.vodovoz.data.vodovoz_service.VodovozRequestExecutor
 import com.m.vodovoz.data.vodovoz_service.VodovozService
 import com.m.vodovoz.data.vodovoz_service.executeRequest
 import com.m.vodovoz.data.vodovoz_service.mappers.mapToDomain
+import com.m.vodovoz.data.vodovoz_service.mappers.toPagingSourceData
 import com.m.vodovoz.data.vodovoz_service.mappers.toDomain
 import com.m.vodovoz.data.vodovoz_service.model.BrandSectionDTO
 import com.m.vodovoz.data.vodovoz_service.model.ProductCommentsDTO
@@ -28,6 +29,7 @@ import com.m.vodovoz.data.vodovoz_service.model.cart.RecommendationsDTO
 import com.m.vodovoz.data.vodovoz_service.model.messageOrEmpty
 import com.m.vodovoz.data.vodovoz_service.model.order.OrdersHistoryDetailsDTO
 import com.m.vodovoz.data.vodovoz_service.paging.VodovozPagerFactory
+import com.m.vodovoz.data.vodovoz_service.paging.PagingSourceData
 import com.m.vodovoz.design_system.model.widgets.FieldUi
 import com.m.vodovoz.domain.general.model.cart.AdditionalProductsBSModel
 import com.m.vodovoz.domain.general.model.cart.BottomCartModel
@@ -541,9 +543,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
                     search = searchQuery.takeIf { it.isNotBlank() }
                 )
             },
-            mapper = { dto ->
-                dto.toDomain().items
-            }
+            mapper = { dto -> dto.toPagingSourceData() }
         )
     }
 
@@ -573,9 +573,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
             request = { page, _ ->
                 vodovozService.getWaitFeedbackProducts(page)
             },
-            mapper = { dto ->
-                dto.products!!.mapToDomain()
-            }
+            mapper = { dto -> dto.toPagingSourceData() }
         )
     }
 
@@ -851,10 +849,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
                     categoryId = categoryId.takeIf { id -> id > -1 }
                 )
             },
-            mapper = { dto ->
-                dto.DATA?.mapToDomain()
-                    ?: throw IllegalArgumentException("Past purchases can't be null")
-            },
+            mapper = { dto -> dto.toPagingSourceData() },
         )
     }
 
@@ -887,10 +882,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
                     search = searchQuery.takeIf { s -> s.isNotEmpty() }
                 )
             },
-            mapper = { dto ->
-                dto.DATA?.mapToDomain()
-                    ?: throw IllegalArgumentException("Brands can't be null")
-            }
+            mapper = { dto -> dto.toPagingSourceData() }
         )
     }
 
@@ -932,10 +924,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
                     categoryId = categoryId.takeIf { categoryId >= 0 }
                 )
             },
-            mapper = { dto ->
-                dto.DATA?.mapToDomain()
-                    ?: throw IllegalArgumentException("Brand products can't be null")
-            }
+            mapper = { dto -> dto.toPagingSourceData() }
         )
     }
 
@@ -974,9 +963,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
                     categoryId = categoryId
                 )
             },
-            mapper = { dto ->
-                dto.DATA!!.mapToDomain()
-            }
+            mapper = { dto -> dto.toPagingSourceData() }
         )
     }
 
@@ -1021,10 +1008,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
                     categoryId = categoryId.takeIf { categoryId >= 0 }
                 )
             },
-            mapper = { dto ->
-                dto.DATA?.mapToDomain()
-                    ?: error("Banner products can't be null")
-            },
+            mapper = { dto -> dto.toPagingSourceData() },
         )
     }
 
@@ -1367,10 +1351,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
                     queries = boundsMap
                 )
             },
-            mapper = { dto ->
-                dto.DATA?.mapToDomain()
-                    ?: throw IllegalArgumentException("Paged search products can't be null")
-            }
+            mapper = { dto -> dto.toPagingSourceData() }
         )
     }
 
@@ -1392,10 +1373,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
                     order = sort.order
                 )
             },
-            mapper = { dto ->
-                dto.TOVAR?.mapToDomain()
-                    ?: throw IllegalArgumentException("Paged search products can't be null")
-            },
+            mapper = { dto -> dto.toPagingSourceData() },
         )
     }
 
@@ -1541,10 +1519,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
                     productsIds = if (accountManager.fetchAccountId() == null) productsIds else null
                 )
             },
-            mapper = { dto ->
-                dto.DATA?.mapToDomain()
-                    ?: throw IllegalArgumentException("Paged favorite products can't be null")
-            }
+            mapper = { dto -> dto.toPagingSourceData() }
         )
     }
 
@@ -1631,9 +1606,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
                     productsArticle = productsArticle
                 )
             },
-            mapper = { dto ->
-                dto.products!!.mapToDomain()
-            }
+            mapper = { dto -> dto.toPagingSourceData() }
         )
     }
 
@@ -1782,9 +1755,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
                     order = sort.order
                 )
             },
-            mapper = { dto ->
-                dto.COMMENTS?.mapNotNull { it?.toDomain() } ?: emptyList()
-            }
+            mapper = { dto -> dto.toPagingSourceData() }
         )
     }
 
@@ -1863,9 +1834,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
             request = { page, limit ->
                 vodovozService.getPromotionDetails(promotionId, page, limit)
             },
-            mapper = { dto ->
-                dto.TOVAR?.DATA?.mapToDomain() ?: emptyList()
-            }
+            mapper = { dto -> dto.toPagingSourceData() }
         )
     }
 
@@ -1896,9 +1865,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
                     categoryId = categoryId
                 )
             },
-            mapper = { dto ->
-                dto.toDomain().promotions
-            },
+            mapper = { dto -> dto.toPagingSourceData() },
         )
     }
 
@@ -1955,9 +1922,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
                     order = sort.order
                 )
             },
-            mapper = { dto ->
-                dto.DATA?.mapToDomain() ?: emptyList()
-            }
+            mapper = { dto -> dto.toPagingSourceData() }
         )
     }
 
@@ -2001,9 +1966,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
                     order = sort.order
                 )
             },
-            mapper = { dto ->
-                dto.DATA?.mapToDomain() ?: emptyList()
-            }
+            mapper = { dto -> dto.toPagingSourceData() }
         )
     }
 
@@ -2055,9 +2018,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
                     order = sort.order
                 )
             },
-            mapper = { dto ->
-                dto.DATA?.mapToDomain() ?: emptyList()
-            }
+            mapper = { dto -> dto.toPagingSourceData() }
         )
     }
 
@@ -2100,11 +2061,9 @@ class VodovozServiceRepositoryImpl @Inject constructor(
                     sort = sort.value,
                     order = sort.order,
 
-                    )
+                )
             },
-            mapper = { dto ->
-                dto.DATA?.mapToDomain() ?: emptyList()
-            },
+            mapper = { dto -> dto.toPagingSourceData() },
         )
     }
 }

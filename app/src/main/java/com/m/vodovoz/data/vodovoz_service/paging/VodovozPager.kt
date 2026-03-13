@@ -16,7 +16,7 @@ data object VodovozPagerFactory {
     inline fun <reified T : Any, R : Any> create(
         executor: VodovozRequestExecutor,
         noinline request: suspend (page: Int, limit: Int) -> Response<VodovozResponseDTO<T>>,
-        noinline mapper: (T) -> List<R>
+        noinline mapper: (T) -> PagingSourceData<R>
     ): Pager<Int, R> {
         return Pager(
             config = PagingConfig(5),
@@ -29,7 +29,7 @@ data object VodovozPagerFactory {
     inline fun <reified T : Any, R : Any> getFlow(
         executor: VodovozRequestExecutor,
         noinline request: suspend (page: Int, limit: Int) -> Response<VodovozResponseDTO<T>>,
-        noinline mapper: (T) -> List<R>,
+        noinline mapper: (T) -> PagingSourceData<R>,
     ): Flow<PagingData<R>> {
         return create(executor, request, mapper).flow
     }

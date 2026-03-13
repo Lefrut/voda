@@ -6,16 +6,19 @@ import com.m.vodovoz.data.vodovoz_service.VodovozRequestExecutor
 import com.m.vodovoz.data.vodovoz_service.model.VodovozResponseDTO
 import com.m.vodovoz.util.extensions.debugLog
 import kotlinx.coroutines.flow.singleOrNull
-import retrofit2.Response
 import kotlin.reflect.KType
 import kotlin.reflect.javaType
 
 class VodovozPagingSource<T : Any, R : Any>(
     private val executor: VodovozRequestExecutor,
     private val type: KType,
-    private val request: suspend (page: Int, limit: Int) -> Response<VodovozResponseDTO<T>>,
-    private val mapper: (T) -> List<R>,
+    private val request: suspend (page: Int, limit: Int) -> retrofit2.Response<VodovozResponseDTO<T>>,
+    private val mapper: (T) -> PagingSourceData<R>,
 ) : PagingSource<Int, R>() {
+
+    private companion object {
+        const val MIN_ITEMS_FOR_NEXT_PAGE = 3
+    }
 
     @OptIn(ExperimentalStdlibApi::class)
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, R> {
@@ -33,11 +36,12 @@ class VodovozPagingSource<T : Any, R : Any>(
             return LoadResult.Error(NoSuchElementException("No elements received from the flow"))
         }
 
-        result.onSuccess { list ->
-            val nextKey = if (list.size < 3) null else page + 1
+        result.onSuccess { pagingData ->
+            val items = pagingData.items
+            val nextKey = if (items.size > 2 && page < pagingData.pageCount) page + 1 else null
 
             return LoadResult.Page(
-                data = list,
+                data = items,
                 prevKey = if (page == 1) null else page - 1,
                 nextKey = nextKey
             )
