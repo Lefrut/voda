@@ -158,7 +158,6 @@ fun List<SWITCH_DTO>.mapToDomain(): List<SwitchModel>{
     return mapNotNull { it.toDomain() }
 }
 
-//todo
 fun SWITCH_DTO.toDomain(): SwitchModel? {
     return SwitchModel(
         id = PROP_CODE ?: ID ?: return null,

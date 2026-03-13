@@ -261,7 +261,7 @@ class FavoriteFlowViewModel @Inject constructor(
         val lastSavedLikes: Map<Long, Boolean> = emptyMap(),
     ) : PagingState<ProductUi, FavoriteState>() {
 
-        //todo - mb refactor
+
         override fun copyPagingState(
             items: List<ProductUi>,
             loadStates: CombinedLoadStates,
