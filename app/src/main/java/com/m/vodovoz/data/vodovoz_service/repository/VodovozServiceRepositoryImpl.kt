@@ -735,6 +735,8 @@ class VodovozServiceRepositoryImpl @Inject constructor(
                     queries = params
                 )
             },
+            toDomain = { "" },
+            mapper = { "" }
         )
     }
 
