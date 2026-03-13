@@ -1,8 +1,10 @@
 package com.m.vodovoz.domain.general.model.product
 
 import androidx.compose.runtime.Immutable
+import com.m.vodovoz.design_system.model.BannerUi
 import com.m.vodovoz.design_system.model.ForAdultsUi
 import com.m.vodovoz.design_system.model.ProductUi
+import com.m.vodovoz.design_system.model.mapToUi
 import com.m.vodovoz.design_system.model.toUi
 import com.m.vodovoz.feature.home.model.CategoryUi
 import com.m.vodovoz.feature.home.model.toUi
@@ -11,6 +13,7 @@ import com.m.vodovoz.feature.product_comments.model.toUi
 
 @Immutable
 data class ProductsSectionUi(
+    val banners: List<BannerUi>,
     val title: String,
     val sortingTitle: String,
     val productsQuantityText: String,
@@ -22,7 +25,17 @@ data class ProductsSectionUi(
 ) {
     companion object {
         val Empty =
-            ProductsSectionUi("", "", "", emptyList(), emptyList(), emptyList(), ShareUi.Empty, null)
+            ProductsSectionUi(
+                emptyList(),
+                "",
+                "",
+                "",
+                emptyList(),
+                emptyList(),
+                emptyList(),
+                ShareUi.Empty,
+                null
+            )
     }
 }
 
@@ -46,6 +59,7 @@ fun ShareModel.toUi(): ShareUi {
 
 fun ProductsSectionModel.toUi(): ProductsSectionUi {
     return ProductsSectionUi(
+        banners = banners.mapToUi(),
         title,
         sortingTitle,
         productsQuantityText,

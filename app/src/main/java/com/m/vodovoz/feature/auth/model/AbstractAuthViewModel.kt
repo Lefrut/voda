@@ -1,5 +1,7 @@
 package com.m.vodovoz.feature.auth.model
 
+import com.m.vodovoz.common.account.AccountManager
+import com.m.vodovoz.core.network.VodovozWebConfig
 import com.m.vodovoz.design_system.model.ColorfulButtonUi
 import com.m.vodovoz.design_system.model.updateButton
 import com.m.vodovoz.design_system.model.widgets.CheckboxUi
@@ -14,7 +16,9 @@ import com.m.vodovoz.design_system.model.widgets.withUpdatedSwitch
 import com.m.vodovoz.ui.mvi.MviViewModel
 
 abstract class AbstractAuthViewModel<State : AuthState<State>, Event>(
-    state: State, private val blockingButtonId: String
+    state: State,
+    private val blockingButtonId: String,
+    private val accountManager: AccountManager
 ) : MviViewModel<State, Event>(state), AuthContentOperations {
 
     private data class BlockingButtonInputSignature(
@@ -38,6 +42,7 @@ abstract class AbstractAuthViewModel<State : AuthState<State>, Event>(
 
             if (!shouldRecalculate) return@collect
             lastInputSignature = currentInputSignature
+
 
             updateBlockingButton { button ->
                 button.copy(
@@ -137,10 +142,10 @@ abstract class AbstractAuthViewModel<State : AuthState<State>, Event>(
                     items = accountTypeSwitches.map { it.copy(value = false) }
                         .withUpdatedSwitch(updatedSwitch)
                 )
-
             )
         }
     }
+
 
     @Suppress("SameParameterValue")
     protected fun List<FieldUi>.withLastFieldErrorText(error: String = ""): List<FieldUi> {
@@ -154,4 +159,18 @@ abstract class AbstractAuthViewModel<State : AuthState<State>, Event>(
             )
         } ?: this
     }
+
+    override fun onDispose() {
+        if(!accountManager.isAlreadyLogin()){
+            accountManager.updateUserUrl(VodovozWebConfig.VODOVOZ_BASE_URL)
+        }
+
+    }
+
+    fun setAccountTypeById(accountTypeId: String?) {
+        updateAuthDetails {
+            withAccountTypeSelection(accountTypeId)
+        }
+    }
+
 }

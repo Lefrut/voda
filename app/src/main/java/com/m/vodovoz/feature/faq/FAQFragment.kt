@@ -23,19 +23,6 @@ class FAQFragment: Fragment() {
 
     val viewModel: FAQViewModel by viewModels()
 
-    @Inject
-    lateinit var tabManager: TabManager
-
-    override fun onStart() {
-        super.onStart()
-        tabManager.changeTabVisibility(false)
-    }
-
-    override fun onStop() {
-        super.onStop()
-        tabManager.changeTabVisibility(true)
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,

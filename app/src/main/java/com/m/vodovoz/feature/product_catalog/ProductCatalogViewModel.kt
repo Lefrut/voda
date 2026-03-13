@@ -11,7 +11,10 @@ import androidx.paging.map
 import com.m.vodovoz.R
 import com.m.vodovoz.common.cart.CartManager
 import com.m.vodovoz.common.like.LikeManager
+import com.m.vodovoz.common.model.BaseVodovozAction
 import com.m.vodovoz.common.resources.ResourcesProvider
+import com.m.vodovoz.design_system.model.AboutAdvertisingUi
+import com.m.vodovoz.design_system.model.BannerUi
 import com.m.vodovoz.design_system.model.ForAdultsUi
 import com.m.vodovoz.design_system.model.ParentCategoryUi
 import com.m.vodovoz.design_system.model.ProductUi
@@ -593,6 +596,25 @@ class ProductCatalogViewModel @Inject constructor(
         sendEvent(ProductCatalogEvent.GoToProductAnalogs(product.id))
     }
 
+    fun activateBannerAction(banner: BannerUi) = viewModelScope.launch {
+        sendEvent(ProductCatalogEvent.ActivateAction(banner.action))
+    }
+
+    fun showAdvertisingBottomSheet(advertising: AboutAdvertisingUi) = viewModelScope.launch {
+        updateState { s ->
+            s.copy(
+                currentAdvertising = advertising,
+                showAdvertisingBS = true
+            )
+        }
+    }
+
+    fun closeAdvertisingBottomSheet() = viewModelScope.launch {
+        updateState { s ->
+            s.copy(showAdvertisingBS = false)
+        }
+    }
+
     fun navigateToSpeech() = viewModelScope.launch {
         sendEvent(ProductCatalogEvent.GoToSpeech)
     }
@@ -632,6 +654,8 @@ class ProductCatalogViewModel @Inject constructor(
         val showRefreshIndicator: Boolean = false,
         val showEmptyCategory: Boolean = false,
         val showShare: Boolean = false,
+        val showAdvertisingBS: Boolean = false,
+        val currentAdvertising: AboutAdvertisingUi = AboutAdvertisingUi.Empty,
     ) : PagingState<ProductUi, ProductCatalogState>() {
 
         override fun copyPagingState(
@@ -687,6 +711,7 @@ class ProductCatalogViewModel @Inject constructor(
         data object GoToSpeech : ProductCatalogEvent()
         data object GoToQrCode : ProductCatalogEvent()
         data object GoToCatalog : ProductCatalogEvent()
+        data class ActivateAction(val action: BaseVodovozAction) : ProductCatalogEvent()
 
         data class GoToSearch(val query: String) : ProductCatalogEvent()
         data class GoToCategories(

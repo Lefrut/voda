@@ -1,9 +1,9 @@
 package com.m.vodovoz.feature.product_catalog.composables
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -24,11 +24,14 @@ import androidx.paging.CombinedLoadStates
 import androidx.paging.LoadState
 import com.valentinilk.shimmer.ShimmerBounds
 import com.valentinilk.shimmer.rememberShimmer
+import com.m.vodovoz.design_system.composables.decoration.SmallBannerPager
 import com.m.vodovoz.design_system.composables.list.ProductListCategoriesRow
 import com.m.vodovoz.design_system.composables.list.ProductListOptionsRow
 import com.m.vodovoz.design_system.composables.list.ProductListTitle
 import com.m.vodovoz.design_system.composables.list.linearOrGridProducts
 import com.m.vodovoz.design_system.composables.placeholders.VodovozPlaceholder
+import com.m.vodovoz.design_system.model.AboutAdvertisingUi
+import com.m.vodovoz.design_system.model.BannerUi
 import com.m.vodovoz.design_system.model.ParentCategoryUi
 import com.m.vodovoz.design_system.model.ProductUi
 import com.m.vodovoz.design_system.model.allCategories
@@ -42,6 +45,7 @@ import com.m.vodovoz.feature.product_comments.model.SortUi
 fun ProductCatalogBody(
     modifier: Modifier = Modifier,
     lazyGridState: LazyGridState,
+    banners: List<BannerUi>,
     title: String,
     categories: List<CategoryUi>,
     categoriesTree: List<ParentCategoryUi>,
@@ -56,6 +60,8 @@ fun ProductCatalogBody(
     productsLoadStates: CombinedLoadStates,
     onProductSee: (Int) -> Unit,
     onSortingClick: () -> Unit,
+    onBannerClick: (BannerUi) -> Unit,
+    onAboutAdvertisingClick: (AboutAdvertisingUi) -> Unit,
     onSwitchLayoutClick: () -> Unit,
     onCategoryClick: (CategoryUi) -> Unit,
     onCategoriesListClick: () -> Unit,
@@ -95,6 +101,22 @@ fun ProductCatalogBody(
         contentPadding = PaddingValues(vertical = 16.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
+        if (banners.isNotEmpty()) {
+            item(span = { GridItemSpan(maxLineSpan) }, key = ProductGridKeys.BANNERS) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp)
+                ) {
+                    SmallBannerPager(
+                        banners = banners,
+                        onBannerClick = onBannerClick,
+                        onAboutAdvertisingClick = onAboutAdvertisingClick
+                    )
+                }
+            }
+        }
+
         item(span = { GridItemSpan(maxLineSpan) }, key = ProductGridKeys.TITLE) {
             ProductListTitle(
                 modifier = Modifier.padding(bottom = 16.dp),
@@ -151,23 +173,25 @@ fun ProductCatalogBody(
             ) {
                 val placeholder =
                     (refreshLoadState.error as? EmptyResultException)?.placeholder?.toUi()
-                        ?: return@item
 
-                VodovozPlaceholder(
+                if (placeholder != null) {
+                    VodovozPlaceholder(
 
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(
-                            placeholderHeight.coerceAtLeast(1.dp)
-                        ),
-                    data = placeholder,
-                    onProductClick = onProductClick,
-                    onProductLike = onProductLike,
-                    onAnalogsClick = onProductAnalogsClick,
-                    onDecrementToCart = onDecrementProductToCart,
-                    onIncrementToCart = onIncrementProductToCart,
-                    onButtonClick = onPlacholderButtonClick
-                )
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(
+                                placeholderHeight.coerceAtLeast(1.dp)
+                            ),
+                        data = placeholder,
+                        onProductClick = onProductClick,
+                        onProductLike = onProductLike,
+                        onAnalogsClick = onProductAnalogsClick,
+                        onDecrementToCart = onDecrementProductToCart,
+                        onIncrementToCart = onIncrementProductToCart,
+                        onButtonClick = onPlacholderButtonClick
+                    )
+                }
+
             }
         } else {
             linearOrGridProducts(
@@ -187,10 +211,11 @@ fun ProductCatalogBody(
 }
 
 private object ProductGridKeys {
+    const val BANNERS = "ProductBanners"
     const val TITLE = "ProductListTitle"
     const val CATEGORIES = "ProductListCategoriesRow"
     const val OPTIONS = "ProductListOptionsRow"
     const val EMPTY_PLACEHOLDER = "EmptyPlaceholder"
 
-    val HEADER_KEYS = setOf(TITLE, CATEGORIES, OPTIONS)
+    val HEADER_KEYS = setOf(BANNERS, TITLE, CATEGORIES, OPTIONS)
 }

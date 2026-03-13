@@ -17,8 +17,10 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.m.vodovoz.R
+import com.m.vodovoz.common.cookie.CookieManager
 import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.core.navigation.ContentSearchNavigator
+import com.m.vodovoz.core.navigation.activate
 import com.m.vodovoz.core.navigation.navigateToCategories
 import com.m.vodovoz.core.navigation.navigateToProductAnalogs
 import com.m.vodovoz.core.navigation.navigateToProductDetails
@@ -43,6 +45,9 @@ class ProductCatalogFragment : Fragment() {
 
     @Inject
     lateinit var tabManager: TabManager
+
+    @Inject
+    lateinit var cookieManager: CookieManager
 
     @Inject
     lateinit var navigatorFactory: ContentSearchNavigator.Factory
@@ -162,6 +167,15 @@ class ProductCatalogFragment : Fragment() {
                                 ProductCatalogViewModel.ProductCatalogEvent.GoToCatalog -> {
                                     findNavController().popBackStack()
                                     tabManager.selectTab(R.id.graph_catalog)
+                                }
+
+                                is ProductCatalogViewModel.ProductCatalogEvent.ActivateAction -> {
+                                    event.action.activate(
+                                        navController = findNavController(),
+                                        context = requireActivity(),
+                                        cookie = cookieManager.fetchCookieSessionId() ?: "",
+                                        tabManager = tabManager
+                                    )
                                 }
                             }
                         }

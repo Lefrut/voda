@@ -1,8 +1,10 @@
 package com.m.vodovoz.domain.general.model.product
 
 import com.m.vodovoz.domain.general.model.user.ForAdultsModel
+import com.m.vodovoz.domain.general.model.promotion.BannerModel
 
 data class ProductsSectionModel(
+    val banners: List<BannerModel>,
     val title: String,
     val sortingTitle: String,
     val productsQuantityText: String,
@@ -14,6 +16,7 @@ data class ProductsSectionModel(
 ) {
     companion object {
         val Empty = ProductsSectionModel(
+            banners = emptyList(),
             title = "",
             sortingTitle = "",
             productsQuantityText = "",

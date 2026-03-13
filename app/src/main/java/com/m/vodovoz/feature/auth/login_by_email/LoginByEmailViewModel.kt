@@ -4,9 +4,11 @@ import androidx.compose.runtime.Stable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.m.vodovoz.R
+import com.m.vodovoz.common.account.AccountManager
 import com.m.vodovoz.common.account.LoginManager
 import com.m.vodovoz.common.resources.ResourcesProvider
 import com.m.vodovoz.core.navigation.AuthArgs
+import com.m.vodovoz.core.network.VodovozWebConfig
 import com.m.vodovoz.design_system.model.ColorfulButtonUi
 import com.m.vodovoz.design_system.model.updateButton
 import com.m.vodovoz.design_system.model.widgets.updateField
@@ -38,9 +40,11 @@ class LoginByEmailViewModel @Inject constructor(
     private val resourcesProvider: ResourcesProvider,
     private val loginManager: LoginManager,
     private val savedStateHandle: SavedStateHandle,
+    private val accountManager: AccountManager
 ) : AbstractAuthViewModel<LoginByEmailState, LoginByEmailEvent>(
-    LoginByEmailState(),
-    LOGIN_BY_EMAIL_BUTTON
+    state = LoginByEmailState(),
+    blockingButtonId = LOGIN_BY_EMAIL_BUTTON,
+    accountManager = accountManager
 ) {
 
     override val blockingButtonValidators = LOGIN_BY_EMAIL_VALIDATORS
@@ -52,6 +56,7 @@ class LoginByEmailViewModel @Inject constructor(
     private fun loginByEmail() = viewModelScope.launch {
         setBlockingButtonState(loading = true)
 
+        accountManager.updateUserUrl(stateSnapshot.userUrl)
 
         val loginByEmailResult = vodovozServiceRepository.loginByEmail(
             stateSnapshot.fields.associate {
@@ -65,7 +70,6 @@ class LoginByEmailViewModel @Inject constructor(
             loginManager.initializeUserSession(
                 userId = userAuthInfo.userId,
                 userToken = userAuthInfo.token,
-                userUrl = stateSnapshot.userUrl
             )
 
             setBlockingButtonState(loading = false, enabled = false)
@@ -120,6 +124,8 @@ class LoginByEmailViewModel @Inject constructor(
                     uiState = LoginByEmailUiState.Success,
                 )
             }
+
+
         }.onFailure {
             updateState { s ->
                 s.copy(uiState = LoginByEmailUiState.Error)

@@ -1,12 +1,9 @@
 package com.m.vodovoz.feature.auth.composables
 
-import androidx.compose.animation.AnimatedContent
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -22,6 +19,8 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -48,6 +47,18 @@ fun AuthContent(
     authDetails: AuthDetailsUi,
 ) {
     LifecycleEffect { operations.listenAuthDetailsChanges() }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            operations.onDispose()
+        }
+    }
+
+    BackHandler {
+        operations.onBackClick()
+    }
+
+
 
     Column(
         modifier = modifier

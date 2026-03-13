@@ -1,5 +1,6 @@
 package com.m.vodovoz.feature.faq
 
+import androidx.compose.runtime.Stable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.m.vodovoz.feature.buy_certificate.model.FAQItemUi
@@ -13,6 +14,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
+@Stable
 class FAQViewModel @Inject constructor(savedStateHandle: SavedStateHandle) :
     MviViewModel<FAQState, FAQEvent>(FAQState()) {
 

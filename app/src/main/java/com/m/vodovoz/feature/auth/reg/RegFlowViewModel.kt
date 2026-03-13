@@ -42,7 +42,8 @@ class RegFlowViewModel @Inject constructor(
     private val loginManager: LoginManager,
 ) : AbstractAuthViewModel<RegFlowViewModel.RegState, RegFlowViewModel.RegEvents>(
     RegState(),
-    REGISTER_BUTTON
+    REGISTER_BUTTON,
+    accountManager
 ) {
 
     override val blockingButtonValidators = REGISTER_FIELD_VALIDATORS
@@ -105,8 +106,7 @@ class RegFlowViewModel @Inject constructor(
 
             loginManager.initializeUserSession(
                 authInfo.userId,
-                authInfo.token,
-                VodovozWebConfig.VODOVOZ_URL
+                authInfo.token
             )
 
             accountManager.updateLastLoginSetting(

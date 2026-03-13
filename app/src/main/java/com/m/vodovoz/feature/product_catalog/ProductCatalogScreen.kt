@@ -4,17 +4,15 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import coil3.compose.rememberAsyncImagePainter
 import com.m.vodovoz.design_system.composables.bottom_sheet.SortOptionsBottomSheet
-import com.m.vodovoz.design_system.composables.placeholders.EmptyResultPlaceholder
 import com.m.vodovoz.design_system.composables.placeholders.LoadingPlaceholder
 import com.m.vodovoz.design_system.composables.placeholders.NetworkErrorPlaceholder
 import com.m.vodovoz.design_system.composables.placeholders.VodovozPlaceholder
 import com.m.vodovoz.design_system.composables.pull_to_refresh.VodovozPullToRefreshBox
 import com.m.vodovoz.design_system.composables.top_bar.VodovozSearchTopBar
+import com.m.vodovoz.feature.all.promotions.composables.AdvertisingInfoBottomSheet
 import com.m.vodovoz.feature.product_catalog.composables.CategoriesBottomSheet
 import com.m.vodovoz.feature.product_catalog.composables.ProductCatalogBody
 
@@ -67,6 +65,7 @@ fun ProductCatalogScreen(
                 ProductCatalogViewModel.ProductCatalogUiState.Body -> {
                     ProductCatalogBody(
                         lazyGridState = lazyGridState,
+                        banners = productsSection.banners,
                         title = productsSection.title,
                         productsQuantity = productsSection.productsQuantityText,
                         categories = productsSection.categories,
@@ -84,6 +83,12 @@ fun ProductCatalogScreen(
                         },
                         onSortingClick = {
                             viewModel.showSortBottomSheet()
+                        },
+                        onBannerClick = { banner ->
+                            viewModel.activateBannerAction(banner)
+                        },
+                        onAboutAdvertisingClick = { advertising ->
+                            viewModel.showAdvertisingBottomSheet(advertising)
                         },
                         onSwitchLayoutClick = {
                             viewModel.switchLayout()
@@ -163,6 +168,15 @@ fun ProductCatalogScreen(
             },
             onCategoryChoose = {
                 viewModel.chooseBottomSheetCategory()
+            }
+        )
+    }
+
+    if (viewState.showAdvertisingBS) {
+        AdvertisingInfoBottomSheet(
+            advertising = viewState.currentAdvertising,
+            onDismissRequest = {
+                viewModel.closeAdvertisingBottomSheet()
             }
         )
     }

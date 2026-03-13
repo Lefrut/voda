@@ -3,6 +3,7 @@ package com.m.vodovoz.feature.auth.login_by_phone_code
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import com.m.vodovoz.common.account.AccountManager
 import com.m.vodovoz.common.account.LoginManager
 import com.m.vodovoz.core.android.getString
 import com.m.vodovoz.core.navigation.LoginByPhoneCodeArgs
@@ -30,6 +31,7 @@ class LoginByPhoneCodeViewModel @Inject constructor(
     private val siteStateManager: SiteStateManager,
     private val loginManager: LoginManager,
     savedStateHandle: SavedStateHandle,
+    accountManager: AccountManager,
 ) : MviViewModel<LoginByPhoneCodeState, LoginByPhoneCodeEvent>(
     LoginByPhoneCodeState(phone = formatPhone(savedStateHandle.getString(LoginByPhoneCodeArgs.PHONE)))
 ) {
@@ -91,6 +93,7 @@ class LoginByPhoneCodeViewModel @Inject constructor(
             s.copy(blockScreen = true)
         }
 
+
         val smsUrl = siteStateManager.siteStateFlow.value?.smsUrl ?: ""
 
         val loginByPhoneResult = vodovozServiceRepository.loginByPhone(
@@ -102,8 +105,7 @@ class LoginByPhoneCodeViewModel @Inject constructor(
         loginByPhoneResult.onSuccess { userAuthInfo ->
             loginManager.initializeUserSession(
                 userAuthInfo.userId,
-                userAuthInfo.token,
-                userUrl
+                userAuthInfo.token
             )
 
             updateState { s ->

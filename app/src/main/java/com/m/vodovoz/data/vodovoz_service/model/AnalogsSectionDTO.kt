@@ -19,6 +19,8 @@ data class AnalogsSectionDTO(
 @Keep
 @JsonClass(generateAdapter = true)
 data class ProductsSectionDTO(
+    @Json(name = "BANNER")
+    val BANNER: List<BannerDTO?>?,
     @Json(name = "TITLE")
     val TITLE: String?,
     @Json(name = "COUNT")

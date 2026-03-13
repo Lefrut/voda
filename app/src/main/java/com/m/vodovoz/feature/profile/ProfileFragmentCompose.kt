@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -95,6 +96,7 @@ class ProfileFragment : Fragment() {
             setContent {
                 VodovozTheme {
                     val viewState by viewModel.collectAsState()
+
 
                     when (val uiState = viewState.uiState) {
                         ProfileFlowViewModel.ProfileUiState.Loading -> {

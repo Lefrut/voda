@@ -9,6 +9,7 @@ import com.m.vodovoz.common.account.AccountManager
 import com.m.vodovoz.common.model.GlobalAppExtraAgreement
 import com.m.vodovoz.common.resources.ResourcesProvider
 import com.m.vodovoz.core.navigation.AuthArgs
+import com.m.vodovoz.core.network.VodovozWebConfig
 import com.m.vodovoz.design_system.model.ColorfulButtonUi
 import com.m.vodovoz.domain.general.model.exceptions.TooManyRequestsException
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
@@ -40,8 +41,9 @@ class LoginFlowViewModel @Inject constructor(
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val resourcesProvider: ResourcesProvider,
     private val savedStateHandle: SavedStateHandle,
+    private val accountManager: AccountManager
 ) : AbstractAuthViewModel<LoginFlowViewModel.LoginState, LoginFlowViewModel.LoginEvents>(
-    LoginState(), AUTH_BUTTON
+    LoginState(), AUTH_BUTTON, accountManager
 ) {
 
 
@@ -97,6 +99,8 @@ class LoginFlowViewModel @Inject constructor(
             return@launch
         }
 
+
+        accountManager.updateUserUrl(stateSnapshot.userUrl)
 
         val requestPhoneCodeResult = vodovozServiceRepository.requestPhoneCode(
             url = requestPhoneCodeUrl,
@@ -171,10 +175,6 @@ class LoginFlowViewModel @Inject constructor(
         launchInViewModelScope {
             sendEvent(LoginEvents.GoToWebView(url, title))
         }
-    }
-
-    fun setAccountTypeById(accountTypeId: String?) {
-        updateAuthDetails { withAccountTypeSelection(accountTypeId) }
     }
 
     sealed class LoginEvents : Event {

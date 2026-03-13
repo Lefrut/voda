@@ -15,18 +15,14 @@ class LoginManager @Inject constructor(
     private val likeManager: LikeManager,
     private val firebaseTokenManager: FirebaseTokenManager,
     private val tabManager: TabManager,
-    private val urlManager: VodovozUrlManager
 ) {
 
 
     suspend fun initializeUserSession(
         userId: Long,
-        userToken: String,
-        userUrl: String
+        userToken: String
     ) {
-        urlManager.setUrl(userUrl)
         tabManager.updateBottomNavCartState()
-        accountManager.updateUserUrl(userUrl)
         accountManager.updateUserId(userId)
         accountManager.updateUserToken(userToken)
         likeManager.updateLikesAfterLogin()

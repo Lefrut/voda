@@ -3,6 +3,7 @@ package com.m.vodovoz.feature.auth.recover_password
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.viewModelScope
 import com.m.vodovoz.R
+import com.m.vodovoz.common.account.AccountManager
 import com.m.vodovoz.common.resources.ResourcesProvider
 import com.m.vodovoz.design_system.model.ColorfulButtonUi
 import com.m.vodovoz.design_system.model.toUi
@@ -31,9 +32,11 @@ private const val RECOVER_PASSWORD_BUTTON = "otpravka"
 class RecoverPasswordViewModel @Inject constructor(
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val resourcesProvider: ResourcesProvider,
+    private val accountManager: AccountManager
 ) : AbstractAuthViewModel<RecoverPasswordState, RecoverPasswordEvent>(
     RecoverPasswordState(),
-    RECOVER_PASSWORD_BUTTON
+    RECOVER_PASSWORD_BUTTON,
+    accountManager = accountManager
 ) {
 
     init {

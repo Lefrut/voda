@@ -25,4 +25,6 @@ interface AuthContentOperations {
 
     fun clickForgotPassword() = Unit
 
+    fun onDispose()
+
 }
