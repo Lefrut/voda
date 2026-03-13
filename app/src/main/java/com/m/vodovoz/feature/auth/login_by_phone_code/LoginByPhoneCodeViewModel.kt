@@ -31,7 +31,7 @@ class LoginByPhoneCodeViewModel @Inject constructor(
     private val siteStateManager: SiteStateManager,
     private val loginManager: LoginManager,
     savedStateHandle: SavedStateHandle,
-    accountManager: AccountManager,
+    private val accountManager: AccountManager,
 ) : MviViewModel<LoginByPhoneCodeState, LoginByPhoneCodeEvent>(
     LoginByPhoneCodeState(phone = formatPhone(savedStateHandle.getString(LoginByPhoneCodeArgs.PHONE)))
 ) {
@@ -64,6 +64,7 @@ class LoginByPhoneCodeViewModel @Inject constructor(
 
     fun sendCode() = viewModelScope.launch {
         val currentCode = stateSnapshot.code.take(smsCodeCount)
+        accountManager.updateUserUrl(userUrl)
         loadingByPhone(currentCode)
     }
 
@@ -73,6 +74,8 @@ class LoginByPhoneCodeViewModel @Inject constructor(
         }
 
         val smsUrl = siteStateManager.siteStateFlow.value?.smsUrl ?: ""
+
+        accountManager.updateUserUrl(userUrl)
 
         val requestPhoneCodeResult = vodovozServiceRepository
             .requestPhoneCode(smsUrl, stateSnapshot.phone)
