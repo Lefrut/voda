@@ -12,13 +12,17 @@ import com.m.vodovoz.core.navigation.NavigationEntry
 import com.m.vodovoz.core.navigation.navigateToAddAddress
 import com.m.vodovoz.core.navigation.navigateToMap
 import com.m.vodovoz.design_system.effects.LifecycleEffect
+import com.m.vodovoz.feature.addresses.api.AddressesNavKey
 import com.m.vodovoz.feature.addresses.model.AddressScreenTypeUi
 import com.m.vodovoz.ui.mvi.collectAsState
 import com.yandex.mapkit.MapKit
 import com.yandex.mapkit.MapKitFactory
 
 @Composable
-fun AddressesEntry() = NavigationEntry<AddressesFlowViewModel> {
+fun AddressesEntry(navKey: AddressesNavKey? = null) =
+    NavigationEntry<AddressesFlowViewModel, AddressesFlowViewModel.Factory>(
+        creationCallback = { factory -> factory.create(navKey) }
+    ) {
     val viewState by viewModel.collectAsState()
     val lifecycleOwner = LocalLifecycleOwner.current
     val mapKit: MapKit = MapKitFactory.getInstance()

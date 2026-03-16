@@ -5,11 +5,15 @@ import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.LifecycleStartEffect
 import com.m.vodovoz.core.navigation.NavigationEntry
 import com.m.vodovoz.design_system.effects.LifecycleEffect
+import com.m.vodovoz.feature.categories.api.CategoriesNavKey
 import com.m.vodovoz.feature.categories.model.CategoriesEvent
 import com.m.vodovoz.ui.mvi.collectAsState
 
 @Composable
-fun CategoriesEntry() = NavigationEntry<CategoriesViewModel> {
+fun CategoriesEntry(navKey: CategoriesNavKey? = null) =
+    NavigationEntry<CategoriesViewModel, CategoriesViewModel.Factory>(
+        creationCallback = { factory -> factory.create(navKey) }
+    ) {
     val viewState by viewModel.collectAsState()
 
     LifecycleStartEffect(Unit) {

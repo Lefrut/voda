@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.LifecycleStartEffect
 import com.m.vodovoz.core.navigation.NavigationEntry
+import com.m.vodovoz.feature.about_product.api.AboutProductNavKey
 import com.m.vodovoz.feature.document_viewer.api.DocumentViewerNavKey
 import com.m.vodovoz.core.navigation.navigateToProductAnalogs
 import com.m.vodovoz.design_system.effects.LifecycleEffect
@@ -11,7 +12,10 @@ import com.m.vodovoz.feature.about_product.model.AboutProductEvent
 import com.m.vodovoz.ui.mvi.collectAsState
 
 @Composable
-fun AboutProductEntry() = NavigationEntry<AboutProductViewModel> {
+fun AboutProductEntry(navKey: AboutProductNavKey? = null) =
+    NavigationEntry<AboutProductViewModel, AboutProductViewModel.Factory>(
+        creationCallback = { factory -> factory.create(navKey) }
+    ) {
     val viewState by viewModel.collectAsState()
 
     LifecycleStartEffect(Unit) {

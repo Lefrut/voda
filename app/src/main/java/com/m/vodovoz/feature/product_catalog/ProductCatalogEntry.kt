@@ -18,12 +18,16 @@ import com.m.vodovoz.design_system.composables.placeholders.ForAdultsPlaceholder
 import com.m.vodovoz.design_system.effects.LifecycleEffect
 import com.m.vodovoz.design_system.model.filters.FiltersUi
 import com.m.vodovoz.feature.home.model.CategoryUi
+import com.m.vodovoz.feature.product_catalog.api.ProductCatalogNavKey
 import com.m.vodovoz.ui.mvi.collectAsState
 import com.m.vodovoz.ui.mvi.collectEvents
 import com.m.vodovoz.util.extensions.shareText
 
 @Composable
-fun ProductCatalogEntry() = NavigationEntry<ProductCatalogViewModel> {
+fun ProductCatalogEntry(navKey: ProductCatalogNavKey? = null) =
+    NavigationEntry<ProductCatalogViewModel, ProductCatalogViewModel.Factory>(
+        creationCallback = { factory -> factory.create(navKey) }
+    ) {
     val viewState by viewModel.collectAsState()
     val lazyGridState = rememberLazyGridState()
     val context = LocalContext.current

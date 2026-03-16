@@ -9,13 +9,17 @@ import com.m.vodovoz.core.navigation.NavigationEntry
 import com.m.vodovoz.design_system.composables.placeholders.LoadingPlaceholder
 import com.m.vodovoz.design_system.composables.placeholders.NetworkErrorPlaceholder
 import com.m.vodovoz.design_system.composables.placeholders.VodovozLongPlaceholder
+import com.m.vodovoz.feature.order_question.api.OrderQuestionNavKey
 import com.m.vodovoz.feature.order_question.model.OrderQuestionEvent
 import com.m.vodovoz.feature.order_question.model.OrderQuestionUiState
 import com.m.vodovoz.ui.mvi.collectAsState
 import com.m.vodovoz.ui.mvi.collectEvents
 
 @Composable
-fun OrderQuestionEntry() = NavigationEntry<OrderQuestionViewModel> {
+fun OrderQuestionEntry(navKey: OrderQuestionNavKey? = null) =
+    NavigationEntry<OrderQuestionViewModel, OrderQuestionViewModel.Factory>(
+        creationCallback = { factory -> factory.create(navKey) }
+    ) {
     val viewState by viewModel.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
 

@@ -13,6 +13,7 @@ import com.m.vodovoz.design_system.model.withItems
 import com.m.vodovoz.domain.general.model.order.PaymentMethodItemModel
 import com.m.vodovoz.domain.general.model.widgets.FieldModel
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
+import com.m.vodovoz.feature.payment_method.api.PaymentMethodNavKey
 import com.m.vodovoz.feature.payment_method.model.PaymentMethodEvent
 import com.m.vodovoz.feature.payment_method.model.PaymentMethodItemUi
 import com.m.vodovoz.feature.payment_method.model.PaymentMethodState
@@ -23,30 +24,33 @@ import com.m.vodovoz.ui.mvi.MviViewModel
 import com.m.vodovoz.util.extensions.singleResult
 import com.m.vodovoz.util.toRoundIntOrNull
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.launch
 import java.time.LocalDate
-import javax.inject.Inject
 
-@HiltViewModel
+@HiltViewModel(assistedFactory = PaymentMethodViewModel.Factory::class)
 @Stable
-class PaymentMethodViewModel @Inject constructor(
+class PaymentMethodViewModel @AssistedInject constructor(
     val tabManager: TabManager,
     savedStateHandle: SavedStateHandle,
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val resourcesProvider: ResourcesProvider,
+    @Assisted private val navKey: PaymentMethodNavKey?,
 ) : MviViewModel<PaymentMethodState, PaymentMethodEvent>(PaymentMethodState()) {
 
-    private val addressId = savedStateHandle.get<Long>("addressId") ?: -1
-    private val orderDate = savedStateHandle.get<Long>("date")?.let { days ->
+    private val addressId = navKey?.addressId ?: savedStateHandle.get<Long>("addressId") ?: -1
+    private val orderDate = (navKey?.date ?: savedStateHandle.get<Long>("date"))?.let { days ->
         LocalDate.ofEpochDay(days)
     } ?: LocalDate.now()
-    private val paymentMethodId: String? = savedStateHandle["paymentMethodId"]
-    private val paymentChange: String = savedStateHandle["paymentChange"] ?: ""
-    private val useBalance: Boolean? = savedStateHandle["balance"]
-    private val useBonuses: Boolean? = savedStateHandle["bonuses"]
-    private val bonusesValue: Int? = savedStateHandle["bonusesValue"]
+    private val paymentMethodId: String? = navKey?.paymentMethodId ?: savedStateHandle["paymentMethodId"]
+    private val paymentChange: String = navKey?.paymentChange ?: savedStateHandle["paymentChange"] ?: ""
+    private val useBalance: Boolean? = navKey?.balance ?: savedStateHandle["balance"]
+    private val useBonuses: Boolean? = navKey?.bonuses ?: savedStateHandle["bonuses"]
+    private val bonusesValue: Int? = navKey?.bonusesValue ?: savedStateHandle["bonusesValue"]
 
-    private val queryParams = savedStateHandle.getQueryParams()
+    private val queryParams = navKey?.queryParams ?: savedStateHandle.getQueryParams()
 
     fun navigateBack() = viewModelScope.launch {
         sendEvent(PaymentMethodEvent.GoBack)
@@ -246,6 +250,11 @@ class PaymentMethodViewModel @Inject constructor(
                 }
             )
         }
+    }
+
+    @AssistedFactory
+    interface Factory {
+        fun create(navKey: PaymentMethodNavKey?): PaymentMethodViewModel
     }
 
 }

@@ -5,24 +5,28 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.design_system.model.DocumentUi
+import com.m.vodovoz.feature.document_viewer.api.DocumentViewerNavKey
 import com.m.vodovoz.feature.document_viewer.model.DocumentViewerEvent
 import com.m.vodovoz.feature.document_viewer.model.DocumentViewerState
 import com.m.vodovoz.feature.document_viewer.model.DocumentViewerUiState
 import com.m.vodovoz.ui.mvi.MviViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-@HiltViewModel
+@HiltViewModel(assistedFactory = DocumentViewerViewModel.Factory::class)
 @Stable
-class DocumentViewerViewModel @Inject constructor(
+class DocumentViewerViewModel @AssistedInject constructor(
     val tabManager: TabManager,
     savedStateHandle: SavedStateHandle,
+    @Assisted private val navKey: DocumentViewerNavKey?,
 ) : MviViewModel<DocumentViewerState, DocumentViewerEvent>(DocumentViewerState()) {
 
     init {
-        savedStateHandle.get<DocumentUi>("documentId")?.let { document ->
+        (navKey?.documentId ?: savedStateHandle.get<DocumentUi>("documentId"))?.let { document ->
             setDocument(document)
         }
     }
@@ -45,4 +49,8 @@ class DocumentViewerViewModel @Inject constructor(
         sendEvent(DocumentViewerEvent.GoBack)
     }
 
+    @AssistedFactory
+    interface Factory {
+        fun create(navKey: DocumentViewerNavKey?): DocumentViewerViewModel
+    }
 }

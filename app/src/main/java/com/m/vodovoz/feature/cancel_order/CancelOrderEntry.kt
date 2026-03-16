@@ -6,13 +6,17 @@ import androidx.compose.runtime.getValue
 import com.m.vodovoz.core.navigation.NavigationEntry
 import com.m.vodovoz.design_system.composables.placeholders.LoadingPlaceholder
 import com.m.vodovoz.design_system.composables.placeholders.NetworkErrorPlaceholder
+import com.m.vodovoz.feature.cancel_order.api.CancelOrderNavKey
 import com.m.vodovoz.feature.cancel_order.model.CancelOrderEvent
 import com.m.vodovoz.feature.cancel_order.model.CancelOrderUiState
 import com.m.vodovoz.ui.mvi.collectAsState
 import com.m.vodovoz.ui.mvi.collectEvents
 
 @Composable
-fun CancelOrderEntry() = NavigationEntry<CancelOrderViewModel> {
+fun CancelOrderEntry(navKey: CancelOrderNavKey? = null) =
+    NavigationEntry<CancelOrderViewModel, CancelOrderViewModel.Factory>(
+        creationCallback = { factory -> factory.create(navKey) }
+    ) {
     val viewState by viewModel.collectAsState()
 
     DisposableEffect(Unit) {

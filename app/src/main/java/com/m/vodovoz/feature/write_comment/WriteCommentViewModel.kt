@@ -22,6 +22,7 @@ import com.m.vodovoz.design_system.model.widgets.getErrorText
 import com.m.vodovoz.design_system.model.widgets.resetError
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
 import com.m.vodovoz.feature.sitestate.SiteStateManager
+import com.m.vodovoz.feature.write_comment.api.WriteCommentNavKey
 import com.m.vodovoz.feature.write_comment.model.WriteCommentEvent
 import com.m.vodovoz.feature.write_comment.model.WriteCommentState
 import com.m.vodovoz.feature.write_comment.model.WriteCommentUiState
@@ -30,28 +31,31 @@ import com.m.vodovoz.util.extensions.compressAsJPEG
 import com.m.vodovoz.util.extensions.resizeBitmap
 import com.m.vodovoz.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 import kotlin.math.roundToInt
 
-@HiltViewModel
+@HiltViewModel(assistedFactory = WriteCommentViewModel.Factory::class)
 @Stable
-class WriteCommentViewModel @Inject constructor(
+class WriteCommentViewModel @AssistedInject constructor(
     savedStateHandle: SavedStateHandle,
     val tabManager: TabManager,
     private val siteStateManager: SiteStateManager,
     private val resourcesProvider: ResourcesProvider,
     private val contentProvider: ContentProvider,
     private val vodovozServiceRepository: VodovozServiceRepository,
+    @Assisted private val navKey: WriteCommentNavKey?,
 ) : MviViewModel<WriteCommentState, WriteCommentEvent>(WriteCommentState()) {
 
-    private val productId: Long = savedStateHandle["product_id"] ?: -1
-    private val productName: String = savedStateHandle["product_name"] ?: ""
-    private val productImage: String = savedStateHandle["product_image"] ?: ""
-    private val rating: Int = savedStateHandle["rating"] ?: 0
+    private val productId: Long = navKey?.product_id ?: savedStateHandle["product_id"] ?: -1
+    private val productName: String = navKey?.product_name ?: savedStateHandle["product_name"] ?: ""
+    private val productImage: String = navKey?.product_image ?: savedStateHandle["product_image"] ?: ""
+    private val rating: Int = navKey?.rating ?: savedStateHandle["rating"] ?: 0
 
     private val commentField = FieldUi(
         id = "comment",
@@ -182,6 +186,11 @@ class WriteCommentViewModel @Inject constructor(
                 imagesUri = s.imagesUri - image
             )
         }
+    }
+
+    @AssistedFactory
+    interface Factory {
+        fun create(navKey: WriteCommentNavKey?): WriteCommentViewModel
     }
 
 }

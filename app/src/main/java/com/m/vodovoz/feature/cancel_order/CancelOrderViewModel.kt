@@ -7,6 +7,7 @@ import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.design_system.model.ColorfulButtonUi
 import com.m.vodovoz.design_system.model.toUi
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
+import com.m.vodovoz.feature.cancel_order.api.CancelOrderNavKey
 import com.m.vodovoz.feature.cancel_order.model.CancelOrderEvent
 import com.m.vodovoz.feature.cancel_order.model.CancelOrderState
 import com.m.vodovoz.feature.cancel_order.model.CancelOrderUiState
@@ -16,19 +17,23 @@ import com.m.vodovoz.design_system.model.widgets.updateFieldAndResetError
 import com.m.vodovoz.ui.mvi.MviViewModel
 import com.m.vodovoz.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-@HiltViewModel
+@HiltViewModel(assistedFactory = CancelOrderViewModel.Factory::class)
 @Stable
-class CancelOrderViewModel @Inject constructor(
+class CancelOrderViewModel @AssistedInject constructor(
     val tabManager: TabManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
     savedStateHandle: SavedStateHandle,
+    @Assisted private val navKey: CancelOrderNavKey?,
 ) : MviViewModel<CancelOrderState, CancelOrderEvent>(CancelOrderState()) {
 
-    private val orderId = savedStateHandle.get<Long>("orderId") ?: 0L.also { navigateBack() }
+    private val orderId =
+        navKey?.orderId ?: savedStateHandle.get<Long>("orderId") ?: 0L.also { navigateBack() }
 
     init {
         viewModelScope.launch { delay(250L) }.invokeOnCompletion {
@@ -113,4 +118,8 @@ class CancelOrderViewModel @Inject constructor(
 
     }
 
+    @AssistedFactory
+    interface Factory {
+        fun create(navKey: CancelOrderNavKey?): CancelOrderViewModel
+    }
 }

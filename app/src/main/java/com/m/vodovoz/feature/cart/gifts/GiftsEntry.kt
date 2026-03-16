@@ -9,11 +9,15 @@ import com.m.vodovoz.core.navigation.NavigationEntry
 import com.m.vodovoz.design_system.composables.dialogs.VodovozDialog
 import com.m.vodovoz.design_system.effects.LifecycleEffect
 import com.m.vodovoz.feature.cart.composables.ImagePreviewDialog
+import com.m.vodovoz.feature.cart.gifts.api.GiftsNavKey
 import com.m.vodovoz.feature.cart.gifts.model.GiftsEvent
 import com.m.vodovoz.ui.mvi.collectAsState
 
 @Composable
-fun GiftsEntry() = NavigationEntry<GiftsViewModel> {
+fun GiftsEntry(navKey: GiftsNavKey? = null) =
+    NavigationEntry<GiftsViewModel, GiftsViewModel.Factory>(
+        creationCallback = { factory -> factory.create(navKey) }
+    ) {
     val viewState by viewModel.collectAsState()
 
     LifecycleStartEffect(Unit) {

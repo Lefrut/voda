@@ -9,13 +9,17 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import com.m.vodovoz.core.navigation.NavigationEntry
 import com.m.vodovoz.design_system.composables.placeholders.VodovozLongPlaceholder
+import com.m.vodovoz.feature.write_comment.api.WriteCommentNavKey
 import com.m.vodovoz.feature.write_comment.model.WriteCommentEvent
 import com.m.vodovoz.feature.write_comment.model.WriteCommentUiState
 import com.m.vodovoz.ui.mvi.collectAsState
 import com.m.vodovoz.ui.mvi.collectEvents
 
 @Composable
-fun WriteCommentEntry() = NavigationEntry<WriteCommentViewModel> {
+fun WriteCommentEntry(navKey: WriteCommentNavKey? = null) =
+    NavigationEntry<WriteCommentViewModel, WriteCommentViewModel.Factory>(
+        creationCallback = { factory -> factory.create(navKey) }
+    ) {
     val viewState by viewModel.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     val pickImagesLauncher = rememberLauncherForActivityResult(

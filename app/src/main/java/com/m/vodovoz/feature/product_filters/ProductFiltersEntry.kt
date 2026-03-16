@@ -13,6 +13,7 @@ import com.m.vodovoz.design_system.composables.placeholders.NetworkErrorPlacehol
 import com.m.vodovoz.design_system.effects.LifecycleEffect
 import com.m.vodovoz.design_system.model.filters.FilterUi
 import com.m.vodovoz.design_system.model.filters.FiltersPriceUi
+import com.m.vodovoz.feature.product_filters.api.ProductFiltersNavKey
 import com.m.vodovoz.ui.mvi.collectAsState
 import com.m.vodovoz.util.extensions.calculateActiveRange
 
@@ -44,7 +45,10 @@ private fun rememberFiltersRangeSliderState(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProductFiltersEntry() = NavigationEntry<ProductFiltersFlowViewModel> {
+fun ProductFiltersEntry(navKey: ProductFiltersNavKey? = null) =
+    NavigationEntry<ProductFiltersFlowViewModel, ProductFiltersFlowViewModel.Factory>(
+        creationCallback = { factory -> factory.create(navKey) }
+    ) {
     val viewState by viewModel.collectAsState()
     val filterPrice = viewState.filters.price
 

@@ -13,6 +13,8 @@ data class CartPresentPopupWindowUi(
     val present: CartPresentUi?
 ): Parcelable
 
+
+
 fun CartPresentPopupWindowModel.toUi(): CartPresentPopupWindowUi{
     return CartPresentPopupWindowUi(
         items = items.mapToUi(),

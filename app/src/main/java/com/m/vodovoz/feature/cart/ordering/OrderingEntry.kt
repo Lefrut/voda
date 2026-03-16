@@ -21,6 +21,7 @@ import com.m.vodovoz.design_system.effects.LifecycleEffect
 import com.m.vodovoz.design_system.model.widgets.CheckboxUi
 import com.m.vodovoz.feature.addresses.model.AddressScreenTypeUi
 import com.m.vodovoz.feature.addresses.model.AddressUi
+import com.m.vodovoz.feature.cart.ordering.api.OrderingNavKey
 import com.m.vodovoz.feature.delivery_date.model.DeliveryDateOptionUi
 import com.m.vodovoz.feature.delivery_date.model.DeliveryTimeIntervalUi
 import com.m.vodovoz.feature.order_call_you.model.CallYouItemUi
@@ -34,7 +35,10 @@ import kotlinx.coroutines.launch
 @Composable
 fun OrderingEntry(
     onRefreshCart: () -> Unit,
-) = NavigationEntry<OrderingFlowViewModel> {
+    navKey: OrderingNavKey? = null,
+) = NavigationEntry<OrderingFlowViewModel, OrderingFlowViewModel.Factory>(
+    creationCallback = { factory -> factory.create(navKey) }
+) {
     val viewState by viewModel.collectAsState()
     val scrollState = rememberScrollState()
     val context = LocalContext.current

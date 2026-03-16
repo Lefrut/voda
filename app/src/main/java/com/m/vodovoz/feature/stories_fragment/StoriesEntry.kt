@@ -16,13 +16,17 @@ import com.m.vodovoz.core.navigation.NavigationEntry
 import com.m.vodovoz.core.navigation.activate
 import com.m.vodovoz.design_system.composables.placeholders.LoadingPlaceholder
 import com.m.vodovoz.design_system.effects.AppearanceSystemBarsEffect
+import com.m.vodovoz.feature.stories_fragment.api.StoriesNavKey
 import com.m.vodovoz.ui.mvi.collectAsState
 import com.m.vodovoz.ui.mvi.collectEvents
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
-fun StoriesEntry() = NavigationEntry<StoriesViewModel> {
+fun StoriesEntry(navKey: StoriesNavKey? = null) =
+    NavigationEntry<StoriesViewModel, StoriesViewModel.Factory>(
+        creationCallback = { factory -> factory.create(navKey) }
+    ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val viewState by viewModel.collectAsState()

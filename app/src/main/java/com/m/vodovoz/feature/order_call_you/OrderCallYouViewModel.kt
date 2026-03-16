@@ -8,6 +8,7 @@ import com.m.vodovoz.core.navigation.getQueryParams
 import com.m.vodovoz.design_system.model.ColorfulButtonUi
 import com.m.vodovoz.design_system.model.toUi
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
+import com.m.vodovoz.feature.order_call_you.api.OrderCallYouNavKey
 import com.m.vodovoz.feature.order_call_you.model.CallYouItemUi
 import com.m.vodovoz.feature.order_call_you.model.OrderCallYouEvent
 import com.m.vodovoz.feature.order_call_you.model.OrderCallYouState
@@ -16,22 +17,25 @@ import com.m.vodovoz.feature.order_call_you.model.mapToUi
 import com.m.vodovoz.ui.mvi.MviViewModel
 import com.m.vodovoz.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-@HiltViewModel
+@HiltViewModel(assistedFactory = OrderCallYouViewModel.Factory::class)
 @Stable
-class OrderCallYouViewModel @Inject constructor(
+class OrderCallYouViewModel @AssistedInject constructor(
     val tabManager: TabManager,
     savedStateHandle: SavedStateHandle,
     private val vodovozServiceRepository: VodovozServiceRepository,
+    @Assisted private val navKey: OrderCallYouNavKey?,
 ) : MviViewModel<OrderCallYouState, OrderCallYouEvent>(OrderCallYouState()) {
 
-    private val addressId: Long = savedStateHandle.get<Long>("addressId") ?: -1
+    private val addressId: Long = navKey?.addressId ?: savedStateHandle.get<Long>("addressId") ?: -1
 
-    private val callYouId: String? = savedStateHandle.get<String>("callYouId")
+    private val callYouId: String? = navKey?.callYouId ?: savedStateHandle.get<String>("callYouId")
 
-    private val queryParams: Map<String, String> = savedStateHandle.getQueryParams()
+    private val queryParams: Map<String, String> = navKey?.queryParams ?: savedStateHandle.getQueryParams()
 
     init {
         fetchOrderCallYouDetails()
@@ -85,5 +89,10 @@ class OrderCallYouViewModel @Inject constructor(
         updateState { s ->
             s.copy(currentItem = item, button = s.button.copy(enabled = true))
         }
+    }
+
+    @AssistedFactory
+    interface Factory {
+        fun create(navKey: OrderCallYouNavKey?): OrderCallYouViewModel
     }
 }

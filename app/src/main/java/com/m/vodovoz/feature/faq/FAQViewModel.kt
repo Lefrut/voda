@@ -5,22 +5,26 @@ import androidx.lifecycle.viewModelScope
 import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.feature.buy_certificate.model.FAQItemUi
 import com.m.vodovoz.feature.buy_certificate.model.FAQUi
+import com.m.vodovoz.feature.faq.api.FAQNavKey
 import com.m.vodovoz.feature.faq.model.FAQEvent
 import com.m.vodovoz.feature.faq.model.FAQState
 import com.m.vodovoz.ui.mvi.MviViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-@HiltViewModel
-class FAQViewModel @Inject constructor(
+@HiltViewModel(assistedFactory = FAQViewModel.Factory::class)
+class FAQViewModel @AssistedInject constructor(
     val tabManager: TabManager,
     savedStateHandle: SavedStateHandle,
+    @Assisted private val navKey: FAQNavKey?,
 ) :
     MviViewModel<FAQState, FAQEvent>(FAQState()) {
 
-    private val faq = savedStateHandle.get<FAQUi>("faq") ?: FAQUi.Empty.also {
+    private val faq = navKey?.faq ?: savedStateHandle.get<FAQUi>("faq") ?: FAQUi.Empty.also {
         navigateBack()
     }
 
@@ -49,6 +53,11 @@ class FAQViewModel @Inject constructor(
                 }
             )
         }
+    }
+
+    @AssistedFactory
+    interface Factory {
+        fun create(navKey: FAQNavKey?): FAQViewModel
     }
 
 

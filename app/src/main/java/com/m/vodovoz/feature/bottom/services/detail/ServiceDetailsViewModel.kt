@@ -10,6 +10,7 @@ import com.m.vodovoz.design_system.model.ProductUi
 import com.m.vodovoz.design_system.model.toUi
 import com.m.vodovoz.domain.general.respository.UserPreferencesRepository
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
+import com.m.vodovoz.feature.bottom.services.detail.api.ServiceDetailNavKey
 import com.m.vodovoz.feature.bottom.services.detail.model.ServiceDetailsEvent
 import com.m.vodovoz.feature.bottom.services.detail.model.ServiceDetailsState
 import com.m.vodovoz.feature.bottom.services.detail.model.ServiceDetailsUiState
@@ -18,18 +19,21 @@ import com.m.vodovoz.feature.bottom.services.detail.model.toUi
 import com.m.vodovoz.ui.paging.ProductsMviViewModel
 import com.m.vodovoz.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-@HiltViewModel
+@HiltViewModel(assistedFactory = ServiceDetailsViewModel.Factory::class)
 @Stable
-class ServiceDetailsViewModel @Inject constructor(
+class ServiceDetailsViewModel @AssistedInject constructor(
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val cartManager: CartManager,
     private val favoriteManager: LikeManager,
     userPreferencesRepository: UserPreferencesRepository,
     savedStateHandle: SavedStateHandle,
+    @Assisted private val navKey: ServiceDetailNavKey?,
 ) : ProductsMviViewModel<ServiceProductsUi, ServiceDetailsState, ServiceDetailsEvent>(
     state = ServiceDetailsState(),
     blockedProductsFlow = cartManager.blockedProductsFlow,
@@ -38,7 +42,8 @@ class ServiceDetailsViewModel @Inject constructor(
     canViewAdultProducts = userPreferencesRepository.canViewAdultProducts
 ) {
 
-    private val serviceId: Int = savedStateHandle.get<Int>("serviceId") ?: navigateBack().run { -1 }
+    private val serviceId: Int =
+        navKey?.serviceId ?: savedStateHandle.get<Int>("serviceId") ?: navigateBack().run { -1 }
 
     init {
         viewModelScope.launch { delay(250) }.invokeOnCompletion {
@@ -124,4 +129,8 @@ class ServiceDetailsViewModel @Inject constructor(
         }
     }
 
+    @AssistedFactory
+    interface Factory {
+        fun create(navKey: ServiceDetailNavKey?): ServiceDetailsViewModel
+    }
 }

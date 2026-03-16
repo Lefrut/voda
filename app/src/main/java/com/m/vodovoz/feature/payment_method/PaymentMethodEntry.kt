@@ -7,13 +7,17 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.m.vodovoz.core.navigation.NavigationEntry
+import com.m.vodovoz.feature.payment_method.api.PaymentMethodNavKey
 import com.m.vodovoz.feature.payment_method.model.PaymentMethodEvent
 import com.m.vodovoz.feature.payment_method.model.toNav
 import com.m.vodovoz.ui.mvi.collectAsState
 import com.m.vodovoz.ui.mvi.collectEvents
 
 @Composable
-fun PaymentMethodEntry() = NavigationEntry<PaymentMethodViewModel> {
+fun PaymentMethodEntry(navKey: PaymentMethodNavKey? = null) =
+    NavigationEntry<PaymentMethodViewModel, PaymentMethodViewModel.Factory>(
+        creationCallback = { factory -> factory.create(navKey) }
+    ) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val viewState by viewModel.collectAsState()
 

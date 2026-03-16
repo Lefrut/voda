@@ -11,28 +11,31 @@ import com.m.vodovoz.design_system.model.DocumentUi
 import com.m.vodovoz.design_system.model.PriceUi
 import com.m.vodovoz.design_system.model.ProductUi
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
+import com.m.vodovoz.feature.about_product.api.AboutProductNavKey
 import com.m.vodovoz.feature.about_product.model.AboutProductEvent
 import com.m.vodovoz.feature.about_product.model.AboutProductState
 import com.m.vodovoz.feature.product_details.model.toUi
 import com.m.vodovoz.ui.paging.ProductsMviViewModel
 import com.m.vodovoz.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.launch
-import javax.inject.Inject
-
-@HiltViewModel
+@HiltViewModel(assistedFactory = AboutProductViewModel.Factory::class)
 @Stable
-class AboutProductViewModel @Inject constructor(
+class AboutProductViewModel @AssistedInject constructor(
     val tabManager: TabManager,
     private val aboutProductManager: AboutProductManager,
     private val cartManager: CartManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
     savedStateHandle: SavedStateHandle,
+    @Assisted private val navKey: AboutProductNavKey?,
 ) : ProductsMviViewModel<ProductUi, AboutProductState, AboutProductEvent>(
     state = AboutProductState(),
     blockedProductsFlow = cartManager.blockedProductsFlow,
@@ -42,14 +45,14 @@ class AboutProductViewModel @Inject constructor(
 ) {
 
     private val productId: Long =
-        savedStateHandle.get<Long>("productId") ?: -1L
+        navKey?.productId ?: savedStateHandle.get<Long>("productId") ?: -1L
 
     private val productPrices: List<PriceUi> =
-        savedStateHandle.get<List<PriceUi>>("prices") ?: emptyList()
+        navKey?.prices ?: savedStateHandle.get<List<PriceUi>>("prices") ?: emptyList()
 
-    private val analogButton: ColorfulButtonUi? = savedStateHandle["analogButton"]
+    private val analogButton: ColorfulButtonUi? = navKey?.analogButton ?: savedStateHandle["analogButton"]
 
-    private val isAvailable: Boolean = savedStateHandle["isAvailable"] ?: false
+    private val isAvailable: Boolean = navKey?.isAvailable ?: savedStateHandle["isAvailable"] ?: false
 
 
     init {
@@ -131,5 +134,9 @@ class AboutProductViewModel @Inject constructor(
         cartManager.change(productId, stateSnapshot.product.cartQuantity - 1)
     }
 
+    @AssistedFactory
+    interface Factory {
+        fun create(navKey: AboutProductNavKey?): AboutProductViewModel
+    }
 
 }

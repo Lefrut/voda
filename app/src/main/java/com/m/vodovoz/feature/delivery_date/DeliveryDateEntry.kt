@@ -5,11 +5,15 @@ import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.LifecycleStartEffect
 import com.m.vodovoz.core.navigation.NavigationEntry
 import com.m.vodovoz.design_system.effects.LifecycleEffect
+import com.m.vodovoz.feature.delivery_date.api.DeliveryDateNavKey
 import com.m.vodovoz.feature.delivery_date.model.DeliveryDateEvent
 import com.m.vodovoz.ui.mvi.collectAsState
 
 @Composable
-fun DeliveryDateEntry() = NavigationEntry<DeliveryDateViewModel> {
+fun DeliveryDateEntry(navKey: DeliveryDateNavKey? = null) =
+    NavigationEntry<DeliveryDateViewModel, DeliveryDateViewModel.Factory>(
+        creationCallback = { factory -> factory.create(navKey) }
+    ) {
     val viewState by viewModel.collectAsState()
 
     LifecycleStartEffect(Unit) {

@@ -4,22 +4,26 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.design_system.model.ParentCategoryUi
+import com.m.vodovoz.feature.sub_categories.api.SubCategoriesNavKey
 import com.m.vodovoz.feature.sub_categories.model.SubCategoriesEvent
 import com.m.vodovoz.feature.sub_categories.model.SubCategoriesState
 import com.m.vodovoz.ui.mvi.MviViewModel
 import com.m.vodovoz.ui.mvi.launchInViewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.launch
 
-@HiltViewModel
-class SubCategoriesViewModel @Inject constructor(
+@HiltViewModel(assistedFactory = SubCategoriesViewModel.Factory::class)
+class SubCategoriesViewModel @AssistedInject constructor(
     val tabManager: TabManager,
     savedStateHandle: SavedStateHandle,
+    @Assisted private val navKey: SubCategoriesNavKey?,
 ) : MviViewModel<SubCategoriesState, SubCategoriesEvent>(SubCategoriesState()) {
 
     private val catalogCategoryArg =
-        savedStateHandle.get<ParentCategoryUi>("category") ?: ParentCategoryUi.Empty
+        navKey?.category ?: savedStateHandle.get<ParentCategoryUi>("category") ?: ParentCategoryUi.Empty
 
     init {
         setInitialCatalogCategory()
@@ -70,6 +74,11 @@ class SubCategoriesViewModel @Inject constructor(
 
     fun navigateToScanner() = launchInViewModelScope {
         sendEvent(SubCategoriesEvent.GoToScanner)
+    }
+
+    @AssistedFactory
+    interface Factory {
+        fun create(navKey: SubCategoriesNavKey?): SubCategoriesViewModel
     }
 
 

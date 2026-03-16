@@ -22,6 +22,7 @@ import com.m.vodovoz.domain.general.model.exceptions.EmptyResultException
 import com.m.vodovoz.domain.general.model.location.MapAreaModel
 import com.m.vodovoz.domain.general.respository.MapServiceRepository
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
+import com.m.vodovoz.feature.addresses.api.AddressesNavKey
 import com.m.vodovoz.feature.addresses.model.AddressScreenTypeUi
 import com.m.vodovoz.feature.addresses.model.AddressUi
 import com.m.vodovoz.feature.addresses.model.mapToUi
@@ -38,29 +39,34 @@ import com.m.vodovoz.util.extensions.onEachSuccess
 import com.m.vodovoz.util.extensions.singleGetOrNull
 import com.m.vodovoz.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.retry
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 import kotlin.math.floor
 
-@HiltViewModel
+@HiltViewModel(assistedFactory = AddressesFlowViewModel.Factory::class)
 @Stable
-class AddressesFlowViewModel @Inject constructor(
+class AddressesFlowViewModel @AssistedInject constructor(
     val tabManager: TabManager,
     savedState: SavedStateHandle,
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val mapServiceRepository: MapServiceRepository,
+    @Assisted private val navKey: AddressesNavKey?,
 ) : MviViewModel<AddressesFlowViewModel.AddressesState, AddressesFlowViewModel.AddressesEvents>(
     AddressesState(
-        screenType = savedState.get<AddressScreenTypeUi>("screenType") ?: AddressScreenTypeUi.Add
+        screenType = navKey?.screenType
+            ?: savedState.get<AddressScreenTypeUi>("screenType")
+            ?: AddressScreenTypeUi.Add
     )
 ) {
 
-    private val selectedAddressId = savedState.get<Long>("addressId")
+    private val selectedAddressId = navKey?.addressId ?: savedState.get<Long>("addressId")
 
     init {
         fetchMapAreas()
@@ -290,5 +296,10 @@ class AddressesFlowViewModel @Inject constructor(
         data object Error : AddressesUiState
         data object Success : AddressesUiState
         data class Empty(val placeholder: VodovozPlaceholderUi) : AddressesUiState
+    }
+
+    @AssistedFactory
+    interface Factory {
+        fun create(navKey: AddressesNavKey?): AddressesFlowViewModel
     }
 }

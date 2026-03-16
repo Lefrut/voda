@@ -5,8 +5,10 @@ import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.platform.LocalContext
 import com.m.vodovoz.R
 import com.m.vodovoz.core.navigation.NavigationEntry
+import com.m.vodovoz.core.navigation.NavigationEntryScope
 import com.m.vodovoz.core.navigation.navigateToAboutProduct
 import com.m.vodovoz.core.navigation.navigateToBrandProductList
 import com.m.vodovoz.core.navigation.navigateToCategoryProductList
@@ -21,14 +23,18 @@ import com.m.vodovoz.core.navigation.navigateToViewedProductList
 import com.m.vodovoz.core.navigation.navigateToWriteComment
 import com.m.vodovoz.design_system.composables.placeholders.ForAdultsPlaceholder
 import com.m.vodovoz.design_system.effects.LifecycleEffect
+import com.m.vodovoz.feature.product_details.api.ProductDetailsNavKey
 import com.m.vodovoz.ui.mvi.collectAsState
 import com.m.vodovoz.util.extensions.copyText
 import com.m.vodovoz.util.extensions.shareText
 import kotlinx.coroutines.flow.onSubscription
 
 @Composable
-fun ProductDetailsEntry() = NavigationEntry<ProductDetailsFlowViewModel> {
-    val context = androidx.compose.ui.platform.LocalContext.current
+fun ProductDetailsEntry(navKey: ProductDetailsNavKey? = null) =
+    NavigationEntry<ProductDetailsFlowViewModel, ProductDetailsFlowViewModel.Factory>(
+        creationCallback = { factory -> factory.create(navKey) }
+    ) {
+    val context = LocalContext.current
     val viewState by viewModel.collectAsState()
     val uiState = viewState.uiState
 
@@ -77,7 +83,7 @@ fun ProductDetailsEntry() = NavigationEntry<ProductDetailsFlowViewModel> {
     }
 }
 
-private suspend fun com.m.vodovoz.core.navigation.NavigationEntryScope<ProductDetailsFlowViewModel>.observeEvents(
+private suspend fun NavigationEntryScope<ProductDetailsFlowViewModel>.observeEvents(
     mediaPagerState: PagerState,
     context: Context,
 ): Unit =

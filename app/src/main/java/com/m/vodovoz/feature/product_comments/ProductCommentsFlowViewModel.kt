@@ -13,6 +13,7 @@ import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.design_system.model.CommentUi
 import com.m.vodovoz.design_system.model.toUi
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
+import com.m.vodovoz.feature.product_comments.api.ProductCommentsNavKey
 import com.m.vodovoz.feature.product_comments.model.CommentMediaUi
 import com.m.vodovoz.feature.product_comments.model.ProductCommentsInfoUi
 import com.m.vodovoz.feature.product_comments.model.SortUi
@@ -23,30 +24,32 @@ import com.m.vodovoz.ui.mvi.Event
 import com.m.vodovoz.ui.mvi.MviViewModel
 import com.m.vodovoz.ui.mvi.State
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import javax.inject.Inject
-
-@HiltViewModel
+@HiltViewModel(assistedFactory = ProductCommentsFlowViewModel.Factory::class)
 @Stable
-class ProductCommentsFlowViewModel @Inject constructor(
+class ProductCommentsFlowViewModel @AssistedInject constructor(
     savedState: SavedStateHandle,
     val tabManager: TabManager,
     val insetsVisibilityState: InsetsVisibilityState,
     private val accountManager: AccountManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val resourcesProvider: ResourcesProvider,
+    @Assisted private val navKey: ProductCommentsNavKey?,
 ) : MviViewModel<ProductCommentsFlowViewModel.ProductCommentsState, ProductCommentsFlowViewModel.ProductCommentsEvents>(
     ProductCommentsState()
 ) {
 
-    private val productId = savedState.get<Long>("productId") ?: navigateBack().let { -1 }
-    private val productName = savedState.get<String>("productName") ?: ""
-    private val productImage = savedState.get<String>("productImage") ?: ""
+    private val productId = navKey?.productId ?: savedState.get<Long>("productId") ?: navigateBack().let { -1 }
+    private val productName = navKey?.productName ?: savedState.get<String>("productName") ?: ""
+    private val productImage = navKey?.productImage ?: savedState.get<String>("productImage") ?: ""
 
     init {
         fetchProductComments()
@@ -159,5 +162,10 @@ class ProductCommentsFlowViewModel @Inject constructor(
         val showWriteComment: Boolean = false,
         val commentMedia: CommentMediaUi? = null,
     ) : State
+
+    @AssistedFactory
+    interface Factory {
+        fun create(navKey: ProductCommentsNavKey?): ProductCommentsFlowViewModel
+    }
 
 }

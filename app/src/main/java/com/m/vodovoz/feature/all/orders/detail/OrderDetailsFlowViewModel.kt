@@ -15,6 +15,7 @@ import com.m.vodovoz.design_system.model.order.OrderSummaryItemUi
 import com.m.vodovoz.design_system.model.order.mapToUi
 import com.m.vodovoz.domain.general.respository.UserPreferencesRepository
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
+import com.m.vodovoz.feature.all.orders.detail.api.OrderDetailsNavKey
 import com.m.vodovoz.feature.all.orders.detail.composables.AboutOrderPopupWindowUi
 import com.m.vodovoz.feature.all.orders.detail.model.OrderDetailsButtonUi
 import com.m.vodovoz.feature.all.orders.detail.model.OrderStatusUi
@@ -24,12 +25,14 @@ import com.m.vodovoz.ui.paging.ItemsState
 import com.m.vodovoz.ui.paging.ProductsMviViewModel
 import com.m.vodovoz.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-@HiltViewModel
+@HiltViewModel(assistedFactory = OrderDetailsFlowViewModel.Factory::class)
 @Stable
-class OrderDetailsFlowViewModel @Inject constructor(
+class OrderDetailsFlowViewModel @AssistedInject constructor(
     savedState: SavedStateHandle,
     val tabManager: TabManager,
     val accountManager: AccountManager,
@@ -37,6 +40,7 @@ class OrderDetailsFlowViewModel @Inject constructor(
     private val likeManager: LikeManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
     userPreferencesRepository: UserPreferencesRepository,
+    @Assisted private val navKey: OrderDetailsNavKey?,
 ) : ProductsMviViewModel<OrderProductUi, OrderDetailsFlowViewModel.OrderDetailsState, OrderDetailsFlowViewModel.OrderDetailsEvent>(
     state = OrderDetailsState(),
     blockedProductsFlow = cartManager.blockedProductsFlow,
@@ -49,7 +53,7 @@ class OrderDetailsFlowViewModel @Inject constructor(
         const val QUESTION_BUTTON_ID = "voproszakaz"
     }
 
-    private val orderId = savedState.get<Long>("orderId") ?: navigateBack().run { -1 }
+    private val orderId = navKey?.orderId ?: savedState.get<Long>("orderId") ?: navigateBack().run { -1 }
 
     fun navigateBack() = viewModelScope.launch {
         sendEvent(OrderDetailsEvent.GoBack)
@@ -224,5 +228,10 @@ class OrderDetailsFlowViewModel @Inject constructor(
         data object Loading : OrderDetailsUiState
         data object Error : OrderDetailsUiState
         data object Body : OrderDetailsUiState
+    }
+
+    @AssistedFactory
+    interface Factory {
+        fun create(navKey: OrderDetailsNavKey?): OrderDetailsFlowViewModel
     }
 }

@@ -7,12 +7,16 @@ import com.m.vodovoz.common.account.LoginManager
 import com.m.vodovoz.core.android.getString
 import com.m.vodovoz.core.navigation.LoginByPhoneCodeArgs
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
+import com.m.vodovoz.feature.auth.login_by_phone_code.api.LoginByPhoneCodeNavKey
 import com.m.vodovoz.feature.auth.login_by_phone_code.model.LoginByPhoneCodeEvent
 import com.m.vodovoz.feature.auth.login_by_phone_code.model.LoginByPhoneCodeState
 import com.m.vodovoz.feature.sitestate.SiteStateManager
 import com.m.vodovoz.ui.mvi.MviViewModel
 import com.m.vodovoz.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.update
@@ -20,24 +24,26 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
-import javax.inject.Inject
 import kotlin.time.Duration.Companion.seconds
 
 @Stable
-@HiltViewModel
-class LoginByPhoneCodeViewModel @Inject constructor(
+@HiltViewModel(assistedFactory = LoginByPhoneCodeViewModel.Factory::class)
+class LoginByPhoneCodeViewModel @AssistedInject constructor(
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val siteStateManager: SiteStateManager,
     private val loginManager: LoginManager,
     savedStateHandle: SavedStateHandle,
+    @Assisted private val navKey: LoginByPhoneCodeNavKey?,
 ) : MviViewModel<LoginByPhoneCodeState, LoginByPhoneCodeEvent>(
-    LoginByPhoneCodeState(phone = formatPhone(savedStateHandle.getString(LoginByPhoneCodeArgs.PHONE)))
+    LoginByPhoneCodeState(
+        phone = formatPhone(navKey?.phoneNumber ?: savedStateHandle.getString(LoginByPhoneCodeArgs.PHONE))
+    )
 ) {
 
     private val waitRequestCodeSeconds: Int =
-        savedStateHandle[LoginByPhoneCodeArgs.WAIT_SECONDS] ?: 60
+        navKey?.waitRequestCodeSeconds ?: savedStateHandle[LoginByPhoneCodeArgs.WAIT_SECONDS] ?: 60
 
-    private val userUrl = savedStateHandle.getString(LoginByPhoneCodeArgs.USER_URL)
+    private val userUrl = navKey?.user_url ?: savedStateHandle.getString(LoginByPhoneCodeArgs.USER_URL)
     val smsCodeCount = siteStateManager.siteStateFlow.value?.smsCodeCount ?: 4
 
     init {
@@ -172,4 +178,8 @@ class LoginByPhoneCodeViewModel @Inject constructor(
         }
     }
 
+    @AssistedFactory
+    interface Factory {
+        fun create(navKey: LoginByPhoneCodeNavKey?): LoginByPhoneCodeViewModel
+    }
 }

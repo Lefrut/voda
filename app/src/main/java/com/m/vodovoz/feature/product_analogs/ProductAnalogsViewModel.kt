@@ -9,6 +9,7 @@ import com.m.vodovoz.design_system.model.ProductUi
 import com.m.vodovoz.domain.general.model.product.toUi
 import com.m.vodovoz.domain.general.respository.UserPreferencesRepository
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
+import com.m.vodovoz.feature.product_analogs.api.ProductAnalogsNavKey
 import com.m.vodovoz.feature.product_analogs.model.ProductAnalogsEvent
 import com.m.vodovoz.feature.product_analogs.model.ProductAnalogsState
 import com.m.vodovoz.feature.product_analogs.model.ProductAnalogsUiState
@@ -16,22 +17,25 @@ import com.m.vodovoz.feature.product_comments.model.SortUi
 import com.m.vodovoz.feature.product_comments.model.toDomain
 import com.m.vodovoz.ui.paging.ProductsMviViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-@HiltViewModel
+@HiltViewModel(assistedFactory = ProductAnalogsViewModel.Factory::class)
 @Stable
-class ProductAnalogsViewModel @Inject constructor(
+class ProductAnalogsViewModel @AssistedInject constructor(
     savedStateHandle: SavedStateHandle,
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val cartManager: CartManager,
     private val favoritesManager: LikeManager,
-    userPreferencesRepository: UserPreferencesRepository
+    userPreferencesRepository: UserPreferencesRepository,
+    @Assisted private val navKey: ProductAnalogsNavKey?,
 ) : ProductsMviViewModel<ProductUi, ProductAnalogsState, ProductAnalogsEvent>(
     state = ProductAnalogsState(),
     blockedProductsFlow = cartManager.blockedProductsFlow,
@@ -39,7 +43,7 @@ class ProductAnalogsViewModel @Inject constructor(
     cartFlow = cartManager.observeCarts(),
     canViewAdultProducts = userPreferencesRepository.canViewAdultProducts
 ) {
-    private val productId = savedStateHandle.get<Long>("productId") ?: -1
+    private val productId = navKey?.productId ?: savedStateHandle.get<Long>("productId") ?: -1
 
 
     fun fetchProductAnalogs() =
@@ -125,5 +129,9 @@ class ProductAnalogsViewModel @Inject constructor(
         cartManager.change(product.id, product.cartQuantity - 1)
     }
 
+    @AssistedFactory
+    interface Factory {
+        fun create(navKey: ProductAnalogsNavKey?): ProductAnalogsViewModel
+    }
 
 }

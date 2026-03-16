@@ -11,32 +11,35 @@ import com.m.vodovoz.design_system.model.MapPointUi
 import com.m.vodovoz.design_system.model.mapToUi
 import com.m.vodovoz.design_system.model.toUi
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
+import com.m.vodovoz.feature.all.orders.detail.traceorder.api.TraceOrderNavKey
 import com.m.vodovoz.feature.sitestate.SiteStateManager
 import com.m.vodovoz.ui.mvi.Event
 import com.m.vodovoz.ui.mvi.MviViewModel
 import com.m.vodovoz.ui.mvi.State
 import com.m.vodovoz.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import javax.inject.Inject
-
-@HiltViewModel
+@HiltViewModel(assistedFactory = TraceOrderViewModel.Factory::class)
 @Stable
-class TraceOrderViewModel @Inject constructor(
+class TraceOrderViewModel @AssistedInject constructor(
     savedStateHandle: SavedStateHandle,
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val siteStateManager: SiteStateManager,
+    @Assisted private val navKey: TraceOrderNavKey?,
 ) : MviViewModel<TraceOrderViewModel.TraceOrderState, TraceOrderViewModel.TraceOrderEvents>(
     TraceOrderState()
 ) {
 
-    private val orderId: Long = savedStateHandle["orderId"] ?: -1
-    private val driverId: String = savedStateHandle["driverId"] ?: ""
+    private val orderId: Long = navKey?.orderId ?: savedStateHandle["orderId"] ?: -1
+    private val driverId: String = navKey?.driverId ?: savedStateHandle["driverId"] ?: ""
 
     init {
         viewModelScope.launch {
@@ -207,5 +210,10 @@ class TraceOrderViewModel @Inject constructor(
         data object ShowBottomSheet : TraceOrderEvents()
 
 
+    }
+
+    @AssistedFactory
+    interface Factory {
+        fun create(navKey: TraceOrderNavKey?): TraceOrderViewModel
     }
 }

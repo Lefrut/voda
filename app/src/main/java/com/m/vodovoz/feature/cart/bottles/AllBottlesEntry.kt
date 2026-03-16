@@ -10,10 +10,14 @@ import com.m.vodovoz.core.navigation.NavigationEntry
 import com.m.vodovoz.design_system.composables.placeholders.LoadingPlaceholder
 import com.m.vodovoz.design_system.composables.placeholders.NetworkErrorPlaceholder
 import com.m.vodovoz.design_system.effects.LifecycleEffect
+import com.m.vodovoz.feature.cart.bottles.api.AllBottlesNavKey
 import com.m.vodovoz.ui.mvi.collectAsState
 
 @Composable
-fun AllBottlesEntry() = NavigationEntry<AllBottlesFlowViewModel> {
+fun AllBottlesEntry(navKey: AllBottlesNavKey? = null) =
+    NavigationEntry<AllBottlesFlowViewModel, AllBottlesFlowViewModel.Factory>(
+        creationCallback = { factory -> factory.create(navKey) }
+    ) {
     val viewState by viewModel.collectAsState()
 
     Crossfade(

@@ -15,6 +15,7 @@ import com.m.vodovoz.domain.general.model.location.MapAddressModel
 import com.m.vodovoz.domain.general.model.location.MapAreaModel
 import com.m.vodovoz.domain.general.respository.MapServiceRepository
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
+import com.m.vodovoz.feature.map.api.MapNavKey
 import com.m.vodovoz.feature.map.model.MapAddressUi
 import com.m.vodovoz.feature.map.model.MapAreaUi
 import com.m.vodovoz.feature.map.model.MapPopupWindowUi
@@ -27,6 +28,9 @@ import com.m.vodovoz.ui.mvi.State
 import com.m.vodovoz.util.extensions.debounceWithMax
 import com.m.vodovoz.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -42,20 +46,20 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.retryWhen
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
-import javax.inject.Inject
 import kotlin.math.floor
 
-@HiltViewModel
+@HiltViewModel(assistedFactory = MapFlowViewModel.Factory::class)
 @Stable
-class MapFlowViewModel @Inject constructor(
+class MapFlowViewModel @AssistedInject constructor(
     savedState: SavedStateHandle,
     private val mapServiceRepository: MapServiceRepository,
     private val vodovozServiceRepository: VodovozServiceRepository,
+    @Assisted private val navKey: MapNavKey?,
 ) : MviViewModel<MapFlowViewModel.MapFlowState, MapFlowViewModel.MapFlowEvents>(
     MapFlowState()
 ) {
 
-    private val addressName = savedState.get<String>("addressName")?.apply {
+    private val addressName = (navKey?.addressName ?: savedState.get<String>("addressName"))?.apply {
         updateState { s -> s.copy(screenType = MapScreenTypeUi.Edit) }
     }
 
@@ -401,5 +405,10 @@ class MapFlowViewModel @Inject constructor(
         data class BackToAddAddress(val mapAddress: MapAddressUi) : MapFlowEvents()
 
         data class MoveToAddress(val addressPoint: MapPointUi) : MapFlowEvents()
+    }
+
+    @AssistedFactory
+    interface Factory {
+        fun create(navKey: MapNavKey?): MapFlowViewModel
     }
 }

@@ -19,23 +19,28 @@ import com.m.vodovoz.design_system.model.widgets.mapToDomain
 import com.m.vodovoz.design_system.model.widgets.mapToUi
 import com.m.vodovoz.design_system.model.widgets.updateFieldAndResetError
 import com.m.vodovoz.design_system.model.widgets.vodovozValidators
+import com.m.vodovoz.feature.order_question.api.OrderQuestionNavKey
 import com.m.vodovoz.ui.mvi.MviViewModel
 import com.m.vodovoz.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-@HiltViewModel
-class OrderQuestionViewModel @Inject constructor(
+@HiltViewModel(assistedFactory = OrderQuestionViewModel.Factory::class)
+class OrderQuestionViewModel @AssistedInject constructor(
     val tabManager: TabManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val resourcesProvider: ResourcesProvider,
     savedStateHandle: SavedStateHandle,
+    @Assisted private val navKey: OrderQuestionNavKey?,
 ) : MviViewModel<OrderQuestionState, OrderQuestionEvent>(
     OrderQuestionState()
 ) {
-    private val orderId = savedStateHandle.get<Long>("orderId") ?: 0L.also { navigateBack() }
+    private val orderId =
+        navKey?.orderId ?: savedStateHandle.get<Long>("orderId") ?: 0L.also { navigateBack() }
 
     init {
         viewModelScope.launch { delay(350) }.invokeOnCompletion {
@@ -139,4 +144,8 @@ class OrderQuestionViewModel @Inject constructor(
         }
     }
 
+    @AssistedFactory
+    interface Factory {
+        fun create(navKey: OrderQuestionNavKey?): OrderQuestionViewModel
+    }
 }

@@ -6,11 +6,15 @@ import androidx.lifecycle.compose.LifecycleStartEffect
 import com.m.vodovoz.core.navigation.NavigationEntry
 import com.m.vodovoz.design_system.effects.AppearanceSystemBarsEffect
 import com.m.vodovoz.design_system.effects.LifecycleEffect
+import com.m.vodovoz.feature.document_viewer.api.DocumentViewerNavKey
 import com.m.vodovoz.feature.document_viewer.model.DocumentViewerEvent
 import com.m.vodovoz.ui.mvi.collectAsState
 
 @Composable
-fun DocumentViewerEntry() = NavigationEntry<DocumentViewerViewModel> {
+fun DocumentViewerEntry(navKey: DocumentViewerNavKey? = null) =
+    NavigationEntry<DocumentViewerViewModel, DocumentViewerViewModel.Factory>(
+        creationCallback = { factory -> factory.create(navKey) }
+    ) {
     val viewState by viewModel.collectAsState()
 
     LifecycleStartEffect(Unit) {

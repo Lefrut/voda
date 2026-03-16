@@ -6,10 +6,14 @@ import androidx.compose.runtime.getValue
 import com.m.vodovoz.core.navigation.NavigationEntry
 import com.m.vodovoz.core.navigation.navigateToPromotionDetails
 import com.m.vodovoz.design_system.effects.LifecycleEffect
+import com.m.vodovoz.feature.all.promotions.api.AllPromotionsNavKey
 import com.m.vodovoz.ui.mvi.collectAsState
 
 @Composable
-fun AllPromotionsEntry() = NavigationEntry<AllPromotionsFlowViewModel> {
+fun AllPromotionsEntry(navKey: AllPromotionsNavKey? = null) =
+    NavigationEntry<AllPromotionsFlowViewModel, AllPromotionsFlowViewModel.Factory>(
+        creationCallback = { factory -> factory.create(navKey) }
+    ) {
     val viewState by viewModel.collectAsState()
     val lazyListState = rememberLazyListState()
 

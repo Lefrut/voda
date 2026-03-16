@@ -12,6 +12,7 @@ import com.m.vodovoz.core.navigation.AuthArgs
 import com.m.vodovoz.design_system.model.ColorfulButtonUi
 import com.m.vodovoz.domain.general.model.exceptions.TooManyRequestsException
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
+import com.m.vodovoz.feature.auth.login.api.LoginNavKey
 import com.m.vodovoz.feature.auth.model.AbstractAuthViewModel
 import com.m.vodovoz.feature.auth.model.AuthDetailsUi
 import com.m.vodovoz.feature.auth.model.AuthState
@@ -23,23 +24,26 @@ import com.m.vodovoz.ui.mvi.Event
 import com.m.vodovoz.ui.mvi.launchInViewModelScope
 import com.m.vodovoz.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 
 private const val AUTH_BUTTON = "sms"
 private const val NAVIGATION_BUTTON = "auth"
 
-@HiltViewModel
+@HiltViewModel(assistedFactory = LoginFlowViewModel.Factory::class)
 @Stable
-class LoginFlowViewModel @Inject constructor(
+class LoginFlowViewModel @AssistedInject constructor(
     private val siteStateManager: SiteStateManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val resourcesProvider: ResourcesProvider,
     private val savedStateHandle: SavedStateHandle,
+    @Assisted private val navKey: LoginNavKey?,
 ) : AbstractAuthViewModel<LoginFlowViewModel.LoginState, LoginFlowViewModel.LoginEvents>(
     LoginState(), AUTH_BUTTON
 ) {
@@ -66,7 +70,7 @@ class LoginFlowViewModel @Inject constructor(
                     waringTitles = GlobalAppExtraAgreement.titles,
                 )
                 .withAccountTypeSelection(
-                    selectedAccountTypeId = savedStateHandle[AuthArgs.ACCOUNT_TYPE_ID]
+                    selectedAccountTypeId = navKey?.accountTypeId ?: savedStateHandle[AuthArgs.ACCOUNT_TYPE_ID]
                 )
 
             updateState { s ->
@@ -203,5 +207,10 @@ class LoginFlowViewModel @Inject constructor(
         data object Success : LoginUiState
         data object Loading : LoginUiState
         data object Error : LoginUiState
+    }
+
+    @AssistedFactory
+    interface Factory {
+        fun create(navKey: LoginNavKey?): LoginFlowViewModel
     }
 }

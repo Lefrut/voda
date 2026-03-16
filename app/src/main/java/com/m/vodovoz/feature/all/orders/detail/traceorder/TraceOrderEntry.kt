@@ -33,6 +33,7 @@ import com.m.vodovoz.core.navigation.NavigationEntry
 import com.m.vodovoz.core.navigation.navigateToWebView
 import com.m.vodovoz.design_system.effects.LifecycleEffect
 import com.m.vodovoz.design_system.model.toPoint
+import com.m.vodovoz.feature.all.orders.detail.traceorder.api.TraceOrderNavKey
 import com.m.vodovoz.ui.mvi.collectAsState
 import com.m.vodovoz.ui.yandex_map.VodovozUserLocationListener
 import com.m.vodovoz.ui.yandex_map.YandexMapUi
@@ -59,7 +60,10 @@ import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TraceOrderEntry() = NavigationEntry<TraceOrderViewModel> {
+fun TraceOrderEntry(navKey: TraceOrderNavKey? = null) =
+    NavigationEntry<TraceOrderViewModel, TraceOrderViewModel.Factory>(
+        creationCallback = { factory -> factory.create(navKey) }
+    ) {
     val context = LocalContext.current
     val activity = context as? Activity
     val viewState by viewModel.collectAsState()

@@ -36,6 +36,7 @@ import com.m.vodovoz.core.navigation.slideAnim
 import com.m.vodovoz.design_system.effects.LifecycleEffect
 import com.m.vodovoz.design_system.model.toMapPoint
 import com.m.vodovoz.design_system.model.toPoint
+import com.m.vodovoz.feature.map.api.MapNavKey
 import com.m.vodovoz.ui.mvi.collectAsState
 import com.m.vodovoz.ui.yandex_map.VodovozUserLocationListener
 import com.m.vodovoz.ui.yandex_map.YandexMapUi
@@ -61,7 +62,10 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MapEntry() = NavigationEntry<MapFlowViewModel> {
+fun MapEntry(navKey: MapNavKey? = null) =
+    NavigationEntry<MapFlowViewModel, MapFlowViewModel.Factory>(
+        creationCallback = { factory -> factory.create(navKey) }
+    ) {
     val context = LocalContext.current
     val activity = context as? Activity
     val viewState by viewModel.collectAsState()

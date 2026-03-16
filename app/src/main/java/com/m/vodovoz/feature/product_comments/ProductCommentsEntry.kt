@@ -28,6 +28,7 @@ import com.m.vodovoz.core.navigation.navigateToWriteComment
 import com.m.vodovoz.design_system.composables.VerticalImagePager
 import com.m.vodovoz.design_system.composables.decoration.LocalShimmer
 import com.m.vodovoz.design_system.effects.LifecycleEffect
+import com.m.vodovoz.feature.product_comments.api.ProductCommentsNavKey
 import com.m.vodovoz.feature.product_comments.model.CommentMediaUi
 import com.m.vodovoz.ui.compose.player.MediaComposePlayer
 import com.m.vodovoz.ui.mvi.collectAsState
@@ -36,7 +37,10 @@ import com.valentinilk.shimmer.rememberShimmer
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
-fun ProductCommentsEntry() = NavigationEntry<ProductCommentsFlowViewModel> {
+fun ProductCommentsEntry(navKey: ProductCommentsNavKey? = null) =
+    NavigationEntry<ProductCommentsFlowViewModel, ProductCommentsFlowViewModel.Factory>(
+        creationCallback = { factory -> factory.create(navKey) }
+    ) {
     val viewState by viewModel.collectAsState()
     val lazyCommentColumnState = rememberLazyListState()
     val lazyMediaRowState = rememberLazyListState()

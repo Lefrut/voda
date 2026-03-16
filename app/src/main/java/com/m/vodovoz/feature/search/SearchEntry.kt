@@ -19,10 +19,14 @@ import com.m.vodovoz.core.navigation.navigateToSpeechDialog
 import com.m.vodovoz.core.navigation.navigateToWebView
 import com.m.vodovoz.design_system.composables.placeholders.NetworkErrorPlaceholder
 import com.m.vodovoz.design_system.effects.LifecycleEffect
+import com.m.vodovoz.feature.search.api.SearchNavKey
 import com.m.vodovoz.ui.mvi.collectAsState
 
 @Composable
-fun SearchEntry() = NavigationEntry<SearchFlowViewModel> {
+fun SearchEntry(navKey: SearchNavKey? = null) =
+    NavigationEntry<SearchFlowViewModel, SearchFlowViewModel.Factory>(
+        creationCallback = { factory -> factory.create(navKey) }
+    ) {
     val view = LocalView.current
     val viewState by viewModel.collectAsState()
 

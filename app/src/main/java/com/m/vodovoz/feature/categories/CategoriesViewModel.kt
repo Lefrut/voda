@@ -4,27 +4,31 @@ import androidx.compose.runtime.Stable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.m.vodovoz.common.tab.TabManager
+import com.m.vodovoz.feature.categories.api.CategoriesNavKey
 import com.m.vodovoz.feature.categories.model.CategoriesEvent
 import com.m.vodovoz.feature.categories.model.CategoriesState
 import com.m.vodovoz.feature.home.model.CategoryUi
 import com.m.vodovoz.ui.mvi.MviViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-@HiltViewModel
+@HiltViewModel(assistedFactory = CategoriesViewModel.Factory::class)
 @Stable
-class CategoriesViewModel @Inject constructor(
+class CategoriesViewModel @AssistedInject constructor(
     val tabManager: TabManager,
     savedStateHandle: SavedStateHandle,
+    @Assisted private val navKey: CategoriesNavKey?,
 ) : MviViewModel<CategoriesState, CategoriesEvent>(CategoriesState()) {
 
     private val categoriesArg =
-        savedStateHandle.remove<Array<CategoryUi>>("categoryList") ?: emptyArray()
+        navKey?.categoryList ?: savedStateHandle.remove<Array<CategoryUi>>("categoryList") ?: emptyArray()
     private val categoryArg =
-        savedStateHandle.remove<CategoryUi>("category") ?: categoriesArg.firstOrNull()
-        ?: CategoryUi.Empty
+        navKey?.category ?: savedStateHandle.remove<CategoryUi>("category")
+        ?: categoriesArg.firstOrNull() ?: CategoryUi.Empty
 
     init {
         setInitialCategories()
@@ -56,5 +60,9 @@ class CategoriesViewModel @Inject constructor(
         sendEvent(CategoriesEvent.GoBack)
     }
 
+    @AssistedFactory
+    interface Factory {
+        fun create(navKey: CategoriesNavKey?): CategoriesViewModel
+    }
 
 }

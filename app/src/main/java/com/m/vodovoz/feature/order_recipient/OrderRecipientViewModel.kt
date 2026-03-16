@@ -18,25 +18,29 @@ import com.m.vodovoz.design_system.model.widgets.updateCheckbox
 import com.m.vodovoz.design_system.model.widgets.updateFieldAndResetError
 import com.m.vodovoz.design_system.model.widgets.vodovozValidators
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
+import com.m.vodovoz.feature.order_recipient.api.OrderRecipientNavKey
 import com.m.vodovoz.feature.order_recipient.model.OrderRecipientEvent
 import com.m.vodovoz.feature.order_recipient.model.OrderRecipientState
 import com.m.vodovoz.feature.order_recipient.model.OrderRecipientUiState
 import com.m.vodovoz.ui.mvi.MviViewModel
 import com.m.vodovoz.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-@HiltViewModel
+@HiltViewModel(assistedFactory = OrderRecipientViewModel.Factory::class)
 @Stable
-class OrderRecipientViewModel @Inject constructor(
+class OrderRecipientViewModel @AssistedInject constructor(
     val tabManager: TabManager,
     savedStateHandle: SavedStateHandle,
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val resourcesProvider: ResourcesProvider,
+    @Assisted private val navKey: OrderRecipientNavKey?,
 ) : MviViewModel<OrderRecipientState, OrderRecipientEvent>(OrderRecipientState()) {
 
-    private val addressId = savedStateHandle.get<Long>("addressId") ?: -1
+    private val addressId = navKey?.addressId ?: savedStateHandle.get<Long>("addressId") ?: -1
 
     init {
         fetchOrderRecipientDetails()
@@ -155,6 +159,11 @@ class OrderRecipientViewModel @Inject constructor(
             s.copy(button = s.button.copy(loading = false))
         }
 
+    }
+
+    @AssistedFactory
+    interface Factory {
+        fun create(navKey: OrderRecipientNavKey?): OrderRecipientViewModel
     }
 
 

@@ -14,6 +14,7 @@ import com.m.vodovoz.core.navigation.navigateToWebView
 import com.m.vodovoz.design_system.composables.placeholders.LoadingPlaceholder
 import com.m.vodovoz.design_system.composables.placeholders.NetworkErrorPlaceholder
 import com.m.vodovoz.design_system.effects.LifecycleEffect
+import com.m.vodovoz.feature.all.orders.detail.api.OrderDetailsNavKey
 import com.m.vodovoz.feature.all.orders.detail.composables.AboutOrderBottomSheet
 import com.m.vodovoz.ui.mvi.collectAsState
 import com.m.vodovoz.util.extensions.copyText
@@ -24,7 +25,10 @@ import kotlinx.coroutines.flow.filter
 @Composable
 fun OrderDetailsEntry(
     onOrderIdCopied: () -> Unit,
-) = NavigationEntry<OrderDetailsFlowViewModel> {
+    navKey: OrderDetailsNavKey? = null,
+) = NavigationEntry<OrderDetailsFlowViewModel, OrderDetailsFlowViewModel.Factory>(
+    creationCallback = { factory -> factory.create(navKey) }
+) {
     val viewState by viewModel.collectAsState()
     val context = LocalContext.current
 

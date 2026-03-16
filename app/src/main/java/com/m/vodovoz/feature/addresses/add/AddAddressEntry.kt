@@ -13,6 +13,7 @@ import com.m.vodovoz.core.navigation.NavigationEntry
 import com.m.vodovoz.core.navigation.navigateToMap
 import com.m.vodovoz.core.navigation.slideAnim
 import com.m.vodovoz.design_system.effects.LifecycleEffect
+import com.m.vodovoz.feature.addresses.add.api.AddAddressNavKey
 import com.m.vodovoz.feature.addresses.add.composables.AddAddressScreen
 import com.m.vodovoz.feature.addresses.add.model.AddAddressEvent
 import com.m.vodovoz.feature.map.model.MapAddressUi
@@ -24,7 +25,10 @@ import kotlinx.coroutines.flow.onSubscription
 import kotlinx.coroutines.launch
 
 @Composable
-fun AddAddressEntry() = NavigationEntry<AddAddressViewModel> {
+fun AddAddressEntry(navKey: AddAddressNavKey? = null) =
+    NavigationEntry<AddAddressViewModel, AddAddressViewModel.Factory>(
+        creationCallback = { factory -> factory.create(navKey) }
+    ) {
     val viewState by viewModel.collectAsState()
     val mainScope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }

@@ -23,6 +23,7 @@ import com.m.vodovoz.design_system.model.widgets.checkFields
 import com.m.vodovoz.design_system.model.widgets.mapToUi
 import com.m.vodovoz.design_system.model.widgets.toUi
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
+import com.m.vodovoz.feature.addresses.add.api.AddAddressNavKey
 import com.m.vodovoz.feature.addresses.add.model.AddAddressEvent
 import com.m.vodovoz.feature.addresses.add.model.AddAddressState
 import com.m.vodovoz.feature.addresses.add.model.AddAddressUiState
@@ -31,29 +32,31 @@ import com.m.vodovoz.feature.map.model.toDomain
 import com.m.vodovoz.ui.mvi.MviViewModel
 import com.m.vodovoz.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
-import javax.inject.Inject
-
-@HiltViewModel
+@HiltViewModel(assistedFactory = AddAddressViewModel.Factory::class)
 @Stable
-class AddAddressViewModel @Inject constructor(
+class AddAddressViewModel @AssistedInject constructor(
     savedStateHandle: SavedStateHandle,
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val resourcesProvider: ResourcesProvider,
+    @Assisted private val navKey: AddAddressNavKey?,
 ) : MviViewModel<AddAddressState, AddAddressEvent>(AddAddressState()) {
 
 
-    private val addressId = savedStateHandle.get<Long>("addressId")?.also { id ->
+    private val addressId = (navKey?.addressId ?: savedStateHandle.get<Long>("addressId"))?.also { id ->
         updateState { s -> s.copy(addressId = id) }
     }
-    private val addressName = savedStateHandle.get<String>("addressName")
+    private val addressName = navKey?.addressName ?: savedStateHandle.get<String>("addressName")
 
     init {
-        savedStateHandle.get<MapAddressUi>("mapAddress")?.let { mapAddress ->
+        (navKey?.mapAddress ?: savedStateHandle.get<MapAddressUi>("mapAddress"))?.let { mapAddress ->
             updateState { s -> s.copy(mapAddress = mapAddress) }
         }
         fetchAddressDetails()
@@ -403,6 +406,11 @@ class AddAddressViewModel @Inject constructor(
 
     fun closeAddLabelBS() {
         updateAddLabelBS(false)
+    }
+
+    @AssistedFactory
+    interface Factory {
+        fun create(navKey: AddAddressNavKey?): AddAddressViewModel
     }
 
 }

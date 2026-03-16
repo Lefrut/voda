@@ -26,6 +26,7 @@ import com.m.vodovoz.design_system.model.toUi
 import com.m.vodovoz.design_system.model.toVodovozSectionUi
 import com.m.vodovoz.domain.general.respository.UserPreferencesRepository
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
+import com.m.vodovoz.feature.product_details.api.ProductDetailsNavKey
 import com.m.vodovoz.feature.product_details.model.PresentInfoUi
 import com.m.vodovoz.feature.product_details.model.ProductBonusesUi
 import com.m.vodovoz.feature.product_details.model.toUi
@@ -35,17 +36,19 @@ import com.m.vodovoz.ui.paging.ProductsMviViewModel
 import com.m.vodovoz.util.calculateProductPrice
 import com.m.vodovoz.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-@HiltViewModel
+@HiltViewModel(assistedFactory = ProductDetailsFlowViewModel.Factory::class)
 @Stable
-class ProductDetailsFlowViewModel @Inject constructor(
+class ProductDetailsFlowViewModel @AssistedInject constructor(
     private val cartManager: CartManager,
     private val likeManager: LikeManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
@@ -54,6 +57,7 @@ class ProductDetailsFlowViewModel @Inject constructor(
     private val accountManager: AccountManager,
     val tabManager: TabManager,
     savedStateHandle: SavedStateHandle,
+    @Assisted private val navKey: ProductDetailsNavKey?,
 ) : ProductsMviViewModel<VodovozSectionUi<ProductUi>, ProductDetailsFlowViewModel.ProductDetailsState, ProductDetailsFlowViewModel.ProductDetailsEvents>(
     state = ProductDetailsState(),
     blockedProductsFlow = cartManager.blockedProductsFlow,
@@ -63,7 +67,7 @@ class ProductDetailsFlowViewModel @Inject constructor(
 ) {
 
     init {
-        savedStateHandle.get<Long>("productId")?.let {
+        (navKey?.productId ?: savedStateHandle.get<Long>("productId"))?.let {
             updateState { s ->
                 s.copy(productDetails = s.productDetails.copy(id = it))
             }
@@ -541,5 +545,10 @@ class ProductDetailsFlowViewModel @Inject constructor(
         data class ForAdults(val forAdultsUi: ForAdultsUi) : ProductDetailsUiState()
 
         fun isLoading() = this is Loading
+    }
+
+    @AssistedFactory
+    interface Factory {
+        fun create(navKey: ProductDetailsNavKey?): ProductDetailsFlowViewModel
     }
 }

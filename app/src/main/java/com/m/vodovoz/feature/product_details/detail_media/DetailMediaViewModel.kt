@@ -5,25 +5,29 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.design_system.model.ProductMediaUi
+import com.m.vodovoz.feature.product_details.detail_media.api.DetailMediaNavKey
 import com.m.vodovoz.feature.product_details.detail_media.model.DetailMediaEvent
 import com.m.vodovoz.feature.product_details.detail_media.model.DetailMediaState
 import com.m.vodovoz.ui.insets.InsetsVisibilityState
 import com.m.vodovoz.ui.mvi.MviViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-@HiltViewModel
+@HiltViewModel(assistedFactory = DetailMediaViewModel.Factory::class)
 @Stable
-class DetailMediaViewModel @Inject constructor(
+class DetailMediaViewModel @AssistedInject constructor(
     val tabManager: TabManager,
     val insetsVisibilityState: InsetsVisibilityState,
     savedStateHandle: SavedStateHandle,
+    @Assisted private val navKey: DetailMediaNavKey?,
 ) : MviViewModel<DetailMediaState, DetailMediaEvent>(
     DetailMediaState(
-        currentMedia = savedStateHandle["media"] ?: ProductMediaUi.Picture(""),
-        mediaList = savedStateHandle["mediaList"] ?: emptyList()
+        currentMedia = navKey?.media ?: savedStateHandle["media"] ?: ProductMediaUi.Picture(""),
+        mediaList = navKey?.mediaList ?: savedStateHandle["mediaList"] ?: emptyList()
     )
 ){
 
@@ -47,6 +51,11 @@ class DetailMediaViewModel @Inject constructor(
     fun makeLandscape() = viewModelScope.launch {
         updateState{ s -> s.copy(portraitOrientation = false) }
         sendEvent(DetailMediaEvent.MakeLandscape)
+    }
+
+    @AssistedFactory
+    interface Factory {
+        fun create(navKey: DetailMediaNavKey?): DetailMediaViewModel
     }
 
 }

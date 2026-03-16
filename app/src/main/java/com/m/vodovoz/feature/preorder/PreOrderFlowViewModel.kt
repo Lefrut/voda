@@ -9,29 +9,32 @@ import com.m.vodovoz.common.resources.ResourcesProvider
 import com.m.vodovoz.design_system.model.widgets.WidgetUi
 import com.m.vodovoz.domain.general.model.exceptions.ValidationException
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
+import com.m.vodovoz.feature.preorder.api.PreOrderNavKey
 import com.m.vodovoz.feature.preorder.model.FormUi
 import com.m.vodovoz.feature.preorder.model.toUi
 import com.m.vodovoz.ui.mvi.Event
 import com.m.vodovoz.ui.mvi.FormMviViewModel
 import com.m.vodovoz.ui.mvi.FormState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
-import javax.inject.Inject
-
-@HiltViewModel
-class PreOrderFlowViewModel @Inject constructor(
+@HiltViewModel(assistedFactory = PreOrderFlowViewModel.Factory::class)
+class PreOrderFlowViewModel @AssistedInject constructor(
     savedState: SavedStateHandle,
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val resourcesProvider: ResourcesProvider,
+    @Assisted private val navKey: PreOrderNavKey?,
 ) : FormMviViewModel<PreOrderFlowViewModel.PreOrderState, PreOrderFlowViewModel.PreOrderEvent>(
     PreOrderState()
 ) {
 
-    private val productId = savedState.get<Long>("productId") ?: -1L
+    private val productId = navKey?.productId ?: savedState.get<Long>("productId") ?: -1L
 
     fun fetchPreOrderData() = viewModelScope.launch {
         vodovozServiceRepository.getPreorderDetails(productId)
@@ -119,5 +122,9 @@ class PreOrderFlowViewModel @Inject constructor(
         data object Loading : UiState
     }
 
+    @AssistedFactory
+    interface Factory {
+        fun create(navKey: PreOrderNavKey?): PreOrderFlowViewModel
+    }
 
 }

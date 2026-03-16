@@ -15,12 +15,16 @@ import com.m.vodovoz.design_system.model.toUi
 import com.m.vodovoz.domain.general.model.exceptions.EmptyResultException
 import com.m.vodovoz.domain.general.respository.UserPreferencesRepository
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
+import com.m.vodovoz.feature.search.api.SearchNavKey
 import com.m.vodovoz.ui.mvi.Event
 import com.m.vodovoz.ui.insets.InsetsVisibilityState
 import com.m.vodovoz.ui.paging.ItemsState
 import com.m.vodovoz.ui.paging.ProductsMviViewModel
 import com.m.vodovoz.util.extensions.debounceWithMax
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -31,11 +35,9 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.singleOrNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
-import javax.inject.Inject
-
-@HiltViewModel
+@HiltViewModel(assistedFactory = SearchFlowViewModel.Factory::class)
 @Stable
-class SearchFlowViewModel @Inject constructor(
+class SearchFlowViewModel @AssistedInject constructor(
     val tabManager: TabManager,
     val insetsVisibilityState: InsetsVisibilityState,
     private val cartManager: CartManager,
@@ -44,6 +46,7 @@ class SearchFlowViewModel @Inject constructor(
     private val vodovozServiceRepository: VodovozServiceRepository,
     userPreferencesRepository: UserPreferencesRepository,
     savedStateHandle: SavedStateHandle,
+    @Assisted private val navKey: SearchNavKey?,
 ) : ProductsMviViewModel<ProductUi, SearchFlowViewModel.SearchState, SearchFlowViewModel.SearchEvents>(
     state = SearchState(),
     blockedProductsFlow = cartManager.blockedProductsFlow,
@@ -52,7 +55,8 @@ class SearchFlowViewModel @Inject constructor(
     canViewAdultProducts = userPreferencesRepository.canViewAdultProducts
 ) {
 
-    private val previousSearchQuery: String = savedStateHandle.get<String>("query") ?: ""
+    private val previousSearchQuery: String =
+        navKey?.query ?: savedStateHandle.get<String>("query") ?: ""
 
     private val querySharedFlow = MutableSharedFlow<String>(10)
 
@@ -283,5 +287,10 @@ class SearchFlowViewModel @Inject constructor(
         data class Empty(val placeholder: VodovozPlaceholderUi) : UiState
         data object Error : UiState
 
+    }
+
+    @AssistedFactory
+    interface Factory {
+        fun create(navKey: SearchNavKey?): SearchFlowViewModel
     }
 }

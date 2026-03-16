@@ -8,12 +8,16 @@ import com.m.vodovoz.core.navigation.NavigationEntry
 import com.m.vodovoz.core.navigation.navigateToProductDetails
 import com.m.vodovoz.design_system.composables.bottom_sheet.SortOptionsBottomSheet
 import com.m.vodovoz.design_system.effects.LifecycleEffect
+import com.m.vodovoz.feature.product_analogs.api.ProductAnalogsNavKey
 import com.m.vodovoz.feature.product_analogs.model.ProductAnalogsEvent
 import com.m.vodovoz.ui.mvi.collectAsState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProductAnalogsEntry() = NavigationEntry<ProductAnalogsViewModel> {
+fun ProductAnalogsEntry(navKey: ProductAnalogsNavKey? = null) =
+    NavigationEntry<ProductAnalogsViewModel, ProductAnalogsViewModel.Factory>(
+        creationCallback = { factory -> factory.create(navKey) }
+    ) {
     val viewState by viewModel.collectAsState()
 
     LaunchedEffect(Unit) {

@@ -6,12 +6,16 @@ import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.LifecycleStartEffect
 import com.m.vodovoz.core.navigation.NavigationEntry
 import com.m.vodovoz.core.navigation.navigateToWebView
+import com.m.vodovoz.feature.order_recipient.api.OrderRecipientNavKey
 import com.m.vodovoz.feature.order_recipient.model.OrderRecipientEvent
 import com.m.vodovoz.ui.mvi.collectAsState
 import com.m.vodovoz.ui.mvi.collectEvents
 
 @Composable
-fun OrderRecipientEntry() = NavigationEntry<OrderRecipientViewModel> {
+fun OrderRecipientEntry(navKey: OrderRecipientNavKey? = null) =
+    NavigationEntry<OrderRecipientViewModel, OrderRecipientViewModel.Factory>(
+        creationCallback = { factory -> factory.create(navKey) }
+    ) {
     val viewState by viewModel.collectAsState()
 
     LifecycleStartEffect(Unit) {

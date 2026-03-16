@@ -14,13 +14,17 @@ import com.m.vodovoz.design_system.composables.placeholders.NetworkErrorPlacehol
 import com.m.vodovoz.design_system.effects.LifecycleEffect
 import com.m.vodovoz.feature.auth.login.composables.LoginByEmailUiState
 import com.m.vodovoz.feature.auth.login.model.LoginByEmailEvent
+import com.m.vodovoz.feature.auth.login_by_email.api.LoginByEmailNavKey
 import com.m.vodovoz.ui.mvi.collectAsState
 import kotlinx.coroutines.delay
 
 @Composable
 fun LoginByEmailEntry(
     onRefreshAll: () -> Unit,
-) = NavigationEntry<LoginByEmailViewModel> {
+    navKey: LoginByEmailNavKey? = null,
+) = NavigationEntry<LoginByEmailViewModel, LoginByEmailViewModel.Factory>(
+    creationCallback = { factory -> factory.create(navKey) }
+) {
     val viewState by viewModel.collectAsState()
 
     when (viewState.uiState) {

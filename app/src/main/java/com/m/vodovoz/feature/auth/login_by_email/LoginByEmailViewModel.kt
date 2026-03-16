@@ -16,6 +16,7 @@ import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
 import com.m.vodovoz.feature.auth.login.composables.LoginByEmailUiState
 import com.m.vodovoz.feature.auth.login.model.LoginByEmailEvent
 import com.m.vodovoz.feature.auth.login.model.LoginByEmailState
+import com.m.vodovoz.feature.auth.login_by_email.api.LoginByEmailNavKey
 import com.m.vodovoz.feature.auth.model.AbstractAuthViewModel
 import com.m.vodovoz.feature.auth.model.AuthDetailsUi
 import com.m.vodovoz.feature.auth.model.authValidators
@@ -25,21 +26,24 @@ import com.m.vodovoz.feature.auth.model.withAccountTypeSelection
 import com.m.vodovoz.ui.mvi.launchInViewModelScope
 import com.m.vodovoz.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 private const val LOGIN_BY_EMAIL_BUTTON = "otpravka"
 private const val NAVIGATION_BUTTON = "registr"
 private val LOGIN_BY_EMAIL_VALIDATORS = AuthDetailsUi.authValidators()
 
-@HiltViewModel
+@HiltViewModel(assistedFactory = LoginByEmailViewModel.Factory::class)
 @Stable
-class LoginByEmailViewModel @Inject constructor(
+class LoginByEmailViewModel @AssistedInject constructor(
     val tabManager: TabManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val resourcesProvider: ResourcesProvider,
     private val loginManager: LoginManager,
     private val savedStateHandle: SavedStateHandle,
+    @Assisted private val navKey: LoginByEmailNavKey?,
 ) : AbstractAuthViewModel<LoginByEmailState, LoginByEmailEvent>(
     LoginByEmailState(),
     LOGIN_BY_EMAIL_BUTTON
@@ -113,7 +117,7 @@ class LoginByEmailViewModel @Inject constructor(
             val authDetails = loginDetails.toUi().withBlockingButton { button ->
                 button.copy(enabled = false)
             }.withAccountTypeSelection(
-                savedStateHandle[AuthArgs.ACCOUNT_TYPE_ID]
+                navKey?.accountTypeId ?: savedStateHandle[AuthArgs.ACCOUNT_TYPE_ID]
             )
 
             updateState { s ->
@@ -171,4 +175,8 @@ class LoginByEmailViewModel @Inject constructor(
         }
     }
 
+    @AssistedFactory
+    interface Factory {
+        fun create(navKey: LoginByEmailNavKey?): LoginByEmailViewModel
+    }
 }

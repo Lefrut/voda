@@ -39,7 +39,6 @@ import com.m.vodovoz.domain.general.respository.UserPreferencesRepository
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
 import com.m.vodovoz.feature.home.model.CategoryUi
 import com.m.vodovoz.feature.home.model.toParentCategory
-import com.m.vodovoz.feature.main.AppNavigatorStore
 import com.m.vodovoz.feature.product_catalog.ProductCatalogFragment.DataSource
 import com.m.vodovoz.feature.product_catalog.api.ProductCatalogNavKey
 import com.m.vodovoz.feature.product_comments.model.SortUi
@@ -52,15 +51,17 @@ import com.m.vodovoz.ui.paging.emptyCombinedLoadStates
 import com.m.vodovoz.ui.paging.errorOrNull
 import com.m.vodovoz.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-@HiltViewModel
+@HiltViewModel(assistedFactory = ProductCatalogViewModel.Factory::class)
 @Stable
-class ProductCatalogViewModel @Inject constructor(
+class ProductCatalogViewModel @AssistedInject constructor(
     val tabManager: TabManager,
     savedState: SavedStateHandle,
     private val cartManager: CartManager,
@@ -68,6 +69,7 @@ class ProductCatalogViewModel @Inject constructor(
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val resourcesProvider: ResourcesProvider,
     private val userPreferencesRepository: UserPreferencesRepository,
+    @Assisted private val navKey: ProductCatalogNavKey?,
 ) : PagingProductsMviViewModel<ProductUi, ProductCatalogViewModel.ProductCatalogState, ProductCatalogViewModel.ProductCatalogEvent>(
     state = ProductCatalogState(),
     blockedProductsFlow = cartManager.blockedProductsFlow,
@@ -77,7 +79,7 @@ class ProductCatalogViewModel @Inject constructor(
 ) {
 
     val dataSource: DataSource = (
-        (AppNavigatorStore.navigator?.state?.currentKey as? ProductCatalogNavKey)
+        navKey
             ?.toLegacy()
         ) ?: savedState.get<DataSource>("dataSource")
         ?: DataSource.Missing
@@ -708,5 +710,10 @@ class ProductCatalogViewModel @Inject constructor(
 
         data class Share(val text: String) : ProductCatalogEvent()
         data class GoToProductAnalogs(val productId: Long) : ProductCatalogEvent()
+    }
+
+    @AssistedFactory
+    interface Factory {
+        fun create(navKey: ProductCatalogNavKey?): ProductCatalogViewModel
     }
 }

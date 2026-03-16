@@ -12,23 +12,28 @@ import com.m.vodovoz.design_system.model.filters.FilterUi
 import com.m.vodovoz.design_system.model.filters.FilterValueUi
 import com.m.vodovoz.design_system.model.filters.mapToUi
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
+import com.m.vodovoz.feature.filter_values.api.FilterValuesNavKey
 import com.m.vodovoz.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-@HiltViewModel
-class FilterValuesViewModel @Inject constructor(
+@HiltViewModel(assistedFactory = FilterValuesViewModel.Factory::class)
+class FilterValuesViewModel @AssistedInject constructor(
     val tabManager: TabManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
     savedStateHandle: SavedStateHandle,
+    @Assisted private val navKey: FilterValuesNavKey?,
 ) : MviViewModel<FilterValuesViewModel.ConcreteFilterState, FilterValuesViewModel.ConcreteFilterEvent>(
     ConcreteFilterState()
 ) {
 
-    private val filter = savedStateHandle.get<FilterUi>("filter") ?: FilterUi.Empty
-    private val categoryId = savedStateHandle.get<Long>("categoryId")?.toInt() ?: -1
+    private val filter = navKey?.filter ?: savedStateHandle.get<FilterUi>("filter") ?: FilterUi.Empty
+    private val categoryId =
+        navKey?.categoryId?.toInt() ?: savedStateHandle.get<Long>("categoryId")?.toInt() ?: -1
 
     init {
         viewModelScope.launch {
@@ -129,6 +134,11 @@ class FilterValuesViewModel @Inject constructor(
     sealed interface ConcreteFilterEvent : Event {
         data object GoBack : ConcreteFilterEvent
         data class GoToProductFilters(val filter: FilterUi) : ConcreteFilterEvent
+    }
+
+    @AssistedFactory
+    interface Factory {
+        fun create(navKey: FilterValuesNavKey?): FilterValuesViewModel
     }
 
 }

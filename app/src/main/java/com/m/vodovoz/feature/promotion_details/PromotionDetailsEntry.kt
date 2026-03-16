@@ -8,11 +8,15 @@ import com.m.vodovoz.core.navigation.navigateToProductAnalogs
 import com.m.vodovoz.core.navigation.navigateToProductDetails
 import com.m.vodovoz.design_system.composables.placeholders.NetworkErrorPlaceholder
 import com.m.vodovoz.design_system.effects.LifecycleEffect
+import com.m.vodovoz.feature.promotion_details.api.PromotionDetailsNavKey
 import com.m.vodovoz.ui.mvi.collectAsState
 import com.m.vodovoz.util.extensions.openUrl
 
 @Composable
-fun PromotionDetailsEntry() = NavigationEntry<PromotionDetailsViewModel> {
+fun PromotionDetailsEntry(navKey: PromotionDetailsNavKey? = null) =
+    NavigationEntry<PromotionDetailsViewModel, PromotionDetailsViewModel.Factory>(
+        creationCallback = { factory -> factory.create(navKey) }
+    ) {
     val viewState by viewModel.collectAsState()
     val context = LocalContext.current
 

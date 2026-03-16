@@ -9,12 +9,16 @@ import com.m.vodovoz.core.navigation.navigateToQrCode
 import com.m.vodovoz.core.navigation.navigateToSearch
 import com.m.vodovoz.core.navigation.navigateToSpeechDialog
 import com.m.vodovoz.core.navigation.navigateToSubCategories
+import com.m.vodovoz.feature.sub_categories.api.SubCategoriesNavKey
 import com.m.vodovoz.feature.sub_categories.model.SubCategoriesEvent
 import com.m.vodovoz.ui.mvi.collectAsState
 import com.m.vodovoz.ui.mvi.collectEvents
 
 @Composable
-fun SubCategoriesEntry() = NavigationEntry<SubCategoriesViewModel> {
+fun SubCategoriesEntry(navKey: SubCategoriesNavKey? = null) =
+    NavigationEntry<SubCategoriesViewModel, SubCategoriesViewModel.Factory>(
+        creationCallback = { factory -> factory.create(navKey) }
+    ) {
     val viewState by viewModel.collectAsState()
 
     SubCategoriesScreen(

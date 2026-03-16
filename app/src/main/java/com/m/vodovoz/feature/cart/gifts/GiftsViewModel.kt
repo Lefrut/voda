@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.design_system.model.ForAdultsUi
 import com.m.vodovoz.domain.general.respository.UserPreferencesRepository
+import com.m.vodovoz.feature.cart.gifts.api.GiftsNavKey
 import com.m.vodovoz.feature.cart.gifts.model.GiftsEvent
 import com.m.vodovoz.feature.cart.gifts.model.GiftsState
 import com.m.vodovoz.feature.cart.model.CartPresentItemUi
@@ -13,17 +14,20 @@ import com.m.vodovoz.feature.cart.model.CartPresentPopupWindowUi
 import com.m.vodovoz.feature.cart.model.CartPresentUi
 import com.m.vodovoz.ui.paging.ProductsMviViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 
-@HiltViewModel
+@HiltViewModel(assistedFactory = GiftsViewModel.Factory::class)
 @Stable
-class GiftsViewModel @Inject constructor(
+class GiftsViewModel @AssistedInject constructor(
     val tabManager: TabManager,
     savedStateHandle: SavedStateHandle,
     private val userPreferencesRepository: UserPreferencesRepository,
+    @Assisted private val navKey: GiftsNavKey?,
 ) : ProductsMviViewModel<CartPresentItemUi, GiftsState, GiftsEvent>(
     state = GiftsState(),
     blockedProductsFlow = emptyFlow(),
@@ -32,10 +36,11 @@ class GiftsViewModel @Inject constructor(
     canViewAdultProducts = userPreferencesRepository.canViewAdultProducts
 ) {
 
-    private val present: CartPresentUi? = savedStateHandle.get<CartPresentUi>("present")
+    private val present: CartPresentUi? =
+        navKey?.present ?: savedStateHandle.get<CartPresentUi>("present")
 
     private val giftDetails: CartPresentPopupWindowUi? =
-        savedStateHandle.get<CartPresentPopupWindowUi>("popupWindow")
+        navKey?.popupWindow ?: savedStateHandle.get<CartPresentPopupWindowUi>("popupWindow")
 
     init {
         initializeData()
@@ -110,5 +115,8 @@ class GiftsViewModel @Inject constructor(
         }
     }
 
-
+    @AssistedFactory
+    interface Factory {
+        fun create(navKey: GiftsNavKey?): GiftsViewModel
+    }
 }

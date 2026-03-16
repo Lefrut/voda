@@ -12,11 +12,15 @@ import com.m.vodovoz.core.navigation.navigateToWebView
 import com.m.vodovoz.design_system.composables.placeholders.LoadingPlaceholder
 import com.m.vodovoz.design_system.composables.placeholders.NetworkErrorPlaceholder
 import com.m.vodovoz.design_system.effects.LifecycleEffect
+import com.m.vodovoz.feature.preorder.api.PreOrderNavKey
 import com.m.vodovoz.ui.mvi.collectAsState
 import kotlinx.coroutines.withTimeoutOrNull
 
 @Composable
-fun PreOrderEntry() = NavigationEntry<PreOrderFlowViewModel> {
+fun PreOrderEntry(navKey: PreOrderNavKey? = null) =
+    NavigationEntry<PreOrderFlowViewModel, PreOrderFlowViewModel.Factory>(
+        creationCallback = { factory -> factory.create(navKey) }
+    ) {
     val viewState by viewModel.collectAsState()
     val keyboardController = LocalSoftwareKeyboardController.current
     val snackbarHostState = remember { SnackbarHostState() }

@@ -15,29 +15,33 @@ import com.m.vodovoz.design_system.model.filters.FiltersPriceUi
 import com.m.vodovoz.design_system.model.filters.FiltersUi
 import com.m.vodovoz.design_system.model.filters.toUi
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
+import com.m.vodovoz.feature.product_filters.api.ProductFiltersNavKey
 import com.m.vodovoz.util.extensions.singleResult
 import com.m.vodovoz.util.roundToOneDecimal
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.roundToInt
 
-@HiltViewModel
-class ProductFiltersFlowViewModel @Inject constructor(
+@HiltViewModel(assistedFactory = ProductFiltersFlowViewModel.Factory::class)
+class ProductFiltersFlowViewModel @AssistedInject constructor(
     val tabManager: TabManager,
     savedStateHandle: SavedStateHandle,
     private val vodovozServiceRepository: VodovozServiceRepository,
+    @Assisted private val navKey: ProductFiltersNavKey?,
 ) : MviViewModel<ProductFiltersFlowViewModel.ProductFiltersState, ProductFiltersFlowViewModel.ProductFiltersEvent>(
     ProductFiltersState()
 ) {
 
     private val categoryIdArg =
-        savedStateHandle.remove<Long>("categoryId")?.toInt() ?: navigateBack().let { -1 }
-    private val filtersArg = savedStateHandle.remove<FiltersUi>("filters") ?: FiltersUi.Empty
+        navKey?.categoryId?.toInt() ?: savedStateHandle.remove<Long>("categoryId")?.toInt() ?: navigateBack().let { -1 }
+    private val filtersArg = navKey?.filters ?: savedStateHandle.remove<FiltersUi>("filters") ?: FiltersUi.Empty
 
     init {
         listenFiltersSelectionState()
@@ -396,5 +400,10 @@ class ProductFiltersFlowViewModel @Inject constructor(
             ProductFiltersEvent
 
         data object ResetSlider : ProductFiltersEvent
+    }
+
+    @AssistedFactory
+    interface Factory {
+        fun create(navKey: ProductFiltersNavKey?): ProductFiltersFlowViewModel
     }
 }

@@ -10,6 +10,7 @@ import com.m.vodovoz.design_system.model.toUi
 import com.m.vodovoz.design_system.model.widgets.CheckboxUi
 import com.m.vodovoz.design_system.model.widgets.toUi
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
+import com.m.vodovoz.feature.delivery_date.api.DeliveryDateNavKey
 import com.m.vodovoz.feature.delivery_date.model.DeliveryDateEvent
 import com.m.vodovoz.feature.delivery_date.model.DeliveryDateOptionUi
 import com.m.vodovoz.feature.delivery_date.model.DeliveryDateState
@@ -20,28 +21,32 @@ import com.m.vodovoz.ui.mvi.MviViewModel
 import com.m.vodovoz.util.extensions.singleResult
 import com.m.vodovoz.util.formatters.VodovozDateFormatters
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.util.UUID
-import javax.inject.Inject
 
-@HiltViewModel
+@HiltViewModel(assistedFactory = DeliveryDateViewModel.Factory::class)
 @Stable
-class DeliveryDateViewModel @Inject constructor(
+class DeliveryDateViewModel @AssistedInject constructor(
     val tabManager: TabManager,
     savedStateHandle: SavedStateHandle,
     private val vodovozServiceRepository: VodovozServiceRepository,
+    @Assisted private val navKey: DeliveryDateNavKey?,
 ) : MviViewModel<DeliveryDateState, DeliveryDateEvent>(DeliveryDateState()) {
 
-    private val addressId = savedStateHandle.get<Long>("addressId") ?: -1
+    private val addressId = navKey?.addressId ?: savedStateHandle.get<Long>("addressId") ?: -1
 
-    private val deliveryDate = savedStateHandle.get<String>("date")
+    private val deliveryDate = navKey?.date ?: savedStateHandle.get<String>("date")
 
-    private val timeInterval = savedStateHandle.get<String>("timeInterval")
+    private val timeInterval = navKey?.timeInterval ?: savedStateHandle.get<String>("timeInterval")
 
-    private val earlierDelivery = savedStateHandle.get<Boolean>("earlierDelivery")
+    private val earlierDelivery =
+        navKey?.earlierDelivery ?: savedStateHandle.get<Boolean>("earlierDelivery")
 
-    private val queryParams = savedStateHandle.getQueryParams()
+    private val queryParams = navKey?.queryParams ?: savedStateHandle.getQueryParams()
 
     init {
         if (deliveryDate != null && timeInterval != null) {
@@ -214,6 +219,11 @@ class DeliveryDateViewModel @Inject constructor(
 
     fun changeCheckbox(newEarlierCheckbox: CheckboxUi) {
         updateState { s -> s.copy(earlierCheckbox = newEarlierCheckbox) }
+    }
+
+    @AssistedFactory
+    interface Factory {
+        fun create(navKey: DeliveryDateNavKey?): DeliveryDateViewModel
     }
 
 }

@@ -7,10 +7,14 @@ import com.m.vodovoz.R
 import com.m.vodovoz.core.navigation.NavigationEntry
 import com.m.vodovoz.design_system.composables.placeholders.LoadingPlaceholder
 import com.m.vodovoz.design_system.effects.LifecycleEffect
+import com.m.vodovoz.feature.filter_values.api.FilterValuesNavKey
 import com.m.vodovoz.ui.mvi.collectAsState
 
 @Composable
-fun FilterValuesEntry() = NavigationEntry<FilterValuesViewModel> {
+fun FilterValuesEntry(navKey: FilterValuesNavKey? = null) =
+    NavigationEntry<FilterValuesViewModel, FilterValuesViewModel.Factory>(
+        creationCallback = { factory -> factory.create(navKey) }
+    ) {
     val viewState by viewModel.collectAsState()
 
     LifecycleStartEffect(Unit) {

@@ -13,6 +13,7 @@ import com.m.vodovoz.design_system.model.PromotionDetailsUi
 import com.m.vodovoz.design_system.model.toUi
 import com.m.vodovoz.domain.general.respository.UserPreferencesRepository
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
+import com.m.vodovoz.feature.promotion_details.api.PromotionDetailsNavKey
 import com.m.vodovoz.ui.mvi.Event
 import com.m.vodovoz.ui.paging.PagingProductsMviViewModel
 import com.m.vodovoz.ui.paging.PagingState
@@ -20,21 +21,23 @@ import com.m.vodovoz.ui.paging.emptyCombinedLoadStates
 import com.m.vodovoz.util.extensions.onEachFailure
 import com.m.vodovoz.util.extensions.onEachSuccess
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
-import javax.inject.Inject
-
-@HiltViewModel
+@HiltViewModel(assistedFactory = PromotionDetailsViewModel.Factory::class)
 @Stable
-class PromotionDetailsViewModel @Inject constructor(
+class PromotionDetailsViewModel @AssistedInject constructor(
     savedState: SavedStateHandle,
     private val cartManager: CartManager,
     private val likeManager: LikeManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
     userPreferencesRepository: UserPreferencesRepository,
+    @Assisted private val navKey: PromotionDetailsNavKey?,
 ) : PagingProductsMviViewModel<ProductUi, PromotionDetailsViewModel.PromotionDetailsState, PromotionDetailsViewModel.PromotionDetailEvent>(
     state = PromotionDetailsState(),
     blockedProductsFlow = cartManager.blockedProductsFlow,
@@ -43,7 +46,7 @@ class PromotionDetailsViewModel @Inject constructor(
     canViewAdultProducts = userPreferencesRepository.canViewAdultProducts
 ) {
 
-    private var promotionId = savedState.get<Long>("promotionId")?.toInt() ?: -1
+    private var promotionId = navKey?.promotionId?.toInt() ?: savedState.get<Long>("promotionId")?.toInt() ?: -1
 
     init {
         fetchPromotionDetails()
@@ -130,5 +133,10 @@ class PromotionDetailsViewModel @Inject constructor(
         data class GoToProductAnalogs(val productId: Long) : PromotionDetailEvent()
         data class GoToProductDetails(val productId: Long) : PromotionDetailEvent()
         data object GoBack : PromotionDetailEvent()
+    }
+
+    @AssistedFactory
+    interface Factory {
+        fun create(navKey: PromotionDetailsNavKey?): PromotionDetailsViewModel
     }
 }

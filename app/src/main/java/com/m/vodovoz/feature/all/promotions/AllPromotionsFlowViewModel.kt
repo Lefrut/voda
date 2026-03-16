@@ -18,27 +18,31 @@ import com.m.vodovoz.design_system.model.mapToUi
 import com.m.vodovoz.design_system.model.toUi
 import com.m.vodovoz.domain.general.model.promotion.PromotionsSectionModel
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
+import com.m.vodovoz.feature.all.promotions.api.AllPromotionsNavKey
 import com.m.vodovoz.ui.mvi.Event
 import com.m.vodovoz.ui.paging.PagingMviViewModel
 import com.m.vodovoz.ui.paging.PagingState
 import com.m.vodovoz.ui.paging.emptyCombinedLoadStates
 import com.m.vodovoz.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-@HiltViewModel
-class AllPromotionsFlowViewModel @Inject constructor(
+@HiltViewModel(assistedFactory = AllPromotionsFlowViewModel.Factory::class)
+class AllPromotionsFlowViewModel @AssistedInject constructor(
     savedState: SavedStateHandle,
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val resourcesProvider: ResourcesProvider,
+    @Assisted private val navKey: AllPromotionsNavKey?,
 ) : PagingMviViewModel<PromotionUi, AllPromotionsFlowViewModel.AllPromotionsState, AllPromotionsFlowViewModel.AllPromotionsEvent>(
     AllPromotionsState()
 ) {
 
-    private val dataSource = savedState.get<AllPromotionsFragment.DataSource>("dataSource")
+    private val dataSource = navKey?.dataSource ?: savedState.get<AllPromotionsFragment.DataSource>("dataSource")
         ?: AllPromotionsFragment.DataSource.All
 
     init {
@@ -206,5 +210,10 @@ class AllPromotionsFlowViewModel @Inject constructor(
 
         data object GoBack : AllPromotionsEvent()
 
+    }
+
+    @AssistedFactory
+    interface Factory {
+        fun create(navKey: AllPromotionsNavKey?): AllPromotionsFlowViewModel
     }
 }

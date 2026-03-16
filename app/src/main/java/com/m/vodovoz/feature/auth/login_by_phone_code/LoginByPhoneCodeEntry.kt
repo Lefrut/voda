@@ -10,6 +10,7 @@ import com.m.vodovoz.R
 import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.core.navigation.NavigationEntry
 import com.m.vodovoz.design_system.effects.LifecycleEffect
+import com.m.vodovoz.feature.auth.login_by_phone_code.api.LoginByPhoneCodeNavKey
 import com.m.vodovoz.feature.auth.login_by_phone_code.model.LoginByPhoneCodeEvent
 import com.m.vodovoz.feature.cart.CartFlowViewModel
 import com.m.vodovoz.feature.favorite.FavoriteFlowViewModel
@@ -19,7 +20,11 @@ import com.m.vodovoz.ui.mvi.collectAsState
 import kotlinx.coroutines.delay
 
 @Composable
-fun LoginByPhoneCodeEntry() = NavigationEntry<LoginByPhoneCodeViewModel> {
+fun LoginByPhoneCodeEntry(
+    navKey: LoginByPhoneCodeNavKey? = null,
+) = NavigationEntry<LoginByPhoneCodeViewModel, LoginByPhoneCodeViewModel.Factory>(
+    creationCallback = { factory -> factory.create(navKey) }
+) {
     val activity = LocalActivity.current ?: return@NavigationEntry
     val owner = activity as? ViewModelStoreOwner ?: return@NavigationEntry
     val profileViewModel = hiltViewModel<ProfileFlowViewModel>(owner)

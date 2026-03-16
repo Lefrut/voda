@@ -13,27 +13,31 @@ import com.m.vodovoz.common.model.VodovozAction
 import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.design_system.model.StoryUi
 import com.m.vodovoz.domain.general.respository.UserPreferencesRepository
+import com.m.vodovoz.feature.stories_fragment.api.StoriesNavKey
 import com.m.vodovoz.ui.insets.InsetsVisibilityState
 import com.m.vodovoz.util.extensions.indexOfOrNull
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-@HiltViewModel
+@HiltViewModel(assistedFactory = StoriesViewModel.Factory::class)
 @Stable
-class StoriesViewModel @Inject constructor(
+class StoriesViewModel @AssistedInject constructor(
     savedState: SavedStateHandle,
     val tabManager: TabManager,
     val cookieManager: CookieManager,
     val insetsVisibilityState: InsetsVisibilityState,
     private val userPreferencesRepository: UserPreferencesRepository,
+    @Assisted private val navKey: StoriesNavKey?,
 ) : MviViewModel<StoriesViewModel.HistoriesSliderState, StoriesViewModel.StoriesEvents>(
     HistoriesSliderState()
 ) {
 
-    private val startStoryId = savedState.get<Long>("storyId") ?: 0L
-    private val stories: List<StoryUi>? = savedState.get<List<StoryUi>>("stories")
+    private val startStoryId = navKey?.storyId ?: savedState.get<Long>("storyId") ?: 0L
+    private val stories: List<StoryUi>? = navKey?.stories ?: savedState.get<List<StoryUi>>("stories")
 
     init {
         fetchStories()
@@ -210,5 +214,10 @@ class StoriesViewModel @Inject constructor(
         val currentStory get() = stories[currentStoryIndex]
         val currentStoryPage get() = currentStory.pages[currentPageIndex]
 
+    }
+
+    @AssistedFactory
+    interface Factory {
+        fun create(navKey: StoriesNavKey?): StoriesViewModel
     }
 }

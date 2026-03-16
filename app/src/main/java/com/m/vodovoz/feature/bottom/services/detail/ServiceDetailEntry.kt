@@ -7,11 +7,15 @@ import com.m.vodovoz.core.navigation.navigateToProductAnalogs
 import com.m.vodovoz.core.navigation.navigateToProductDetails
 import com.m.vodovoz.core.navigation.navigateToServiceOrder
 import com.m.vodovoz.design_system.effects.LifecycleEffect
+import com.m.vodovoz.feature.bottom.services.detail.api.ServiceDetailNavKey
 import com.m.vodovoz.feature.bottom.services.detail.model.ServiceDetailsEvent
 import com.m.vodovoz.ui.mvi.collectAsState
 
 @Composable
-fun ServiceDetailEntry() = NavigationEntry<ServiceDetailsViewModel> {
+fun ServiceDetailEntry(navKey: ServiceDetailNavKey? = null) =
+    NavigationEntry<ServiceDetailsViewModel, ServiceDetailsViewModel.Factory>(
+        creationCallback = { factory -> factory.create(navKey) }
+    ) {
     val viewState by viewModel.collectAsState()
 
     ServiceDetailScreen(

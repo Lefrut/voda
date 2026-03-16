@@ -9,11 +9,15 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.compose.LifecycleStartEffect
 import com.m.vodovoz.core.navigation.NavigationEntry
 import com.m.vodovoz.core.navigation.navigateToWebView
+import com.m.vodovoz.feature.service_order.api.ServiceOrderNavKey
 import com.m.vodovoz.ui.mvi.collectAsState
 import com.m.vodovoz.ui.mvi.collectEvents
 
 @Composable
-fun ServiceOrderEntry() = NavigationEntry<ServiceOrderViewModel> {
+fun ServiceOrderEntry(navKey: ServiceOrderNavKey? = null) =
+    NavigationEntry<ServiceOrderViewModel, ServiceOrderViewModel.Factory>(
+        creationCallback = { factory -> factory.create(navKey) }
+    ) {
     val view = LocalView.current
 
     LifecycleStartEffect(view) {

@@ -12,30 +12,34 @@ import com.m.vodovoz.design_system.model.widgets.WidgetUi
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
 import com.m.vodovoz.feature.preorder.model.FormUi
 import com.m.vodovoz.feature.preorder.model.toUi
+import com.m.vodovoz.feature.service_order.api.ServiceOrderNavKey
 import com.m.vodovoz.ui.mvi.Event
 import com.m.vodovoz.ui.mvi.FormMviViewModel
 import com.m.vodovoz.ui.mvi.FormState
 import com.m.vodovoz.ui.insets.InsetsVisibilityState
 import com.m.vodovoz.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-@HiltViewModel
+@HiltViewModel(assistedFactory = ServiceOrderViewModel.Factory::class)
 @Stable
-class ServiceOrderViewModel @Inject constructor(
+class ServiceOrderViewModel @AssistedInject constructor(
     val tabManager: TabManager,
     val insetsState: InsetsVisibilityState,
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val resourceProvider: ResourcesProvider,
     savedStateHandle: SavedStateHandle,
+    @Assisted private val navKey: ServiceOrderNavKey?,
 ) : FormMviViewModel<ServiceOrderViewModel.ServiceOrderState, ServiceOrderViewModel.ServiceOrderEvent>(
     ServiceOrderState()
 ) {
 
 
-    private val serviceType = savedStateHandle.get<String>("serviceType") ?: ""
+    private val serviceType = navKey?.serviceType ?: savedStateHandle.get<String>("serviceType") ?: ""
 
     init {
         viewModelScope.launch { delay(200L) }.invokeOnCompletion {
@@ -131,5 +135,8 @@ class ServiceOrderViewModel @Inject constructor(
         data class Success(val placeholder: VodovozPlaceholderUi) : ServiceOrderUiState
     }
 
-
+    @AssistedFactory
+    interface Factory {
+        fun create(navKey: ServiceOrderNavKey?): ServiceOrderViewModel
+    }
 }

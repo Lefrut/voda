@@ -12,6 +12,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.LifecycleStartEffect
 import com.m.vodovoz.core.navigation.NavigationEntry
 import com.m.vodovoz.design_system.effects.LifecycleEffect
+import com.m.vodovoz.feature.product_details.detail_media.api.DetailMediaNavKey
 import com.m.vodovoz.feature.product_details.detail_media.model.DetailMediaEvent
 import com.m.vodovoz.ui.mvi.collectAsState
 import com.m.vodovoz.util.extensions.disableFullScreen
@@ -22,7 +23,10 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 
 @SuppressLint("SourceLockedOrientationActivity")
 @Composable
-fun DetailMediaEntry() = NavigationEntry<DetailMediaViewModel> {
+fun DetailMediaEntry(navKey: DetailMediaNavKey? = null) =
+    NavigationEntry<DetailMediaViewModel, DetailMediaViewModel.Factory>(
+        creationCallback = { factory -> factory.create(navKey) }
+    ) {
     val viewState by viewModel.collectAsState()
     val mediaList = viewState.mediaList
     val context = LocalContext.current

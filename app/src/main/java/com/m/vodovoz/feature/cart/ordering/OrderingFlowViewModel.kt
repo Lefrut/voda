@@ -25,6 +25,7 @@ import com.m.vodovoz.design_system.model.widgets.toQueryMap
 import com.m.vodovoz.domain.general.model.order.OrderingDetailsModel
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
 import com.m.vodovoz.feature.addresses.model.AddressUi
+import com.m.vodovoz.feature.cart.ordering.api.OrderingNavKey
 import com.m.vodovoz.feature.cart.ordering.model.OrderNotifyItemUi
 import com.m.vodovoz.feature.cart.ordering.model.OrderNotifySectionUi
 import com.m.vodovoz.feature.cart.ordering.model.OrderingMenuItemUi
@@ -50,24 +51,27 @@ import com.m.vodovoz.util.extensions.singleResult
 import com.m.vodovoz.util.formatters.VodovozDateFormatters
 import com.m.vodovoz.util.isValidRussianPhoneNumber
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.launch
 import okhttp3.internal.toLongOrDefault
 import java.time.LocalDate
-import javax.inject.Inject
 
-@HiltViewModel
+@HiltViewModel(assistedFactory = OrderingFlowViewModel.Factory::class)
 @Stable
-class OrderingFlowViewModel @Inject constructor(
+class OrderingFlowViewModel @AssistedInject constructor(
     savedStateHandle: SavedStateHandle,
     val tabManager: TabManager,
     val accountManager: AccountManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val resourcesProvider: ResourcesProvider,
-    private val cartManager: CartManager
+    private val cartManager: CartManager,
+    @Assisted private val navKey: OrderingNavKey?,
 ) : MviViewModel<OrderingFlowViewModel.OrderingState, OrderingFlowViewModel.OrderingEvents>(
     OrderingState()
 ) {
-    private val coupon = savedStateHandle.get<String>("coupon")
+    private val coupon = navKey?.coupon ?: savedStateHandle.get<String>("coupon")
 
     init {
         fetchOrderingDetails()
@@ -796,5 +800,10 @@ class OrderingFlowViewModel @Inject constructor(
         data object Loading : OrderingUiState
         data object Error : OrderingUiState
         data class Success(val placeholder: VodovozPlaceholderUi) : OrderingUiState
+    }
+
+    @AssistedFactory
+    interface Factory {
+        fun create(navKey: OrderingNavKey?): OrderingFlowViewModel
     }
 }

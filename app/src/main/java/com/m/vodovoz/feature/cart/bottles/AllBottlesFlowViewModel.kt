@@ -8,6 +8,7 @@ import com.m.vodovoz.common.cart.CartManager
 import com.m.vodovoz.core.android.getList
 import com.m.vodovoz.domain.general.model.product.toCartProducts
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
+import com.m.vodovoz.feature.cart.bottles.api.AllBottlesNavKey
 import com.m.vodovoz.feature.cart.bottles.model.BottleUi
 import com.m.vodovoz.feature.cart.bottles.model.mapToUi
 import com.m.vodovoz.feature.cart.bottles.model.toMap
@@ -17,23 +18,26 @@ import com.m.vodovoz.ui.mvi.MviViewModel
 import com.m.vodovoz.ui.mvi.State
 import com.m.vodovoz.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 @Stable
-@HiltViewModel
-class AllBottlesFlowViewModel @Inject constructor(
+@HiltViewModel(assistedFactory = AllBottlesFlowViewModel.Factory::class)
+class AllBottlesFlowViewModel @AssistedInject constructor(
     private val cartManager: CartManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
     savedStateHandle: SavedStateHandle,
+    @Assisted private val navKey: AllBottlesNavKey?,
 ) : MviViewModel<AllBottlesFlowViewModel.BottlesState, AllBottlesFlowViewModel.BottlesEvent>(
     BottlesState()
 ) {
 
-    private val cartBottles = savedStateHandle.getList<BottleUi>("bottles")
+    private val cartBottles = navKey?.bottles ?: savedStateHandle.getList<BottleUi>("bottles")
 
     init {
         fetchAllBottlesDetails()
@@ -202,8 +206,11 @@ class AllBottlesFlowViewModel @Inject constructor(
         }.onFailure {
             viewModelMode.handleFail()
         }
+    }
 
-
+    @AssistedFactory
+    interface Factory {
+        fun create(navKey: AllBottlesNavKey?): AllBottlesFlowViewModel
     }
 
 

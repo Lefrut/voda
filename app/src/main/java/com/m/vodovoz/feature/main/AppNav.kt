@@ -21,9 +21,11 @@ import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.derivedStateOf
@@ -194,7 +196,10 @@ fun BottmNav(
 
 
     Scaffold(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .systemBarsPadding()
+            .consumeWindowInsets(WindowInsets.systemBars),
         bottomBar = {
             NavigationBar {
                 BottomNavKey.values.forEach { key ->
@@ -213,7 +218,7 @@ fun BottmNav(
                 }
             }
         },
-        contentWindowInsets = WindowInsets.systemBars
+        contentWindowInsets = WindowInsets(0)
     ) { paddingValues ->
         val navController = LocalView.current.findNavController()
         navigator.attachNavController(navController)
@@ -238,38 +243,38 @@ fun BottmNav(
             entry<AboutAppNavKey> {
                 AboutAppEntry(onRefreshApp = {})
             }
-            entry<AboutProductNavKey> {
-                AboutProductEntry()
+            entry<AboutProductNavKey> { key ->
+                AboutProductEntry(key)
             }
-            entry<AddressesNavKey> {
-                AddressesEntry()
+            entry<AddressesNavKey> { key ->
+                AddressesEntry(key)
             }
-            entry<AddAddressNavKey> {
-                AddAddressEntry()
+            entry<AddAddressNavKey> { key ->
+                AddAddressEntry(key)
             }
             entry<AllBrandsNavKey> {
                 AllBrandsEntry()
             }
-            entry<OrderDetailsNavKey> {
-                OrderDetailsEntry(onOrderIdCopied = {})
+            entry<OrderDetailsNavKey> { key ->
+                OrderDetailsEntry(onOrderIdCopied = {}, navKey = key)
             }
-            entry<TraceOrderNavKey> {
-                TraceOrderEntry()
+            entry<TraceOrderNavKey> { key ->
+                TraceOrderEntry(key)
             }
             entry<OrdersHistoryNavKey> {
                 OrdersHistoryEntry()
             }
-            entry<AllPromotionsNavKey> {
-                AllPromotionsEntry()
+            entry<AllPromotionsNavKey> { key ->
+                AllPromotionsEntry(key)
             }
-            entry<LoginNavKey> {
-                LoginEntry()
+            entry<LoginNavKey> { key ->
+                LoginEntry(key)
             }
-            entry<LoginByEmailNavKey> {
-                LoginByEmailEntry(onRefreshAll = {})
+            entry<LoginByEmailNavKey> { key ->
+                LoginByEmailEntry(onRefreshAll = {}, navKey = key)
             }
-            entry<LoginByPhoneCodeNavKey> {
-                LoginByPhoneCodeEntry()
+            entry<LoginByPhoneCodeNavKey> { key ->
+                LoginByPhoneCodeEntry(navKey = key)
             }
             entry<RecoverPasswordNavKey> {
                 RecoverPasswordEntry()
@@ -280,89 +285,89 @@ fun BottmNav(
             entry<AboutServicesNavKey> {
                 AboutServicesEntry()
             }
-            entry<ServiceDetailNavKey> {
-                ServiceDetailEntry()
+            entry<ServiceDetailNavKey> { key ->
+                ServiceDetailEntry(key)
             }
             entry<BuyCertificateNavKey> {
                 BuyCertificateEntry()
             }
-            entry<CancelOrderNavKey> {
-                CancelOrderEntry()
+            entry<CancelOrderNavKey> { key ->
+                CancelOrderEntry(key)
             }
             entry<CartNavKey> {
                 CartEntry(cartFlowViewModel)
             }
-            entry<AllBottlesNavKey> {
-                AllBottlesEntry()
+            entry<AllBottlesNavKey> { key ->
+                AllBottlesEntry(key)
             }
-            entry<GiftsNavKey> {
-                GiftsEntry()
+            entry<GiftsNavKey> { key ->
+                GiftsEntry(key)
             }
-            entry<OrderingNavKey> {
-                OrderingEntry(onRefreshCart = {})
+            entry<OrderingNavKey> { key ->
+                OrderingEntry(onRefreshCart = {}, navKey = key)
             }
             entry<CatalogNavKey> {
                 CatalogEntry(catalogFlowViewModel)
             }
-            entry<CategoriesNavKey> {
-                CategoriesEntry()
+            entry<CategoriesNavKey> { key ->
+                CategoriesEntry(key)
             }
             entry<CertificateActivationNavKey> {
                 CertificateActivationEntry()
             }
-            entry<DeliveryDateNavKey> {
-                DeliveryDateEntry()
+            entry<DeliveryDateNavKey> { key ->
+                DeliveryDateEntry(key)
             }
-            entry<DocumentViewerNavKey> {
-                DocumentViewerEntry()
+            entry<DocumentViewerNavKey> { key ->
+                DocumentViewerEntry(key)
             }
-            entry<FAQNavKey> {
-                FAQEntry()
+            entry<FAQNavKey> { key ->
+                FAQEntry(key)
             }
             entry<FavoriteNavKey> {
                 FavoriteEntry(favoriteFlowViewModel)
             }
-            entry<FilterValuesNavKey> {
-                FilterValuesEntry()
+            entry<FilterValuesNavKey> { key ->
+                FilterValuesEntry(key)
             }
             entry<HomeNavKey> {
                 HomeEntry(homeViewModel)
             }
-            entry<MapNavKey> {
-                MapEntry()
+            entry<MapNavKey> { key ->
+                MapEntry(key)
             }
-            entry<OrderCallYouNavKey> {
-                OrderCallYouEntry()
+            entry<OrderCallYouNavKey> { key ->
+                OrderCallYouEntry(key)
             }
-            entry<OrderQuestionNavKey> {
-                OrderQuestionEntry()
+            entry<OrderQuestionNavKey> { key ->
+                OrderQuestionEntry(key)
             }
-            entry<OrderRecipientNavKey> {
-                OrderRecipientEntry()
+            entry<OrderRecipientNavKey> { key ->
+                OrderRecipientEntry(key)
             }
-            entry<PaymentMethodNavKey> {
-                PaymentMethodEntry()
+            entry<PaymentMethodNavKey> { key ->
+                PaymentMethodEntry(key)
             }
-            entry<PreOrderNavKey> {
-                PreOrderEntry()
+            entry<PreOrderNavKey> { key ->
+                PreOrderEntry(key)
             }
-            entry<ProductAnalogsNavKey> {
-                ProductAnalogsEntry()
+            entry<ProductAnalogsNavKey> { key ->
+                ProductAnalogsEntry(key)
             }
-            entry<ProductCatalogNavKey> {
-                ProductCatalogEntry()
+            entry<ProductCatalogNavKey> { key ->
+                ProductCatalogEntry(key)
             }
-            entry<ProductCommentsNavKey> {
-                ProductCommentsEntry()
+            entry<ProductCommentsNavKey> { key ->
+                ProductCommentsEntry(key)
             }
-            entry<ProductDetailsNavKey> {
-                ProductDetailsEntry()
+            entry<ProductDetailsNavKey> { key ->
+                ProductDetailsEntry(key)
             }
-            entry<DetailMediaNavKey> {
-                DetailMediaEntry()
+            entry<DetailMediaNavKey> { key ->
+                DetailMediaEntry(key)
             }
-            entry<ProductFiltersNavKey> {
-                ProductFiltersEntry()
+            entry<ProductFiltersNavKey> { key ->
+                ProductFiltersEntry(key)
             }
             entry<ProfileNavKey> {
                 ProfileEntry(profileFlowViewModel)
@@ -379,17 +384,17 @@ fun BottmNav(
             entry<WaterAppNavKey> {
                 WaterAppEntry()
             }
-            entry<PromotionDetailsNavKey> {
-                PromotionDetailsEntry()
+            entry<PromotionDetailsNavKey> { key ->
+                PromotionDetailsEntry(key)
             }
             entry<QuestionnairesNavKey> {
                 QuestionnairesEntry()
             }
-            entry<SearchNavKey> {
-                SearchEntry()
+            entry<SearchNavKey> { key ->
+                SearchEntry(key)
             }
-            entry<WebViewNavKey> {
-                WebViewEntry()
+            entry<WebViewNavKey> { key ->
+                WebViewEntry(key)
             }
             entry<QrCodeNavKey> {
                 QrCodeEntry()
@@ -397,20 +402,20 @@ fun BottmNav(
             entry<SpeechDialogNavKey> {
                 SpeechDialogEntry()
             }
-            entry<ServiceOrderNavKey> {
-                ServiceOrderEntry()
+            entry<ServiceOrderNavKey> { key ->
+                ServiceOrderEntry(key)
             }
-            entry<StoriesNavKey> {
-                StoriesEntry()
+            entry<StoriesNavKey> { key ->
+                StoriesEntry(key)
             }
-            entry<SubCategoriesNavKey> {
-                SubCategoriesEntry()
+            entry<SubCategoriesNavKey> { key ->
+                SubCategoriesEntry(key)
             }
             entry<WaitFeedbackProductsNavKey> {
                 WaitFeedbackProductsEntry()
             }
-            entry<WriteCommentNavKey> {
-                WriteCommentEntry()
+            entry<WriteCommentNavKey> { key ->
+                WriteCommentEntry(key)
             }
             entry<WriteMessageNavKey> {
                 WriteMessageEntry()
@@ -418,7 +423,9 @@ fun BottmNav(
         }
         CompositionLocalProvider(LocalNavigator provides navigator) {
             NavDisplay(
-                modifier = Modifier.padding(paddingValues),
+                modifier = Modifier
+                    .padding(paddingValues)
+                    .consumeWindowInsets(paddingValues),
                 entries = navigationState.toEntries(entryProvider),
                 onBack = { navigator.goBack() },
                 sceneStrategy = SinglePaneSceneStrategy()
@@ -548,7 +555,11 @@ class Navigator(val state: NavigationState) {
             ?.let(::entryOf)
             ?: error("No back stack entry for destinationId=$destinationId")
 
-    fun navigate(resId: Int, args: android.os.Bundle? = null, navOptions: androidx.navigation.NavOptions? = null) {
+    fun navigate(
+        resId: Int,
+        args: android.os.Bundle? = null,
+        navOptions: androidx.navigation.NavOptions? = null
+    ) {
         navController.navigate(resId, args, navOptions)
     }
 

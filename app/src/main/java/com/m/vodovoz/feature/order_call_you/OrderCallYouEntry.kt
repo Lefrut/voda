@@ -5,12 +5,16 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.LifecycleStartEffect
 import com.m.vodovoz.core.navigation.NavigationEntry
+import com.m.vodovoz.feature.order_call_you.api.OrderCallYouNavKey
 import com.m.vodovoz.feature.order_call_you.model.OrderCallYouEvent
 import com.m.vodovoz.ui.mvi.collectAsState
 import com.m.vodovoz.ui.mvi.collectEvents
 
 @Composable
-fun OrderCallYouEntry() = NavigationEntry<OrderCallYouViewModel> {
+fun OrderCallYouEntry(navKey: OrderCallYouNavKey? = null) =
+    NavigationEntry<OrderCallYouViewModel, OrderCallYouViewModel.Factory>(
+        creationCallback = { factory -> factory.create(navKey) }
+    ) {
     val viewState by viewModel.collectAsState()
 
     LifecycleStartEffect(Unit) {
