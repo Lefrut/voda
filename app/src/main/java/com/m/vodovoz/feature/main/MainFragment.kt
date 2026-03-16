@@ -8,8 +8,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.animation.AccelerateInterpolator
-import android.view.animation.LinearInterpolator
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -24,13 +22,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
-import androidx.core.graphics.Insets
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.WindowInsetsCompat.CONSUMED
-import androidx.core.view.WindowInsetsCompat.Type
-import androidx.core.view.WindowInsetsCompat.Type.InsetsType
-import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
@@ -38,7 +29,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import androidx.navigation.Navigation
 import androidx.navigationevent.compose.LocalNavigationEventDispatcherOwner
 import androidx.navigationevent.compose.rememberNavigationEventDispatcherOwner
 import com.google.android.material.snackbar.Snackbar
@@ -49,8 +39,6 @@ import com.m.vodovoz.common.update.AppUpdateController
 import com.m.vodovoz.core.android.locationPermissionGranted
 import com.m.vodovoz.core.android.locationPermissions
 import com.m.vodovoz.core.android.notificationPermissionGranted
-import com.m.vodovoz.core.navigation.setupWithNavController
-import com.m.vodovoz.databinding.FragmentMainBinding
 import com.m.vodovoz.design_system.VodovozTheme
 import com.m.vodovoz.design_system.composables.snackbar.VodovozSnackbarHost
 import com.m.vodovoz.feature.cart.CartFlowViewModel
@@ -58,16 +46,8 @@ import com.m.vodovoz.feature.catalog.CatalogFlowViewModel
 import com.m.vodovoz.feature.favorite.FavoriteFlowViewModel
 import com.m.vodovoz.feature.home.HomeFlowViewModel
 import com.m.vodovoz.feature.profile.ProfileFlowViewModel
-import com.m.vodovoz.ui.insets.InsetsPadding
 import com.m.vodovoz.ui.insets.InsetsVisibilityState
-import com.m.vodovoz.ui.insets.consumeWindowInsets
-import com.m.vodovoz.ui.insets.ime.handleImeInsetIfNeeded
-import com.m.vodovoz.ui.insets.ime.removeImeHandling
-import com.m.vodovoz.ui.insets.plus
-import com.m.vodovoz.ui.insets.toInsetsPadding
-import com.m.vodovoz.ui.insets.updatePadding
 import com.m.vodovoz.ui.snackbar.SnackbarHostStateOwner
-import com.m.vodovoz.util.extensions.doWhenAttached
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
@@ -210,7 +190,8 @@ class MainFragment : Fragment(), SnackbarHostStateOwner {
                                 catalogFlowViewModel = catalogFlowViewModel,
                                 favoriteFlowViewModel = favoriteFlowViewModel,
                                 profileFlowViewModel = profileFlowViewModel,
-                                cartFlowViewModel = cartFlowViewModel
+                                cartFlowViewModel = cartFlowViewModel,
+                                tabManager = tabManager
                             )
                             VodovozSnackbarHost(
                                 modifier = Modifier
@@ -235,7 +216,7 @@ class MainFragment : Fragment(), SnackbarHostStateOwner {
 
     private fun observeTabVisibility() = lifecycleScope.launch {
         repeatOnLifecycle(Lifecycle.State.STARTED) {
-            tabManager.observeTabVisibility().collect { isVisible ->
+            tabManager.observeShowBottomBar().collect { isVisible ->
 //                val bottomNavigationView = binding.nvNavigation
 //                if (isVisible) {
 //                    bottomNavigationView.apply {

@@ -38,6 +38,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraph
 import androidx.navigation.findNavController
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.rememberDecoratedNavEntries
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
@@ -46,6 +47,7 @@ import androidx.navigation3.ui.NavDisplay
 import com.m.vodovoz.common.webview.WebViewEntry
 import com.m.vodovoz.common.webview.api.WebViewNavKey
 import com.m.vodovoz.R
+import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.core.navigation.LegacyDestinationNavKey
 import com.m.vodovoz.core.navigation.LocalNavigator
 import com.m.vodovoz.design_system.VodovozTheme
@@ -182,7 +184,8 @@ fun BottmNav(
     catalogFlowViewModel: CatalogFlowViewModel,
     favoriteFlowViewModel: FavoriteFlowViewModel,
     profileFlowViewModel: ProfileFlowViewModel,
-    cartFlowViewModel: CartFlowViewModel
+    cartFlowViewModel: CartFlowViewModel,
+    tabManager: TabManager
 ) {
 
     val navigationState = rememberNavigationState(
@@ -190,6 +193,10 @@ fun BottmNav(
         topLevelKeys = BottomNavKey.values
     )
     val navigator = remember { Navigator(navigationState) }
+
+    val showBottomBar by tabManager.observeShowBottomBar().collectAsStateWithLifecycle()
+
+
     SideEffect {
         AppNavigatorStore.navigator = navigator
     }
@@ -201,20 +208,22 @@ fun BottmNav(
             .systemBarsPadding()
             .consumeWindowInsets(WindowInsets.systemBars),
         bottomBar = {
-            NavigationBar {
-                BottomNavKey.values.forEach { key ->
-                    NavigationBarItem(
-                        selected = key == navigationState.currentKey,
-                        label = {
-                            Text(text = key.title)
-                        },
-                        icon = {
+            if (showBottomBar) {
+                NavigationBar {
+                    BottomNavKey.values.forEach { key ->
+                        NavigationBarItem(
+                            selected = key == navigationState.currentKey,
+                            label = {
+                                Text(text = key.title)
+                            },
+                            icon = {
 
-                        },
-                        onClick = {
-                            navigator.navigate(key)
-                        }
-                    )
+                            },
+                            onClick = {
+                                navigator.navigate(key)
+                            }
+                        )
+                    }
                 }
             }
         },

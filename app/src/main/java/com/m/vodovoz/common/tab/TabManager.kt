@@ -2,7 +2,6 @@ package com.m.vodovoz.common.tab
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
-import com.google.android.material.tabs.TabLayout
 import com.m.vodovoz.R
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
 import kotlinx.coroutines.CoroutineScope
@@ -39,8 +38,8 @@ class TabManager @Inject constructor(
     private val tabAuthRedirectListener = MutableStateFlow<Int>(DEFAULT_AUTH_REDIRECT)
     fun fetchAuthRedirect() = tabAuthRedirectListener.value
 
-    private val tabVisibilityListener = MutableStateFlow(true)
-    fun observeTabVisibility() = tabVisibilityListener.asStateFlow()
+    private val showBottomBar = MutableStateFlow(true)
+    fun observeShowBottomBar() = showBottomBar.asStateFlow()
 
     fun setAuthRedirect(graphId: Int) {
         tabAuthRedirectListener.value = graphId
@@ -72,7 +71,7 @@ class TabManager @Inject constructor(
 
 
     fun changeTabVisibility(vis: Boolean) {
-        tabVisibilityListener.value = vis
+        showBottomBar.value = vis
     }
 
     fun clearBottomNavCartState() {
