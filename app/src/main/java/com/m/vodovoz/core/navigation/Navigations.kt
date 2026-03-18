@@ -30,7 +30,7 @@ import com.m.vodovoz.feature.product_catalog.ProductCatalogFragment
 import java.time.LocalDate
 
 const val GIFT_STATE_KEY = "gift"
-const val PRE_ORDER_PRODUCT_ID_STATE_KEY = "preOrderProductId"
+const val PRE_ORDER_PRODUCTS_STATE_KEY = "preOrderProducts"
 
 fun View.findRootNavController(): NavController? {
     return generateSequence(this) { view ->

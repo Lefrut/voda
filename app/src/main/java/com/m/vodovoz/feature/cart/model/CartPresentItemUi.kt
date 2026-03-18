@@ -17,6 +17,8 @@ data class CartPresentItemUi(
     val price: String?,
     val oldPrice: String?,
     override val forAdults: ForAdultsUi?,
+    override val cartLoading: Boolean = false,
+    override val cartQuantity: Int = 0,
 ) : Parcelable, VodovozItemUi<CartPresentItemUi>() {
     companion object {
         val Empty = CartPresentItemUi(-1, "", "", "", "", null)
@@ -29,7 +31,11 @@ data class CartPresentItemUi(
         cartQuantity: Int,
         items: List<VodovozItemUi<*>>,
     ): CartPresentItemUi {
-        return copy(forAdults = forAdults)
+        return copy(
+            forAdults = forAdults,
+            cartLoading = cartLoading,
+            cartQuantity = cartQuantity
+        )
     }
 }
 

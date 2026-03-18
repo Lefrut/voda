@@ -89,8 +89,11 @@ class CartFlowViewModel @Inject constructor(
             val preOrderProductsPopupWindow = cartDetails.preOrderProductsPopupWindow?.toUi()
 
             updateState { s ->
-                val selectedPreOrderProductId = s.selectedPreOrderProductId
-                    ?.takeIf { selectedId -> cartItems.any { cartItem -> cartItem.id == selectedId } }
+                val selectedPreOrderProducts = if (preOrderProductsPopupWindow?.items.isNullOrEmpty()) {
+                    emptyList()
+                } else {
+                    s.selectedPreOrderProducts
+                }
 
                 s.copy(
                     title = cartDetails.title,
@@ -103,7 +106,7 @@ class CartFlowViewModel @Inject constructor(
                     presentButton = cartDetails.presentButton?.toUi(),
                     uiState = CartUiState.Cart,
                     orderSummary = cartDetails.orderSummary.mapToUi(),
-                    selectedPreOrderProductId = selectedPreOrderProductId,
+                    selectedPreOrderProducts = selectedPreOrderProducts,
                     promoCode = s.promoCode.ifEmpty { promoButton?.popupWindow?.value.orEmpty() }
                 )
             }
@@ -131,7 +134,7 @@ class CartFlowViewModel @Inject constructor(
                     ) to stateSnapshot.copy(
                         items2 = items2,
                         preOrderProductsPopupWindow = null,
-                        selectedPreOrderProductId = null
+                        selectedPreOrderProducts = emptyList()
                     )
                 }
 
@@ -206,7 +209,7 @@ class CartFlowViewModel @Inject constructor(
             s.copy(
                 lockCart = true,
                 showClearCartDialog = false,
-                selectedPreOrderProductId = null
+                selectedPreOrderProducts = emptyList()
             )
         }
         val clearCartResult = vodovozServiceRepository.clearCart().singleResult()
@@ -257,11 +260,6 @@ class CartFlowViewModel @Inject constructor(
     }
 
     private suspend fun changeCartQuantity(id: Long, quantity: Int) {
-        if (quantity <= 0 && stateSnapshot.selectedPreOrderProductId == id) {
-            updateState { state ->
-                state.copy(selectedPreOrderProductId = null)
-            }
-        }
         setSensitiveButtonsAvailability(false)
         cartManager.change(id, quantity)
     }
@@ -326,9 +324,7 @@ class CartFlowViewModel @Inject constructor(
             s.copy(
                 lockCart = true,
                 showRemoveItemDialog = false,
-                currentRemoveItem = null,
-                selectedPreOrderProductId = s.selectedPreOrderProductId
-                    ?.takeUnless { it == currentRemoveItem.id }
+                currentRemoveItem = null
             )
         }
 
@@ -420,9 +416,9 @@ class CartFlowViewModel @Inject constructor(
 
     }
 
-    fun onPreOrderProductSelected(productId: Long) {
+    fun onPreOrderProductsSelected(products: List<CartPresentItemUi>) {
         updateState { state ->
-            state.copy(selectedPreOrderProductId = productId)
+            state.copy(selectedPreOrderProducts = products)
         }
     }
 
@@ -449,7 +445,7 @@ class CartFlowViewModel @Inject constructor(
             val canShowPreOrderProducts =
                 popupWindow != null
                         && popupWindow.items.isNotEmpty()
-                        && stateSnapshot.selectedPreOrderProductId == null
+                        && !stateSnapshot.hasAddedPreOrderProducts()
 
             if (canShowPreOrderProducts) {
                 sendEvent(
@@ -504,7 +500,7 @@ class CartFlowViewModel @Inject constructor(
         val orderSummary: List<OrderSummaryItemUi> = emptyList(),
         val showPromotionCodeBottomSheet: Boolean = false,
         val lockOrderButton: Boolean = false,
-        val selectedPreOrderProductId: Long? = null,
+        val selectedPreOrderProducts: List<CartPresentItemUi> = emptyList(),
         val promoCode: String = "",
         val additionalProductsBS: AdditionalProductsBSUi? = null,
         val showAdditionalProductsBS: Boolean = false,
@@ -535,6 +531,15 @@ class CartFlowViewModel @Inject constructor(
                     )
                 } else uiState
             )
+        }
+
+        fun hasAddedPreOrderProducts(): Boolean {
+            val trackedIds = selectedPreOrderProducts
+                .map { product -> product.id }
+                .toSet()
+            return trackedIds.isNotEmpty() && items1.any { cartItem ->
+                cartItem.id in trackedIds && cartItem.cartQuantity > 0
+            }
         }
 
     }

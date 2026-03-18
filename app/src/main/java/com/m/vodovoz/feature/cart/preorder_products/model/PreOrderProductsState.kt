@@ -10,7 +10,7 @@ import com.m.vodovoz.ui.paging.ItemsState
 @Immutable
 data class PreOrderProductsState(
     val title: String = "",
-    val description: String = "",
+    val purchase: Boolean = false,
     val button: ColorfulButtonUi = ColorfulButtonUi.Empty,
     override val items: List<CartPresentItemUi> = emptyList(),
     val currentProduct: CartPresentItemUi? = null,

@@ -29,7 +29,7 @@ import com.m.vodovoz.R
 import com.m.vodovoz.common.account.AccountManager
 import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.core.navigation.GIFT_STATE_KEY
-import com.m.vodovoz.core.navigation.PRE_ORDER_PRODUCT_ID_STATE_KEY
+import com.m.vodovoz.core.navigation.PRE_ORDER_PRODUCTS_STATE_KEY
 import com.m.vodovoz.core.navigation.navigateToAllBottles
 import com.m.vodovoz.core.navigation.navigateToGifts
 import com.m.vodovoz.core.navigation.navigateToOrdering
@@ -71,11 +71,12 @@ class CartFragment : Fragment() {
                 viewModel.addGiftToCart(gift)
             }
 
+
         findNavController().currentBackStackEntry
             ?.savedStateHandle
-            ?.remove<Long>(PRE_ORDER_PRODUCT_ID_STATE_KEY)
+            ?.remove<ArrayList<CartPresentItemUi>>(PRE_ORDER_PRODUCTS_STATE_KEY)
             ?.let {
-                viewModel.onPreOrderProductSelected(it)
+                viewModel.onPreOrderProductsSelected(it)
             }
     }
 

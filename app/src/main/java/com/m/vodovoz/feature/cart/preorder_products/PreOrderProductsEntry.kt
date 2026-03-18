@@ -5,7 +5,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.res.stringResource
 import com.m.vodovoz.R
 import com.m.vodovoz.core.navigation.NavigationEntry
-import com.m.vodovoz.core.navigation.PRE_ORDER_PRODUCT_ID_STATE_KEY
+import com.m.vodovoz.core.navigation.PRE_ORDER_PRODUCTS_STATE_KEY
 import com.m.vodovoz.core.navigation.navigateToOrdering
 import com.m.vodovoz.design_system.composables.dialogs.VodovozDialog
 import com.m.vodovoz.design_system.effects.LifecycleEffect
@@ -53,8 +53,8 @@ fun PreOrderProductsEntry() = NavigationEntry<PreOrderProductsViewModel> {
 
                 is PreOrderProductsEvent.GoToCart -> {
                     navController.previousBackStackEntry?.savedStateHandle?.set(
-                        PRE_ORDER_PRODUCT_ID_STATE_KEY,
-                        event.productId
+                        PRE_ORDER_PRODUCTS_STATE_KEY,
+                        ArrayList(event.products)
                     )
                     navController.popBackStack(R.id.cartFragment, false)
                 }

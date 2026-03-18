@@ -12,6 +12,7 @@ import com.m.vodovoz.common.model.DataAllAction
 import com.m.vodovoz.common.model.GlobalAppLinks
 import com.m.vodovoz.common.model.VodovozAction
 import com.m.vodovoz.common.tab.TabManager
+import com.m.vodovoz.core.analytics.Analytics
 import com.m.vodovoz.core.network.VodovozWebConfig
 import com.m.vodovoz.util.extensions.openUrl
 
@@ -52,6 +53,7 @@ fun BaseVodovozAction.activate(
         }
 
         DataAllAction.WaterTracker -> {
+            Analytics.reportEvent("trekervodi_catalog")
             navController.navigateToWaterApp()
         }
 
@@ -174,6 +176,5 @@ inline fun <reified T : DataAllAction> createDataAllActivator(
 ): DataAllActionActivator {
     return DataAllActionActivator(action = action, activate = { activate(action) })
 }
-
 
 

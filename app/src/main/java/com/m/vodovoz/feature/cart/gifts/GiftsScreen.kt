@@ -11,9 +11,10 @@ fun GiftsScreen(viewModel: GiftsViewModel, viewState: GiftsState) {
     SelectableProductsScreen(
         title = stringResource(id = R.string.choose_present),
         items = viewState.items,
-        selectedItem = viewState.currentGift,
+        selectedItems = listOf(viewState.currentGift),
         button = viewState.button,
         present = viewState.present?.popupWindow?.present,
+        purchase = false,
         onBackClick = viewModel::navigateBack,
         onItemClick = viewModel::selectGift,
         onImageClick = { gift -> viewModel.showPreviewImageDialog(gift.image) },

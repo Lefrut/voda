@@ -3,12 +3,14 @@ package com.m.vodovoz.feature.cart.composables
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ButtonDefaults
@@ -26,26 +28,33 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import com.m.vodovoz.R
 import com.m.vodovoz.design_system.ExtendedTheme
 import com.m.vodovoz.design_system.composables.blur.VodovozBlur
+import com.m.vodovoz.design_system.composables.button.QuantityButtonSmall
 import com.m.vodovoz.design_system.composables.button.VodovozButton
+import com.m.vodovoz.design_system.composables.button.VodovozButtonSmall
 import com.m.vodovoz.design_system.composables.button.VodovozRadioButton
 import com.m.vodovoz.design_system.composables.top_bar.VodovozTopBar
 import com.m.vodovoz.design_system.model.ColorfulButtonUi
 import com.m.vodovoz.feature.cart.model.CartPresentItemUi
 import com.m.vodovoz.feature.cart.model.CartPresentUi
+import androidx.compose.ui.res.stringResource
 
 @Composable
 fun SelectableProductsScreen(
     title: String,
     items: List<CartPresentItemUi>,
-    selectedItem: CartPresentItemUi?,
+    selectedItems: List<CartPresentItemUi>,
     button: ColorfulButtonUi,
     present: CartPresentUi?,
+    purchase: Boolean = false,
     showIndicator: Boolean = true,
     onBackClick: () -> Unit,
     onItemClick: (CartPresentItemUi) -> Unit,
     onImageClick: (CartPresentItemUi) -> Unit,
+    onIncrementClick: (CartPresentItemUi) -> Unit = {},
+    onDecrementClick: (CartPresentItemUi) -> Unit = {},
     onButtonClick: () -> Unit,
 ) {
     Column(
@@ -78,9 +87,12 @@ fun SelectableProductsScreen(
                     Column {
                         SelectableProductItem(
                             item = item,
-                            selected = selectedItem?.id == item.id,
+                            purchase = purchase,
+                            selected = selectedItems.any { selectedItem -> selectedItem.id == item.id },
                             onClick = onItemClick,
-                            onImageClick = onImageClick
+                            onImageClick = onImageClick,
+                            onIncrementClick = onIncrementClick,
+                            onDecrementClick = onDecrementClick
                         )
 
                         if (items.lastIndex != index) {
@@ -112,17 +124,26 @@ fun SelectableProductsScreen(
 private fun SelectableProductItem(
     modifier: Modifier = Modifier,
     item: CartPresentItemUi,
+    purchase: Boolean,
     selected: Boolean,
     onClick: (CartPresentItemUi) -> Unit,
     onImageClick: (CartPresentItemUi) -> Unit,
+    onIncrementClick: (CartPresentItemUi) -> Unit,
+    onDecrementClick: (CartPresentItemUi) -> Unit,
 ) {
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .clickable(
-                onClick = { onClick(item) },
-                interactionSource = null,
-                indication = null
+            .then(
+                if (purchase) {
+                    Modifier
+                } else {
+                    Modifier.clickable(
+                        onClick = { onClick(item) },
+                        interactionSource = null,
+                        indication = null
+                    )
+                }
             )
             .padding(horizontal = 16.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -180,6 +201,24 @@ private fun SelectableProductItem(
             }
         }
 
-        VodovozRadioButton(selected = selected, onClick = { onClick(item) })
+        if (purchase) {
+            Box(modifier = Modifier.width(120.dp), contentAlignment = Alignment.Center) {
+                if (item.cartQuantity > 0) {
+                    QuantityButtonSmall(
+                        isLoading = item.cartLoading,
+                        quantity = item.cartQuantity,
+                        onPlus = { onIncrementClick(item) },
+                        onMinus = { onDecrementClick(item) }
+                    )
+                } else {
+                    VodovozButtonSmall(
+                        text = stringResource(id = R.string.to_cart),
+                        onClick = { onIncrementClick(item) },
+                    )
+                }
+            }
+        } else {
+            VodovozRadioButton(selected = selected, onClick = { onClick(item) })
+        }
     }
 }
