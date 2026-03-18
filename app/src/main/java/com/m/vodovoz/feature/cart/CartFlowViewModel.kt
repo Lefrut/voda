@@ -36,7 +36,6 @@ import com.m.vodovoz.ui.paging.PagingState2
 import com.m.vodovoz.ui.paging.emptyCombinedLoadStates
 import com.m.vodovoz.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
@@ -204,7 +203,11 @@ class CartFlowViewModel @Inject constructor(
 
     fun clearCart() = viewModelScope.launch {
         updateState { s ->
-            s.copy(lockCart = true, showClearCartDialog = false)
+            s.copy(
+                lockCart = true,
+                showClearCartDialog = false,
+                selectedPreOrderProductId = null
+            )
         }
         val clearCartResult = vodovozServiceRepository.clearCart().singleResult()
 
@@ -254,6 +257,11 @@ class CartFlowViewModel @Inject constructor(
     }
 
     private suspend fun changeCartQuantity(id: Long, quantity: Int) {
+        if (quantity <= 0 && stateSnapshot.selectedPreOrderProductId == id) {
+            updateState { state ->
+                state.copy(selectedPreOrderProductId = null)
+            }
+        }
         setSensitiveButtonsAvailability(false)
         cartManager.change(id, quantity)
     }
@@ -318,7 +326,9 @@ class CartFlowViewModel @Inject constructor(
             s.copy(
                 lockCart = true,
                 showRemoveItemDialog = false,
-                currentRemoveItem = null
+                currentRemoveItem = null,
+                selectedPreOrderProductId = s.selectedPreOrderProductId
+                    ?.takeUnless { it == currentRemoveItem.id }
             )
         }
 

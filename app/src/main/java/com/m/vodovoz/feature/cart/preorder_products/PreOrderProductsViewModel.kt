@@ -35,7 +35,6 @@ class PreOrderProductsViewModel @Inject constructor(
     private val popupWindow: CartPresentPopupWindowUi? =
         savedStateHandle.get<CartPresentPopupWindowUi>("popupWindow")
 
-    //todo
     private val coupon: String = savedStateHandle.get<String>("coupon").orEmpty()
 
     init {
@@ -51,7 +50,7 @@ class PreOrderProductsViewModel @Inject constructor(
         updateState { state ->
             with(popupWindow) {
                 state.copy(
-                    title = present?.title.orEmpty(),
+                    title = title,
                     description = description,
                     button = button,
                     items = items,
