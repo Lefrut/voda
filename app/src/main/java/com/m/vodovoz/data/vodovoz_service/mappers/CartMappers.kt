@@ -41,6 +41,7 @@ fun CartDetailsDTO.toDomain(): CartDetailsModel {
         items = KORZINA?.mapToDomain()
             ?: throw IllegalArgumentException("Cart items can't be null"),
         present = PODAROK?.toDomain(),
+        preOrderProductsPopupWindow = PODAROK_OFORMLENIE?.toDomain(),
         bottlesButton = KNOPKI?.BYTYLI?.toDomain(),
         promotionalCodeButton = KNOPKI?.PROMOKOD?.toDomain(),
         presentButton = KNOPKI?.PODARKI?.toDomain(),
@@ -120,6 +121,8 @@ fun PODAROK_DTO.toDomain(): CartPresentModel {
 
 fun OKNO_PODAROK_DTO.toDomain(): CartPresentPopupWindowModel {
     return CartPresentPopupWindowModel(
+        title = TITLE.orEmpty(),
+        description = OPIS.orEmpty(),
         items = PODAROK?.mapToDomain() ?: emptyList(),
         button = KNOPKA?.toDomain() ?: ColorfulButtonModel.Empty,
         present = PODAROK_BANNER?.toDomain()

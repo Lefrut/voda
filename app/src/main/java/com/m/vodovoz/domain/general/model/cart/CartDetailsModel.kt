@@ -6,6 +6,7 @@ data class CartDetailsModel(
     val items: List<CartItemModel>,
     val orderSummary: List<OrderSummaryItemModel>,
     val present: CartPresentModel?,
+    val preOrderProductsPopupWindow: CartPresentPopupWindowModel?,
     val bottlesButton: CartButtonModel?,
     val promotionalCodeButton: CartPromoButtonModel?,
     val presentButton: CartButtonModel?,

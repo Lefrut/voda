@@ -36,6 +36,7 @@ import com.m.vodovoz.ui.paging.PagingState2
 import com.m.vodovoz.ui.paging.emptyCombinedLoadStates
 import com.m.vodovoz.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
@@ -86,18 +87,24 @@ class CartFlowViewModel @Inject constructor(
         cartDetailsResult.onSuccess { cartDetails ->
             val cartItems = cartDetails.items.mapToUi()
             val promoButton = cartDetails.promotionalCodeButton?.toUi()
+            val preOrderProductsPopupWindow = cartDetails.preOrderProductsPopupWindow?.toUi()
 
             updateState { s ->
+                val selectedPreOrderProductId = s.selectedPreOrderProductId
+                    ?.takeIf { selectedId -> cartItems.any { cartItem -> cartItem.id == selectedId } }
+
                 s.copy(
                     title = cartDetails.title,
                     countText = cartDetails.countText,
                     items1 = cartDetails.items.mapToUi(),
                     present = cartDetails.present?.toUi(),
+                    preOrderProductsPopupWindow = preOrderProductsPopupWindow,
                     bottlesButton = cartDetails.bottlesButton?.toUi(),
                     promotionalCodeButton = promoButton,
                     presentButton = cartDetails.presentButton?.toUi(),
                     uiState = CartUiState.Cart,
                     orderSummary = cartDetails.orderSummary.mapToUi(),
+                    selectedPreOrderProductId = selectedPreOrderProductId,
                     promoCode = s.promoCode.ifEmpty { promoButton?.popupWindow?.value.orEmpty() }
                 )
             }
@@ -122,7 +129,11 @@ class CartFlowViewModel @Inject constructor(
 
                     CartUiState.Empty(
                         placeholder = placeholder
-                    ) to stateSnapshot.copy(items2 = items2)
+                    ) to stateSnapshot.copy(
+                        items2 = items2,
+                        preOrderProductsPopupWindow = null,
+                        selectedPreOrderProductId = null
+                    )
                 }
 
                 else -> {
@@ -399,6 +410,12 @@ class CartFlowViewModel @Inject constructor(
 
     }
 
+    fun onPreOrderProductSelected(productId: Long) {
+        updateState { state ->
+            state.copy(selectedPreOrderProductId = productId)
+        }
+    }
+
     fun navigateToAllBottles() = viewModelScope.launch {
         val bottles = stateSnapshot.items1.filter { item ->
             listOf(
@@ -418,7 +435,22 @@ class CartFlowViewModel @Inject constructor(
 
     fun navigateToOrder() = viewModelScope.launch {
         if (accountManager.fetchAccountId() != null) {
-            sendEvent(CartEvents.GoToOrder(stateSnapshot.promoCode))
+            val popupWindow = stateSnapshot.preOrderProductsPopupWindow
+            val canShowPreOrderProducts =
+                popupWindow != null
+                        && popupWindow.items.isNotEmpty()
+                        && stateSnapshot.selectedPreOrderProductId == null
+
+            if (canShowPreOrderProducts) {
+                sendEvent(
+                    CartEvents.GoToPreOrderProducts(
+                        popupWindow = popupWindow,
+                        coupon = stateSnapshot.promoCode
+                    )
+                )
+            } else {
+                sendEvent(CartEvents.GoToOrder(stateSnapshot.promoCode))
+            }
         } else {
             sendEvent(CartEvents.GoToProfile)
         }
@@ -441,6 +473,7 @@ class CartFlowViewModel @Inject constructor(
         closePromoCodeBottomSheet()
     }
 
+
     @Immutable
     data class CartState(
         val title: String = "",
@@ -449,6 +482,7 @@ class CartFlowViewModel @Inject constructor(
         override val items2: List<ProductUi> = emptyList(),
         val uiState: CartUiState = CartUiState.Loading,
         val present: CartPresentUi? = null,
+        val preOrderProductsPopupWindow: CartPresentPopupWindowUi? = null,
         val bottlesButton: CartButtonUi? = null,
         val promotionalCodeButton: CartPromoButtonUi? = null,
         val presentButton: CartButtonUi? = null,
@@ -460,6 +494,7 @@ class CartFlowViewModel @Inject constructor(
         val orderSummary: List<OrderSummaryItemUi> = emptyList(),
         val showPromotionCodeBottomSheet: Boolean = false,
         val lockOrderButton: Boolean = false,
+        val selectedPreOrderProductId: Long? = null,
         val promoCode: String = "",
         val additionalProductsBS: AdditionalProductsBSUi? = null,
         val showAdditionalProductsBS: Boolean = false,
@@ -520,6 +555,11 @@ class CartFlowViewModel @Inject constructor(
         data class GoToGifts(
             val present: CartPresentUi? = null,
             val popupWindow: CartPresentPopupWindowUi,
+        ) : CartEvents()
+
+        data class GoToPreOrderProducts(
+            val popupWindow: CartPresentPopupWindowUi,
+            val coupon: String,
         ) : CartEvents()
 
         data object GoToProfile : CartEvents()

@@ -4,6 +4,11 @@
     android:id="@+id/graph_profile"
     app:startDestination="@id/profileFragment">
 
+    <fragment
+        android:id="@+id/preOrderProductsFragment"
+        android:name="com.m.vodovoz.feature.cart.preorder_products.PreOrderProductsFragment"
+        android:label="PreOrderProductsFragment"/>
+
 
     <fragment
         android:id="@+id/writeMessageFragment"

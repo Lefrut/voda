@@ -29,6 +29,9 @@ import com.m.vodovoz.feature.map.model.MapAddressUi
 import com.m.vodovoz.feature.product_catalog.ProductCatalogFragment
 import java.time.LocalDate
 
+const val GIFT_STATE_KEY = "gift"
+const val PRE_ORDER_PRODUCT_ID_STATE_KEY = "preOrderProductId"
+
 fun View.findRootNavController(): NavController? {
     return generateSequence(this) { view ->
         view.parent as? View?
@@ -244,6 +247,22 @@ fun NavController.navigateToGifts(
     navigate(
         R.id.giftsFragment,
         bundleOf("present" to present, "popupWindow" to popupWindow),
+        navOptions {
+            slideAnim()
+        }
+    )
+}
+
+fun NavController.navigateToPreOrderProducts(
+    popupWindow: CartPresentPopupWindowUi,
+    coupon: String,
+) {
+    navigate(
+        R.id.preOrderProductsFragment,
+        bundleOf(
+            "popupWindow" to popupWindow,
+            "coupon" to coupon
+        ),
         navOptions {
             slideAnim()
         }

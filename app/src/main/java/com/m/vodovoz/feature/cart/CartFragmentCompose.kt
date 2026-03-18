@@ -28,9 +28,12 @@ import androidx.navigation.fragment.findNavController
 import com.m.vodovoz.R
 import com.m.vodovoz.common.account.AccountManager
 import com.m.vodovoz.common.tab.TabManager
+import com.m.vodovoz.core.navigation.GIFT_STATE_KEY
+import com.m.vodovoz.core.navigation.PRE_ORDER_PRODUCT_ID_STATE_KEY
 import com.m.vodovoz.core.navigation.navigateToAllBottles
 import com.m.vodovoz.core.navigation.navigateToGifts
 import com.m.vodovoz.core.navigation.navigateToOrdering
+import com.m.vodovoz.core.navigation.navigateToPreOrderProducts
 import com.m.vodovoz.core.navigation.navigateToProductAnalogs
 import com.m.vodovoz.core.navigation.navigateToProductDetails
 import com.m.vodovoz.design_system.VodovozTheme
@@ -63,9 +66,16 @@ class CartFragment : Fragment() {
         super.onStart()
         findNavController().currentBackStackEntry
             ?.savedStateHandle
-            ?.remove<CartPresentItemUi>("gift")
+            ?.remove<CartPresentItemUi>(GIFT_STATE_KEY)
             ?.let { gift ->
                 viewModel.addGiftToCart(gift)
+            }
+
+        findNavController().currentBackStackEntry
+            ?.savedStateHandle
+            ?.remove<Long>(PRE_ORDER_PRODUCT_ID_STATE_KEY)
+            ?.let {
+                viewModel.onPreOrderProductSelected(it)
             }
     }
 
@@ -184,6 +194,13 @@ class CartFragment : Fragment() {
                         findNavController().navigateToGifts(
                             event.present,
                             event.popupWindow
+                        )
+                    }
+
+                    is CartFlowViewModel.CartEvents.GoToPreOrderProducts -> {
+                        findNavController().navigateToPreOrderProducts(
+                            popupWindow = event.popupWindow,
+                            coupon = event.coupon
                         )
                     }
 

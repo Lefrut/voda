@@ -12,6 +12,12 @@
         />
 
     <fragment
+        android:id="@+id/preOrderProductsFragment"
+        android:name="com.m.vodovoz.feature.cart.preorder_products.PreOrderProductsFragment"
+        android:label="PreOrderProductsFragment"/>
+
+
+    <fragment
         android:id="@+id/orderCallYouFragment"
         android:name="com.m.vodovoz.feature.order_call_you.OrderCallYouFragment"
         android:label="OrderCallYouFragment"

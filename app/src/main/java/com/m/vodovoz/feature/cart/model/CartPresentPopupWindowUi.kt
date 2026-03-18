@@ -8,13 +8,17 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class CartPresentPopupWindowUi(
+    val title: String,
+    val description: String,
     val items: List<CartPresentItemUi>,
     val button: ColorfulButtonUi,
     val present: CartPresentUi?
-): Parcelable
+) : Parcelable
 
-fun CartPresentPopupWindowModel.toUi(): CartPresentPopupWindowUi{
+fun CartPresentPopupWindowModel.toUi(): CartPresentPopupWindowUi {
     return CartPresentPopupWindowUi(
+        title = title,
+        description = description,
         items = items.mapToUi(),
         button = button.toUi(),
         present = present?.toUi()

@@ -8,6 +8,8 @@ import com.squareup.moshi.Json
 data class CartDetailsDTO(
     @Json(name = "PODAROK")
     val PODAROK: PODAROK_DTO?,
+    @Json(name = "PODAROK_OFORMLENIE")
+    val PODAROK_OFORMLENIE: OKNO_PODAROK_DTO?,
     @Json(name = "TITLE")
     val TITLE: String?,
     @Json(name = "COUNT")

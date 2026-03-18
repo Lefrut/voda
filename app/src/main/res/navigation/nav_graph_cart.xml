@@ -62,6 +62,11 @@
         android:label="GiftsFragment"/>
 
     <fragment
+        android:id="@+id/preOrderProductsFragment"
+        android:name="com.m.vodovoz.feature.cart.preorder_products.PreOrderProductsFragment"
+        android:label="PreOrderProductsFragment"/>
+
+    <fragment
         android:id="@+id/preOrderFragment"
         android:name="com.m.vodovoz.feature.preorder.PreOrderFragment"
         android:label="PreOrderFragment"/>

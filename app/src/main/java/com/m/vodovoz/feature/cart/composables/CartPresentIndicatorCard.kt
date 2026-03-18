@@ -1,5 +1,6 @@
 package com.m.vodovoz.feature.cart.composables
 
+import android.annotation.SuppressLint
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -46,8 +47,9 @@ import com.m.vodovoz.design_system.VodovozTheme
 import com.m.vodovoz.design_system.composables.button.VodovozButtonSmall
 import com.m.vodovoz.feature.cart.model.CartPresentUi
 
+@SuppressLint("UnusedBoxWithConstraintsScope")
 @Composable
-fun CartPresentCard(
+fun CartPresentIndicatorCard(
     modifier: Modifier = Modifier,
     present: CartPresentUi,
     onChoosePresentClick: () -> Unit,
@@ -140,8 +142,15 @@ fun CartPresentCard(
                         }
                     }
                 } else {
+                    val progressTarget = present.maxPresentPrice
+                        .takeIf { it > 0 }
+                        ?.let { maxPrice ->
+                            (present.currentPresentPrice.toFloat() / maxPrice).coerceIn(0f, 1f)
+                        }
+                        ?: 0f
+
                     val animatedProgress by animateFloatAsState(
-                        targetValue = present.currentPresentPrice.toFloat() / present.maxPresentPrice,
+                        targetValue = progressTarget,
                         label = "animated present progress",
                         animationSpec = tween(160)
                     )
@@ -209,7 +218,7 @@ fun CartPresentCard(
 
 @Preview
 @Composable
-private fun CartPresentCardPreview() {
+private fun CartPresentIndicatorCardPreview() {
     val cartPresent = CartPresentUi(
         id = 1,
         title = "123".repeat(10) ,
@@ -221,6 +230,6 @@ private fun CartPresentCardPreview() {
         popupWindow = null
     )
     VodovozTheme {
-        CartPresentCard(present = cartPresent) { }
+        CartPresentIndicatorCard(present = cartPresent) { }
     }
 }

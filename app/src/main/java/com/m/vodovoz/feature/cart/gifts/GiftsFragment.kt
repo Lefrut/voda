@@ -12,6 +12,7 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.m.vodovoz.R
 import com.m.vodovoz.common.tab.TabManager
+import com.m.vodovoz.core.navigation.GIFT_STATE_KEY
 import com.m.vodovoz.design_system.VodovozTheme
 import com.m.vodovoz.design_system.composables.dialogs.VodovozDialog
 import com.m.vodovoz.design_system.effects.LifecycleEffect
@@ -88,7 +89,7 @@ class GiftsFragment : Fragment() {
                                     val navController = findNavController()
 
                                     navController.previousBackStackEntry?.savedStateHandle?.set(
-                                        "gift", event.currentGift
+                                        GIFT_STATE_KEY, event.currentGift
                                     )
                                     navController.popBackStack()
                                 }
