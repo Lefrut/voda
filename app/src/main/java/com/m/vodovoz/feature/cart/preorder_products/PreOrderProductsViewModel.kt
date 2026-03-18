@@ -50,7 +50,7 @@ class PreOrderProductsViewModel @Inject constructor(
         updateState { state ->
             with(popupWindow) {
                 state.copy(
-                    title = title,
+                    title = present?.title.orEmpty(),
                     description = description,
                     button = button,
                     items = items,
