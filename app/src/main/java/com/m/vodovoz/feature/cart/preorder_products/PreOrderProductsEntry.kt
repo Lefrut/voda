@@ -1,5 +1,6 @@
 package com.m.vodovoz.feature.cart.preorder_products
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.res.stringResource
@@ -18,6 +19,10 @@ fun PreOrderProductsEntry() = NavigationEntry<PreOrderProductsViewModel> {
     val viewState by viewModel.collectAsState()
 
     PreOrderProductsScreen(viewModel = viewModel, viewState = viewState)
+
+    BackHandler {
+        viewModel.navigateBack()
+    }
 
     val previewImage = viewState.previewImage
     if (previewImage != null) {
@@ -47,19 +52,11 @@ fun PreOrderProductsEntry() = NavigationEntry<PreOrderProductsViewModel> {
     LifecycleEffect {
         viewModel.events.collect { event ->
             when (event) {
-                PreOrderProductsEvent.GoBack -> {
-                    navController.popBackStack()
-                }
-
-                is PreOrderProductsEvent.GoToCart -> {
+                is PreOrderProductsEvent.GoToOrdering -> {
                     navController.previousBackStackEntry?.savedStateHandle?.set(
                         PRE_ORDER_PRODUCTS_STATE_KEY,
-                        ArrayList(event.products)
+                        ArrayList(event.productsInCart)
                     )
-                    navController.popBackStack(R.id.cartFragment, false)
-                }
-
-                is PreOrderProductsEvent.GoToOrdering -> {
                     navController.popBackStack(R.id.cartFragment, false)
                     navController.navigateToOrdering(event.coupon)
                 }
