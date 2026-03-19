@@ -537,11 +537,6 @@ class Navigator(val state: NavigationState) {
         _navController = navController
     }
 
-    fun popBackStack(): Boolean {
-        val canPop = state.currentKey != state.startKey
-        if (canPop) goBack()
-        return canPop
-    }
 
     fun popBackStack(destinationId: Int, inclusive: Boolean): Boolean {
         val stack = state.currentSubStack
@@ -558,11 +553,6 @@ class Navigator(val state: NavigationState) {
     fun popBackStack(destinationId: Int, inclusive: Boolean, saveState: Boolean): Boolean =
         popBackStack(destinationId, inclusive)
 
-    fun getBackStackEntry(destinationId: Int): BackStackEntry =
-        state.currentSubStack
-            .lastOrNull { key -> destinationId(key) == destinationId }
-            ?.let(::entryOf)
-            ?: error("No back stack entry for destinationId=$destinationId")
 
     fun navigate(
         resId: Int,
