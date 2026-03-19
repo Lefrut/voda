@@ -121,7 +121,7 @@ fun PODAROK_DTO.toDomain(): CartPresentModel {
 
 fun OKNO_PODAROK_DTO.toDomain(): CartPresentPopupWindowModel {
     return CartPresentPopupWindowModel(
-        purchase = POKUPKA == true,
+        purchase = POKYPKA == true,
         items = PODAROK?.mapToDomain() ?: emptyList(),
         button = KNOPKA?.toDomain() ?: ColorfulButtonModel.Empty,
         present = PODAROK_BANNER?.toDomain()

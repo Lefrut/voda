@@ -6,8 +6,8 @@ import com.squareup.moshi.Json
 
 @Keep
 data class OKNO_PODAROK_DTO(
-    @Json(name = "POKUPKA")
-    val POKUPKA: Boolean?,
+    @Json(name = "POKYPKA")
+    val POKYPKA: Boolean?,
     @Json(name = "PODAROK")
     val PODAROK: List<PRODUCT_PODAROK_DTO>?,
     @Json(name = "KNOPKA")
