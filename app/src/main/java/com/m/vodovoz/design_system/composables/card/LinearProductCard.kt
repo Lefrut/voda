@@ -51,6 +51,7 @@ fun LinearProductCard(
     onClick: (ProductUi) -> Unit,
     onLike: (ProductUi) -> Unit,
     showFavorite: Boolean = true,
+    showRating: Boolean = true,
     onAnalogsClick: (ProductUi) -> Unit,
     onIncrementToCart: (ProductUi) -> Unit,
     onDecrementToCart: (ProductUi) -> Unit,
@@ -135,25 +136,26 @@ fun LinearProductCard(
 
                     Spacer(modifier = Modifier.weight(1f))
 
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_star_active_v2),
-                        contentDescription = null,
-                        tint = if (product.rating <= 0.0f) MaterialTheme.colorScheme.surfaceVariant else MaterialTheme.colorScheme.tertiary,
-                        modifier = Modifier
-                            .padding(start = 4.dp)
-                            .size(18.dp),
-                    )
+                    if (showRating) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_star_active_v2),
+                            contentDescription = null,
+                            tint = if (product.rating <= 0.0f) MaterialTheme.colorScheme.surfaceVariant else MaterialTheme.colorScheme.tertiary,
+                            modifier = Modifier
+                                .padding(start = 4.dp)
+                                .size(18.dp),
+                        )
 
-
-                    Text(
-                        modifier = Modifier
-                            .align(Alignment.CenterVertically)
-                            .padding(start = 2.dp),
-                        text = formatRating(product.rating),
-                        color = if (product.rating <= 0.0f) MaterialTheme.colorScheme.surfaceTint else MaterialTheme.colorScheme.onBackground,
-                        style = ExtendedTheme.typography.labelMediumVariant,
-                        maxLines = 1
-                    )
+                        Text(
+                            modifier = Modifier
+                                .align(Alignment.CenterVertically)
+                                .padding(start = 2.dp),
+                            text = formatRating(product.rating),
+                            color = if (product.rating <= 0.0f) MaterialTheme.colorScheme.surfaceTint else MaterialTheme.colorScheme.onBackground,
+                            style = ExtendedTheme.typography.labelMediumVariant,
+                            maxLines = 1
+                        )
+                    }
                 }
 
                 product.PricePerUnitText()

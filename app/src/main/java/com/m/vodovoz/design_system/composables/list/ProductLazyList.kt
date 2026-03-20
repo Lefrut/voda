@@ -36,6 +36,7 @@ fun ProductLazyList(
     isGridView: Boolean,
     modifier: Modifier = Modifier,
     showFavorite: Boolean = true,
+    showRating: Boolean = true,
     onProductClick: (ProductUi) -> Unit,
     onProductLike: (ProductUi) -> Unit,
     onIncrementProductToCart: (ProductUi) -> Unit,
@@ -61,6 +62,7 @@ fun ProductLazyList(
                     onClick = onProductClick,
                     onLike = onProductLike,
                     showFavorite = showFavorite,
+                    showRating = showRating,
                     modifier = Modifier.fillMaxWidth(),
                     onAnalogsClick = onProductAnalogsClick,
                     onDecrementToCart = onDecrementProductToCart,
@@ -79,6 +81,7 @@ fun ProductLazyList(
                     onClick = onProductClick,
                     onLike = onProductLike,
                     showFavorite = showFavorite,
+                    showRating = showRating,
                     onAnalogsClick = onProductAnalogsClick,
                     onDecrementToCart = onDecrementProductToCart,
                     onIncrementToCart = onIncrementProductToCart

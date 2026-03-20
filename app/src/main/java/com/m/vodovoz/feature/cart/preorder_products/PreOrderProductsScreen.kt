@@ -74,6 +74,7 @@ fun PreOrderProductsScreen(
                 products = viewState.items,
                 isGridView = true,
                 showFavorite = false,
+                showRating = false,
                 onProductClick = {},
                 onProductLike = {},
                 onIncrementProductToCart = viewModel::incrementProduct,
