@@ -145,6 +145,7 @@ fun QuantityButtonSmall(
     modifier: Modifier = Modifier,
     isLoading: Boolean,
     quantity: Int,
+    plusEnabled: Boolean = true,
     onPlus: () -> Unit,
     onMinus: () -> Unit,
 ) {
@@ -153,6 +154,7 @@ fun QuantityButtonSmall(
         isLoading = isLoading,
         onPlus = { onPlus() },
         onMinus = { onMinus() },
+        plusEnabled = plusEnabled,
         iconSize = 18.dp,
         iconPadding = PaddingValues(horizontal = 8.dp)
     ) {
@@ -261,6 +263,5 @@ private fun ProductCounterButtonPreview() {
         )
     }
 }
-
 
 

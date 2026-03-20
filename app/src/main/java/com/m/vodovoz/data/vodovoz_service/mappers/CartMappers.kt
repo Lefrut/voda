@@ -140,6 +140,8 @@ fun PRODUCT_PODAROK_DTO.toDomain(): CartPresentItemModel? {
         image = DETAIL_PICTURE?.toVodovozUrl() ?: "",
         price = EXTENDED_PRICE?.PRICE,
         oldPrice = EXTENDED_PRICE?.OLD_PRICE,
+        label = NALICHIE_MORE?.toDomain(),
+        maxQuantity = EDINICAIZMER?.CATALOG_QUANTITY ?: Int.MAX_VALUE,
         forAdults = TOVAR18?.toDomain()
     )
 }

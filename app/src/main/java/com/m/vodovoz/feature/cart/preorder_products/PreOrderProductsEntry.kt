@@ -60,6 +60,14 @@ fun PreOrderProductsEntry() = NavigationEntry<PreOrderProductsViewModel> {
                     navController.popBackStack(R.id.cartFragment, false)
                     navController.navigateToOrdering(event.coupon)
                 }
+
+                is PreOrderProductsEvent.BackToCart -> {
+                    navController.previousBackStackEntry?.savedStateHandle?.set(
+                        PRE_ORDER_PRODUCTS_STATE_KEY,
+                        ArrayList(event.productsInCart)
+                    )
+                    navController.popBackStack(R.id.cartFragment, false)
+                }
             }
         }
     }

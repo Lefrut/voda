@@ -166,7 +166,7 @@ fun VodovozColorChipSmall(
             .widthIn(30.dp)
             .height(16.dp)
             .clip(MaterialTheme.shapes.extraSmall)
-            .background(backgroundColor),
+            .background(backgroundColor.takeOrElse { MaterialTheme.colorScheme.background }),
         contentAlignment = Alignment.Center
     ) {
 

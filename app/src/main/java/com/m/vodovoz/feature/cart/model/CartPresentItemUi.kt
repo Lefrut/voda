@@ -5,6 +5,8 @@ import androidx.compose.runtime.Immutable
 import com.m.vodovoz.design_system.model.ForAdultsUi
 import com.m.vodovoz.design_system.model.VodovozItemUi
 import com.m.vodovoz.design_system.model.toUi
+import com.m.vodovoz.design_system.model.widgets.LabelUi
+import com.m.vodovoz.design_system.model.widgets.toUi
 import com.m.vodovoz.domain.general.model.cart.CartPresentItemModel
 import kotlinx.parcelize.Parcelize
 
@@ -16,12 +18,23 @@ data class CartPresentItemUi(
     val image: String,
     val price: String?,
     val oldPrice: String?,
+    val label: LabelUi?,
+    val maxQuantity: Int,
     override val forAdults: ForAdultsUi?,
     override val cartLoading: Boolean = false,
     override val cartQuantity: Int = 0,
 ) : Parcelable, VodovozItemUi<CartPresentItemUi>() {
     companion object {
-        val Empty = CartPresentItemUi(-1, "", "", "", "", null)
+        val Empty = CartPresentItemUi(
+            id = -1,
+            name = "",
+            image = "",
+            price = "",
+            oldPrice = "",
+            label = null,
+            maxQuantity = Int.MAX_VALUE,
+            forAdults = null
+        )
     }
 
     override fun copyItem(
@@ -44,5 +57,14 @@ fun List<CartPresentItemModel>.mapToUi(): List<CartPresentItemUi> {
 }
 
 fun CartPresentItemModel.toUi(): CartPresentItemUi {
-    return CartPresentItemUi(id, name, image, price, oldPrice, forAdults?.toUi())
+    return CartPresentItemUi(
+        id = id,
+        name = name,
+        image = image,
+        price = price,
+        oldPrice = oldPrice,
+        label = label?.toUi(),
+        maxQuantity = maxQuantity,
+        forAdults = forAdults?.toUi()
+    )
 }

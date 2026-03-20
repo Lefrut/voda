@@ -56,7 +56,6 @@ class PreOrderProductsViewModel @Inject constructor(
             return@launch
         }
 
-        //todo - test for adults
         updateState { state ->
             with(popupWindow) {
                 state.copy(
@@ -71,7 +70,10 @@ class PreOrderProductsViewModel @Inject constructor(
     }
 
     fun navigateBack() = viewModelScope.launch {
-        sendEvent(PreOrderProductsEvent.GoToOrdering(coupon, emptyList()))
+        val productsInCart = stateSnapshot.items.filter { product ->
+            product.cartQuantity > 0
+        }
+        sendEvent(PreOrderProductsEvent.BackToCart(productsInCart))
     }
 
     fun selectProduct(product: CartPresentItemUi) = viewModelScope.launch {
@@ -191,6 +193,8 @@ class PreOrderProductsViewModel @Inject constructor(
     }
 
     fun incrementProduct(product: CartPresentItemUi) = viewModelScope.launch {
+        if (product.cartQuantity >= product.maxQuantity) return@launch
+
         val forAdults = product.forAdults
 
         if (forAdults != null) {

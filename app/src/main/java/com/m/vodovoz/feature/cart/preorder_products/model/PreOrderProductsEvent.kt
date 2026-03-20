@@ -7,4 +7,6 @@ sealed interface PreOrderProductsEvent {
         val coupon: String,
         val productsInCart: List<CartPresentItemUi>
     ) : PreOrderProductsEvent
+
+    class BackToCart(val productsInCart: List<CartPresentItemUi>): PreOrderProductsEvent
 }

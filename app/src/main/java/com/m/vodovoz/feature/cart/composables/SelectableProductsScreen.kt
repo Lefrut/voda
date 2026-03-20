@@ -3,8 +3,10 @@ package com.m.vodovoz.feature.cart.composables
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -22,8 +24,10 @@ import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
@@ -35,11 +39,11 @@ import com.m.vodovoz.design_system.composables.button.QuantityButtonSmall
 import com.m.vodovoz.design_system.composables.button.VodovozButton
 import com.m.vodovoz.design_system.composables.button.VodovozButtonSmall
 import com.m.vodovoz.design_system.composables.button.VodovozRadioButton
+import com.m.vodovoz.design_system.composables.chip.VodovozColorChipSmall
 import com.m.vodovoz.design_system.composables.top_bar.VodovozTopBar
 import com.m.vodovoz.design_system.model.ColorfulButtonUi
 import com.m.vodovoz.feature.cart.model.CartPresentItemUi
 import com.m.vodovoz.feature.cart.model.CartPresentUi
-import androidx.compose.ui.res.stringResource
 
 @Composable
 fun SelectableProductsScreen(
@@ -149,21 +153,41 @@ private fun SelectableProductItem(
         verticalAlignment = Alignment.CenterVertically
     ) {
         val forAdults = item.forAdults
-        VodovozBlur(
-            modifier = Modifier.clip(MaterialTheme.shapes.extraSmall),
-            showBlur = forAdults != null,
-            placeholderText = "",
-            placeholderImage = null
+        Column(
+            modifier = Modifier.width(76.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            AsyncImage(
-                model = item.image,
-                contentDescription = null,
-                modifier = Modifier
-                    .size(50.dp)
-                    .clickable { onImageClick(item) },
-                contentScale = ContentScale.FillBounds
-            )
+            VodovozBlur(
+                modifier = Modifier.clip(MaterialTheme.shapes.extraSmall),
+                showBlur = forAdults != null,
+                placeholderText = "",
+                placeholderImage = null
+            ) {
+                AsyncImage(
+                    model = item.image,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(50.dp)
+                        .clickable { onImageClick(item) },
+                    contentScale = ContentScale.FillBounds
+                )
+            }
+
+            val label = item.label
+            if (label != null) {
+                Box(
+                    modifier = Modifier.padding(top = 8.dp)
+                ) {
+                    VodovozColorChipSmall(
+                        backgroundColor = label.textColor,
+                        text = label.name,
+                        textColor = Color.Unspecified
+                    )
+
+                }
+            }
         }
+
         Column(
             modifier = Modifier
                 .weight(1f)
@@ -207,6 +231,7 @@ private fun SelectableProductItem(
                     QuantityButtonSmall(
                         isLoading = item.cartLoading,
                         quantity = item.cartQuantity,
+                        plusEnabled = item.cartQuantity < item.maxQuantity,
                         onPlus = { onIncrementClick(item) },
                         onMinus = { onDecrementClick(item) }
                     )
@@ -214,6 +239,7 @@ private fun SelectableProductItem(
                     VodovozButtonSmall(
                         text = stringResource(id = R.string.to_cart),
                         onClick = { onIncrementClick(item) },
+                        enabled = item.maxQuantity > 0,
                     )
                 }
             }
