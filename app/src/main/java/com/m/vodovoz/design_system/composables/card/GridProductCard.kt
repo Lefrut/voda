@@ -77,6 +77,7 @@ fun GridProductCard(
     product: ProductUi,
     onClick: (ProductUi) -> Unit,
     onLike: (ProductUi) -> Unit,
+    showFavorite: Boolean = true,
     onAnalogsClick: (ProductUi) -> Unit,
     onIncrementToCart: (ProductUi) -> Unit,
     onDecrementToCart: (ProductUi) -> Unit,
@@ -96,6 +97,7 @@ fun GridProductCard(
                 percentLabels = product.percentLabels,
                 otherLabels = product.notPercentLabels,
                 isFavorite = product.isFavorite,
+                showFavorite = showFavorite,
                 onLike = { onLike(product) }
             )
         }
@@ -145,6 +147,7 @@ private fun GridImageSection(
     percentLabels: List<LabelUi>,
     otherLabels: List<LabelUi>,
     isFavorite: Boolean,
+    showFavorite: Boolean,
     onLike: () -> Unit,
 ) {
 
@@ -165,18 +168,20 @@ private fun GridImageSection(
                 .weight(1f)
                 .pointerInput(Unit) { detectTapGestures { } })
 
-            Icon(
-                painter = painterResource(id = if (isFavorite) R.drawable.ic_favorite_filled else R.drawable.ic_favorite_outline),
-                contentDescription = null,
-                tint = if (isFavorite) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.surfaceTint,
-                modifier = Modifier
-                    .size(18.dp)
-                    .clickable(
-                        onClick = onLike,
-                        indication = null,
-                        interactionSource = null
-                    )
-            )
+            if (showFavorite) {
+                Icon(
+                    painter = painterResource(id = if (isFavorite) R.drawable.ic_favorite_filled else R.drawable.ic_favorite_outline),
+                    contentDescription = null,
+                    tint = if (isFavorite) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.surfaceTint,
+                    modifier = Modifier
+                        .size(18.dp)
+                        .clickable(
+                            onClick = onLike,
+                            indication = null,
+                            interactionSource = null
+                        )
+                )
+            }
         }
 
         FlowRow(
@@ -275,6 +280,7 @@ private fun GridProductCardPreview() {
                 LabelUi.from("Хит продаж", Color.Green)
             ),
             isAvailable = false,
+            maxQuantity = 0,
             pricePerUnit = null,
             unitOfMeasurement = null,
             forAdults = ForAdultsUi("dwqqwd", "dqwdqw", "Не нажимай", ColorfulButtonUi.Empty),
@@ -291,6 +297,4 @@ private fun GridProductCardPreview() {
             onIncrementToCart = {})
     }
 }
-
-
 

@@ -291,6 +291,7 @@ data class ProductUi(
     val image: String,
     val labels: List<LabelUi>,
     val isAvailable: Boolean,
+    val maxQuantity: Int,
     val pricePerUnit: String?,
     val unitOfMeasurement: String?,
     val button: ColorfulButtonUi?,
@@ -324,6 +325,7 @@ data class ProductUi(
             image = "",
             labels = emptyList(),
             isAvailable = false,
+            maxQuantity = Int.MAX_VALUE,
             pricePerUnit = null,
             unitOfMeasurement = null,
             button = null,
@@ -417,6 +419,7 @@ fun ProductUi.Button(
                 QuantityButtonSmall(
                     isLoading = cartLoading,
                     quantity = cartQuantity,
+                    plusEnabled = cartQuantity < maxQuantity,
                     onPlus = { onIncrementToCart(product) },
                     onMinus = { onDecrementToCart(product) }
                 )
@@ -477,6 +480,7 @@ fun ProductModel.toUi(): ProductUi {
         image = picture,
         labels = labels.toUi(),
         isAvailable = quantity > 0,
+        maxQuantity = quantity,
         pricePerUnit = pricePerUnit,
         unitOfMeasurement = unitOfMeasurement,
         forAdults = forAdults?.toUi(),

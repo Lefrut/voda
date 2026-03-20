@@ -416,7 +416,7 @@ class CartFlowViewModel @Inject constructor(
 
     }
 
-    fun onPreOrderProductsSelected(products: List<CartPresentItemUi>) {
+    fun onPreOrderProductsSelected(products: List<Long>) {
         updateState { state ->
             state.copy(selectedPreOrderProducts = products)
         }
@@ -500,7 +500,7 @@ class CartFlowViewModel @Inject constructor(
         val orderSummary: List<OrderSummaryItemUi> = emptyList(),
         val showPromotionCodeBottomSheet: Boolean = false,
         val lockOrderButton: Boolean = false,
-        val selectedPreOrderProducts: List<CartPresentItemUi> = emptyList(),
+        val selectedPreOrderProducts: List<Long> = emptyList(),
         val promoCode: String = "",
         val additionalProductsBS: AdditionalProductsBSUi? = null,
         val showAdditionalProductsBS: Boolean = false,
@@ -534,9 +534,7 @@ class CartFlowViewModel @Inject constructor(
         }
 
         fun hasAddedPreOrderProducts(): Boolean {
-            val trackedIds = selectedPreOrderProducts
-                .map { product -> product.id }
-                .toSet()
+            val trackedIds = selectedPreOrderProducts.toSet()
             return trackedIds.isNotEmpty() && items1.any { cartItem ->
                 cartItem.id in trackedIds && cartItem.cartQuantity > 0
             }

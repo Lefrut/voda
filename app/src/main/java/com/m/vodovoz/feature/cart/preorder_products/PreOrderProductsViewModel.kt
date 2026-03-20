@@ -5,24 +5,18 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.m.vodovoz.common.cart.CartManager
 import com.m.vodovoz.design_system.model.ForAdultsUi
+import com.m.vodovoz.design_system.model.ProductUi
 import com.m.vodovoz.domain.general.respository.UserPreferencesRepository
-import com.m.vodovoz.feature.cart.bottles.AllBottlesFlowViewModel.BottlesUiState
-import com.m.vodovoz.feature.cart.model.CartPresentItemUi
 import com.m.vodovoz.feature.cart.model.CartPresentPopupWindowUi
+import com.m.vodovoz.feature.cart.model.mapToProductUi
 import com.m.vodovoz.feature.cart.preorder_products.model.PreOrderProductsEvent
 import com.m.vodovoz.feature.cart.preorder_products.model.PreOrderProductsState
 import com.m.vodovoz.ui.paging.ProductsMviViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.emptyFlow
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withTimeoutOrNull
 import javax.inject.Inject
 
 @HiltViewModel
@@ -31,7 +25,7 @@ class PreOrderProductsViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val cartManager: CartManager,
     private val userPreferencesRepository: UserPreferencesRepository,
-) : ProductsMviViewModel<CartPresentItemUi, PreOrderProductsState, PreOrderProductsEvent>(
+) : ProductsMviViewModel<ProductUi, PreOrderProductsState, PreOrderProductsEvent>(
     state = PreOrderProductsState(),
     blockedProductsFlow = cartManager.blockedProductsFlow,
     favoritesFlow = emptyFlow(),
@@ -43,7 +37,6 @@ class PreOrderProductsViewModel @Inject constructor(
         savedStateHandle.get<CartPresentPopupWindowUi>("popupWindow")
 
     private val coupon: String = savedStateHandle.get<String>("coupon").orEmpty()
-    private var pendingAdultProductId: Long? = null
     private var pendingAdultAction: PendingAdultAction = PendingAdultAction.None
 
     init {
@@ -52,6 +45,7 @@ class PreOrderProductsViewModel @Inject constructor(
 
     private fun initializeData() = viewModelScope.launch {
         if (popupWindow == null) {
+            delay(250L)
             navigateBack()
             return@launch
         }
@@ -62,137 +56,130 @@ class PreOrderProductsViewModel @Inject constructor(
                     title = present?.title.orEmpty(),
                     purchase = purchase,
                     button = button,
-                    items = items,
-                    present = present
+                    items = items.map { itemUi ->
+                        val label = itemUi.label
+                        itemUi.copy(
+                            label = label?.copy(
+                                backgroundColorValue = label.textColorValue
+                            )
+                        )
+                    }.mapToProductUi()
                 )
             }
         }
     }
 
     fun navigateBack() = viewModelScope.launch {
-        val productsInCart = stateSnapshot.items.filter { product ->
-            product.cartQuantity > 0
-        }
-        sendEvent(PreOrderProductsEvent.BackToCart(productsInCart))
-    }
-
-    fun selectProduct(product: CartPresentItemUi) = viewModelScope.launch {
-        updateState { state ->
-            val finalProduct = if (product.id == state.currentProduct?.id) {
-                null
-            } else product
-
-            state.copy(currentProduct = finalProduct)
-        }
+        sendEvent(PreOrderProductsEvent.BackToCart(currentProductIdsInCart()))
     }
 
     fun tryToAddProduct() = viewModelScope.launch {
+        if (!stateSnapshot.purchase) {
+            val selectedProduct = stateSnapshot.items.firstOrNull { item ->
+                item.id == stateSnapshot.currentProductId
+            }
+            val forAdults = selectedProduct?.forAdults
 
-        val selectedProduct = stateSnapshot.currentProduct
-        val productsInCart = stateSnapshot.items.filter { product ->
-            product.cartQuantity > 0
+            when {
+                forAdults != null -> {
+                    showForAdultsDialog(
+                        forAdults = forAdults,
+                        productId = selectedProduct.id,
+                        action = PendingAdultAction.SubmitSelection
+                    )
+                }
+
+                selectedProduct != null -> {
+                    submitSelectedProduct(selectedProduct)
+                }
+
+                else -> {
+                    navigateToOrdering(emptyList())
+                }
+            }
+            return@launch
         }
-        val forAdults = selectedProduct?.forAdults
 
-        when {
-            forAdults != null -> {
-                showForAdultsDialog(
-                    forAdults = forAdults,
-                    productId = selectedProduct.id,
-                    action = PendingAdultAction.SubmitSelection
-                )
-            }
-
-            selectedProduct != null -> {
-                submitSelectedProduct(selectedProduct)
-            }
-
-            productsInCart.isNotEmpty() -> {
-                applyLocalChanges(productsInCart)
-            }
-
-            else -> {
-                navigateToOrdering(emptyList())
-            }
+        val productIds = currentProductIdsInCart()
+        if (productIds.isNotEmpty()) {
+            applyLocalChanges()
+        } else {
+            navigateToOrdering(emptyList())
         }
     }
 
-    private suspend fun navigateToOrdering(productsInCart: List<CartPresentItemUi>) {
-        sendEvent(PreOrderProductsEvent.GoToOrdering(coupon, productsInCart))
+    fun selectProduct(productId: Long) = viewModelScope.launch {
+        updateState { state ->
+            state.copy(
+                currentProductId = if (state.currentProductId == productId) null else productId
+            )
+        }
+    }
+
+    private suspend fun navigateToOrdering(productIds: List<Long>) {
+        sendEvent(PreOrderProductsEvent.GoToOrdering(coupon, productIds))
+    }
+
+    private suspend fun submitSelectedProduct(product: ProductUi) {
+        updateState { state ->
+            state.copy(button = state.button.copy(loading = true))
+        }
+
+        cartManager.change(product.id, 1).join()
+
+        val productIds = currentProductIdsInCart()
+        if (productIds.isNotEmpty()) {
+            navigateToOrdering(productIds)
+        } else {
+            updateState { state ->
+                state.copy(button = state.button.copy(loading = false))
+            }
+        }
     }
 
     private fun showForAdultsDialog(
         forAdults: ForAdultsUi,
-        productId: Long? = null,
-        action: PendingAdultAction = PendingAdultAction.LocalIncrement,
+        productId: Long,
+        action: PendingAdultAction,
     ) {
-        pendingAdultProductId = productId
         pendingAdultAction = action
         updateState { state ->
-            state.copy(showForAdultsDialog = true, forAdultsDialog = forAdults)
+            state.copy(
+                showForAdultsDialog = true,
+                forAdultsDialog = forAdults,
+                blockedAdultProductId = productId
+            )
         }
     }
 
     fun closeForAdultsDialog() {
-        pendingAdultProductId = null
         pendingAdultAction = PendingAdultAction.None
         updateState { state ->
-            state.copy(showForAdultsDialog = false)
+            state.copy(showForAdultsDialog = false, blockedAdultProductId = null)
         }
     }
 
     fun acceptForAdults() = viewModelScope.launch {
         userPreferencesRepository.setCanViewAdultProducts(true)
-        val currentProduct = pendingAdultProductId?.let { productId ->
-            stateSnapshot.items.firstOrNull { item -> item.id == productId }
-        } ?: stateSnapshot.currentProduct
-
-        val pendingAction = pendingAdultAction
-        pendingAdultProductId = null
+        val currentProductId = stateSnapshot.blockedAdultProductId
+        val action = pendingAdultAction
         pendingAdultAction = PendingAdultAction.None
         updateState { state ->
-            state.copy(showForAdultsDialog = false)
+            state.copy(showForAdultsDialog = false, blockedAdultProductId = null)
         }
 
-        currentProduct ?: return@launch
-        when (pendingAction) {
-            PendingAdultAction.LocalIncrement -> {
-                incrementProduct(currentProduct)
-            }
+        val currentProduct = stateSnapshot.items.firstOrNull { item ->
+            item.id == currentProductId
+        } ?: return@launch
 
-            PendingAdultAction.SubmitSelection -> {
-                submitSelectedProduct(currentProduct)
-            }
-
+        when (action) {
+            PendingAdultAction.LocalIncrement -> incrementProduct(currentProduct)
+            PendingAdultAction.SubmitSelection -> submitSelectedProduct(currentProduct)
             PendingAdultAction.None -> Unit
         }
     }
 
-    private suspend fun submitSelectedProduct(product: CartPresentItemUi) {
-        updateState { state ->
-            state.copy(
-                button = state.button.copy(loading = true)
-            )
-        }
-
-        cartManager.change(product.id, 1).join()
-
-        val isAdded = stateSnapshot.items.any {
-            it.cartQuantity == 1
-        }
-
-        if (isAdded) {
-            navigateToOrdering(listOf(product))
-        } else {
-            updateState { state ->
-                state.copy(
-                    button = state.button.copy(loading = false)
-                )
-            }
-        }
-    }
-
-    fun incrementProduct(product: CartPresentItemUi) = viewModelScope.launch {
+    fun incrementProduct(product: ProductUi) = viewModelScope.launch {
         if (product.cartQuantity >= product.maxQuantity) return@launch
 
         val forAdults = product.forAdults
@@ -208,7 +195,7 @@ class PreOrderProductsViewModel @Inject constructor(
         }
     }
 
-    fun decrementProduct(product: CartPresentItemUi) = viewModelScope.launch {
+    fun decrementProduct(product: ProductUi) = viewModelScope.launch {
         cartManager.change(product.id, product.cartQuantity - 1)
     }
 
@@ -224,7 +211,7 @@ class PreOrderProductsViewModel @Inject constructor(
         }
     }
 
-    private suspend fun applyLocalChanges(products: List<CartPresentItemUi>) {
+    private suspend fun applyLocalChanges() {
         updateState { state ->
             state.copy(button = state.button.copy(loading = true))
         }
@@ -232,12 +219,15 @@ class PreOrderProductsViewModel @Inject constructor(
         delay(250L)
         cartManager.blockedProductsFlow.collectLatest { blockedProducts ->
             if (blockedProducts.isEmpty()) {
-                val productsInCart = products.filter { product ->
-                    product.cartQuantity > 0
-                }
-                navigateToOrdering(productsInCart)
+                navigateToOrdering(currentProductIdsInCart())
             }
         }
+    }
+
+    private fun currentProductIdsInCart(): List<Long> {
+        return stateSnapshot.items
+            .filter { product -> product.cartQuantity > 0 }
+            .map { product -> product.id }
     }
 
     private enum class PendingAdultAction {

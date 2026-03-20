@@ -74,7 +74,7 @@ class CartFragment : Fragment() {
 
         findNavController().currentBackStackEntry
             ?.savedStateHandle
-            ?.remove<ArrayList<CartPresentItemUi>>(PRE_ORDER_PRODUCTS_STATE_KEY)
+            ?.remove<ArrayList<Long>>(PRE_ORDER_PRODUCTS_STATE_KEY)
             ?.let {
                 viewModel.onPreOrderProductsSelected(it)
             }

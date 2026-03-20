@@ -14,7 +14,6 @@ fun GiftsScreen(viewModel: GiftsViewModel, viewState: GiftsState) {
         selectedItems = listOf(viewState.currentGift),
         button = viewState.button,
         present = viewState.present?.popupWindow?.present,
-        purchase = false,
         onBackClick = viewModel::navigateBack,
         onItemClick = viewModel::selectGift,
         onImageClick = { gift -> viewModel.showPreviewImageDialog(gift.image) },

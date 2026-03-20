@@ -50,6 +50,7 @@ fun LinearProductCard(
     product: ProductUi,
     onClick: (ProductUi) -> Unit,
     onLike: (ProductUi) -> Unit,
+    showFavorite: Boolean = true,
     onAnalogsClick: (ProductUi) -> Unit,
     onIncrementToCart: (ProductUi) -> Unit,
     onDecrementToCart: (ProductUi) -> Unit,
@@ -74,6 +75,7 @@ fun LinearProductCard(
                     percentLabels = percentLabels,
                     otherLabels = otherLabels,
                     isFavorite = product.isFavorite,
+                    showFavorite = showFavorite,
                     onLike = { onLike(product) }
                 )
 
@@ -179,6 +181,7 @@ private fun LinearImageSection(
     percentLabels: List<LabelUi>,
     otherLabels: List<LabelUi>,
     isFavorite: Boolean,
+    showFavorite: Boolean,
     onLike: () -> Unit,
 ) {
     Box(
@@ -194,18 +197,20 @@ private fun LinearImageSection(
         )
 
         Row(verticalAlignment = Alignment.Top) {
-            Icon(
-                painter = painterResource(id = if (isFavorite) R.drawable.ic_favorite_filled else R.drawable.ic_favorite_outline),
-                contentDescription = null,
-                tint = if (isFavorite) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.surfaceTint,
-                modifier = Modifier
-                    .size(18.dp)
-                    .clickable(
-                        onClick = onLike,
-                        indication = null,
-                        interactionSource = null
-                    )
-            )
+            if (showFavorite) {
+                Icon(
+                    painter = painterResource(id = if (isFavorite) R.drawable.ic_favorite_filled else R.drawable.ic_favorite_outline),
+                    contentDescription = null,
+                    tint = if (isFavorite) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.surfaceTint,
+                    modifier = Modifier
+                        .size(18.dp)
+                        .clickable(
+                            onClick = onLike,
+                            indication = null,
+                            interactionSource = null
+                        )
+                )
+            }
 
             Spacer(modifier = Modifier.weight(1f))
 
@@ -252,6 +257,7 @@ private fun LinearProductCardPreview() {
                 LabelUi.from("Хит продаж", Color.Green)
             ),
             isAvailable = true,
+            maxQuantity = Int.MAX_VALUE,
             pricePerUnit = null,
             unitOfMeasurement = null,
             forAdults = null,
@@ -259,6 +265,14 @@ private fun LinearProductCardPreview() {
         )
 
 
-        LinearProductCard(Modifier, product = sampleProduct, onClick = {}, onLike = {}, {}, {}, {})
+        LinearProductCard(
+            modifier = Modifier,
+            product = sampleProduct,
+            onClick = {},
+            onLike = {},
+            onAnalogsClick = {},
+            onIncrementToCart = {},
+            onDecrementToCart = {}
+        )
     }
 }

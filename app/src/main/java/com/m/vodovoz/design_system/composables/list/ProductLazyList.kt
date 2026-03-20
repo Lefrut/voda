@@ -35,6 +35,7 @@ fun ProductLazyList(
     products: List<ProductUi>,
     isGridView: Boolean,
     modifier: Modifier = Modifier,
+    showFavorite: Boolean = true,
     onProductClick: (ProductUi) -> Unit,
     onProductLike: (ProductUi) -> Unit,
     onIncrementProductToCart: (ProductUi) -> Unit,
@@ -59,6 +60,7 @@ fun ProductLazyList(
                     product = products[i],
                     onClick = onProductClick,
                     onLike = onProductLike,
+                    showFavorite = showFavorite,
                     modifier = Modifier.fillMaxWidth(),
                     onAnalogsClick = onProductAnalogsClick,
                     onDecrementToCart = onDecrementProductToCart,
@@ -76,6 +78,7 @@ fun ProductLazyList(
                     product = products[i],
                     onClick = onProductClick,
                     onLike = onProductLike,
+                    showFavorite = showFavorite,
                     onAnalogsClick = onProductAnalogsClick,
                     onDecrementToCart = onDecrementProductToCart,
                     onIncrementToCart = onIncrementProductToCart
@@ -298,4 +301,3 @@ inline fun GridHorizontalPadding(
         content()
     }
 }
-

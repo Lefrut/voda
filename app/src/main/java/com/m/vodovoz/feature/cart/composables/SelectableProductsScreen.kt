@@ -3,10 +3,8 @@ package com.m.vodovoz.feature.cart.composables
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -27,7 +25,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
@@ -35,9 +32,7 @@ import coil3.compose.AsyncImage
 import com.m.vodovoz.R
 import com.m.vodovoz.design_system.ExtendedTheme
 import com.m.vodovoz.design_system.composables.blur.VodovozBlur
-import com.m.vodovoz.design_system.composables.button.QuantityButtonSmall
 import com.m.vodovoz.design_system.composables.button.VodovozButton
-import com.m.vodovoz.design_system.composables.button.VodovozButtonSmall
 import com.m.vodovoz.design_system.composables.button.VodovozRadioButton
 import com.m.vodovoz.design_system.composables.chip.VodovozColorChipSmall
 import com.m.vodovoz.design_system.composables.top_bar.VodovozTopBar
@@ -52,13 +47,10 @@ fun SelectableProductsScreen(
     selectedItems: List<CartPresentItemUi>,
     button: ColorfulButtonUi,
     present: CartPresentUi?,
-    purchase: Boolean = false,
     showIndicator: Boolean = true,
     onBackClick: () -> Unit,
     onItemClick: (CartPresentItemUi) -> Unit,
     onImageClick: (CartPresentItemUi) -> Unit,
-    onIncrementClick: (CartPresentItemUi) -> Unit = {},
-    onDecrementClick: (CartPresentItemUi) -> Unit = {},
     onButtonClick: () -> Unit,
 ) {
     Column(
@@ -91,12 +83,9 @@ fun SelectableProductsScreen(
                     Column {
                         SelectableProductItem(
                             item = item,
-                            purchase = purchase,
                             selected = selectedItems.any { selectedItem -> selectedItem.id == item.id },
                             onClick = onItemClick,
-                            onImageClick = onImageClick,
-                            onIncrementClick = onIncrementClick,
-                            onDecrementClick = onDecrementClick
+                            onImageClick = onImageClick
                         )
 
                         if (items.lastIndex != index) {
@@ -128,26 +117,17 @@ fun SelectableProductsScreen(
 private fun SelectableProductItem(
     modifier: Modifier = Modifier,
     item: CartPresentItemUi,
-    purchase: Boolean,
     selected: Boolean,
     onClick: (CartPresentItemUi) -> Unit,
     onImageClick: (CartPresentItemUi) -> Unit,
-    onIncrementClick: (CartPresentItemUi) -> Unit,
-    onDecrementClick: (CartPresentItemUi) -> Unit,
 ) {
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .then(
-                if (purchase) {
-                    Modifier
-                } else {
-                    Modifier.clickable(
-                        onClick = { onClick(item) },
-                        interactionSource = null,
-                        indication = null
-                    )
-                }
+            .clickable(
+                onClick = { onClick(item) },
+                interactionSource = null,
+                indication = null
             )
             .padding(horizontal = 16.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -225,26 +205,6 @@ private fun SelectableProductItem(
             }
         }
 
-        if (purchase) {
-            Box(modifier = Modifier.width(120.dp), contentAlignment = Alignment.Center) {
-                if (item.cartQuantity > 0) {
-                    QuantityButtonSmall(
-                        isLoading = item.cartLoading,
-                        quantity = item.cartQuantity,
-                        plusEnabled = item.cartQuantity < item.maxQuantity,
-                        onPlus = { onIncrementClick(item) },
-                        onMinus = { onDecrementClick(item) }
-                    )
-                } else {
-                    VodovozButtonSmall(
-                        text = stringResource(id = R.string.to_cart),
-                        onClick = { onIncrementClick(item) },
-                        enabled = item.maxQuantity > 0,
-                    )
-                }
-            }
-        } else {
-            VodovozRadioButton(selected = selected, onClick = { onClick(item) })
-        }
+        VodovozRadioButton(selected = selected, onClick = { onClick(item) })
     }
 }
