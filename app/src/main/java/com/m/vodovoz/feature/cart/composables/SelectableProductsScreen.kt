@@ -33,6 +33,7 @@ import com.m.vodovoz.R
 import com.m.vodovoz.design_system.ExtendedTheme
 import com.m.vodovoz.design_system.composables.blur.VodovozBlur
 import com.m.vodovoz.design_system.composables.button.VodovozButton
+import com.m.vodovoz.design_system.composables.floating.BottomFloatingContainer
 import com.m.vodovoz.design_system.composables.button.VodovozRadioButton
 import com.m.vodovoz.design_system.composables.chip.VodovozColorChipSmall
 import com.m.vodovoz.design_system.composables.top_bar.VodovozTopBar
@@ -66,7 +67,7 @@ fun SelectableProductsScreen(
             modifier = Modifier
                 .weight(1f)
                 .verticalScroll(rememberScrollState())
-                .padding(bottom = 24.dp, top = 8.dp)
+                .padding(bottom = 96.dp, top = 8.dp)
         ) {
             if (present != null && present.button == null && showIndicator) {
                 CartPresentIndicatorCard(
@@ -100,16 +101,18 @@ fun SelectableProductsScreen(
             }
         }
 
-        VodovozButton(
-            modifier = Modifier.padding(bottom = 24.dp, start = 16.dp, end = 16.dp),
-            text = button.name,
-            isLoading = button.loading,
-            colors = ButtonDefaults.filledTonalButtonColors(
-                containerColor = button.backgroundColor.takeOrElse { MaterialTheme.colorScheme.primary },
-                contentColor = button.textColor.takeOrElse { MaterialTheme.colorScheme.background }
-            ),
-            onClick = onButtonClick
-        )
+        BottomFloatingContainer {
+            VodovozButton(
+                modifier = Modifier.padding(horizontal = 16.dp),
+                text = button.name,
+                isLoading = button.loading,
+                colors = ButtonDefaults.filledTonalButtonColors(
+                    containerColor = button.backgroundColor.takeOrElse { MaterialTheme.colorScheme.primary },
+                    contentColor = button.textColor.takeOrElse { MaterialTheme.colorScheme.background }
+                ),
+                onClick = onButtonClick
+            )
+        }
     }
 }
 

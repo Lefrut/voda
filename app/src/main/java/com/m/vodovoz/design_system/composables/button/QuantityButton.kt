@@ -50,7 +50,8 @@ fun BaseQuantityButton(
     plusEnabled: Boolean = true,
     colors: ButtonColors = ButtonDefaults.buttonColors(
         containerColor = MaterialTheme.colorScheme.secondary,
-        contentColor = MaterialTheme.colorScheme.background
+        contentColor = MaterialTheme.colorScheme.background,
+        disabledContentColor = MaterialTheme.colorScheme.background.copy(alpha = 0.45f)
     ),
     content: @Composable () -> Unit,
 ) {

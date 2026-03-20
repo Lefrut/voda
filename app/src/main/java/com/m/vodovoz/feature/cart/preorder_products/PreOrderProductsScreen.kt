@@ -1,17 +1,21 @@
 package com.m.vodovoz.feature.cart.preorder_products
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.unit.dp
 import com.m.vodovoz.design_system.composables.button.VodovozButton
+import com.m.vodovoz.design_system.composables.floating.BottomFloatingContainer
 import com.m.vodovoz.design_system.composables.list.ProductLazyList
+import com.m.vodovoz.design_system.composables.scaffold.VodovozScaffold
 import com.m.vodovoz.design_system.composables.top_bar.VodovozTopBar
 import com.m.vodovoz.feature.cart.composables.SelectableProductsScreen
 import com.m.vodovoz.feature.cart.model.toCartPresentItemUi
@@ -36,41 +40,46 @@ fun PreOrderProductsScreen(
             onImageClick = { item -> viewModel.showPreviewImageDialog(item.image) },
             onButtonClick = viewModel::tryToAddProduct
         )
-    } else Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-    ) {
-        VodovozTopBar(
-            onBack = viewModel::navigateBack,
-            title = viewState.title
-        )
-
-        ProductLazyList(
-            modifier = Modifier.weight(1f),
-            products = viewState.items,
-            isGridView = true,
-            showFavorite = false,
-            onProductClick = {},
-            onProductLike = {},
-            onIncrementProductToCart = viewModel::incrementProduct,
-            onDecrementProductToCart = viewModel::decrementProduct,
-            onProductAnalogsClick = {}
-        )
-
-        VodovozButton(
-            modifier = Modifier.padding(bottom = 24.dp, start = 16.dp, end = 16.dp),
-            text = viewState.button.name,
-            isLoading = viewState.button.loading,
-            colors = ButtonDefaults.filledTonalButtonColors(
-                containerColor = viewState.button.backgroundColor.takeOrElse {
-                    MaterialTheme.colorScheme.primary
-                },
-                contentColor = viewState.button.textColor.takeOrElse {
-                    MaterialTheme.colorScheme.background
+    } else {
+        VodovozScaffold(
+            topBar = {
+                VodovozTopBar(
+                    onBack = viewModel::navigateBack,
+                    title = viewState.title
+                )
+            },
+            bottomBar = {
+                BottomFloatingContainer {
+                    VodovozButton(
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        text = viewState.button.name,
+                        isLoading = viewState.button.loading,
+                        colors = ButtonDefaults.filledTonalButtonColors(
+                            containerColor = viewState.button.backgroundColor.takeOrElse {
+                                MaterialTheme.colorScheme.primary
+                            },
+                            contentColor = viewState.button.textColor.takeOrElse {
+                                MaterialTheme.colorScheme.background
+                            }
+                        ),
+                        onClick = viewModel::tryToAddProduct
+                    )
                 }
-            ),
-            onClick = viewModel::tryToAddProduct
-        )
+            }
+        ) { paddingValues ->
+            ProductLazyList(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues),
+                products = viewState.items,
+                isGridView = true,
+                showFavorite = false,
+                onProductClick = {},
+                onProductLike = {},
+                onIncrementProductToCart = viewModel::incrementProduct,
+                onDecrementProductToCart = viewModel::decrementProduct,
+                onProductAnalogsClick = {}
+            )
+        }
     }
 }
