@@ -51,6 +51,7 @@ class CartManager @Inject constructor(
     fun change(
         productId: Long,
         count: Int,
+        onSuccess: () -> Unit = {},
         onFailure: (Throwable) -> Unit = {},
     ) = coroutineScope.launch {
         val currentCartVersion = cartMutex.withLock {
@@ -85,6 +86,8 @@ class CartManager @Inject constructor(
             updateCartOnline(cartChanges, currentFirstCart)
         }.onFailure { throwable ->
             onFailure(throwable)
+        }.onSuccess {
+            onSuccess()
         }
         
         cartMutex.withLock {

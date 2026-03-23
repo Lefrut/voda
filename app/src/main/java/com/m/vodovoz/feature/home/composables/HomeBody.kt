@@ -141,7 +141,10 @@ fun HomeBody(
                     promotions = {
                         HomePromotions(
                             modifier = Modifier.padding(top = 32.dp),
-                            onShowAllClick = onShowAllClick,
+                            onShowAllClick = {
+                                Analytics.reportEvent("promo_banner_section_see_all_tap")
+                                onShowAllClick(it)
+                            },
                             onPromotionClick = onPromotionClick,
                             sectionPromotions = value,
                             onAboutAdvertisingClick = onAboutAdvertisingClick

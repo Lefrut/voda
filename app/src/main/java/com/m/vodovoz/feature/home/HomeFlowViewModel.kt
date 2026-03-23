@@ -279,7 +279,7 @@ class HomeFlowViewModel @Inject constructor(
                 ""
             }
         }
-        Analytics.reportEvent(eventName){
+        Analytics.reportEvent(eventName) {
             param("name", categoryWithProducts.name)
         }
 
@@ -325,6 +325,7 @@ class HomeFlowViewModel @Inject constructor(
     }
 
     fun navigateToProductDetails(product: ProductUi) = viewModelScope.launch {
+        Analytics.reportEvent("add_to_cart_click")
         sendEvent(HomeEvents.GoToProductDetails(productId = product.id))
     }
 
@@ -448,13 +449,17 @@ class HomeFlowViewModel @Inject constructor(
     }
 
     fun incrementProductToCart(product: ProductUi) = viewModelScope.launch {
+
         cartManager.change(
-            product.id,
-            product.cartQuantity + 1,
-        ) { throwable ->
-            print(throwable)
-            Analytics.reportEvent("error_add_to_cart")
-        }
+            productId = product.id,
+            count = product.cartQuantity + 1,
+            onSuccess = {
+                Analytics.reportEvent("add_to_cart_success")
+            },
+            onFailure = { throwable ->
+                Analytics.reportEvent("error_add_to_cart")
+            }
+        )
     }
 
     fun decrementProductToCart(product: ProductUi) = viewModelScope.launch {
