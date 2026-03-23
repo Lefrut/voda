@@ -10,6 +10,7 @@ import androidx.lifecycle.viewModelScope
 import com.m.vodovoz.R
 import com.m.vodovoz.common.resources.ContentProvider
 import com.m.vodovoz.common.resources.ResourcesProvider
+import com.m.vodovoz.core.analytics.Analytics
 import com.m.vodovoz.design_system.model.toUi
 import com.m.vodovoz.design_system.model.widgets.FieldTypeUi
 import com.m.vodovoz.design_system.model.widgets.FieldUi
@@ -135,6 +136,8 @@ class WriteCommentViewModel @Inject constructor(
             message = stateSnapshot.field.value,
             imageBytesArray = imageBytesArray
         ).singleResult().onSuccess { placeholder ->
+            Analytics.reportEvent("rate_comment_submit")
+
             sendEvent(WriteCommentEvent.SetRatedProductResult(productId))
             updateState { s ->
                 s.copy(

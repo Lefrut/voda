@@ -23,8 +23,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.isUnspecified
-import coil3.compose.AsyncImage
 
+import com.m.vodovoz.design_system.composables.image.VodovozAsyncImage
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 
@@ -55,7 +55,7 @@ fun AutoScrollImagePager(
         val currentImage = images[imageIndex]
 
         Box {
-            AsyncImage(
+            VodovozAsyncImage(
                 model = currentImage,
                 contentDescription = null,
                 modifier = Modifier
@@ -106,4 +106,3 @@ fun rememberAutoScrollPagerState(initialIndex: Int = 0, itemsCount: Int): PagerS
 
     return rememberPagerState(initialPage) { pageCount }
 }
-

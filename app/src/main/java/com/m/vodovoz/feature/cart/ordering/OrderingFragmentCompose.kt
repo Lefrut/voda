@@ -119,12 +119,6 @@ class OrderingFragment : Fragment() {
         }
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        accountManager.reportEvent("Зашел на экран оформления заказа")
-    }
-
-
     private suspend fun observeEvents(scrollState: ScrollState) {
         viewModel.events.onSubscription {
 

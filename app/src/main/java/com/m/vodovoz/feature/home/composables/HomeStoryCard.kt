@@ -19,8 +19,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
-import coil3.compose.AsyncImage
 import com.m.vodovoz.design_system.composables.card.VodovozOutlinedCard
+import com.m.vodovoz.design_system.composables.image.VodovozAsyncImage
 import com.m.vodovoz.design_system.model.StoryUi
 
 
@@ -67,7 +67,7 @@ private fun HomeStoryCard(
         borderColor = if (!viewed) MaterialTheme.colorScheme.primary else Color.Transparent,
         onClick = onClick
     ) {
-        AsyncImage(
+        VodovozAsyncImage(
             model = storyImage,
             contentDescription = null,
             contentScale = ContentScale.Crop,

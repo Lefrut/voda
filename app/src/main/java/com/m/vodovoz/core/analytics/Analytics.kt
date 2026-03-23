@@ -3,8 +3,8 @@ package com.m.vodovoz.core.analytics
 import androidx.annotation.Keep
 import com.m.vodovoz.BuildConfig
 import io.appmetrica.analytics.AppMetrica
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import org.json.JSONObject
 
 data object Analytics {
 
@@ -18,19 +18,17 @@ data object Analytics {
     }
 
     @Keep
-    fun reportEvent(text: String, eventParam: String? = null) = runCatching {
+    fun reportEvent(name: String, block: EventParamsBuilder.() -> Unit = {}) = runCatching {
         if (!BuildConfig.DEBUG) {
             val userId = userIdState.value ?: "0"
-
-            val eventParameters = buildString {
-                append("""{"UserID":"$userId"""")
-                if (eventParam != null) append(",").append(eventParam)
-                append("}")
+            val builder = EventParamsBuilder().apply(block)
+            val params = builder.build().toMutableMap().apply {
+                put("user_id", userId)
             }
-
-            AppMetrica.reportEvent(text, eventParameters)
+            AppMetrica.reportEvent(name, JSONObject(params).toString())
         }
     }
+
 
     @Keep
     fun reportError(text: String, throwable: Throwable? = null) = runCatching {
@@ -40,3 +38,14 @@ data object Analytics {
     }
 
 }
+
+class EventParamsBuilder {
+    private val map = mutableMapOf<String, Any?>()
+
+    fun param(key: String, value: Any?) {
+        map[key] = value
+    }
+
+    fun build(): Map<String, Any?> = map
+}
+

@@ -24,6 +24,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImagePainter
 import coil3.compose.rememberAsyncImagePainter
 import com.m.vodovoz.R
+import com.m.vodovoz.design_system.composables.image.rememberVodovozAsyncImagePainter
 import dev.chrisbanes.haze.hazeEffect
 
 
@@ -56,7 +57,7 @@ inline fun AsyncImageBlur(
     image: @Composable (AsyncImagePainter) -> Unit,
 ) {
 
-    val imagePainter = rememberAsyncImagePainter(model = model)
+    val imagePainter = rememberVodovozAsyncImagePainter(model = model)
     val imageState by imagePainter.state.collectAsStateWithLifecycle()
 
     VodovozBlur(

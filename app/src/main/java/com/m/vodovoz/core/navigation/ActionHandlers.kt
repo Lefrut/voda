@@ -53,7 +53,6 @@ fun BaseVodovozAction.activate(
         }
 
         DataAllAction.WaterTracker -> {
-            Analytics.reportEvent("trekervodi_catalog")
             navController.navigateToWaterApp()
         }
 

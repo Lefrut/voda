@@ -321,7 +321,6 @@ class HomeFragment : Fragment() {
                     debugLog { "DeepLinkPath: $path" }
                     when {
                         path == "kalkulyator_vody" -> {
-                            accountManager.reportEvent("trekervodi_ssilka")
                             navController.navigateToWaterApp()
                         }
 
@@ -355,9 +354,6 @@ class HomeFragment : Fragment() {
                             navController.navigateToPromotions()
                             return@collect
                         }
-
-                        val eventParameters = "\"ID_AKCII\": \"$promotionId\""
-                        accountManager.reportEvent("Зашел в акцию (push)", eventParameters)
                         navController.navigateToPromotionDetails(promotionId.toLong())
 
                     }
@@ -365,13 +361,6 @@ class HomeFragment : Fragment() {
                     "TOVAR" -> {
                         val productId = pushData.id
                         if (!productId.isNullOrEmpty()) {
-                            val eventParameters = "\"ID_Product\": \"$productId\""
-                            accountManager.reportEvent(
-                                "Зашел в товар (push)",
-                                eventParameters
-                            )
-
-
                             navController.navigateToProductDetails(productId.toLong())
                         }
                     }
@@ -382,11 +371,6 @@ class HomeFragment : Fragment() {
 
                         if (sectionId.isNullOrEmpty()) return@collect
 
-                        val eventParameters = "\"Secition_ID\": \"$sectionId\""
-                        accountManager.reportEvent(
-                            "Зашел в раздел (push)",
-                            eventParameters
-                        )
 
                         if (!blockId.isNullOrEmpty()) {
                             navController.navigateToBannerProductList(
@@ -416,12 +400,6 @@ class HomeFragment : Fragment() {
                     "Karta" -> {
                         val orderId = pushData.orderId
                         if (orderId.isNullOrEmpty()) return@collect
-
-                        val eventParameters = "\"ID_Zakaz\": \"$orderId\""
-                        accountManager.reportEvent(
-                            "Зашел в заказ, статус в пути (push)",
-                            eventParameters
-                        )
 
                         navController.navigateToOrderDetails(orderId.toLong())
 
@@ -502,8 +480,6 @@ class HomeFragment : Fragment() {
                     }
 
                     "trekervodi" -> {
-                        val eventName = "trekervodi_push"
-                        accountManager.reportEvent(eventName)
                         navController.navigateToWaterApp()
                     }
 
@@ -519,16 +495,6 @@ class HomeFragment : Fragment() {
                     }
 
                 }
-                pushData.action?.let { action ->
-                    if (action.contains("SOBNEW")) {
-                        val eventParameters = "\"SOBNEW_NAME\": \"${pushData.id}\""
-                        accountManager.reportEvent(
-                            "Зашел в приложение (push)",
-                            eventParameters
-                        )
-                    }
-                }
-
                 siteStateManager.clearPushListener()
             }
         }

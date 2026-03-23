@@ -48,9 +48,9 @@ class CartManager @Inject constructor(
 
     fun observeCarts() = cartSharedFlow.asSharedFlow()
 
-    suspend fun change(productId: Long, count: Int) = coroutineScope.launch {
+    suspend fun change(productId: Long, count: Int) = coroutineScope.async {
         val currentCartVersion = cartMutex.withLock {
-            if (_blockedProductsFlow.value.contains(productId) || count < 0) return@launch
+            if (_blockedProductsFlow.value.contains(productId) || count < 0) return@async
             val cartBeforeUpdate = cart.toMap()
             setCartItem(productId, count)
             if (firstCart == null) {
@@ -62,12 +62,12 @@ class CartManager @Inject constructor(
         delay(365L)
 
         val (currentFirstCart, cartChanges) = cartMutex.withLock {
-            if (currentCartVersion < cartVersion) return@launch
+            if (currentCartVersion < cartVersion) return@async
             val cartChanges = calculateCartChanges(
                 firstCart ?: emptyMap(), cart
             )
             val firstCartCopy = firstCart?.toMap()
-            if (cartChanges.isEmpty() || firstCartCopy == null) return@launch
+            if (cartChanges.isEmpty() || firstCartCopy == null) return@async
             firstCart = null
             _blockedProductsFlow.update { s -> s + cartChanges.keys }
             firstCartCopy to cartChanges

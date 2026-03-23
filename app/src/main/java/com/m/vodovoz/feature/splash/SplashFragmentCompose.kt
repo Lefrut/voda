@@ -123,12 +123,6 @@ class SplashFragment : Fragment() {
         }
     }
 
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        accountManager.reportEvent("Зашел в приложение")
-    }
-
     private suspend fun listenEvents(): Unit = splashViewModel.events.collect { event ->
         when (event) {
             SplashEvent.RefreshApp -> {

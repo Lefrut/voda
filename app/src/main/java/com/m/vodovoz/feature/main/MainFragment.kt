@@ -2,7 +2,6 @@ package com.m.vodovoz.feature.main
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.app.Activity.RESULT_OK
 import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -163,14 +162,9 @@ class MainFragment : Fragment(), SnackbarHostStateOwner {
     }
 
 
-    private val updateResultLauncher =
-        registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result: ActivityResult ->
-            if (result.resultCode != RESULT_OK) {
-                accountManager.reportError("Update flow failed! Result code: ${result.resultCode}")
-            } else {
-                accountManager.reportEvent("Success update!")
-            }
-        }
+    private val updateResultLauncher = registerForActivityResult(
+        ActivityResultContracts.StartIntentSenderForResult()
+    ) { _: ActivityResult -> }
 
     private fun checkForUpdate() {
         appUpdateController.checkForUpdate(updateResultLauncher)

@@ -14,6 +14,7 @@ import com.m.vodovoz.common.model.ButtonAction
 import com.m.vodovoz.common.model.GlobalAppLinks
 import com.m.vodovoz.common.model.VodovozAction
 import com.m.vodovoz.common.resources.ResourcesProvider
+import com.m.vodovoz.core.analytics.Analytics
 import com.m.vodovoz.design_system.model.AboutAdvertisingUi
 import com.m.vodovoz.design_system.model.BannerUi
 import com.m.vodovoz.design_system.model.CategoryWithProductsUi
@@ -31,6 +32,7 @@ import com.m.vodovoz.domain.general.respository.UserPreferencesRepository
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
 import com.m.vodovoz.feature.home.model.AppUpdateInfoUi
 import com.m.vodovoz.feature.home.model.HomeListItem
+import com.m.vodovoz.feature.home.model.HomeListItem.Positions
 import com.m.vodovoz.feature.home.model.HomeOrderUi
 import com.m.vodovoz.feature.home.model.MenuItemTypeUi
 import com.m.vodovoz.feature.home.model.MenuItemUi
@@ -262,12 +264,32 @@ class HomeFlowViewModel @Inject constructor(
             currentCategoryId = categoryWithProducts.id
         )
 
+        val updatedItemPosition = updatedItem.position
+
+        val eventName = when (updatedItemPosition) {
+            Positions.BOTTOM_SECTION -> {
+                "special_segment_bottom_tap"
+            }
+
+            Positions.TOP_SECTION -> {
+                "special_segment_top_tap"
+            }
+
+            else -> {
+                ""
+            }
+        }
+        Analytics.reportEvent(eventName){
+            param("name", categoryWithProducts.name)
+        }
 
         updateState { s ->
             s.copy(items = s.items.plusItem(updatedItem))
         }
 
         if (categoryWithProducts.items.isNotEmpty()) return@launch
+
+
 
         fetchDataThenUpdateItems(
             request = {
@@ -311,6 +333,7 @@ class HomeFlowViewModel @Inject constructor(
     }
 
     fun navigateToSearch() = viewModelScope.launch {
+        Analytics.reportEvent("search_initiate")
         sendEvent(HomeEvents.GoToSearch)
     }
 
@@ -352,6 +375,9 @@ class HomeFlowViewModel @Inject constructor(
     }
 
     fun navigateToPopularCategory(popularCategory: PopularCategoryUi) = viewModelScope.launch {
+        Analytics.reportEvent("category_tap") {
+            param("name", popularCategory.name)
+        }
         if (popularCategory.action == null) {
             sendEvent(HomeEvents.GoToCategoryProductList(popularCategory.id))
         } else {
@@ -380,6 +406,9 @@ class HomeFlowViewModel @Inject constructor(
 
     fun activateBannerAction(banner: BannerUi) = viewModelScope.launch {
         sendEvent(HomeEvents.ActivateAction(banner.action))
+        Analytics.reportEvent("main_promo_banner_tap") {
+            param("name", banner.name)
+        }
     }
 
     fun activateSpecialPromotionAction(action: VodovozAction) = viewModelScope.launch {
@@ -390,6 +419,7 @@ class HomeFlowViewModel @Inject constructor(
 
 
     fun navigateToOrderDetails(order: HomeOrderUi) = viewModelScope.launch {
+        Analytics.reportEvent("active_order_click")
         sendEvent(HomeEvents.GoToOrderDetails(order.orderId))
     }
 
@@ -400,11 +430,15 @@ class HomeFlowViewModel @Inject constructor(
 
 
         val event = when (menuItem.type) {
-            MenuItemTypeUi.History -> HomeEvents.GoToOrdersHistory
+            MenuItemTypeUi.History -> HomeEvents.GoToOrdersHistory.also {
+                Analytics.reportEvent("nav_my_orders_click")
+            }
 
             MenuItemTypeUi.Payment -> getWebViewEvent(GlobalAppLinks.aboutPayment)
 
-            MenuItemTypeUi.Delivery -> getWebViewEvent(GlobalAppLinks.aboutDelivery)
+            MenuItemTypeUi.Delivery -> getWebViewEvent(GlobalAppLinks.aboutDelivery).also {
+                Analytics.reportEvent("nav_delivery_click")
+            }
 
             MenuItemTypeUi.None -> {
                 return@launch

@@ -21,10 +21,10 @@ import androidx.compose.ui.text.fromHtml
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImagePainter
-import coil3.compose.rememberAsyncImagePainter
 import com.m.vodovoz.design_system.composables.button.VodovozButtonsColumn
 import com.m.vodovoz.design_system.composables.decoration.AdvertisingChip
 import com.m.vodovoz.design_system.composables.decoration.SkeletonBox
+import com.m.vodovoz.design_system.composables.image.rememberVodovozAsyncImagePainter
 import com.m.vodovoz.design_system.model.AboutAdvertisingUi
 import com.m.vodovoz.design_system.model.ColorfulButtonUi
 import com.m.vodovoz.design_system.vodovozTextLinkStyle
@@ -50,7 +50,7 @@ fun BaseBottomSheetContent(
             style = MaterialTheme.typography.titleMedium
         )
 
-        val asyncPainter = rememberAsyncImagePainter(model = picture)
+        val asyncPainter = rememberVodovozAsyncImagePainter(model = picture)
         val asyncPainterState by asyncPainter.state.collectAsStateWithLifecycle()
 
         if (picture.isNotBlank()) {

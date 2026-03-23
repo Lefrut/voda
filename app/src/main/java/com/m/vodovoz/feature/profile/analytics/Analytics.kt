@@ -7,5 +7,4 @@ fun Analytics.reportProfileEvent(screenName: String) {
     if (screenName.isNotEmpty()) {
         reportEvent("Профиль $screenName")
     }
-
 }

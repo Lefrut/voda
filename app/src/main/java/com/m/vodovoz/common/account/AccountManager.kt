@@ -78,24 +78,6 @@ class AccountManager @Inject constructor(
 
     fun isAlreadyLogin() = fetchUserId() != null
 
-    @Keep
-    fun reportEvent(text: String, eventParam: String? = null) = runCatching {
-        if (!BuildConfig.DEBUG) {
-            val eventParameters = "{\"UserID\":\"${_accountIdListener.value ?: "0"}\"" +
-                    if (eventParam != null) ",$eventParam}" else "}"
-
-            AppMetrica.reportEvent(text, eventParameters)
-        }
-
-    }
-
-    @Keep
-    fun reportError(text: String, throwable: Throwable? = null) = runCatching {
-        if (!BuildConfig.DEBUG) {
-            AppMetrica.reportError(text, throwable)
-        }
-    }
-
     data class UserSettings(
         val email: String,
         val password: String,

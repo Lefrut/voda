@@ -3,6 +3,7 @@ package com.m.vodovoz.feature.search.qrcode
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.viewModelScope
+import com.m.vodovoz.core.analytics.Analytics
 import com.m.vodovoz.ui.mvi.Event
 import com.m.vodovoz.ui.mvi.MviViewModel
 import com.m.vodovoz.ui.mvi.State
@@ -34,6 +35,8 @@ class QrCodeViewModel @Inject constructor(
             vodovozServiceRepository.getBarCodeProducts(barCode).singleResult()
 
         barCodeProductsResult.onSuccess { products ->
+            Analytics.reportEvent("barcode_scan_success")
+
             updateState { s ->
                 s.copy(uiState = QrCodeUiState.Scanner)
             }
@@ -45,6 +48,7 @@ class QrCodeViewModel @Inject constructor(
                 sendEvent(QrCodeEvents.GoToSearchProducts(barCode))
             }
         }.onFailure { t ->
+            Analytics.reportEvent("barcode_scan_failed")
 
             if (t is EmptyResultException && t.placeholder != null) {
                 val errorModel = t.placeholder

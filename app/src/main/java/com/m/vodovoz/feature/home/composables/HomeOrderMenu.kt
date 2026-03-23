@@ -25,9 +25,9 @@ import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.text.style.LineHeightStyle.Trim
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import coil3.compose.AsyncImage
 import com.m.vodovoz.R
 import com.m.vodovoz.design_system.composables.card.VodovozOutlinedCard
+import com.m.vodovoz.design_system.composables.image.VodovozAsyncImage
 import com.m.vodovoz.feature.home.model.HomeOrderUi
 import com.m.vodovoz.feature.home.model.MenuItemUi
 import com.m.vodovoz.feature.home.model.OrderWithMenuUi
@@ -81,7 +81,7 @@ fun MenuOrderItem(
         }
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            AsyncImage(
+            VodovozAsyncImage(
                 model = menuItemUi.image,
                 contentDescription = null,
                 modifier = Modifier.size(56.dp),
@@ -180,6 +180,5 @@ private fun OrderItem(
     }
 
 }
-
 
 

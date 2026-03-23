@@ -25,7 +25,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil3.compose.AsyncImage
+import com.m.vodovoz.design_system.composables.image.VodovozAsyncImage
 import com.m.vodovoz.design_system.model.SectionUi
 import com.m.vodovoz.feature.home.model.PopularCategoryUi
 
@@ -82,7 +82,7 @@ private fun HomeSectionItem(
                     shape = MaterialTheme.shapes.large
                 )
         ) {
-            AsyncImage(
+            VodovozAsyncImage(
                 model = category.image,
                 contentDescription = null,
                 modifier = Modifier.size(40.dp),
@@ -107,4 +107,3 @@ private fun HomeSectionItem(
         )
     }
 }
-

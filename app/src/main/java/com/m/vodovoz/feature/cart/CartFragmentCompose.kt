@@ -171,7 +171,6 @@ class CartFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         observeTabReselect()
-        accountManager.reportEvent("Зашел в корзину")
 
         ViewCompat.setOnApplyWindowInsetsListener(view) { _, insets ->
             val imeVisible = insets.isVisible(WindowInsetsCompat.Type.ime())

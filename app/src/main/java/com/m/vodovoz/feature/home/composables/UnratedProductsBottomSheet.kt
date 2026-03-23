@@ -78,11 +78,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import coil3.compose.AsyncImage
 import com.gowtham.ratingbar.RatingBar
 import com.m.vodovoz.R
 import com.m.vodovoz.design_system.VodovozTheme
 import com.m.vodovoz.design_system.composables.bottom_sheet.VodovozDragHandle
+import com.m.vodovoz.design_system.composables.image.VodovozAsyncImage
 import com.m.vodovoz.feature.home.model.UnratedProductUi
 import com.m.vodovoz.feature.home.model.UnratedProductsSectionUi
 import mx.platacard.pagerindicator.PagerWormIndicator
@@ -356,7 +356,7 @@ fun UpdatedProductsExpanded(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    AsyncImage(
+                    VodovozAsyncImage(
                         modifier = Modifier
                             .size(300.dp, 300.dp)
                         ,
@@ -470,7 +470,7 @@ fun UnratedProductsPartially(
         ) {
             products.take(10).forEach { product ->
                 key(product.id) {
-                    AsyncImage(
+                    VodovozAsyncImage(
                         modifier = Modifier.size(90.dp),
                         model = product.detailPicture,
                         contentDescription = null,

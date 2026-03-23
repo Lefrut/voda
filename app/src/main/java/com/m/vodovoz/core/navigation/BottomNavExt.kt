@@ -12,6 +12,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.m.vodovoz.core.analytics.Analytics
 import java.util.LinkedList
 
 fun BottomNavigationView.setupWithNavController(
@@ -43,7 +44,8 @@ fun BottomNavigationView.setupWithNavController(
             if (graphsBackStack.size > 1) {
                 graphsBackStack.removeLast()
             }
-            selectedItemId = graphIdToTagMap.keyAt(graphIdToTagMap.indexOfValue(graphsBackStack.lastOrNull()))
+            selectedItemId =
+                graphIdToTagMap.keyAt(graphIdToTagMap.indexOfValue(graphsBackStack.lastOrNull()))
         } else {
             selectedItemId = firstFragmentGraphId
         }
@@ -94,6 +96,9 @@ fun BottomNavigationView.setupWithNavController(
         if (fragmentManager.isStateSaved) {
             false
         } else {
+            Analytics.reportEvent("bottom_nav_tap") {
+                param("tab_name", item.title)
+            }
             val newlySelectedItemTag = graphIdToTagMap[item.itemId]
             if (selectedItemTag != newlySelectedItemTag) {
                 // Pop everything above the first fragment (the "fixed start destination")
@@ -257,7 +262,11 @@ private fun FragmentManager.isOnBackStack(backStackName: String): Boolean {
 
 private fun getFragmentTag(index: Int) = "bottomNavigation#$index"
 
-private fun backPressedCallback(activity: FragmentActivity, lifecycleOwner: LifecycleOwner, callback:() -> Unit) {
+private fun backPressedCallback(
+    activity: FragmentActivity,
+    lifecycleOwner: LifecycleOwner,
+    callback: () -> Unit
+) {
     val onBackPressedCallback = object : OnBackPressedCallback(true) {
         override fun handleOnBackPressed() {
             callback.invoke()

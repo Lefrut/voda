@@ -10,7 +10,7 @@ import com.m.vodovoz.design_system.composables.decoration.AdvertisingChip
 import com.m.vodovoz.design_system.model.AboutAdvertisingUi
 import com.m.vodovoz.design_system.model.BannerUi
 
-@Suppress("NonSkippableComposable")
+
 @Composable
 fun HomeBanners(
     modifier: Modifier = Modifier,
