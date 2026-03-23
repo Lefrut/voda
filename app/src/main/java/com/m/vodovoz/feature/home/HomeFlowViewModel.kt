@@ -448,7 +448,13 @@ class HomeFlowViewModel @Inject constructor(
     }
 
     fun incrementProductToCart(product: ProductUi) = viewModelScope.launch {
-        cartManager.change(product.id, product.cartQuantity + 1)
+        cartManager.change(
+            product.id,
+            product.cartQuantity + 1,
+        ) { throwable ->
+            print(throwable)
+            Analytics.reportEvent("error_add_to_cart")
+        }
     }
 
     fun decrementProductToCart(product: ProductUi) = viewModelScope.launch {

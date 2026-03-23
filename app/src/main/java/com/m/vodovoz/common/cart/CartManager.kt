@@ -48,9 +48,13 @@ class CartManager @Inject constructor(
 
     fun observeCarts() = cartSharedFlow.asSharedFlow()
 
-    suspend fun change(productId: Long, count: Int) = coroutineScope.async {
+    fun change(
+        productId: Long,
+        count: Int,
+        onFailure: (Throwable) -> Unit = {},
+    ) = coroutineScope.launch {
         val currentCartVersion = cartMutex.withLock {
-            if (_blockedProductsFlow.value.contains(productId) || count < 0) return@async
+            if (_blockedProductsFlow.value.contains(productId) || count < 0) return@launch
             val cartBeforeUpdate = cart.toMap()
             setCartItem(productId, count)
             if (firstCart == null) {
@@ -62,12 +66,12 @@ class CartManager @Inject constructor(
         delay(365L)
 
         val (currentFirstCart, cartChanges) = cartMutex.withLock {
-            if (currentCartVersion < cartVersion) return@async
+            if (currentCartVersion < cartVersion) return@launch
             val cartChanges = calculateCartChanges(
                 firstCart ?: emptyMap(), cart
             )
             val firstCartCopy = firstCart?.toMap()
-            if (cartChanges.isEmpty() || firstCartCopy == null) return@async
+            if (cartChanges.isEmpty() || firstCartCopy == null) return@launch
             firstCart = null
             _blockedProductsFlow.update { s -> s + cartChanges.keys }
             firstCartCopy to cartChanges
@@ -79,8 +83,10 @@ class CartManager @Inject constructor(
             withLock = true
         ) {
             updateCartOnline(cartChanges, currentFirstCart)
+        }.onFailure { throwable ->
+            onFailure(throwable)
         }
-
+        
         cartMutex.withLock {
             unblockProducts(cartChanges.keys, currentCartVersion)
         }
@@ -207,12 +213,14 @@ class CartManager @Inject constructor(
         withLock: Boolean = true,
         timeout: Long = 4000L,
         operation: suspend () -> Unit,
-    ) {
-        runCatching {
+    ): Result<Unit> {
+        val result = runCatching {
             withTimeout(timeout) {
                 operation()
             }
-        }.onFailure {
+        }
+
+        result.onFailure {
             if (withLock) {
                 cartMutex.lock()
             }
@@ -227,6 +235,7 @@ class CartManager @Inject constructor(
             }
         }
 
+        return result
     }
 
 
