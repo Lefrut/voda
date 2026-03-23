@@ -97,7 +97,7 @@ fun BottomNavigationView.setupWithNavController(
             false
         } else {
             Analytics.reportEvent("bottom_nav_tap") {
-                param("tab_name", item.title)
+                param("tab_name", item.contentDescription)
             }
             val newlySelectedItemTag = graphIdToTagMap[item.itemId]
             if (selectedItemTag != newlySelectedItemTag) {
