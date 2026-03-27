@@ -21,7 +21,7 @@ import kotlinx.coroutines.delay
 @Composable
 fun LoginByEmailEntry(
     onRefreshAll: () -> Unit,
-    navKey: LoginByEmailNavKey? = null,
+    navKey: LoginByEmailNavKey,
 ) = NavigationEntry<LoginByEmailViewModel, LoginByEmailViewModel.Factory>(
     creationCallback = { factory -> factory.create(navKey) }
 ) {
