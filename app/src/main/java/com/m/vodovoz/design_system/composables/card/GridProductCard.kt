@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -88,12 +89,12 @@ fun GridProductCard(
         val forAdults = product.forAdults
 
         AsyncImageBlur(
-            modifier = Modifier.clip(MaterialTheme.shapes.small),
             model = product.image,
             showBlur = forAdults != null,
             placeholderText = forAdults?.textBlur ?: ""
         ) { imagePainter ->
             GridImageSection(
+                modifier = Modifier,
                 imagePainter = imagePainter,
                 percentLabels = product.percentLabels,
                 otherLabels = product.notPercentLabels,
@@ -167,24 +168,15 @@ private fun GridImageSection(
         Row {
             percentLabels.forEach { label ->
                 VodovozColorChipSmall(backgroundColor = label.backgroundColor, text = label.name)
+                Spacer(Modifier.width(2.dp))
             }
-            Spacer(modifier = Modifier
-                .weight(1f)
-                .pointerInput(Unit) { detectTapGestures { } })
+            Spacer(
+                modifier = Modifier
+                    .weight(1f)
+                    .pointerInput(Unit) { detectTapGestures { } })
 
             if (showFavorite) {
-                Icon(
-                    painter = painterResource(id = if (isFavorite) R.drawable.ic_favorite_filled else R.drawable.ic_favorite_outline),
-                    contentDescription = null,
-                    tint = if (isFavorite) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.surfaceTint,
-                    modifier = Modifier
-                        .size(18.dp)
-                        .clickable(
-                            onClick = onLike,
-                            indication = null,
-                            interactionSource = null
-                        )
-                )
+                Box(modifier = Modifier.size(18.dp))
             }
         }
 
@@ -200,6 +192,24 @@ private fun GridImageSection(
                 )
             }
         }
+
+        if (showFavorite) {
+            Icon(
+                painter = painterResource(id = if (isFavorite) R.drawable.ic_favorite_filled else R.drawable.ic_favorite_outline),
+                contentDescription = null,
+                tint = if (isFavorite) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.surfaceTint,
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .wrapContentSize(unbounded = true)
+                    .size(18.dp)
+                    .clickable(
+                        onClick = onLike,
+                        indication = null,
+                        interactionSource = null
+                    )
+            )
+        }
+
     }
 
 }
@@ -300,7 +310,9 @@ private fun GridProductCardPreview() {
         GridProductCard(
             product = sampleProduct,
             onClick = {},
-            modifier = Modifier.width(160.dp).height(255.dp),
+            modifier = Modifier
+                .width(160.dp)
+                .height(255.dp),
             onLike = {},
             onAnalogsClick = {},
             onDecrementToCart = {},

@@ -61,7 +61,7 @@ inline fun AsyncImageBlur(
     val imageState by imagePainter.state.collectAsStateWithLifecycle()
 
     VodovozBlur(
-        modifier = modifier.clip(MaterialTheme.shapes.small),
+        modifier = modifier,
         showBlur = showBlur && imageState !is AsyncImagePainter.State.Loading,
         placeholderText = placeholderText,
         content = {
