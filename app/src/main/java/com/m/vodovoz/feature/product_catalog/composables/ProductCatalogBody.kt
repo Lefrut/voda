@@ -14,12 +14,15 @@ import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.LocalSaveableStateRegistry
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.paging.CombinedLoadStates
 import androidx.paging.LoadState
 import com.valentinilk.shimmer.ShimmerBounds
@@ -36,6 +39,7 @@ import com.m.vodovoz.design_system.model.toUi
 import com.m.vodovoz.domain.general.model.exceptions.EmptyResultException
 import com.m.vodovoz.feature.home.model.CategoryUi
 import com.m.vodovoz.feature.product_comments.model.SortUi
+import timber.log.Timber
 
 @Suppress("NonSkippableComposable")
 @Composable

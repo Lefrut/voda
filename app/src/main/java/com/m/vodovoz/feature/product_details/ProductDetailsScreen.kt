@@ -11,13 +11,17 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.util.lerp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.m.vodovoz.design_system.composables.button.ProductBottomFloatingButton
 import com.m.vodovoz.design_system.composables.placeholders.NetworkErrorPlaceholder
 import com.m.vodovoz.design_system.composables.scaffold.VodovozScaffold
+import com.m.vodovoz.feature.product_catalog.ProductCatalogViewModel
 import com.m.vodovoz.feature.product_details.composables.MultiProductBottomSheet
 import com.m.vodovoz.feature.product_details.composables.PresentBottomSheet
 import com.m.vodovoz.feature.product_details.composables.ProductDetailsBody
@@ -33,6 +37,14 @@ fun ProductDetailsScreen(
     mediaPagerState: PagerState,
 ) {
     val productDetails = viewState.productDetails
+
+    //todo - remove
+    val productCatalogViewModel = viewModel(modelClass = ProductCatalogViewModel::class)
+
+    SideEffect {
+        //todo - remove
+        productCatalogViewModel.toString()
+    }
 
     val floatingButtonProgress by animateFloatAsState(
         targetValue = if (viewState.hideFloatingButton) 1f else 0f,

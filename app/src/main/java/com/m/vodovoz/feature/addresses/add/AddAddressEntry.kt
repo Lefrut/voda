@@ -6,7 +6,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.LocalSaveableStateRegistry
 import androidx.lifecycle.compose.LifecycleStartEffect
+import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.navigation.navOptions
 import com.m.vodovoz.R
 import com.m.vodovoz.core.navigation.NavigationEntry
@@ -29,32 +31,32 @@ fun AddAddressEntry(navKey: AddAddressNavKey? = null) =
     NavigationEntry<AddAddressViewModel, AddAddressViewModel.Factory>(
         creationCallback = { factory -> factory.create(navKey) }
     ) {
-    val viewState by viewModel.collectAsState()
-    val mainScope = rememberCoroutineScope()
-    val snackbarHostState = remember { SnackbarHostState() }
-    val mapKit: MapKit = remember { MapKitFactory.getInstance() }
+        val viewState by viewModel.collectAsState()
+        val mainScope = rememberCoroutineScope()
+        val snackbarHostState = remember { SnackbarHostState() }
+        val mapKit: MapKit = remember { MapKitFactory.getInstance() }
 
-    LifecycleStartEffect(Unit) {
-        mapKit.onStart()
-        onStopOrDispose {
-            mapKit.onStop()
+        LifecycleStartEffect(Unit) {
+            mapKit.onStart()
+            onStopOrDispose {
+                mapKit.onStop()
+            }
+        }
+
+        AddAddressScreen(
+            viewModel = viewModel,
+            viewState = viewState,
+            snackbarHostState = snackbarHostState
+        )
+
+        LifecycleEffect(snackbarHostState) {
+            observeEvents(mainScope, snackbarHostState)
+        }
+
+        BackHandler {
+            viewModel.navigateBack()
         }
     }
-
-    AddAddressScreen(
-        viewModel = viewModel,
-        viewState = viewState,
-        snackbarHostState = snackbarHostState
-    )
-
-    LifecycleEffect(snackbarHostState) {
-        observeEvents(mainScope, snackbarHostState)
-    }
-
-    BackHandler {
-        viewModel.navigateBack()
-    }
-}
 
 private suspend fun com.m.vodovoz.core.navigation.NavigationEntryScope<AddAddressViewModel>.observeEvents(
     mainScope: CoroutineScope,
@@ -63,8 +65,8 @@ private suspend fun com.m.vodovoz.core.navigation.NavigationEntryScope<AddAddres
     viewModel.events.onSubscription {
         navigator.currentBackStackEntry?.savedStateHandle?.remove<MapAddressUi>("mapAddress")
             ?.let { mapAddress ->
-            viewModel.changeMapAddress(mapAddress)
-        }
+                viewModel.changeMapAddress(mapAddress)
+            }
     }.collect { event ->
         when (event) {
             AddAddressEvent.GoBackToMap -> {

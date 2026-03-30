@@ -1,5 +1,6 @@
 package com.m.vodovoz.feature.main
 
+import android.os.Bundle
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
@@ -29,6 +30,7 @@ import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.saveable.LocalSaveableStateRegistry
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Modifier
@@ -39,17 +41,23 @@ import androidx.navigation.NavGraph
 import androidx.navigation.findNavController
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.MutableCreationExtras
+import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
+import androidx.navigation.NavOptions
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.rememberDecoratedNavEntries
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.scene.SinglePaneSceneStrategy
 import androidx.navigation3.ui.NavDisplay
+import androidx.savedstate.compose.LocalSavedStateRegistryOwner
 import com.m.vodovoz.common.webview.WebViewEntry
 import com.m.vodovoz.common.webview.api.WebViewNavKey
 import com.m.vodovoz.R
 import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.core.navigation.LegacyDestinationNavKey
 import com.m.vodovoz.core.navigation.LocalNavigator
+import com.m.vodovoz.core.navigation.viewmodel.SharedViewModelStoreNavEntryDecorator
+import com.m.vodovoz.core.navigation.viewmodel.rememberSharedViewModelStoreNavEntryDecorator
 import com.m.vodovoz.design_system.VodovozTheme
 import com.m.vodovoz.feature.about_app.AboutAppEntry
 import com.m.vodovoz.feature.about_app.api.AboutAppNavKey
@@ -200,6 +208,8 @@ fun BottmNav(
     SideEffect {
         AppNavigatorStore.navigator = navigator
     }
+
+
 
 
     Scaffold(
@@ -369,7 +379,11 @@ fun BottmNav(
             entry<ProductCommentsNavKey> { key ->
                 ProductCommentsEntry(key)
             }
-            entry<ProductDetailsNavKey> { key ->
+            entry<ProductDetailsNavKey>(
+                metadata = SharedViewModelStoreNavEntryDecorator.parent(
+                    ProductCatalogNavKey(ProductCatalogNavKey.DataSource.NewProducts)
+                )
+            ) { key ->
                 ProductDetailsEntry(key)
             }
             entry<DetailMediaNavKey> { key ->
@@ -437,7 +451,7 @@ fun BottmNav(
                     .consumeWindowInsets(paddingValues),
                 entries = navigationState.toEntries(entryProvider),
                 onBack = { navigator.goBack() },
-                sceneStrategy = SinglePaneSceneStrategy()
+                sceneStrategies = listOf(SinglePaneSceneStrategy()),
             )
         }
     }
@@ -489,7 +503,7 @@ fun NavigationState.toEntries(
     val decoratedEntries = subStacks.mapValues { (_, stack) ->
         val decorators = listOf(
             rememberSaveableStateHolderNavEntryDecorator(),
-            rememberViewModelStoreNavEntryDecorator<NavKey>(),
+            rememberSharedViewModelStoreNavEntryDecorator<NavKey>(),
         )
         rememberDecoratedNavEntries(
             backStack = stack,
@@ -556,8 +570,8 @@ class Navigator(val state: NavigationState) {
 
     fun navigate(
         resId: Int,
-        args: android.os.Bundle? = null,
-        navOptions: androidx.navigation.NavOptions? = null
+        args: Bundle? = null,
+        navOptions: NavOptions? = null
     ) {
         navController.navigate(resId, args, navOptions)
     }
