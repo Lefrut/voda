@@ -863,39 +863,30 @@ class Navigator(val state: NavigationState) {
 @Stable
 sealed interface BottomNavKey : NavKey {
 
-    val title: String
 
     @Serializable
     data object Home : BottomNavKey {
-        override val title: String
-            get() = "Дом"
-
-
     }
 
     @Serializable
     data object Catalog : BottomNavKey {
-        override val title: String
-            get() = "Каталог"
+
     }
 
 
     @Serializable
     data object Cart : BottomNavKey {
-        override val title: String
-            get() = "Корзина"
+
     }
 
     @Serializable
     data object Favorites : BottomNavKey {
-        override val title: String
-            get() = "Избранные"
+
     }
 
     @Serializable
     data object Profile : BottomNavKey {
-        override val title: String
-            get() = "Профиль"
+
     }
 
 
