@@ -1,9 +1,26 @@
 package com.m.vodovoz.feature.main
 
 import android.os.Bundle
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -19,22 +36,24 @@ import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.annotation.VisibleForTesting
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.consumeWindowInsets
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.systemBars
-import androidx.compose.foundation.layout.systemBarsPadding
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.Alignment
+import androidx.compose.material3.Icon
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.saveable.LocalSaveableStateRegistry
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation.NavController
 import androidx.navigation.NavGraph
@@ -58,7 +77,7 @@ import com.m.vodovoz.core.navigation.LegacyDestinationNavKey
 import com.m.vodovoz.core.navigation.LocalNavigator
 import com.m.vodovoz.core.navigation.viewmodel.SharedViewModelStoreNavEntryDecorator
 import com.m.vodovoz.core.navigation.viewmodel.rememberSharedViewModelStoreNavEntryDecorator
-import com.m.vodovoz.design_system.VodovozTheme
+import com.m.vodovoz.design_system.robotoFontFamily
 import com.m.vodovoz.feature.about_app.AboutAppEntry
 import com.m.vodovoz.feature.about_app.api.AboutAppNavKey
 import com.m.vodovoz.feature.about_product.AboutProductEntry
@@ -203,6 +222,7 @@ fun BottmNav(
     val navigator = remember { Navigator(navigationState) }
 
     val showBottomBar by tabManager.observeShowBottomBar().collectAsStateWithLifecycle()
+    val cartState by tabManager.observeBottomNavCartState().collectAsStateWithLifecycle()
 
 
     SideEffect {
@@ -219,22 +239,11 @@ fun BottmNav(
             .consumeWindowInsets(WindowInsets.systemBars),
         bottomBar = {
             if (showBottomBar) {
-                NavigationBar {
-                    BottomNavKey.values.forEach { key ->
-                        NavigationBarItem(
-                            selected = key == navigationState.currentKey,
-                            label = {
-                                Text(text = key.title)
-                            },
-                            icon = {
-
-                            },
-                            onClick = {
-                                navigator.navigate(key)
-                            }
-                        )
-                    }
-                }
+                BottomNavBar(
+                    selectedKey = navigationState.currentTopLevelKey as? BottomNavKey,
+                    cartState = cartState,
+                    onItemClick = navigator::navigate,
+                )
             }
         },
         contentWindowInsets = WindowInsets(0)
@@ -381,7 +390,7 @@ fun BottmNav(
             }
             entry<ProductDetailsNavKey>(
                 metadata = SharedViewModelStoreNavEntryDecorator.parent(
-                    ProductCatalogNavKey(ProductCatalogNavKey.DataSource.NewProducts)
+                    ProductCatalogNavKey(ProductCatalogNavKey.DataSource.NewProducts).toContentKey()
                 )
             ) { key ->
                 ProductDetailsEntry(key)
@@ -456,6 +465,134 @@ fun BottmNav(
         }
     }
 }
+
+@Composable
+private fun BottomNavBar(
+    selectedKey: BottomNavKey?,
+    cartState: TabManager.BottomNavCartState?,
+    onItemClick: (BottomNavKey) -> Unit,
+) {
+    val selectedColor = colorResource(R.color.bluePrimary)
+    val unselectedColor = Color(0xFFBDBDBD)
+    val backgroundColor = colorResource(R.color.white)
+
+    Surface(
+        color = backgroundColor,
+        contentColor = selectedColor,
+        tonalElevation = 0.dp,
+        shadowElevation = 4.dp,
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            BottomNavKey.values.forEach { key ->
+                val isSelected = key == selectedKey
+                val itemColor = if (isSelected) selectedColor else unselectedColor
+
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight()
+                        .selectable(
+                            selected = isSelected,
+                            onClick = { onItemClick(key) },
+                            role = Role.Tab,
+                        ),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center,
+                ) {
+                    Box(
+                        modifier = Modifier.size(28.dp),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Icon(
+                            painter = painterResource(key.iconResId),
+                            contentDescription = bottomNavLabel(key, cartState),
+                            tint = itemColor,
+                            modifier = Modifier.size(24.dp),
+                        )
+
+                        if (key is BottomNavKey.Cart && cartState?.count.orZero() > 0) {
+                            Box(
+                                modifier = Modifier
+                                    .align(Alignment.TopEnd)
+                                    .offset(x = 4.dp, y = (-2).dp)
+                                    .size(16.dp)
+                                    .background(
+                                        color = colorResource(R.color.promo_red),
+                                        shape = CircleShape,
+                                    ),
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                Text(
+                                    text = cartState?.count.orZero().toString(),
+                                    color = backgroundColor,
+                                    style = TextStyle(
+                                        fontFamily = robotoFontFamily,
+                                        fontWeight = FontWeight.Normal,
+                                        fontSize = 9.sp,
+                                        lineHeight = 9.sp,
+                                        letterSpacing = 0.sp,
+                                    ),
+                                )
+                            }
+                        }
+                    }
+
+                    Text(
+                        text = bottomNavLabel(key, cartState),
+                        color = itemColor,
+                        style = TextStyle(
+                            fontFamily = robotoFontFamily,
+                            fontWeight = FontWeight.Normal,
+                            fontSize = 12.sp,
+                            lineHeight = 16.sp,
+                            letterSpacing = 0.sp,
+                        ),
+                        modifier = Modifier.padding(top = 2.dp),
+                        maxLines = 1,
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun bottomNavLabel(
+    key: BottomNavKey,
+    cartState: TabManager.BottomNavCartState?,
+): String {
+    return if (key is BottomNavKey.Cart && cartState?.count.orZero() > 0) {
+        stringResource(R.string.price_text, cartState?.total.orZero())
+    } else {
+        stringResource(key.labelResId)
+    }
+}
+
+private val BottomNavKey.iconResId: Int
+    get() = when (this) {
+        BottomNavKey.Home -> R.drawable.ic_home
+        BottomNavKey.Catalog -> R.drawable.ic_catalog
+        BottomNavKey.Cart -> R.drawable.ic_basket
+        BottomNavKey.Favorites -> R.drawable.ic_like
+        BottomNavKey.Profile -> R.drawable.ic_profile
+    }
+
+private val BottomNavKey.labelResId: Int
+    get() = when (this) {
+        BottomNavKey.Home -> R.string.home
+        BottomNavKey.Catalog -> R.string.catalog
+        BottomNavKey.Cart -> R.string.cart
+        BottomNavKey.Favorites -> R.string.favorite
+        BottomNavKey.Profile -> R.string.account
+    }
+
+private fun Int?.orZero(): Int = this ?: 0
 
 @Composable
 fun rememberNavigationState(
@@ -768,4 +905,9 @@ sealed interface BottomNavKey : NavKey {
 
     }
 
+}
+
+
+fun NavKey.toContentKey(): String {
+    return toString()
 }

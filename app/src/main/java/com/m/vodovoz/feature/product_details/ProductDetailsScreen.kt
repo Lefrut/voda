@@ -38,14 +38,6 @@ fun ProductDetailsScreen(
 ) {
     val productDetails = viewState.productDetails
 
-    //todo - remove
-    val productCatalogViewModel = viewModel(modelClass = ProductCatalogViewModel::class)
-
-    SideEffect {
-        //todo - remove
-        productCatalogViewModel.toString()
-    }
-
     val floatingButtonProgress by animateFloatAsState(
         targetValue = if (viewState.hideFloatingButton) 1f else 0f,
         animationSpec = tween(easing = LinearEasing, durationMillis = 100),
