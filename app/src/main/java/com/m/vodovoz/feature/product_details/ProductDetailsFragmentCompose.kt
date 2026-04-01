@@ -32,7 +32,6 @@ import com.m.vodovoz.design_system.VodovozTheme
 import com.m.vodovoz.design_system.composables.placeholders.ForAdultsPlaceholder
 import com.m.vodovoz.design_system.composables.snackbar.VodovozSnackBarVisuals
 import com.m.vodovoz.design_system.effects.LifecycleEffect
-import com.m.vodovoz.feature.main.AppNavigatorStore
 import com.m.vodovoz.ui.mvi.collectAsState
 import com.m.vodovoz.ui.snackbar.snackBarHostState
 import com.m.vodovoz.util.extensions.copyText

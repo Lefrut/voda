@@ -12,6 +12,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.LineHeightStyle
 import com.m.vodovoz.R
 import com.m.vodovoz.common.model.ButtonAction
+import com.m.vodovoz.core.navigation.LocalNavigator
 import com.m.vodovoz.core.navigation.navigateToPreOrder
 import com.m.vodovoz.design_system.ExtendedTheme
 import com.m.vodovoz.design_system.composables.button.QuantityButtonSmall
@@ -28,7 +29,6 @@ import com.m.vodovoz.domain.general.model.product.ProductModel
 import com.m.vodovoz.domain.general.model.product.SectionModel
 import com.m.vodovoz.feature.home.model.PopularCategoryUi
 import com.m.vodovoz.feature.home.model.toUi
-import com.m.vodovoz.feature.main.AppNavigatorStore
 
 
 fun <T : VodovozItemUi<T>> Iterable<T>.withCanViewForAdults(canView: Boolean): List<T> {
@@ -390,11 +390,13 @@ fun ProductUi.Button(
     onDecrementToCart: (ProductUi) -> Unit,
 
 ) {
-    val product = this@Button
+    val product = apply {  }
+
+    val navigator = LocalNavigator.current
 
     val onAnalogsOrPreOrderClick = { it: ProductUi ->
         if (it.button?.id == "predzakaz") {
-            AppNavigatorStore.navigator?.navigateToPreOrder(it.id)
+            navigator.navigateToPreOrder(it.id)
         }
         else onAnalogsClick(it)
     }

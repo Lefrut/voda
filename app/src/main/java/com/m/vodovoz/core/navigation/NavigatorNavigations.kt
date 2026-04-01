@@ -4,8 +4,6 @@ package com.m.vodovoz.core.navigation
 
 import android.os.Bundle
 
-import androidx.core.os.bundleOf
-
 import androidx.navigation.NavOptions
 
 import androidx.navigation.navOptions
@@ -64,7 +62,6 @@ import com.m.vodovoz.feature.certificate_activation.api.CertificateActivationNav
 import com.m.vodovoz.feature.home.model.CategoryUi
 import com.m.vodovoz.feature.categories.api.CategoriesNavKey
 
-import com.m.vodovoz.feature.document_viewer.api.DocumentViewerNavKey
 import com.m.vodovoz.feature.faq.api.FAQNavKey
 import com.m.vodovoz.feature.filter_values.api.FilterValuesNavKey
 import com.m.vodovoz.feature.map.model.MapAddressUi
@@ -361,7 +358,7 @@ fun Navigator.navigateToLoginByPhone(phone: String, waitSeconds: Int, userUrl: S
         LoginByPhoneCodeNavKey(
             phoneNumber = phone,
             waitRequestCodeSeconds = waitSeconds,
-            user_url = userUrl
+            userUrl = userUrl
         )
     )
 }
@@ -527,13 +524,6 @@ fun Navigator.navigateToImagePicker() {
     navigateLegacy(
         destinationId = R.id.imagePickerFragment,
         args = Bundle.EMPTY,
-        navOptions = navOptions { slideAnim() }
-    )
-}
-
-fun Navigator.navigateToBlockApp() {
-    navigateLegacy(
-        destinationId = R.id.blockAppFragment,
         navOptions = navOptions { slideAnim() }
     )
 }

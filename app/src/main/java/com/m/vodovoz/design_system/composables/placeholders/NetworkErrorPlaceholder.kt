@@ -1,6 +1,7 @@
 package com.m.vodovoz.design_system.composables.placeholders
 
 import android.annotation.SuppressLint
+import android.os.Bundle
 import android.os.Parcelable
 import androidx.activity.compose.LocalActivity
 import androidx.annotation.DrawableRes
@@ -26,22 +27,26 @@ import androidx.compose.runtime.saveable.Saver
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.findNavController
+import androidx.navigation.navOptions
 import com.m.vodovoz.R
 import com.m.vodovoz.common.block_app_signal.BlockAppSignal
 import com.m.vodovoz.common.cache.VodovozHttpError
+import com.m.vodovoz.core.navigation.LocalNavigator
 import com.m.vodovoz.core.navigation.navigateToBlockApp
+import com.m.vodovoz.core.navigation.slideAnim
 import com.m.vodovoz.design_system.VodovozTheme
 import com.m.vodovoz.design_system.composables.button.VodovozButton
 import com.m.vodovoz.design_system.composables.button.VodovozButtonsColumn
 import com.m.vodovoz.design_system.effects.LifecycleEffect
 import com.m.vodovoz.design_system.model.ColorfulButtonUi
-import com.m.vodovoz.feature.main.AppNavigatorStore
 import com.m.vodovoz.ui.base.blockAppSignal
 import com.m.vodovoz.ui.base.httpErrorCache
 import com.m.vodovoz.util.extensions.isInternetAvailable
@@ -141,6 +146,7 @@ fun NetworkErrorPlaceholder(
     onTryAgainClick: () -> Unit,
 ) {
     val activity = LocalActivity.current
+    val view = LocalView.current
 
     val placeholderType = when (mode) {
         ErrorPlaceholderMode.Automatic -> {
@@ -162,7 +168,12 @@ fun NetworkErrorPlaceholder(
                     onTryAgainClick()
                 },
                 onBlock = {
-                    AppNavigatorStore.navigator?.navigateToBlockApp()
+                    activity.findNavController(view.id).navigate(
+                        R.id.blockAppFragment,
+                        Bundle.EMPTY,
+                        navOptions { slideAnim() }
+                    )
+
                 }
             )
         }

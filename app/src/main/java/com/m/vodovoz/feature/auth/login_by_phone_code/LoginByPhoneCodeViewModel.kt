@@ -19,7 +19,6 @@ import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import java.time.LocalTime
@@ -43,7 +42,7 @@ class LoginByPhoneCodeViewModel @AssistedInject constructor(
     private val waitRequestCodeSeconds: Int =
         navKey?.waitRequestCodeSeconds ?: savedStateHandle[LoginByPhoneCodeArgs.WAIT_SECONDS] ?: 60
 
-    private val userUrl = navKey?.user_url ?: savedStateHandle.getString(LoginByPhoneCodeArgs.USER_URL)
+    private val userUrl = navKey?.userUrl ?: savedStateHandle.getString(LoginByPhoneCodeArgs.USER_URL)
     val smsCodeCount = siteStateManager.siteStateFlow.value?.smsCodeCount ?: 4
 
     init {

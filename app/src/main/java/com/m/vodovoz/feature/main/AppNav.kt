@@ -72,6 +72,8 @@ import androidx.savedstate.compose.LocalSavedStateRegistryOwner
 import com.m.vodovoz.common.webview.WebViewEntry
 import com.m.vodovoz.common.webview.api.WebViewNavKey
 import com.m.vodovoz.R
+import com.m.vodovoz.common.media.ImagePickerEntry
+import com.m.vodovoz.common.media.api.ImagePickerNavKey
 import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.core.navigation.LegacyDestinationNavKey
 import com.m.vodovoz.core.navigation.LocalNavigator
@@ -225,11 +227,6 @@ fun BottmNav(
     val cartState by tabManager.observeBottomNavCartState().collectAsStateWithLifecycle()
 
 
-    SideEffect {
-        AppNavigatorStore.navigator = navigator
-    }
-
-
 
 
     Scaffold(
@@ -267,6 +264,9 @@ fun BottmNav(
             }
             entry<BottomNavKey.Favorites> {
                 FavoriteEntry(favoriteFlowViewModel)
+            }
+            entry<ImagePickerNavKey> {
+                ImagePickerEntry()
             }
             entry<AboutAppNavKey> {
                 AboutAppEntry(onRefreshApp = {})
@@ -673,13 +673,10 @@ class Navigator(val state: NavigationState) {
     private val backStackEntries = mutableMapOf<NavKey, BackStackEntry>()
 
     val currentBackStackEntry: BackStackEntry?
-        get() = state.currentSubStack.lastOrNull()?.let(::entryOf)
+        get() = null
 
     val previousBackStackEntry: BackStackEntry?
-        get() = state.currentSubStack
-            .getOrNull(state.currentSubStack.lastIndex - 1)
-            ?.let(::entryOf)
-
+        get() = null
 
     val graph: NavGraph
         get() = navController.graph
@@ -722,7 +719,7 @@ class Navigator(val state: NavigationState) {
             )
             return
         }
-        updateEntryArgs(key)
+
         when (key) {
             state.currentTopLevelKey -> clearSubStack()
             in state.topLevelKeys -> goToTopLevel(key)
@@ -734,8 +731,6 @@ class Navigator(val state: NavigationState) {
         when (state.currentKey) {
             state.startKey -> error("You cannot go back from the start route")
             state.currentTopLevelKey -> {
-                // We're at the base of the current sub stack, go back to the previous top level
-                // stack.
                 state.topLevelStack.removeLastOrNull()
             }
 
@@ -745,7 +740,7 @@ class Navigator(val state: NavigationState) {
 
     private fun goToKey(key: NavKey) {
         state.currentSubStack.apply {
-            // Remove it if it's already in the stack so it's added at the end.
+
             remove(key)
             add(key)
         }
@@ -768,29 +763,6 @@ class Navigator(val state: NavigationState) {
         }
     }
 
-    private fun entryOf(key: NavKey): BackStackEntry {
-        return backStackEntries.getOrPut(key) {
-            BackStackEntry(
-                savedStateHandle = SavedStateHandle(),
-                destination = destinationId(key)?.let(::Destination)
-            )
-        }
-    }
-
-    private fun updateEntryArgs(key: NavKey) {
-        val savedStateHandle = entryOf(key).savedStateHandle
-        key.javaClass.declaredFields
-            .asSequence()
-            .filterNot { field ->
-                field.isSynthetic || ReflectModifier.isStatic(field.modifiers)
-            }
-            .forEach { field ->
-                runCatching {
-                    field.isAccessible = true
-                    savedStateHandle[field.name] = field.get(key)
-                }
-            }
-    }
 
     private fun destinationId(key: NavKey): Int? {
         return when (key) {

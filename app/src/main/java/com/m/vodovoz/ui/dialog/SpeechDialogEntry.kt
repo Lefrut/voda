@@ -9,16 +9,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalContext
 import com.m.vodovoz.R
+import com.m.vodovoz.core.navigation.LocalNavigator
 import com.m.vodovoz.core.navigation.navigateToSearch
 import com.m.vodovoz.design_system.VodovozTheme
-import com.m.vodovoz.feature.main.AppNavigatorStore
 import java.util.Locale
 
 @Composable
 fun SpeechDialogEntry() {
     VodovozTheme {
         val context = LocalContext.current
-        val navigator = AppNavigatorStore.navigator
+        val navigator = LocalNavigator.current
         val getSpeechResultLauncher = rememberLauncherForActivityResult(
             contract = ActivityResultContracts.StartActivityForResult()
         ) { result ->
@@ -30,11 +30,11 @@ fun SpeechDialogEntry() {
                         ?.ifBlank { null }
                         ?: return@rememberLauncherForActivityResult
 
-                    navigator?.navigateToSearch(query)
+                    navigator.navigateToSearch(query)
                 }
 
                 else -> {
-                    navigator?.goBack()
+                    navigator.goBack()
                 }
             }
         }

@@ -21,7 +21,7 @@ import kotlinx.coroutines.delay
 
 @Composable
 fun LoginByPhoneCodeEntry(
-    navKey: LoginByPhoneCodeNavKey? = null,
+    navKey: LoginByPhoneCodeNavKey,
 ) = NavigationEntry<LoginByPhoneCodeViewModel, LoginByPhoneCodeViewModel.Factory>(
     creationCallback = { factory -> factory.create(navKey) }
 ) {

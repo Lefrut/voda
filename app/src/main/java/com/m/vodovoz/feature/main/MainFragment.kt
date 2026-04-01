@@ -113,41 +113,10 @@ class MainFragment : Fragment(), SnackbarHostStateOwner {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         checkForUpdate()
-
-        observeCartState()
-        observeTabVisibility()
-
-        listenInsetsStates()
-        setOnApplyWindowInsets()
-
     }
 
 
-    private fun setOnApplyWindowInsets() {
-//        ViewCompat.setOnApplyWindowInsetsListener(
-//            binding.fgvContainer
-//        ) { _, applyInsets ->
-//            return@setOnApplyWindowInsetsListener WindowInsetsCompat.Builder(
-//                applyInsets
-//            ).apply {
-//                insetsVisibilityState.insets.map { flow ->
-//                    flow.value
-//                }.forEach { insetState ->
-//                    if (insetState.consume) {
-//                        consumeWindowInsets(insetState.type)
-//                    }
-//                }
-//            }.build()
-//        }
-//
-//        ViewCompat.setOnApplyWindowInsetsListener(
-//            binding.nvNavigation
-//        ) { _, _ ->
-//            return@setOnApplyWindowInsetsListener CONSUMED
-//        }
-    }
 
 
     private val updateResultLauncher =
@@ -164,12 +133,6 @@ class MainFragment : Fragment(), SnackbarHostStateOwner {
     }
 
 
-    override fun onStart() {
-        super.onStart()
-        if (!viewModel.isBottomBarInitialized) {
-            setupBottomNavigationBar()
-        }
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -209,100 +172,11 @@ class MainFragment : Fragment(), SnackbarHostStateOwner {
         }
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        viewModel.isBottomBarInitialized = false
-    }
-
-    private fun observeTabVisibility() = lifecycleScope.launch {
-        repeatOnLifecycle(Lifecycle.State.STARTED) {
-            tabManager.observeShowBottomBar().collect { isVisible ->
-//                val bottomNavigationView = binding.nvNavigation
-//                if (isVisible) {
-//                    bottomNavigationView.apply {
-//                        animate().cancel()
-//                        alpha = if (isVisible) 1f else 0f
-//                        visibility = View.VISIBLE
-//                        animate().alpha(1f).setInterpolator(
-//                            LinearInterpolator()
-//                        ).setDuration(300).start()
-//                    }
-//                } else {
-//                    bottomNavigationView.apply { visibility = View.GONE }
-//                }
-            }
-        }
-    }
-
-    private fun listenInsetsStates() = combine(
-        insetsVisibilityState.insets
-    ) { insetsStates -> insetsStates.toList() }.flowWithLifecycle(lifecycle)
-        .onEach { insetsStates ->
-//            binding.root.doWhenAttached {
-//                var accInsetsPadding = InsetsPadding(0, 0, 0, 0)
-//
-//                for (insetState in insetsStates) {
-//                    if (insetState.type == Type.ime()) {
-//                        if (insetState.consume) binding.root.handleImeInsetIfNeeded()
-//                        else binding.root.removeImeHandling()
-//                        continue
-//                    }
-//
-//                    val insets = ViewCompat.getRootWindowInsets(binding.root)
-//                    insets?.getInsetsIgnoringVisibility(insetState.type)?.toInsetsPadding()
-//                        ?.takeIf { insetState.consume }
-//                        ?.let { insetsPadding ->
-//                            accInsetsPadding += insetsPadding
-//                        }
-//                }
-//
-//                binding.root.updatePadding(accInsetsPadding)
-//                binding.root.requestApplyInsets()
-//            }
-        }.launchIn(viewLifecycleOwner.lifecycleScope)
-
-
-    @SuppressLint("UseKtx", "StringFormatMatches")
-    private fun observeCartState() {
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-//                tabManager.observeBottomNavCartState().collect { state ->
-//                    if (state == null || state.count == 0) {
-//                        binding.circleAmount.isVisible = false
-//                        binding.nvNavigation.menu.getItem(2).title = getString(R.string.cart)
-//                    } else {
-//                        binding.circleAmount.text = state.count.toString()
-//                        binding.circleAmount.isVisible = true
-//                        binding.circleAmount
-//                            .animate()
-//                            .scaleX(1.4f)
-//                            .scaleY(1.4f)
-//                            .setDuration(300)
-//                            .setInterpolator(AccelerateInterpolator())
-//                            .withEndAction {
-//                                binding.circleAmount.animate()
-//                                    .scaleX(1f)
-//                                    .scaleY(1f)
-//                            }
-//                            .start()
-//                        binding.nvNavigation.menu.getItem(2).title =
-//                            getString(R.string.price_text, state.total)
-//                    }
-//                }
-            }
-        }
-    }
-
-
     override fun onResume() {
         super.onResume()
         appUpdateController.onResumeAction()
     }
 
-
-    private fun setupBottomNavigationBar() = lifecycleScope.launch {
-        viewModel.isBottomBarInitialized = true
-    }
 
 
     private fun popupSnackbarForCompleteUpdate() {
