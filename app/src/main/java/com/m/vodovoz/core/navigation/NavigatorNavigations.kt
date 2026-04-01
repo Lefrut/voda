@@ -1,7 +1,6 @@
 package com.m.vodovoz.core.navigation
 
 
-
 import android.os.Bundle
 
 import androidx.navigation.NavOptions
@@ -9,6 +8,7 @@ import androidx.navigation.NavOptions
 import androidx.navigation.navOptions
 
 import com.m.vodovoz.R
+import com.m.vodovoz.common.media.api.ImagePickerNavKey
 
 import com.m.vodovoz.design_system.model.ColorfulButtonUi
 
@@ -99,21 +99,6 @@ import com.m.vodovoz.common.webview.api.WebViewNavKey
 import com.m.vodovoz.ui.dialog.api.SpeechDialogNavKey
 
 import java.time.LocalDate
-
-private fun Navigator.navigateLegacy(
-    destinationId: Int,
-    args: Bundle? = null,
-    navOptions: NavOptions? = null,
-) {
-    navigate(
-        LegacyDestinationNavKey(
-            destinationId = destinationId,
-            args = args,
-            navOptions = navOptions
-        )
-    )
-}
-
 
 
 fun Navigator.navigateToWriteMessage() {
@@ -521,9 +506,5 @@ fun Navigator.navigateToAllServices() {
 }
 
 fun Navigator.navigateToImagePicker() {
-    navigateLegacy(
-        destinationId = R.id.imagePickerFragment,
-        args = Bundle.EMPTY,
-        navOptions = navOptions { slideAnim() }
-    )
+    navigate(ImagePickerNavKey)
 }

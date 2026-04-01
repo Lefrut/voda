@@ -39,8 +39,6 @@ import androidx.navigation.navOptions
 import com.m.vodovoz.R
 import com.m.vodovoz.common.block_app_signal.BlockAppSignal
 import com.m.vodovoz.common.cache.VodovozHttpError
-import com.m.vodovoz.core.navigation.LocalNavigator
-import com.m.vodovoz.core.navigation.navigateToBlockApp
 import com.m.vodovoz.core.navigation.slideAnim
 import com.m.vodovoz.design_system.VodovozTheme
 import com.m.vodovoz.design_system.composables.button.VodovozButton

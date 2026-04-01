@@ -75,7 +75,6 @@ import com.m.vodovoz.R
 import com.m.vodovoz.common.media.ImagePickerEntry
 import com.m.vodovoz.common.media.api.ImagePickerNavKey
 import com.m.vodovoz.common.tab.TabManager
-import com.m.vodovoz.core.navigation.LegacyDestinationNavKey
 import com.m.vodovoz.core.navigation.LocalNavigator
 import com.m.vodovoz.core.navigation.viewmodel.SharedViewModelStoreNavEntryDecorator
 import com.m.vodovoz.core.navigation.viewmodel.rememberSharedViewModelStoreNavEntryDecorator
@@ -670,7 +669,6 @@ class Navigator(val state: NavigationState) {
     val navController: NavController
         get() = _navController ?: error("Navigator is not attached to NavController")
 
-    private val backStackEntries = mutableMapOf<NavKey, BackStackEntry>()
 
     val currentBackStackEntry: BackStackEntry?
         get() = null
@@ -702,24 +700,8 @@ class Navigator(val state: NavigationState) {
         popBackStack(destinationId, inclusive)
 
 
-    fun navigate(
-        resId: Int,
-        args: Bundle? = null,
-        navOptions: NavOptions? = null
-    ) {
-        navController.navigate(resId, args, navOptions)
-    }
 
     fun navigate(key: NavKey) {
-        if (key is LegacyDestinationNavKey) {
-            navController.navigate(
-                key.destinationId,
-                key.args,
-                key.navOptions
-            )
-            return
-        }
-
         when (key) {
             state.currentTopLevelKey -> clearSubStack()
             in state.topLevelKeys -> goToTopLevel(key)
@@ -766,7 +748,6 @@ class Navigator(val state: NavigationState) {
 
     private fun destinationId(key: NavKey): Int? {
         return when (key) {
-            is LegacyDestinationNavKey -> key.destinationId
             is BottomNavKey.Home, is HomeNavKey -> R.id.homeFragment
             is BottomNavKey.Catalog, is CatalogNavKey -> R.id.catalogFragment
             is BottomNavKey.Cart, is CartNavKey -> R.id.cartFragment
