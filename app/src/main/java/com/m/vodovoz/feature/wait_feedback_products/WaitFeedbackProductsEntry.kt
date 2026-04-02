@@ -6,8 +6,8 @@ import androidx.compose.runtime.getValue
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import com.m.vodovoz.R
 import com.m.vodovoz.core.navigation.NavigationEntry
+import com.m.vodovoz.core.navigation.navigateToCatalog
 import com.m.vodovoz.core.navigation.navigateToProductDetails
 import com.m.vodovoz.core.navigation.navigateToWriteComment
 import com.m.vodovoz.feature.wait_feedback_products.model.WaitFeedbackProductsEvent
@@ -46,7 +46,7 @@ fun WaitFeedbackProductsEntry() = NavigationEntry<WaitFeedbackProductsViewModel>
             }
 
             WaitFeedbackProductsEvent.GoToCatalog -> {
-                viewModel.tabManager.selectTab(R.id.graph_catalog)
+                navigator.navigateToCatalog()
             }
 
             is WaitFeedbackProductsEvent.GoToProductsDetails -> {

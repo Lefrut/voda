@@ -32,7 +32,7 @@ fun AddressesEntry(navKey: AddressesNavKey? = null) =
             AddressScreenTypeUi.Add -> Unit
             AddressScreenTypeUi.Choose -> {
                 mapKit.onStart()
-                viewModel.tabManager.changeTabVisibility(false)
+                viewModel.tabManager.setTabVisibility(false)
             }
         }
         onStopOrDispose {

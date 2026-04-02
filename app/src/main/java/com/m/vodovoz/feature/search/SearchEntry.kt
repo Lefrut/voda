@@ -7,15 +7,14 @@ import androidx.compose.ui.platform.LocalView
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.compose.LifecycleStartEffect
-import com.m.vodovoz.R
 import com.m.vodovoz.core.navigation.NavigationEntry
 import com.m.vodovoz.core.navigation.navigateToProductAnalogs
 import com.m.vodovoz.core.navigation.navigateToPreOrder
+import com.m.vodovoz.core.navigation.navigateToProfile
 import com.m.vodovoz.core.navigation.navigateToProductDetails
 import com.m.vodovoz.core.navigation.navigateToPromotions
 import com.m.vodovoz.core.navigation.navigateToQrCode
 import com.m.vodovoz.core.navigation.navigateToSearchProductList
-import com.m.vodovoz.core.navigation.navigateToSpeechDialog
 import com.m.vodovoz.core.navigation.navigateToWebView
 import com.m.vodovoz.design_system.composables.placeholders.NetworkErrorPlaceholder
 import com.m.vodovoz.design_system.effects.LifecycleEffect
@@ -33,7 +32,7 @@ fun SearchEntry(navKey: SearchNavKey? = null) =
     LifecycleStartEffect(Unit) {
         viewModel.insetsVisibilityState.consumeSystemBarInsets(true)
         onStopOrDispose {
-            viewModel.tabManager.changeTabVisibility(true)
+            viewModel.tabManager.setTabVisibility(true)
             viewModel.insetsVisibilityState.consumeSystemBarInsets(true)
         }
     }
@@ -41,7 +40,7 @@ fun SearchEntry(navKey: SearchNavKey? = null) =
     DisposableEffect(view) {
         ViewCompat.setOnApplyWindowInsetsListener(view) { _, insets ->
             val imeVisible = insets.isVisible(WindowInsetsCompat.Type.ime())
-            viewModel.tabManager.changeTabVisibility(!imeVisible)
+            viewModel.tabManager.setTabVisibility(!imeVisible)
             insets
         }
         onDispose {
@@ -67,8 +66,7 @@ fun SearchEntry(navKey: SearchNavKey? = null) =
                 }
 
                 is SearchFlowViewModel.SearchEvents.GoToProfile -> {
-                    viewModel.tabManager.setAuthRedirect(navigator.graph.id)
-                    viewModel.tabManager.selectTab(R.id.graph_profile)
+                    navigator.navigateToProfile(viewModel.tabManager)
                 }
 
                 SearchFlowViewModel.SearchEvents.GoToContacts -> Unit

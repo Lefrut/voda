@@ -25,9 +25,9 @@ fun ChangePasswordEntry() = NavigationEntry<ChangePasswordViewModel> {
 
     val imeIsVisible = WindowInsets.isImeVisible
     DisposableEffect(imeIsVisible) {
-        viewModel.tabManager.changeTabVisibility(!imeIsVisible)
+        viewModel.tabManager.setTabVisibility(!imeIsVisible)
         onDispose {
-            viewModel.tabManager.changeTabVisibility(true)
+            viewModel.tabManager.setTabVisibility(true)
         }
     }
 

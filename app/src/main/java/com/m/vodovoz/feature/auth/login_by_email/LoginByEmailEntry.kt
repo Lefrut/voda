@@ -6,6 +6,7 @@ import com.m.vodovoz.R
 import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.core.navigation.AuthArgs
 import com.m.vodovoz.core.navigation.NavigationEntry
+import com.m.vodovoz.core.navigation.navigateToBottomTabByGraphId
 import com.m.vodovoz.core.navigation.navigateToRecoverPassword
 import com.m.vodovoz.core.navigation.navigateToRegister
 import com.m.vodovoz.core.navigation.navigateToWebView
@@ -69,7 +70,7 @@ fun LoginByEmailEntry(
                         navigator.popBackStack(R.id.profileFragment, false)
                     } else {
                         navigator.popBackStack(R.id.profileFragment, false)
-                        viewModel.tabManager.selectTab(redirect)
+                        navigator.navigateToBottomTabByGraphId(redirect)
                         viewModel.tabManager.setDefaultAuthRedirect()
                     }
                 }

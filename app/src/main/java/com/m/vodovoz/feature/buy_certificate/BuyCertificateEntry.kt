@@ -8,6 +8,7 @@ import androidx.compose.ui.platform.LocalContext
 import com.m.vodovoz.R
 import com.m.vodovoz.core.navigation.NavigationEntry
 import com.m.vodovoz.core.navigation.navigateToFAQ
+import com.m.vodovoz.core.navigation.navigateToProfile
 import com.m.vodovoz.core.navigation.navigateToWebView
 import com.m.vodovoz.design_system.composables.placeholders.LoadingPlaceholder
 import com.m.vodovoz.design_system.composables.placeholders.NetworkErrorPlaceholder
@@ -65,8 +66,7 @@ fun BuyCertificateEntry() = NavigationEntry<BuyCertificateViewModel> {
                 }
 
                 BuyCertificateViewModel.BuyCertificateEvents.GoToProfile -> {
-                    viewModel.tabManager.setAuthRedirect(navigator.graph.id)
-                    viewModel.tabManager.selectTab(R.id.graph_profile)
+                    navigator.navigateToProfile(viewModel.tabManager)
                 }
 
                 is BuyCertificateViewModel.BuyCertificateEvents.GoToWebView -> {

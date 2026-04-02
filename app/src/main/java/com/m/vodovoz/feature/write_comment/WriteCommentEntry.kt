@@ -28,9 +28,9 @@ fun WriteCommentEntry(navKey: WriteCommentNavKey? = null) =
 
     DisposableEffect(Unit) {
         val tabManager = viewModel.tabManager
-        tabManager.changeTabVisibility(false)
+        tabManager.setTabVisibility(false)
         onDispose {
-            tabManager.changeTabVisibility(true)
+            tabManager.setTabVisibility(true)
         }
     }
 

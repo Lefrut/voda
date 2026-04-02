@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.webkit.CookieManager
-import com.m.vodovoz.R
 import com.m.vodovoz.common.model.BaseVodovozAction
 import com.m.vodovoz.common.model.ButtonAction
 import com.m.vodovoz.common.model.DataAllAction
@@ -44,11 +43,7 @@ fun BaseVodovozAction.activate(
         }
 
         DataAllAction.Profile -> {
-            tabManager?.apply {
-                setAuthRedirect(navigator.graph.id)
-                selectTab(R.id.graph_profile)
-            }
-
+            navigator.navigateToProfile(tabManager)
         }
 
         DataAllAction.WaterTracker -> {
@@ -174,5 +169,4 @@ inline fun <reified T : DataAllAction> createDataAllActivator(
 ): DataAllActionActivator {
     return DataAllActionActivator(action = action, activate = { activate(action) })
 }
-
 

@@ -17,9 +17,9 @@ fun FAQEntry(navKey: FAQNavKey? = null) =
     val viewState by viewModel.collectAsState()
 
     LifecycleStartEffect(Unit) {
-        viewModel.tabManager.changeTabVisibility(false)
+        viewModel.tabManager.setTabVisibility(false)
         onStopOrDispose {
-            viewModel.tabManager.changeTabVisibility(true)
+            viewModel.tabManager.setTabVisibility(true)
         }
     }
 

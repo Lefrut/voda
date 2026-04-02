@@ -47,14 +47,14 @@ fun WaterAppEntry() = NavigationEntry<WaterAppViewModel> {
     }
 
     LifecycleStartEffect(Unit) {
-        viewModel.tabManager.changeTabVisibility(false)
+        viewModel.tabManager.setTabVisibility(false)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             viewModel.insetsVisibilityState.consumeSystemBarInsets(false)
         }
 
         onStopOrDispose {
             viewModel.insetsVisibilityState.consumeSystemBarInsets(true)
-            viewModel.tabManager.changeTabVisibility(true)
+            viewModel.tabManager.setTabVisibility(true)
         }
     }
 

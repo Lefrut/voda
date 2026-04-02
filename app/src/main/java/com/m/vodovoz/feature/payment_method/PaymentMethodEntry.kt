@@ -29,11 +29,11 @@ fun PaymentMethodEntry(navKey: PaymentMethodNavKey? = null) =
         val observer = LifecycleEventObserver { _, event ->
             when (event) {
                 Lifecycle.Event.ON_START -> {
-                    viewModel.tabManager.changeTabVisibility(false)
+                    viewModel.tabManager.setTabVisibility(false)
                 }
 
                 Lifecycle.Event.ON_PAUSE -> {
-                    viewModel.tabManager.changeTabVisibility(true)
+                    viewModel.tabManager.setTabVisibility(true)
                 }
 
                 else -> Unit

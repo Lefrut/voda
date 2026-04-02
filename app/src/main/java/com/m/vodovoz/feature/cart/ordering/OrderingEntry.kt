@@ -12,24 +12,17 @@ import com.m.vodovoz.R
 import com.m.vodovoz.core.navigation.NavigationEntry
 import com.m.vodovoz.core.navigation.navigateToAddresses
 import com.m.vodovoz.core.navigation.navigateToDeliveryDate
+import com.m.vodovoz.core.navigation.navigateToHome
 import com.m.vodovoz.core.navigation.navigateToOrderCallYou
 import com.m.vodovoz.core.navigation.navigateToOrderRecipient
 import com.m.vodovoz.core.navigation.navigateToPaymentMethod
 import com.m.vodovoz.core.navigation.navigateToWebView
 import com.m.vodovoz.design_system.composables.placeholders.VodovozLongPlaceholder
 import com.m.vodovoz.design_system.effects.LifecycleEffect
-import com.m.vodovoz.design_system.model.widgets.CheckboxUi
 import com.m.vodovoz.feature.addresses.model.AddressScreenTypeUi
-import com.m.vodovoz.feature.addresses.model.AddressUi
 import com.m.vodovoz.feature.cart.ordering.api.OrderingNavKey
-import com.m.vodovoz.feature.delivery_date.model.DeliveryDateOptionUi
-import com.m.vodovoz.feature.delivery_date.model.DeliveryTimeIntervalUi
-import com.m.vodovoz.feature.order_call_you.model.CallYouItemUi
-import com.m.vodovoz.feature.payment_method.model.PaymentMethodItemNav
-import com.m.vodovoz.feature.payment_method.model.toUi
 import com.m.vodovoz.ui.mvi.collectAsState
 import com.m.vodovoz.util.extensions.openUrl
-import kotlinx.coroutines.launch
 
 @Composable
 fun OrderingEntry(
@@ -43,10 +36,9 @@ fun OrderingEntry(
     val context = LocalContext.current
 
     LifecycleStartEffect(Unit) {
-        viewModel.tabManager.changeTabVisibility(false)
-        viewModel.accountManager.reportEvent("Зашел на экран оформления заказа")
+        viewModel.tabManager.setTabVisibility(false)
         onStopOrDispose {
-            viewModel.tabManager.changeTabVisibility(true)
+            viewModel.tabManager.setTabVisibility(true)
         }
     }
 
@@ -74,7 +66,7 @@ fun OrderingEntry(
             )
 
             LaunchedEffect(Unit) {
-                viewModel.tabManager.changeTabVisibility(true)
+                viewModel.tabManager.setTabVisibility(true)
             }
         }
     }
@@ -164,8 +156,7 @@ private suspend fun com.m.vodovoz.core.navigation.NavigationEntryScope<OrderingF
             }
 
             OrderingFlowViewModel.OrderingEvents.GoToHome -> {
-                navigator.goBack()
-                viewModel.tabManager.selectTab(R.id.graph_home)
+                navigator.navigateToHome()
             }
 
             OrderingFlowViewModel.OrderingEvents.ScrollToBottom -> {

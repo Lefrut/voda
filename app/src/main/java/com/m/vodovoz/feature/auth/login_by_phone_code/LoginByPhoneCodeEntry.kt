@@ -9,6 +9,7 @@ import androidx.lifecycle.ViewModelStoreOwner
 import com.m.vodovoz.R
 import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.core.navigation.NavigationEntry
+import com.m.vodovoz.core.navigation.navigateToBottomTabByGraphId
 import com.m.vodovoz.design_system.effects.LifecycleEffect
 import com.m.vodovoz.feature.auth.login_by_phone_code.api.LoginByPhoneCodeNavKey
 import com.m.vodovoz.feature.auth.login_by_phone_code.model.LoginByPhoneCodeEvent
@@ -36,9 +37,9 @@ fun LoginByPhoneCodeEntry(
     val viewState by viewModel.collectAsState()
 
     LifecycleStartEffect(Unit) {
-        tabManager.changeTabVisibility(false)
+        tabManager.setTabVisibility(false)
         onStopOrDispose {
-            tabManager.changeTabVisibility(true)
+            tabManager.setTabVisibility(true)
         }
     }
 
@@ -71,7 +72,7 @@ fun LoginByPhoneCodeEntry(
                         navigator.popBackStack(
                             R.id.profileFragment, false
                         )
-                        tabManager.selectTab(redirect)
+                        navigator.navigateToBottomTabByGraphId(redirect)
                         tabManager.setDefaultAuthRedirect()
                     }
                 }

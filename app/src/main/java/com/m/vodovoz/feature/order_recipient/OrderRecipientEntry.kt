@@ -1,7 +1,6 @@
 package com.m.vodovoz.feature.order_recipient
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.LifecycleStartEffect
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -22,9 +21,9 @@ fun OrderRecipientEntry(navKey: OrderRecipientNavKey? = null) =
     val viewState by viewModel.collectAsState()
 
     LifecycleStartEffect(Unit) {
-        viewModel.tabManager.changeTabVisibility(false)
+        viewModel.tabManager.setTabVisibility(false)
         onStopOrDispose {
-            viewModel.tabManager.changeTabVisibility(true)
+            viewModel.tabManager.setTabVisibility(true)
         }
     }
 

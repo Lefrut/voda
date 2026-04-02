@@ -38,6 +38,7 @@ import com.m.vodovoz.core.navigation.navigateToNewProducts
 import com.m.vodovoz.core.navigation.navigateToOrderDetails
 import com.m.vodovoz.core.navigation.navigateToOrdersHistory
 import com.m.vodovoz.core.navigation.navigateToPreOrder
+import com.m.vodovoz.core.navigation.navigateToProfile
 import com.m.vodovoz.core.navigation.navigateToProductAnalogs
 import com.m.vodovoz.core.navigation.navigateToProductDetails
 import com.m.vodovoz.core.navigation.navigateToPromotionDetails
@@ -166,10 +167,7 @@ private suspend fun listenEvents(
             }
 
             is HomeFlowViewModel.HomeEvents.GoToProfile -> {
-                viewModel.tabManager.apply {
-                    setAuthRedirect(navigator.graph.id)
-                    selectTab(R.id.graph_profile)
-                }
+                navigator.navigateToProfile(viewModel.tabManager)
             }
 
             is HomeFlowViewModel.HomeEvents.GoToStories -> {
@@ -431,10 +429,7 @@ private suspend fun observePushFromSiteState(
                     )
                 }
                 if (section == context.getString(R.string.contact_us)) {
-                    viewModel.tabManager.apply {
-                        setAuthRedirect(navigator.graph.id)
-                        selectTab(R.id.graph_profile)
-                    }
+                    navigator.navigateToProfile(viewModel.tabManager)
                 }
             }
 
@@ -453,10 +448,7 @@ private suspend fun observePushFromSiteState(
             }
 
             "feedback" -> {
-                viewModel.tabManager.apply {
-                    setAuthRedirect(navigator.graph.id)
-                    selectTab(R.id.graph_profile)
-                }
+                navigator.navigateToProfile(viewModel.tabManager)
             }
 
             "ACTIONS", "vseakcii" -> {
@@ -474,10 +466,7 @@ private suspend fun observePushFromSiteState(
             }
 
             "profil" -> {
-                viewModel.tabManager.apply {
-                    setAuthRedirect(navigator.graph.id)
-                    selectTab(R.id.graph_profile)
-                }
+                navigator.navigateToProfile(viewModel.tabManager)
             }
 
             "pokypkasertificat" -> {

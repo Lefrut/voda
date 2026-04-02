@@ -12,6 +12,7 @@ import com.m.vodovoz.R
 import com.m.vodovoz.core.navigation.LocalNavigator
 import com.m.vodovoz.core.navigation.activate
 import com.m.vodovoz.core.navigation.navigateToCategoryProductList
+import com.m.vodovoz.core.navigation.navigateToProfile
 import com.m.vodovoz.core.navigation.navigateToQrCode
 import com.m.vodovoz.core.navigation.navigateToSearch
 import com.m.vodovoz.core.navigation.navigateToSpeechDialog
@@ -66,8 +67,7 @@ fun CatalogEntry(
         viewModel.events.collect { event ->
             when (event) {
                 is CatalogFlowViewModel.CatalogEvents.GoToProfile -> {
-                    viewModel.tabManager.setAuthRedirect(navigator.graph.id)
-                    viewModel.tabManager.selectTab(R.id.graph_profile)
+                    navigator.navigateToProfile(viewModel.tabManager)
                 }
 
                 CatalogFlowViewModel.CatalogEvents.GoToSearch -> {

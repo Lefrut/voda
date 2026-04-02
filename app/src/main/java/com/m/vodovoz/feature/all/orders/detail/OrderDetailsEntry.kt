@@ -7,7 +7,9 @@ import androidx.lifecycle.compose.LifecycleStartEffect
 import com.m.vodovoz.R
 import com.m.vodovoz.core.navigation.NavigationEntry
 import com.m.vodovoz.core.navigation.navigateToCancelOrder
+import com.m.vodovoz.core.navigation.navigateToCart
 import com.m.vodovoz.core.navigation.navigateToOrderQuestion
+import com.m.vodovoz.core.navigation.navigateToProfile
 import com.m.vodovoz.core.navigation.navigateToProductDetails
 import com.m.vodovoz.core.navigation.navigateToTraceOrder
 import com.m.vodovoz.core.navigation.navigateToWebView
@@ -66,7 +68,7 @@ fun OrderDetailsEntry(
     LifecycleEffect {
         viewModel.accountManager.observeAccountId().filter { it == null }.collect {
             navigator.goBack()
-            viewModel.tabManager.selectTab(R.id.graph_profile)
+            navigator.navigateToProfile(viewModel.tabManager)
         }
     }
 
@@ -114,7 +116,7 @@ fun OrderDetailsEntry(
                 }
 
                 OrderDetailsFlowViewModel.OrderDetailsEvent.GoToCart -> {
-                    viewModel.tabManager.selectTab(R.id.graph_cart)
+                    navigator.navigateToCart()
                 }
             }
         }

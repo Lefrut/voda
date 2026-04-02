@@ -5,15 +5,17 @@ import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
-import com.m.vodovoz.R
 import com.m.vodovoz.core.navigation.LocalNavigator
+import com.m.vodovoz.core.navigation.navigateToCatalog
 import com.m.vodovoz.core.navigation.navigateToCategories
+import com.m.vodovoz.core.navigation.navigateToProfile
 import com.m.vodovoz.core.navigation.navigateToProductAnalogs
 import com.m.vodovoz.core.navigation.navigateToProductDetails
 import com.m.vodovoz.core.navigation.navigateToSearch
 import com.m.vodovoz.design_system.composables.placeholders.NetworkErrorPlaceholder
 import com.m.vodovoz.design_system.effects.LifecycleEffect
 import com.m.vodovoz.feature.home.model.CategoryUi
+import com.m.vodovoz.feature.main.Navigator
 import com.m.vodovoz.ui.mvi.collectAsState
 
 @Composable
@@ -61,14 +63,13 @@ fun FavoriteEntry(
 
 private suspend fun observeEvents(
     viewModel: FavoriteFlowViewModel,
-    navigator: com.m.vodovoz.feature.main.Navigator,
+    navigator: Navigator,
     lazyGridState: LazyGridState,
 ) {
     viewModel.events.collect { event ->
         when (event) {
             is FavoriteFlowViewModel.FavoriteEvents.GoToProfile -> {
-                viewModel.tabManager.setAuthRedirect(navigator.graph.id)
-                viewModel.tabManager.selectTab(R.id.graph_profile)
+                navigator.navigateToProfile(viewModel.tabManager)
             }
 
             is FavoriteFlowViewModel.FavoriteEvents.GoToCategories -> {
@@ -91,8 +92,7 @@ private suspend fun observeEvents(
             }
 
             FavoriteFlowViewModel.FavoriteEvents.GoToCatalog -> {
-                viewModel.tabManager.selectTab(R.id.graph_catalog)
-                navigator.popBackStack(R.id.catalogFragment, false)
+                navigator.navigateToCatalog()
             }
 
             is FavoriteFlowViewModel.FavoriteEvents.GoToProductAnalogs -> {

@@ -18,12 +18,13 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.compose.LifecycleStartEffect
 import com.m.vodovoz.R
-import com.m.vodovoz.common.account.AccountManager
 import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.core.navigation.LocalNavigator
 import com.m.vodovoz.core.navigation.navigateToAllBottles
+import com.m.vodovoz.core.navigation.navigateToCatalog
 import com.m.vodovoz.core.navigation.navigateToGifts
 import com.m.vodovoz.core.navigation.navigateToOrdering
+import com.m.vodovoz.core.navigation.navigateToProfile
 import com.m.vodovoz.core.navigation.navigateToProductAnalogs
 import com.m.vodovoz.core.navigation.navigateToProductDetails
 import com.m.vodovoz.design_system.composables.placeholders.ForAdultsPlaceholder
@@ -68,14 +69,14 @@ fun CartEntry(
 
     LifecycleStartEffect(Unit) {
         onStopOrDispose {
-            tabManager.changeTabVisibility(true)
+            tabManager.setTabVisibility(true)
         }
     }
 
     DisposableEffect(view, tabManager) {
         ViewCompat.setOnApplyWindowInsetsListener(view) { _, insets ->
             val imeVisible = insets.isVisible(WindowInsetsCompat.Type.ime())
-            tabManager.changeTabVisibility(!imeVisible)
+            tabManager.setTabVisibility(!imeVisible)
             insets
         }
         onDispose {
@@ -152,8 +153,7 @@ fun CartEntry(
             }
 
             is CartFlowViewModel.CartEvents.GoToProfile -> {
-                tabManager.setAuthRedirect(navigator.graph.id)
-                tabManager.selectTab(R.id.graph_profile)
+                navigator.navigateToProfile(tabManager)
             }
 
             is CartFlowViewModel.CartEvents.GoToProductDetails -> {
@@ -161,7 +161,7 @@ fun CartEntry(
             }
 
             CartFlowViewModel.CartEvents.GoToCatalog -> {
-                tabManager.selectTab(R.id.graph_catalog)
+                navigator.navigateToCatalog()
             }
 
             is CartFlowViewModel.CartEvents.GoToAllBottles -> {
@@ -175,10 +175,10 @@ fun CartEntry(
     }
 
     LaunchedEffect(viewState.showPromotionCodeBottomSheet) {
-        if (viewState.showPromotionCodeBottomSheet) tabManager.changeTabVisibility(false)
+        if (viewState.showPromotionCodeBottomSheet) tabManager.setTabVisibility(false)
         else {
             delay(145)
-            tabManager.changeTabVisibility(true)
+            tabManager.setTabVisibility(true)
         }
     }
 }

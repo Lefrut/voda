@@ -6,14 +6,16 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
-import com.m.vodovoz.R
 import com.m.vodovoz.core.navigation.NavigationEntry
 import com.m.vodovoz.core.navigation.NavigationEntryScope
+import com.m.vodovoz.core.navigation.currentBottomTabGraphId
 import com.m.vodovoz.core.navigation.navigateToAboutProduct
 import com.m.vodovoz.core.navigation.navigateToBrandProductList
+import com.m.vodovoz.core.navigation.navigateToCart
 import com.m.vodovoz.core.navigation.navigateToCategoryProductList
 import com.m.vodovoz.core.navigation.navigateToDetailMedia
 import com.m.vodovoz.core.navigation.navigateToPreOrder
+import com.m.vodovoz.core.navigation.navigateToProfile
 import com.m.vodovoz.core.navigation.navigateToProductAnalogs
 import com.m.vodovoz.core.navigation.navigateToProductComments
 import com.m.vodovoz.core.navigation.navigateToProductDetails
@@ -93,13 +95,12 @@ private suspend fun NavigationEntryScope<ProductDetailsFlowViewModel>.observeEve
             }
 
             is ProductDetailsFlowViewModel.ProductDetailsEvents.GoToProfile -> {
-                viewModel.tabManager.setAuthRedirect(navigator.graph.id)
-                viewModel.tabManager.selectTab(R.id.graph_profile)
+                navigator.navigateToProfile(viewModel.tabManager)
             }
 
             is ProductDetailsFlowViewModel.ProductDetailsEvents.GoToCart -> {
-                viewModel.tabManager.setAuthRedirect(navigator.graph.id)
-                viewModel.tabManager.selectTab(R.id.graph_cart)
+                viewModel.tabManager.setAuthRedirect(navigator.currentBottomTabGraphId())
+                navigator.navigateToCart()
             }
 
             is ProductDetailsFlowViewModel.ProductDetailsEvents.GoToAboutProduct -> {

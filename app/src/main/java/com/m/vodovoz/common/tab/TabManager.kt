@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -22,10 +23,6 @@ class TabManager @Inject constructor(
     private val vodovozServiceRepository: VodovozServiceRepository,
 ) {
 
-    private val tabStateListener = MutableSharedFlow<Int>()
-    fun observeTabState() = tabStateListener.asSharedFlow()
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
-
     private val bottomNavCartStateListener = MutableStateFlow<BottomNavCartState?>(null)
     fun observeBottomNavCartState() = bottomNavCartStateListener.asStateFlow()
 
@@ -35,7 +32,7 @@ class TabManager @Inject constructor(
         tabReselectListener.value = DEFAULT_STATE
     }
 
-    private val tabAuthRedirectListener = MutableStateFlow<Int>(DEFAULT_AUTH_REDIRECT)
+    private val tabAuthRedirectListener = MutableStateFlow(DEFAULT_AUTH_REDIRECT)
     fun fetchAuthRedirect() = tabAuthRedirectListener.value
 
     private val showBottomBar = MutableStateFlow(true)
@@ -49,29 +46,23 @@ class TabManager @Inject constructor(
         tabAuthRedirectListener.value = DEFAULT_AUTH_REDIRECT
     }
 
-    fun selectTab(id: Int) {
-        scope.launch { tabStateListener.emit(id) }
-    }
-
-    fun reselect(id: Int) {
-        tabReselectListener.value = id
-    }
-
     suspend fun updateBottomNavCartState() =
         vodovozServiceRepository.getBottomCart().onEach { result ->
             result.onSuccess { bottomCartModel ->
-                bottomNavCartStateListener.value = BottomNavCartState(
-                    count = bottomCartModel.count,
-                    total = bottomCartModel.total
-                )
+                bottomNavCartStateListener.update {
+                    BottomNavCartState(
+                        count = bottomCartModel.count,
+                        total = bottomCartModel.total
+                    )
+                }
             }.onFailure {
-                bottomNavCartStateListener.value = null
+                bottomNavCartStateListener.update { null }
             }
         }.collect {}
 
 
-    fun changeTabVisibility(vis: Boolean) {
-        showBottomBar.value = vis
+    fun setTabVisibility(visible: Boolean) {
+        showBottomBar.value = visible
     }
 
     fun clearBottomNavCartState() {
@@ -92,10 +83,10 @@ class TabManager @Inject constructor(
     }
 }
 
-fun TabManager.showTab(){
-    changeTabVisibility(true)
+fun TabManager.showTab() {
+    setTabVisibility(true)
 }
 
-fun TabManager.hideTab(){
-    changeTabVisibility(false)
+fun TabManager.hideTab() {
+    setTabVisibility(false)
 }

@@ -6,7 +6,10 @@ import androidx.compose.ui.platform.LocalContext
 import com.m.vodovoz.R
 import com.m.vodovoz.core.navigation.NavigationEntry
 import com.m.vodovoz.core.navigation.activate
+import com.m.vodovoz.core.navigation.navigateToCart
+import com.m.vodovoz.core.navigation.navigateToCatalog
 import com.m.vodovoz.core.navigation.navigateToOrderDetails
+import com.m.vodovoz.core.navigation.navigateToProfile
 import com.m.vodovoz.core.navigation.navigateToWebView
 import com.m.vodovoz.design_system.effects.LifecycleEffect
 import com.m.vodovoz.ui.mvi.collectAsState
@@ -27,7 +30,7 @@ fun OrdersHistoryEntry() = NavigationEntry<OrdersHistoryViewModel> {
         viewModel.events.collect { event ->
             when (event) {
                 is OrdersHistoryViewModel.AllOrdersEvent.GoToCart -> {
-                    viewModel.tabManager.selectTab(R.id.graph_cart)
+                    navigator.navigateToCart()
                 }
 
                 OrdersHistoryViewModel.AllOrdersEvent.GoBack -> {
@@ -35,8 +38,7 @@ fun OrdersHistoryEntry() = NavigationEntry<OrdersHistoryViewModel> {
                 }
 
                 OrdersHistoryViewModel.AllOrdersEvent.GoToCatalog -> {
-                    navigator.goBack()
-                    viewModel.tabManager.selectTab(R.id.graph_catalog)
+                    navigator.navigateToCatalog()
                 }
 
                 is OrdersHistoryViewModel.AllOrdersEvent.GoToOrderDetails -> {
@@ -69,7 +71,7 @@ fun OrdersHistoryEntry() = NavigationEntry<OrdersHistoryViewModel> {
     LifecycleEffect {
         viewModel.accountManager.observeAccountId().filter { it == null }.collect {
             navigator.goBack()
-            viewModel.tabManager.selectTab(R.id.graph_profile)
+            navigator.navigateToProfile(viewModel.tabManager)
         }
     }
 }

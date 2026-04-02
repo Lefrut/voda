@@ -5,8 +5,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.LifecycleStartEffect
-import com.m.vodovoz.R
 import com.m.vodovoz.core.navigation.NavigationEntry
+import com.m.vodovoz.core.navigation.navigateToCatalog
 import com.m.vodovoz.core.navigation.navigateToCategories
 import com.m.vodovoz.core.navigation.navigateToProductAnalogs
 import com.m.vodovoz.core.navigation.navigateToProductDetails
@@ -118,8 +118,7 @@ fun ProductCatalogEntry(navKey: ProductCatalogNavKey? = null) =
             }
 
             ProductCatalogViewModel.ProductCatalogEvent.GoToCatalog -> {
-                navigator.goBack()
-                viewModel.tabManager.selectTab(R.id.graph_catalog)
+                navigator.navigateToCatalog()
             }
         }
     }

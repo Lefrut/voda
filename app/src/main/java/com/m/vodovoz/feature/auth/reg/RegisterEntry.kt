@@ -7,6 +7,7 @@ import androidx.compose.runtime.remember
 import com.m.vodovoz.R
 import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.core.navigation.NavigationEntry
+import com.m.vodovoz.core.navigation.navigateToBottomTabByGraphId
 import com.m.vodovoz.core.navigation.navigateToLogin
 import com.m.vodovoz.core.navigation.navigateToLoginByEmail
 import com.m.vodovoz.core.navigation.navigateToWebView
@@ -78,7 +79,11 @@ fun RegisterEntry(
                             false
                         )
                     } else {
-                        viewModel.tabManager.selectTab(redirect)
+                        navigator.popBackStack(
+                            R.id.profileFragment,
+                            false
+                        )
+                        navigator.navigateToBottomTabByGraphId(redirect)
                         viewModel.tabManager.setDefaultAuthRedirect()
                     }
                 }

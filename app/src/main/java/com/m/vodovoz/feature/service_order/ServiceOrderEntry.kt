@@ -1,7 +1,6 @@
 package com.m.vodovoz.feature.service_order
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.ViewCompat
@@ -21,7 +20,7 @@ fun ServiceOrderEntry(navKey: ServiceOrderNavKey? = null) =
     val view = LocalView.current
 
     LifecycleStartEffect(view) {
-        viewModel.tabManager.changeTabVisibility(false)
+        viewModel.tabManager.setTabVisibility(false)
 
         ViewCompat.setOnApplyWindowInsetsListener(view) { _, insets ->
             val imeVisible = insets.isVisible(WindowInsetsCompat.Type.ime())
@@ -31,7 +30,7 @@ fun ServiceOrderEntry(navKey: ServiceOrderNavKey? = null) =
         onStopOrDispose {
             ViewCompat.setOnApplyWindowInsetsListener(view, null)
             viewModel.insetsState.consumeNavigationBarInsets(true)
-            viewModel.tabManager.changeTabVisibility(true)
+            viewModel.tabManager.setTabVisibility(true)
         }
     }
 

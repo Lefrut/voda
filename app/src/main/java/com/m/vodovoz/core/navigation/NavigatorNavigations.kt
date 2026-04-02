@@ -2,12 +2,14 @@ package com.m.vodovoz.core.navigation
 
 
 import android.os.Bundle
+import androidx.annotation.IdRes
 
 import androidx.navigation.NavOptions
 
 import androidx.navigation.navOptions
 
 import com.m.vodovoz.R
+import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.common.media.api.ImagePickerNavKey
 
 import com.m.vodovoz.design_system.model.ColorfulButtonUi
@@ -67,6 +69,7 @@ import com.m.vodovoz.feature.filter_values.api.FilterValuesNavKey
 import com.m.vodovoz.feature.map.model.MapAddressUi
 import com.m.vodovoz.feature.map.api.MapNavKey
 
+import com.m.vodovoz.feature.main.BottomNavKey
 import com.m.vodovoz.feature.main.Navigator
 import com.m.vodovoz.feature.main.toContentKey
 import com.m.vodovoz.feature.order_call_you.api.OrderCallYouNavKey
@@ -374,6 +377,38 @@ fun Navigator.navigateToLogin(selectedAccountTypeId: String? = null) {
     navigate(LoginNavKey(accountTypeId = selectedAccountTypeId))
 }
 
+fun Navigator.navigateToHome() {
+    navigateToBottomTabRoot(BottomNavKey.Home)
+}
+
+fun Navigator.navigateToCatalog() {
+    navigateToBottomTabRoot(BottomNavKey.Catalog)
+}
+
+fun Navigator.navigateToCart() {
+    navigateToBottomTabRoot(BottomNavKey.Cart)
+}
+
+fun Navigator.navigateToFavorites() {
+    navigateToBottomTabRoot(BottomNavKey.Favorites)
+}
+
+fun Navigator.navigateToProfile(tabManager: TabManager? = null) {
+    tabManager?.setAuthRedirect(currentBottomTabGraphId())
+    navigateToBottomTabRoot(BottomNavKey.Profile)
+}
+
+fun Navigator.navigateToBottomTabByGraphId(@IdRes graphId: Int) {
+    when (graphId) {
+        R.id.graph_home -> navigateToHome()
+        R.id.graph_catalog -> navigateToCatalog()
+        R.id.graph_cart -> navigateToCart()
+        R.id.graph_favorite -> navigateToFavorites()
+        R.id.graph_profile -> navigateToProfile()
+        else -> navigateToProfile()
+    }
+}
+
 fun Navigator.navigateToProductFilterValues(categoryId: Long, filter: FilterUi) {
     navigate(
         FilterValuesNavKey(
@@ -418,6 +453,23 @@ fun Navigator.navigateToProductAnalogs(productId: Long) {
 
 fun Navigator.navigateToCertificateActivation() {
     navigate(CertificateActivationNavKey)
+}
+
+@IdRes
+fun Navigator.currentBottomTabGraphId(): Int {
+    return when (state.currentTopLevelKey) {
+        BottomNavKey.Home -> R.id.graph_home
+        BottomNavKey.Catalog -> R.id.graph_catalog
+        BottomNavKey.Cart -> R.id.graph_cart
+        BottomNavKey.Favorites -> R.id.graph_favorite
+        BottomNavKey.Profile -> R.id.graph_profile
+        else -> R.id.graph_profile
+    }
+}
+
+private fun Navigator.navigateToBottomTabRoot(key: BottomNavKey) {
+    navigate(key)
+    navigate(key)
 }
 
 fun Navigator.navigateToCategories(category: CategoryUi, categories: List<CategoryUi>) {

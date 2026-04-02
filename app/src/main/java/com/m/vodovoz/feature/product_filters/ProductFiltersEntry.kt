@@ -60,9 +60,9 @@ fun ProductFiltersEntry(navKey: ProductFiltersNavKey? = null) =
     )
 
     LifecycleStartEffect(Unit) {
-        viewModel.tabManager.changeTabVisibility(false)
+        viewModel.tabManager.setTabVisibility(false)
         onStopOrDispose {
-            viewModel.tabManager.changeTabVisibility(true)
+            viewModel.tabManager.setTabVisibility(true)
         }
     }
 

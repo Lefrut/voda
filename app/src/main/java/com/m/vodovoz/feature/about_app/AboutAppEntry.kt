@@ -11,6 +11,7 @@ import androidx.core.net.toUri
 import com.m.vodovoz.BuildConfig
 import com.m.vodovoz.R
 import com.m.vodovoz.core.navigation.NavigationEntry
+import com.m.vodovoz.core.navigation.navigateToHome
 import com.m.vodovoz.core.navigation.navigateToWebView
 import com.m.vodovoz.design_system.effects.LifecycleEffect
 import com.m.vodovoz.feature.about_app.composables.DeveloperBottomSheet
@@ -66,7 +67,7 @@ fun AboutAppEntry(
 
                 AboutAppEvent.RefreshApp -> {
                     onRefreshApp()
-                    viewModel.tabManager.selectTab(R.id.graph_home)
+                    navigator.navigateToHome()
                 }
             }
         }

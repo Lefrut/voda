@@ -24,9 +24,9 @@ fun OrderQuestionEntry(navKey: OrderQuestionNavKey? = null) =
     val snackbarHostState = remember { SnackbarHostState() }
 
     DisposableEffect(Unit) {
-        viewModel.tabManager.changeTabVisibility(false)
+        viewModel.tabManager.setTabVisibility(false)
         onDispose {
-            viewModel.tabManager.changeTabVisibility(true)
+            viewModel.tabManager.setTabVisibility(true)
         }
     }
 

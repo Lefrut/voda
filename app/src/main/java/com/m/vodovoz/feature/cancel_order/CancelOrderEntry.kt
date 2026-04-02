@@ -20,9 +20,9 @@ fun CancelOrderEntry(navKey: CancelOrderNavKey? = null) =
     val viewState by viewModel.collectAsState()
 
     DisposableEffect(Unit) {
-        viewModel.tabManager.changeTabVisibility(false)
+        viewModel.tabManager.setTabVisibility(false)
         onDispose {
-            viewModel.tabManager.changeTabVisibility(true)
+            viewModel.tabManager.setTabVisibility(true)
         }
     }
 
