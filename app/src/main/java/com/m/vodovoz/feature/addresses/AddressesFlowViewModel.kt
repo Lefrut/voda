@@ -39,7 +39,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.retry
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import kotlin.math.floor
+import kotlin.math.ceil
 
 @HiltViewModel
 @Stable
@@ -160,7 +160,7 @@ class AddressesFlowViewModel @Inject constructor(
         vodovozServiceRepository.updateAddress(
             addressId = selectedAddress.id,
             address = mapAddress.copy(
-                fromMoscowToPoint = floor(updatedFromMoscowRingToAddress).toInt()
+                fromMoscowToPoint = ceil(updatedFromMoscowRingToAddress).toInt()
             ).toDomain(),
             params = addressParams
         ).singleResult().onSuccess {

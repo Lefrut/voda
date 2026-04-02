@@ -38,7 +38,7 @@ import kotlinx.coroutines.flow.retryWhen
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import javax.inject.Inject
-import kotlin.math.floor
+import kotlin.math.ceil
 
 @HiltViewModel
 @Stable
@@ -294,7 +294,7 @@ class MapFlowViewModel @Inject constructor(
         } ?: return@launch
 
         val updatedMapAddress = mapAddress.copy(
-            fromMoscowToPoint = floor(fromMoscowToPoint).toInt()
+            fromMoscowToPoint = ceil(fromMoscowToPoint).toInt()
         )
 
         val screenType = stateSnapshot.screenType
