@@ -1,7 +1,6 @@
 package com.m.vodovoz.feature.product_details.detail_media
 
 import androidx.compose.runtime.Stable
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.design_system.model.ProductMediaUi
@@ -22,12 +21,11 @@ import kotlinx.coroutines.launch
 class DetailMediaViewModel @AssistedInject constructor(
     val tabManager: TabManager,
     val insetsVisibilityState: InsetsVisibilityState,
-    savedStateHandle: SavedStateHandle,
     @Assisted private val navKey: DetailMediaNavKey?,
 ) : MviViewModel<DetailMediaState, DetailMediaEvent>(
     DetailMediaState(
-        currentMedia = navKey?.media ?: savedStateHandle["media"] ?: ProductMediaUi.Picture(""),
-        mediaList = navKey?.mediaList ?: savedStateHandle["mediaList"] ?: emptyList()
+        currentMedia = navKey?.media ?: ProductMediaUi.Picture(""),
+        mediaList = navKey?.mediaList ?: emptyList()
     )
 ){
 

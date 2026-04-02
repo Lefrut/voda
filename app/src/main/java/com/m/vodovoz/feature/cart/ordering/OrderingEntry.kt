@@ -29,7 +29,6 @@ import com.m.vodovoz.feature.payment_method.model.PaymentMethodItemNav
 import com.m.vodovoz.feature.payment_method.model.toUi
 import com.m.vodovoz.ui.mvi.collectAsState
 import com.m.vodovoz.util.extensions.openUrl
-import kotlinx.coroutines.flow.onSubscription
 import kotlinx.coroutines.launch
 
 @Composable
@@ -90,44 +89,7 @@ private suspend fun com.m.vodovoz.core.navigation.NavigationEntryScope<OrderingF
     context: android.content.Context,
     onRefreshCart: () -> Unit,
 ) {
-    viewModel.events.onSubscription {
-        val backEntrySavedStateHandle = navigator.currentBackStackEntry?.savedStateHandle
-
-        backEntrySavedStateHandle?.apply {
-            remove<AddressUi>("back_address")?.let { address ->
-                viewModel.resetOrderIfEmptyAddress(address)
-            }
-
-            remove<AddressUi>("address")?.let { address ->
-                viewModel.setAddress(address)
-            }
-
-            val timeInterval = remove<DeliveryTimeIntervalUi>("timeInterval")
-            val date = remove<DeliveryDateOptionUi>("dateOption")
-
-            if (timeInterval != null && date != null) {
-                viewModel.setDeliveryDateTime(timeInterval, date)
-            }
-
-            remove<CheckboxUi>("earlierCheckbox")?.let { checkbox ->
-                viewModel.setEarlierDelivery(checkbox)
-            }
-
-            remove<CallYouItemUi>("callYou")?.let { callYouItem ->
-                viewModel.setCallYou(callYouItem)
-            }
-
-            viewModel.setPaymentInfo(
-                paymentBalance = remove<PaymentMethodItemNav>("paymentBalance")?.toUi(),
-                paymentBonuses = remove<PaymentMethodItemNav>("paymentBonuses")?.toUi(),
-                paymentMethod = remove<PaymentMethodItemNav>("paymentMethod")?.toUi()
-            )
-
-            remove<Boolean>("updateRecipient")?.let {
-                viewModel.refreshRecipient()
-            }
-        }
-    }.collect { event ->
+    viewModel.events.collect { event ->
         when (event) {
             OrderingFlowViewModel.OrderingEvents.GoBack -> {
                 navigator.goBack()

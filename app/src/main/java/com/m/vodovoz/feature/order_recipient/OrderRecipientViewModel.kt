@@ -1,7 +1,6 @@
 package com.m.vodovoz.feature.order_recipient
 
 import androidx.compose.runtime.Stable
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.common.resources.ResourcesProvider
@@ -34,13 +33,12 @@ import kotlinx.coroutines.launch
 @Stable
 class OrderRecipientViewModel @AssistedInject constructor(
     val tabManager: TabManager,
-    savedStateHandle: SavedStateHandle,
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val resourcesProvider: ResourcesProvider,
     @Assisted private val navKey: OrderRecipientNavKey?,
 ) : MviViewModel<OrderRecipientState, OrderRecipientEvent>(OrderRecipientState()) {
 
-    private val addressId = navKey?.addressId ?: savedStateHandle.get<Long>("addressId") ?: -1
+    private val addressId = navKey?.addressId ?: -1
 
     init {
         fetchOrderRecipientDetails()

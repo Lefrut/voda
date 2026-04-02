@@ -77,6 +77,7 @@ import com.m.vodovoz.common.media.api.ImagePickerNavKey
 import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.core.navigation.LocalNavigator
 import com.m.vodovoz.core.navigation.viewmodel.SharedViewModelStoreNavEntryDecorator
+import com.m.vodovoz.core.navigation.viewmodel.SharedViewModelStoreNavKey
 import com.m.vodovoz.core.navigation.viewmodel.rememberSharedViewModelStoreNavEntryDecorator
 import com.m.vodovoz.design_system.robotoFontFamily
 import com.m.vodovoz.feature.about_app.AboutAppEntry
@@ -387,11 +388,7 @@ fun BottmNav(
             entry<ProductCommentsNavKey> { key ->
                 ProductCommentsEntry(key)
             }
-            entry<ProductDetailsNavKey>(
-                metadata = SharedViewModelStoreNavEntryDecorator.parent(
-                    ProductCatalogNavKey(ProductCatalogNavKey.DataSource.NewProducts).toContentKey()
-                )
-            ) { key ->
+            entry<ProductDetailsNavKey> { key ->
                 ProductDetailsEntry(key)
             }
             entry<DetailMediaNavKey> { key ->
@@ -853,5 +850,8 @@ sealed interface BottomNavKey : NavKey {
 
 
 fun NavKey.toContentKey(): String {
-    return toString()
+    return when (this) {
+        is SharedViewModelStoreNavKey -> parentContentKey ?: toString()
+        else -> toString()
+    }
 }

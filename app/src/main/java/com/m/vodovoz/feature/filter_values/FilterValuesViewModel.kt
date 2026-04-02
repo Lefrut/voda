@@ -1,7 +1,6 @@
 package com.m.vodovoz.feature.filter_values
 
 import androidx.compose.runtime.Immutable
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.ui.mvi.Event
@@ -25,15 +24,13 @@ import kotlinx.coroutines.launch
 class FilterValuesViewModel @AssistedInject constructor(
     val tabManager: TabManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
-    savedStateHandle: SavedStateHandle,
     @Assisted private val navKey: FilterValuesNavKey?,
 ) : MviViewModel<FilterValuesViewModel.ConcreteFilterState, FilterValuesViewModel.ConcreteFilterEvent>(
     ConcreteFilterState()
 ) {
 
-    private val filter = navKey?.filter ?: savedStateHandle.get<FilterUi>("filter") ?: FilterUi.Empty
-    private val categoryId =
-        navKey?.categoryId?.toInt() ?: savedStateHandle.get<Long>("categoryId")?.toInt() ?: -1
+    private val filter = navKey?.filter ?: FilterUi.Empty
+    private val categoryId = navKey?.categoryId?.toInt() ?: -1
 
     init {
         viewModelScope.launch {

@@ -68,6 +68,7 @@ import com.m.vodovoz.feature.map.model.MapAddressUi
 import com.m.vodovoz.feature.map.api.MapNavKey
 
 import com.m.vodovoz.feature.main.Navigator
+import com.m.vodovoz.feature.main.toContentKey
 import com.m.vodovoz.feature.order_call_you.api.OrderCallYouNavKey
 import com.m.vodovoz.feature.order_question.api.OrderQuestionNavKey
 import com.m.vodovoz.feature.order_recipient.api.OrderRecipientNavKey
@@ -242,7 +243,8 @@ fun Navigator.navigateToDeliveryDate(
             earlierDelivery = earlierDelivery,
             date = date,
             timeInterval = timeInterval,
-            queryParams = queryParams
+            queryParams = queryParams,
+            parentContentKey = state.currentKey.toContentKey()
         )
     )
 }
@@ -266,7 +268,8 @@ fun Navigator.navigateToPaymentMethod(
             balance = balance,
             bonuses = bonuses,
             bonusesValue = bonusesValue,
-            queryParams = queryParams
+            queryParams = queryParams,
+            parentContentKey = state.currentKey.toContentKey()
         )
     )
 }
@@ -280,13 +283,19 @@ fun Navigator.navigateToOrderCallYou(
         OrderCallYouNavKey(
             addressId = addressId,
             callYouId = callYouId,
-            queryParams = queryParams
+            queryParams = queryParams,
+            parentContentKey = state.currentKey.toContentKey()
         )
     )
 }
 
 fun Navigator.navigateToOrderRecipient(addressId: Long) {
-    navigate(OrderRecipientNavKey(addressId = addressId))
+    navigate(
+        OrderRecipientNavKey(
+            addressId = addressId,
+            parentContentKey = state.currentKey.toContentKey()
+        )
+    )
 }
 
 fun Navigator.navigateToRecoverPassword() {
@@ -325,7 +334,8 @@ fun Navigator.navigateToDetailMedia(media: ProductMediaUi, mediaList: List<Produ
     navigate(
         DetailMediaNavKey(
             media = media,
-            mediaList = mediaList
+            mediaList = mediaList,
+            parentContentKey = state.currentKey.toContentKey()
         )
     )
 }
@@ -368,7 +378,8 @@ fun Navigator.navigateToProductFilterValues(categoryId: Long, filter: FilterUi) 
     navigate(
         FilterValuesNavKey(
             categoryId = categoryId,
-            filter = filter
+            filter = filter,
+            parentContentKey = state.currentKey.toContentKey()
         )
     )
 }
@@ -377,7 +388,8 @@ fun Navigator.navigateToProductFilters(categoryId: Long, filters: FiltersUi) {
     navigate(
         ProductFiltersNavKey(
             categoryId = categoryId,
-            filters = filters
+            filters = filters,
+            parentContentKey = state.currentKey.toContentKey()
         )
     )
 }

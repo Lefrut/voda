@@ -2,7 +2,6 @@ package com.m.vodovoz.feature.product_filters
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.ui.mvi.Event
@@ -32,7 +31,6 @@ import kotlin.math.roundToInt
 @HiltViewModel(assistedFactory = ProductFiltersFlowViewModel.Factory::class)
 class ProductFiltersFlowViewModel @AssistedInject constructor(
     val tabManager: TabManager,
-    savedStateHandle: SavedStateHandle,
     private val vodovozServiceRepository: VodovozServiceRepository,
     @Assisted private val navKey: ProductFiltersNavKey?,
 ) : MviViewModel<ProductFiltersFlowViewModel.ProductFiltersState, ProductFiltersFlowViewModel.ProductFiltersEvent>(
@@ -40,8 +38,8 @@ class ProductFiltersFlowViewModel @AssistedInject constructor(
 ) {
 
     private val categoryIdArg =
-        navKey?.categoryId?.toInt() ?: savedStateHandle.remove<Long>("categoryId")?.toInt() ?: navigateBack().let { -1 }
-    private val filtersArg = navKey?.filters ?: savedStateHandle.remove<FiltersUi>("filters") ?: FiltersUi.Empty
+        navKey?.categoryId?.toInt() ?: navigateBack().let { -1 }
+    private val filtersArg = navKey?.filters ?: FiltersUi.Empty
 
     init {
         listenFiltersSelectionState()

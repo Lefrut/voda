@@ -6,13 +6,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.lifecycle.compose.LifecycleStartEffect
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.m.vodovoz.core.navigation.NavigationEntry
 import com.m.vodovoz.core.navigation.navigateToProductFilterValues
 import com.m.vodovoz.design_system.composables.placeholders.LoadingPlaceholder
 import com.m.vodovoz.design_system.composables.placeholders.NetworkErrorPlaceholder
 import com.m.vodovoz.design_system.effects.LifecycleEffect
-import com.m.vodovoz.design_system.model.filters.FilterUi
 import com.m.vodovoz.design_system.model.filters.FiltersPriceUi
+import com.m.vodovoz.feature.product_catalog.ProductCatalogViewModel
 import com.m.vodovoz.feature.product_filters.api.ProductFiltersNavKey
 import com.m.vodovoz.ui.mvi.collectAsState
 import com.m.vodovoz.util.extensions.calculateActiveRange
@@ -49,6 +50,7 @@ fun ProductFiltersEntry(navKey: ProductFiltersNavKey? = null) =
     NavigationEntry<ProductFiltersFlowViewModel, ProductFiltersFlowViewModel.Factory>(
         creationCallback = { factory -> factory.create(navKey) }
     ) {
+    val productCatalogViewModel = viewModel(modelClass = ProductCatalogViewModel::class)
     val viewState by viewModel.collectAsState()
     val filterPrice = viewState.filters.price
 
@@ -58,11 +60,6 @@ fun ProductFiltersEntry(navKey: ProductFiltersNavKey? = null) =
     )
 
     LifecycleStartEffect(Unit) {
-        navigator.currentBackStackEntry?.savedStateHandle?.remove<FilterUi>("filter")
-            ?.let { newFilter ->
-                viewModel.changeFilter(newFilter)
-            }
-
         viewModel.tabManager.changeTabVisibility(false)
         onStopOrDispose {
             viewModel.tabManager.changeTabVisibility(true)
@@ -102,12 +99,8 @@ fun ProductFiltersEntry(navKey: ProductFiltersNavKey? = null) =
                 }
 
                 is ProductFiltersFlowViewModel.ProductFiltersEvent.GoToProductList -> {
-                    navigator.previousBackStackEntry?.savedStateHandle?.set(
-                        "filters",
-                        event.filters
-                    ).also {
-                        navigator.goBack()
-                    }
+                    productCatalogViewModel.changeFilters(event.filters)
+                    navigator.goBack()
                 }
 
                 ProductFiltersFlowViewModel.ProductFiltersEvent.ResetSlider -> {

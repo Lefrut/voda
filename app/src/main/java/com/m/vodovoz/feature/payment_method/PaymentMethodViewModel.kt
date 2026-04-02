@@ -1,12 +1,10 @@
 package com.m.vodovoz.feature.payment_method
 
 import androidx.compose.runtime.Stable
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.m.vodovoz.R
 import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.common.resources.ResourcesProvider
-import com.m.vodovoz.core.navigation.getQueryParams
 import com.m.vodovoz.design_system.model.toUi
 import com.m.vodovoz.design_system.model.widgets.FieldUi
 import com.m.vodovoz.design_system.model.withItems
@@ -34,23 +32,22 @@ import java.time.LocalDate
 @Stable
 class PaymentMethodViewModel @AssistedInject constructor(
     val tabManager: TabManager,
-    savedStateHandle: SavedStateHandle,
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val resourcesProvider: ResourcesProvider,
     @Assisted private val navKey: PaymentMethodNavKey?,
 ) : MviViewModel<PaymentMethodState, PaymentMethodEvent>(PaymentMethodState()) {
 
-    private val addressId = navKey?.addressId ?: savedStateHandle.get<Long>("addressId") ?: -1
-    private val orderDate = (navKey?.date ?: savedStateHandle.get<Long>("date"))?.let { days ->
+    private val addressId = navKey?.addressId ?: -1
+    private val orderDate = navKey?.date?.let { days ->
         LocalDate.ofEpochDay(days)
     } ?: LocalDate.now()
-    private val paymentMethodId: String? = navKey?.paymentMethodId ?: savedStateHandle["paymentMethodId"]
-    private val paymentChange: String = navKey?.paymentChange ?: savedStateHandle["paymentChange"] ?: ""
-    private val useBalance: Boolean? = navKey?.balance ?: savedStateHandle["balance"]
-    private val useBonuses: Boolean? = navKey?.bonuses ?: savedStateHandle["bonuses"]
-    private val bonusesValue: Int? = navKey?.bonusesValue ?: savedStateHandle["bonusesValue"]
+    private val paymentMethodId: String? = navKey?.paymentMethodId
+    private val paymentChange: String = navKey?.paymentChange ?: ""
+    private val useBalance: Boolean? = navKey?.balance
+    private val useBonuses: Boolean? = navKey?.bonuses
+    private val bonusesValue: Int? = navKey?.bonusesValue
 
-    private val queryParams = navKey?.queryParams ?: savedStateHandle.getQueryParams()
+    private val queryParams = navKey?.queryParams.orEmpty()
 
     fun navigateBack() = viewModelScope.launch {
         sendEvent(PaymentMethodEvent.GoBack)

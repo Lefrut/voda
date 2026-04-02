@@ -4,8 +4,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.LifecycleStartEffect
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.m.vodovoz.core.navigation.NavigationEntry
 import com.m.vodovoz.core.navigation.navigateToWebView
+import com.m.vodovoz.feature.cart.ordering.OrderingFlowViewModel
 import com.m.vodovoz.feature.order_recipient.api.OrderRecipientNavKey
 import com.m.vodovoz.feature.order_recipient.model.OrderRecipientEvent
 import com.m.vodovoz.ui.mvi.collectAsState
@@ -16,6 +18,7 @@ fun OrderRecipientEntry(navKey: OrderRecipientNavKey? = null) =
     NavigationEntry<OrderRecipientViewModel, OrderRecipientViewModel.Factory>(
         creationCallback = { factory -> factory.create(navKey) }
     ) {
+    val orderingViewModel = viewModel(modelClass = OrderingFlowViewModel::class)
     val viewState by viewModel.collectAsState()
 
     LifecycleStartEffect(Unit) {
@@ -37,10 +40,7 @@ fun OrderRecipientEntry(navKey: OrderRecipientNavKey? = null) =
             }
 
             OrderRecipientEvent.GoBackToOrdering -> {
-                navigator.previousBackStackEntry?.savedStateHandle?.set(
-                    "updateRecipient",
-                    true
-                )
+                orderingViewModel.refreshRecipient()
                 navigator.goBack()
             }
 

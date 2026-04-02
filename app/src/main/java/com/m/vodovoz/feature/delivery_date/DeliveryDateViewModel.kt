@@ -1,10 +1,8 @@
 package com.m.vodovoz.feature.delivery_date
 
 import androidx.compose.runtime.Stable
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.m.vodovoz.common.tab.TabManager
-import com.m.vodovoz.core.navigation.getQueryParams
 import com.m.vodovoz.design_system.model.SectionUi
 import com.m.vodovoz.design_system.model.toUi
 import com.m.vodovoz.design_system.model.widgets.CheckboxUi
@@ -32,21 +30,19 @@ import java.util.UUID
 @Stable
 class DeliveryDateViewModel @AssistedInject constructor(
     val tabManager: TabManager,
-    savedStateHandle: SavedStateHandle,
     private val vodovozServiceRepository: VodovozServiceRepository,
     @Assisted private val navKey: DeliveryDateNavKey?,
 ) : MviViewModel<DeliveryDateState, DeliveryDateEvent>(DeliveryDateState()) {
 
-    private val addressId = navKey?.addressId ?: savedStateHandle.get<Long>("addressId") ?: -1
+    private val addressId = navKey?.addressId ?: -1
 
-    private val deliveryDate = navKey?.date ?: savedStateHandle.get<String>("date")
+    private val deliveryDate = navKey?.date
 
-    private val timeInterval = navKey?.timeInterval ?: savedStateHandle.get<String>("timeInterval")
+    private val timeInterval = navKey?.timeInterval
 
-    private val earlierDelivery =
-        navKey?.earlierDelivery ?: savedStateHandle.get<Boolean>("earlierDelivery")
+    private val earlierDelivery = navKey?.earlierDelivery
 
-    private val queryParams = navKey?.queryParams ?: savedStateHandle.getQueryParams()
+    private val queryParams = navKey?.queryParams.orEmpty()
 
     init {
         if (deliveryDate != null && timeInterval != null) {

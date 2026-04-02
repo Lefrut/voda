@@ -4,7 +4,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.LifecycleStartEffect
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.m.vodovoz.core.navigation.NavigationEntry
+import com.m.vodovoz.feature.cart.ordering.OrderingFlowViewModel
 import com.m.vodovoz.feature.order_call_you.api.OrderCallYouNavKey
 import com.m.vodovoz.feature.order_call_you.model.OrderCallYouEvent
 import com.m.vodovoz.ui.mvi.collectAsState
@@ -15,6 +17,7 @@ fun OrderCallYouEntry(navKey: OrderCallYouNavKey? = null) =
     NavigationEntry<OrderCallYouViewModel, OrderCallYouViewModel.Factory>(
         creationCallback = { factory -> factory.create(navKey) }
     ) {
+    val orderingViewModel = viewModel(modelClass = OrderingFlowViewModel::class)
     val viewState by viewModel.collectAsState()
 
     LifecycleStartEffect(Unit) {
@@ -33,10 +36,7 @@ fun OrderCallYouEntry(navKey: OrderCallYouNavKey? = null) =
             }
 
             is OrderCallYouEvent.GoBackToOrdering -> {
-                navigator.previousBackStackEntry?.savedStateHandle?.set(
-                    "callYou",
-                    event.currentItem
-                )
+                orderingViewModel.setCallYou(event.currentItem)
                 navigator.goBack()
             }
         }

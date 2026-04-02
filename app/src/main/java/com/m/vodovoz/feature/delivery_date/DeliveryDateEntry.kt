@@ -3,7 +3,9 @@ package com.m.vodovoz.feature.delivery_date
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.LifecycleStartEffect
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.m.vodovoz.core.navigation.NavigationEntry
+import com.m.vodovoz.feature.cart.ordering.OrderingFlowViewModel
 import com.m.vodovoz.design_system.effects.LifecycleEffect
 import com.m.vodovoz.feature.delivery_date.api.DeliveryDateNavKey
 import com.m.vodovoz.feature.delivery_date.model.DeliveryDateEvent
@@ -14,6 +16,7 @@ fun DeliveryDateEntry(navKey: DeliveryDateNavKey? = null) =
     NavigationEntry<DeliveryDateViewModel, DeliveryDateViewModel.Factory>(
         creationCallback = { factory -> factory.create(navKey) }
     ) {
+    val orderingViewModel = viewModel(modelClass = OrderingFlowViewModel::class)
     val viewState by viewModel.collectAsState()
 
     LifecycleStartEffect(Unit) {
@@ -36,11 +39,8 @@ fun DeliveryDateEntry(navKey: DeliveryDateNavKey? = null) =
                 }
 
                 is DeliveryDateEvent.GoBackToOrdering -> {
-                    navigator.previousBackStackEntry?.savedStateHandle?.apply {
-                        set("timeInterval", event.timeInterval)
-                        set("dateOption", event.dateOption)
-                        set("earlierCheckbox", event.earlierCheckbox)
-                    }
+                    orderingViewModel.setDeliveryDateTime(event.timeInterval, event.dateOption)
+                    event.earlierCheckbox?.let(orderingViewModel::setEarlierDelivery)
                     navigator.goBack()
                 }
             }

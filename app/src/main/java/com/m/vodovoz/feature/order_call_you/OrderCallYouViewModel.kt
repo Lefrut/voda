@@ -1,10 +1,8 @@
 package com.m.vodovoz.feature.order_call_you
 
 import androidx.compose.runtime.Stable
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.m.vodovoz.common.tab.TabManager
-import com.m.vodovoz.core.navigation.getQueryParams
 import com.m.vodovoz.design_system.model.ColorfulButtonUi
 import com.m.vodovoz.design_system.model.toUi
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
@@ -26,16 +24,15 @@ import kotlinx.coroutines.launch
 @Stable
 class OrderCallYouViewModel @AssistedInject constructor(
     val tabManager: TabManager,
-    savedStateHandle: SavedStateHandle,
     private val vodovozServiceRepository: VodovozServiceRepository,
     @Assisted private val navKey: OrderCallYouNavKey?,
 ) : MviViewModel<OrderCallYouState, OrderCallYouEvent>(OrderCallYouState()) {
 
-    private val addressId: Long = navKey?.addressId ?: savedStateHandle.get<Long>("addressId") ?: -1
+    private val addressId: Long = navKey?.addressId ?: -1
 
-    private val callYouId: String? = navKey?.callYouId ?: savedStateHandle.get<String>("callYouId")
+    private val callYouId: String? = navKey?.callYouId
 
-    private val queryParams: Map<String, String> = navKey?.queryParams ?: savedStateHandle.getQueryParams()
+    private val queryParams: Map<String, String> = navKey?.queryParams.orEmpty()
 
     init {
         fetchOrderCallYouDetails()

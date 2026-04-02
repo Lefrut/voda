@@ -27,6 +27,10 @@ import androidx.navigation3.runtime.metadata
 import androidx.savedstate.SavedStateRegistryOwner
 import androidx.savedstate.compose.LocalSavedStateRegistryOwner
 
+interface SharedViewModelStoreNavKey {
+    val parentContentKey: String?
+}
+
 @Composable
 fun <T : Any> rememberSharedViewModelStoreNavEntryDecorator(
     viewModelStoreOwner: ViewModelStoreOwner =

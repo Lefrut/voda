@@ -2,11 +2,16 @@ package com.m.vodovoz.feature.product_filters.api
 
 import androidx.navigation3.runtime.NavKey
 import com.m.vodovoz.design_system.model.filters.FiltersUi
+import com.m.vodovoz.core.navigation.viewmodel.SharedViewModelStoreNavKey
 
 data class ProductFiltersNavKey(
     val categoryId: Long,
     val filters: FiltersUi,
-) : NavKey {
+    override val parentContentKey: String? = null,
+) : NavKey, SharedViewModelStoreNavKey {
+    override fun toString(): String = parentContentKey
+        ?: "ProductFiltersNavKey(categoryId=$categoryId, filters=$filters)"
+
     companion object {
         const val NAV_NAME: String = "feature/product_filters/ProductFilters"
     }

@@ -27,7 +27,6 @@ import com.m.vodovoz.feature.product_details.api.ProductDetailsNavKey
 import com.m.vodovoz.ui.mvi.collectAsState
 import com.m.vodovoz.util.extensions.copyText
 import com.m.vodovoz.util.extensions.shareText
-import kotlinx.coroutines.flow.onSubscription
 
 @Composable
 fun ProductDetailsEntry(navKey: ProductDetailsNavKey? = null) =
@@ -87,15 +86,7 @@ private suspend fun NavigationEntryScope<ProductDetailsFlowViewModel>.observeEve
     mediaPagerState: PagerState,
     context: Context,
 ): Unit =
-    viewModel.events.onSubscription {
-        val mediaIndex = navigator.currentBackStackEntry
-            ?.savedStateHandle
-            ?.get<Int>("mediaIndex")
-
-        mediaIndex?.let { page ->
-            viewModel.setMediaPage(page)
-        }
-    }.collect { event ->
+    viewModel.events.collect { event ->
         when (event) {
             is ProductDetailsFlowViewModel.ProductDetailsEvents.GoToPreOrder -> {
                 navigator.navigateToPreOrder(event.id)

@@ -3,11 +3,12 @@ package com.m.vodovoz.feature.filter_values
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.LifecycleStartEffect
-import com.m.vodovoz.R
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.m.vodovoz.core.navigation.NavigationEntry
 import com.m.vodovoz.design_system.composables.placeholders.LoadingPlaceholder
 import com.m.vodovoz.design_system.effects.LifecycleEffect
 import com.m.vodovoz.feature.filter_values.api.FilterValuesNavKey
+import com.m.vodovoz.feature.product_filters.ProductFiltersFlowViewModel
 import com.m.vodovoz.ui.mvi.collectAsState
 
 @Composable
@@ -15,6 +16,7 @@ fun FilterValuesEntry(navKey: FilterValuesNavKey? = null) =
     NavigationEntry<FilterValuesViewModel, FilterValuesViewModel.Factory>(
         creationCallback = { factory -> factory.create(navKey) }
     ) {
+    val productFiltersViewModel = viewModel(modelClass = ProductFiltersFlowViewModel::class)
     val viewState by viewModel.collectAsState()
 
     LifecycleStartEffect(Unit) {
@@ -42,14 +44,8 @@ fun FilterValuesEntry(navKey: FilterValuesNavKey? = null) =
                 }
 
                 is FilterValuesViewModel.ConcreteFilterEvent.GoToProductFilters -> {
-                    navigator.previousBackStackEntry?.savedStateHandle?.set(
-                        "filter",
-                        event.filter
-                    )
-                    navigator.popBackStack(
-                        R.id.productFiltersFragment,
-                        false
-                    )
+                    productFiltersViewModel.changeFilter(event.filter)
+                    navigator.goBack()
                 }
             }
         }

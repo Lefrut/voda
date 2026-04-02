@@ -10,8 +10,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.LifecycleStartEffect
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.m.vodovoz.core.navigation.NavigationEntry
 import com.m.vodovoz.design_system.effects.LifecycleEffect
+import com.m.vodovoz.feature.product_details.ProductDetailsFlowViewModel
 import com.m.vodovoz.feature.product_details.detail_media.api.DetailMediaNavKey
 import com.m.vodovoz.feature.product_details.detail_media.model.DetailMediaEvent
 import com.m.vodovoz.ui.mvi.collectAsState
@@ -27,6 +29,7 @@ fun DetailMediaEntry(navKey: DetailMediaNavKey? = null) =
     NavigationEntry<DetailMediaViewModel, DetailMediaViewModel.Factory>(
         creationCallback = { factory -> factory.create(navKey) }
     ) {
+    val productDetailsViewModel = viewModel(modelClass = ProductDetailsFlowViewModel::class)
     val viewState by viewModel.collectAsState()
     val mediaList = viewState.mediaList
     val context = LocalContext.current
@@ -57,10 +60,7 @@ fun DetailMediaEntry(navKey: DetailMediaNavKey? = null) =
                 .distinctUntilChanged()
                 .collectLatest { currentPage ->
                     viewModel.setMediaByIndex(currentPage)
-                    navigator.previousBackStackEntry?.savedStateHandle?.set(
-                        "mediaIndex",
-                        currentPage
-                    )
+                    productDetailsViewModel.setMediaPage(currentPage)
                 }
         }
     }
