@@ -32,7 +32,6 @@ import com.m.vodovoz.design_system.composables.placeholders.LoadingPlaceholder
 import com.m.vodovoz.design_system.composables.placeholders.NetworkErrorPlaceholder
 import com.m.vodovoz.design_system.composables.placeholders.VodovozPlaceholder
 import com.m.vodovoz.design_system.effects.LifecycleEffect
-import com.m.vodovoz.feature.cart.model.CartPresentItemUi
 import com.m.vodovoz.ui.mvi.collectAsState
 import com.m.vodovoz.ui.mvi.collectEvents
 import kotlinx.coroutines.delay
@@ -45,15 +44,6 @@ fun CartEntry(
     val view = LocalView.current
     val navigator = LocalNavigator.current
     val tabManager = viewModel.tabManager
-
-    LifecycleEffect(navigator) {
-        navigator.currentBackStackEntry
-            ?.savedStateHandle
-            ?.remove<CartPresentItemUi>("gift")
-            ?.let { gift ->
-                viewModel.addGiftToCart(gift)
-            }
-    }
 
     LifecycleEffect(tabManager) {
         tabManager.observeTabReselect().collect { id ->

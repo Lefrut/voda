@@ -4,7 +4,6 @@ import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
-import androidx.lifecycle.compose.LifecycleStartEffect
 import com.m.vodovoz.core.navigation.NavigationEntry
 import com.m.vodovoz.core.navigation.navigateToCatalog
 import com.m.vodovoz.core.navigation.navigateToCategories
@@ -15,9 +14,6 @@ import com.m.vodovoz.core.navigation.navigateToQrCode
 import com.m.vodovoz.core.navigation.navigateToSearch
 import com.m.vodovoz.core.navigation.navigateToSpeechDialog
 import com.m.vodovoz.design_system.composables.placeholders.ForAdultsPlaceholder
-import com.m.vodovoz.design_system.effects.LifecycleEffect
-import com.m.vodovoz.design_system.model.filters.FiltersUi
-import com.m.vodovoz.feature.home.model.CategoryUi
 import com.m.vodovoz.feature.product_catalog.api.ProductCatalogNavKey
 import com.m.vodovoz.ui.mvi.collectAsState
 import com.m.vodovoz.ui.mvi.collectEvents
@@ -31,20 +27,6 @@ fun ProductCatalogEntry(navKey: ProductCatalogNavKey? = null) =
     val viewState by viewModel.collectAsState()
     val lazyGridState = rememberLazyGridState()
     val context = LocalContext.current
-
-    LifecycleStartEffect(Unit) {
-        navigator.currentBackStackEntry?.savedStateHandle?.remove<CategoryUi>("category")
-            ?.let { category ->
-                viewModel.selectCategory(category)
-            }
-
-        navigator.currentBackStackEntry?.savedStateHandle?.remove<FiltersUi>("filters")
-            ?.let { filters ->
-                viewModel.changeFilters(filters)
-            }
-
-        onStopOrDispose { }
-    }
 
     when (val uiState = viewState.uiState) {
         is ProductCatalogViewModel.ProductCatalogUiState.ForAdults -> {

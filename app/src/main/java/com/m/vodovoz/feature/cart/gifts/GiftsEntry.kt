@@ -1,11 +1,15 @@
 package com.m.vodovoz.feature.cart.gifts
 
+import androidx.activity.compose.LocalActivity
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.res.stringResource
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleStartEffect
+import androidx.lifecycle.ViewModelStoreOwner
 import com.m.vodovoz.R
 import com.m.vodovoz.core.navigation.NavigationEntry
+import com.m.vodovoz.feature.cart.CartFlowViewModel
 import com.m.vodovoz.design_system.composables.dialogs.VodovozDialog
 import com.m.vodovoz.design_system.effects.LifecycleEffect
 import com.m.vodovoz.feature.cart.composables.ImagePreviewDialog
@@ -18,6 +22,8 @@ fun GiftsEntry(navKey: GiftsNavKey? = null) =
     NavigationEntry<GiftsViewModel, GiftsViewModel.Factory>(
         creationCallback = { factory -> factory.create(navKey) }
     ) {
+    val activityOwner = LocalActivity.current as? ViewModelStoreOwner
+    val cartViewModel = activityOwner?.let { hiltViewModel<CartFlowViewModel>(it) }
     val viewState by viewModel.collectAsState()
 
     LifecycleStartEffect(Unit) {
@@ -62,10 +68,7 @@ fun GiftsEntry(navKey: GiftsNavKey? = null) =
                 }
 
                 is GiftsEvent.GoToCart -> {
-                    navigator.previousBackStackEntry?.savedStateHandle?.set(
-                        "gift",
-                        event.currentGift
-                    )
+                    cartViewModel?.addGiftToCart(event.currentGift)
                     navigator.goBack()
                 }
             }

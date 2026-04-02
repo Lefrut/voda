@@ -66,6 +66,8 @@ import com.m.vodovoz.feature.categories.api.CategoriesNavKey
 
 import com.m.vodovoz.feature.faq.api.FAQNavKey
 import com.m.vodovoz.feature.filter_values.api.FilterValuesNavKey
+import com.m.vodovoz.feature.favorite.api.FavoriteNavKey
+import com.m.vodovoz.feature.home.api.HomeNavKey
 import com.m.vodovoz.feature.map.model.MapAddressUi
 import com.m.vodovoz.feature.map.api.MapNavKey
 
@@ -124,12 +126,19 @@ fun Navigator.navigateToAddAddress(
             addressType = addressType
         )
     )
-
-    currentBackStackEntry?.savedStateHandle?.set("mapAddress", mapAddress)
 }
 
 fun Navigator.navigateToMap(addressName: String?, navOptions: NavOptions? = null) {
-    navigate(MapNavKey(addressName = addressName))
+    navigate(
+        MapNavKey(
+            addressName = addressName,
+            source = when (state.currentKey) {
+                is AddAddressNavKey -> MapNavKey.Source.AddAddress
+                else -> MapNavKey.Source.None
+            },
+            parentContentKey = state.currentKey.toContentKey()
+        )
+    )
 }
 
 fun Navigator.navigateToAboutProduct(
@@ -175,7 +184,13 @@ fun Navigator.navigateToWriteComment(
             product_id = productId,
             product_name = productName,
             product_image = productImage,
-            rating = rating
+            rating = rating,
+            source = when (state.currentKey) {
+                is BottomNavKey.Home, is HomeNavKey -> WriteCommentNavKey.Source.Home
+                is WaitFeedbackProductsNavKey -> WriteCommentNavKey.Source.WaitFeedbackProducts
+                else -> WriteCommentNavKey.Source.None
+            },
+            parentContentKey = state.currentKey.toContentKey()
         )
     )
 }
@@ -215,7 +230,8 @@ fun Navigator.navigateToGifts(
     navigate(
         GiftsNavKey(
             present = present,
-            popupWindow = popupWindow
+            popupWindow = popupWindow,
+            parentContentKey = state.currentKey.toContentKey()
         )
     )
 }
@@ -227,7 +243,8 @@ fun Navigator.navigateToAddresses(
     navigate(
         AddressesNavKey(
             screenType = addressScreenType,
-            addressId = addressId
+            addressId = addressId,
+            parentContentKey = state.currentKey.toContentKey()
         )
     )
 }
@@ -370,7 +387,16 @@ fun Navigator.navigateToUserData() {
 }
 
 fun Navigator.navigateToLoginByEmail(selectedAccountTypeId: String? = null) {
-    navigate(LoginByEmailNavKey(accountTypeId = selectedAccountTypeId))
+    navigate(
+        LoginByEmailNavKey(
+            accountTypeId = selectedAccountTypeId,
+            source = when (state.currentKey) {
+                is LoginNavKey -> LoginByEmailNavKey.Source.Login
+                else -> LoginByEmailNavKey.Source.None
+            },
+            parentContentKey = state.currentKey.toContentKey()
+        )
+    )
 }
 
 fun Navigator.navigateToLogin(selectedAccountTypeId: String? = null) {
@@ -476,7 +502,13 @@ fun Navigator.navigateToCategories(category: CategoryUi, categories: List<Catego
     navigate(
         CategoriesNavKey(
             categoryList = categories.toTypedArray(),
-            category = category
+            category = category,
+            source = when (state.currentKey) {
+                is ProductCatalogNavKey -> CategoriesNavKey.Source.ProductCatalog
+                is BottomNavKey.Favorites, is FavoriteNavKey -> CategoriesNavKey.Source.Favorite
+                else -> CategoriesNavKey.Source.ProductCatalog
+            },
+            parentContentKey = state.currentKey.toContentKey()
         )
     )
 }

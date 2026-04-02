@@ -8,12 +8,14 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.LifecycleStartEffect
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.m.vodovoz.core.navigation.NavigationEntry
 import com.m.vodovoz.core.navigation.navigateToAddAddress
 import com.m.vodovoz.core.navigation.navigateToMap
 import com.m.vodovoz.design_system.effects.LifecycleEffect
 import com.m.vodovoz.feature.addresses.api.AddressesNavKey
 import com.m.vodovoz.feature.addresses.model.AddressScreenTypeUi
+import com.m.vodovoz.feature.cart.ordering.OrderingFlowViewModel
 import com.m.vodovoz.ui.mvi.collectAsState
 import com.yandex.mapkit.MapKit
 import com.yandex.mapkit.MapKitFactory
@@ -25,6 +27,11 @@ fun AddressesEntry(navKey: AddressesNavKey? = null) =
     ) {
     val viewState by viewModel.collectAsState()
     val lifecycleOwner = LocalLifecycleOwner.current
+    val orderingViewModel = if (viewState.screenType == AddressScreenTypeUi.Choose) {
+        viewModel(modelClass = OrderingFlowViewModel::class)
+    } else {
+        null
+    }
     val mapKit: MapKit = MapKitFactory.getInstance()
 
     LifecycleStartEffect(viewState.screenType) {
@@ -65,9 +72,6 @@ fun AddressesEntry(navKey: AddressesNavKey? = null) =
         viewModel.events.collect { event ->
             when (event) {
                 is AddressesFlowViewModel.AddressesEvents.GoBack -> {
-                    navigator.previousBackStackEntry
-                        ?.savedStateHandle
-                        ?.set("back_address", event.address)
                     navigator.goBack()
                 }
 
@@ -83,9 +87,7 @@ fun AddressesEntry(navKey: AddressesNavKey? = null) =
                 }
 
                 is AddressesFlowViewModel.AddressesEvents.GoBackToOrdering -> {
-                    navigator.previousBackStackEntry
-                        ?.savedStateHandle
-                        ?.set("address", event.address)
+                    orderingViewModel?.setAddress(event.address)
                     navigator.goBack()
                 }
             }

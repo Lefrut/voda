@@ -86,15 +86,6 @@ fun HomeEntry(
         if (granted)  navigator.navigateToSpeechDialog()
     }
 
-    LifecycleEffect(Unit) {
-        navigator.currentBackStackEntry
-            ?.savedStateHandle
-            ?.remove<Long>("ratedProductId")
-            ?.let { productId ->
-                viewModel.removeUnratedProduct(productId)
-            }
-    }
-
     BackHandler {
         viewModel.showExitDialog()
     }

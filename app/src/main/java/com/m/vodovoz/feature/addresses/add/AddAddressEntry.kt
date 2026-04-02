@@ -6,9 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.LocalSaveableStateRegistry
 import androidx.lifecycle.compose.LifecycleStartEffect
-import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.navigation.navOptions
 import com.m.vodovoz.R
 import com.m.vodovoz.core.navigation.NavigationEntry
@@ -63,10 +61,6 @@ private suspend fun com.m.vodovoz.core.navigation.NavigationEntryScope<AddAddres
     snackbarHostState: SnackbarHostState,
 ) {
     viewModel.events.onSubscription {
-        navigator.currentBackStackEntry?.savedStateHandle?.remove<MapAddressUi>("mapAddress")
-            ?.let { mapAddress ->
-                viewModel.changeMapAddress(mapAddress)
-            }
     }.collect { event ->
         when (event) {
             AddAddressEvent.GoBackToMap -> {

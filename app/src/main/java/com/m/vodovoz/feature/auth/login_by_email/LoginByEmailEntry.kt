@@ -13,6 +13,8 @@ import com.m.vodovoz.core.navigation.navigateToWebView
 import com.m.vodovoz.design_system.composables.placeholders.LoadingPlaceholder
 import com.m.vodovoz.design_system.composables.placeholders.NetworkErrorPlaceholder
 import com.m.vodovoz.design_system.effects.LifecycleEffect
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.m.vodovoz.feature.auth.login.LoginFlowViewModel
 import com.m.vodovoz.feature.auth.login.composables.LoginByEmailUiState
 import com.m.vodovoz.feature.auth.login.model.LoginByEmailEvent
 import com.m.vodovoz.feature.auth.login_by_email.api.LoginByEmailNavKey
@@ -26,6 +28,10 @@ fun LoginByEmailEntry(
 ) = NavigationEntry<LoginByEmailViewModel, LoginByEmailViewModel.Factory>(
     creationCallback = { factory -> factory.create(navKey) }
 ) {
+    val loginViewModel = when (navKey.source) {
+        LoginByEmailNavKey.Source.Login -> viewModel(modelClass = LoginFlowViewModel::class)
+        LoginByEmailNavKey.Source.None -> null
+    }
     val viewState by viewModel.collectAsState()
 
     when (viewState.uiState) {
@@ -46,9 +52,7 @@ fun LoginByEmailEntry(
         viewModel.events.collect { event ->
             when (event) {
                 is LoginByEmailEvent.GoBack -> {
-                    navigator.previousBackStackEntry
-                        ?.savedStateHandle
-                        ?.set(AuthArgs.ACCOUNT_TYPE_ID, event.selectedAccountTypeId)
+                    loginViewModel?.setAccountTypeById(event.selectedAccountTypeId)
                     navigator.goBack()
                 }
 

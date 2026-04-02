@@ -26,6 +26,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.SoftwareKeyboardController
 import androidx.lifecycle.compose.LifecycleStartEffect
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.android.gms.location.LocationServices
 import com.m.vodovoz.core.android.getLocationOrNull
 import com.m.vodovoz.core.android.handleLocationAvailability
@@ -33,6 +34,7 @@ import com.m.vodovoz.core.android.locationPermissions
 import com.m.vodovoz.core.navigation.NavigationEntry
 import com.m.vodovoz.core.navigation.navigateToAddAddress
 import com.m.vodovoz.core.navigation.slideAnim
+import com.m.vodovoz.feature.addresses.add.AddAddressViewModel
 import com.m.vodovoz.design_system.effects.LifecycleEffect
 import com.m.vodovoz.design_system.model.toMapPoint
 import com.m.vodovoz.design_system.model.toPoint
@@ -66,6 +68,10 @@ fun MapEntry(navKey: MapNavKey? = null) =
     NavigationEntry<MapFlowViewModel, MapFlowViewModel.Factory>(
         creationCallback = { factory -> factory.create(navKey) }
     ) {
+    val addAddressViewModel = when (navKey?.source) {
+        MapNavKey.Source.AddAddress -> viewModel(modelClass = AddAddressViewModel::class)
+        else -> null
+    }
     val context = LocalContext.current
     val activity = context as? Activity
     val viewState by viewModel.collectAsState()
@@ -142,6 +148,7 @@ fun MapEntry(navKey: MapNavKey? = null) =
 
     LifecycleEffect(anchoredDraggableState) {
         observeEvents(
+            addAddressViewModel = addAddressViewModel,
             activity = activity,
             context = context,
             map = map,
@@ -157,6 +164,7 @@ fun MapEntry(navKey: MapNavKey? = null) =
 
 @OptIn(ExperimentalMaterial3Api::class)
 private suspend fun com.m.vodovoz.core.navigation.NavigationEntryScope<MapFlowViewModel>.observeEvents(
+    addAddressViewModel: AddAddressViewModel?,
     activity: Activity?,
     context: android.content.Context,
     map: Map,
@@ -270,10 +278,7 @@ private suspend fun com.m.vodovoz.core.navigation.NavigationEntryScope<MapFlowVi
             }
 
             is MapFlowViewModel.MapFlowEvents.BackToAddAddress -> {
-                navigator.previousBackStackEntry?.savedStateHandle?.set(
-                    "mapAddress",
-                    event.mapAddress
-                )
+                addAddressViewModel?.changeMapAddress(event.mapAddress)
                 navigator.goBack()
             }
         }

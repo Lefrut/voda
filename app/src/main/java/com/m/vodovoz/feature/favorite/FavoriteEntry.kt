@@ -14,7 +14,6 @@ import com.m.vodovoz.core.navigation.navigateToProductDetails
 import com.m.vodovoz.core.navigation.navigateToSearch
 import com.m.vodovoz.design_system.composables.placeholders.NetworkErrorPlaceholder
 import com.m.vodovoz.design_system.effects.LifecycleEffect
-import com.m.vodovoz.feature.home.model.CategoryUi
 import com.m.vodovoz.feature.main.Navigator
 import com.m.vodovoz.ui.mvi.collectAsState
 
@@ -27,9 +26,7 @@ fun FavoriteEntry(
     val navigator = LocalNavigator.current
 
     LifecycleEffect(Unit) {
-        navigator.currentBackStackEntry?.savedStateHandle?.remove<CategoryUi>("category")
-            ?.let { category -> viewModel.selectCategory(category) }
-            ?: viewModel.fetchFavoritesIfChanges()
+        viewModel.fetchFavoritesIfChanges()
     }
 
     DisposableEffect(Unit) {
