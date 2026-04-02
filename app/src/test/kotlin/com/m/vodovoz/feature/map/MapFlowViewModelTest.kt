@@ -3,12 +3,14 @@ package com.m.vodovoz.feature.map
 import ViewModelTestBase
 import app.cash.turbine.test
 import com.m.vodovoz.design_system.model.MapPointUi
+import com.m.vodovoz.domain.general.MkadDistanceUseCase
 import com.m.vodovoz.domain.general.model.location.MapAddressModel
 import com.m.vodovoz.feature.map.MapFlowViewModel.MapUiMode
 import com.m.vodovoz.feature.map.model.MapAddressUi
 import com.m.vodovoz.feature.map.model.toUi
 import io.mockk.coEvery
 import io.mockk.every
+import io.mockk.mockk
 import io.mockk.spyk
 import io.mockk.verify
 import kotlinx.coroutines.Job
@@ -21,6 +23,8 @@ import kotlin.time.Duration.Companion.seconds
 
 class MapFlowViewModelTest : ViewModelTestBase<MapFlowViewModel>() {
 
+    private val mkadDistanceUseCase = mockk<MkadDistanceUseCase>(relaxed = true)
+
     override fun createViewModel(): MapFlowViewModel {
 
         every { savedStateHandle.get<String>(any()) } returns null
@@ -30,7 +34,8 @@ class MapFlowViewModelTest : ViewModelTestBase<MapFlowViewModel>() {
             MapFlowViewModel(
                 savedState = savedStateHandle,
                 mapServiceRepository = mapServiceRepository,
-                vodovozServiceRepository = vodovozServiceRepository
+                vodovozServiceRepository = vodovozServiceRepository,
+                mkadDistanceUseCase = mkadDistanceUseCase
             )
         )
     }
@@ -132,7 +137,8 @@ class MapFlowViewModelTest : ViewModelTestBase<MapFlowViewModel>() {
             MapFlowViewModel(
                 savedState = savedStateHandle,
                 mapServiceRepository = mapServiceRepository,
-                vodovozServiceRepository = vodovozServiceRepository
+                vodovozServiceRepository = vodovozServiceRepository,
+                mkadDistanceUseCase = mkadDistanceUseCase
             )
         )
         every { viewModel2.searchAddress("addressName") } returns Job()

@@ -7,25 +7,22 @@ import androidx.lifecycle.viewModelScope
 import com.m.vodovoz.common.model.VodovozBoolean
 import com.m.vodovoz.common.model.boolean
 import com.m.vodovoz.common.model.from
-import com.m.vodovoz.design_system.model.MapPointUi
 import com.m.vodovoz.design_system.model.SectionUi
 import com.m.vodovoz.design_system.model.VodovozPlaceholderUi
-import com.m.vodovoz.design_system.model.contains
-import com.m.vodovoz.design_system.model.distanceKm
 import com.m.vodovoz.design_system.model.mapToUi
 import com.m.vodovoz.design_system.model.toDomain
 import com.m.vodovoz.design_system.model.toUi
 import com.m.vodovoz.design_system.model.widgets.mapToUi
 import com.m.vodovoz.design_system.model.widgets.toUi
+import com.m.vodovoz.domain.general.MkadDistanceUseCase
 import com.m.vodovoz.domain.general.model.exceptions.EmptyResultException
-import com.m.vodovoz.domain.general.model.location.MapAreaModel
 import com.m.vodovoz.domain.general.respository.MapServiceRepository
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
 import com.m.vodovoz.feature.addresses.model.AddressScreenTypeUi
 import com.m.vodovoz.feature.addresses.model.AddressUi
 import com.m.vodovoz.feature.addresses.model.mapToUi
 import com.m.vodovoz.feature.map.model.MapAreaUi
-import com.m.vodovoz.feature.map.model.findNearestPointsTo
+import com.m.vodovoz.feature.map.model.mapToDomain
 import com.m.vodovoz.feature.map.model.mapToUi
 import com.m.vodovoz.feature.map.model.toDomain
 import com.m.vodovoz.feature.map.model.toUi
@@ -37,8 +34,6 @@ import com.m.vodovoz.util.extensions.onEachSuccess
 import com.m.vodovoz.util.extensions.singleGetOrNull
 import com.m.vodovoz.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.retry
@@ -52,6 +47,7 @@ class AddressesFlowViewModel @Inject constructor(
     savedState: SavedStateHandle,
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val mapServiceRepository: MapServiceRepository,
+    private val mkadDistanceUseCase: MkadDistanceUseCase,
 ) : MviViewModel<AddressesFlowViewModel.AddressesState, AddressesFlowViewModel.AddressesEvents>(
     AddressesState(
         screenType = savedState.get<AddressScreenTypeUi>("screenType") ?: AddressScreenTypeUi.Add
@@ -143,27 +139,11 @@ class AddressesFlowViewModel @Inject constructor(
         val mapAddress = mapServiceRepository.searchAddressInMoscow(
             address = selectedAddress.address
         ).singleGetOrNull()?.toUi() ?: return@launch
-        val addressPoint = mapAddress.point
 
-        val mapAreas = stateSnapshot.mapAreas.ifEmpty {
-            return@launch
-        }
-        val coreMapArea = mapAreas.find { area ->
-            area.id == MapAreaModel.CORE_AREA_ID && area.isMoscowRingRow
-        } ?: return@launch
-
-        val updatedFromMoscowRingToAddress = if (coreMapArea.contains(addressPoint)) {
-            0f
-        } else {
-            val nearestPoints = coreMapArea.findNearestPointsTo(target = addressPoint, count = 5)
-            val routes = nearestPoints.map { nearestPoint ->
-                async { nearestPoint.routeTo(addressPoint) }
-            }.awaitAll()
-            val fromMoscowToPoint = routes.minOf { route ->
-                route?.distanceKm() ?: Float.MAX_VALUE
-            }
-            fromMoscowToPoint
-        }
+        val updatedFromMoscowRingToAddress = mkadDistanceUseCase(
+            areas = stateSnapshot.mapAreas.mapToDomain(),
+            addressPoint = mapAddress.point.toDomain()
+        ).getOrNull()?.distanceKm ?: return@launch
 
         val addressParams = with(addressDetails) {
             linearSwitches.mapToUi().associate { w ->
@@ -190,14 +170,6 @@ class AddressesFlowViewModel @Inject constructor(
     }.invokeOnCompletion {
         updateState { s -> s.copy(buttonLoading = false) }
     }
-
-    private suspend fun MapPointUi.routeTo(end: MapPointUi): List<MapPointUi>? {
-        return mapServiceRepository.getRoutes(
-            start = this.toDomain(),
-            end = end.toDomain()
-        ).singleGetOrNull()?.mapToUi()
-    }
-
 
     fun editAddress(address: AddressUi) = viewModelScope.launch {
         sendEvent(AddressesEvents.GoToEditAddress(address.id, address.address))

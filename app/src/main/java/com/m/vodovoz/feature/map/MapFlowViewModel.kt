@@ -6,19 +6,17 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.m.vodovoz.design_system.model.ImageButtonUi
 import com.m.vodovoz.design_system.model.MapPointUi
-import com.m.vodovoz.design_system.model.contains
-import com.m.vodovoz.design_system.model.distanceKm
 import com.m.vodovoz.design_system.model.mapToUi
 import com.m.vodovoz.design_system.model.toDomain
 import com.m.vodovoz.design_system.model.toUi
+import com.m.vodovoz.domain.general.MkadDistanceUseCase
 import com.m.vodovoz.domain.general.model.location.MapAddressModel
-import com.m.vodovoz.domain.general.model.location.MapAreaModel
 import com.m.vodovoz.domain.general.respository.MapServiceRepository
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
 import com.m.vodovoz.feature.map.model.MapAddressUi
 import com.m.vodovoz.feature.map.model.MapAreaUi
 import com.m.vodovoz.feature.map.model.MapPopupWindowUi
-import com.m.vodovoz.feature.map.model.findNearestPointsTo
+import com.m.vodovoz.feature.map.model.mapToDomain
 import com.m.vodovoz.feature.map.model.mapToUi
 import com.m.vodovoz.feature.map.model.toUi
 import com.m.vodovoz.ui.mvi.Event
@@ -28,9 +26,6 @@ import com.m.vodovoz.util.extensions.debounceWithMax
 import com.m.vodovoz.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -51,6 +46,7 @@ class MapFlowViewModel @Inject constructor(
     savedState: SavedStateHandle,
     private val mapServiceRepository: MapServiceRepository,
     private val vodovozServiceRepository: VodovozServiceRepository,
+    private val mkadDistanceUseCase: MkadDistanceUseCase,
 ) : MviViewModel<MapFlowViewModel.MapFlowState, MapFlowViewModel.MapFlowEvents>(
     MapFlowState()
 ) {
@@ -153,31 +149,16 @@ class MapFlowViewModel @Inject constructor(
             delay(300L)
         }
 
-        val coreMapArea = stateSnapshot.areas.find { area ->
-            area.id == MapAreaModel.CORE_AREA_ID && area.isMoscowRingRow
-        } ?: run { return null }
+        val distanceResult = mkadDistanceUseCase(
+            areas = stateSnapshot.areas.mapToDomain(),
+            addressPoint = addressPoint.toDomain()
+        ).getOrNull() ?: return null
 
-        if (coreMapArea.contains(addressPoint)) {
-            return 0f
+        updateState { s ->
+            s.copy(routeToAddress = distanceResult.routeToAddress.mapToUi())
         }
 
-        val nearestPoints = coreMapArea.findNearestPointsTo(target = addressPoint, count = 5)
-        val routes = nearestPoints
-            .map { nearestPoint ->
-                coroutineScope {
-                    async { nearestPoint.routeTo(addressPoint) }
-                }
-            }.awaitAll()
-            .mapNotNull { route -> route?.drop(10) }
-
-        val fromMoscowToPoint = routes
-            .minBy { route ->
-                route.distanceKm()
-            }.also { route ->
-                updateState { s -> s.copy(routeToAddress = route) }
-            }.distanceKm()
-
-        return fromMoscowToPoint
+        return distanceResult.distanceKm
     }
 
     fun moveToAvailableGeo() = viewModelScope.launch {
@@ -283,14 +264,6 @@ class MapFlowViewModel @Inject constructor(
         activeSearchJobs.add(newSearchJob)
         newSearchJob.join()
     }
-
-    private suspend fun MapPointUi.routeTo(end: MapPointUi): List<MapPointUi>? {
-        return mapServiceRepository.getRoutes(
-            start = this.toDomain(),
-            end = end.toDomain()
-        ).singleResult().getOrNull()?.mapToUi()
-    }
-
     fun changeToSearchMode() {
         updateState { s ->
             s.copy(mode = MapUiMode.Search)

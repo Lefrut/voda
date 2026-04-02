@@ -4,6 +4,7 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
 import com.m.vodovoz.design_system.model.MapPointUi
 import com.m.vodovoz.design_system.model.mapToUi
+import com.m.vodovoz.design_system.model.toDomain
 import com.m.vodovoz.domain.general.model.location.MapAreaModel
 import com.m.vodovoz.ui.graphics.fromHexOrUnspecified
 import com.m.vodovoz.ui.yandex_map.distanceBetween
@@ -28,6 +29,20 @@ fun MapAreaModel.toUi(): MapAreaUi {
         isMoscowRingRow = isMoscowRingRow,
         color = Color.fromHexOrUnspecified(color),
         points = points.mapToUi()
+    )
+}
+
+fun List<MapAreaUi>.mapToDomain(): List<MapAreaModel> {
+    return map { it.toDomain() }
+}
+
+fun MapAreaUi.toDomain(): MapAreaModel {
+    return MapAreaModel(
+        id = id,
+        name = name,
+        isMoscowRingRow = isMoscowRingRow,
+        color = color.toString(),
+        points = points.map(MapPointUi::toDomain)
     )
 }
 
