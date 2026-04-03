@@ -61,9 +61,7 @@ class AddressesFlowViewModel @Inject constructor(
     }
 
     private fun fetchMapAreas() =
-        vodovozServiceRepository.getMapAreas().onEachFailure { throwable ->
-            throw throwable
-        }.onEachSuccess { mapZonesModel ->
+        vodovozServiceRepository.getMapAreas().onEachSuccess { mapZonesModel ->
             updateState { s ->
                 s.copy(mapAreas = mapZonesModel.areas.mapToUi())
             }
