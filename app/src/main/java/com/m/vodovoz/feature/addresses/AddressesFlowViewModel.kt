@@ -139,8 +139,7 @@ class AddressesFlowViewModel @Inject constructor(
         val mapAddressPoint = mapAddress.point
 
         if (
-            fromMoscowRingToAddress != null && fromMoscowRingToAddress != 0
-            && stateSnapshot.mapAreas.find { it.isMoscowRingRow }?.contains(mapAddressPoint) == true
+            fromMoscowRingToAddress != null && stateSnapshot.mapAreas.find { it.isMoscowRingRow }?.contains(mapAddressPoint) == true
         ) {
             sendEvent(AddressesEvents.GoBackToOrdering(selectedAddress))
             return@launch
