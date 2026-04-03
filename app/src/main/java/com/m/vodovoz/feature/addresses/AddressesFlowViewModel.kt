@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.m.vodovoz.common.model.VodovozBoolean
 import com.m.vodovoz.common.model.boolean
 import com.m.vodovoz.common.model.from
+import com.m.vodovoz.design_system.model.contains
 import com.m.vodovoz.design_system.model.SectionUi
 import com.m.vodovoz.design_system.model.VodovozPlaceholderUi
 import com.m.vodovoz.design_system.model.mapToUi
@@ -131,14 +132,20 @@ class AddressesFlowViewModel @Inject constructor(
         ).singleGetOrNull() ?: return@launch
         val fromMoscowRingToAddress = addressDetails.formMoscowRingToAddressKm
 
-        if (fromMoscowRingToAddress != null) {
+        val mapAddress = mapServiceRepository.searchAddressInMoscow(
+            address = selectedAddress.address
+        ).singleGetOrNull()?.toUi() ?: return@launch
+
+        val mapAddressPoint = mapAddress.point
+
+        if (
+            fromMoscowRingToAddress != null && fromMoscowRingToAddress != 0
+            && stateSnapshot.mapAreas.find { it.isMoscowRingRow }?.contains(mapAddressPoint) == true
+        ) {
             sendEvent(AddressesEvents.GoBackToOrdering(selectedAddress))
             return@launch
         }
 
-        val mapAddress = mapServiceRepository.searchAddressInMoscow(
-            address = selectedAddress.address
-        ).singleGetOrNull()?.toUi() ?: return@launch
 
         val updatedFromMoscowRingToAddress = mkadDistanceUseCase(
             areas = stateSnapshot.mapAreas.mapToDomain(),
