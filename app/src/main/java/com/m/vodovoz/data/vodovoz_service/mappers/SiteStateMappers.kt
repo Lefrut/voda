@@ -43,8 +43,9 @@ fun SiteStateResponseDTO.toDomain(): AppConfig {
         mapkitKey = BuildConfig.MAPKIT_API_KEY,
         geocoderKey = mapKeysAndroid?.GEOKODER ?: BuildConfig.GEOCODER,
         appLinks = DANNYESSILKI?.toDomain() ?: AppLinks.Empty,
-        //todo - put prodUrl from dto
-        prodUrl = ""
+        //todo - remove
+        prodUrl = "",
+        mkadZonesIds = IDZONES.orEmpty()
     )
 }
 

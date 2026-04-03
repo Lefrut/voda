@@ -20,6 +20,8 @@ data class AddAddressDetailsDTO(
     val fromMKADToAddressKm: Int?,
     @Json(name = "gridFields")
     val gridFields: List<POLE_DTO>?,
+    @Json(name = "idzone")
+    val zoneId: Int?,
     @Json(name = "switchFields")
     val switchFields: List<SWITCH_DTO>?,
     @Json(name = "linearFields")

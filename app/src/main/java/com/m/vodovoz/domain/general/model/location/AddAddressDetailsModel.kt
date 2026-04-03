@@ -8,6 +8,7 @@ data class AddAddressDetailsModel(
     val addressId: Long,
     val coordinates: MapPointModel?,
     val formMoscowRingToAddressKm: Int?,
+    val zoneId: Int?,
     val addressField: FieldModel,
     val label: AddressLabelModel,
     val gridFields: List<FieldModel>,

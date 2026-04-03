@@ -34,6 +34,8 @@ data class SiteStateResponseDTO(
     val CALL: String?,
     @Json(name = "DANNYESSILKI")
     val DANNYESSILKI: AppLinksDTO?,
+    @Json(name = "IDZONES")
+    val IDZONES: List<Int>?,
     @Json(name = "IDMAPKIT")
     val IDMAPKIT: MapKeysDTO?,
 )

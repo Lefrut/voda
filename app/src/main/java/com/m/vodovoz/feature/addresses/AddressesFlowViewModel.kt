@@ -27,6 +27,7 @@ import com.m.vodovoz.feature.map.model.mapToDomain
 import com.m.vodovoz.feature.map.model.mapToUi
 import com.m.vodovoz.feature.map.model.toDomain
 import com.m.vodovoz.feature.map.model.toUi
+import com.m.vodovoz.feature.sitestate.SiteStateManager
 import com.m.vodovoz.ui.mvi.Event
 import com.m.vodovoz.ui.mvi.MviViewModel
 import com.m.vodovoz.ui.mvi.State
@@ -49,6 +50,7 @@ class AddressesFlowViewModel @Inject constructor(
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val mapServiceRepository: MapServiceRepository,
     private val mkadDistanceUseCase: MkadDistanceUseCase,
+    private val siteStateManager: SiteStateManager
 ) : MviViewModel<AddressesFlowViewModel.AddressesState, AddressesFlowViewModel.AddressesEvents>(
     AddressesState(
         screenType = savedState.get<AddressScreenTypeUi>("screenType") ?: AddressScreenTypeUi.Add
@@ -121,6 +123,23 @@ class AddressesFlowViewModel @Inject constructor(
         sendEvent(AddressesEvents.GoToMap)
     }
 
+    private fun shouldResaveAddress(
+        zoneId: Int?,
+        mkadZoneIds: List<Int>?,
+        distanceKm: Number?
+    ): Boolean {
+        val actualZoneId = zoneId ?: return true
+        val actualMkadZoneIds = mkadZoneIds ?: return true
+
+        if (actualMkadZoneIds.contains(actualZoneId)) {
+            return false
+        }
+
+        val actualDistance = distanceKm?.toDouble() ?: return true
+
+        return actualDistance == 0.0
+    }
+
     fun searchThenNavigateToOrdering() = viewModelScope.launch {
         updateState { s ->
             s.copy(buttonLoading = true)
@@ -136,15 +155,17 @@ class AddressesFlowViewModel @Inject constructor(
             address = selectedAddress.address
         ).singleGetOrNull()?.toUi() ?: return@launch
 
-        val mapAddressPoint = mapAddress.point
 
-        if (
-            fromMoscowRingToAddress != null && stateSnapshot.mapAreas.find { it.isMoscowRingRow }?.contains(mapAddressPoint) == true
-        ) {
+        val shouldResave = shouldResaveAddress(
+            zoneId = addressDetails.zoneId,
+            mkadZoneIds = siteStateManager.siteStateSnapshot.mkadZonesIds,
+            distanceKm = fromMoscowRingToAddress
+        )
+
+        if (!shouldResave) {
             sendEvent(AddressesEvents.GoBackToOrdering(selectedAddress))
             return@launch
         }
-
 
         val updatedFromMoscowRingToAddress = mkadDistanceUseCase(
             areas = stateSnapshot.mapAreas.mapToDomain(),

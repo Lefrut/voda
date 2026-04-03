@@ -19,6 +19,7 @@ data class AppConfig(
     val geocoderKey: String,
     val mapkitKey: String,
     val appLinks: AppLinks,
+    val mkadZonesIds: List<Int>
 ) {
     companion object {
         val Empty = AppConfig(
@@ -37,7 +38,8 @@ data class AppConfig(
             data = null,
             geocoderKey = "",
             mapkitKey = "",
-            appLinks = AppLinks.Empty
+            appLinks = AppLinks.Empty,
+            mkadZonesIds = emptyList()
         )
 
         val Blocked = Empty.copy(isActive = false)

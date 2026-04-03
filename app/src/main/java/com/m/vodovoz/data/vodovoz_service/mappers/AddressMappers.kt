@@ -107,6 +107,7 @@ fun AddAddressDetailsDTO.toDomain(): AddAddressDetailsModel {
             ?: throw IllegalArgumentException("AddAddressDetails field can't be null"),
         label = label?.toDomain() ?: AddressLabelModel.Empty,
         formMoscowRingToAddressKm = fromMKADToAddressKm,
+        zoneId = zoneId,
         coordinates = coordinates?.toDomain(),
         gridFields = gridFields?.mapToDomain() ?: emptyList(),
         linearFields = linearFields?.mapToDomain() ?: emptyList(),
