@@ -7,12 +7,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.lifecycle.compose.LifecycleStartEffect
-import androidx.navigation.navOptions
-import com.m.vodovoz.R
 import com.m.vodovoz.core.navigation.NavigationEntry
 import com.m.vodovoz.core.navigation.NavigationEntryScope
 import com.m.vodovoz.core.navigation.navigateToMap
-import com.m.vodovoz.core.navigation.slideAnim
+import com.m.vodovoz.core.navigation.popToAddresses
+import com.m.vodovoz.core.navigation.popToMap
 import com.m.vodovoz.design_system.effects.LifecycleEffect
 import com.m.vodovoz.feature.addresses.add.api.AddAddressNavKey
 import com.m.vodovoz.feature.addresses.add.composables.AddAddressScreen
@@ -65,20 +64,13 @@ private suspend fun NavigationEntryScope<AddAddressViewModel>.observeEvents(
     }.collect { event ->
         when (event) {
             AddAddressEvent.GoBackToMap -> {
-                navigator.popBackStack(
-                    destinationId = R.id.mapFragment,
-                    inclusive = false,
-                    saveState = true
-                )
+                navigator.popToMap(saveState = true)
             }
 
             is AddAddressEvent.GoToMap -> {
                 navigator.navigateToMap(
                     event.addressName,
-                    navOptions {
-                        slideAnim()
-                        launchSingleTop = true
-                    }
+                    launchSingleTop = true,
                 )
             }
 
@@ -89,11 +81,7 @@ private suspend fun NavigationEntryScope<AddAddressViewModel>.observeEvents(
             }
 
             AddAddressEvent.GoBackToAddresses -> {
-                navigator.popBackStack(
-                    destinationId = R.id.addressesFragment,
-                    inclusive = false,
-                    saveState = false
-                )
+                navigator.popToAddresses()
             }
         }
     }

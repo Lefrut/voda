@@ -6,10 +6,10 @@ import androidx.compose.runtime.getValue
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleStartEffect
 import androidx.lifecycle.ViewModelStoreOwner
-import com.m.vodovoz.R
 import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.core.navigation.NavigationEntry
 import com.m.vodovoz.core.navigation.navigateToBottomTabByGraphId
+import com.m.vodovoz.core.navigation.popToProfileRoot
 import com.m.vodovoz.design_system.effects.LifecycleEffect
 import com.m.vodovoz.feature.auth.login_by_phone_code.api.LoginByPhoneCodeNavKey
 import com.m.vodovoz.feature.auth.login_by_phone_code.model.LoginByPhoneCodeEvent
@@ -65,13 +65,9 @@ fun LoginByPhoneCodeEntry(
 
                     val redirect = tabManager.fetchAuthRedirect()
                     if (redirect == TabManager.DEFAULT_AUTH_REDIRECT) {
-                        navigator.popBackStack(
-                            R.id.profileFragment, false
-                        )
+                        navigator.popToProfileRoot()
                     } else {
-                        navigator.popBackStack(
-                            R.id.profileFragment, false
-                        )
+                        navigator.popToProfileRoot()
                         navigator.navigateToBottomTabByGraphId(redirect)
                         tabManager.setDefaultAuthRedirect()
                     }

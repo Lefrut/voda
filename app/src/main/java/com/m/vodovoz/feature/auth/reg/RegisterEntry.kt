@@ -4,13 +4,13 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import com.m.vodovoz.R
 import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.core.navigation.NavigationEntry
 import com.m.vodovoz.core.navigation.navigateToBottomTabByGraphId
 import com.m.vodovoz.core.navigation.navigateToLogin
 import com.m.vodovoz.core.navigation.navigateToLoginByEmail
 import com.m.vodovoz.core.navigation.navigateToWebView
+import com.m.vodovoz.core.navigation.popToProfileRoot
 import com.m.vodovoz.design_system.effects.LifecycleEffect
 import com.m.vodovoz.feature.auth.reg.composables.RegisterScreen
 import com.m.vodovoz.ui.mvi.collectAsState
@@ -47,10 +47,7 @@ fun RegisterEntry(
 
                 RegFlowViewModel.RegEvents.GoToProfile -> {
                     onFetchProfile()
-                    navigator.popBackStack(
-                        R.id.profileFragment,
-                        false
-                    )
+                    navigator.popToProfileRoot()
                 }
 
                 is RegFlowViewModel.RegEvents.GoToWebView -> {
@@ -58,12 +55,12 @@ fun RegisterEntry(
                 }
 
                 RegFlowViewModel.RegEvents.GoToLogin -> {
-                    navigator.popBackStack(R.id.profileFragment, false)
+                    navigator.popToProfileRoot()
                     navigator.navigateToLogin()
                 }
 
                 RegFlowViewModel.RegEvents.GoToLoginByEmail -> {
-                    navigator.popBackStack(R.id.profileFragment, false)
+                    navigator.popToProfileRoot()
                     navigator.navigateToLoginByEmail()
                 }
 
@@ -74,15 +71,9 @@ fun RegisterEntry(
 
                     val redirect = viewModel.tabManager.fetchAuthRedirect()
                     if (redirect == TabManager.DEFAULT_AUTH_REDIRECT) {
-                        navigator.popBackStack(
-                            R.id.profileFragment,
-                            false
-                        )
+                        navigator.popToProfileRoot()
                     } else {
-                        navigator.popBackStack(
-                            R.id.profileFragment,
-                            false
-                        )
+                        navigator.popToProfileRoot()
                         navigator.navigateToBottomTabByGraphId(redirect)
                         viewModel.tabManager.setDefaultAuthRedirect()
                     }

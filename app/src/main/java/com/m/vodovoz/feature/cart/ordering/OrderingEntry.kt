@@ -7,7 +7,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.LifecycleStartEffect
-import androidx.navigation.navOptions
 import com.m.vodovoz.R
 import com.m.vodovoz.core.navigation.NavigationEntry
 import com.m.vodovoz.core.navigation.navigateToAddresses
@@ -17,6 +16,7 @@ import com.m.vodovoz.core.navigation.navigateToOrderCallYou
 import com.m.vodovoz.core.navigation.navigateToOrderRecipient
 import com.m.vodovoz.core.navigation.navigateToPaymentMethod
 import com.m.vodovoz.core.navigation.navigateToWebView
+import com.m.vodovoz.core.navigation.popToCartRoot
 import com.m.vodovoz.design_system.composables.placeholders.VodovozLongPlaceholder
 import com.m.vodovoz.design_system.effects.LifecycleEffect
 import com.m.vodovoz.feature.addresses.model.AddressScreenTypeUi
@@ -139,15 +139,8 @@ private suspend fun com.m.vodovoz.core.navigation.NavigationEntryScope<OrderingF
             }
 
             is OrderingFlowViewModel.OrderingEvents.GoToWebView -> {
-                navigator.navigateToWebView(
-                    title = context.getString(R.string.space),
-                    url = event.url,
-                    navOptions = navOptions {
-                        popUpTo(R.id.cartFragment) {
-                            inclusive = false
-                        }
-                    }
-                )
+                navigator.popToCartRoot()
+                navigator.navigateToWebView(title = context.getString(R.string.space), url = event.url)
             }
 
             is OrderingFlowViewModel.OrderingEvents.OpenUrl -> {

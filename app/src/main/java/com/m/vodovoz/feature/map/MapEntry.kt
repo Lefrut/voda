@@ -33,7 +33,6 @@ import com.m.vodovoz.core.android.handleLocationAvailability
 import com.m.vodovoz.core.android.locationPermissions
 import com.m.vodovoz.core.navigation.NavigationEntry
 import com.m.vodovoz.core.navigation.navigateToAddAddress
-import com.m.vodovoz.core.navigation.slideAnim
 import com.m.vodovoz.feature.addresses.add.AddAddressViewModel
 import com.m.vodovoz.design_system.effects.LifecycleEffect
 import com.m.vodovoz.design_system.model.toMapPoint
@@ -269,11 +268,8 @@ private suspend fun com.m.vodovoz.core.navigation.NavigationEntryScope<MapFlowVi
             is MapFlowViewModel.MapFlowEvents.GoToAddAddress -> {
                 navigator.navigateToAddAddress(
                     mapAddress = event.mapAddress,
-                    navOptions = androidx.navigation.navOptions {
-                        launchSingleTop = true
-                        restoreState = true
-                        slideAnim()
-                    }
+                    launchSingleTop = true,
+                    restoreState = true,
                 )
             }
 

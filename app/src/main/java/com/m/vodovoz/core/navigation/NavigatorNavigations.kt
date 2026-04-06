@@ -1,13 +1,7 @@
 package com.m.vodovoz.core.navigation
 
-
-import android.os.Bundle
 import androidx.annotation.IdRes
-
 import androidx.navigation.NavOptions
-
-import androidx.navigation.navOptions
-
 import com.m.vodovoz.R
 import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.common.media.api.ImagePickerNavKey
@@ -102,6 +96,7 @@ import com.m.vodovoz.feature.wait_feedback_products.api.WaitFeedbackProductsNavK
 import com.m.vodovoz.feature.write_comment.api.WriteCommentNavKey
 import com.m.vodovoz.feature.write_message.api.WriteMessageNavKey
 import com.m.vodovoz.common.webview.api.WebViewNavKey
+import com.m.vodovoz.feature.main.popTo
 import com.m.vodovoz.ui.dialog.api.SpeechDialogNavKey
 
 import java.time.LocalDate
@@ -116,7 +111,8 @@ fun Navigator.navigateToAddAddress(
     addressId: Long? = null,
     addressName: String? = null,
     addressType: Int? = null,
-    navOptions: NavOptions? = null,
+    launchSingleTop: Boolean = false,
+    restoreState: Boolean = false,
 ) {
     navigate(
         AddAddressNavKey(
@@ -124,11 +120,17 @@ fun Navigator.navigateToAddAddress(
             addressId = addressId,
             addressName = addressName,
             addressType = addressType
-        )
+        ),
+        launchSingleTop = launchSingleTop,
+        restoreState = restoreState,
     )
 }
 
-fun Navigator.navigateToMap(addressName: String?, navOptions: NavOptions? = null) {
+fun Navigator.navigateToMap(
+    addressName: String?,
+    launchSingleTop: Boolean = false,
+    restoreState: Boolean = false,
+) {
     navigate(
         MapNavKey(
             addressName = addressName,
@@ -137,7 +139,9 @@ fun Navigator.navigateToMap(addressName: String?, navOptions: NavOptions? = null
                 else -> MapNavKey.Source.None
             },
             parentContentKey = state.currentKey.toContentKey()
-        )
+        ),
+        launchSingleTop = launchSingleTop,
+        restoreState = restoreState,
     )
 }
 
@@ -592,7 +596,6 @@ fun Navigator.navigateToBuyCertificate() {
 fun Navigator.navigateToWebView(
     url: String,
     title: String = "",
-    navOptions: NavOptions? = null,
 ) {
     navigate(WebViewNavKey(url = url, title = title))
 }
@@ -604,3 +607,35 @@ fun Navigator.navigateToAllServices() {
 fun Navigator.navigateToImagePicker() {
     navigate(ImagePickerNavKey)
 }
+
+fun Navigator.popToProfileRoot(
+    inclusive: Boolean = false,
+    saveState: Boolean = false,
+): Boolean = popTo<BottomNavKey.Profile>(
+    inclusive = inclusive,
+    saveState = saveState,
+)
+
+fun Navigator.popToAddresses(
+    inclusive: Boolean = false,
+    saveState: Boolean = false,
+): Boolean = popTo<AddressesNavKey>(
+    inclusive = inclusive,
+    saveState = saveState,
+)
+
+fun Navigator.popToMap(
+    inclusive: Boolean = false,
+    saveState: Boolean = false,
+): Boolean = popTo<MapNavKey>(
+    inclusive = inclusive,
+    saveState = saveState,
+)
+
+fun Navigator.popToCartRoot(
+    inclusive: Boolean = false,
+    saveState: Boolean = false,
+): Boolean = popTo<BottomNavKey.Cart>(
+    inclusive = inclusive,
+    saveState = saveState,
+)

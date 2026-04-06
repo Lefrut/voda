@@ -227,6 +227,13 @@ fun BottmNav(
     val cartState by tabManager.observeBottomNavCartState().collectAsStateWithLifecycle()
 
 
+    fun refreshAllScreens() {
+        profileFlowViewModel.refresh()
+        favoriteFlowViewModel.refresh()
+        cartFlowViewModel.refresh()
+        homeViewModel.refresh()
+        catalogFlowViewModel.refresh()
+    }
 
 
     Scaffold(
@@ -266,7 +273,9 @@ fun BottmNav(
                 ImagePickerEntry()
             }
             entry<AboutAppNavKey> {
-                AboutAppEntry(onRefreshApp = {})
+                AboutAppEntry(
+                    onRefreshApp = { refreshAllScreens() }
+                )
             }
             entry<AboutProductNavKey> { key ->
                 AboutProductEntry(key)
@@ -296,7 +305,12 @@ fun BottmNav(
                 LoginEntry(key)
             }
             entry<LoginByEmailNavKey> { key ->
-                LoginByEmailEntry(onRefreshAll = {}, navKey = key)
+                LoginByEmailEntry(
+                    onRefreshAll = {
+                        refreshAllScreens()
+                    },
+                    navKey = key
+                )
             }
             entry<LoginByPhoneCodeNavKey> { key ->
                 LoginByPhoneCodeEntry(navKey = key)
@@ -305,7 +319,13 @@ fun BottmNav(
                 RecoverPasswordEntry()
             }
             entry<RegisterNavKey> {
-                RegisterEntry(onRefreshAll = {}, onFetchProfile = {})
+                RegisterEntry(
+                    onRefreshAll = {
+                        refreshAllScreens()
+                    }, onFetchProfile = {
+                        profileFlowViewModel.refresh()
+                    }
+                )
             }
             entry<AboutServicesNavKey> {
                 AboutServicesEntry()
@@ -320,7 +340,7 @@ fun BottmNav(
                 CancelOrderEntry(key)
             }
             entry<CartNavKey> {
-                CartEntry(cartFlowViewModel)
+                CartEntry(viewModel = cartFlowViewModel)
             }
             entry<AllBottlesNavKey> { key ->
                 AllBottlesEntry(key)
@@ -329,7 +349,7 @@ fun BottmNav(
                 GiftsEntry(key)
             }
             entry<OrderingNavKey> { key ->
-                OrderingEntry(onRefreshCart = {}, navKey = key)
+                OrderingEntry(onRefreshCart = { cartFlowViewModel.refresh() }, navKey = key)
             }
             entry<CatalogNavKey> {
                 CatalogEntry(catalogFlowViewModel)
@@ -404,7 +424,10 @@ fun BottmNav(
                 NotificationSettingsEntry()
             }
             entry<UserDataNavKey> {
-                UserDataEntry(onRefreshAll = {}, onUpdateProfile = {})
+                UserDataEntry(
+                    onRefreshAll = { refreshAllScreens() },
+                    onUpdateProfile = { profileFlowViewModel.refresh() }
+                )
             }
             entry<WaterAppNavKey> {
                 WaterAppEntry()
@@ -649,30 +672,50 @@ fun NavigationState.toEntries(
 
 @Immutable
 class Navigator(val state: NavigationState) {
+    private val savedKeysByDestination = mutableMapOf<String, ArrayDeque<NavKey>>()
 
+    fun popTo(
+        key: NavKey,
+        inclusive: Boolean = false,
+        saveState: Boolean = false,
+    ): Boolean = popTo(
+        inclusive = inclusive,
+        saveState = saveState,
+    ) { stackKey ->
+        matchesDestination(stackKey, key)
+    }
 
-    fun popBackStack(destinationId: Int, inclusive: Boolean): Boolean {
+    fun popTo(
+        inclusive: Boolean,
+        saveState: Boolean,
+        match: (NavKey) -> Boolean,
+    ): Boolean {
         val stack = state.currentSubStack
-        val targetIndex = stack.indexOfLast { key ->
-            destinationId(key) == destinationId
-        }
+        val targetIndex = stack.indexOfLast(match)
         if (targetIndex == -1) return false
         val removeFrom = if (inclusive) targetIndex else targetIndex + 1
         if (removeFrom >= stack.size) return false
+        val removedKeys = stack.subList(removeFrom, stack.size).toList()
+        if (saveState) {
+            saveKeys(removedKeys)
+        }
         stack.subList(removeFrom, stack.size).clear()
         return true
     }
 
-    fun popBackStack(destinationId: Int, inclusive: Boolean, saveState: Boolean): Boolean =
-        popBackStack(destinationId, inclusive)
-
-
-
-    fun navigate(key: NavKey) {
+    fun navigate(
+        key: NavKey,
+        launchSingleTop: Boolean = false,
+        restoreState: Boolean = false,
+    ) {
         when (key) {
             state.currentTopLevelKey -> clearSubStack()
             in state.topLevelKeys -> goToTopLevel(key)
-            else -> goToKey(key)
+            else -> goToKey(
+                key = key,
+                launchSingleTop = launchSingleTop,
+                restoreState = restoreState,
+            )
         }
     }
 
@@ -687,11 +730,42 @@ class Navigator(val state: NavigationState) {
         }
     }
 
-    private fun goToKey(key: NavKey) {
-        state.currentSubStack.apply {
+    private fun goToKey(
+        key: NavKey,
+        launchSingleTop: Boolean,
+        restoreState: Boolean,
+    ) {
+        val keyToNavigate = if (restoreState) {
+            restoreKey(key)
+                ?: state.currentSubStack.lastOrNull { stackKey ->
+                    matchesDestination(
+                        stackKey,
+                        key
+                    )
+                }
+                ?: key
+        } else {
+            removeSavedKeys(key)
+            key
+        }
 
-            remove(key)
-            add(key)
+        state.currentSubStack.apply {
+            val currentKey = lastOrNull()
+            if (launchSingleTop && currentKey != null && matchesDestination(
+                    currentKey,
+                    keyToNavigate
+                )
+            ) {
+                return
+            }
+
+            if (restoreState) {
+                removeLastMatching { stackKey -> matchesDestination(stackKey, keyToNavigate) }
+            } else {
+                remove(key)
+            }
+
+            add(keyToNavigate)
         }
     }
 
@@ -712,73 +786,55 @@ class Navigator(val state: NavigationState) {
         }
     }
 
-
-    private fun destinationId(key: NavKey): Int? {
-        return when (key) {
-            is BottomNavKey.Home, is HomeNavKey -> R.id.homeFragment
-            is BottomNavKey.Catalog, is CatalogNavKey -> R.id.catalogFragment
-            is BottomNavKey.Cart, is CartNavKey -> R.id.cartFragment
-            is BottomNavKey.Favorites, is FavoriteNavKey -> R.id.favoriteFragment
-            is BottomNavKey.Profile, is ProfileNavKey -> R.id.profileFragment
-            is AboutAppNavKey -> R.id.aboutAppFragment
-            is AboutProductNavKey -> R.id.aboutProductFragment
-            is AddressesNavKey -> R.id.addressesFragment
-            is AddAddressNavKey -> R.id.addAddressFragment
-            is AllBrandsNavKey -> R.id.allBrandsFragment
-            is OrderDetailsNavKey -> R.id.orderDetailsFragment
-            is TraceOrderNavKey -> R.id.traceOrderFragment
-            is OrdersHistoryNavKey -> R.id.allOrdersFragment
-            is AllPromotionsNavKey -> R.id.allPromotionsFragment
-            is LoginNavKey -> R.id.loginFragment
-            is LoginByEmailNavKey -> R.id.loginByEmailFragment
-            is LoginByPhoneCodeNavKey -> R.id.loginByPhoneCodeFragment
-            is RecoverPasswordNavKey -> R.id.recoverPasswordFragment
-            is RegisterNavKey -> R.id.registerFragment
-            is AboutServicesNavKey -> R.id.aboutServicesFragment
-            is ServiceDetailNavKey -> R.id.serviceDetailFragment
-            is BuyCertificateNavKey -> R.id.buyCertificateFragment
-            is CancelOrderNavKey -> R.id.cancelOrderFragment
-            is AllBottlesNavKey -> R.id.allBottlesFragment
-            is GiftsNavKey -> R.id.giftsFragment
-            is OrderingNavKey -> R.id.orderingFragment
-            is CategoriesNavKey -> R.id.categoriesFragment
-            is CertificateActivationNavKey -> R.id.certificateActivationFragment
-            is DeliveryDateNavKey -> R.id.deliveryDateFragment
-            is DocumentViewerNavKey -> R.id.documentViewerFragment
-            is FAQNavKey -> R.id.faqFragment
-            is FilterValuesNavKey -> R.id.concreteFilterFragment
-            is MapNavKey -> R.id.mapFragment
-            is OrderCallYouNavKey -> R.id.orderCallYouFragment
-            is OrderQuestionNavKey -> R.id.orderQuestionFragment
-            is OrderRecipientNavKey -> R.id.orderRecipientFragment
-            is PaymentMethodNavKey -> R.id.paymentMethodFragment
-            is PreOrderNavKey -> R.id.preOrderFragment
-            is ProductAnalogsNavKey -> R.id.productsCollectionFragment
-            is ProductCatalogNavKey -> R.id.productCatalogFragment
-            is ProductCommentsNavKey -> R.id.productCommentsFragment
-            is ProductDetailsNavKey -> R.id.productDetailFragment
-            is DetailMediaNavKey -> R.id.detailMedia
-            is ProductFiltersNavKey -> R.id.productFiltersFragment
-            is ChangePasswordNavKey -> R.id.changePasswordFragment
-            is NotificationSettingsNavKey -> R.id.notificationSettingsFragment
-            is UserDataNavKey -> R.id.userDataFragment
-            is WaterAppNavKey -> R.id.waterAppFragment
-            is PromotionDetailsNavKey -> R.id.promotionDetailFragment
-            is QuestionnairesNavKey -> R.id.questionnairesFragment
-            is SearchNavKey -> R.id.searchFragment
-            is WebViewNavKey -> R.id.webViewFragment
-            is QrCodeNavKey -> R.id.qrCodeFragment
-            is SpeechDialogNavKey -> R.id.speechDialogFragment
-            is ServiceOrderNavKey -> R.id.serviceOrderFragment
-            is StoriesNavKey -> R.id.fullScreenHistorySliderFragment
-            is SubCategoriesNavKey -> R.id.subCategoriesFragment
-            is WaitFeedbackProductsNavKey -> R.id.waitFeedbackProductsFragment
-            is WriteCommentNavKey -> R.id.writeCommentFragment
-            is WriteMessageNavKey -> R.id.writeMessageFragment
-            else -> null
+    private fun saveKeys(keys: List<NavKey>) {
+        keys.forEach { key ->
+            savedKeysByDestination.getOrPut(destinationKey(key), ::ArrayDeque).addLast(key)
         }
     }
+
+    private fun restoreKey(key: NavKey): NavKey? {
+        val destinationKey = destinationKey(key)
+        val savedKeys = savedKeysByDestination[destinationKey] ?: return null
+        val restoredKey = savedKeys.removeLastOrNull()
+        if (savedKeys.isEmpty()) {
+            savedKeysByDestination.remove(destinationKey)
+        }
+        return restoredKey
+    }
+
+    private fun removeSavedKeys(key: NavKey) {
+        savedKeysByDestination.remove(destinationKey(key))
+    }
+
+    private fun matchesDestination(first: NavKey, second: NavKey): Boolean {
+        return destinationKey(first) == destinationKey(second)
+    }
+
+    private fun destinationKey(key: NavKey): String {
+        return key.toString()
+    }
+
+    private inline fun NavBackStack<NavKey>.removeLastMatching(match: (NavKey) -> Boolean): Boolean {
+        val index = indexOfLast(match)
+        if (index == -1) return false
+        removeAt(index)
+        return true
+    }
+
 }
+
+inline fun <reified T : NavKey> Navigator.popTo(
+    inclusive: Boolean = false,
+    saveState: Boolean = false,
+    noinline predicate: (T) -> Boolean = { true },
+): Boolean = popTo(
+    inclusive = inclusive,
+    saveState = saveState,
+) { stackKey ->
+    val typedKey = stackKey as? T ?: return@popTo false
+    predicate(typedKey)
+}
+
 
 @Stable
 sealed interface BottomNavKey : NavKey {
