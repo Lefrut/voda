@@ -1,11 +1,14 @@
 package com.m.vodovoz.feature.all.orders.detail
 
+import androidx.activity.compose.LocalActivity
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.LifecycleStartEffect
 import com.m.vodovoz.R
 import com.m.vodovoz.core.navigation.NavigationEntry
+import com.m.vodovoz.core.navigation.mainFragment
 import com.m.vodovoz.core.navigation.navigateToCancelOrder
 import com.m.vodovoz.core.navigation.navigateToCart
 import com.m.vodovoz.core.navigation.navigateToOrderQuestion
@@ -15,10 +18,12 @@ import com.m.vodovoz.core.navigation.navigateToTraceOrder
 import com.m.vodovoz.core.navigation.navigateToWebView
 import com.m.vodovoz.design_system.composables.placeholders.LoadingPlaceholder
 import com.m.vodovoz.design_system.composables.placeholders.NetworkErrorPlaceholder
+import com.m.vodovoz.design_system.composables.snackbar.VodovozSnackBarVisuals
 import com.m.vodovoz.design_system.effects.LifecycleEffect
 import com.m.vodovoz.feature.all.orders.detail.api.OrderDetailsNavKey
 import com.m.vodovoz.feature.all.orders.detail.composables.AboutOrderBottomSheet
 import com.m.vodovoz.ui.mvi.collectAsState
+import com.m.vodovoz.ui.snackbar.snackBarHostState
 import com.m.vodovoz.util.extensions.copyText
 import com.m.vodovoz.util.extensions.openUrl
 import kotlinx.coroutines.flow.collectLatest
@@ -26,13 +31,13 @@ import kotlinx.coroutines.flow.filter
 
 @Composable
 fun OrderDetailsEntry(
-    onOrderIdCopied: () -> Unit,
-    navKey: OrderDetailsNavKey? = null,
+    navKey: OrderDetailsNavKey,
 ) = NavigationEntry<OrderDetailsFlowViewModel, OrderDetailsFlowViewModel.Factory>(
     creationCallback = { factory -> factory.create(navKey) }
 ) {
     val viewState by viewModel.collectAsState()
     val context = LocalContext.current
+    val activity = LocalActivity.current
 
     LifecycleStartEffect(Unit) {
         viewModel.fetchOrderDetails()
@@ -72,12 +77,17 @@ fun OrderDetailsEntry(
         }
     }
 
+    val snackbarHostText = stringResource(R.string.order_number_copied)
     LifecycleEffect {
         viewModel.events.collectLatest { event ->
             when (event) {
                 is OrderDetailsFlowViewModel.OrderDetailsEvent.CopyText -> {
                     context.copyText(event.text)
-                    onOrderIdCopied()
+                    activity?.mainFragment?.snackBarHostState?.showSnackbar(
+                        VodovozSnackBarVisuals.create(
+                            snackbarHostText
+                        )
+                    )
                 }
 
                 OrderDetailsFlowViewModel.OrderDetailsEvent.GoBack -> {

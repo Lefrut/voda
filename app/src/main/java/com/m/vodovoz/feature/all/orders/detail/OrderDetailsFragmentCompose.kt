@@ -25,17 +25,7 @@ class OrderDetailsFragment @Inject constructor() : Fragment() {
     ): View {
         return ComposeView(requireContext()).apply {
             setContent {
-                OrderDetailsEntry(
-                    onOrderIdCopied = {
-                        viewLifecycleOwner.lifecycleScope.launch {
-                            mainFragment?.snackBarHostState?.showSnackbar(
-                                VodovozSnackBarVisuals.create(
-                                    getString(R.string.order_number_copied)
-                                )
-                            )
-                        }
-                    }
-                )
+                OrderDetailsEntry(null!!)
             }
         }
     }

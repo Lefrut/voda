@@ -290,7 +290,7 @@ fun BottmNav(
                 AllBrandsEntry()
             }
             entry<OrderDetailsNavKey> { key ->
-                OrderDetailsEntry(onOrderIdCopied = {}, navKey = key)
+                OrderDetailsEntry(navKey = key)
             }
             entry<TraceOrderNavKey> { key ->
                 TraceOrderEntry(key)
