@@ -1,7 +1,6 @@
 package com.m.vodovoz.feature.addresses.add
 
 import androidx.compose.runtime.Stable
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.m.vodovoz.R
 import com.m.vodovoz.common.model.VodovozBoolean
@@ -43,20 +42,19 @@ import kotlinx.coroutines.launch
 @HiltViewModel(assistedFactory = AddAddressViewModel.Factory::class)
 @Stable
 class AddAddressViewModel @AssistedInject constructor(
-    savedStateHandle: SavedStateHandle,
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val resourcesProvider: ResourcesProvider,
-    @Assisted private val navKey: AddAddressNavKey?,
+    @Assisted private val navKey: AddAddressNavKey,
 ) : MviViewModel<AddAddressState, AddAddressEvent>(AddAddressState()) {
 
 
-    private val addressId = (navKey?.addressId ?: savedStateHandle.get<Long>("addressId"))?.also { id ->
+    private val addressId = navKey.addressId?.also { id ->
         updateState { s -> s.copy(addressId = id) }
     }
-    private val addressName = navKey?.addressName ?: savedStateHandle.get<String>("addressName")
+    private val addressName = navKey.addressName
 
     init {
-        (navKey?.mapAddress ?: savedStateHandle.get<MapAddressUi>("mapAddress"))?.let { mapAddress ->
+        navKey.mapAddress?.let { mapAddress ->
             updateState { s -> s.copy(mapAddress = mapAddress) }
         }
         fetchAddressDetails()
@@ -410,7 +408,7 @@ class AddAddressViewModel @AssistedInject constructor(
 
     @AssistedFactory
     interface Factory {
-        fun create(navKey: AddAddressNavKey?): AddAddressViewModel
+        fun create(navKey: AddAddressNavKey): AddAddressViewModel
     }
 
 }

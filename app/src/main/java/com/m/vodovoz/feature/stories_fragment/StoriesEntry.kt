@@ -23,84 +23,84 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
-fun StoriesEntry(navKey: StoriesNavKey? = null) =
+fun StoriesEntry(navKey: StoriesNavKey) =
     NavigationEntry<StoriesViewModel, StoriesViewModel.Factory>(
         creationCallback = { factory -> factory.create(navKey) }
     ) {
-    val context = LocalContext.current
-    val coroutineScope = rememberCoroutineScope()
-    val viewState by viewModel.collectAsState()
+        val context = LocalContext.current
+        val coroutineScope = rememberCoroutineScope()
+        val viewState by viewModel.collectAsState()
 
-    LifecycleStartEffect(Unit) {
-        viewModel.tabManager.setTabVisibility(false)
-        coroutineScope.launch {
-            delay(100)
-            viewModel.insetsVisibilityState.consumeSystemBarInsets(false)
+        LifecycleStartEffect(Unit) {
+            viewModel.tabManager.setTabVisibility(false)
+            coroutineScope.launch {
+                delay(100)
+                viewModel.insetsVisibilityState.consumeSystemBarInsets(false)
+            }
+            onStopOrDispose {
+                viewModel.insetsVisibilityState.consumeSystemBarInsets(true)
+                viewModel.tabManager.setTabVisibility(true)
+            }
         }
-        onStopOrDispose {
-            viewModel.insetsVisibilityState.consumeSystemBarInsets(true)
-            viewModel.tabManager.setTabVisibility(true)
-        }
-    }
 
-    AppearanceSystemBarsEffect(
-        lightNavigationBar = false,
-        lightStatusBar = false
-    )
+        AppearanceSystemBarsEffect(
+            lightNavigationBar = false,
+            lightStatusBar = false
+        )
 
-    val pagerState = rememberPagerState(viewState.currentStoryIndex) { viewState.stories.size }
+        val pagerState = rememberPagerState(viewState.currentStoryIndex) { viewState.stories.size }
 
-    Crossfade(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.onBackground),
-        targetState = viewState.uiState,
-        label = "stories cross fade"
-    ) { uiState ->
-        when (uiState) {
-            StoriesViewModel.StoriesUiState.Success,
-            StoriesViewModel.StoriesUiState.Loading -> {
-                if (!pagerState.isScrollInProgress) {
-                    LoadingPlaceholder(
-                        containerColor = MaterialTheme.colorScheme.onBackground
+        Crossfade(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.onBackground),
+            targetState = viewState.uiState,
+            label = "stories cross fade"
+        ) { uiState ->
+            when (uiState) {
+                StoriesViewModel.StoriesUiState.Success,
+                StoriesViewModel.StoriesUiState.Loading -> {
+                    if (!pagerState.isScrollInProgress) {
+                        LoadingPlaceholder(
+                            containerColor = MaterialTheme.colorScheme.onBackground
+                        )
+                    }
+                    StoriesScreen(
+                        viewState = viewState,
+                        viewModel = viewModel,
+                        pagerState = pagerState
                     )
                 }
-                StoriesScreen(
-                    viewState = viewState,
-                    viewModel = viewModel,
-                    pagerState = pagerState
-                )
+            }
+        }
+
+        LaunchedEffect(pagerState.currentPage, pagerState.isScrollInProgress) {
+            if (!pagerState.isScrollInProgress) {
+                viewModel.changeStoryIndex(pagerState.currentPage)
+            } else {
+                viewModel.stopStory()
+            }
+        }
+
+        viewModel.collectEvents { event ->
+            when (event) {
+                is StoriesViewModel.StoriesEvents.ChangePagerIndex -> {
+                    coroutineScope.launch { pagerState.animateScrollToPage(event.newStoryIndex) }
+                }
+
+                StoriesViewModel.StoriesEvents.GoBack -> {
+                    navigator.goBack()
+                }
+
+                is StoriesViewModel.StoriesEvents.ActivateAction -> {
+                    val cookie = viewModel.cookieManager.fetchCookieSessionId() ?: ""
+                    event.action.activate(
+                        navigator = navigator,
+                        context = context,
+                        cookie = cookie,
+                        tabManager = viewModel.tabManager
+                    )
+                }
             }
         }
     }
-
-    LaunchedEffect(pagerState.currentPage, pagerState.isScrollInProgress) {
-        if (!pagerState.isScrollInProgress) {
-            viewModel.changeStoryIndex(pagerState.currentPage)
-        } else {
-            viewModel.stopStory()
-        }
-    }
-
-    viewModel.collectEvents { event ->
-        when (event) {
-            is StoriesViewModel.StoriesEvents.ChangePagerIndex -> {
-                coroutineScope.launch { pagerState.animateScrollToPage(event.newStoryIndex) }
-            }
-
-            StoriesViewModel.StoriesEvents.GoBack -> {
-                navigator.goBack()
-            }
-
-            is StoriesViewModel.StoriesEvents.ActivateAction -> {
-                val cookie = viewModel.cookieManager.fetchCookieSessionId() ?: ""
-                event.action.activate(
-                    navigator = navigator,
-                    context = context,
-                    cookie = cookie,
-                    tabManager = viewModel.tabManager
-                )
-            }
-        }
-    }
-}

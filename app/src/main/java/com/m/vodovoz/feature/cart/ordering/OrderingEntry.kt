@@ -27,7 +27,7 @@ import com.m.vodovoz.util.extensions.openUrl
 @Composable
 fun OrderingEntry(
     onRefreshCart: () -> Unit,
-    navKey: OrderingNavKey? = null,
+    navKey: OrderingNavKey,
 ) = NavigationEntry<OrderingFlowViewModel, OrderingFlowViewModel.Factory>(
     creationCallback = { factory -> factory.create(navKey) }
 ) {

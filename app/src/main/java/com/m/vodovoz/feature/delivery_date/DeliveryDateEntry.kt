@@ -12,38 +12,38 @@ import com.m.vodovoz.feature.delivery_date.model.DeliveryDateEvent
 import com.m.vodovoz.ui.mvi.collectAsState
 
 @Composable
-fun DeliveryDateEntry(navKey: DeliveryDateNavKey? = null) =
+fun DeliveryDateEntry(navKey: DeliveryDateNavKey) =
     NavigationEntry<DeliveryDateViewModel, DeliveryDateViewModel.Factory>(
         creationCallback = { factory -> factory.create(navKey) }
     ) {
-    val orderingViewModel = viewModel(modelClass = OrderingFlowViewModel::class)
-    val viewState by viewModel.collectAsState()
+        val orderingViewModel = viewModel(modelClass = OrderingFlowViewModel::class)
+        val viewState by viewModel.collectAsState()
 
-    LifecycleStartEffect(Unit) {
-        viewModel.tabManager.setTabVisibility(false)
-        onStopOrDispose {
-            viewModel.tabManager.setTabVisibility(true)
+        LifecycleStartEffect(Unit) {
+            viewModel.tabManager.setTabVisibility(false)
+            onStopOrDispose {
+                viewModel.tabManager.setTabVisibility(true)
+            }
         }
-    }
 
-    DeliveryDateScreen(
-        viewState = viewState,
-        viewModel = viewModel
-    )
+        DeliveryDateScreen(
+            viewState = viewState,
+            viewModel = viewModel
+        )
 
-    LifecycleEffect {
-        viewModel.events.collect { event ->
-            when (event) {
-                DeliveryDateEvent.GoBack -> {
-                    navigator.goBack()
-                }
+        LifecycleEffect {
+            viewModel.events.collect { event ->
+                when (event) {
+                    DeliveryDateEvent.GoBack -> {
+                        navigator.goBack()
+                    }
 
-                is DeliveryDateEvent.GoBackToOrdering -> {
-                    orderingViewModel.setDeliveryDateTime(event.timeInterval, event.dateOption)
-                    event.earlierCheckbox?.let(orderingViewModel::setEarlierDelivery)
-                    navigator.goBack()
+                    is DeliveryDateEvent.GoBackToOrdering -> {
+                        orderingViewModel.setDeliveryDateTime(event.timeInterval, event.dateOption)
+                        event.earlierCheckbox?.let(orderingViewModel::setEarlierDelivery)
+                        navigator.goBack()
+                    }
                 }
             }
         }
     }
-}

@@ -2,7 +2,6 @@ package com.m.vodovoz.feature.addresses
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.common.model.VodovozBoolean
@@ -54,19 +53,16 @@ import kotlin.math.floor
 @Stable
 class AddressesFlowViewModel @AssistedInject constructor(
     val tabManager: TabManager,
-    savedState: SavedStateHandle,
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val mapServiceRepository: MapServiceRepository,
-    @Assisted private val navKey: AddressesNavKey?,
+    @Assisted private val navKey: AddressesNavKey,
 ) : MviViewModel<AddressesFlowViewModel.AddressesState, AddressesFlowViewModel.AddressesEvents>(
     AddressesState(
-        screenType = navKey?.screenType
-            ?: savedState.get<AddressScreenTypeUi>("screenType")
-            ?: AddressScreenTypeUi.Add
+        screenType = navKey.screenType
     )
 ) {
 
-    private val selectedAddressId = navKey?.addressId ?: savedState.get<Long>("addressId")
+    private val selectedAddressId = navKey.addressId
 
     init {
         fetchMapAreas()
@@ -300,6 +296,6 @@ class AddressesFlowViewModel @AssistedInject constructor(
 
     @AssistedFactory
     interface Factory {
-        fun create(navKey: AddressesNavKey?): AddressesFlowViewModel
+        fun create(navKey: AddressesNavKey): AddressesFlowViewModel
     }
 }

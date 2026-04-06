@@ -25,64 +25,65 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 
 @SuppressLint("SourceLockedOrientationActivity")
 @Composable
-fun DetailMediaEntry(navKey: DetailMediaNavKey? = null) =
+fun DetailMediaEntry(navKey: DetailMediaNavKey) {
     NavigationEntry<DetailMediaViewModel, DetailMediaViewModel.Factory>(
         creationCallback = { factory -> factory.create(navKey) }
     ) {
-    val productDetailsViewModel = viewModel(modelClass = ProductDetailsFlowViewModel::class)
-    val viewState by viewModel.collectAsState()
-    val mediaList = viewState.mediaList
-    val context = LocalContext.current
+        val productDetailsViewModel = viewModel(modelClass = ProductDetailsFlowViewModel::class)
+        val viewState by viewModel.collectAsState()
+        val mediaList = viewState.mediaList
+        val context = LocalContext.current
 
-    LifecycleStartEffect(Unit) {
-        viewModel.tabManager.setTabVisibility(false)
-        onStopOrDispose {
-            viewModel.insetsVisibilityState.consumeSystemBarInsets(false)
-            viewModel.insetsVisibilityState.consumeSystemBarInsets(true)
-            viewModel.tabManager.setTabVisibility(true)
+        LifecycleStartEffect(Unit) {
+            viewModel.tabManager.setTabVisibility(false)
+            onStopOrDispose {
+                viewModel.insetsVisibilityState.consumeSystemBarInsets(false)
+                viewModel.insetsVisibilityState.consumeSystemBarInsets(true)
+                viewModel.tabManager.setTabVisibility(true)
+            }
         }
-    }
 
-    if (mediaList.isNotEmpty()) {
-        val pagerState = rememberPagerState(
-            initialPage = mediaList.indexOfOrNull(viewState.currentMedia) ?: 0,
-            pageCount = { mediaList.size }
-        )
+        if (mediaList.isNotEmpty()) {
+            val pagerState = rememberPagerState(
+                initialPage = mediaList.indexOfOrNull(viewState.currentMedia) ?: 0,
+                pageCount = { mediaList.size }
+            )
 
-        DetailMediaScreen(
-            viewModel = viewModel,
-            viewState = viewState,
-            pagerState = pagerState
-        )
+            DetailMediaScreen(
+                viewModel = viewModel,
+                viewState = viewState,
+                pagerState = pagerState
+            )
 
-        LaunchedEffect(pagerState) {
-            snapshotFlow { pagerState.currentPage }
-                .distinctUntilChanged()
-                .collectLatest { currentPage ->
-                    viewModel.setMediaByIndex(currentPage)
-                    productDetailsViewModel.setMediaPage(currentPage)
-                }
+            LaunchedEffect(pagerState) {
+                snapshotFlow { pagerState.currentPage }
+                    .distinctUntilChanged()
+                    .collectLatest { currentPage ->
+                        viewModel.setMediaByIndex(currentPage)
+                        productDetailsViewModel.setMediaPage(currentPage)
+                    }
+            }
         }
-    }
 
-    LifecycleEffect {
-        viewModel.events.collect { event ->
-            val activity = context as? Activity
-            when (event) {
-                DetailMediaEvent.GoBack -> {
-                    navigator.goBack()
-                }
+        LifecycleEffect {
+            viewModel.events.collect { event ->
+                val activity = context as? Activity
+                when (event) {
+                    DetailMediaEvent.GoBack -> {
+                        navigator.goBack()
+                    }
 
-                DetailMediaEvent.MakeLandscape -> {
-                    activity?.enableFullScreen()
-                    viewModel.insetsVisibilityState.consumeSystemBarInsets(false)
-                    activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
-                }
+                    DetailMediaEvent.MakeLandscape -> {
+                        activity?.enableFullScreen()
+                        viewModel.insetsVisibilityState.consumeSystemBarInsets(false)
+                        activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+                    }
 
-                DetailMediaEvent.MakePortrait -> {
-                    activity?.disableFullScreen()
-                    viewModel.insetsVisibilityState.consumeSystemBarInsets(true)
-                    activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+                    DetailMediaEvent.MakePortrait -> {
+                        activity?.disableFullScreen()
+                        viewModel.insetsVisibilityState.consumeSystemBarInsets(true)
+                        activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+                    }
                 }
             }
         }

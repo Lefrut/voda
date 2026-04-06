@@ -14,56 +14,56 @@ import com.m.vodovoz.feature.auth.login.api.LoginNavKey
 import com.m.vodovoz.ui.mvi.collectAsState
 
 @Composable
-fun LoginEntry(navKey: LoginNavKey? = null) =
+fun LoginEntry(navKey: LoginNavKey) =
     NavigationEntry<LoginFlowViewModel, LoginFlowViewModel.Factory>(
         creationCallback = { factory -> factory.create(navKey) }
     ) {
-    val viewState by viewModel.collectAsState()
+        val viewState by viewModel.collectAsState()
 
-    when (viewState.uiState) {
-        LoginFlowViewModel.LoginUiState.Error -> {
-            NetworkErrorPlaceholder { viewModel.fetchLoginDetails() }
+        when (viewState.uiState) {
+            LoginFlowViewModel.LoginUiState.Error -> {
+                NetworkErrorPlaceholder { viewModel.fetchLoginDetails() }
+            }
+
+            LoginFlowViewModel.LoginUiState.Loading -> {
+                LoadingPlaceholder()
+            }
+
+            LoginFlowViewModel.LoginUiState.Success -> {
+                LoginScreen(viewModel = viewModel, viewState = viewState)
+            }
         }
 
-        LoginFlowViewModel.LoginUiState.Loading -> {
-            LoadingPlaceholder()
-        }
+        LifecycleEffect {
+            viewModel.events.collect { event ->
+                when (event) {
+                    LoginFlowViewModel.LoginEvents.GoBack -> {
+                        navigator.goBack()
+                    }
 
-        LoginFlowViewModel.LoginUiState.Success -> {
-            LoginScreen(viewModel = viewModel, viewState = viewState)
-        }
-    }
+                    is LoginFlowViewModel.LoginEvents.GoToWebView -> {
+                        navigator.navigateToWebView(
+                            url = event.url,
+                            title = event.title,
+                        )
+                    }
 
-    LifecycleEffect {
-        viewModel.events.collect { event ->
-            when (event) {
-                LoginFlowViewModel.LoginEvents.GoBack -> {
-                    navigator.goBack()
-                }
+                    is LoginFlowViewModel.LoginEvents.GoToLoginByEmail -> {
+                        navigator.navigateToLoginByEmail(event.selectedAccountTypeId)
+                    }
 
-                is LoginFlowViewModel.LoginEvents.GoToWebView -> {
-                    navigator.navigateToWebView(
-                        url = event.url,
-                        title = event.title,
-                    )
-                }
+                    LoginFlowViewModel.LoginEvents.GoToRegister -> {
+                        navigator.navigateToRegister()
+                    }
 
-                is LoginFlowViewModel.LoginEvents.GoToLoginByEmail -> {
-                    navigator.navigateToLoginByEmail(event.selectedAccountTypeId)
-                }
-
-                LoginFlowViewModel.LoginEvents.GoToRegister -> {
-                    navigator.navigateToRegister()
-                }
-
-                is LoginFlowViewModel.LoginEvents.GoToLoginByPhone -> {
-                    navigator.navigateToLoginByPhone(
-                        phone = event.phone,
-                        waitSeconds = event.waitSeconds,
-                        userUrl = event.userUrl
-                    )
+                    is LoginFlowViewModel.LoginEvents.GoToLoginByPhone -> {
+                        navigator.navigateToLoginByPhone(
+                            phone = event.phone,
+                            waitSeconds = event.waitSeconds,
+                            userUrl = event.userUrl
+                        )
+                    }
                 }
             }
         }
     }
-}

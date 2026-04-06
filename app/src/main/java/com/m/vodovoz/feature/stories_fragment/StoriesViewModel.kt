@@ -2,7 +2,6 @@ package com.m.vodovoz.feature.stories_fragment
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.m.vodovoz.ui.mvi.Event
 import com.m.vodovoz.ui.mvi.MviViewModel
@@ -26,18 +25,17 @@ import kotlinx.coroutines.launch
 @HiltViewModel(assistedFactory = StoriesViewModel.Factory::class)
 @Stable
 class StoriesViewModel @AssistedInject constructor(
-    savedState: SavedStateHandle,
     val tabManager: TabManager,
     val cookieManager: CookieManager,
     val insetsVisibilityState: InsetsVisibilityState,
     private val userPreferencesRepository: UserPreferencesRepository,
-    @Assisted private val navKey: StoriesNavKey?,
+    @Assisted private val navKey: StoriesNavKey,
 ) : MviViewModel<StoriesViewModel.HistoriesSliderState, StoriesViewModel.StoriesEvents>(
     HistoriesSliderState()
 ) {
 
-    private val startStoryId = navKey?.storyId ?: savedState.get<Long>("storyId") ?: 0L
-    private val stories: List<StoryUi>? = navKey?.stories ?: savedState.get<List<StoryUi>>("stories")
+    private val startStoryId = navKey.storyId
+    private val stories: List<StoryUi> = navKey.stories
 
     init {
         fetchStories()
@@ -48,26 +46,20 @@ class StoriesViewModel @AssistedInject constructor(
             s.copy(uiState = StoriesUiState.Loading)
         }
 
-        if (stories != null) {
-            val storyIndex = stories.indexOfOrNull(
-                stories.firstOrNull { story -> story.id == startStoryId }
-            ) ?: 0
+        val storyIndex = stories.indexOfOrNull(
+            stories.firstOrNull { story -> story.id == startStoryId }
+        ) ?: 0
 
-
-            updateState { s ->
-                s.copy(
-                    stories = stories,
-                    currentStoryIndex = storyIndex,
-                    currentPageIndex = 0,
-                    uiState = StoriesUiState.Success,
-                    timePassed = 0
-                )
-            }
-            startStory()
-        } else {
-            delay(500L)
-            navigateBack()
+        updateState { s ->
+            s.copy(
+                stories = stories,
+                currentStoryIndex = storyIndex,
+                currentPageIndex = 0,
+                uiState = StoriesUiState.Success,
+                timePassed = 0
+            )
         }
+        startStory()
 
         userPreferencesRepository.addViewedStoryId(startStoryId)
     }
@@ -218,6 +210,6 @@ class StoriesViewModel @AssistedInject constructor(
 
     @AssistedFactory
     interface Factory {
-        fun create(navKey: StoriesNavKey?): StoriesViewModel
+        fun create(navKey: StoriesNavKey): StoriesViewModel
     }
 }

@@ -12,42 +12,42 @@ import com.m.vodovoz.feature.product_filters.ProductFiltersFlowViewModel
 import com.m.vodovoz.ui.mvi.collectAsState
 
 @Composable
-fun FilterValuesEntry(navKey: FilterValuesNavKey? = null) =
+fun FilterValuesEntry(navKey: FilterValuesNavKey) =
     NavigationEntry<FilterValuesViewModel, FilterValuesViewModel.Factory>(
         creationCallback = { factory -> factory.create(navKey) }
     ) {
-    val productFiltersViewModel = viewModel(modelClass = ProductFiltersFlowViewModel::class)
-    val viewState by viewModel.collectAsState()
+        val productFiltersViewModel = viewModel(modelClass = ProductFiltersFlowViewModel::class)
+        val viewState by viewModel.collectAsState()
 
-    LifecycleStartEffect(Unit) {
-        viewModel.tabManager.setTabVisibility(false)
-        onStopOrDispose {
-            viewModel.tabManager.setTabVisibility(true)
-        }
-    }
-
-    when (viewState.uiState) {
-        FilterValuesViewModel.ConcreteFilterUiState.Loading -> {
-            LoadingPlaceholder()
+        LifecycleStartEffect(Unit) {
+            viewModel.tabManager.setTabVisibility(false)
+            onStopOrDispose {
+                viewModel.tabManager.setTabVisibility(true)
+            }
         }
 
-        FilterValuesViewModel.ConcreteFilterUiState.Success -> {
-            FilterValuesScreen(viewModel = viewModel, viewState = viewState)
+        when (viewState.uiState) {
+            FilterValuesViewModel.ConcreteFilterUiState.Loading -> {
+                LoadingPlaceholder()
+            }
+
+            FilterValuesViewModel.ConcreteFilterUiState.Success -> {
+                FilterValuesScreen(viewModel = viewModel, viewState = viewState)
+            }
         }
-    }
 
-    LifecycleEffect {
-        viewModel.events.collect { event ->
-            when (event) {
-                FilterValuesViewModel.ConcreteFilterEvent.GoBack -> {
-                    navigator.goBack()
-                }
+        LifecycleEffect {
+            viewModel.events.collect { event ->
+                when (event) {
+                    FilterValuesViewModel.ConcreteFilterEvent.GoBack -> {
+                        navigator.goBack()
+                    }
 
-                is FilterValuesViewModel.ConcreteFilterEvent.GoToProductFilters -> {
-                    productFiltersViewModel.changeFilter(event.filter)
-                    navigator.goBack()
+                    is FilterValuesViewModel.ConcreteFilterEvent.GoToProductFilters -> {
+                        productFiltersViewModel.changeFilter(event.filter)
+                        navigator.goBack()
+                    }
                 }
             }
         }
     }
-}

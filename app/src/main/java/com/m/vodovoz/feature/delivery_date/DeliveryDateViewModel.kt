@@ -31,18 +31,18 @@ import java.util.UUID
 class DeliveryDateViewModel @AssistedInject constructor(
     val tabManager: TabManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
-    @Assisted private val navKey: DeliveryDateNavKey?,
+    @Assisted private val navKey: DeliveryDateNavKey,
 ) : MviViewModel<DeliveryDateState, DeliveryDateEvent>(DeliveryDateState()) {
 
-    private val addressId = navKey?.addressId ?: -1
+    private val addressId = navKey.addressId
 
-    private val deliveryDate = navKey?.date
+    private val deliveryDate = navKey.date
 
-    private val timeInterval = navKey?.timeInterval
+    private val timeInterval = navKey.timeInterval
 
-    private val earlierDelivery = navKey?.earlierDelivery
+    private val earlierDelivery = navKey.earlierDelivery
 
-    private val queryParams = navKey?.queryParams.orEmpty()
+    private val queryParams = navKey.queryParams
 
     init {
         if (deliveryDate != null && timeInterval != null) {
@@ -219,7 +219,7 @@ class DeliveryDateViewModel @AssistedInject constructor(
 
     @AssistedFactory
     interface Factory {
-        fun create(navKey: DeliveryDateNavKey?): DeliveryDateViewModel
+        fun create(navKey: DeliveryDateNavKey): DeliveryDateViewModel
     }
 
 }

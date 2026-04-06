@@ -2,7 +2,6 @@ package com.m.vodovoz.feature.search
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.m.vodovoz.common.cart.CartManager
 import com.m.vodovoz.common.like.LikeManager
@@ -45,8 +44,7 @@ class SearchFlowViewModel @AssistedInject constructor(
     private val searchManager: SearchManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
     userPreferencesRepository: UserPreferencesRepository,
-    savedStateHandle: SavedStateHandle,
-    @Assisted private val navKey: SearchNavKey?,
+    @Assisted private val navKey: SearchNavKey,
 ) : ProductsMviViewModel<ProductUi, SearchFlowViewModel.SearchState, SearchFlowViewModel.SearchEvents>(
     state = SearchState(),
     blockedProductsFlow = cartManager.blockedProductsFlow,
@@ -55,8 +53,7 @@ class SearchFlowViewModel @AssistedInject constructor(
     canViewAdultProducts = userPreferencesRepository.canViewAdultProducts
 ) {
 
-    private val previousSearchQuery: String =
-        navKey?.query ?: savedStateHandle.get<String>("query") ?: ""
+    private val previousSearchQuery: String = navKey.query
 
     private val querySharedFlow = MutableSharedFlow<String>(10)
 
@@ -291,6 +288,6 @@ class SearchFlowViewModel @AssistedInject constructor(
 
     @AssistedFactory
     interface Factory {
-        fun create(navKey: SearchNavKey?): SearchFlowViewModel
+        fun create(navKey: SearchNavKey): SearchFlowViewModel
     }
 }

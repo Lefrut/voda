@@ -28,6 +28,7 @@ import com.m.vodovoz.core.navigation.navigateToSearch
 import com.m.vodovoz.core.navigation.navigateToSearchProductList
 import com.m.vodovoz.core.navigation.navigateToViewedProductList
 import com.m.vodovoz.core.navigation.navigateToWriteComment
+import com.m.vodovoz.feature.product_details.api.ProductDetailsNavKey
 import com.m.vodovoz.design_system.VodovozTheme
 import com.m.vodovoz.design_system.composables.placeholders.ForAdultsPlaceholder
 import com.m.vodovoz.design_system.composables.snackbar.VodovozSnackBarVisuals
@@ -49,11 +50,12 @@ class ProductDetailsFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View {
+        val args = requireArguments()
 
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
-                ProductDetailsEntry()
+                ProductDetailsEntry(ProductDetailsNavKey(productId = args.getLong("productId")))
             }
         }
     }

@@ -12,32 +12,32 @@ import com.m.vodovoz.ui.mvi.collectAsState
 import com.m.vodovoz.ui.mvi.collectEvents
 
 @Composable
-fun OrderCallYouEntry(navKey: OrderCallYouNavKey? = null) =
+fun OrderCallYouEntry(navKey: OrderCallYouNavKey) =
     NavigationEntry<OrderCallYouViewModel, OrderCallYouViewModel.Factory>(
         creationCallback = { factory -> factory.create(navKey) }
     ) {
-    val orderingViewModel = viewModel(modelClass = OrderingFlowViewModel::class)
-    val viewState by viewModel.collectAsState()
+        val orderingViewModel = viewModel(modelClass = OrderingFlowViewModel::class)
+        val viewState by viewModel.collectAsState()
 
-    LifecycleStartEffect(Unit) {
-        viewModel.tabManager.setTabVisibility(false)
-        onStopOrDispose {
-            viewModel.tabManager.setTabVisibility(true)
-        }
-    }
-
-    OrderCallYouScreen(viewModel = viewModel, viewState = viewState)
-
-    viewModel.collectEvents { event ->
-        when (event) {
-            OrderCallYouEvent.GoBack -> {
-                navigator.goBack()
-            }
-
-            is OrderCallYouEvent.GoBackToOrdering -> {
-                orderingViewModel.setCallYou(event.currentItem)
-                navigator.goBack()
+        LifecycleStartEffect(Unit) {
+            viewModel.tabManager.setTabVisibility(false)
+            onStopOrDispose {
+                viewModel.tabManager.setTabVisibility(true)
             }
         }
+
+        OrderCallYouScreen(viewModel = viewModel, viewState = viewState)
+
+        viewModel.collectEvents { event ->
+            when (event) {
+                OrderCallYouEvent.GoBack -> {
+                    navigator.goBack()
+                }
+
+                is OrderCallYouEvent.GoBackToOrdering -> {
+                    orderingViewModel.setCallYou(event.currentItem)
+                    navigator.goBack()
+                }
+            }
+        }
     }
-}

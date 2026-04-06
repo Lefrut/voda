@@ -2,7 +2,6 @@ package com.m.vodovoz.feature.product_details
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.m.vodovoz.common.about_product.AboutProductManager
 import com.m.vodovoz.common.account.AccountManager
@@ -56,8 +55,7 @@ class ProductDetailsFlowViewModel @AssistedInject constructor(
     private val userPreferencesRepository: UserPreferencesRepository,
     private val accountManager: AccountManager,
     val tabManager: TabManager,
-    savedStateHandle: SavedStateHandle,
-    @Assisted private val navKey: ProductDetailsNavKey?,
+    @Assisted private val navKey: ProductDetailsNavKey,
 ) : ProductsMviViewModel<VodovozSectionUi<ProductUi>, ProductDetailsFlowViewModel.ProductDetailsState, ProductDetailsFlowViewModel.ProductDetailsEvents>(
     state = ProductDetailsState(),
     blockedProductsFlow = cartManager.blockedProductsFlow,
@@ -67,10 +65,8 @@ class ProductDetailsFlowViewModel @AssistedInject constructor(
 ) {
 
     init {
-        (navKey?.productId ?: savedStateHandle.get<Long>("productId"))?.let {
-            updateState { s ->
-                s.copy(productDetails = s.productDetails.copy(id = it))
-            }
+        updateState { s ->
+            s.copy(productDetails = s.productDetails.copy(id = navKey.productId))
         }
         fetchProductDetails()
     }
@@ -549,6 +545,6 @@ class ProductDetailsFlowViewModel @AssistedInject constructor(
 
     @AssistedFactory
     interface Factory {
-        fun create(navKey: ProductDetailsNavKey?): ProductDetailsFlowViewModel
+        fun create(navKey: ProductDetailsNavKey): ProductDetailsFlowViewModel
     }
 }

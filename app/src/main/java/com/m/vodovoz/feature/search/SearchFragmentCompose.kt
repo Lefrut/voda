@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
+import com.m.vodovoz.feature.search.api.SearchNavKey
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -17,9 +18,10 @@ class SearchFragment @Inject constructor() : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View {
+        val args = requireArguments()
         return ComposeView(requireContext()).apply {
             setContent {
-                SearchEntry()
+                SearchEntry(SearchNavKey(query = args.getString("query").orEmpty()))
             }
         }
     }

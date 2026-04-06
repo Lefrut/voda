@@ -15,50 +15,50 @@ import com.m.vodovoz.ui.mvi.collectAsState
 import com.m.vodovoz.ui.mvi.collectEvents
 
 @Composable
-fun PaymentMethodEntry(navKey: PaymentMethodNavKey? = null) =
+fun PaymentMethodEntry(navKey: PaymentMethodNavKey) =
     NavigationEntry<PaymentMethodViewModel, PaymentMethodViewModel.Factory>(
         creationCallback = { factory -> factory.create(navKey) }
     ) {
-    val orderingViewModel = viewModel(modelClass = OrderingFlowViewModel::class)
-    val lifecycleOwner = LocalLifecycleOwner.current
-    val viewState by viewModel.collectAsState()
+        val orderingViewModel = viewModel(modelClass = OrderingFlowViewModel::class)
+        val lifecycleOwner = LocalLifecycleOwner.current
+        val viewState by viewModel.collectAsState()
 
-    PaymentMethodScreen(viewModel = viewModel, viewState = viewState)
+        PaymentMethodScreen(viewModel = viewModel, viewState = viewState)
 
-    DisposableEffect(lifecycleOwner) {
-        val observer = LifecycleEventObserver { _, event ->
+        DisposableEffect(lifecycleOwner) {
+            val observer = LifecycleEventObserver { _, event ->
+                when (event) {
+                    Lifecycle.Event.ON_START -> {
+                        viewModel.tabManager.setTabVisibility(false)
+                    }
+
+                    Lifecycle.Event.ON_PAUSE -> {
+                        viewModel.tabManager.setTabVisibility(true)
+                    }
+
+                    else -> Unit
+                }
+            }
+            lifecycleOwner.lifecycle.addObserver(observer)
+            onDispose {
+                lifecycleOwner.lifecycle.removeObserver(observer)
+            }
+        }
+
+        viewModel.collectEvents { event ->
             when (event) {
-                Lifecycle.Event.ON_START -> {
-                    viewModel.tabManager.setTabVisibility(false)
+                PaymentMethodEvent.GoBack -> {
+                    navigator.goBack()
                 }
 
-                Lifecycle.Event.ON_PAUSE -> {
-                    viewModel.tabManager.setTabVisibility(true)
+                is PaymentMethodEvent.GoBackToOrdering -> {
+                    orderingViewModel.setPaymentInfo(
+                        paymentBalance = event.paymentBalance,
+                        paymentBonuses = event.paymentBonuses,
+                        paymentMethod = event.paymentMethod
+                    )
+                    navigator.goBack()
                 }
-
-                else -> Unit
-            }
-        }
-        lifecycleOwner.lifecycle.addObserver(observer)
-        onDispose {
-            lifecycleOwner.lifecycle.removeObserver(observer)
-        }
-    }
-
-    viewModel.collectEvents { event ->
-        when (event) {
-            PaymentMethodEvent.GoBack -> {
-                navigator.goBack()
-            }
-
-            is PaymentMethodEvent.GoBackToOrdering -> {
-                orderingViewModel.setPaymentInfo(
-                    paymentBalance = event.paymentBalance,
-                    paymentBonuses = event.paymentBonuses,
-                    paymentMethod = event.paymentMethod
-                )
-                navigator.goBack()
             }
         }
     }
-}

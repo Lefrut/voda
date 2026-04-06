@@ -5,7 +5,6 @@ import android.net.Uri
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.core.net.toUri
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.m.vodovoz.R
 import com.m.vodovoz.common.tab.TabManager
@@ -43,19 +42,18 @@ import kotlin.math.roundToInt
 @HiltViewModel(assistedFactory = WriteCommentViewModel.Factory::class)
 @Stable
 class WriteCommentViewModel @AssistedInject constructor(
-    savedStateHandle: SavedStateHandle,
     val tabManager: TabManager,
     private val siteStateManager: SiteStateManager,
     private val resourcesProvider: ResourcesProvider,
     private val contentProvider: ContentProvider,
     private val vodovozServiceRepository: VodovozServiceRepository,
-    @Assisted private val navKey: WriteCommentNavKey?,
+    @Assisted private val navKey: WriteCommentNavKey,
 ) : MviViewModel<WriteCommentState, WriteCommentEvent>(WriteCommentState()) {
 
-    private val productId: Long = navKey?.product_id ?: savedStateHandle["product_id"] ?: -1
-    private val productName: String = navKey?.product_name ?: savedStateHandle["product_name"] ?: ""
-    private val productImage: String = navKey?.product_image ?: savedStateHandle["product_image"] ?: ""
-    private val rating: Int = navKey?.rating ?: savedStateHandle["rating"] ?: 0
+    private val productId: Long = navKey.product_id
+    private val productName: String = navKey.product_name
+    private val productImage: String = navKey.product_image
+    private val rating: Int = navKey.rating
 
     private val commentField = FieldUi(
         id = "comment",
@@ -190,7 +188,7 @@ class WriteCommentViewModel @AssistedInject constructor(
 
     @AssistedFactory
     interface Factory {
-        fun create(navKey: WriteCommentNavKey?): WriteCommentViewModel
+        fun create(navKey: WriteCommentNavKey): WriteCommentViewModel
     }
 
 }

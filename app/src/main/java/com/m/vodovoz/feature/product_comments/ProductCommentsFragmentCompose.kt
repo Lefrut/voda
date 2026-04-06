@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
+import com.m.vodovoz.feature.product_comments.api.ProductCommentsNavKey
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -17,9 +18,16 @@ class ProductCommentsFragment @Inject constructor() : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View {
+        val args = requireArguments()
         return ComposeView(requireContext()).apply {
             setContent {
-                ProductCommentsEntry()
+                ProductCommentsEntry(
+                    ProductCommentsNavKey(
+                        productId = args.getLong("productId"),
+                        productName = args.getString("productName").orEmpty(),
+                        productImage = args.getString("productImage").orEmpty()
+                    )
+                )
             }
         }
     }

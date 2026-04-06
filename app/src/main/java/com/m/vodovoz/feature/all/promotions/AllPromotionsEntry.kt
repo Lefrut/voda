@@ -10,34 +10,34 @@ import com.m.vodovoz.feature.all.promotions.api.AllPromotionsNavKey
 import com.m.vodovoz.ui.mvi.collectAsState
 
 @Composable
-fun AllPromotionsEntry(navKey: AllPromotionsNavKey? = null) =
+fun AllPromotionsEntry(navKey: AllPromotionsNavKey) =
     NavigationEntry<AllPromotionsFlowViewModel, AllPromotionsFlowViewModel.Factory>(
         creationCallback = { factory -> factory.create(navKey) }
     ) {
-    val viewState by viewModel.collectAsState()
-    val lazyListState = rememberLazyListState()
+        val viewState by viewModel.collectAsState()
+        val lazyListState = rememberLazyListState()
 
-    AllPromotionsScreen(
-        viewModel = viewModel,
-        viewState = viewState,
-        lazyListState = lazyListState
-    )
+        AllPromotionsScreen(
+            viewModel = viewModel,
+            viewState = viewState,
+            lazyListState = lazyListState
+        )
 
-    LifecycleEffect {
-        viewModel.events.collect { event ->
-            when (event) {
-                AllPromotionsFlowViewModel.AllPromotionsEvent.ScrollTop -> {
-                    lazyListState.animateScrollToItem(0)
-                }
+        LifecycleEffect {
+            viewModel.events.collect { event ->
+                when (event) {
+                    AllPromotionsFlowViewModel.AllPromotionsEvent.ScrollTop -> {
+                        lazyListState.animateScrollToItem(0)
+                    }
 
-                is AllPromotionsFlowViewModel.AllPromotionsEvent.GoToProductDetails -> {
-                    navigator.navigateToPromotionDetails(event.promotionId)
-                }
+                    is AllPromotionsFlowViewModel.AllPromotionsEvent.GoToProductDetails -> {
+                        navigator.navigateToPromotionDetails(event.promotionId)
+                    }
 
-                AllPromotionsFlowViewModel.AllPromotionsEvent.GoBack -> {
-                    navigator.goBack()
+                    AllPromotionsFlowViewModel.AllPromotionsEvent.GoBack -> {
+                        navigator.goBack()
+                    }
                 }
             }
         }
     }
-}

@@ -1,11 +1,8 @@
 package com.m.vodovoz.feature.auth.login_by_phone_code
 
 import androidx.compose.runtime.Stable
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.m.vodovoz.common.account.LoginManager
-import com.m.vodovoz.core.android.getString
-import com.m.vodovoz.core.navigation.LoginByPhoneCodeArgs
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
 import com.m.vodovoz.feature.auth.login_by_phone_code.api.LoginByPhoneCodeNavKey
 import com.m.vodovoz.feature.auth.login_by_phone_code.model.LoginByPhoneCodeEvent
@@ -31,18 +28,16 @@ class LoginByPhoneCodeViewModel @AssistedInject constructor(
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val siteStateManager: SiteStateManager,
     private val loginManager: LoginManager,
-    savedStateHandle: SavedStateHandle,
-    @Assisted private val navKey: LoginByPhoneCodeNavKey?,
+    @Assisted private val navKey: LoginByPhoneCodeNavKey,
 ) : MviViewModel<LoginByPhoneCodeState, LoginByPhoneCodeEvent>(
     LoginByPhoneCodeState(
-        phone = formatPhone(navKey?.phoneNumber ?: savedStateHandle.getString(LoginByPhoneCodeArgs.PHONE))
+        phone = formatPhone(navKey.phoneNumber)
     )
 ) {
 
-    private val waitRequestCodeSeconds: Int =
-        navKey?.waitRequestCodeSeconds ?: savedStateHandle[LoginByPhoneCodeArgs.WAIT_SECONDS] ?: 60
+    private val waitRequestCodeSeconds: Int = navKey.waitRequestCodeSeconds
 
-    private val userUrl = navKey?.userUrl ?: savedStateHandle.getString(LoginByPhoneCodeArgs.USER_URL)
+    private val userUrl = navKey.userUrl
     val smsCodeCount = siteStateManager.siteStateFlow.value?.smsCodeCount ?: 4
 
     init {
@@ -179,6 +174,6 @@ class LoginByPhoneCodeViewModel @AssistedInject constructor(
 
     @AssistedFactory
     interface Factory {
-        fun create(navKey: LoginByPhoneCodeNavKey?): LoginByPhoneCodeViewModel
+        fun create(navKey: LoginByPhoneCodeNavKey): LoginByPhoneCodeViewModel
     }
 }

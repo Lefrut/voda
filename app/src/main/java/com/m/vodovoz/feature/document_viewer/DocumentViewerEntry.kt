@@ -11,36 +11,36 @@ import com.m.vodovoz.feature.document_viewer.model.DocumentViewerEvent
 import com.m.vodovoz.ui.mvi.collectAsState
 
 @Composable
-fun DocumentViewerEntry(navKey: DocumentViewerNavKey? = null) =
+fun DocumentViewerEntry(navKey: DocumentViewerNavKey) =
     NavigationEntry<DocumentViewerViewModel, DocumentViewerViewModel.Factory>(
         creationCallback = { factory -> factory.create(navKey) }
     ) {
-    val viewState by viewModel.collectAsState()
+        val viewState by viewModel.collectAsState()
 
-    LifecycleStartEffect(Unit) {
-        viewModel.tabManager.setTabVisibility(false)
-        onStopOrDispose {
-            viewModel.tabManager.setTabVisibility(true)
+        LifecycleStartEffect(Unit) {
+            viewModel.tabManager.setTabVisibility(false)
+            onStopOrDispose {
+                viewModel.tabManager.setTabVisibility(true)
+            }
         }
-    }
 
-    AppearanceSystemBarsEffect(
-        lightStatusBar = true,
-        lightNavigationBar = true
-    )
+        AppearanceSystemBarsEffect(
+            lightStatusBar = true,
+            lightNavigationBar = true
+        )
 
-    DocumentViewerScreen(
-        viewModel = viewModel,
-        viewState = viewState
-    )
+        DocumentViewerScreen(
+            viewModel = viewModel,
+            viewState = viewState
+        )
 
-    LifecycleEffect {
-        viewModel.events.collect { event ->
-            when (event) {
-                DocumentViewerEvent.GoBack -> {
-                    navigator.goBack()
+        LifecycleEffect {
+            viewModel.events.collect { event ->
+                when (event) {
+                    DocumentViewerEvent.GoBack -> {
+                        navigator.goBack()
+                    }
                 }
             }
         }
     }
-}

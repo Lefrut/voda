@@ -2,7 +2,6 @@ package com.m.vodovoz.feature.all.promotions
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.paging.CombinedLoadStates
 import androidx.paging.LoadState
@@ -34,16 +33,14 @@ import kotlinx.coroutines.launch
 
 @HiltViewModel(assistedFactory = AllPromotionsFlowViewModel.Factory::class)
 class AllPromotionsFlowViewModel @AssistedInject constructor(
-    savedState: SavedStateHandle,
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val resourcesProvider: ResourcesProvider,
-    @Assisted private val navKey: AllPromotionsNavKey?,
+    @Assisted private val navKey: AllPromotionsNavKey,
 ) : PagingMviViewModel<PromotionUi, AllPromotionsFlowViewModel.AllPromotionsState, AllPromotionsFlowViewModel.AllPromotionsEvent>(
     AllPromotionsState()
 ) {
 
-    private val dataSource = navKey?.dataSource ?: savedState.get<AllPromotionsFragment.DataSource>("dataSource")
-        ?: AllPromotionsFragment.DataSource.All
+    private val dataSource = navKey.dataSource
 
     init {
         fetchPromotions()
@@ -214,6 +211,6 @@ class AllPromotionsFlowViewModel @AssistedInject constructor(
 
     @AssistedFactory
     interface Factory {
-        fun create(navKey: AllPromotionsNavKey?): AllPromotionsFlowViewModel
+        fun create(navKey: AllPromotionsNavKey): AllPromotionsFlowViewModel
     }
 }

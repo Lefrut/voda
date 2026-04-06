@@ -1,13 +1,11 @@
 package com.m.vodovoz.feature.auth.login_by_email
 
 import androidx.compose.runtime.Stable
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.m.vodovoz.R
 import com.m.vodovoz.common.account.LoginManager
 import com.m.vodovoz.common.resources.ResourcesProvider
 import com.m.vodovoz.common.tab.TabManager
-import com.m.vodovoz.core.navigation.AuthArgs
 import com.m.vodovoz.design_system.model.ColorfulButtonUi
 import com.m.vodovoz.design_system.model.updateButton
 import com.m.vodovoz.design_system.model.widgets.updateField
@@ -42,8 +40,7 @@ class LoginByEmailViewModel @AssistedInject constructor(
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val resourcesProvider: ResourcesProvider,
     private val loginManager: LoginManager,
-    private val savedStateHandle: SavedStateHandle,
-    @Assisted private val navKey: LoginByEmailNavKey?,
+    @Assisted private val navKey: LoginByEmailNavKey,
 ) : AbstractAuthViewModel<LoginByEmailState, LoginByEmailEvent>(
     LoginByEmailState(),
     LOGIN_BY_EMAIL_BUTTON
@@ -117,7 +114,7 @@ class LoginByEmailViewModel @AssistedInject constructor(
             val authDetails = loginDetails.toUi().withBlockingButton { button ->
                 button.copy(enabled = false)
             }.withAccountTypeSelection(
-                navKey?.accountTypeId ?: savedStateHandle[AuthArgs.ACCOUNT_TYPE_ID]
+                navKey.accountTypeId
             )
 
             updateState { s ->
@@ -177,6 +174,6 @@ class LoginByEmailViewModel @AssistedInject constructor(
 
     @AssistedFactory
     interface Factory {
-        fun create(navKey: LoginByEmailNavKey?): LoginByEmailViewModel
+        fun create(navKey: LoginByEmailNavKey): LoginByEmailViewModel
     }
 }

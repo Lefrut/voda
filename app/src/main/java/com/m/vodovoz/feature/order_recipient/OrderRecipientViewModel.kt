@@ -35,10 +35,10 @@ class OrderRecipientViewModel @AssistedInject constructor(
     val tabManager: TabManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val resourcesProvider: ResourcesProvider,
-    @Assisted private val navKey: OrderRecipientNavKey?,
+    @Assisted private val navKey: OrderRecipientNavKey,
 ) : MviViewModel<OrderRecipientState, OrderRecipientEvent>(OrderRecipientState()) {
 
-    private val addressId = navKey?.addressId ?: -1
+    private val addressId = navKey.addressId
 
     init {
         fetchOrderRecipientDetails()
@@ -161,7 +161,7 @@ class OrderRecipientViewModel @AssistedInject constructor(
 
     @AssistedFactory
     interface Factory {
-        fun create(navKey: OrderRecipientNavKey?): OrderRecipientViewModel
+        fun create(navKey: OrderRecipientNavKey): OrderRecipientViewModel
     }
 
 

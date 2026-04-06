@@ -64,35 +64,35 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MapEntry(navKey: MapNavKey? = null) =
+fun MapEntry(navKey: MapNavKey) =
     NavigationEntry<MapFlowViewModel, MapFlowViewModel.Factory>(
         creationCallback = { factory -> factory.create(navKey) }
     ) {
-    val addAddressViewModel = when (navKey?.source) {
-        MapNavKey.Source.AddAddress -> viewModel(modelClass = AddAddressViewModel::class)
-        else -> null
-    }
-    val context = LocalContext.current
-    val activity = context as? Activity
-    val viewState by viewModel.collectAsState()
+        val addAddressViewModel = when (navKey.source) {
+            MapNavKey.Source.AddAddress -> viewModel(modelClass = AddAddressViewModel::class)
+            else -> null
+        }
+        val context = LocalContext.current
+        val activity = context as? Activity
+        val viewState by viewModel.collectAsState()
 
-    val fusedLocationClient = remember(context) {
-        LocationServices.getFusedLocationProviderClient(context)
-    }
-    val mapKit: MapKit = remember { MapKitFactory.getInstance() }
-    val yandexMap = remember(context) {
-        YandexMapUi(
-            mapView = MapView(context).apply {
-                layoutParams = ViewGroup.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.MATCH_PARENT
-                )
-                mapWindow.map.logo.setAlignment(
-                    Alignment(HorizontalAlignment.LEFT, VerticalAlignment.TOP)
-                )
-            }
-        )
-    }
+        val fusedLocationClient = remember(context) {
+            LocationServices.getFusedLocationProviderClient(context)
+        }
+        val mapKit: MapKit = remember { MapKitFactory.getInstance() }
+        val yandexMap = remember(context) {
+            YandexMapUi(
+                mapView = MapView(context).apply {
+                    layoutParams = ViewGroup.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.MATCH_PARENT
+                    )
+                    mapWindow.map.logo.setAlignment(
+                        Alignment(HorizontalAlignment.LEFT, VerticalAlignment.TOP)
+                    )
+                }
+            )
+        }
 
     val mapView: MapView = yandexMap.mapView
     val mapWindow: MapWindow = mapView.mapWindow
@@ -146,21 +146,21 @@ fun MapEntry(navKey: MapNavKey? = null) =
         anchoredDraggableState = anchoredDraggableState
     )
 
-    LifecycleEffect(anchoredDraggableState) {
-        observeEvents(
-            addAddressViewModel = addAddressViewModel,
-            activity = activity,
-            context = context,
-            map = map,
-            moscowPoint = moscowPoint,
-            fusedLocationClient = fusedLocationClient,
-            locationLauncher = locationPermissionLauncher,
-            anchoredDraggableState = anchoredDraggableState,
-            mainScope = coroutineScope,
-            keyboardController = keyboardController
-        )
+        LifecycleEffect(anchoredDraggableState) {
+            observeEvents(
+                addAddressViewModel = addAddressViewModel,
+                activity = activity,
+                context = context,
+                map = map,
+                moscowPoint = moscowPoint,
+                fusedLocationClient = fusedLocationClient,
+                locationLauncher = locationPermissionLauncher,
+                anchoredDraggableState = anchoredDraggableState,
+                mainScope = coroutineScope,
+                keyboardController = keyboardController
+            )
+        }
     }
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 private suspend fun com.m.vodovoz.core.navigation.NavigationEntryScope<MapFlowViewModel>.observeEvents(

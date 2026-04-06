@@ -14,44 +14,44 @@ import com.m.vodovoz.ui.mvi.collectAsState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProductAnalogsEntry(navKey: ProductAnalogsNavKey? = null) =
+fun ProductAnalogsEntry(navKey: ProductAnalogsNavKey) =
     NavigationEntry<ProductAnalogsViewModel, ProductAnalogsViewModel.Factory>(
         creationCallback = { factory -> factory.create(navKey) }
     ) {
-    val viewState by viewModel.collectAsState()
+        val viewState by viewModel.collectAsState()
 
-    LaunchedEffect(Unit) {
-        viewModel.fetchProductAnalogs()
-    }
+        LaunchedEffect(Unit) {
+            viewModel.fetchProductAnalogs()
+        }
 
-    ProductAnalogsScreen(viewModel = viewModel, viewState = viewState)
+        ProductAnalogsScreen(viewModel = viewModel, viewState = viewState)
 
-    if (viewState.showSortOptionsBottomSheet) {
-        SortOptionsBottomSheet(
-            onDismissRequest = { viewModel.closeSortOptionsBottomSheet() },
-            currentSort = viewState.currentSort,
-            sorting = viewState.productsSection.sorting,
-            onSortSelect = { sort ->
-                viewModel.selectSort(sort)
-            }
-        )
-    }
-
-    LifecycleEffect {
-        viewModel.events.collect { event ->
-            when (event) {
-                ProductAnalogsEvent.GoBack -> {
-                    navigator.goBack()
+        if (viewState.showSortOptionsBottomSheet) {
+            SortOptionsBottomSheet(
+                onDismissRequest = { viewModel.closeSortOptionsBottomSheet() },
+                currentSort = viewState.currentSort,
+                sorting = viewState.productsSection.sorting,
+                onSortSelect = { sort ->
+                    viewModel.selectSort(sort)
                 }
+            )
+        }
 
-                is ProductAnalogsEvent.GoToProductAnalogs -> {
-                    navigator.navigateToProductDetails(event.productId)
-                }
+        LifecycleEffect {
+            viewModel.events.collect { event ->
+                when (event) {
+                    ProductAnalogsEvent.GoBack -> {
+                        navigator.goBack()
+                    }
 
-                is ProductAnalogsEvent.GoToProductDetails -> {
-                    navigator.navigateToProductDetails(event.productId)
+                    is ProductAnalogsEvent.GoToProductAnalogs -> {
+                        navigator.navigateToProductDetails(event.productId)
+                    }
+
+                    is ProductAnalogsEvent.GoToProductDetails -> {
+                        navigator.navigateToProductDetails(event.productId)
+                    }
                 }
             }
         }
     }
-}

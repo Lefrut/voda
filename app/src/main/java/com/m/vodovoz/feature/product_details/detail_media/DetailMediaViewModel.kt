@@ -21,11 +21,11 @@ import kotlinx.coroutines.launch
 class DetailMediaViewModel @AssistedInject constructor(
     val tabManager: TabManager,
     val insetsVisibilityState: InsetsVisibilityState,
-    @Assisted private val navKey: DetailMediaNavKey?,
+    @Assisted private val navKey: DetailMediaNavKey,
 ) : MviViewModel<DetailMediaState, DetailMediaEvent>(
     DetailMediaState(
-        currentMedia = navKey?.media ?: ProductMediaUi.Picture(""),
-        mediaList = navKey?.mediaList ?: emptyList()
+        currentMedia = navKey.media,
+        mediaList = navKey.mediaList
     )
 ){
 
@@ -53,7 +53,7 @@ class DetailMediaViewModel @AssistedInject constructor(
 
     @AssistedFactory
     interface Factory {
-        fun create(navKey: DetailMediaNavKey?): DetailMediaViewModel
+        fun create(navKey: DetailMediaNavKey): DetailMediaViewModel
     }
 
 }

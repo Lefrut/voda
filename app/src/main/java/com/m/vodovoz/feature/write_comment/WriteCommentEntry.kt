@@ -22,69 +22,69 @@ import com.m.vodovoz.ui.mvi.collectAsState
 import com.m.vodovoz.ui.mvi.collectEvents
 
 @Composable
-fun WriteCommentEntry(navKey: WriteCommentNavKey? = null) =
+fun WriteCommentEntry(navKey: WriteCommentNavKey) =
     NavigationEntry<WriteCommentViewModel, WriteCommentViewModel.Factory>(
         creationCallback = { factory -> factory.create(navKey) }
     ) {
-    val activityOwner = LocalActivity.current as? ViewModelStoreOwner
-    val homeViewModel = when (navKey?.source) {
-        WriteCommentNavKey.Source.Home -> activityOwner?.let { hiltViewModel<HomeFlowViewModel>(it) }
-        else -> null
-    }
-    val waitFeedbackProductsViewModel = when (navKey?.source) {
-        WriteCommentNavKey.Source.WaitFeedbackProducts -> viewModel(modelClass = WaitFeedbackProductsViewModel::class)
-        else -> null
-    }
-    val viewState by viewModel.collectAsState()
-    val snackbarHostState = remember { SnackbarHostState() }
-    val pickImagesLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.OpenMultipleDocuments()
-    ) { uri -> viewModel.addUri(uri) }
-
-    DisposableEffect(Unit) {
-        val tabManager = viewModel.tabManager
-        tabManager.setTabVisibility(false)
-        onDispose {
-            tabManager.setTabVisibility(true)
+        val activityOwner = LocalActivity.current as? ViewModelStoreOwner
+        val homeViewModel = when (navKey.source) {
+            WriteCommentNavKey.Source.Home -> activityOwner?.let { hiltViewModel<HomeFlowViewModel>(it) }
+            else -> null
         }
-    }
-
-    when (val uiState = viewState.uiState) {
-        WriteCommentUiState.Comment -> {
-            WriteCommentScreen(
-                viewModel = viewModel,
-                viewState = viewState,
-                snackbarHostState = snackbarHostState
-            )
+        val waitFeedbackProductsViewModel = when (navKey.source) {
+            WriteCommentNavKey.Source.WaitFeedbackProducts -> viewModel(modelClass = WaitFeedbackProductsViewModel::class)
+            else -> null
         }
+        val viewState by viewModel.collectAsState()
+        val snackbarHostState = remember { SnackbarHostState() }
+        val pickImagesLauncher = rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.OpenMultipleDocuments()
+        ) { uri -> viewModel.addUri(uri) }
 
-        is WriteCommentUiState.Success -> {
-            VodovozLongPlaceholder(
-                data = uiState.placeholder,
-                onButtonClick = { viewModel.navigateBack() },
-                onCloseClick = { viewModel.navigateBack() }
-            )
-        }
-    }
-
-    viewModel.collectEvents { event ->
-        when (event) {
-            WriteCommentEvent.GoBack -> {
-                navigator.goBack()
-            }
-
-            WriteCommentEvent.OpenImagePicker -> {
-                pickImagesLauncher.launch(arrayOf("image/*"))
-            }
-
-            is WriteCommentEvent.SetRatedProductResult -> {
-                homeViewModel?.removeUnratedProduct(event.productId)
-                waitFeedbackProductsViewModel?.removeProduct(event.productId)
-            }
-
-            is WriteCommentEvent.ShowSnackbar -> {
-                snackbarHostState.showSnackbar(event.message)
+        DisposableEffect(Unit) {
+            val tabManager = viewModel.tabManager
+            tabManager.setTabVisibility(false)
+            onDispose {
+                tabManager.setTabVisibility(true)
             }
         }
+
+        when (val uiState = viewState.uiState) {
+            WriteCommentUiState.Comment -> {
+                WriteCommentScreen(
+                    viewModel = viewModel,
+                    viewState = viewState,
+                    snackbarHostState = snackbarHostState
+                )
+            }
+
+            is WriteCommentUiState.Success -> {
+                VodovozLongPlaceholder(
+                    data = uiState.placeholder,
+                    onButtonClick = { viewModel.navigateBack() },
+                    onCloseClick = { viewModel.navigateBack() }
+                )
+            }
+        }
+
+        viewModel.collectEvents { event ->
+            when (event) {
+                WriteCommentEvent.GoBack -> {
+                    navigator.goBack()
+                }
+
+                WriteCommentEvent.OpenImagePicker -> {
+                    pickImagesLauncher.launch(arrayOf("image/*"))
+                }
+
+                is WriteCommentEvent.SetRatedProductResult -> {
+                    homeViewModel?.removeUnratedProduct(event.productId)
+                    waitFeedbackProductsViewModel?.removeProduct(event.productId)
+                }
+
+                is WriteCommentEvent.ShowSnackbar -> {
+                    snackbarHostState.showSnackbar(event.message)
+                }
+            }
+        }
     }
-}

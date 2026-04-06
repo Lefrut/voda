@@ -26,6 +26,7 @@ class OrderingFragment @Inject constructor() : Fragment() {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
                 OrderingEntry(
+                    navKey = null!!,
                     onRefreshCart = {
                         cartViewModel.refresh()
                     }

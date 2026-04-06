@@ -13,39 +13,39 @@ import com.m.vodovoz.ui.mvi.collectAsState
 import com.m.vodovoz.ui.mvi.collectEvents
 
 @Composable
-fun OrderRecipientEntry(navKey: OrderRecipientNavKey? = null) =
+fun OrderRecipientEntry(navKey: OrderRecipientNavKey) =
     NavigationEntry<OrderRecipientViewModel, OrderRecipientViewModel.Factory>(
         creationCallback = { factory -> factory.create(navKey) }
     ) {
-    val orderingViewModel = viewModel(modelClass = OrderingFlowViewModel::class)
-    val viewState by viewModel.collectAsState()
+        val orderingViewModel = viewModel(modelClass = OrderingFlowViewModel::class)
+        val viewState by viewModel.collectAsState()
 
-    LifecycleStartEffect(Unit) {
-        viewModel.tabManager.setTabVisibility(false)
-        onStopOrDispose {
-            viewModel.tabManager.setTabVisibility(true)
-        }
-    }
-
-    OrderRecipientScreen(
-        viewModel = viewModel,
-        viewState = viewState
-    )
-
-    viewModel.collectEvents { event ->
-        when (event) {
-            OrderRecipientEvent.GoBack -> {
-                navigator.goBack()
-            }
-
-            OrderRecipientEvent.GoBackToOrdering -> {
-                orderingViewModel.refreshRecipient()
-                navigator.goBack()
-            }
-
-            is OrderRecipientEvent.GoToWebView -> {
-                navigator.navigateToWebView(event.url, event.title)
+        LifecycleStartEffect(Unit) {
+            viewModel.tabManager.setTabVisibility(false)
+            onStopOrDispose {
+                viewModel.tabManager.setTabVisibility(true)
             }
         }
+
+        OrderRecipientScreen(
+            viewModel = viewModel,
+            viewState = viewState
+        )
+
+        viewModel.collectEvents { event ->
+            when (event) {
+                OrderRecipientEvent.GoBack -> {
+                    navigator.goBack()
+                }
+
+                OrderRecipientEvent.GoBackToOrdering -> {
+                    orderingViewModel.refreshRecipient()
+                    navigator.goBack()
+                }
+
+                is OrderRecipientEvent.GoToWebView -> {
+                    navigator.navigateToWebView(event.url, event.title)
+                }
+            }
+        }
     }
-}

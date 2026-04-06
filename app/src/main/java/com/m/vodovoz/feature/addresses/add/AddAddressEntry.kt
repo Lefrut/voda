@@ -10,6 +10,7 @@ import androidx.lifecycle.compose.LifecycleStartEffect
 import androidx.navigation.navOptions
 import com.m.vodovoz.R
 import com.m.vodovoz.core.navigation.NavigationEntry
+import com.m.vodovoz.core.navigation.NavigationEntryScope
 import com.m.vodovoz.core.navigation.navigateToMap
 import com.m.vodovoz.core.navigation.slideAnim
 import com.m.vodovoz.design_system.effects.LifecycleEffect
@@ -25,7 +26,7 @@ import kotlinx.coroutines.flow.onSubscription
 import kotlinx.coroutines.launch
 
 @Composable
-fun AddAddressEntry(navKey: AddAddressNavKey? = null) =
+fun AddAddressEntry(navKey: AddAddressNavKey) =
     NavigationEntry<AddAddressViewModel, AddAddressViewModel.Factory>(
         creationCallback = { factory -> factory.create(navKey) }
     ) {
@@ -56,7 +57,7 @@ fun AddAddressEntry(navKey: AddAddressNavKey? = null) =
         }
     }
 
-private suspend fun com.m.vodovoz.core.navigation.NavigationEntryScope<AddAddressViewModel>.observeEvents(
+private suspend fun NavigationEntryScope<AddAddressViewModel>.observeEvents(
     mainScope: CoroutineScope,
     snackbarHostState: SnackbarHostState,
 ) {

@@ -18,60 +18,60 @@ import com.m.vodovoz.feature.cart.gifts.model.GiftsEvent
 import com.m.vodovoz.ui.mvi.collectAsState
 
 @Composable
-fun GiftsEntry(navKey: GiftsNavKey? = null) =
+fun GiftsEntry(navKey: GiftsNavKey) =
     NavigationEntry<GiftsViewModel, GiftsViewModel.Factory>(
         creationCallback = { factory -> factory.create(navKey) }
     ) {
-    val activityOwner = LocalActivity.current as? ViewModelStoreOwner
-    val cartViewModel = activityOwner?.let { hiltViewModel<CartFlowViewModel>(it) }
-    val viewState by viewModel.collectAsState()
+        val activityOwner = LocalActivity.current as? ViewModelStoreOwner
+        val cartViewModel = activityOwner?.let { hiltViewModel<CartFlowViewModel>(it) }
+        val viewState by viewModel.collectAsState()
 
-    LifecycleStartEffect(Unit) {
-        viewModel.tabManager.setTabVisibility(false)
-        onStopOrDispose {
-            viewModel.tabManager.setTabVisibility(true)
+        LifecycleStartEffect(Unit) {
+            viewModel.tabManager.setTabVisibility(false)
+            onStopOrDispose {
+                viewModel.tabManager.setTabVisibility(true)
+            }
         }
-    }
 
-    GiftsScreen(viewModel = viewModel, viewState = viewState)
+        GiftsScreen(viewModel = viewModel, viewState = viewState)
 
-    val previewImage = viewState.previewImage
-    if (previewImage != null) {
-        ImagePreviewDialog(
-            image = previewImage,
-            onDismissRequest = viewModel::closePreviewImageDialog
-        )
-    }
-
-    if (viewState.showForAdultsDialog) {
-        with(viewState.forAdultsDialog) {
-            VodovozDialog(
-                title = title,
-                description = description,
-                acceptButtonText = button.name,
-                cancelButtonText = stringResource(id = R.string.no),
-                onDismiss = {
-                    viewModel.closeForAdultsDialog()
-                },
-                onAccept = {
-                    viewModel.acceptForAdults()
-                }
+        val previewImage = viewState.previewImage
+        if (previewImage != null) {
+            ImagePreviewDialog(
+                image = previewImage,
+                onDismissRequest = viewModel::closePreviewImageDialog
             )
         }
-    }
 
-    LifecycleEffect {
-        viewModel.events.collect { event ->
-            when (event) {
-                GiftsEvent.GoBack -> {
-                    navigator.goBack()
-                }
+        if (viewState.showForAdultsDialog) {
+            with(viewState.forAdultsDialog) {
+                VodovozDialog(
+                    title = title,
+                    description = description,
+                    acceptButtonText = button.name,
+                    cancelButtonText = stringResource(id = R.string.no),
+                    onDismiss = {
+                        viewModel.closeForAdultsDialog()
+                    },
+                    onAccept = {
+                        viewModel.acceptForAdults()
+                    }
+                )
+            }
+        }
 
-                is GiftsEvent.GoToCart -> {
-                    cartViewModel?.addGiftToCart(event.currentGift)
-                    navigator.goBack()
+        LifecycleEffect {
+            viewModel.events.collect { event ->
+                when (event) {
+                    GiftsEvent.GoBack -> {
+                        navigator.goBack()
+                    }
+
+                    is GiftsEvent.GoToCart -> {
+                        cartViewModel?.addGiftToCart(event.currentGift)
+                        navigator.goBack()
+                    }
                 }
             }
         }
     }
-}

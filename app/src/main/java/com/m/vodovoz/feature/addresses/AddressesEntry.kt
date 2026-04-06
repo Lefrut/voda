@@ -21,76 +21,76 @@ import com.yandex.mapkit.MapKit
 import com.yandex.mapkit.MapKitFactory
 
 @Composable
-fun AddressesEntry(navKey: AddressesNavKey? = null) =
+fun AddressesEntry(navKey: AddressesNavKey) =
     NavigationEntry<AddressesFlowViewModel, AddressesFlowViewModel.Factory>(
         creationCallback = { factory -> factory.create(navKey) }
     ) {
-    val viewState by viewModel.collectAsState()
-    val lifecycleOwner = LocalLifecycleOwner.current
-    val orderingViewModel = if (viewState.screenType == AddressScreenTypeUi.Choose) {
-        viewModel(modelClass = OrderingFlowViewModel::class)
-    } else {
-        null
-    }
-    val mapKit: MapKit = MapKitFactory.getInstance()
-
-    LifecycleStartEffect(viewState.screenType) {
-        when (viewState.screenType) {
-            AddressScreenTypeUi.Add -> Unit
-            AddressScreenTypeUi.Choose -> {
-                mapKit.onStart()
-                viewModel.tabManager.setTabVisibility(false)
-            }
+        val viewState by viewModel.collectAsState()
+        val lifecycleOwner = LocalLifecycleOwner.current
+        val orderingViewModel = if (viewState.screenType == AddressScreenTypeUi.Choose) {
+            viewModel(modelClass = OrderingFlowViewModel::class)
+        } else {
+            null
         }
-        onStopOrDispose {
-            mapKit.onStart()
-        }
-    }
+        val mapKit: MapKit = MapKitFactory.getInstance()
 
-    DisposableEffect(lifecycleOwner) {
-        val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_RESUME) {
-                viewModel.refresh()
-            }
-        }
-        lifecycleOwner.lifecycle.addObserver(observer)
-        onDispose {
-            lifecycleOwner.lifecycle.removeObserver(observer)
-        }
-    }
-
-    AddressesScreen(
-        viewModel = viewModel,
-        viewState = viewState
-    )
-
-    BackHandler {
-        viewModel.navigateBack()
-    }
-
-    LifecycleEffect {
-        viewModel.events.collect { event ->
-            when (event) {
-                is AddressesFlowViewModel.AddressesEvents.GoBack -> {
-                    navigator.goBack()
-                }
-
-                AddressesFlowViewModel.AddressesEvents.GoToMap -> {
-                    navigator.navigateToMap(null)
-                }
-
-                is AddressesFlowViewModel.AddressesEvents.GoToEditAddress -> {
-                    navigator.navigateToAddAddress(
-                        addressId = event.addressId,
-                        addressName = event.addressName
-                    )
-                }
-
-                is AddressesFlowViewModel.AddressesEvents.GoBackToOrdering -> {
-                    orderingViewModel?.setAddress(event.address)
-                    navigator.goBack()
+        LifecycleStartEffect(viewState.screenType) {
+            when (viewState.screenType) {
+                AddressScreenTypeUi.Add -> Unit
+                AddressScreenTypeUi.Choose -> {
+                    mapKit.onStart()
+                    viewModel.tabManager.setTabVisibility(false)
                 }
             }
+            onStopOrDispose {
+                mapKit.onStop()
+            }
+        }
+
+        DisposableEffect(lifecycleOwner) {
+            val observer = LifecycleEventObserver { _, event ->
+                if (event == Lifecycle.Event.ON_RESUME) {
+                    viewModel.refresh()
+                }
+            }
+            lifecycleOwner.lifecycle.addObserver(observer)
+            onDispose {
+                lifecycleOwner.lifecycle.removeObserver(observer)
+            }
+        }
+
+        AddressesScreen(
+            viewModel = viewModel,
+            viewState = viewState
+        )
+
+        BackHandler {
+            viewModel.navigateBack()
+        }
+
+        LifecycleEffect {
+            viewModel.events.collect { event ->
+                when (event) {
+                    is AddressesFlowViewModel.AddressesEvents.GoBack -> {
+                        navigator.goBack()
+                    }
+
+                    AddressesFlowViewModel.AddressesEvents.GoToMap -> {
+                        navigator.navigateToMap(null)
+                    }
+
+                    is AddressesFlowViewModel.AddressesEvents.GoToEditAddress -> {
+                        navigator.navigateToAddAddress(
+                            addressId = event.addressId,
+                            addressName = event.addressName
+                        )
+                    }
+
+                    is AddressesFlowViewModel.AddressesEvents.GoBackToOrdering -> {
+                        orderingViewModel?.setAddress(event.address)
+                        navigator.goBack()
+                    }
+                }
+            }
         }
     }
-}

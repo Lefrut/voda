@@ -1,7 +1,6 @@
 package com.m.vodovoz.feature.cart.gifts
 
 import androidx.compose.runtime.Stable
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.design_system.model.ForAdultsUi
@@ -25,9 +24,8 @@ import kotlinx.coroutines.launch
 @Stable
 class GiftsViewModel @AssistedInject constructor(
     val tabManager: TabManager,
-    savedStateHandle: SavedStateHandle,
     private val userPreferencesRepository: UserPreferencesRepository,
-    @Assisted private val navKey: GiftsNavKey?,
+    @Assisted private val navKey: GiftsNavKey,
 ) : ProductsMviViewModel<CartPresentItemUi, GiftsState, GiftsEvent>(
     state = GiftsState(),
     blockedProductsFlow = emptyFlow(),
@@ -36,22 +34,15 @@ class GiftsViewModel @AssistedInject constructor(
     canViewAdultProducts = userPreferencesRepository.canViewAdultProducts
 ) {
 
-    private val present: CartPresentUi? =
-        navKey?.present ?: savedStateHandle.get<CartPresentUi>("present")
+    private val present: CartPresentUi? = navKey.present
 
-    private val giftDetails: CartPresentPopupWindowUi? =
-        navKey?.popupWindow ?: savedStateHandle.get<CartPresentPopupWindowUi>("popupWindow")
+    private val giftDetails: CartPresentPopupWindowUi = navKey.popupWindow
 
     init {
         initializeData()
     }
 
     private fun initializeData() = viewModelScope.launch {
-        if (giftDetails == null) {
-            navigateBack()
-            return@launch
-        }
-
         updateState { s ->
             s.copy(
                 button = giftDetails.button,
@@ -117,6 +108,6 @@ class GiftsViewModel @AssistedInject constructor(
 
     @AssistedFactory
     interface Factory {
-        fun create(navKey: GiftsNavKey?): GiftsViewModel
+        fun create(navKey: GiftsNavKey): GiftsViewModel
     }
 }

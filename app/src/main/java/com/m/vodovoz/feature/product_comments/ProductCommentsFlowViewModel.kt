@@ -2,7 +2,6 @@ package com.m.vodovoz.feature.product_comments
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.map
@@ -36,20 +35,19 @@ import kotlinx.coroutines.launch
 @HiltViewModel(assistedFactory = ProductCommentsFlowViewModel.Factory::class)
 @Stable
 class ProductCommentsFlowViewModel @AssistedInject constructor(
-    savedState: SavedStateHandle,
     val tabManager: TabManager,
     val insetsVisibilityState: InsetsVisibilityState,
     private val accountManager: AccountManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val resourcesProvider: ResourcesProvider,
-    @Assisted private val navKey: ProductCommentsNavKey?,
+    @Assisted private val navKey: ProductCommentsNavKey,
 ) : MviViewModel<ProductCommentsFlowViewModel.ProductCommentsState, ProductCommentsFlowViewModel.ProductCommentsEvents>(
     ProductCommentsState()
 ) {
 
-    private val productId = navKey?.productId ?: savedState.get<Long>("productId") ?: navigateBack().let { -1 }
-    private val productName = navKey?.productName ?: savedState.get<String>("productName") ?: ""
-    private val productImage = navKey?.productImage ?: savedState.get<String>("productImage") ?: ""
+    private val productId = navKey.productId
+    private val productName = navKey.productName
+    private val productImage = navKey.productImage
 
     init {
         fetchProductComments()
@@ -165,7 +163,7 @@ class ProductCommentsFlowViewModel @AssistedInject constructor(
 
     @AssistedFactory
     interface Factory {
-        fun create(navKey: ProductCommentsNavKey?): ProductCommentsFlowViewModel
+        fun create(navKey: ProductCommentsNavKey): ProductCommentsFlowViewModel
     }
 
 }

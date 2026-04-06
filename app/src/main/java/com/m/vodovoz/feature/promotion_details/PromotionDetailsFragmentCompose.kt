@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
+import com.m.vodovoz.feature.promotion_details.api.PromotionDetailsNavKey
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -17,9 +18,10 @@ class PromotionDetailsFragment @Inject constructor() : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View {
+        val args = requireArguments()
         return ComposeView(requireContext()).apply {
             setContent {
-                PromotionDetailsEntry()
+                PromotionDetailsEntry(PromotionDetailsNavKey(promotionId = args.getLong("promotionId")))
             }
         }
     }

@@ -1,7 +1,6 @@
 package com.m.vodovoz.feature.product_analogs
 
 import androidx.compose.runtime.Stable
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.m.vodovoz.common.cart.CartManager
 import com.m.vodovoz.common.like.LikeManager
@@ -30,12 +29,11 @@ import kotlinx.coroutines.launch
 @HiltViewModel(assistedFactory = ProductAnalogsViewModel.Factory::class)
 @Stable
 class ProductAnalogsViewModel @AssistedInject constructor(
-    savedStateHandle: SavedStateHandle,
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val cartManager: CartManager,
     private val favoritesManager: LikeManager,
     userPreferencesRepository: UserPreferencesRepository,
-    @Assisted private val navKey: ProductAnalogsNavKey?,
+    @Assisted private val navKey: ProductAnalogsNavKey,
 ) : ProductsMviViewModel<ProductUi, ProductAnalogsState, ProductAnalogsEvent>(
     state = ProductAnalogsState(),
     blockedProductsFlow = cartManager.blockedProductsFlow,
@@ -43,7 +41,7 @@ class ProductAnalogsViewModel @AssistedInject constructor(
     cartFlow = cartManager.observeCarts(),
     canViewAdultProducts = userPreferencesRepository.canViewAdultProducts
 ) {
-    private val productId = navKey?.productId ?: savedStateHandle.get<Long>("productId") ?: -1
+    private val productId = navKey.productId
 
 
     fun fetchProductAnalogs() =
@@ -131,7 +129,7 @@ class ProductAnalogsViewModel @AssistedInject constructor(
 
     @AssistedFactory
     interface Factory {
-        fun create(navKey: ProductAnalogsNavKey?): ProductAnalogsViewModel
+        fun create(navKey: ProductAnalogsNavKey): ProductAnalogsViewModel
     }
 
 }

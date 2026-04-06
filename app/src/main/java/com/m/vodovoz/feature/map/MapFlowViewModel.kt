@@ -2,7 +2,6 @@ package com.m.vodovoz.feature.map
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.m.vodovoz.design_system.model.ImageButtonUi
 import com.m.vodovoz.design_system.model.MapPointUi
@@ -51,15 +50,14 @@ import kotlin.math.floor
 @HiltViewModel(assistedFactory = MapFlowViewModel.Factory::class)
 @Stable
 class MapFlowViewModel @AssistedInject constructor(
-    savedState: SavedStateHandle,
     private val mapServiceRepository: MapServiceRepository,
     private val vodovozServiceRepository: VodovozServiceRepository,
-    @Assisted private val navKey: MapNavKey?,
+    @Assisted private val navKey: MapNavKey,
 ) : MviViewModel<MapFlowViewModel.MapFlowState, MapFlowViewModel.MapFlowEvents>(
     MapFlowState()
 ) {
 
-    private val addressName = (navKey?.addressName ?: savedState.get<String>("addressName"))?.apply {
+    private val addressName = navKey.addressName?.apply {
         updateState { s -> s.copy(screenType = MapScreenTypeUi.Edit) }
     }
 
@@ -409,6 +407,6 @@ class MapFlowViewModel @AssistedInject constructor(
 
     @AssistedFactory
     interface Factory {
-        fun create(navKey: MapNavKey?): MapFlowViewModel
+        fun create(navKey: MapNavKey): MapFlowViewModel
     }
 }

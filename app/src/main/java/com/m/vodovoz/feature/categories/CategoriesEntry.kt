@@ -16,43 +16,48 @@ import com.m.vodovoz.feature.product_catalog.ProductCatalogViewModel
 import com.m.vodovoz.ui.mvi.collectAsState
 
 @Composable
-fun CategoriesEntry(navKey: CategoriesNavKey? = null) =
+fun CategoriesEntry(navKey: CategoriesNavKey) =
     NavigationEntry<CategoriesViewModel, CategoriesViewModel.Factory>(
         creationCallback = { factory -> factory.create(navKey) }
     ) {
-    val activityOwner = LocalActivity.current as? ViewModelStoreOwner
-    val productCatalogViewModel = when (navKey?.source) {
-        CategoriesNavKey.Source.ProductCatalog -> viewModel(modelClass = ProductCatalogViewModel::class)
-        else -> null
-    }
-    val favoriteViewModel = when (navKey?.source) {
-        CategoriesNavKey.Source.Favorite -> activityOwner?.let { hiltViewModel<FavoriteFlowViewModel>(it) }
-        else -> null
-    }
-    val viewState by viewModel.collectAsState()
-
-    LifecycleStartEffect(Unit) {
-        viewModel.tabManager.setTabVisibility(false)
-        onStopOrDispose {
-            viewModel.tabManager.setTabVisibility(true)
+        val activityOwner = LocalActivity.current as? ViewModelStoreOwner
+        val productCatalogViewModel = when (navKey.source) {
+            CategoriesNavKey.Source.ProductCatalog -> viewModel(modelClass = ProductCatalogViewModel::class)
+            else -> null
         }
-    }
+        val favoriteViewModel = when (navKey.source) {
+            CategoriesNavKey.Source.Favorite -> activityOwner?.let {
+                hiltViewModel<FavoriteFlowViewModel>(
+                    it
+                )
+            }
 
-    CategoriesScreen(viewModel = viewModel, viewState = viewState)
+            else -> null
+        }
+        val viewState by viewModel.collectAsState()
 
-    LifecycleEffect {
-        viewModel.events.collect { event ->
-            when (event) {
-                is CategoriesEvent.GoBackWithArguments -> {
-                    productCatalogViewModel?.selectCategory(event.currentCategory)
-                    favoriteViewModel?.selectCategory(event.currentCategory)
-                    navigator.goBack()
-                }
+        LifecycleStartEffect(Unit) {
+            viewModel.tabManager.setTabVisibility(false)
+            onStopOrDispose {
+                viewModel.tabManager.setTabVisibility(true)
+            }
+        }
 
-                CategoriesEvent.GoBack -> {
-                    navigator.goBack()
+        CategoriesScreen(viewModel = viewModel, viewState = viewState)
+
+        LifecycleEffect {
+            viewModel.events.collect { event ->
+                when (event) {
+                    is CategoriesEvent.GoBackWithArguments -> {
+                        productCatalogViewModel?.selectCategory(event.currentCategory)
+                        favoriteViewModel?.selectCategory(event.currentCategory)
+                        navigator.goBack()
+                    }
+
+                    CategoriesEvent.GoBack -> {
+                        navigator.goBack()
+                    }
                 }
             }
         }
     }
-}

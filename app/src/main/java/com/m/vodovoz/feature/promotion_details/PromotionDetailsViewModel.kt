@@ -2,7 +2,6 @@ package com.m.vodovoz.feature.promotion_details
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.paging.CombinedLoadStates
 import androidx.paging.map
@@ -32,12 +31,11 @@ import kotlinx.coroutines.launch
 @HiltViewModel(assistedFactory = PromotionDetailsViewModel.Factory::class)
 @Stable
 class PromotionDetailsViewModel @AssistedInject constructor(
-    savedState: SavedStateHandle,
     private val cartManager: CartManager,
     private val likeManager: LikeManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
     userPreferencesRepository: UserPreferencesRepository,
-    @Assisted private val navKey: PromotionDetailsNavKey?,
+    @Assisted private val navKey: PromotionDetailsNavKey,
 ) : PagingProductsMviViewModel<ProductUi, PromotionDetailsViewModel.PromotionDetailsState, PromotionDetailsViewModel.PromotionDetailEvent>(
     state = PromotionDetailsState(),
     blockedProductsFlow = cartManager.blockedProductsFlow,
@@ -46,7 +44,7 @@ class PromotionDetailsViewModel @AssistedInject constructor(
     canViewAdultProducts = userPreferencesRepository.canViewAdultProducts
 ) {
 
-    private var promotionId = navKey?.promotionId?.toInt() ?: savedState.get<Long>("promotionId")?.toInt() ?: -1
+    private var promotionId = navKey.promotionId.toInt()
 
     init {
         fetchPromotionDetails()
@@ -137,6 +135,6 @@ class PromotionDetailsViewModel @AssistedInject constructor(
 
     @AssistedFactory
     interface Factory {
-        fun create(navKey: PromotionDetailsNavKey?): PromotionDetailsViewModel
+        fun create(navKey: PromotionDetailsNavKey): PromotionDetailsViewModel
     }
 }

@@ -22,89 +22,89 @@ import com.m.vodovoz.feature.search.api.SearchNavKey
 import com.m.vodovoz.ui.mvi.collectAsState
 
 @Composable
-fun SearchEntry(navKey: SearchNavKey? = null) =
+fun SearchEntry(navKey: SearchNavKey) =
     NavigationEntry<SearchFlowViewModel, SearchFlowViewModel.Factory>(
         creationCallback = { factory -> factory.create(navKey) }
     ) {
-    val view = LocalView.current
-    val viewState by viewModel.collectAsState()
+        val view = LocalView.current
+        val viewState by viewModel.collectAsState()
 
-    LifecycleStartEffect(Unit) {
-        viewModel.insetsVisibilityState.consumeSystemBarInsets(true)
-        onStopOrDispose {
-            viewModel.tabManager.setTabVisibility(true)
+        LifecycleStartEffect(Unit) {
             viewModel.insetsVisibilityState.consumeSystemBarInsets(true)
-        }
-    }
-
-    DisposableEffect(view) {
-        ViewCompat.setOnApplyWindowInsetsListener(view) { _, insets ->
-            val imeVisible = insets.isVisible(WindowInsetsCompat.Type.ime())
-            viewModel.tabManager.setTabVisibility(!imeVisible)
-            insets
-        }
-        onDispose {
-            ViewCompat.setOnApplyWindowInsetsListener(view, null)
-        }
-    }
-
-    when (viewState.uiState) {
-        SearchFlowViewModel.UiState.Error -> {
-            NetworkErrorPlaceholder { viewModel.retrySearchQuery() }
+            onStopOrDispose {
+                viewModel.tabManager.setTabVisibility(true)
+                viewModel.insetsVisibilityState.consumeSystemBarInsets(true)
+            }
         }
 
-        else -> {
-            SearchScreen(viewModel = viewModel, viewState = viewState)
+        DisposableEffect(view) {
+            ViewCompat.setOnApplyWindowInsetsListener(view) { _, insets ->
+                val imeVisible = insets.isVisible(WindowInsetsCompat.Type.ime())
+                viewModel.tabManager.setTabVisibility(!imeVisible)
+                insets
+            }
+            onDispose {
+                ViewCompat.setOnApplyWindowInsetsListener(view, null)
+            }
         }
-    }
 
-    LifecycleEffect {
-        viewModel.events.collect { event ->
-            when (event) {
-                is SearchFlowViewModel.SearchEvents.GoToPreOrder -> {
-                    navigator.navigateToPreOrder(event.productId)
-                }
+        when (viewState.uiState) {
+            SearchFlowViewModel.UiState.Error -> {
+                NetworkErrorPlaceholder { viewModel.retrySearchQuery() }
+            }
 
-                is SearchFlowViewModel.SearchEvents.GoToProfile -> {
-                    navigator.navigateToProfile(viewModel.tabManager)
-                }
+            else -> {
+                SearchScreen(viewModel = viewModel, viewState = viewState)
+            }
+        }
 
-                SearchFlowViewModel.SearchEvents.GoToContacts -> Unit
+        LifecycleEffect {
+            viewModel.events.collect { event ->
+                when (event) {
+                    is SearchFlowViewModel.SearchEvents.GoToPreOrder -> {
+                        navigator.navigateToPreOrder(event.productId)
+                    }
 
-                SearchFlowViewModel.SearchEvents.GoToPromotions -> {
-                    navigator.navigateToPromotions()
-                }
+                    is SearchFlowViewModel.SearchEvents.GoToProfile -> {
+                        navigator.navigateToProfile(viewModel.tabManager)
+                    }
 
-                is SearchFlowViewModel.SearchEvents.GoToService -> Unit
+                    SearchFlowViewModel.SearchEvents.GoToContacts -> Unit
 
-                is SearchFlowViewModel.SearchEvents.GoToWebView -> {
-                    navigator.navigateToWebView(event.url, event.title)
-                }
+                    SearchFlowViewModel.SearchEvents.GoToPromotions -> {
+                        navigator.navigateToPromotions()
+                    }
 
-                SearchFlowViewModel.SearchEvents.GoBack -> {
-                    navigator.goBack()
-                }
+                    is SearchFlowViewModel.SearchEvents.GoToService -> Unit
 
-                is SearchFlowViewModel.SearchEvents.GoToSearchProductList -> {
-                    navigator.navigateToSearchProductList(event.query)
-                }
+                    is SearchFlowViewModel.SearchEvents.GoToWebView -> {
+                        navigator.navigateToWebView(event.url, event.title)
+                    }
 
-                SearchFlowViewModel.SearchEvents.GoToScanner -> {
-                    navigator.navigateToQrCode()
-                }
+                    SearchFlowViewModel.SearchEvents.GoBack -> {
+                        navigator.goBack()
+                    }
 
-                is SearchFlowViewModel.SearchEvents.GoToProductDetails -> {
-                    navigator.navigateToProductDetails(event.productId)
-                }
+                    is SearchFlowViewModel.SearchEvents.GoToSearchProductList -> {
+                        navigator.navigateToSearchProductList(event.query)
+                    }
 
-                is SearchFlowViewModel.SearchEvents.GoToProductAnalogs -> {
-                    navigator.navigateToProductAnalogs(event.productId)
+                    SearchFlowViewModel.SearchEvents.GoToScanner -> {
+                        navigator.navigateToQrCode()
+                    }
+
+                    is SearchFlowViewModel.SearchEvents.GoToProductDetails -> {
+                        navigator.navigateToProductDetails(event.productId)
+                    }
+
+                    is SearchFlowViewModel.SearchEvents.GoToProductAnalogs -> {
+                        navigator.navigateToProductAnalogs(event.productId)
+                    }
                 }
             }
         }
-    }
 
-    LifecycleEffect {
-        viewModel.listenSearchHistory()
+        LifecycleEffect {
+            viewModel.listenSearchHistory()
+        }
     }
-}

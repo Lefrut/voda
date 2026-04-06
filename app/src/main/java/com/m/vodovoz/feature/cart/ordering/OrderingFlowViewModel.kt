@@ -2,7 +2,6 @@ package com.m.vodovoz.feature.cart.ordering
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.m.vodovoz.R
 import com.m.vodovoz.common.account.AccountManager
@@ -61,17 +60,16 @@ import java.time.LocalDate
 @HiltViewModel(assistedFactory = OrderingFlowViewModel.Factory::class)
 @Stable
 class OrderingFlowViewModel @AssistedInject constructor(
-    savedStateHandle: SavedStateHandle,
     val tabManager: TabManager,
     val accountManager: AccountManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val resourcesProvider: ResourcesProvider,
     private val cartManager: CartManager,
-    @Assisted private val navKey: OrderingNavKey?,
+    @Assisted private val navKey: OrderingNavKey,
 ) : MviViewModel<OrderingFlowViewModel.OrderingState, OrderingFlowViewModel.OrderingEvents>(
     OrderingState()
 ) {
-    private val coupon = navKey?.coupon ?: savedStateHandle.get<String>("coupon")
+    private val coupon = navKey.coupon
 
     init {
         fetchOrderingDetails()
@@ -804,6 +802,6 @@ class OrderingFlowViewModel @AssistedInject constructor(
 
     @AssistedFactory
     interface Factory {
-        fun create(navKey: OrderingNavKey?): OrderingFlowViewModel
+        fun create(navKey: OrderingNavKey): OrderingFlowViewModel
     }
 }

@@ -1,7 +1,6 @@
 package com.m.vodovoz.feature.document_viewer
 
 import androidx.compose.runtime.Stable
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.design_system.model.DocumentUi
@@ -21,14 +20,11 @@ import kotlinx.coroutines.launch
 @Stable
 class DocumentViewerViewModel @AssistedInject constructor(
     val tabManager: TabManager,
-    savedStateHandle: SavedStateHandle,
-    @Assisted private val navKey: DocumentViewerNavKey?,
+    @Assisted private val navKey: DocumentViewerNavKey,
 ) : MviViewModel<DocumentViewerState, DocumentViewerEvent>(DocumentViewerState()) {
 
     init {
-        (navKey?.documentId ?: savedStateHandle.get<DocumentUi>("documentId"))?.let { document ->
-            setDocument(document)
-        }
+        setDocument(navKey.documentId)
     }
 
     fun setDocument(document: DocumentUi) {
@@ -51,6 +47,6 @@ class DocumentViewerViewModel @AssistedInject constructor(
 
     @AssistedFactory
     interface Factory {
-        fun create(navKey: DocumentViewerNavKey?): DocumentViewerViewModel
+        fun create(navKey: DocumentViewerNavKey): DocumentViewerViewModel
     }
 }

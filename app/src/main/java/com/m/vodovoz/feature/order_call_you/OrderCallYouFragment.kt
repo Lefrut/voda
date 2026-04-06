@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
+import com.m.vodovoz.feature.order_call_you.api.OrderCallYouNavKey
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -18,10 +19,17 @@ class OrderCallYouFragment @Inject constructor() : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View {
+        val args = requireArguments()
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
-                OrderCallYouEntry()
+                OrderCallYouEntry(
+                    OrderCallYouNavKey(
+                        addressId = args.getLong("addressId"),
+                        callYouId = args.getString("callYouId"),
+                        queryParams = args.get("queryParams") as? Map<String, String> ?: emptyMap()
+                    )
+                )
             }
         }
     }

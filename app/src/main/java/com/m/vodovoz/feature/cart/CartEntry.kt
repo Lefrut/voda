@@ -129,9 +129,6 @@ fun CartEntry(
     viewModel.collectEvents { event ->
         when (event) {
             is CartFlowViewModel.CartEvents.GoToOrder -> {
-                if (navigator.currentBackStackEntry?.destination?.id == R.id.orderingFragment) {
-                    navigator.goBack()
-                }
                 navigator.navigateToOrdering(event.coupon)
             }
 

@@ -31,58 +31,58 @@ import com.m.vodovoz.util.extensions.copyText
 import com.m.vodovoz.util.extensions.shareText
 
 @Composable
-fun ProductDetailsEntry(navKey: ProductDetailsNavKey? = null) =
+fun ProductDetailsEntry(navKey: ProductDetailsNavKey) =
     NavigationEntry<ProductDetailsFlowViewModel, ProductDetailsFlowViewModel.Factory>(
         creationCallback = { factory -> factory.create(navKey) }
     ) {
-    val context = LocalContext.current
-    val viewState by viewModel.collectAsState()
-    val uiState = viewState.uiState
+        val context = LocalContext.current
+        val viewState by viewModel.collectAsState()
+        val uiState = viewState.uiState
 
-    val mediaPagerState = when (uiState) {
-        ProductDetailsFlowViewModel.ProductDetailsUiState.Success -> {
-            rememberPagerState { viewState.productDetails.mediaList.size }
+        val mediaPagerState = when (uiState) {
+            ProductDetailsFlowViewModel.ProductDetailsUiState.Success -> {
+                rememberPagerState { viewState.productDetails.mediaList.size }
+            }
+
+            else -> {
+                rememberPagerState { 0 }
+            }
         }
 
-        else -> {
-            rememberPagerState { 0 }
+        when (uiState) {
+            is ProductDetailsFlowViewModel.ProductDetailsUiState.ForAdults -> {
+                ForAdultsPlaceholder(
+                    forAdults = uiState.forAdultsUi,
+                    onBackClick = {
+                        viewModel.navigateBack()
+                    },
+                    onApplyClick = {
+                        viewModel.setCanViewAdultProducts()
+                    }
+                )
+            }
+
+            else -> {
+                ProductDetailsScreen(
+                    viewState = viewState,
+                    viewModel = viewModel,
+                    mediaPagerState = mediaPagerState
+                )
+            }
+        }
+
+        LifecycleEffect {
+            observeEvents(mediaPagerState = mediaPagerState, context = context)
+        }
+
+        LifecycleEffect {
+            viewModel.listenProductDetailsUpdates(this)
+        }
+
+        LifecycleEffect {
+            viewModel.listenCartUpdates()
         }
     }
-
-    when (uiState) {
-        is ProductDetailsFlowViewModel.ProductDetailsUiState.ForAdults -> {
-            ForAdultsPlaceholder(
-                forAdults = uiState.forAdultsUi,
-                onBackClick = {
-                    viewModel.navigateBack()
-                },
-                onApplyClick = {
-                    viewModel.setCanViewAdultProducts()
-                }
-            )
-        }
-
-        else -> {
-            ProductDetailsScreen(
-                viewState = viewState,
-                viewModel = viewModel,
-                mediaPagerState = mediaPagerState
-            )
-        }
-    }
-
-    LifecycleEffect {
-        observeEvents(mediaPagerState = mediaPagerState, context = context)
-    }
-
-    LifecycleEffect {
-        viewModel.listenProductDetailsUpdates(this)
-    }
-
-    LifecycleEffect {
-        viewModel.listenCartUpdates()
-    }
-}
 
 private suspend fun NavigationEntryScope<ProductDetailsFlowViewModel>.observeEvents(
     mediaPagerState: PagerState,
@@ -178,3 +178,4 @@ private suspend fun NavigationEntryScope<ProductDetailsFlowViewModel>.observeEve
             }
         }
     }
+

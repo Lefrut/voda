@@ -2,13 +2,11 @@ package com.m.vodovoz.feature.auth.login
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.m.vodovoz.R
 import com.m.vodovoz.common.account.AccountManager
 import com.m.vodovoz.common.model.GlobalAppExtraAgreement
 import com.m.vodovoz.common.resources.ResourcesProvider
-import com.m.vodovoz.core.navigation.AuthArgs
 import com.m.vodovoz.design_system.model.ColorfulButtonUi
 import com.m.vodovoz.domain.general.model.exceptions.TooManyRequestsException
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
@@ -42,8 +40,7 @@ class LoginFlowViewModel @AssistedInject constructor(
     private val siteStateManager: SiteStateManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val resourcesProvider: ResourcesProvider,
-    private val savedStateHandle: SavedStateHandle,
-    @Assisted private val navKey: LoginNavKey?,
+    @Assisted private val navKey: LoginNavKey,
 ) : AbstractAuthViewModel<LoginFlowViewModel.LoginState, LoginFlowViewModel.LoginEvents>(
     LoginState(), AUTH_BUTTON
 ) {
@@ -70,7 +67,7 @@ class LoginFlowViewModel @AssistedInject constructor(
                     waringTitles = GlobalAppExtraAgreement.titles,
                 )
                 .withAccountTypeSelection(
-                    selectedAccountTypeId = navKey?.accountTypeId ?: savedStateHandle[AuthArgs.ACCOUNT_TYPE_ID]
+                    selectedAccountTypeId = navKey.accountTypeId
                 )
 
             updateState { s ->
@@ -211,6 +208,6 @@ class LoginFlowViewModel @AssistedInject constructor(
 
     @AssistedFactory
     interface Factory {
-        fun create(navKey: LoginNavKey?): LoginFlowViewModel
+        fun create(navKey: LoginNavKey): LoginFlowViewModel
     }
 }

@@ -6,6 +6,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
+import com.m.vodovoz.design_system.model.DocumentUi
+import com.m.vodovoz.feature.document_viewer.api.DocumentViewerNavKey
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -16,9 +18,10 @@ class DocumentViewerFragment @Inject constructor() : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View {
+        val args = requireArguments()
         return ComposeView(requireContext()).apply {
             setContent {
-                DocumentViewerEntry()
+                DocumentViewerEntry(DocumentViewerNavKey(documentId = args.get("documentId") as DocumentUi))
             }
         }
     }

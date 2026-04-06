@@ -37,109 +37,110 @@ import com.valentinilk.shimmer.rememberShimmer
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
-fun ProductCommentsEntry(navKey: ProductCommentsNavKey? = null) =
+fun ProductCommentsEntry(navKey: ProductCommentsNavKey) =
     NavigationEntry<ProductCommentsFlowViewModel, ProductCommentsFlowViewModel.Factory>(
         creationCallback = { factory -> factory.create(navKey) }
     ) {
-    val viewState by viewModel.collectAsState()
-    val lazyCommentColumnState = rememberLazyListState()
-    val lazyMediaRowState = rememberLazyListState()
-    val lazyPagingComments = viewState.pagedComments.collectAsLazyPagingItems()
+        val viewState by viewModel.collectAsState()
+        val lazyCommentColumnState = rememberLazyListState()
+        val lazyMediaRowState = rememberLazyListState()
+        val lazyPagingComments = viewState.pagedComments.collectAsLazyPagingItems()
 
-    CompositionLocalProvider(LocalShimmer provides rememberShimmer(ShimmerBounds.View)) {
-        SharedTransitionLayout {
-            AnimatedContent(
-                targetState = viewState.commentMedia,
-                transitionSpec = {
-                    EnterTransition.None togetherWith ExitTransition.None
-                }
-            ) { currentMedia ->
-
-                if (currentMedia != null) {
-                    BackHandler {
-                        viewModel.resetFullScreenMedia()
+        CompositionLocalProvider(LocalShimmer provides rememberShimmer(ShimmerBounds.View)) {
+            SharedTransitionLayout {
+                AnimatedContent(
+                    targetState = viewState.commentMedia,
+                    transitionSpec = {
+                        EnterTransition.None togetherWith ExitTransition.None
                     }
-                }
+                ) { currentMedia ->
 
-                when (currentMedia) {
-                    is CommentMediaUi.Image -> {
-                        val images = viewState.productCommentsInfo.media.mapNotNull { image ->
-                            image as? CommentMediaUi.Image
+                    if (currentMedia != null) {
+                        BackHandler {
+                            viewModel.resetFullScreenMedia()
                         }
 
-                        DisposableEffect(Unit) {
-                            viewModel.tabManager.hideTab()
-                            viewModel.insetsVisibilityState.consumeStatusBarInsets(false)
+                        when (currentMedia) {
+                            is CommentMediaUi.Image -> {
+                                val images =
+                                    viewState.productCommentsInfo.media.mapNotNull { image ->
+                                        image as? CommentMediaUi.Image
+                                    }
 
-                            onDispose {
-                                viewModel.insetsVisibilityState.consumeStatusBarInsets(true)
-                                viewModel.tabManager.showTab()
+                                DisposableEffect(Unit) {
+                                    viewModel.tabManager.hideTab()
+                                    viewModel.insetsVisibilityState.consumeStatusBarInsets(false)
+
+                                    onDispose {
+                                        viewModel.insetsVisibilityState.consumeStatusBarInsets(true)
+                                        viewModel.tabManager.showTab()
+                                    }
+                                }
+
+                                VerticalImagePager(
+                                    modifier = Modifier
+                                        .background(MaterialTheme.colorScheme.onBackground)
+                                        .fillMaxSize()
+                                        .windowInsetsPadding(WindowInsets.systemBars),
+                                    initialPage = images.indexOf(currentMedia),
+                                    images = images,
+                                    sharedTransitionScope = this@SharedTransitionLayout,
+                                    animatedContentScope = this,
+                                    onCloseClick = {
+                                        viewModel.resetFullScreenMedia()
+                                    }
+                                )
+                            }
+
+                            is CommentMediaUi.Video -> {
+                                MediaComposePlayer(
+                                    url = currentMedia.url,
+                                    modifier = Modifier.clickable {},
+                                    onCloseClick = {
+                                        viewModel.resetFullScreenMedia()
+                                    }
+                                )
+                            }
+
+                            null -> {
+                                ProductCommentsScreen(
+                                    viewModel = viewModel,
+                                    viewState = viewState,
+                                    lazyCommentsListState = lazyCommentColumnState,
+                                    sharedTransitionScope = this@SharedTransitionLayout,
+                                    animatedContentScope = this,
+                                    lazyPagingComments = lazyPagingComments,
+                                    lazyMediaListState = lazyMediaRowState
+                                )
                             }
                         }
-
-                        VerticalImagePager(
-                            modifier = Modifier
-                                .background(MaterialTheme.colorScheme.onBackground)
-                                .fillMaxSize()
-                                .windowInsetsPadding(WindowInsets.systemBars),
-                            initialPage = images.indexOf(currentMedia),
-                            images = images,
-                            sharedTransitionScope = this@SharedTransitionLayout,
-                            animatedContentScope = this,
-                            onCloseClick = {
-                                viewModel.resetFullScreenMedia()
-                            }
-                        )
-                    }
-
-                    is CommentMediaUi.Video -> {
-                        MediaComposePlayer(
-                            url = currentMedia.url,
-                            modifier = Modifier.clickable {},
-                            onCloseClick = {
-                                viewModel.resetFullScreenMedia()
-                            }
-                        )
-                    }
-
-                    null -> {
-                        ProductCommentsScreen(
-                            viewModel = viewModel,
-                            viewState = viewState,
-                            lazyCommentsListState = lazyCommentColumnState,
-                            sharedTransitionScope = this@SharedTransitionLayout,
-                            animatedContentScope = this,
-                            lazyPagingComments = lazyPagingComments,
-                            lazyMediaListState = lazyMediaRowState
-                        )
                     }
                 }
             }
-        }
-    }
 
-    LifecycleEffect {
-        viewModel.events.collect { event ->
-            when (event) {
-                ProductCommentsFlowViewModel.ProductCommentsEvents.ScrollToTop -> {
-                    lazyCommentColumnState.animateScrollToItem(0)
-                }
+            LifecycleEffect {
+                viewModel.events.collect { event ->
+                    when (event) {
+                        ProductCommentsFlowViewModel.ProductCommentsEvents.ScrollToTop -> {
+                            lazyCommentColumnState.animateScrollToItem(0)
+                        }
 
-                ProductCommentsFlowViewModel.ProductCommentsEvents.GoBack -> {
-                    navigator.goBack()
-                }
+                        ProductCommentsFlowViewModel.ProductCommentsEvents.GoBack -> {
+                            navigator.goBack()
+                        }
 
-                is ProductCommentsFlowViewModel.ProductCommentsEvents.GoToWriteComment -> {
-                    navigator.navigateToWriteComment(
-                        productId = event.productId,
-                        productImage = event.productImage,
-                        productName = event.productName,
-                        rating = 0
-                    )
+                        is ProductCommentsFlowViewModel.ProductCommentsEvents.GoToWriteComment -> {
+                            navigator.navigateToWriteComment(
+                                productId = event.productId,
+                                productImage = event.productImage,
+                                productName = event.productName,
+                                rating = 0
+                            )
+                        }
+                    }
                 }
             }
+
+            BackHandler { viewModel.navigateBack() }
         }
     }
-
-    BackHandler { viewModel.navigateBack() }
-}

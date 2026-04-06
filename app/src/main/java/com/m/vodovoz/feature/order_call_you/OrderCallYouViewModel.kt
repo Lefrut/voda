@@ -25,14 +25,14 @@ import kotlinx.coroutines.launch
 class OrderCallYouViewModel @AssistedInject constructor(
     val tabManager: TabManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
-    @Assisted private val navKey: OrderCallYouNavKey?,
+    @Assisted private val navKey: OrderCallYouNavKey,
 ) : MviViewModel<OrderCallYouState, OrderCallYouEvent>(OrderCallYouState()) {
 
-    private val addressId: Long = navKey?.addressId ?: -1
+    private val addressId: Long = navKey.addressId
 
-    private val callYouId: String? = navKey?.callYouId
+    private val callYouId: String? = navKey.callYouId
 
-    private val queryParams: Map<String, String> = navKey?.queryParams.orEmpty()
+    private val queryParams: Map<String, String> = navKey.queryParams
 
     init {
         fetchOrderCallYouDetails()
@@ -90,6 +90,6 @@ class OrderCallYouViewModel @AssistedInject constructor(
 
     @AssistedFactory
     interface Factory {
-        fun create(navKey: OrderCallYouNavKey?): OrderCallYouViewModel
+        fun create(navKey: OrderCallYouNavKey): OrderCallYouViewModel
     }
 }

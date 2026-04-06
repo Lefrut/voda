@@ -1,7 +1,6 @@
 package com.m.vodovoz.feature.categories
 
 import androidx.compose.runtime.Stable
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.feature.categories.api.CategoriesNavKey
@@ -20,15 +19,11 @@ import kotlinx.coroutines.launch
 @Stable
 class CategoriesViewModel @AssistedInject constructor(
     val tabManager: TabManager,
-    savedStateHandle: SavedStateHandle,
-    @Assisted private val navKey: CategoriesNavKey?,
+    @Assisted private val navKey: CategoriesNavKey,
 ) : MviViewModel<CategoriesState, CategoriesEvent>(CategoriesState()) {
 
-    private val categoriesArg =
-        navKey?.categoryList ?: savedStateHandle.remove<Array<CategoryUi>>("categoryList") ?: emptyArray()
-    private val categoryArg =
-        navKey?.category ?: savedStateHandle.remove<CategoryUi>("category")
-        ?: categoriesArg.firstOrNull() ?: CategoryUi.Empty
+    private val categoriesArg = navKey.categoryList
+    private val categoryArg = navKey.category
 
     init {
         setInitialCategories()
@@ -62,7 +57,7 @@ class CategoriesViewModel @AssistedInject constructor(
 
     @AssistedFactory
     interface Factory {
-        fun create(navKey: CategoriesNavKey?): CategoriesViewModel
+        fun create(navKey: CategoriesNavKey): CategoriesViewModel
     }
 
 }

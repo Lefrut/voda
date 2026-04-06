@@ -245,9 +245,6 @@ fun BottmNav(
         },
         contentWindowInsets = WindowInsets(0)
     ) { paddingValues ->
-        val navController = LocalView.current.findNavController()
-        navigator.attachNavController(navController)
-
 
         val entryProvider = entryProvider<NavKey> {
             entry<BottomNavKey.Home> {
@@ -652,33 +649,6 @@ fun NavigationState.toEntries(
 
 @Immutable
 class Navigator(val state: NavigationState) {
-
-    @Immutable
-    data class Destination(val id: Int)
-
-    @Immutable
-    data class BackStackEntry(
-        val savedStateHandle: SavedStateHandle,
-        val destination: Destination?,
-    )
-
-    private var _navController: NavController? = null
-    val navController: NavController
-        get() = _navController ?: error("Navigator is not attached to NavController")
-
-
-    val currentBackStackEntry: BackStackEntry?
-        get() = null
-
-    val previousBackStackEntry: BackStackEntry?
-        get() = null
-
-    val graph: NavGraph
-        get() = navController.graph
-
-    fun attachNavController(navController: NavController) {
-        _navController = navController
-    }
 
 
     fun popBackStack(destinationId: Int, inclusive: Boolean): Boolean {

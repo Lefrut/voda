@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
+import com.m.vodovoz.feature.all.promotions.api.AllPromotionsNavKey
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
@@ -20,9 +21,15 @@ class AllPromotionsFragment @Inject constructor() : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View {
+        val args = requireArguments()
         return ComposeView(requireContext()).apply {
             setContent {
-                AllPromotionsEntry()
+                AllPromotionsEntry(
+                    AllPromotionsNavKey(
+                        dataSource = args.get("dataSource") as? AllPromotionsFragment.DataSource
+                            ?: AllPromotionsFragment.DataSource.All
+                    )
+                )
             }
         }
     }

@@ -34,20 +34,18 @@ class PaymentMethodViewModel @AssistedInject constructor(
     val tabManager: TabManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val resourcesProvider: ResourcesProvider,
-    @Assisted private val navKey: PaymentMethodNavKey?,
+    @Assisted private val navKey: PaymentMethodNavKey,
 ) : MviViewModel<PaymentMethodState, PaymentMethodEvent>(PaymentMethodState()) {
 
-    private val addressId = navKey?.addressId ?: -1
-    private val orderDate = navKey?.date?.let { days ->
-        LocalDate.ofEpochDay(days)
-    } ?: LocalDate.now()
-    private val paymentMethodId: String? = navKey?.paymentMethodId
-    private val paymentChange: String = navKey?.paymentChange ?: ""
-    private val useBalance: Boolean? = navKey?.balance
-    private val useBonuses: Boolean? = navKey?.bonuses
-    private val bonusesValue: Int? = navKey?.bonusesValue
+    private val addressId = navKey.addressId
+    private val orderDate = LocalDate.ofEpochDay(navKey.date)
+    private val paymentMethodId: String? = navKey.paymentMethodId
+    private val paymentChange: String = navKey.paymentChange ?: ""
+    private val useBalance: Boolean? = navKey.balance
+    private val useBonuses: Boolean? = navKey.bonuses
+    private val bonusesValue: Int? = navKey.bonusesValue
 
-    private val queryParams = navKey?.queryParams.orEmpty()
+    private val queryParams = navKey.queryParams
 
     fun navigateBack() = viewModelScope.launch {
         sendEvent(PaymentMethodEvent.GoBack)
@@ -251,7 +249,7 @@ class PaymentMethodViewModel @AssistedInject constructor(
 
     @AssistedFactory
     interface Factory {
-        fun create(navKey: PaymentMethodNavKey?): PaymentMethodViewModel
+        fun create(navKey: PaymentMethodNavKey): PaymentMethodViewModel
     }
 
 }

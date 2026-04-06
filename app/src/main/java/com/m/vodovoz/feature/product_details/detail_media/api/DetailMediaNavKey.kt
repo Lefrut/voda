@@ -1,9 +1,11 @@
 package com.m.vodovoz.feature.product_details.detail_media.api
 
+import androidx.compose.runtime.Immutable
 import androidx.navigation3.runtime.NavKey
 import com.m.vodovoz.design_system.model.ProductMediaUi
 import com.m.vodovoz.core.navigation.viewmodel.SharedViewModelStoreNavKey
 
+@Immutable
 data class DetailMediaNavKey(
     val media: ProductMediaUi,
     val mediaList: List<ProductMediaUi>,

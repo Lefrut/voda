@@ -13,47 +13,47 @@ import com.m.vodovoz.ui.mvi.collectAsState
 import com.m.vodovoz.util.extensions.openUrl
 
 @Composable
-fun PromotionDetailsEntry(navKey: PromotionDetailsNavKey? = null) =
+fun PromotionDetailsEntry(navKey: PromotionDetailsNavKey) =
     NavigationEntry<PromotionDetailsViewModel, PromotionDetailsViewModel.Factory>(
         creationCallback = { factory -> factory.create(navKey) }
     ) {
-    val viewState by viewModel.collectAsState()
-    val context = LocalContext.current
+        val viewState by viewModel.collectAsState()
+        val context = LocalContext.current
 
-    when (viewState.uiState) {
-        PromotionDetailsViewModel.UiState.Error -> {
-            NetworkErrorPlaceholder(
-                onTryAgainClick = { viewModel.fetchPromotionDetails() }
-            )
+        when (viewState.uiState) {
+            PromotionDetailsViewModel.UiState.Error -> {
+                NetworkErrorPlaceholder(
+                    onTryAgainClick = { viewModel.fetchPromotionDetails() }
+                )
+            }
+
+            else -> {
+                PromotionDetailsScreen(
+                    viewModel = viewModel,
+                    viewState = viewState,
+                )
+            }
         }
 
-        else -> {
-            PromotionDetailsScreen(
-                viewModel = viewModel,
-                viewState = viewState,
-            )
-        }
-    }
+        LifecycleEffect {
+            viewModel.events.collect { event ->
+                when (event) {
+                    PromotionDetailsViewModel.PromotionDetailEvent.GoBack -> {
+                        navigator.goBack()
+                    }
 
-    LifecycleEffect {
-        viewModel.events.collect { event ->
-            when (event) {
-                PromotionDetailsViewModel.PromotionDetailEvent.GoBack -> {
-                    navigator.goBack()
-                }
+                    is PromotionDetailsViewModel.PromotionDetailEvent.OpenUrl -> {
+                        context.openUrl(event.url)
+                    }
 
-                is PromotionDetailsViewModel.PromotionDetailEvent.OpenUrl -> {
-                    context.openUrl(event.url)
-                }
+                    is PromotionDetailsViewModel.PromotionDetailEvent.GoToProductAnalogs -> {
+                        navigator.navigateToProductAnalogs(event.productId)
+                    }
 
-                is PromotionDetailsViewModel.PromotionDetailEvent.GoToProductAnalogs -> {
-                    navigator.navigateToProductAnalogs(event.productId)
-                }
-
-                is PromotionDetailsViewModel.PromotionDetailEvent.GoToProductDetails -> {
-                    navigator.navigateToProductDetails(event.productId)
+                    is PromotionDetailsViewModel.PromotionDetailEvent.GoToProductDetails -> {
+                        navigator.navigateToProductDetails(event.productId)
+                    }
                 }
             }
         }
     }
-}

@@ -24,13 +24,13 @@ import kotlinx.coroutines.launch
 class FilterValuesViewModel @AssistedInject constructor(
     val tabManager: TabManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
-    @Assisted private val navKey: FilterValuesNavKey?,
+    @Assisted private val navKey: FilterValuesNavKey,
 ) : MviViewModel<FilterValuesViewModel.ConcreteFilterState, FilterValuesViewModel.ConcreteFilterEvent>(
     ConcreteFilterState()
 ) {
 
-    private val filter = navKey?.filter ?: FilterUi.Empty
-    private val categoryId = navKey?.categoryId?.toInt() ?: -1
+    private val filter = navKey.filter
+    private val categoryId = navKey.categoryId.toInt()
 
     init {
         viewModelScope.launch {
@@ -135,7 +135,7 @@ class FilterValuesViewModel @AssistedInject constructor(
 
     @AssistedFactory
     interface Factory {
-        fun create(navKey: FilterValuesNavKey?): FilterValuesViewModel
+        fun create(navKey: FilterValuesNavKey): FilterValuesViewModel
     }
 
 }
