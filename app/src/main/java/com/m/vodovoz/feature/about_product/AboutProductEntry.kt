@@ -12,7 +12,7 @@ import com.m.vodovoz.feature.about_product.model.AboutProductEvent
 import com.m.vodovoz.ui.mvi.collectAsState
 
 @Composable
-fun AboutProductEntry(navKey: AboutProductNavKey? = null) =
+fun AboutProductEntry(navKey: AboutProductNavKey) =
     NavigationEntry<AboutProductViewModel, AboutProductViewModel.Factory>(
         creationCallback = { factory -> factory.create(navKey) }
     ) {

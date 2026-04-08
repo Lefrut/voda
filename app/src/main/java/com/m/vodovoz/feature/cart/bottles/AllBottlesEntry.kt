@@ -14,7 +14,7 @@ import com.m.vodovoz.feature.cart.bottles.api.AllBottlesNavKey
 import com.m.vodovoz.ui.mvi.collectAsState
 
 @Composable
-fun AllBottlesEntry(navKey: AllBottlesNavKey? = null) =
+fun AllBottlesEntry(navKey: AllBottlesNavKey) =
     NavigationEntry<AllBottlesFlowViewModel, AllBottlesFlowViewModel.Factory>(
         creationCallback = { factory -> factory.create(navKey) }
     ) {

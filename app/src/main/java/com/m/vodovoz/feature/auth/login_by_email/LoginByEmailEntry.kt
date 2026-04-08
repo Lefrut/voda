@@ -5,7 +5,7 @@ import androidx.compose.runtime.getValue
 import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.core.navigation.AuthArgs
 import com.m.vodovoz.core.navigation.NavigationEntry
-import com.m.vodovoz.core.navigation.navigateToBottomTabByGraphId
+import com.m.vodovoz.core.navigation.navigateToBottomTab
 import com.m.vodovoz.core.navigation.navigateToRecoverPassword
 import com.m.vodovoz.core.navigation.navigateToRegister
 import com.m.vodovoz.core.navigation.navigateToWebView
@@ -74,7 +74,7 @@ fun LoginByEmailEntry(
                         navigator.popToProfileRoot()
                     } else {
                         navigator.popToProfileRoot()
-                        navigator.navigateToBottomTabByGraphId(redirect)
+                        navigator.navigateToBottomTab(redirect)
                         viewModel.tabManager.setDefaultAuthRedirect()
                     }
                 }

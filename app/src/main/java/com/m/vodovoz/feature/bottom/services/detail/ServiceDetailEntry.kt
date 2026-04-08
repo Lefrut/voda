@@ -12,7 +12,7 @@ import com.m.vodovoz.feature.bottom.services.detail.model.ServiceDetailsEvent
 import com.m.vodovoz.ui.mvi.collectAsState
 
 @Composable
-fun ServiceDetailEntry(navKey: ServiceDetailNavKey? = null) =
+fun ServiceDetailEntry(navKey: ServiceDetailNavKey) =
     NavigationEntry<ServiceDetailsViewModel, ServiceDetailsViewModel.Factory>(
         creationCallback = { factory -> factory.create(navKey) }
     ) {

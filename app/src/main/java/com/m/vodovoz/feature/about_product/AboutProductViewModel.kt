@@ -1,7 +1,6 @@
 package com.m.vodovoz.feature.about_product
 
 import androidx.compose.runtime.Stable
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.m.vodovoz.common.about_product.AboutProductManager
 import com.m.vodovoz.common.cart.CartManager
@@ -34,8 +33,7 @@ class AboutProductViewModel @AssistedInject constructor(
     private val aboutProductManager: AboutProductManager,
     private val cartManager: CartManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
-    savedStateHandle: SavedStateHandle,
-    @Assisted private val navKey: AboutProductNavKey?,
+    @Assisted private val navKey: AboutProductNavKey,
 ) : ProductsMviViewModel<ProductUi, AboutProductState, AboutProductEvent>(
     state = AboutProductState(),
     blockedProductsFlow = cartManager.blockedProductsFlow,
@@ -44,15 +42,13 @@ class AboutProductViewModel @AssistedInject constructor(
     canViewAdultProducts = MutableStateFlow(false)
 ) {
 
-    private val productId: Long =
-        navKey?.productId ?: savedStateHandle.get<Long>("productId") ?: -1L
+    private val productId: Long = navKey.productId
 
-    private val productPrices: List<PriceUi> =
-        navKey?.prices ?: savedStateHandle.get<List<PriceUi>>("prices") ?: emptyList()
+    private val productPrices: List<PriceUi> = navKey.prices
 
-    private val analogButton: ColorfulButtonUi? = navKey?.analogButton ?: savedStateHandle["analogButton"]
+    private val analogButton: ColorfulButtonUi? = navKey.analogButton
 
-    private val isAvailable: Boolean = navKey?.isAvailable ?: savedStateHandle["isAvailable"] ?: false
+    private val isAvailable: Boolean = navKey.isAvailable
 
 
     init {
@@ -136,7 +132,7 @@ class AboutProductViewModel @AssistedInject constructor(
 
     @AssistedFactory
     interface Factory {
-        fun create(navKey: AboutProductNavKey?): AboutProductViewModel
+        fun create(navKey: AboutProductNavKey): AboutProductViewModel
     }
 
 }

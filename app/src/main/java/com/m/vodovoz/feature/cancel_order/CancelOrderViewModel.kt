@@ -1,7 +1,6 @@
 package com.m.vodovoz.feature.cancel_order
 
 import androidx.compose.runtime.Stable
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.design_system.model.ColorfulButtonUi
@@ -28,12 +27,10 @@ import kotlinx.coroutines.launch
 class CancelOrderViewModel @AssistedInject constructor(
     val tabManager: TabManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
-    savedStateHandle: SavedStateHandle,
-    @Assisted private val navKey: CancelOrderNavKey?,
+    @Assisted private val navKey: CancelOrderNavKey,
 ) : MviViewModel<CancelOrderState, CancelOrderEvent>(CancelOrderState()) {
 
-    private val orderId =
-        navKey?.orderId ?: savedStateHandle.get<Long>("orderId") ?: 0L.also { navigateBack() }
+    private val orderId = navKey.orderId
 
     init {
         viewModelScope.launch { delay(250L) }.invokeOnCompletion {
@@ -120,6 +117,6 @@ class CancelOrderViewModel @AssistedInject constructor(
 
     @AssistedFactory
     interface Factory {
-        fun create(navKey: CancelOrderNavKey?): CancelOrderViewModel
+        fun create(navKey: CancelOrderNavKey): CancelOrderViewModel
     }
 }

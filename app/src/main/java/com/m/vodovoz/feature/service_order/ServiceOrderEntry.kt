@@ -13,7 +13,7 @@ import com.m.vodovoz.ui.mvi.collectAsState
 import com.m.vodovoz.ui.mvi.collectEvents
 
 @Composable
-fun ServiceOrderEntry(navKey: ServiceOrderNavKey? = null) =
+fun ServiceOrderEntry(navKey: ServiceOrderNavKey) =
     NavigationEntry<ServiceOrderViewModel, ServiceOrderViewModel.Factory>(
         creationCallback = { factory -> factory.create(navKey) }
     ) {

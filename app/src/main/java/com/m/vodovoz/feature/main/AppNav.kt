@@ -247,6 +247,7 @@ fun BottmNav(
                     selectedKey = navigationState.currentTopLevelKey as? BottomNavKey,
                     cartState = cartState,
                     onItemClick = navigator::navigate,
+                    onItemReselect = tabManager::notifyTabReselect,
                 )
             }
         },
@@ -487,6 +488,7 @@ private fun BottomNavBar(
     selectedKey: BottomNavKey?,
     cartState: TabManager.BottomNavCartState?,
     onItemClick: (BottomNavKey) -> Unit,
+    onItemReselect: (BottomNavKey) -> Unit,
 ) {
     val selectedColor = colorResource(R.color.bluePrimary)
     val unselectedColor = Color(0xFFBDBDBD)
@@ -515,7 +517,12 @@ private fun BottomNavBar(
                         .fillMaxHeight()
                         .selectable(
                             selected = isSelected,
-                            onClick = { onItemClick(key) },
+                            onClick = {
+                                if (isSelected) {
+                                    onItemReselect(key)
+                                }
+                                onItemClick(key)
+                            },
                             role = Role.Tab,
                         ),
                     horizontalAlignment = Alignment.CenterHorizontally,

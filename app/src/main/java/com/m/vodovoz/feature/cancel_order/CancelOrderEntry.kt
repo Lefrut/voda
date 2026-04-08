@@ -13,7 +13,7 @@ import com.m.vodovoz.ui.mvi.collectAsState
 import com.m.vodovoz.ui.mvi.collectEvents
 
 @Composable
-fun CancelOrderEntry(navKey: CancelOrderNavKey? = null) =
+fun CancelOrderEntry(navKey: CancelOrderNavKey) =
     NavigationEntry<CancelOrderViewModel, CancelOrderViewModel.Factory>(
         creationCallback = { factory -> factory.create(navKey) }
     ) {

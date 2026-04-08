@@ -6,4 +6,5 @@ import kotlinx.serialization.Serializable
 @Serializable
 data object WaterAppNavKey : NavKey {
     const val NAV_NAME: String = "feature/profile/waterapp/WaterApp"
+    const val DEEP_LINK_PATH: String = "kalkulyator_vody"
 }

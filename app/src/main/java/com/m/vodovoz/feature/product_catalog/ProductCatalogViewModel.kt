@@ -2,7 +2,6 @@ package com.m.vodovoz.feature.product_catalog
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.paging.CombinedLoadStates
 import androidx.paging.LoadState
@@ -39,8 +38,8 @@ import com.m.vodovoz.domain.general.respository.UserPreferencesRepository
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
 import com.m.vodovoz.feature.home.model.CategoryUi
 import com.m.vodovoz.feature.home.model.toParentCategory
-import com.m.vodovoz.feature.product_catalog.ProductCatalogFragment.DataSource
 import com.m.vodovoz.feature.product_catalog.api.ProductCatalogNavKey
+import com.m.vodovoz.feature.product_catalog.api.ProductCatalogNavKey.DataSource
 import com.m.vodovoz.feature.product_comments.model.SortUi
 import com.m.vodovoz.feature.product_comments.model.toDomain
 import com.m.vodovoz.ui.mvi.Event
@@ -63,13 +62,12 @@ import kotlinx.coroutines.launch
 @Stable
 class ProductCatalogViewModel @AssistedInject constructor(
     val tabManager: TabManager,
-    savedState: SavedStateHandle,
     private val cartManager: CartManager,
     private val likeManager: LikeManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val resourcesProvider: ResourcesProvider,
     private val userPreferencesRepository: UserPreferencesRepository,
-    @Assisted private val navKey: ProductCatalogNavKey?,
+    @Assisted private val navKey: ProductCatalogNavKey,
 ) : PagingProductsMviViewModel<ProductUi, ProductCatalogViewModel.ProductCatalogState, ProductCatalogViewModel.ProductCatalogEvent>(
     state = ProductCatalogState(),
     blockedProductsFlow = cartManager.blockedProductsFlow,
@@ -78,11 +76,7 @@ class ProductCatalogViewModel @AssistedInject constructor(
     canViewAdultProducts = userPreferencesRepository.canViewAdultProducts
 ) {
 
-    val dataSource: DataSource = (
-        navKey
-            ?.toLegacy()
-        ) ?: savedState.get<DataSource>("dataSource")
-        ?: DataSource.Missing
+    val dataSource: DataSource = navKey.dataSource
 
     init {
         setupScreen().invokeOnCompletion {
@@ -91,7 +85,7 @@ class ProductCatalogViewModel @AssistedInject constructor(
     }
 
     private fun setupScreen() = viewModelScope.launch {
-        if (dataSource is DataSource.Category) {
+        if (dataSource is DataSource.CategoryId) {
             updateState { s ->
                 val currentCategory = CategoryUi(id = dataSource.categoryId.toInt(), name = "")
                 s.copy(
@@ -122,7 +116,7 @@ class ProductCatalogViewModel @AssistedInject constructor(
         val sortModel = stateSnapshot.currentSort.toDomain()
 
         when (dataSource) {
-            is DataSource.Brand -> {
+            is DataSource.BrandId -> {
                 fetchProductsData(
                     fetchProductsSection = {
                         vodovozServiceRepository.getBrandProducts(
@@ -141,7 +135,7 @@ class ProductCatalogViewModel @AssistedInject constructor(
                 )
             }
 
-            is DataSource.ButtonProducts -> {
+            is DataSource.ButtonId -> {
                 fetchProductsData(
                     fetchProductsSection = {
                         vodovozServiceRepository.getAllSuperTop(
@@ -206,7 +200,7 @@ class ProductCatalogViewModel @AssistedInject constructor(
                 )
             }
 
-            is DataSource.Products -> {
+            is DataSource.BannerProducts -> {
                 fetchProductsData(
                     fetchProductsSection = {
                         vodovozServiceRepository.getBannerProducts(
@@ -227,7 +221,7 @@ class ProductCatalogViewModel @AssistedInject constructor(
                 )
             }
 
-            is DataSource.Search -> {
+            is DataSource.SearchQuery -> {
                 fetchProductsData(
                     fetchProductsSection = {
                         vodovozServiceRepository.getSearchProducts(
@@ -245,7 +239,7 @@ class ProductCatalogViewModel @AssistedInject constructor(
                 )
             }
 
-            is DataSource.Category -> {
+            is DataSource.CategoryId -> {
                 val currentFilters = extractSelectedFilters()
 
                 fetchProductsData(
@@ -371,7 +365,7 @@ class ProductCatalogViewModel @AssistedInject constructor(
                     addAll(childOrSiblingCategories.map { category -> category.toCategory() })
                 }
 
-                val categories = if (dataSource is DataSource.Category) {
+                val categories = if (dataSource is DataSource.CategoryId) {
                     categoryTreeList
                 } else {
                     productsSection.categories.takeIf { it.size > 1 } ?: emptyList()
@@ -388,7 +382,7 @@ class ProductCatalogViewModel @AssistedInject constructor(
                         sort != SortUi.Empty
                     } ?: productsSection.sorting.firstOrNull() ?: SortUi.Empty,
                     currentBottomSheetCategory = state.currentCategory.toParentCategory(),
-                    categoryTree = if (dataSource !is DataSource.Category) productsSection.categories.map { categoryUi ->
+                    categoryTree = if (dataSource !is DataSource.CategoryId) productsSection.categories.map { categoryUi ->
                         categoryUi.toParentCategory()
                     } else state.categoryTree,
                     showShare = "${productsSection.share.url}${productsSection.share.text}".isNotBlank()
@@ -461,7 +455,7 @@ class ProductCatalogViewModel @AssistedInject constructor(
 
     private fun fetchCategoriesTree(categoryId: Long) = viewModelScope.launch {
         val currentAllCategories = stateSnapshot.categoryTree.allCategories()
-        if (dataSource !is DataSource.Category
+        if (dataSource !is DataSource.CategoryId
             || (stateSnapshot.currentBottomSheetCategory.takeIf { it.id == categoryId && it.countChildren == 0 } != null)
             || (currentAllCategories.firstOrNull { it.id == categoryId && it.countChildren == 0 } != null)
         ) return@launch
@@ -503,7 +497,7 @@ class ProductCatalogViewModel @AssistedInject constructor(
 
     fun selectCategory(category: CategoryUi) = viewModelScope.launch {
         val newCategory =
-            if (category == stateSnapshot.currentCategory && dataSource !is DataSource.Category) CategoryUi.Empty
+            if (category == stateSnapshot.currentCategory && dataSource !is DataSource.CategoryId) CategoryUi.Empty
             else if (category == stateSnapshot.currentCategory) return@launch
             else category
 
@@ -714,6 +708,6 @@ class ProductCatalogViewModel @AssistedInject constructor(
 
     @AssistedFactory
     interface Factory {
-        fun create(navKey: ProductCatalogNavKey?): ProductCatalogViewModel
+        fun create(navKey: ProductCatalogNavKey): ProductCatalogViewModel
     }
 }

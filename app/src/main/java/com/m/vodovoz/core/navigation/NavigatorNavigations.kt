@@ -1,8 +1,6 @@
 package com.m.vodovoz.core.navigation
 
-import androidx.annotation.IdRes
 import androidx.navigation.NavOptions
-import com.m.vodovoz.R
 import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.common.media.api.ImagePickerNavKey
 
@@ -28,7 +26,6 @@ import com.m.vodovoz.feature.all.orders.detail.api.OrderDetailsNavKey
 import com.m.vodovoz.feature.all.orders.detail.traceorder.api.TraceOrderNavKey
 import com.m.vodovoz.feature.all.orders.history.api.OrdersHistoryNavKey
 
-import com.m.vodovoz.feature.all.promotions.AllPromotionsFragment
 import com.m.vodovoz.feature.all.promotions.api.AllPromotionsNavKey
 import com.m.vodovoz.feature.auth.login.api.LoginNavKey
 import com.m.vodovoz.feature.auth.login_by_email.api.LoginByEmailNavKey
@@ -424,18 +421,17 @@ fun Navigator.navigateToFavorites() {
 }
 
 fun Navigator.navigateToProfile(tabManager: TabManager? = null) {
-    tabManager?.setAuthRedirect(currentBottomTabGraphId())
+    tabManager?.setAuthRedirect(currentBottomTabKey())
     navigateToBottomTabRoot(BottomNavKey.Profile)
 }
 
-fun Navigator.navigateToBottomTabByGraphId(@IdRes graphId: Int) {
-    when (graphId) {
-        R.id.graph_home -> navigateToHome()
-        R.id.graph_catalog -> navigateToCatalog()
-        R.id.graph_cart -> navigateToCart()
-        R.id.graph_favorite -> navigateToFavorites()
-        R.id.graph_profile -> navigateToProfile()
-        else -> navigateToProfile()
+fun Navigator.navigateToBottomTab(tab: BottomNavKey) {
+    when (tab) {
+        BottomNavKey.Home -> navigateToHome()
+        BottomNavKey.Catalog -> navigateToCatalog()
+        BottomNavKey.Cart -> navigateToCart()
+        BottomNavKey.Favorites -> navigateToFavorites()
+        BottomNavKey.Profile -> navigateToProfile()
     }
 }
 
@@ -485,15 +481,14 @@ fun Navigator.navigateToCertificateActivation() {
     navigate(CertificateActivationNavKey)
 }
 
-@IdRes
-fun Navigator.currentBottomTabGraphId(): Int {
+fun Navigator.currentBottomTabKey(): BottomNavKey {
     return when (state.currentTopLevelKey) {
-        BottomNavKey.Home -> R.id.graph_home
-        BottomNavKey.Catalog -> R.id.graph_catalog
-        BottomNavKey.Cart -> R.id.graph_cart
-        BottomNavKey.Favorites -> R.id.graph_favorite
-        BottomNavKey.Profile -> R.id.graph_profile
-        else -> R.id.graph_profile
+        BottomNavKey.Home -> BottomNavKey.Home
+        BottomNavKey.Catalog -> BottomNavKey.Catalog
+        BottomNavKey.Cart -> BottomNavKey.Cart
+        BottomNavKey.Favorites -> BottomNavKey.Favorites
+        BottomNavKey.Profile -> BottomNavKey.Profile
+        else -> BottomNavKey.Profile
     }
 }
 
@@ -564,7 +559,10 @@ fun Navigator.navigateToPromotionDetails(promotionId: Long) {
 fun Navigator.navigateToPromotions(blockId: Long, bannerId: Long) {
     navigate(
         AllPromotionsNavKey(
-            dataSource = AllPromotionsFragment.DataSource.ByBanner(bannerId, blockId)
+            dataSource = AllPromotionsNavKey.DataSource.ByBanner(
+                bannerId = bannerId,
+                blockId = blockId
+            )
         )
     )
 }

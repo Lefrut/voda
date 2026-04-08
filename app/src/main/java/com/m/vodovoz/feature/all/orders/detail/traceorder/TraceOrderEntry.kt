@@ -60,7 +60,7 @@ import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TraceOrderEntry(navKey: TraceOrderNavKey? = null) =
+fun TraceOrderEntry(navKey: TraceOrderNavKey) =
     NavigationEntry<TraceOrderViewModel, TraceOrderViewModel.Factory>(
         creationCallback = { factory -> factory.create(navKey) }
     ) {

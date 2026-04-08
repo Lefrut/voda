@@ -1,6 +1,5 @@
 package com.m.vodovoz.feature.sub_categories
 
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.design_system.model.ParentCategoryUi
@@ -18,12 +17,10 @@ import kotlinx.coroutines.launch
 @HiltViewModel(assistedFactory = SubCategoriesViewModel.Factory::class)
 class SubCategoriesViewModel @AssistedInject constructor(
     val tabManager: TabManager,
-    savedStateHandle: SavedStateHandle,
-    @Assisted private val navKey: SubCategoriesNavKey?,
+    @Assisted private val navKey: SubCategoriesNavKey,
 ) : MviViewModel<SubCategoriesState, SubCategoriesEvent>(SubCategoriesState()) {
 
-    private val catalogCategoryArg =
-        navKey?.category ?: savedStateHandle.get<ParentCategoryUi>("category") ?: ParentCategoryUi.Empty
+    private val catalogCategoryArg = navKey.category
 
     init {
         setInitialCatalogCategory()
@@ -78,7 +75,7 @@ class SubCategoriesViewModel @AssistedInject constructor(
 
     @AssistedFactory
     interface Factory {
-        fun create(navKey: SubCategoriesNavKey?): SubCategoriesViewModel
+        fun create(navKey: SubCategoriesNavKey): SubCategoriesViewModel
     }
 
 

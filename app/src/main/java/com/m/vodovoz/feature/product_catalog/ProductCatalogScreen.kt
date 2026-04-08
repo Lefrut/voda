@@ -17,6 +17,7 @@ import com.m.vodovoz.design_system.composables.pull_to_refresh.VodovozPullToRefr
 import com.m.vodovoz.design_system.composables.top_bar.VodovozSearchTopBar
 import com.m.vodovoz.feature.product_catalog.composables.CategoriesBottomSheet
 import com.m.vodovoz.feature.product_catalog.composables.ProductCatalogBody
+import com.m.vodovoz.feature.product_catalog.api.ProductCatalogNavKey
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -32,7 +33,7 @@ fun ProductCatalogScreen(
         modifier = Modifier.fillMaxSize()
     ) {
         val searchQuery =
-            (viewModel.dataSource as? ProductCatalogFragment.DataSource.Search)?.query ?: ""
+            (viewModel.dataSource as? ProductCatalogNavKey.DataSource.SearchQuery)?.query ?: ""
 
         VodovozSearchTopBar(
             value = searchQuery,

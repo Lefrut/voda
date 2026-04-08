@@ -15,7 +15,7 @@ import com.m.vodovoz.ui.mvi.collectAsState
 import com.m.vodovoz.ui.mvi.collectEvents
 
 @Composable
-fun SubCategoriesEntry(navKey: SubCategoriesNavKey? = null) =
+fun SubCategoriesEntry(navKey: SubCategoriesNavKey) =
     NavigationEntry<SubCategoriesViewModel, SubCategoriesViewModel.Factory>(
         creationCallback = { factory -> factory.create(navKey) }
     ) {

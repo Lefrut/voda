@@ -6,7 +6,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.core.navigation.NavigationEntry
-import com.m.vodovoz.core.navigation.navigateToBottomTabByGraphId
+import com.m.vodovoz.core.navigation.navigateToBottomTab
 import com.m.vodovoz.core.navigation.navigateToLogin
 import com.m.vodovoz.core.navigation.navigateToLoginByEmail
 import com.m.vodovoz.core.navigation.navigateToWebView
@@ -74,7 +74,7 @@ fun RegisterEntry(
                         navigator.popToProfileRoot()
                     } else {
                         navigator.popToProfileRoot()
-                        navigator.navigateToBottomTabByGraphId(redirect)
+                        navigator.navigateToBottomTab(redirect)
                         viewModel.tabManager.setDefaultAuthRedirect()
                     }
                 }

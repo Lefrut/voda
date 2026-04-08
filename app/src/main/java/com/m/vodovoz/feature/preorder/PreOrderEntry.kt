@@ -17,7 +17,7 @@ import com.m.vodovoz.ui.mvi.collectAsState
 import kotlinx.coroutines.withTimeoutOrNull
 
 @Composable
-fun PreOrderEntry(navKey: PreOrderNavKey? = null) =
+fun PreOrderEntry(navKey: PreOrderNavKey) =
     NavigationEntry<PreOrderFlowViewModel, PreOrderFlowViewModel.Factory>(
         creationCallback = { factory -> factory.create(navKey) }
     ) {

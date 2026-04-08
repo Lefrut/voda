@@ -1,6 +1,5 @@
 package com.m.vodovoz.feature.order_question
 
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.m.vodovoz.R
 import com.m.vodovoz.common.tab.TabManager
@@ -34,13 +33,11 @@ class OrderQuestionViewModel @AssistedInject constructor(
     val tabManager: TabManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val resourcesProvider: ResourcesProvider,
-    savedStateHandle: SavedStateHandle,
-    @Assisted private val navKey: OrderQuestionNavKey?,
+    @Assisted private val navKey: OrderQuestionNavKey,
 ) : MviViewModel<OrderQuestionState, OrderQuestionEvent>(
     OrderQuestionState()
 ) {
-    private val orderId =
-        navKey?.orderId ?: savedStateHandle.get<Long>("orderId") ?: 0L.also { navigateBack() }
+    private val orderId = navKey.orderId
 
     init {
         viewModelScope.launch { delay(350) }.invokeOnCompletion {
@@ -146,6 +143,6 @@ class OrderQuestionViewModel @AssistedInject constructor(
 
     @AssistedFactory
     interface Factory {
-        fun create(navKey: OrderQuestionNavKey?): OrderQuestionViewModel
+        fun create(navKey: OrderQuestionNavKey): OrderQuestionViewModel
     }
 }

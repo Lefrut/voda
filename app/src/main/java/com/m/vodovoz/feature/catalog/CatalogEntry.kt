@@ -8,7 +8,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
-import com.m.vodovoz.R
 import com.m.vodovoz.core.navigation.LocalNavigator
 import com.m.vodovoz.core.navigation.activate
 import com.m.vodovoz.core.navigation.navigateToCategoryProductList
@@ -19,6 +18,7 @@ import com.m.vodovoz.core.navigation.navigateToSpeechDialog
 import com.m.vodovoz.core.navigation.navigateToSubCategories
 import com.m.vodovoz.design_system.composables.placeholders.NetworkErrorPlaceholder
 import com.m.vodovoz.design_system.effects.LifecycleEffect
+import com.m.vodovoz.feature.main.BottomNavKey
 import com.m.vodovoz.ui.mvi.collectAsState
 
 @Composable
@@ -57,8 +57,8 @@ fun CatalogEntry(
 
     LifecycleEffect {
         viewModel.tabManager.observeTabReselect().collect {
-            if (it != com.m.vodovoz.common.tab.TabManager.DEFAULT_STATE && it == R.id.catalogFragment) {
-                viewModel.tabManager.setDefaultState()
+            if (it == BottomNavKey.Catalog) {
+                viewModel.tabManager.resetTabReselect()
             }
         }
     }

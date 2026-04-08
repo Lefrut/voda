@@ -2,7 +2,6 @@ package com.m.vodovoz.feature.all.orders.detail
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.m.vodovoz.common.account.AccountManager
 import com.m.vodovoz.common.cart.CartManager
@@ -33,14 +32,13 @@ import kotlinx.coroutines.launch
 @HiltViewModel(assistedFactory = OrderDetailsFlowViewModel.Factory::class)
 @Stable
 class OrderDetailsFlowViewModel @AssistedInject constructor(
-    savedState: SavedStateHandle,
     val tabManager: TabManager,
     val accountManager: AccountManager,
     private val cartManager: CartManager,
     private val likeManager: LikeManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
     userPreferencesRepository: UserPreferencesRepository,
-    @Assisted private val navKey: OrderDetailsNavKey?,
+    @Assisted private val navKey: OrderDetailsNavKey,
 ) : ProductsMviViewModel<OrderProductUi, OrderDetailsFlowViewModel.OrderDetailsState, OrderDetailsFlowViewModel.OrderDetailsEvent>(
     state = OrderDetailsState(),
     blockedProductsFlow = cartManager.blockedProductsFlow,
@@ -53,7 +51,7 @@ class OrderDetailsFlowViewModel @AssistedInject constructor(
         const val QUESTION_BUTTON_ID = "voproszakaz"
     }
 
-    private val orderId = navKey?.orderId ?: savedState.get<Long>("orderId") ?: navigateBack().run { -1 }
+    private val orderId = navKey.orderId
 
     fun navigateBack() = viewModelScope.launch {
         sendEvent(OrderDetailsEvent.GoBack)
@@ -232,6 +230,6 @@ class OrderDetailsFlowViewModel @AssistedInject constructor(
 
     @AssistedFactory
     interface Factory {
-        fun create(navKey: OrderDetailsNavKey?): OrderDetailsFlowViewModel
+        fun create(navKey: OrderDetailsNavKey): OrderDetailsFlowViewModel
     }
 }

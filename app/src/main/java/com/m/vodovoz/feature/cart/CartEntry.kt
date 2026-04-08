@@ -18,7 +18,6 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.compose.LifecycleStartEffect
 import com.m.vodovoz.R
-import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.core.navigation.LocalNavigator
 import com.m.vodovoz.core.navigation.navigateToAllBottles
 import com.m.vodovoz.core.navigation.navigateToCatalog
@@ -32,6 +31,7 @@ import com.m.vodovoz.design_system.composables.placeholders.LoadingPlaceholder
 import com.m.vodovoz.design_system.composables.placeholders.NetworkErrorPlaceholder
 import com.m.vodovoz.design_system.composables.placeholders.VodovozPlaceholder
 import com.m.vodovoz.design_system.effects.LifecycleEffect
+import com.m.vodovoz.feature.main.BottomNavKey
 import com.m.vodovoz.ui.mvi.collectAsState
 import com.m.vodovoz.ui.mvi.collectEvents
 import kotlinx.coroutines.delay
@@ -46,9 +46,9 @@ fun CartEntry(
     val tabManager = viewModel.tabManager
 
     LifecycleEffect(tabManager) {
-        tabManager.observeTabReselect().collect { id ->
-            if (id != TabManager.DEFAULT_STATE && id == R.id.cartFragment) {
-                tabManager.setDefaultState()
+        tabManager.observeTabReselect().collect { tab ->
+            if (tab == BottomNavKey.Cart) {
+                tabManager.resetTabReselect()
             }
         }
     }

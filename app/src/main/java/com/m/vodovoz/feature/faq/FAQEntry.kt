@@ -10,7 +10,7 @@ import com.m.vodovoz.feature.faq.model.FAQEvent
 import com.m.vodovoz.ui.mvi.collectAsState
 
 @Composable
-fun FAQEntry(navKey: FAQNavKey? = null) =
+fun FAQEntry(navKey: FAQNavKey) =
     NavigationEntry<FAQViewModel, FAQViewModel.Factory>(
         creationCallback = { factory -> factory.create(navKey) }
     ) {

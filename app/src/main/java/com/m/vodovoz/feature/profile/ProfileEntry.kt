@@ -15,7 +15,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentActivity
 import com.m.vodovoz.R
-import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.core.navigation.LocalNavigator
 import com.m.vodovoz.core.navigation.ProfileMainNavigator
 import com.m.vodovoz.core.navigation.activate
@@ -33,6 +32,7 @@ import com.m.vodovoz.design_system.composables.placeholders.NetworkErrorPlacehol
 import com.m.vodovoz.design_system.composables.placeholders.VodovozPlaceholder
 import com.m.vodovoz.design_system.composables.snackbar.VodovozSnackBarVisuals
 import com.m.vodovoz.design_system.effects.LifecycleEffect
+import com.m.vodovoz.feature.main.BottomNavKey
 import com.m.vodovoz.feature.profile.navigation.ProfileChatsNavigator
 import com.m.vodovoz.ui.insets.InsetsVisibilityState
 import com.m.vodovoz.ui.mvi.collectAsState
@@ -54,8 +54,8 @@ fun ProfileEntry(
 
     LifecycleEffect(tabManager) {
         tabManager.observeTabReselect().collect {
-            if (it != TabManager.DEFAULT_STATE && it == R.id.profileFragment) {
-                tabManager.setDefaultState()
+            if (it == BottomNavKey.Profile) {
+                tabManager.resetTabReselect()
             }
         }
     }

@@ -1,15 +1,17 @@
 package com.m.vodovoz.feature.profile.waterapp.worker
 
 import android.Manifest
+import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat.getColor
 import androidx.hilt.work.HiltWorker
-import androidx.navigation.NavDeepLinkBuilder
 import androidx.work.CoroutineWorker
 import androidx.work.Data
 import androidx.work.WorkerParameters
@@ -17,12 +19,11 @@ import com.m.vodovoz.R
 import com.m.vodovoz.common.notification.NotificationChannels
 import com.m.vodovoz.common.notification.NotificationConfig
 import com.m.vodovoz.domain.general.respository.WaterAppRepository
-import com.m.vodovoz.feature.profile.waterapp.WaterAppHelper
+import com.m.vodovoz.feature.profile.waterapp.api.WaterAppNavKey
+import com.m.vodovoz.ui.base.MainActivity
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
-import kotlinx.coroutines.runBlocking
 import java.time.LocalTime
-import java.time.temporal.ChronoField
 
 @HiltWorker
 class WaterAppWorker @AssistedInject constructor(
@@ -31,11 +32,22 @@ class WaterAppWorker @AssistedInject constructor(
     private val waterAppRepository: WaterAppRepository,
 ) : CoroutineWorker(context, workerParams) {
 
-    override suspend fun doWork(): Result{
-        val pendingIntent = NavDeepLinkBuilder(applicationContext)
-            .setGraph(R.navigation.nav_graph_profile)
-            .setDestination(R.id.waterAppFragment)
-            .createPendingIntent()
+    override suspend fun doWork(): Result {
+        val intent = Intent(applicationContext, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            data = Uri.Builder()
+                .scheme("vodovoz")
+                .authority("open")
+                .appendPath(WaterAppNavKey.DEEP_LINK_PATH)
+                .build()
+        }
+
+        val pendingIntent = PendingIntent.getActivity(
+            applicationContext,
+            0,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+        )
 
         val iconColor = getColor(applicationContext, R.color.bluePrimary)
 

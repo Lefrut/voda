@@ -20,7 +20,7 @@ import com.m.vodovoz.ui.mvi.collectEvents
 import com.m.vodovoz.util.extensions.shareText
 
 @Composable
-fun ProductCatalogEntry(navKey: ProductCatalogNavKey? = null) =
+fun ProductCatalogEntry(navKey: ProductCatalogNavKey) =
     NavigationEntry<ProductCatalogViewModel, ProductCatalogViewModel.Factory>(
         creationCallback = { factory -> factory.create(navKey) }
     ) {

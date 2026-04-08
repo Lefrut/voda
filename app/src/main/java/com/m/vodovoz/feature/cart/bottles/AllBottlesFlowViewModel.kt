@@ -2,10 +2,8 @@ package com.m.vodovoz.feature.cart.bottles
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.m.vodovoz.common.cart.CartManager
-import com.m.vodovoz.core.android.getList
 import com.m.vodovoz.domain.general.model.product.toCartProducts
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
 import com.m.vodovoz.feature.cart.bottles.api.AllBottlesNavKey
@@ -31,13 +29,12 @@ import kotlinx.coroutines.launch
 class AllBottlesFlowViewModel @AssistedInject constructor(
     private val cartManager: CartManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
-    savedStateHandle: SavedStateHandle,
-    @Assisted private val navKey: AllBottlesNavKey?,
+    @Assisted private val navKey: AllBottlesNavKey,
 ) : MviViewModel<AllBottlesFlowViewModel.BottlesState, AllBottlesFlowViewModel.BottlesEvent>(
     BottlesState()
 ) {
 
-    private val cartBottles = navKey?.bottles ?: savedStateHandle.getList<BottleUi>("bottles")
+    private val cartBottles = navKey.bottles
 
     init {
         fetchAllBottlesDetails()
@@ -210,7 +207,7 @@ class AllBottlesFlowViewModel @AssistedInject constructor(
 
     @AssistedFactory
     interface Factory {
-        fun create(navKey: AllBottlesNavKey?): AllBottlesFlowViewModel
+        fun create(navKey: AllBottlesNavKey): AllBottlesFlowViewModel
     }
 
 

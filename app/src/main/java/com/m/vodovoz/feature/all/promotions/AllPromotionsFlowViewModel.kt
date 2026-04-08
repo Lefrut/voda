@@ -49,9 +49,9 @@ class AllPromotionsFlowViewModel @AssistedInject constructor(
 
     private suspend fun getAllPromotions(): PromotionsSectionModel? {
         return when (dataSource) {
-            AllPromotionsFragment.DataSource.All -> vodovozServiceRepository.getAllPromotionsDetails()
+            AllPromotionsNavKey.DataSource.All -> vodovozServiceRepository.getAllPromotionsDetails()
 
-            is AllPromotionsFragment.DataSource.ByBanner -> vodovozServiceRepository.getBannerPromotions(
+            is AllPromotionsNavKey.DataSource.ByBanner -> vodovozServiceRepository.getBannerPromotions(
                 bannerId = dataSource.bannerId,
                 blockId = dataSource.blockId,
                 categoryId = stateSnapshot.currentCategory.id
@@ -61,11 +61,11 @@ class AllPromotionsFlowViewModel @AssistedInject constructor(
 
     private fun getAllPromotionsPaged(categoryId: Int): Flow<PagingData<PromotionUi>> {
         return when (dataSource) {
-            AllPromotionsFragment.DataSource.All -> vodovozServiceRepository.getAllPromotionsPaged(
+            AllPromotionsNavKey.DataSource.All -> vodovozServiceRepository.getAllPromotionsPaged(
                 categoryId = categoryId.takeIf { it > -1 }
             )
 
-            is AllPromotionsFragment.DataSource.ByBanner -> vodovozServiceRepository.getBannerPromotionsPaged(
+            is AllPromotionsNavKey.DataSource.ByBanner -> vodovozServiceRepository.getBannerPromotionsPaged(
                 bannerId = dataSource.bannerId,
                 blockId = dataSource.blockId,
                 categoryId = categoryId.takeIf { it > -1 }

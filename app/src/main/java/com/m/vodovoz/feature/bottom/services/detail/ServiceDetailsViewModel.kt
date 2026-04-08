@@ -1,7 +1,6 @@
 package com.m.vodovoz.feature.bottom.services.detail
 
 import androidx.compose.runtime.Stable
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.m.vodovoz.common.cart.CartManager
 import com.m.vodovoz.common.like.LikeManager
@@ -32,8 +31,7 @@ class ServiceDetailsViewModel @AssistedInject constructor(
     private val cartManager: CartManager,
     private val favoriteManager: LikeManager,
     userPreferencesRepository: UserPreferencesRepository,
-    savedStateHandle: SavedStateHandle,
-    @Assisted private val navKey: ServiceDetailNavKey?,
+    @Assisted private val navKey: ServiceDetailNavKey,
 ) : ProductsMviViewModel<ServiceProductsUi, ServiceDetailsState, ServiceDetailsEvent>(
     state = ServiceDetailsState(),
     blockedProductsFlow = cartManager.blockedProductsFlow,
@@ -42,8 +40,7 @@ class ServiceDetailsViewModel @AssistedInject constructor(
     canViewAdultProducts = userPreferencesRepository.canViewAdultProducts
 ) {
 
-    private val serviceId: Int =
-        navKey?.serviceId ?: savedStateHandle.get<Int>("serviceId") ?: navigateBack().run { -1 }
+    private val serviceId: Int = navKey.serviceId
 
     init {
         viewModelScope.launch { delay(250) }.invokeOnCompletion {
@@ -131,6 +128,6 @@ class ServiceDetailsViewModel @AssistedInject constructor(
 
     @AssistedFactory
     interface Factory {
-        fun create(navKey: ServiceDetailNavKey?): ServiceDetailsViewModel
+        fun create(navKey: ServiceDetailNavKey): ServiceDetailsViewModel
     }
 }

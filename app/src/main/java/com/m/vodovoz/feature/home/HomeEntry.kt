@@ -24,7 +24,6 @@ import com.m.vodovoz.R
 import com.m.vodovoz.common.account.AccountManager
 import com.m.vodovoz.common.model.GlobalAppLinks
 import com.m.vodovoz.common.model.VodovozAction
-import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.core.navigation.LocalNavigator
 import com.m.vodovoz.core.navigation.activate
 import com.m.vodovoz.core.navigation.navigateToAllBrands
@@ -55,6 +54,8 @@ import com.m.vodovoz.core.navigation.navigateToWriteComment
 import com.m.vodovoz.core.network.VodovozWebConfig
 import com.m.vodovoz.design_system.composables.snackbar.VodovozSnackbarHost
 import com.m.vodovoz.design_system.effects.LifecycleEffect
+import com.m.vodovoz.feature.profile.waterapp.api.WaterAppNavKey
+import com.m.vodovoz.feature.main.BottomNavKey
 import com.m.vodovoz.ui.mvi.collectAsState
 import com.m.vodovoz.util.extensions.debugLog
 import com.m.vodovoz.util.extensions.isVpnActive
@@ -121,8 +122,8 @@ fun HomeEntry(
 
     LifecycleEffect {
         viewModel.tabManager.observeTabReselect().collect {
-            if (it != TabManager.DEFAULT_STATE && it == R.id.homeFragment) {
-                viewModel.tabManager.setDefaultState()
+            if (it == BottomNavKey.Home) {
+                viewModel.tabManager.resetTabReselect()
             }
         }
     }
@@ -294,7 +295,7 @@ private suspend fun observeDeepLinkFromSiteState(
         val orderId = path.toLongOrNull()
         debugLog { "DeepLinkPath: $path" }
         when {
-            path == "kalkulyator_vody" -> {
+            path == WaterAppNavKey.DEEP_LINK_PATH -> {
                 viewModel.accountManager.reportEvent("trekervodi_ssilka")
                  navigator.navigateToWaterApp()
             }

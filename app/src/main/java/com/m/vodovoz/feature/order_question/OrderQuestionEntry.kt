@@ -16,7 +16,7 @@ import com.m.vodovoz.ui.mvi.collectAsState
 import com.m.vodovoz.ui.mvi.collectEvents
 
 @Composable
-fun OrderQuestionEntry(navKey: OrderQuestionNavKey? = null) =
+fun OrderQuestionEntry(navKey: OrderQuestionNavKey) =
     NavigationEntry<OrderQuestionViewModel, OrderQuestionViewModel.Factory>(
         creationCallback = { factory -> factory.create(navKey) }
     ) {

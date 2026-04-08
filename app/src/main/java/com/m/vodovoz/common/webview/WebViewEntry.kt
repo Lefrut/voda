@@ -9,7 +9,7 @@ import com.m.vodovoz.design_system.effects.LifecycleEffect
 import com.m.vodovoz.ui.mvi.collectAsState
 
 @Composable
-fun WebViewEntry(navKey: WebViewNavKey? = null) =
+fun WebViewEntry(navKey: WebViewNavKey) =
     NavigationEntry<WebViewViewModel, WebViewViewModel.Factory>(
         creationCallback = { factory -> factory.create(navKey) }
     ) {

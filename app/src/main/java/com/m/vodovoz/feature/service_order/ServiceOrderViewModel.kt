@@ -2,7 +2,6 @@ package com.m.vodovoz.feature.service_order
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.common.resources.ResourcesProvider
@@ -32,14 +31,13 @@ class ServiceOrderViewModel @AssistedInject constructor(
     val insetsState: InsetsVisibilityState,
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val resourceProvider: ResourcesProvider,
-    savedStateHandle: SavedStateHandle,
-    @Assisted private val navKey: ServiceOrderNavKey?,
+    @Assisted private val navKey: ServiceOrderNavKey,
 ) : FormMviViewModel<ServiceOrderViewModel.ServiceOrderState, ServiceOrderViewModel.ServiceOrderEvent>(
     ServiceOrderState()
 ) {
 
 
-    private val serviceType = navKey?.serviceType ?: savedStateHandle.get<String>("serviceType") ?: ""
+    private val serviceType = navKey.serviceType
 
     init {
         viewModelScope.launch { delay(200L) }.invokeOnCompletion {
@@ -137,6 +135,6 @@ class ServiceOrderViewModel @AssistedInject constructor(
 
     @AssistedFactory
     interface Factory {
-        fun create(navKey: ServiceOrderNavKey?): ServiceOrderViewModel
+        fun create(navKey: ServiceOrderNavKey): ServiceOrderViewModel
     }
 }

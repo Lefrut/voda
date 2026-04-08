@@ -1,6 +1,5 @@
 package com.m.vodovoz.feature.faq
 
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.feature.buy_certificate.model.FAQItemUi
@@ -19,14 +18,11 @@ import kotlinx.coroutines.launch
 @HiltViewModel(assistedFactory = FAQViewModel.Factory::class)
 class FAQViewModel @AssistedInject constructor(
     val tabManager: TabManager,
-    savedStateHandle: SavedStateHandle,
-    @Assisted private val navKey: FAQNavKey?,
+    @Assisted private val navKey: FAQNavKey,
 ) :
     MviViewModel<FAQState, FAQEvent>(FAQState()) {
 
-    private val faq = navKey?.faq ?: savedStateHandle.get<FAQUi>("faq") ?: FAQUi.Empty.also {
-        navigateBack()
-    }
+    private val faq = navKey.faq
 
     init {
         initFAQ(faq)
@@ -57,7 +53,7 @@ class FAQViewModel @AssistedInject constructor(
 
     @AssistedFactory
     interface Factory {
-        fun create(navKey: FAQNavKey?): FAQViewModel
+        fun create(navKey: FAQNavKey): FAQViewModel
     }
 
 

@@ -2,8 +2,8 @@ package com.m.vodovoz.common.tab
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
-import com.m.vodovoz.R
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
+import com.m.vodovoz.feature.main.BottomNavKey
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -26,20 +26,24 @@ class TabManager @Inject constructor(
     private val bottomNavCartStateListener = MutableStateFlow<BottomNavCartState?>(null)
     fun observeBottomNavCartState() = bottomNavCartStateListener.asStateFlow()
 
-    private val tabReselectListener = MutableStateFlow(DEFAULT_STATE)
+    private val tabReselectListener = MutableStateFlow<BottomNavKey?>(null)
     fun observeTabReselect() = tabReselectListener.asStateFlow()
-    fun setDefaultState() {
-        tabReselectListener.value = DEFAULT_STATE
+    fun notifyTabReselect(tab: BottomNavKey) {
+        tabReselectListener.value = tab
     }
 
-    private val tabAuthRedirectListener = MutableStateFlow(DEFAULT_AUTH_REDIRECT)
+    fun resetTabReselect() {
+        tabReselectListener.value = null
+    }
+
+    private val tabAuthRedirectListener = MutableStateFlow<BottomNavKey>(DEFAULT_AUTH_REDIRECT)
     fun fetchAuthRedirect() = tabAuthRedirectListener.value
 
     private val showBottomBar = MutableStateFlow(true)
     fun observeShowBottomBar() = showBottomBar.asStateFlow()
 
-    fun setAuthRedirect(graphId: Int) {
-        tabAuthRedirectListener.value = graphId
+    fun setAuthRedirect(tab: BottomNavKey) {
+        tabAuthRedirectListener.value = tab
     }
 
     fun setDefaultAuthRedirect() {
@@ -76,10 +80,8 @@ class TabManager @Inject constructor(
     )
 
     companion object {
-        const val DEFAULT_STATE = -1
-
         @JvmField
-        val DEFAULT_AUTH_REDIRECT = R.id.graph_profile
+        val DEFAULT_AUTH_REDIRECT: BottomNavKey = BottomNavKey.Profile
     }
 }
 

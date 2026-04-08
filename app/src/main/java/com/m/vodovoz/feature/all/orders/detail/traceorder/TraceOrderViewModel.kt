@@ -2,7 +2,6 @@ package com.m.vodovoz.feature.all.orders.detail.traceorder
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.m.vodovoz.common.jivochat.JivoChatController
 import com.m.vodovoz.design_system.model.ImageAndTextUi
@@ -30,16 +29,15 @@ import kotlinx.coroutines.launch
 @HiltViewModel(assistedFactory = TraceOrderViewModel.Factory::class)
 @Stable
 class TraceOrderViewModel @AssistedInject constructor(
-    savedStateHandle: SavedStateHandle,
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val siteStateManager: SiteStateManager,
-    @Assisted private val navKey: TraceOrderNavKey?,
+    @Assisted private val navKey: TraceOrderNavKey,
 ) : MviViewModel<TraceOrderViewModel.TraceOrderState, TraceOrderViewModel.TraceOrderEvents>(
     TraceOrderState()
 ) {
 
-    private val orderId: Long = navKey?.orderId ?: savedStateHandle["orderId"] ?: -1
-    private val driverId: String = navKey?.driverId ?: savedStateHandle["driverId"] ?: ""
+    private val orderId: Long = navKey.orderId
+    private val driverId: String = navKey.driverId
 
     init {
         viewModelScope.launch {
@@ -214,6 +212,6 @@ class TraceOrderViewModel @AssistedInject constructor(
 
     @AssistedFactory
     interface Factory {
-        fun create(navKey: TraceOrderNavKey?): TraceOrderViewModel
+        fun create(navKey: TraceOrderNavKey): TraceOrderViewModel
     }
 }

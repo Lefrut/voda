@@ -8,7 +8,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
 import com.m.vodovoz.core.navigation.NavigationEntry
 import com.m.vodovoz.core.navigation.NavigationEntryScope
-import com.m.vodovoz.core.navigation.currentBottomTabGraphId
+import com.m.vodovoz.core.navigation.currentBottomTabKey
 import com.m.vodovoz.core.navigation.navigateToAboutProduct
 import com.m.vodovoz.core.navigation.navigateToBrandProductList
 import com.m.vodovoz.core.navigation.navigateToCart
@@ -99,7 +99,7 @@ private suspend fun NavigationEntryScope<ProductDetailsFlowViewModel>.observeEve
             }
 
             is ProductDetailsFlowViewModel.ProductDetailsEvents.GoToCart -> {
-                viewModel.tabManager.setAuthRedirect(navigator.currentBottomTabGraphId())
+                viewModel.tabManager.setAuthRedirect(navigator.currentBottomTabKey())
                 navigator.navigateToCart()
             }
 
@@ -178,4 +178,3 @@ private suspend fun NavigationEntryScope<ProductDetailsFlowViewModel>.observeEve
             }
         }
     }
-

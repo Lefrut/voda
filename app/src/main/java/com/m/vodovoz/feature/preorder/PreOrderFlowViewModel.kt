@@ -2,7 +2,6 @@ package com.m.vodovoz.feature.preorder
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.m.vodovoz.R
 import com.m.vodovoz.common.resources.ResourcesProvider
@@ -26,15 +25,14 @@ import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
 @HiltViewModel(assistedFactory = PreOrderFlowViewModel.Factory::class)
 class PreOrderFlowViewModel @AssistedInject constructor(
-    savedState: SavedStateHandle,
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val resourcesProvider: ResourcesProvider,
-    @Assisted private val navKey: PreOrderNavKey?,
+    @Assisted private val navKey: PreOrderNavKey,
 ) : FormMviViewModel<PreOrderFlowViewModel.PreOrderState, PreOrderFlowViewModel.PreOrderEvent>(
     PreOrderState()
 ) {
 
-    private val productId = navKey?.productId ?: savedState.get<Long>("productId") ?: -1L
+    private val productId = navKey.productId
 
     fun fetchPreOrderData() = viewModelScope.launch {
         vodovozServiceRepository.getPreorderDetails(productId)
@@ -124,7 +122,7 @@ class PreOrderFlowViewModel @AssistedInject constructor(
 
     @AssistedFactory
     interface Factory {
-        fun create(navKey: PreOrderNavKey?): PreOrderFlowViewModel
+        fun create(navKey: PreOrderNavKey): PreOrderFlowViewModel
     }
 
 }

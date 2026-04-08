@@ -1,7 +1,6 @@
 package com.m.vodovoz.common.webview
 
 import androidx.compose.runtime.Stable
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.m.vodovoz.common.webview.api.WebViewNavKey
 import com.m.vodovoz.common.webview.model.WebViewEvents
@@ -18,12 +17,11 @@ import kotlinx.coroutines.launch
 @HiltViewModel(assistedFactory = WebViewViewModel.Factory::class)
 @Stable
 class WebViewViewModel @AssistedInject constructor(
-    savedStateHandle: SavedStateHandle,
-    @Assisted private val navKey: WebViewNavKey?,
+    @Assisted private val navKey: WebViewNavKey,
 ) : MviViewModel<WebViewState, WebViewEvents>(WebViewState()) {
 
-    private val title = navKey?.title ?: savedStateHandle.get<String>("title") ?: navigateBack().run { "" }
-    private val url = navKey?.url ?: savedStateHandle.get<String>("url") ?: navigateBack().run { "" }
+    private val title = navKey.title
+    private val url = navKey.url
 
     init {
         setInitialData(title, url)
@@ -43,6 +41,6 @@ class WebViewViewModel @AssistedInject constructor(
 
     @AssistedFactory
     interface Factory {
-        fun create(navKey: WebViewNavKey?): WebViewViewModel
+        fun create(navKey: WebViewNavKey): WebViewViewModel
     }
 }
