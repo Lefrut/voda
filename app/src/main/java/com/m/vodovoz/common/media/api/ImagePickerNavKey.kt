@@ -1,5 +1,5 @@
 package com.m.vodovoz.common.media.api
 
-import androidx.navigation3.runtime.NavKey
+import com.m.vodovoz.core.navigation.VodovozNavKey
 
-data object ImagePickerNavKey: NavKey
+data object ImagePickerNavKey : VodovozNavKey

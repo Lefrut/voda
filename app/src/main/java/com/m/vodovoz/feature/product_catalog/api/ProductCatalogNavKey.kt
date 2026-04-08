@@ -1,10 +1,10 @@
 package com.m.vodovoz.feature.product_catalog.api
 
-import androidx.navigation3.runtime.NavKey
+import com.m.vodovoz.core.navigation.VodovozNavKey
 
 data class ProductCatalogNavKey(
     val dataSource: DataSource,
-) : NavKey {
+) : VodovozNavKey {
     sealed interface DataSource {
         data class ButtonId(val buttonId: Int) : DataSource
         data class BrandId(val brandId: Long) : DataSource

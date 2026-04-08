@@ -1,10 +1,10 @@
 package com.m.vodovoz.feature.auth.login.api
 
-import androidx.navigation3.runtime.NavKey
+import com.m.vodovoz.core.navigation.VodovozNavKey
 
 data class LoginNavKey(
     val accountTypeId: String? = null,
-) : NavKey {
+) : VodovozNavKey {
     companion object {
         const val NAV_NAME: String = "feature/auth/login/Login"
     }

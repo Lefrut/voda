@@ -1,6 +1,6 @@
 package com.m.vodovoz.feature.payment_method.api
 
-import androidx.navigation3.runtime.NavKey
+import com.m.vodovoz.core.navigation.VodovozNavKey
 import com.m.vodovoz.core.navigation.viewmodel.SharedViewModelStoreNavKey
 
 data class PaymentMethodNavKey(
@@ -13,7 +13,7 @@ data class PaymentMethodNavKey(
     val bonusesValue: Int?,
     val queryParams: Map<String, String> = emptyMap(),
     override val parentContentKey: String? = null,
-) : NavKey, SharedViewModelStoreNavKey {
+) : VodovozNavKey, SharedViewModelStoreNavKey {
     override fun toString(): String = parentContentKey
         ?: "PaymentMethodNavKey(addressId=$addressId, date=$date, paymentMethodId=$paymentMethodId, paymentChange=$paymentChange, balance=$balance, bonuses=$bonuses, bonusesValue=$bonusesValue, queryParams=$queryParams)"
 

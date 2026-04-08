@@ -1,10 +1,10 @@
 package com.m.vodovoz.feature.promotion_details.api
 
-import androidx.navigation3.runtime.NavKey
+import com.m.vodovoz.core.navigation.VodovozNavKey
 
 data class PromotionDetailsNavKey(
     val promotionId: Long,
-) : NavKey {
+) : VodovozNavKey {
     companion object {
         const val NAV_NAME: String = "feature/promotion_details/PromotionDetails"
     }

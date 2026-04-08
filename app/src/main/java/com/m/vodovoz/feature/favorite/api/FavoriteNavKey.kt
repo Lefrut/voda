@@ -1,9 +1,9 @@
 package com.m.vodovoz.feature.favorite.api
 
-import androidx.navigation3.runtime.NavKey
+import com.m.vodovoz.core.navigation.VodovozNavKey
 import kotlinx.serialization.Serializable
 
 @Serializable
-data object FavoriteNavKey : NavKey {
+data object FavoriteNavKey : VodovozNavKey {
     const val NAV_NAME: String = "feature/favorite/Favorite"
 }

@@ -1,9 +1,9 @@
 package com.m.vodovoz.feature.search.qrcode.api
 
-import androidx.navigation3.runtime.NavKey
+import com.m.vodovoz.core.navigation.VodovozNavKey
 import kotlinx.serialization.Serializable
 
 @Serializable
-data object ScannerNavKey : NavKey {
+data object ScannerNavKey : VodovozNavKey {
     const val NAV_NAME: String = "feature/search/qrcode/Scanner"
 }

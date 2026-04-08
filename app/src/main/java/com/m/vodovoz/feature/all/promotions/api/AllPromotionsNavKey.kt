@@ -1,10 +1,10 @@
 package com.m.vodovoz.feature.all.promotions.api
 
-import androidx.navigation3.runtime.NavKey
+import com.m.vodovoz.core.navigation.VodovozNavKey
 
 data class AllPromotionsNavKey(
     val dataSource: DataSource = DataSource.All,
-) : NavKey {
+) : VodovozNavKey {
     sealed interface DataSource {
         data class ByBanner(val bannerId: Long, val blockId: Long) : DataSource
         data object All : DataSource

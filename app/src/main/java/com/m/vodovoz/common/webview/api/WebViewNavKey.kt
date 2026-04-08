@@ -1,11 +1,11 @@
 package com.m.vodovoz.common.webview.api
 
-import androidx.navigation3.runtime.NavKey
+import com.m.vodovoz.core.navigation.VodovozNavKey
 
 data class WebViewNavKey(
     val url: String,
     val title: String = "",
-) : NavKey {
+) : VodovozNavKey {
     companion object {
         const val NAV_NAME: String = "common/webview/WebView"
     }

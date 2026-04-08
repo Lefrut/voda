@@ -1,11 +1,11 @@
 package com.m.vodovoz.feature.all.orders.detail.traceorder.api
 
-import androidx.navigation3.runtime.NavKey
+import com.m.vodovoz.core.navigation.VodovozNavKey
 
 data class TraceOrderNavKey(
     val driverId: String,
     val orderId: Long,
-) : NavKey {
+) : VodovozNavKey {
     companion object {
         const val NAV_NAME: String = "feature/all/orders/detail/traceorder/TraceOrder"
     }

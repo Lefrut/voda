@@ -1,9 +1,9 @@
 package com.m.vodovoz.feature.about_app.api
 
-import androidx.navigation3.runtime.NavKey
+import com.m.vodovoz.core.navigation.VodovozNavKey
 import kotlinx.serialization.Serializable
 
 @Serializable
-data object AboutAppNavKey : NavKey {
+data object AboutAppNavKey : VodovozNavKey {
     const val NAV_NAME: String = "feature/about_app/AboutApp"
 }

@@ -1,9 +1,9 @@
 package com.m.vodovoz.feature.home.api
 
-import androidx.navigation3.runtime.NavKey
+import com.m.vodovoz.core.navigation.VodovozNavKey
 import kotlinx.serialization.Serializable
 
 @Serializable
-data object HomeNavKey : NavKey {
+data object HomeNavKey : VodovozNavKey {
     const val NAV_NAME: String = "feature/home/Home"
 }

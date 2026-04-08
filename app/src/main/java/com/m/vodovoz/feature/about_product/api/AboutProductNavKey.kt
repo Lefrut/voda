@@ -1,6 +1,6 @@
 package com.m.vodovoz.feature.about_product.api
 
-import androidx.navigation3.runtime.NavKey
+import com.m.vodovoz.core.navigation.VodovozNavKey
 import com.m.vodovoz.design_system.model.ColorfulButtonUi
 import com.m.vodovoz.design_system.model.PriceUi
 
@@ -9,7 +9,7 @@ data class AboutProductNavKey(
     val prices: List<PriceUi>,
     val analogButton: ColorfulButtonUi?,
     val isAvailable: Boolean,
-) : NavKey {
+) : VodovozNavKey {
     companion object {
         const val NAV_NAME: String = "feature/about_product/AboutProduct"
     }

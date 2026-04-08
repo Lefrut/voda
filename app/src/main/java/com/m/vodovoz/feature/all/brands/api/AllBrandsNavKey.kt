@@ -1,9 +1,9 @@
 package com.m.vodovoz.feature.all.brands.api
 
-import androidx.navigation3.runtime.NavKey
+import com.m.vodovoz.core.navigation.VodovozNavKey
 import kotlinx.serialization.Serializable
 
 @Serializable
-data object AllBrandsNavKey : NavKey {
+data object AllBrandsNavKey : VodovozNavKey {
     const val NAV_NAME: String = "feature/all/brands/AllBrands"
 }

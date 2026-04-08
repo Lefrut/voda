@@ -1,9 +1,9 @@
 package com.m.vodovoz.feature.profile.api
 
-import androidx.navigation3.runtime.NavKey
+import com.m.vodovoz.core.navigation.VodovozNavKey
 import kotlinx.serialization.Serializable
 
 @Serializable
-data object ProfileNavKey : NavKey {
+data object ProfileNavKey : VodovozNavKey {
     const val NAV_NAME: String = "feature/profile/Profile"
 }

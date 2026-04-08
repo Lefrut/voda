@@ -1,10 +1,10 @@
 package com.m.vodovoz.feature.service_order.api
 
-import androidx.navigation3.runtime.NavKey
+import com.m.vodovoz.core.navigation.VodovozNavKey
 
 data class ServiceOrderNavKey(
     val serviceType: String,
-) : NavKey {
+) : VodovozNavKey {
     companion object {
         const val NAV_NAME: String = "feature/service_order/ServiceOrder"
     }

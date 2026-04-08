@@ -1,6 +1,6 @@
 package com.m.vodovoz.feature.order_call_you.api
 
-import androidx.navigation3.runtime.NavKey
+import com.m.vodovoz.core.navigation.VodovozNavKey
 import com.m.vodovoz.core.navigation.viewmodel.SharedViewModelStoreNavKey
 
 data class OrderCallYouNavKey(
@@ -8,7 +8,7 @@ data class OrderCallYouNavKey(
     val callYouId: String? = null,
     val queryParams: Map<String, String> = emptyMap(),
     override val parentContentKey: String? = null,
-) : NavKey, SharedViewModelStoreNavKey {
+) : VodovozNavKey, SharedViewModelStoreNavKey {
     override fun toString(): String = parentContentKey
         ?: "OrderCallYouNavKey(addressId=$addressId, callYouId=$callYouId, queryParams=$queryParams)"
 

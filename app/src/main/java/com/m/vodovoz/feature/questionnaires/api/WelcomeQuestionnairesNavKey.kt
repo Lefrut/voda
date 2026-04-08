@@ -1,9 +1,9 @@
 package com.m.vodovoz.feature.questionnaires.api
 
-import androidx.navigation3.runtime.NavKey
+import com.m.vodovoz.core.navigation.VodovozNavKey
 import kotlinx.serialization.Serializable
 
 @Serializable
-data object WelcomeQuestionnairesNavKey : NavKey {
+data object WelcomeQuestionnairesNavKey : VodovozNavKey {
     const val NAV_NAME: String = "feature/questionnaires/WelcomeQuestionnaires"
 }

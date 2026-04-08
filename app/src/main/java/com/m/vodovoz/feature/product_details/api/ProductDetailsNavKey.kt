@@ -1,10 +1,10 @@
 package com.m.vodovoz.feature.product_details.api
 
-import androidx.navigation3.runtime.NavKey
+import com.m.vodovoz.core.navigation.VodovozNavKey
 
 data class ProductDetailsNavKey(
     val productId: Long,
-) : NavKey {
+) : VodovozNavKey {
     companion object {
         const val NAV_NAME: String = "feature/product_details/ProductDetails"
     }

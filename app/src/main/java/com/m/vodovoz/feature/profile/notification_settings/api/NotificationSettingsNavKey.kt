@@ -1,9 +1,9 @@
 package com.m.vodovoz.feature.profile.notification_settings.api
 
-import androidx.navigation3.runtime.NavKey
+import com.m.vodovoz.core.navigation.VodovozNavKey
 import kotlinx.serialization.Serializable
 
 @Serializable
-data object NotificationSettingsNavKey : NavKey {
+data object NotificationSettingsNavKey : VodovozNavKey {
     const val NAV_NAME: String = "feature/profile/notification_settings/NotificationSettings"
 }

@@ -1,9 +1,9 @@
 package com.m.vodovoz.feature.auth.reg.api
 
-import androidx.navigation3.runtime.NavKey
+import com.m.vodovoz.core.navigation.VodovozNavKey
 import kotlinx.serialization.Serializable
 
 @Serializable
-data object RegisterNavKey : NavKey {
+data object RegisterNavKey : VodovozNavKey {
     const val NAV_NAME: String = "feature/auth/reg/Register"
 }

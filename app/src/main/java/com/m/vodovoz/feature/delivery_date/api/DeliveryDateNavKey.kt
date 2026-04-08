@@ -1,6 +1,6 @@
 package com.m.vodovoz.feature.delivery_date.api
 
-import androidx.navigation3.runtime.NavKey
+import com.m.vodovoz.core.navigation.VodovozNavKey
 import com.m.vodovoz.core.navigation.viewmodel.SharedViewModelStoreNavKey
 
 data class DeliveryDateNavKey(
@@ -10,7 +10,7 @@ data class DeliveryDateNavKey(
     val timeInterval: String? = null,
     val queryParams: Map<String, String> = emptyMap(),
     override val parentContentKey: String? = null,
-) : NavKey, SharedViewModelStoreNavKey {
+) : VodovozNavKey, SharedViewModelStoreNavKey {
     override fun toString(): String = parentContentKey
         ?: "DeliveryDateNavKey(addressId=$addressId, earlierDelivery=$earlierDelivery, date=$date, timeInterval=$timeInterval, queryParams=$queryParams)"
 

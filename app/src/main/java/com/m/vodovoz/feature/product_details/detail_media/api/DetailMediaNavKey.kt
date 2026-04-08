@@ -1,7 +1,7 @@
 package com.m.vodovoz.feature.product_details.detail_media.api
 
 import androidx.compose.runtime.Immutable
-import androidx.navigation3.runtime.NavKey
+import com.m.vodovoz.core.navigation.VodovozNavKey
 import com.m.vodovoz.design_system.model.ProductMediaUi
 import com.m.vodovoz.core.navigation.viewmodel.SharedViewModelStoreNavKey
 
@@ -10,7 +10,7 @@ data class DetailMediaNavKey(
     val media: ProductMediaUi,
     val mediaList: List<ProductMediaUi>,
     override val parentContentKey: String? = null,
-) : NavKey, SharedViewModelStoreNavKey {
+) : VodovozNavKey, SharedViewModelStoreNavKey {
     override fun toString(): String = parentContentKey
         ?: "DetailMediaNavKey(media=$media, mediaList=$mediaList)"
 

@@ -1,9 +1,9 @@
 package com.m.vodovoz.feature.cart.api
 
-import androidx.navigation3.runtime.NavKey
+import com.m.vodovoz.core.navigation.VodovozNavKey
 import kotlinx.serialization.Serializable
 
 @Serializable
-data object CartNavKey : NavKey {
+data object CartNavKey : VodovozNavKey {
     const val NAV_NAME: String = "feature/cart/Cart"
 }

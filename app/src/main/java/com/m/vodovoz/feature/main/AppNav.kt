@@ -76,6 +76,7 @@ import com.m.vodovoz.common.media.ImagePickerEntry
 import com.m.vodovoz.common.media.api.ImagePickerNavKey
 import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.core.navigation.LocalNavigator
+import com.m.vodovoz.core.navigation.VodovozNavKey
 import com.m.vodovoz.core.navigation.viewmodel.SharedViewModelStoreNavEntryDecorator
 import com.m.vodovoz.core.navigation.viewmodel.SharedViewModelStoreNavKey
 import com.m.vodovoz.core.navigation.viewmodel.rememberSharedViewModelStoreNavEntryDecorator
@@ -844,7 +845,7 @@ inline fun <reified T : NavKey> Navigator.popTo(
 
 
 @Stable
-sealed interface BottomNavKey : NavKey {
+sealed interface BottomNavKey : VodovozNavKey {
 
 
     @Serializable
