@@ -1,6 +1,12 @@
 package com.m.vodovoz.feature.main
 
 import android.os.Bundle
+import androidx.compose.animation.ContentTransform
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -54,6 +60,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.animation.core.tween
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation.NavController
 import androidx.navigation.NavGraph
@@ -478,6 +485,9 @@ fun BottmNav(
                     .consumeWindowInsets(paddingValues),
                 entries = navigationState.toEntries(entryProvider),
                 onBack = { navigator.goBack() },
+                transitionSpec = { defaultForwardTransition() },
+                popTransitionSpec = { defaultBackTransition() },
+                predictivePopTransitionSpec = { defaultBackTransition() },
                 sceneStrategies = listOf(SinglePaneSceneStrategy()),
             )
         }
@@ -682,6 +692,8 @@ fun NavigationState.toEntries(
 class Navigator(val state: NavigationState) {
     private val savedKeysByDestination = mutableMapOf<String, ArrayDeque<NavKey>>()
 
+    fun canGoBack(): Boolean = state.currentKey != state.startKey
+
     fun popTo(
         key: NavKey,
         inclusive: Boolean = false,
@@ -727,14 +739,16 @@ class Navigator(val state: NavigationState) {
         }
     }
 
-    fun goBack() {
+    fun goBack(): Boolean {
+        if (!canGoBack()) return false
+
         when (state.currentKey) {
-            state.startKey -> error("You cannot go back from the start route")
+            state.startKey -> return false
             state.currentTopLevelKey -> {
-                state.topLevelStack.removeLastOrNull()
+                return state.topLevelStack.removeLastOrNull() != null
             }
 
-            else -> state.currentSubStack.removeLastOrNull()
+            else -> return state.currentSubStack.removeLastOrNull() != null
         }
     }
 
@@ -829,6 +843,26 @@ class Navigator(val state: NavigationState) {
         return true
     }
 
+}
+
+private fun defaultForwardTransition(): ContentTransform {
+    return slideInHorizontally(
+        initialOffsetX = { it / 6 },
+        animationSpec = tween(durationMillis = 320),
+    ) + fadeIn(animationSpec = tween(220)) togetherWith slideOutHorizontally(
+        targetOffsetX = { -it / 12 },
+        animationSpec = tween(durationMillis = 320),
+    ) + fadeOut(animationSpec = tween(220))
+}
+
+private fun defaultBackTransition(): ContentTransform {
+    return slideInHorizontally(
+        initialOffsetX = { -it / 12 },
+        animationSpec = tween(durationMillis = 320),
+    ) + fadeIn(animationSpec = tween(220)) togetherWith slideOutHorizontally(
+        targetOffsetX = { it / 6 },
+        animationSpec = tween(durationMillis = 320),
+    ) + fadeOut(animationSpec = tween(220))
 }
 
 inline fun <reified T : NavKey> Navigator.popTo(

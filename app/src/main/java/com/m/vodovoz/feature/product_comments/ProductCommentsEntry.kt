@@ -140,7 +140,5 @@ fun ProductCommentsEntry(navKey: ProductCommentsNavKey) =
                     }
                 }
             }
-
-            BackHandler { viewModel.navigateBack() }
         }
     }

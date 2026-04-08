@@ -44,6 +44,7 @@
         <activity
             android:name="com.m.vodovoz.ui.base.MainActivity"
             android:configChanges="orientation|screenSize|keyboardHidden"
+            android:enableOnBackInvokedCallback="true"
             android:exported="true"
             android:launchMode="singleTask"
             android:screenOrientation="portrait"

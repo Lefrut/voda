@@ -29,6 +29,8 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigationevent.NavigationEventDispatcher
+import androidx.navigationevent.NavigationEventDispatcherOwner
 import androidx.navigationevent.compose.LocalNavigationEventDispatcherOwner
 import androidx.navigationevent.compose.rememberNavigationEventDispatcherOwner
 import com.google.android.material.snackbar.Snackbar
@@ -48,6 +50,7 @@ import com.m.vodovoz.feature.home.HomeFlowViewModel
 import com.m.vodovoz.feature.profile.ProfileFlowViewModel
 import com.m.vodovoz.ui.insets.InsetsVisibilityState
 import com.m.vodovoz.ui.snackbar.SnackbarHostStateOwner
+import com.m.vodovoz.util.extensions.addOnBackPressedCallback
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
@@ -117,8 +120,6 @@ class MainFragment : Fragment(), SnackbarHostStateOwner {
     }
 
 
-
-
     private val updateResultLauncher =
         registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result: ActivityResult ->
             if (result.resultCode != RESULT_OK) {
@@ -133,18 +134,23 @@ class MainFragment : Fragment(), SnackbarHostStateOwner {
     }
 
 
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View {
+        val navigationEventOwner = object : NavigationEventDispatcherOwner {
+            override val navigationEventDispatcher: NavigationEventDispatcher
+                get() = this@MainFragment.requireActivity().navigationEventDispatcher
+
+        }
+
         return ComposeView(requireContext()).apply {
             setContent {
                 VodovozTheme {
                     CompositionLocalProvider(
                         LocalNavigationEventDispatcherOwner provides rememberNavigationEventDispatcherOwner(
-                            parent = null
+                            parent = navigationEventOwner
                         )
                     ) {
                         Box(modifier = Modifier.background(MaterialTheme.colorScheme.background)) {
@@ -176,7 +182,6 @@ class MainFragment : Fragment(), SnackbarHostStateOwner {
         super.onResume()
         appUpdateController.onResumeAction()
     }
-
 
 
     private fun popupSnackbarForCompleteUpdate() {
