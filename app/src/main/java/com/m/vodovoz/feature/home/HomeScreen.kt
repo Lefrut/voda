@@ -17,11 +17,13 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.zIndex
 import coil3.compose.AsyncImagePainter
 import com.m.vodovoz.R
 import com.m.vodovoz.common.model.VodovozAction
+import com.m.vodovoz.common.notification.NotificationFactory
 import com.m.vodovoz.core.analytics.Analytics
 import com.m.vodovoz.design_system.composables.dialogs.VodovozDialog
 import com.m.vodovoz.design_system.composables.image.LocalAsyncImageErrorHandler
@@ -35,6 +37,8 @@ import com.m.vodovoz.feature.home.composables.HomeLoadingPlaceholder
 import com.m.vodovoz.feature.home.composables.HomeTopBar
 import com.m.vodovoz.feature.home.composables.SpecialPromotionBottomSheet
 import com.m.vodovoz.feature.home.composables.UnratedProductsBottomSheet
+import kotlinx.coroutines.delay
+import org.json.JSONObject
 import java.time.Duration
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
@@ -45,6 +49,15 @@ fun HomeScreen(
     viewState: HomeFlowViewModel.HomeState,
     viewModel: HomeFlowViewModel,
 ) {
+    val context = LocalContext.current
+
+    LaunchedEffect(Unit) {
+        //todo - remove
+        delay(3000)
+        val notificationFactory = NotificationFactory(context.applicationContext)
+
+        notificationFactory.showSmallNotification("Test", "dqwdwqdqdqw", JSONObject())
+    }
 
     DisposableEffect(Unit) {
         val startTime = System.currentTimeMillis()

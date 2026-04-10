@@ -13,12 +13,9 @@ object NotificationChannels {
     private const val NOTIFICATION_CHANNEL_NAME = "Reminders notification channel"
 
     fun create(context: Context) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            createMainChannel(context)
-        }
+        createMainChannel(context)
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
     private fun createMainChannel(context: Context) {
         val name = NOTIFICATION_CHANNEL_NAME
         val priority = NotificationManager.IMPORTANCE_HIGH

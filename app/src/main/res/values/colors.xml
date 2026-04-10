@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="bluePrimary">#05A4FF</color>
+    <color name="bluePrimary">#ff00a5ff</color>
     <color name="white">#FFFFFFFF</color>
     <color name="text_black">#434343</color>
     <color name="promo_red">#F91155</color>
-    <color name="new_product_blue">#05A4FF</color>
+    <color name="new_product_blue">#ff00a5ff</color>
     <color name="text_black_composable">#222222</color>
 </resources>
