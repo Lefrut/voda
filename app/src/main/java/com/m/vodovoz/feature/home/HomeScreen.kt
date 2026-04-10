@@ -1,5 +1,8 @@
 package com.m.vodovoz.feature.home
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -20,9 +23,19 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.zIndex
+import androidx.core.app.ActivityCompat
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.ContextCompat.getColor
+import androidx.navigation.NavDeepLinkBuilder
+import androidx.work.Data
+import androidx.work.ListenableWorker
+import androidx.work.WorkerParameters
 import coil3.compose.AsyncImagePainter
 import com.m.vodovoz.R
 import com.m.vodovoz.common.model.VodovozAction
+import com.m.vodovoz.common.notification.NotificationChannels
+import com.m.vodovoz.common.notification.NotificationConfig
 import com.m.vodovoz.common.notification.NotificationFactory
 import com.m.vodovoz.core.analytics.Analytics
 import com.m.vodovoz.design_system.composables.dialogs.VodovozDialog
@@ -37,6 +50,7 @@ import com.m.vodovoz.feature.home.composables.HomeLoadingPlaceholder
 import com.m.vodovoz.feature.home.composables.HomeTopBar
 import com.m.vodovoz.feature.home.composables.SpecialPromotionBottomSheet
 import com.m.vodovoz.feature.home.composables.UnratedProductsBottomSheet
+import com.m.vodovoz.feature.profile.waterapp.worker.WaterAppWorker
 import kotlinx.coroutines.delay
 import org.json.JSONObject
 import java.time.Duration
@@ -49,16 +63,6 @@ fun HomeScreen(
     viewState: HomeFlowViewModel.HomeState,
     viewModel: HomeFlowViewModel,
 ) {
-    val context = LocalContext.current
-
-    LaunchedEffect(Unit) {
-        //todo - remove
-        delay(3000)
-        val notificationFactory = NotificationFactory(context.applicationContext)
-
-        notificationFactory.showSmallNotification("Test", "dqwdwqdqdqw", JSONObject())
-    }
-
     DisposableEffect(Unit) {
         val startTime = System.currentTimeMillis()
 

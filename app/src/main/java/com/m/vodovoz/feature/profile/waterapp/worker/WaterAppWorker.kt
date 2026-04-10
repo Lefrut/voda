@@ -7,6 +7,7 @@ import android.os.Build
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.getColor
 import androidx.hilt.work.HiltWorker
 import androidx.navigation.NavDeepLinkBuilder
@@ -17,12 +18,9 @@ import com.m.vodovoz.R
 import com.m.vodovoz.common.notification.NotificationChannels
 import com.m.vodovoz.common.notification.NotificationConfig
 import com.m.vodovoz.domain.general.respository.WaterAppRepository
-import com.m.vodovoz.feature.profile.waterapp.WaterAppHelper
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
-import kotlinx.coroutines.runBlocking
 import java.time.LocalTime
-import java.time.temporal.ChronoField
 
 @HiltWorker
 class WaterAppWorker @AssistedInject constructor(
@@ -58,7 +56,8 @@ class WaterAppWorker @AssistedInject constructor(
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setColor(iconColor)
             .setColorized(true)
-            .setSmallIcon(R.mipmap.notification_icon)
+            .setSmallIcon(R.drawable.ic_notification_final)
+            .setColor(getColor(applicationContext, R.color.new_product_blue))
             .setAutoCancel(true)
             .setContentIntent(pendingIntent)
             .build()

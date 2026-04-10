@@ -73,7 +73,7 @@ class NotificationFactory(
             NotificationChannels.NOTIFICATION_CHANNEL_ID
         ).apply {
             setPriority(NotificationCompat.PRIORITY_HIGH)
-            setSmallIcon(R.drawable.notification_icon_final)
+            setSmallIcon(R.drawable.ic_notification_final)
             setAutoCancel(false)
             setColor(ContextCompat.getColor(applicationContext, R.color.new_product_blue))
             setContentIntent(pendingIntent)
