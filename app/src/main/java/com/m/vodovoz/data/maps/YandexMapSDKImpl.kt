@@ -18,6 +18,7 @@ import com.yandex.mapkit.search.SearchFactory
 import com.yandex.mapkit.search.SearchManager
 import com.yandex.mapkit.search.SearchManagerType
 import com.yandex.mapkit.search.SearchOptions
+import com.yandex.mapkit.search.SearchType
 import com.yandex.mapkit.search.Session
 import com.yandex.mapkit.search.SuggestItem
 import com.yandex.mapkit.search.SuggestOptions
@@ -39,7 +40,7 @@ typealias YandexSearchResponse = Response
 class YandexMapSDKImpl @Inject constructor() : YandexMapSDK {
 
     companion object {
-        private const val KILOMETERS = 1.2 /*80km*/
+        private const val KILOMETERS = 1.6 /*90km*/
 
         private val moscowCenter = Point(55.75, 37.62)
 
@@ -92,7 +93,10 @@ class YandexMapSDKImpl @Inject constructor() : YandexMapSDK {
             searchManager.submit(
                 address,
                 Geometry.fromBoundingBox(moscowBoundingBox),
-                SearchOptions(),
+                SearchOptions()
+                    .setSearchTypes(SearchType.GEO.value)
+                    .setResultPageSize(6)
+                    .setGeometry(false),
                 object : Session.SearchListener {
                     override fun onSearchResponse(p0: Response) {
                         cont.resume(p0) { _, _, _ -> }
