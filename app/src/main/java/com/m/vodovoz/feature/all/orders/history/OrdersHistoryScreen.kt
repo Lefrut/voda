@@ -66,20 +66,22 @@ fun OrdersHistoryScreen(
                 ) {
                     OrdersHistoryBody(
                         searchMode = viewState.searchMode,
-                        currentFilters = viewState.currentFilters,
+                        tabs = viewState.tabs,
+                        selectedTabIndex = viewState.selectedTabIndex,
+                        currentYear = viewState.currentYear,
+                        currentTabPlaceholder = viewState.currentTabPlaceholder,
                         items = viewState.items,
                         itemsLoading = viewState.loadStates.refresh is LoadState.Loading,
                         appendItems = viewState.loadStates.append is LoadState.Loading,
-                        filters = viewState.filters,
                         banners = viewState.banners,
                         onProductSee = { i ->
                             viewModel.notifyPaging(i)
                         },
-                        onFilterSelect = { filter ->
-                            viewModel.selectFilter(filter)
+                        onTabSelect = { index ->
+                            viewModel.selectTab(index)
                         },
-                        onAllFiltersSelect = {
-                            viewModel.selectAllFilters()
+                        onYearSelect = { year ->
+                            viewModel.selectYear(year)
                         },
                         onItemClick = { item ->
                             viewModel.navigateToOrderDetails(item)
@@ -92,6 +94,9 @@ fun OrdersHistoryScreen(
                         },
                         onItemButtonClick = { ordersHistoryItem ->
                             viewModel.activateOrderItemButton(ordersHistoryItem)
+                        },
+                        onPlaceholderButtonClick = {
+                            viewModel.navigateToCatalog()
                         }
                     )
                 }

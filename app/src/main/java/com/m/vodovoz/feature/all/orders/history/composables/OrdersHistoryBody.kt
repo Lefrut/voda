@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -31,15 +32,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -55,142 +61,263 @@ import com.m.vodovoz.design_system.composables.chip.VodovozChip
 import com.m.vodovoz.design_system.composables.chip.VodovozColorChip
 import com.m.vodovoz.design_system.composables.decoration.SmallBannerPager
 import com.m.vodovoz.design_system.composables.placeholders.LoadingPlaceholder
+import com.m.vodovoz.design_system.composables.placeholders.VodovozPlaceholder
+import com.m.vodovoz.design_system.composables.tab_row.VodovozTab
+import com.m.vodovoz.design_system.composables.tab_row.VodovozTabRow
 import com.m.vodovoz.design_system.composables.tab_row.VodovozScrollableTabRow
 import com.m.vodovoz.design_system.model.AboutAdvertisingUi
 import com.m.vodovoz.design_system.model.BannerUi
-import com.m.vodovoz.feature.all.orders.history.model.OrderFilterUi
+import com.m.vodovoz.design_system.model.VodovozPlaceholderUi
 import com.m.vodovoz.feature.all.orders.history.model.OrdersHistoryButtonUi
 import com.m.vodovoz.feature.all.orders.history.model.OrdersHistoryItemUi
 import com.m.vodovoz.feature.all.orders.history.model.OrdersHistoryProductUi
-import com.m.vodovoz.util.extensions.indexOfOrNull
+import com.m.vodovoz.feature.all.orders.history.model.OrdersHistoryTabUi
+import kotlin.math.ceil
+
+private fun measuredHeightOrZero(
+    shouldCount: Boolean,
+    heightPx: Int
+): Int {
+    return if (shouldCount) {
+        heightPx
+    } else {
+        0
+    }
+}
 
 @Composable
 fun OrdersHistoryBody(
     modifier: Modifier = Modifier,
     searchMode: Boolean,
-    currentFilters: List<OrderFilterUi>,
+    tabs: List<OrdersHistoryTabUi>,
+    selectedTabIndex: Int,
+    currentYear: String?,
+    currentTabPlaceholder: VodovozPlaceholderUi?,
     items: List<OrdersHistoryItemUi>,
     itemsLoading: Boolean,
     appendItems: Boolean,
-    filters: List<OrderFilterUi>,
     banners: List<BannerUi>,
     onProductSee: (Int) -> Unit,
-    onFilterSelect: (OrderFilterUi) -> Unit,
-    onAllFiltersSelect: () -> Unit,
+    onTabSelect: (Int) -> Unit,
+    onYearSelect: (String) -> Unit,
     onItemClick: (OrdersHistoryItemUi) -> Unit,
     onItemButtonClick: (OrdersHistoryItemUi) -> Unit,
     onBannerClick: (BannerUi) -> Unit,
     onAboutAdvertisingClick: (AboutAdvertisingUi) -> Unit,
+    onPlaceholderButtonClick: () -> Unit,
 ) {
-    LazyColumn(
+    val density = LocalDensity.current
+
+    val years = tabs.getOrNull(selectedTabIndex)?.years.orEmpty()
+    val selectedYearIndex = years.indexOf(currentYear)
+
+    var columnHeightPx by remember { mutableIntStateOf(0) }
+    var bannersHeightPx by remember { mutableIntStateOf(0) }
+    var topSpacerHeightPx by remember { mutableIntStateOf(0) }
+    var tabsYearsHeightPx by remember { mutableIntStateOf(0) }
+    var bottomSpacerHeightPx by remember { mutableIntStateOf(0) }
+
+    val bottomListPadding = 8.dp
+    val bottomListPaddingPx = with(density) {
+        bottomListPadding.roundToPx()
+    }
+
+    val hasTopSpacer = tabs.isNotEmpty() || years.isNotEmpty()
+
+    val placeholderHeightDp = with(density) {
+        val remainingHeightPx =
+            columnHeightPx -
+                    measuredHeightOrZero(
+                        shouldCount = banners.isNotEmpty(),
+                        heightPx = bannersHeightPx
+                    ) -
+                    measuredHeightOrZero(
+                        shouldCount = hasTopSpacer,
+                        heightPx = topSpacerHeightPx
+                    ) -
+                    measuredHeightOrZero(
+                        shouldCount = !searchMode,
+                        heightPx = tabsYearsHeightPx
+                    ) -
+                    measuredHeightOrZero(
+                        shouldCount = !searchMode,
+                        heightPx = bottomSpacerHeightPx
+                    ) -
+                    bottomListPaddingPx
+
+        remainingHeightPx.coerceAtLeast(0).toFloat().toDp()
+    }
+
+    Column(
         modifier = modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.surface),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        contentPadding = PaddingValues(bottom = 8.dp)
+            .background(MaterialTheme.colorScheme.surface)
+            .onSizeChanged {
+                columnHeightPx = it.height
+            }
     ) {
-
-        if (!searchMode) {
-            stickyHeader(
-                key = "TabRow",
-                contentType = "TabRow"
+        if (banners.isNotEmpty()) {
+            Box(
+                Modifier
+                    .fillMaxWidth()
+                    .onSizeChanged {
+                        bannersHeightPx = it.height
+                    }
+                    .background(
+                        MaterialTheme.colorScheme.background,
+                        MaterialTheme.shapes.large
+                    )
             ) {
-
-                val middleTabIndex =
-                    (filters.indexOfOrNull(currentFilters.getOrNull(currentFilters.size / 2))
-                        ?.plus(1)) ?: 0
-
-                Column {
-                    VodovozScrollableTabRow(
-                        modifier = Modifier
-                            .background(MaterialTheme.colorScheme.background)
-
-                            .padding(bottom = 20.dp, top = 8.dp)
-                            .fillParentMaxWidth(),
-                        selectedTabIndex = middleTabIndex,
-                        edgePadding = 16.dp,
-                        spacing = 8.dp,
-                    ) {
-                        VodovozChip(
-                            text = stringResource(id = R.string.all),
-                            selected = currentFilters.isEmpty(),
-                            onSelect = { onAllFiltersSelect() }
-                        )
-
-
-                        filters.forEach { filter ->
-                            VodovozChip(
-                                text = filter.name,
-                                selected = currentFilters.contains(filter),
-                                onSelect = { onFilterSelect(filter) }
-                            )
-                        }
-                    }
-
-                    if (banners.isNotEmpty()) {
-                        Box(
-                            Modifier
-                                .fillMaxWidth()
-                                .background(
-                                    MaterialTheme.colorScheme.background,
-                                    MaterialTheme.shapes.large.copy(
-                                        topStart = CornerSize(0.dp),
-                                        topEnd = CornerSize(0.dp)
-                                    )
-                                )
-                                .padding(bottom = 12.dp)
-                        ) {
-                            SmallBannerPager(
-                                banners = banners,
-                                onBannerClick = onBannerClick,
-                                onAboutAdvertisingClick = onAboutAdvertisingClick
-                            )
-                        }
-                    }
-                }
-
+                SmallBannerPager(
+                    banners = banners,
+                    onBannerClick = onBannerClick,
+                    onAboutAdvertisingClick = onAboutAdvertisingClick
+                )
             }
         }
-        if (itemsLoading) {
-            item {
-                LoadingPlaceholder(
-                    modifier = Modifier.padding(top = 32.dp),
-                    containerColor = Color.Transparent
-                )
-            }
-        } else {
-            itemsIndexed(
-                items = items,
-                key = { _, ordersHistoryItemUi -> ordersHistoryItemUi.id }
-            ) { index, item ->
-                LaunchedEffect(index) {
-                    onProductSee(index)
-                }
 
-                OrdersHistoryItemCard(
-                    modifier = Modifier.padding(top = 8.dp),
-                    orderHistoryItem = item,
-                    onClick = onItemClick,
-                    onButtonClick = onItemButtonClick
-                )
-            }
-
-            if (appendItems) {
-                item {
-                    CircularProgressIndicator(
-                        color = MaterialTheme.colorScheme.primary,
-                        strokeWidth = 3.dp,
-                        modifier = Modifier
-                            .padding(vertical = 2.dp)
-                            .fillParentMaxWidth()
-                            .wrapContentWidth()
-                            .size(26.dp),
-                        trackColor = Color.Transparent
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            contentPadding = PaddingValues(bottom = bottomListPadding)
+        ) {
+            stickyHeader {
+                if (hasTopSpacer) {
+                    Spacer(
+                        Modifier
+                            .height(8.dp)
+                            .fillMaxWidth()
+                            .onSizeChanged {
+                                topSpacerHeightPx = it.height
+                            }
+                            .background(MaterialTheme.colorScheme.background)
                     )
                 }
             }
-        }
 
+            if (!searchMode) {
+                item {
+                    Column(
+                        modifier = Modifier
+                            .background(MaterialTheme.colorScheme.background)
+                            .onSizeChanged {
+                                tabsYearsHeightPx = it.height
+                            }
+                    ) {
+                        if (tabs.isNotEmpty()) {
+                            VodovozTabRow(
+                                modifier = Modifier
+                                    .background(MaterialTheme.colorScheme.background)
+                                    .fillMaxWidth()
+                                    .padding(start = 16.dp, end = 16.dp),
+                                selectedTabPosition = selectedTabIndex
+                            ) {
+                                tabs.forEachIndexed { index, tab ->
+                                    VodovozTab(
+                                        title = tab.name,
+                                        position = index,
+                                        selected = selectedTabIndex == index,
+                                        onClick = onTabSelect
+                                    )
+                                }
+                            }
+                        }
+
+                        if (years.isNotEmpty()) {
+                            VodovozScrollableTabRow(
+                                modifier = Modifier
+                                    .background(MaterialTheme.colorScheme.background)
+                                    .padding(top = 8.dp)
+                                    .fillMaxWidth(),
+                                selectedTabIndex = selectedYearIndex,
+                                edgePadding = 16.dp,
+                                spacing = 8.dp,
+                            ) {
+                                years.forEach { year ->
+                                    VodovozChip(
+                                        text = year,
+                                        selected = currentYear == year,
+                                        onSelect = { onYearSelect(year) }
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+
+                stickyHeader {
+                    Spacer(
+                        Modifier
+                            .height(12.dp)
+                            .fillMaxWidth()
+                            .onSizeChanged {
+                                bottomSpacerHeightPx = it.height
+                            }
+                            .background(
+                                MaterialTheme.colorScheme.background,
+                                MaterialTheme.shapes.large.copy(
+                                    topStart = CornerSize(0.dp),
+                                    topEnd = CornerSize(0.dp)
+                                )
+                            )
+                    )
+                }
+            }
+
+            if (itemsLoading) {
+                item {
+                    LoadingPlaceholder(
+                        modifier = Modifier
+                            .padding(top = 8.dp)
+                            .height(placeholderHeightDp),
+                        containerColor = Color.Transparent
+                    )
+                }
+            } else if (items.isEmpty() && currentTabPlaceholder != null) {
+                item {
+                    VodovozPlaceholder(
+                        modifier = Modifier
+                            .padding(top = 8.dp)
+                            .fillMaxWidth()
+                            .height(placeholderHeightDp),
+                        data = currentTabPlaceholder,
+                        onButtonClick = onPlaceholderButtonClick
+                    )
+                }
+            } else {
+                itemsIndexed(
+                    items = items
+                ) { index, item ->
+                    LaunchedEffect(index) {
+                        onProductSee(index)
+                    }
+
+                    OrdersHistoryItemCard(
+                        modifier = Modifier
+                            .padding(top = 8.dp)
+                            .animateItem(fadeOutSpec = null),
+                        orderHistoryItem = item,
+                        onClick = onItemClick,
+                        onButtonClick = onItemButtonClick
+                    )
+                }
+
+                if (appendItems) {
+                    item {
+                        CircularProgressIndicator(
+                            color = MaterialTheme.colorScheme.primary,
+                            strokeWidth = 3.dp,
+                            modifier = Modifier
+                                .padding(vertical = 2.dp)
+                                .fillParentMaxWidth()
+                                .wrapContentWidth()
+                                .size(26.dp),
+                            trackColor = Color.Transparent
+                        )
+                    }
+                }
+            }
+        }
     }
 }
 

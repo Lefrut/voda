@@ -263,11 +263,13 @@ interface VodovozService {
     /**
      * OrdersHistory requests
      * */
-    @GET("profile/historyorder/spisokzakazov.php?action=spisok")
+    @GET("profile/historyorder/spisokzakazov_new.php?action=spisok")
     suspend fun getOrdersHistoryDetails(
 
         @Query("nav") page: Int = 1,
-        @Query("status") statuses: String? = null,
+        @Query("actual") selectedTabId: String? = null,
+        @Query("actyal") selectedTabIdCompat: String? = null,
+        @Query("year") year: String? = null,
         @Query("search") search: String? = null,
     ): Response<VodovozResponseDTO<OrdersHistoryDetailsDTO>>
 

@@ -24,6 +24,7 @@ import com.m.vodovoz.data.vodovoz_service.model.order.ORDERING_COMMENT_OKNO
 import com.m.vodovoz.data.vodovoz_service.model.order.ORDERS_HISTORY_ITEM_DTO
 import com.m.vodovoz.data.vodovoz_service.model.order.ORDERS_HISTORY_KNOPKA_DTO
 import com.m.vodovoz.data.vodovoz_service.model.order.ORDERS_HISTORY_PRODUCT_DTO
+import com.m.vodovoz.data.vodovoz_service.model.order.ORDERS_HISTORY_TAB_DTO
 import com.m.vodovoz.data.vodovoz_service.model.order.ORDER_DETAILS_KNOPKA_DTO
 import com.m.vodovoz.data.vodovoz_service.model.order.ORDER_DETAILS_TOVAR_DTO
 import com.m.vodovoz.data.vodovoz_service.model.order.ORDER_MENU_SECTION_DTO
@@ -67,6 +68,7 @@ import com.m.vodovoz.domain.general.model.order.OrdersHistoryButtonModel
 import com.m.vodovoz.domain.general.model.order.OrdersHistoryDetailsModel
 import com.m.vodovoz.domain.general.model.order.OrdersHistoryItemModel
 import com.m.vodovoz.domain.general.model.order.OrdersHistoryProductModel
+import com.m.vodovoz.domain.general.model.order.OrdersHistoryTabModel
 import com.m.vodovoz.domain.general.model.order.PaymentMethodDetailsModel
 import com.m.vodovoz.domain.general.model.order.PaymentMethodItemModel
 import com.m.vodovoz.domain.general.model.order.RecipientDetailsModel
@@ -491,21 +493,61 @@ fun ORDER_STATUS_DTO.toDomain(): OrderStatusModel? {
 }
 
 fun OrdersHistoryDetailsDTO.toDomain(): OrdersHistoryDetailsModel {
+    val tabs = (TABS ?: TAB)?.mapNotNull { tab -> tab.toDomain() }
+        ?: DANNYE?.let { items ->
+            listOf(
+                OrdersHistoryTabModel(
+                    id = "",
+                    name = TITLE.orEmpty(),
+                    years = emptyList(),
+                    selectedYear = null,
+                    items = items.mapToDomain(),
+                    pageCount = Int.MAX_VALUE,
+                    placeholder = null
+                )
+            )
+        }.orEmpty()
+
     return OrdersHistoryDetailsModel(
         title = TITLE ?: "",
-        filters = FILTERSTATYS?.mapNotNull { it.toDomain() } ?: emptyList(),
         banners = BANNER?.mapToDomain() ?: emptyList(),
-        items = DANNYE?.mapToDomain()
-            ?: throw IllegalArgumentException("OrderHistory items can't be null")
+        tabs = tabs,
+        activeTabId = ACTIVE_TAB.orEmpty(),
+        placeholder = toPlaceholderDomain()
     )
 }
 
+fun OrdersHistoryDetailsDTO.toPlaceholderDomain(): VodovozPlaceholderModel? {
+    if (ZAGALOVOK.isNullOrBlank() && MESSAGE.isNullOrBlank() && IMAGE.isNullOrBlank() && KNOPKA == null) {
+        return null
+    }
+
+    return VodovozPlaceholderModel(
+        title = TITLE.orEmpty(),
+        headerHtml = ZAGALOVOK.orEmpty(),
+        descriptionHtml = MESSAGE.orEmpty(),
+        imageUrl = IMAGE?.toVodovozUrl().orEmpty(),
+        button = KNOPKA?.toDomain()
+    )
+}
+
+fun ORDERS_HISTORY_TAB_DTO.toDomain(): OrdersHistoryTabModel? {
+    val availableYears = AVAILABLE_YEARS.orEmpty()
+
+    return OrdersHistoryTabModel(
+        id = ID ?: "",
+        name = NAME ?: return null,
+        years = availableYears.mapNotNull { it.YEAR }.ifEmpty { GODA.orEmpty() },
+        selectedYear = SELECTED_YEAR ?: availableYears.firstOrNull { it.ACTIVE == true }?.YEAR,
+        items = (ORDERS ?: DANNYE).orEmpty().mapToDomain(),
+        pageCount = PAGINATION?.totalPages?.takeIf { it > 0 } ?: 1,
+        placeholder = DATA?.toDomain() ?: ERROR?.toDomain()
+    )
+}
 
 @JvmName("mapToOrdersHistoryItemModelList")
 fun List<ORDERS_HISTORY_ITEM_DTO>.mapToDomain(): List<OrdersHistoryItemModel> {
-    return mapNotNull { it.toDomain() }.ifEmpty {
-        throw IllegalArgumentException("OrderHistory items can't be null")
-    }
+    return mapNotNull { it.toDomain() }
 }
 
 fun ORDERS_HISTORY_ITEM_DTO.toDomain(): OrdersHistoryItemModel? {

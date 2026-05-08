@@ -171,10 +171,15 @@ interface VodovozServiceRepository {
 
     fun sendFirebaseToken(token: String): FlowResult<String>
 
-    fun getOrdersHistoryDetails(): FlowResult<OrdersHistoryDetailsModel>
+    fun getOrdersHistoryDetails(
+        selectedTabId: String?,
+        year: String?,
+        searchQuery: String,
+    ): FlowResult<OrdersHistoryDetailsModel>
 
     fun getOrdersHistoryItemsPaged(
-        statuses: String,
+        selectedTabId: String?,
+        year: String?,
         searchQuery: String,
     ): Flow<PagingData<OrdersHistoryItemModel>>
 

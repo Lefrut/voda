@@ -26,7 +26,21 @@ fun BrandSectionDTO.toPagingSourceData(): PagingSourceData<BrandModel> {
     )
 }
 
-fun OrdersHistoryDetailsDTO.toPagingSourceData(): PagingSourceData<OrdersHistoryItemModel> {
+fun OrdersHistoryDetailsDTO.toPagingSourceData(
+    selectedTabId: String?,
+): PagingSourceData<OrdersHistoryItemModel> {
+    val tabs = (TABS ?: TAB).orEmpty()
+    val selectedTab = tabs.firstOrNull { it.ID == selectedTabId }
+        ?: tabs.firstOrNull { it.ID == ACTIVE_TAB }
+        ?: tabs.firstOrNull()
+
+    if (selectedTab != null) {
+        return PagingSourceData(
+            items = (selectedTab.ORDERS ?: selectedTab.DANNYE ?: DANNYE).orEmpty().mapToDomain(),
+            pageCount = selectedTab.PAGINATION?.totalPages.orUnknownPageCount()
+        )
+    }
+
     return PagingSourceData(
         items = DANNYE?.mapToDomain()
             ?: throw IllegalArgumentException("OrderHistory items can't be null")

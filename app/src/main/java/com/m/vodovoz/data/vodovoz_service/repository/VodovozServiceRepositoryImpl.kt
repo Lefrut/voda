@@ -519,19 +519,31 @@ class VodovozServiceRepositoryImpl @Inject constructor(
 
     }
 
-    override fun getOrdersHistoryDetails(): Flow<Result<OrdersHistoryDetailsModel>> {
+    override fun getOrdersHistoryDetails(
+        selectedTabId: String?,
+        year: String?,
+        searchQuery: String,
+    ): Flow<Result<OrdersHistoryDetailsModel>> {
+        val selectedTabQuery = selectedTabId?.takeIf { it.isNotBlank() }
         return executeCanEmptyRequest(
             request = {
-                vodovozService.getOrdersHistoryDetails()
+                vodovozService.getOrdersHistoryDetails(
+                    selectedTabId = selectedTabQuery,
+                    selectedTabIdCompat = selectedTabQuery,
+                    year = year?.takeIf { it.isNotBlank() },
+                    search = searchQuery.takeIf { it.isNotBlank() }
+                )
             },
             toDomain = { toDomain() }
         )
     }
 
     override fun getOrdersHistoryItemsPaged(
-        statuses: String,
+        selectedTabId: String?,
+        year: String?,
         searchQuery: String,
     ): Flow<PagingData<OrdersHistoryItemModel>> {
+        val selectedTabQuery = selectedTabId?.takeIf { it.isNotBlank() }
         return VodovozPagerFactory.getFlow(
             executor = defaultExecutor,
 
@@ -539,11 +551,13 @@ class VodovozServiceRepositoryImpl @Inject constructor(
                 vodovozService.getOrdersHistoryDetails(
 
                     page = page,
-                    statuses = if (searchQuery.isNotBlank()) null else statuses,
+                    selectedTabId = selectedTabQuery,
+                    selectedTabIdCompat = selectedTabQuery,
+                    year = year?.takeIf { it.isNotBlank() },
                     search = searchQuery.takeIf { it.isNotBlank() }
                 )
             },
-            mapper = { dto -> dto.toPagingSourceData() }
+            mapper = { dto -> dto.toPagingSourceData(selectedTabQuery) }
         )
     }
 
