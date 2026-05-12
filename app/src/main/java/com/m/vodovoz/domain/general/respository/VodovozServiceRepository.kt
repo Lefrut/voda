@@ -435,6 +435,7 @@ interface VodovozServiceRepository {
         productsArticle: String,
     ): Flow<PagingData<ProductModel>>
 
+    fun getBestForYouProductsPaged(): Flow<PagingData<ProductModel>>
 
     suspend fun addProductToCart(
         productId: Long,

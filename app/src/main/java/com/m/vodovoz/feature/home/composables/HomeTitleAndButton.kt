@@ -49,9 +49,8 @@ fun TitleAndButton(
                     .clickable { onShowAllClick(button.action) }
                     .padding(start = 10.dp)
             ) {
-
                 Text(
-                    text = button.name.ifEmpty { stringResource(id = R.string.all) },
+                    text = button.name,
                     color = MaterialTheme.colorScheme.primary,
                     style = MaterialTheme.typography.bodyMedium
                 )

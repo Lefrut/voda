@@ -6,20 +6,23 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.CombinedLoadStates
 import androidx.paging.map
 import com.m.vodovoz.common.cart.CartManager
+import com.m.vodovoz.common.like.LikeManager
 import com.m.vodovoz.design_system.model.AboutAdvertisingUi
 import com.m.vodovoz.design_system.model.BannerUi
+import com.m.vodovoz.design_system.model.ProductUi
 import com.m.vodovoz.design_system.model.VodovozPlaceholderUi
 import com.m.vodovoz.design_system.model.mapToUi
 import com.m.vodovoz.design_system.model.toUi
 import com.m.vodovoz.domain.general.model.exceptions.EmptyResultException
+import com.m.vodovoz.domain.general.respository.UserPreferencesRepository
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
 import com.m.vodovoz.feature.all.orders.history.model.OrdersHistoryItemUi
 import com.m.vodovoz.feature.all.orders.history.model.OrdersHistoryTabUi
 import com.m.vodovoz.feature.all.orders.history.model.mapToUi
 import com.m.vodovoz.feature.all.orders.history.model.toUi
 import com.m.vodovoz.ui.mvi.Event
-import com.m.vodovoz.ui.paging.PagingMviViewModel
-import com.m.vodovoz.ui.paging.PagingState
+import com.m.vodovoz.ui.paging.PagingProductsMviViewModel2
+import com.m.vodovoz.ui.paging.PagingState2
 import com.m.vodovoz.ui.paging.emptyCombinedLoadStates
 import com.m.vodovoz.util.extensions.debounceWithMax
 import com.m.vodovoz.util.extensions.singleResult
@@ -39,13 +42,20 @@ import javax.inject.Inject
 @Stable
 class OrdersHistoryViewModel @Inject constructor(
     private val cartManager: CartManager,
+    private val likeManager: LikeManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
-) : PagingMviViewModel<OrdersHistoryItemUi, OrdersHistoryViewModel.AllOrdersState, OrdersHistoryViewModel.AllOrdersEvent>(
-    AllOrdersState()
+    userPreferencesRepository: UserPreferencesRepository,
+) : PagingProductsMviViewModel2<OrdersHistoryItemUi, ProductUi, OrdersHistoryViewModel.AllOrdersState, OrdersHistoryViewModel.AllOrdersEvent>(
+    state = AllOrdersState(),
+    blockedProductsFlow = cartManager.blockedProductsFlow,
+    favoritesFlow = likeManager.observeLikes(),
+    cartFlow = cartManager.observeCarts(),
+    canViewAdultProducts = userPreferencesRepository.canViewAdultProducts
 ) {
 
     private val querySharedFlow = MutableSharedFlow<String>(0)
     private var ordersPagingJob: Job? = null
+    private var productsPagingJob: Job? = null
 
     init {
         handleQueries()
@@ -63,7 +73,6 @@ class OrdersHistoryViewModel @Inject constructor(
 
     fun fetchOrdersHistoryDetails() = viewModelScope.launch {
 
-
         if (stateSnapshot.uiState !is AllOrdersUiState.Body) {
             updateState { s ->
                 s.copy(uiState = AllOrdersUiState.Loading)
@@ -72,15 +81,20 @@ class OrdersHistoryViewModel @Inject constructor(
 
         ordersPagingJob?.cancel()
         ordersPagingJob = viewModelScope.launch {
-            vodovozServiceRepository.getOrdersHistoryItemsPaged(
-                selectedTabId = stateSnapshot.currentTab?.id,
-                year = stateSnapshot.currentYear,
-                searchQuery = stateSnapshot.searchQuery
-            ).map { pagingData ->
-                pagingData.map { historyItemModel ->
-                    historyItemModel.toUi()
-                }
-            }.collectPagingData()
+            launch {
+                vodovozServiceRepository.getOrdersHistoryItemsPaged(
+                    selectedTabId = stateSnapshot.currentTab?.id,
+                    year = stateSnapshot.currentYear,
+                    searchQuery = stateSnapshot.searchQuery
+                ).map { pagingData ->
+                    pagingData.map { historyItemModel ->
+                        historyItemModel.toUi()
+                    }
+                }.collectPagingData1()
+            }
+            launch {
+                fetchBestForYouProducts()
+            }
         }
 
         val ordersHistoryDetailsResult =
@@ -185,8 +199,8 @@ class OrdersHistoryViewModel @Inject constructor(
                 selectedTabIndex = index,
                 currentYear = null,
                 currentTabPlaceholder = s.tabs.getOrNull(index)?.placeholder,
-                items = emptyList(),
-                loadStates = emptyCombinedLoadStates
+                items1 = emptyList(),
+                loadStates1 = emptyCombinedLoadStates
             )
         }
 
@@ -197,8 +211,8 @@ class OrdersHistoryViewModel @Inject constructor(
         updateState { s ->
             s.copy(
                 currentYear = year,
-                items = emptyList(),
-                loadStates = emptyCombinedLoadStates
+                items1 = emptyList(),
+                loadStates1 = emptyCombinedLoadStates
             )
         }
 
@@ -207,6 +221,37 @@ class OrdersHistoryViewModel @Inject constructor(
 
     fun navigateToOrderDetails(item: OrdersHistoryItemUi) = viewModelScope.launch {
         sendEvent(AllOrdersEvent.GoToOrderDetails(item.id))
+    }
+
+    fun navigateToProductDetails(product: ProductUi) = viewModelScope.launch {
+        sendEvent(AllOrdersEvent.GoToProductDetails(product.id))
+    }
+
+    fun navigateToProductAnalogs(product: ProductUi) = viewModelScope.launch {
+        sendEvent(AllOrdersEvent.GoToProductAnalogs(product.id))
+    }
+
+    fun changeFavorite(product: ProductUi) = viewModelScope.launch {
+        likeManager.changeFavorite(product.id, !product.isFavorite)
+    }
+
+    fun incrementProductToCart(product: ProductUi) = viewModelScope.launch {
+        cartManager.change(product.id, product.cartQuantity + 1)
+    }
+
+    fun decrementProductToCart(product: ProductUi) = viewModelScope.launch {
+        cartManager.change(product.id, product.cartQuantity - 1)
+    }
+
+    private fun fetchBestForYouProducts() {
+        productsPagingJob?.cancel()
+        productsPagingJob = viewModelScope.launch {
+            vodovozServiceRepository.getBestForYouProductsPaged().map { pagingData ->
+                pagingData.map { productModel ->
+                    productModel.toUi()
+                }
+            }.collectPagingData2()
+        }
     }
 
     fun activateOrderItemButton(ordersHistoryItem: OrdersHistoryItemUi) = viewModelScope.launch {
@@ -282,19 +327,30 @@ class OrdersHistoryViewModel @Inject constructor(
         val currentYear: String? = null,
         val currentTabPlaceholder: VodovozPlaceholderUi? = null,
         val banners: List<BannerUi> = emptyList(),
-        override val items: List<OrdersHistoryItemUi> = emptyList(),
-        override val loadStates: CombinedLoadStates = emptyCombinedLoadStates,
+        override val items1: List<OrdersHistoryItemUi> = emptyList(),
+        override val items2: List<ProductUi> = emptyList(),
+        override val loadStates1: CombinedLoadStates = emptyCombinedLoadStates,
+        override val loadStates2: CombinedLoadStates = emptyCombinedLoadStates,
         val showRefreshIndicator: Boolean = false,
         val aboutAdvertisingBS: AboutAdvertisingUi? = null,
-    ) : PagingState<OrdersHistoryItemUi, AllOrdersState>() {
+        val productsTitle: String = "",
+    ) : PagingState2<OrdersHistoryItemUi, ProductUi, AllOrdersState>() {
+
 
         val currentTab: OrdersHistoryTabUi?
             get() = tabs.getOrNull(selectedTabIndex)
 
         override fun copyPagingState(
-            items: List<OrdersHistoryItemUi>,
-            loadStates: CombinedLoadStates,
-        ): AllOrdersState = copy(items = items, loadStates = loadStates)
+            items1: List<OrdersHistoryItemUi>,
+            items2: List<ProductUi>,
+            loadStates1: CombinedLoadStates,
+            loadStates2: CombinedLoadStates,
+        ): AllOrdersState = copy(
+            items1 = items1,
+            items2 = items2,
+            loadStates1 = loadStates1,
+            loadStates2 = loadStates2
+        )
 
     }
 
@@ -304,6 +360,8 @@ class OrdersHistoryViewModel @Inject constructor(
         data object GoToCatalog : AllOrdersEvent()
 
         data class GoToOrderDetails(val id: Long) : AllOrdersEvent()
+        data class GoToProductDetails(val id: Long) : AllOrdersEvent()
+        data class GoToProductAnalogs(val id: Long) : AllOrdersEvent()
         data class OpenUrl(val url: String) : AllOrdersEvent()
         data class GoToWebView(val url: String) : AllOrdersEvent()
         data class ActivateBanner(val banner: BannerUi) : AllOrdersEvent()

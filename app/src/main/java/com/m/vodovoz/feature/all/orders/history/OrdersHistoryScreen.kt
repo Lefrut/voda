@@ -70,12 +70,17 @@ fun OrdersHistoryScreen(
                         selectedTabIndex = viewState.selectedTabIndex,
                         currentYear = viewState.currentYear,
                         currentTabPlaceholder = viewState.currentTabPlaceholder,
-                        items = viewState.items,
-                        itemsLoading = viewState.loadStates.refresh is LoadState.Loading,
-                        appendItems = viewState.loadStates.append is LoadState.Loading,
+                        orders = viewState.items1,
+                        itemsLoading = viewState.loadStates1.refresh is LoadState.Loading,
+                        appendItems = viewState.loadStates1.append is LoadState.Loading || viewState.loadStates2.append is LoadState.Loading,
+                        products = viewState.items2,
+                        productsTitle = viewState.productsTitle,
                         banners = viewState.banners,
+                        onOrderSee = { i ->
+                            viewModel.notifyPaging1(i)
+                        },
                         onProductSee = { i ->
-                            viewModel.notifyPaging(i)
+                            viewModel.notifyPaging2(i)
                         },
                         onTabSelect = { index ->
                             viewModel.selectTab(index)
@@ -94,6 +99,21 @@ fun OrdersHistoryScreen(
                         },
                         onItemButtonClick = { ordersHistoryItem ->
                             viewModel.activateOrderItemButton(ordersHistoryItem)
+                        },
+                        onProductClick = { product ->
+                            viewModel.navigateToProductDetails(product)
+                        },
+                        onProductLike = { product ->
+                            viewModel.changeFavorite(product)
+                        },
+                        onProductAnalogsClick = { product ->
+                            viewModel.navigateToProductAnalogs(product)
+                        },
+                        onIncrementProductToCart = { product ->
+                            viewModel.incrementProductToCart(product)
+                        },
+                        onDecrementProductToCart = { product ->
+                            viewModel.decrementProductToCart(product)
                         },
                         onPlaceholderButtonClick = {
                             viewModel.navigateToCatalog()

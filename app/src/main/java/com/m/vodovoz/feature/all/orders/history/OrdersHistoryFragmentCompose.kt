@@ -16,6 +16,8 @@ import com.m.vodovoz.common.cookie.CookieManager
 import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.core.navigation.activate
 import com.m.vodovoz.core.navigation.navigateToOrderDetails
+import com.m.vodovoz.core.navigation.navigateToProductAnalogs
+import com.m.vodovoz.core.navigation.navigateToProductDetails
 import com.m.vodovoz.core.navigation.navigateToWebView
 import com.m.vodovoz.design_system.VodovozTheme
 import com.m.vodovoz.design_system.effects.LifecycleEffect
@@ -98,6 +100,14 @@ class OrdersHistoryFragment : Fragment() {
 
                 is OrdersHistoryViewModel.AllOrdersEvent.GoToOrderDetails -> {
                     findNavController().navigateToOrderDetails(event.id)
+                }
+
+                is OrdersHistoryViewModel.AllOrdersEvent.GoToProductDetails -> {
+                    findNavController().navigateToProductDetails(event.id)
+                }
+
+                is OrdersHistoryViewModel.AllOrdersEvent.GoToProductAnalogs -> {
+                    findNavController().navigateToProductAnalogs(event.id)
                 }
 
                 is OrdersHistoryViewModel.AllOrdersEvent.GoToWebView -> {

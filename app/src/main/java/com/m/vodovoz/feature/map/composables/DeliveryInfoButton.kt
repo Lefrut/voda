@@ -21,7 +21,7 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.m.vodovoz.design_system.ExtendedTheme
 import com.m.vodovoz.design_system.model.ImageButtonUi
-import com.m.vodovoz.feature.home.composables.dropShadow
+import com.m.vodovoz.design_system.modifiers.dropShadow
 
 @Composable
 fun DeliveryInfoButton(

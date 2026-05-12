@@ -13,10 +13,25 @@ data class VodovozResponseDTO<T>(
     val message: String?,
     @Json(name = "data")
     val data: T?,
+    @Json(name = "navigation")
+    val navigation: VodovozNavigationDTO? = null,
 )
 
 val <T> VodovozResponseDTO<T>.messageOrEmpty: String
     get() = message ?: ""
+
+@Keep
+@JsonClass(generateAdapter = true)
+data class VodovozNavigationDTO(
+    @Json(name = "CURRENT_PAGE")
+    val currentPage: Int?,
+    @Json(name = "PAGE_SIZE")
+    val pageSize: Int?,
+    @Json(name = "TOTAL_COUNT")
+    val totalCount: Int?,
+    @Json(name = "TOTAL_PAGES")
+    val totalPages: Int?,
+)
 
 @Keep
 data class VodovozPlaceholderDTO(

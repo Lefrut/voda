@@ -605,6 +605,11 @@ interface VodovozService {
         @Query("nav") page: Int = 1,
     ): Response<VodovozResponseDTO<RecommendationsDTO>>
 
+    @GET("functions/doptovary.php?action=tovar")
+    suspend fun getBestForYouProducts(
+        @Query("nav") page: Int = 1
+    ): Response<VodovozResponseDTO<RecommendationsDTO>>
+
     @GET("korzina/index.php?action=getbasket")
     suspend fun getCartDetails(
         @Query("coupon") coupon: String? = null,

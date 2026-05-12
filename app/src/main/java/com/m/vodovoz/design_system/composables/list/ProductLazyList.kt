@@ -233,7 +233,7 @@ fun LazyGridScope.gridProducts(
             ) { index ->
                 SideEffect { onProductSee(index) }
 
-                GridHorizontalPadding(isStartPadding = index % 2 == 0) {
+                GridEdgePadding(isStartPadding = index % 2 == 0) {
                     GridProductCard(
                         product = products[index],
                         onClick = onProductClick,
@@ -253,7 +253,7 @@ fun LazyGridScope.gridProducts(
 
         else -> {
             items(8) { index ->
-                GridHorizontalPadding(isStartPadding = index % 2 == 0) {
+                GridEdgePadding(isStartPadding = index % 2 == 0) {
                     SkeletonBox(
                         shimmerState = shimmerState,
                         modifier = Modifier
@@ -273,7 +273,7 @@ fun LazyGridScope.gridProducts(
     val countAppend = (products.size % 2) + 2
     items(countAppend, span = { GridItemSpan(1) }) { index ->
         if (loadState.append is LoadState.Loading) {
-            GridHorizontalPadding(isStartPadding = if (countAppend % 2 == 0) index % 2 == 0 else index % 2 == 1) {
+            GridEdgePadding(isStartPadding = if (countAppend % 2 == 0) index % 2 == 0 else index % 2 == 1) {
                 SkeletonBox(
                     shimmerState = shimmerState,
                     modifier = Modifier
@@ -288,7 +288,7 @@ fun LazyGridScope.gridProducts(
 }
 
 @Composable
-inline fun GridHorizontalPadding(
+inline fun GridEdgePadding(
     isStartPadding: Boolean,
     modifier: Modifier = Modifier,
     isEndPadding: Boolean = !isStartPadding,
@@ -299,6 +299,33 @@ inline fun GridHorizontalPadding(
         modifier = modifier.padding(
             start = if (isStartPadding) padding else 0.dp,
             end = if (isEndPadding) padding else 0.dp
+        )
+    ) {
+        content()
+    }
+}
+
+@Composable
+inline fun GridHorizontalPadding(
+    isStartPadding: Boolean,
+    modifier: Modifier = Modifier,
+    isEndPadding: Boolean = !isStartPadding,
+    outerPadding: Dp = 16.dp,
+    betweenPadding: Dp = 8.dp,
+    content: ColumnScope.() -> Unit,
+) {
+    Column(
+        modifier = modifier.padding(
+            start = if (isStartPadding) {
+                outerPadding
+            } else {
+                betweenPadding
+            },
+            end = if (isEndPadding) {
+                outerPadding
+            } else {
+                0.dp
+            }
         )
     ) {
         content()

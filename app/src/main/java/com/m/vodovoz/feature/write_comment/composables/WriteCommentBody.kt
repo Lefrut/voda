@@ -1,5 +1,6 @@
 package com.m.vodovoz.feature.write_comment.composables
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -45,7 +46,7 @@ import com.m.vodovoz.design_system.composables.snackbar.VodovozSnackbarHost
 import com.m.vodovoz.design_system.composables.text_fields.VodovozTextField
 import com.m.vodovoz.design_system.model.widgets.FieldUi
 
-@Suppress("NonSkippableComposable")
+@SuppressLint("UnusedBoxWithConstraintsScope")
 @Composable
 fun WriteCommentBody(
     modifier: Modifier = Modifier,
@@ -92,7 +93,7 @@ fun WriteCommentBody(
             VodovozRatingBar(
                 rating = rating.toFloat(),
                 startSize = 24.dp,
-                spaceBetween = 16.dp,
+                spaceBetween = 8.dp,
                 onRatingChange = onRatingChange
             )
         }

@@ -7,8 +7,6 @@ import com.m.vodovoz.data.vodovoz_service.VodovozRequestExecutor
 import com.m.vodovoz.data.vodovoz_service.model.VodovozResponseDTO
 import kotlinx.coroutines.flow.Flow
 import retrofit2.Response
-import kotlin.reflect.KClass
-import kotlin.reflect.KType
 import kotlin.reflect.typeOf
 
 data object VodovozPagerFactory {
@@ -16,12 +14,19 @@ data object VodovozPagerFactory {
     inline fun <reified T : Any, R : Any> create(
         executor: VodovozRequestExecutor,
         noinline request: suspend (page: Int, limit: Int) -> Response<VodovozResponseDTO<T>>,
-        noinline mapper: (T) -> PagingSourceData<R>
+        noinline mapper: (T) -> PagingSourceData<R>,
+        noinline pageCountProvider: (VodovozResponseDTO<T>) -> Int? = { null },
     ): Pager<Int, R> {
         return Pager(
             config = PagingConfig(5),
             pagingSourceFactory = {
-                VodovozPagingSource(executor, typeOf<VodovozResponseDTO<T>>(), request, mapper)
+                VodovozPagingSource(
+                    executor = executor,
+                    type = typeOf<VodovozResponseDTO<T>>(),
+                    request = request,
+                    pageCountProvider = pageCountProvider,
+                    mapper = mapper,
+                )
             }
         )
     }
@@ -30,9 +35,8 @@ data object VodovozPagerFactory {
         executor: VodovozRequestExecutor,
         noinline request: suspend (page: Int, limit: Int) -> Response<VodovozResponseDTO<T>>,
         noinline mapper: (T) -> PagingSourceData<R>,
+        noinline pageCountProvider: (VodovozResponseDTO<T>) -> Int? = { null },
     ): Flow<PagingData<R>> {
-        return create(executor, request, mapper).flow
+        return create(executor, request, mapper, pageCountProvider).flow
     }
-
-
 }

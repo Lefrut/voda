@@ -89,28 +89,28 @@ fun ProductDetailsRatingBar(
 
         Spacer(modifier = Modifier.weight(1f))
 
-        Row(
-            verticalAlignment = Alignment.Bottom,
-            modifier = Modifier
-                .clickable(onClick = onCopyClick)
-        ) {
-            Text(
-                text = stringResource(R.string.article_number, articleNumber),
-                color = MaterialTheme.colorScheme.surfaceTint,
-                style = MaterialTheme.typography.labelSmall
-            )
-
-            Icon(
-                painter = painterResource(id = R.drawable.ic_copy),
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.surfaceTint,
+        if(articleNumber.isNotEmpty()){
+            Row(
+                verticalAlignment = Alignment.Bottom,
                 modifier = Modifier
-                    .padding(start = 4.dp)
-                    .size(18.dp),
-            )
+                    .clickable(onClick = onCopyClick)
+            ) {
+                Text(
+                    text = stringResource(R.string.article_number, articleNumber),
+                    color = MaterialTheme.colorScheme.surfaceTint,
+                    style = MaterialTheme.typography.labelSmall
+                )
+
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_copy),
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.surfaceTint,
+                    modifier = Modifier
+                        .padding(start = 4.dp)
+                        .size(18.dp),
+                )
+            }
         }
-
-
     }
 }
 

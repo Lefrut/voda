@@ -1,5 +1,6 @@
 package com.m.vodovoz.feature.all.orders.detail.traceorder
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.AnchoredDraggableState
 import androidx.compose.foundation.gestures.DraggableAnchors
@@ -52,12 +53,13 @@ import com.m.vodovoz.design_system.composables.top_bar.VodovozTopBar
 import com.m.vodovoz.design_system.model.ImageAndTextUi
 import com.m.vodovoz.design_system.model.ImageButtonUi
 import com.m.vodovoz.feature.all.orders.detail.traceorder.composables.TraceOrderBody
-import com.m.vodovoz.feature.home.composables.dropShadow
+import com.m.vodovoz.design_system.modifiers.dropShadow
 import com.m.vodovoz.ui.yandex_map.YandexMapUi
 import com.yandex.mapkit.ScreenPoint
 import com.yandex.mapkit.ScreenRect
 import kotlin.math.roundToInt
 
+@SuppressLint("UnusedBoxWithConstraintsScope")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TraceOrderScreen(

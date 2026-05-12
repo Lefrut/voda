@@ -18,8 +18,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentWidth
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material3.ButtonDefaults
@@ -30,19 +32,18 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
@@ -56,10 +57,13 @@ import coil3.compose.AsyncImage
 import coil3.compose.rememberAsyncImagePainter
 import com.m.vodovoz.R
 import com.m.vodovoz.design_system.ExtendedTheme
+import com.m.vodovoz.design_system.composables.card.GridProductCard
 import com.m.vodovoz.design_system.composables.chip.OrderStatusChip
 import com.m.vodovoz.design_system.composables.chip.VodovozChip
 import com.m.vodovoz.design_system.composables.chip.VodovozColorChip
 import com.m.vodovoz.design_system.composables.decoration.SmallBannerPager
+import com.m.vodovoz.design_system.composables.list.GridEdgePadding
+import com.m.vodovoz.design_system.composables.list.GridHorizontalPadding
 import com.m.vodovoz.design_system.composables.placeholders.LoadingPlaceholder
 import com.m.vodovoz.design_system.composables.placeholders.VodovozPlaceholder
 import com.m.vodovoz.design_system.composables.tab_row.VodovozTab
@@ -67,12 +71,13 @@ import com.m.vodovoz.design_system.composables.tab_row.VodovozTabRow
 import com.m.vodovoz.design_system.composables.tab_row.VodovozScrollableTabRow
 import com.m.vodovoz.design_system.model.AboutAdvertisingUi
 import com.m.vodovoz.design_system.model.BannerUi
+import com.m.vodovoz.design_system.model.ProductUi
 import com.m.vodovoz.design_system.model.VodovozPlaceholderUi
 import com.m.vodovoz.feature.all.orders.history.model.OrdersHistoryButtonUi
 import com.m.vodovoz.feature.all.orders.history.model.OrdersHistoryItemUi
 import com.m.vodovoz.feature.all.orders.history.model.OrdersHistoryProductUi
 import com.m.vodovoz.feature.all.orders.history.model.OrdersHistoryTabUi
-import kotlin.math.ceil
+import com.m.vodovoz.feature.home.composables.TitleAndButton
 
 private fun measuredHeightOrZero(
     shouldCount: Boolean,
@@ -93,7 +98,6 @@ fun OrdersHistoryBody(
     selectedTabIndex: Int,
     currentYear: String?,
     currentTabPlaceholder: VodovozPlaceholderUi?,
-    items: List<OrdersHistoryItemUi>,
     itemsLoading: Boolean,
     appendItems: Boolean,
     banners: List<BannerUi>,
@@ -105,6 +109,15 @@ fun OrdersHistoryBody(
     onBannerClick: (BannerUi) -> Unit,
     onAboutAdvertisingClick: (AboutAdvertisingUi) -> Unit,
     onPlaceholderButtonClick: () -> Unit,
+    products: List<ProductUi>,
+    productsTitle: String,
+    orders: List<OrdersHistoryItemUi>,
+    onOrderSee: (Int) -> Unit,
+    onProductClick: (ProductUi) -> Unit,
+    onProductLike: (ProductUi) -> Unit,
+    onProductAnalogsClick: (ProductUi) -> Unit,
+    onIncrementProductToCart: (ProductUi) -> Unit,
+    onDecrementProductToCart: (ProductUi) -> Unit,
 ) {
     val density = LocalDensity.current
 
@@ -176,9 +189,9 @@ fun OrdersHistoryBody(
             }
         }
 
-        LazyColumn(
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(2),
             modifier = Modifier.fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
             contentPadding = PaddingValues(bottom = bottomListPadding)
         ) {
             stickyHeader {
@@ -196,7 +209,7 @@ fun OrdersHistoryBody(
             }
 
             if (!searchMode) {
-                item {
+                item(span = { GridItemSpan(maxLineSpan) }) {
                     Column(
                         modifier = Modifier
                             .background(MaterialTheme.colorScheme.background)
@@ -265,7 +278,7 @@ fun OrdersHistoryBody(
             }
 
             if (itemsLoading) {
-                item {
+                item(span = { GridItemSpan(maxLineSpan) }) {
                     LoadingPlaceholder(
                         modifier = Modifier
                             .padding(top = 8.dp)
@@ -273,8 +286,8 @@ fun OrdersHistoryBody(
                         containerColor = Color.Transparent
                     )
                 }
-            } else if (items.isEmpty() && currentTabPlaceholder != null) {
-                item {
+            } else if (orders.isEmpty() && currentTabPlaceholder != null) {
+                item(span = { GridItemSpan(maxLineSpan) }) {
                     VodovozPlaceholder(
                         modifier = Modifier
                             .padding(top = 8.dp)
@@ -286,10 +299,11 @@ fun OrdersHistoryBody(
                 }
             } else {
                 itemsIndexed(
-                    items = items
+                    items = orders,
+                    span = { i, item -> GridItemSpan(maxLineSpan) }
                 ) { index, item ->
                     LaunchedEffect(index) {
-                        onProductSee(index)
+                        onOrderSee(index)
                     }
 
                     OrdersHistoryItemCard(
@@ -302,14 +316,52 @@ fun OrdersHistoryBody(
                     )
                 }
 
-                if (appendItems) {
+                if(productsTitle.isNotEmpty()){
                     item {
+                        TitleAndButton(
+                            modifier = Modifier
+                                .padding(top = 8.dp)
+                                .background(MaterialTheme.colorScheme.background, shape = MaterialTheme.shapes.large)
+                                .padding(bottom = 8.dp),
+                            title = productsTitle,
+                            button = null
+                        )
+                    }
+                }
+
+                itemsIndexed(products) { i, product ->
+                    LaunchedEffect(i) {
+                        onProductSee(i)
+                    }
+
+                    if (i != products.lastIndex || products.size % 2 == 0) {
+                        GridHorizontalPadding(
+                            modifier = Modifier
+                                .background(MaterialTheme.colorScheme.background)
+                                .padding(top = 8.dp),
+                            isStartPadding = i % 2 == 0
+                        ) {
+                            GridProductCard(
+                                product = product,
+                                onAnalogsClick = onProductAnalogsClick,
+                                onLike = onProductLike,
+                                onClick = onProductClick,
+                                onDecrementToCart = onDecrementProductToCart,
+                                onIncrementToCart = onIncrementProductToCart
+                            )
+                        }
+
+                    }
+                }
+
+                if (appendItems) {
+                    item(span = { GridItemSpan(2) }) {
                         CircularProgressIndicator(
                             color = MaterialTheme.colorScheme.primary,
                             strokeWidth = 3.dp,
                             modifier = Modifier
                                 .padding(vertical = 2.dp)
-                                .fillParentMaxWidth()
+                                .fillMaxWidth()
                                 .wrapContentWidth()
                                 .size(26.dp),
                             trackColor = Color.Transparent

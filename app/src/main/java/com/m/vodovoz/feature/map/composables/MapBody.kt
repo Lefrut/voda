@@ -52,7 +52,7 @@ import com.m.vodovoz.design_system.composables.decoration.MapIconsColumn
 import com.m.vodovoz.design_system.composables.decoration.SkeletonBox
 import com.m.vodovoz.design_system.model.ImageButtonUi
 import com.m.vodovoz.design_system.model.MapPointUi
-import com.m.vodovoz.feature.home.composables.dropShadow
+import com.m.vodovoz.design_system.modifiers.dropShadow
 import com.m.vodovoz.feature.map.MapFlowViewModel
 import com.m.vodovoz.feature.map.model.MapAreaUi
 import com.m.vodovoz.ui.yandex_map.YandexMapUi

@@ -549,7 +549,6 @@ class VodovozServiceRepositoryImpl @Inject constructor(
 
             request = { page, _ ->
                 vodovozService.getOrdersHistoryDetails(
-
                     page = page,
                     selectedTabId = selectedTabQuery,
                     selectedTabIdCompat = selectedTabQuery,
@@ -1621,6 +1620,25 @@ class VodovozServiceRepositoryImpl @Inject constructor(
                 )
             },
             mapper = { dto -> dto.toPagingSourceData() }
+        )
+    }
+
+    override fun getBestForYouProductsPaged(): Flow<PagingData<ProductModel>> {
+        return VodovozPagerFactory.getFlow(
+            executor = defaultExecutor,
+
+            request = { page, _ ->
+                vodovozService.getBestForYouProducts(
+                    page = page,
+                )
+            },
+
+            mapper = { dto ->
+                dto.toPagingSourceData()
+            },
+            pageCountProvider = { response ->
+                response.navigation?.totalPages
+            },
         )
     }
 

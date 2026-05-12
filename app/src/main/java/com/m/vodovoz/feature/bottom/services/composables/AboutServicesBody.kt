@@ -28,7 +28,7 @@ import com.m.vodovoz.design_system.VodovozTheme
 import com.m.vodovoz.design_system.utils.toAnnotatedString
 import com.m.vodovoz.design_system.vodovozTextLinkStyle
 import com.m.vodovoz.feature.bottom.services.model.ServiceUi
-import com.m.vodovoz.feature.home.composables.dropShadow
+import com.m.vodovoz.design_system.modifiers.dropShadow
 
 @Suppress("NonSkippableComposable")
 @Composable

@@ -30,7 +30,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.m.vodovoz.R
 import com.m.vodovoz.design_system.VodovozTheme
-import com.m.vodovoz.feature.home.composables.dropShadow
+import com.m.vodovoz.design_system.modifiers.dropShadow
 import kotlinx.coroutines.delay
 
 @Composable

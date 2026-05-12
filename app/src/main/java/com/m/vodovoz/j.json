@@ -1,0 +1,15 @@
+{
+  "status": "Success",
+  "data": {
+    "title": "Лучшее для вас",
+    "data": [
+
+    ]
+  },
+  "navigation": {
+    "CURRENT_PAGE": 1,
+    "PAGE_SIZE": 10,
+    "TOTAL_COUNT": 23,
+    "TOTAL_PAGES": 3
+  }
+}

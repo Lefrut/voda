@@ -53,7 +53,7 @@ fun RecommendationsDTO.toDomain(): AdditionalProductsBSModel {
     return AdditionalProductsBSModel(
         title = title ?: "",
         description = description ?: "",
-        products = products?.mapToDomain() ?: emptyList(),
+        products = (products ?: data)?.mapToDomain() ?: emptyList(),
         button = button?.toDomain()
     )
 }

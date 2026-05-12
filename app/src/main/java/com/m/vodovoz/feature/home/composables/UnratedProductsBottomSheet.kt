@@ -1,8 +1,9 @@
 package com.m.vodovoz.feature.home.composables
 
-import android.graphics.BlurMaskFilter
+import android.annotation.SuppressLint
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearOutSlowInEasing
@@ -22,6 +23,7 @@ import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.anchoredDraggable
 import androidx.compose.foundation.gestures.animateTo
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -34,7 +36,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.sizeIn
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PageSize
 import androidx.compose.foundation.pager.rememberPagerState
@@ -42,9 +44,7 @@ import androidx.compose.foundation.rememberOverscrollEffect
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
@@ -53,29 +53,23 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Paint
-import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.graphics.drawOutline
-import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.gowtham.ratingbar.RatingBar
@@ -83,17 +77,27 @@ import com.m.vodovoz.R
 import com.m.vodovoz.design_system.VodovozTheme
 import com.m.vodovoz.design_system.composables.bottom_sheet.VodovozDragHandle
 import com.m.vodovoz.design_system.composables.image.VodovozAsyncImage
+import com.m.vodovoz.design_system.modifiers.dropShadow
 import com.m.vodovoz.feature.home.model.UnratedProductUi
 import com.m.vodovoz.feature.home.model.UnratedProductsSectionUi
+import kotlinx.coroutines.launch
 import mx.platacard.pagerindicator.PagerWormIndicator
 
-private val shape = RoundedCornerShape(
-    topStart = 20.dp,
-    topEnd = 20.dp,
+private val partiallyExpandedShape = RoundedCornerShape(
+    topStart = 32.dp,
+    topEnd = 32.dp,
     bottomEnd = 0.dp,
     bottomStart = 0.dp
 )
 
+private val expandedShape = RoundedCornerShape(
+    topStart = 32.dp,
+    topEnd = 32.dp,
+    bottomEnd = 0.dp,
+    bottomStart = 0.dp
+)
+
+@SuppressLint("UnusedBoxWithConstraintsScope")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UnratedProductsBottomSheet(
@@ -104,9 +108,14 @@ fun UnratedProductsBottomSheet(
     onProductNoRateClick: (UnratedProductUi) -> Unit,
 ) {
     val density = LocalDensity.current
+    val scope = rememberCoroutineScope()
 
-    val partiallyExpandedHeight = with(density) { 120.dp.toPx() }
-    val expandedPaddingTopPx = with(density) { 32.dp.toPx() }
+    val partiallyExpandedHeightPx = with(density) {
+        148.dp.toPx()
+    }
+    val expandedPaddingTopPx = with(density) {
+        32.dp.toPx()
+    }
 
     BoxWithConstraints(
         modifier = modifier.fillMaxSize()
@@ -117,47 +126,69 @@ fun UnratedProductsBottomSheet(
             AnchoredDraggableState(initialValue = SheetValue.PartiallyExpanded)
         }
 
-
-        if (state.currentValue == SheetValue.PartiallyExpanded) {
-            LaunchedEffect(layoutHeight) {
-                state.updateAnchors(
-                    newAnchors = DraggableAnchors {
-                        SheetValue.Hidden at layoutHeight.coerceAtLeast(0f)
-                        SheetValue.PartiallyExpanded at layoutHeight - partiallyExpandedHeight
-                        SheetValue.Expanded at expandedPaddingTopPx
-                    }
-                )
-            }
+        var wasExpanded by rememberSaveable {
+            mutableStateOf(false)
         }
 
-        when (state.currentValue) {
-            SheetValue.Hidden -> {}
+        val expandedSheetHeightPx = with(density) {
+            500.dp.toPx()
+        }.coerceAtMost(
+            (layoutHeight - expandedPaddingTopPx)
+                .coerceAtLeast(partiallyExpandedHeightPx)
+        )
 
-            SheetValue.Expanded -> {
-                BackHandler { onDispose() }
-            }
+        val isExpandedMode =
+            wasExpanded ||
+                    state.currentValue == SheetValue.Expanded ||
+                    state.targetValue == SheetValue.Expanded
 
-            SheetValue.PartiallyExpanded -> {}
+        val sheetHeightDp = with(density) {
+            expandedSheetHeightPx.toDp()
         }
 
-        LaunchedEffect(state.currentValue, layoutHeight) {
+        LaunchedEffect(
+            layoutHeight,
+            expandedSheetHeightPx
+        ) {
+            if (layoutHeight <= 0f) return@LaunchedEffect
+
+            state.updateAnchors(
+                newAnchors = DraggableAnchors {
+                    SheetValue.Hidden at layoutHeight
+                    SheetValue.PartiallyExpanded at layoutHeight - partiallyExpandedHeightPx
+                    SheetValue.Expanded at layoutHeight - expandedSheetHeightPx
+                }
+            )
+        }
+
+        LaunchedEffect(state.currentValue) {
             when (state.currentValue) {
+                SheetValue.Expanded -> {
+                    wasExpanded = true
+                }
+
                 SheetValue.Hidden -> {
                     onDispose()
                 }
 
-                SheetValue.Expanded -> {
-                    state.updateAnchors(
-                        DraggableAnchors {
-                            SheetValue.Hidden at layoutHeight.coerceAtLeast(0f)
-                            SheetValue.Expanded at expandedPaddingTopPx
-                        }
-                    )
-                    state.animateTo(SheetValue.Expanded)
-                }
-
-                SheetValue.PartiallyExpanded -> {}
+                SheetValue.PartiallyExpanded -> Unit
             }
+        }
+
+        LaunchedEffect(wasExpanded, state.targetValue) {
+            if (wasExpanded && state.targetValue == SheetValue.PartiallyExpanded) {
+                state.animateTo(SheetValue.Hidden)
+            }
+        }
+
+        val hideSheet = {
+            scope.launch {
+                state.animateTo(SheetValue.Hidden)
+            }
+        }
+
+        BackHandler(enabled = isExpandedMode) {
+            hideSheet()
         }
 
         val animatedOffsetY = remember {
@@ -166,13 +197,36 @@ fun UnratedProductsBottomSheet(
 
         LaunchedEffect(Unit) {
             animatedOffsetY.animateTo(
-                0f,
-                tween(250, 0, LinearOutSlowInEasing)
+                targetValue = 0f,
+                animationSpec = tween(
+                    durationMillis = 250,
+                    delayMillis = 0,
+                    easing = LinearOutSlowInEasing
+                )
             )
         }
 
-        val columnHeight = remember(layoutHeight) {
-            with(density) { (layoutHeight - expandedPaddingTopPx).toDp() }
+        val sheetShape = if (isExpandedMode) {
+            expandedShape
+        } else {
+            partiallyExpandedShape
+        }
+
+        AnimatedVisibility(
+            visible = isExpandedMode,
+            enter = fadeIn(tween(250)),
+            exit = fadeOut(tween(250))
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.2f))
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null,
+                        onClick = { hideSheet() }
+                    )
+            )
         }
 
         Column(
@@ -181,34 +235,64 @@ fun UnratedProductsBottomSheet(
                     translationY = animatedOffsetY.value
                 }
                 .fillMaxWidth()
-                .height(columnHeight)
+                .height(sheetHeightDp)
                 .offset {
                     val sheetOffsetY = try {
                         state.requireOffset()
                     } catch (_: RuntimeException) {
                         layoutHeight
                     }
-                    IntOffset(x = 0, y = sheetOffsetY.toInt())
+
+                    IntOffset(
+                        x = 0,
+                        y = sheetOffsetY.toInt()
+                    )
                 }
                 .dropShadow(
-                    shape = shape,
-                    color = MaterialTheme.colorScheme.onBackground.copy(0.12f),
-                    blur = 20.dp,
-                    offsetY = (-3).dp
+                    shape = sheetShape,
+                    color = MaterialTheme.colorScheme.onBackground.copy(
+                        alpha = if (isExpandedMode) 0.2f else 0.12f
+                    ),
+                    blur = if (isExpandedMode) 4.dp else 20.dp,
+                    offsetY = if (isExpandedMode) 0.dp else (-3).dp
                 )
-                .background(MaterialTheme.colorScheme.background, shape)
-                .clip(shape)
+                .background(
+                    color = MaterialTheme.colorScheme.background,
+                    shape = sheetShape
+                )
+                .clip(sheetShape)
                 .anchoredDraggable(
                     state = state,
-                    orientation = Orientation.Vertical,
+                    orientation = Orientation.Vertical
                 ),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            VodovozDragHandle()
-            Spacer(modifier = Modifier.height(8.dp))
+            if (isExpandedMode) {
+                Box(
+                    modifier = Modifier
+                        .padding(top = 8.dp)
+                        .size(width = 36.dp, height = 4.dp)
+                        .background(
+                            color = MaterialTheme.colorScheme.outlineVariant,
+                            shape = CircleShape
+                        )
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+            } else {
+                VodovozDragHandle()
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+
+            val contentSheetValue = if (isExpandedMode) {
+                SheetValue.Expanded
+            } else {
+                state.currentValue
+            }
+
 
             AnimatedContent(
-                targetState = state.currentValue,
+                targetState = contentSheetValue,
                 label = "UpdatedProductsTransition",
                 transitionSpec = {
                     when (targetState) {
@@ -217,14 +301,12 @@ fun UnratedProductsBottomSheet(
                         }
 
                         SheetValue.Expanded -> {
-                            slideInVertically(initialOffsetY = { height -> height }) + fadeIn(
-                                tween(
-                                    250
-                                )
-                            ) togetherWith
-                                    slideOutVertically(targetOffsetY = { height -> -height }) + fadeOut(
-                                tween(250)
-                            )
+                            slideInVertically(
+                                initialOffsetY = { height -> height }
+                            ) + fadeIn(tween(250)) togetherWith
+                                    slideOutVertically(
+                                        targetOffsetY = { height -> -height }
+                                    ) + fadeOut(tween(250))
                         }
 
                         SheetValue.PartiallyExpanded -> {
@@ -237,58 +319,38 @@ fun UnratedProductsBottomSheet(
                 contentKey = { sheetValue -> sheetValue.name }
             ) { targetState ->
                 when (targetState) {
-                    SheetValue.Expanded, SheetValue.Hidden -> {
+                    SheetValue.Expanded -> {
                         UpdatedProductsExpanded(
-                            modifier = Modifier.fillMaxSize(),
+                            modifier = Modifier.fillMaxWidth(),
                             title = sectionUnratedProducts.productTitle,
                             products = sectionUnratedProducts.products,
                             buttonText = sectionUnratedProducts.buttonText,
                             onProductRatingChanged = onProductRatingChanged,
                             onNoRateProductClick = onProductNoRateClick,
-                            onClose = onDispose
                         )
                     }
 
                     SheetValue.PartiallyExpanded -> {
                         UnratedProductsPartially(
-                            modifier = Modifier.fillMaxSize(),
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .clickable {
+                                    scope.launch {
+                                        state.animateTo(SheetValue.Expanded)
+                                    }
+                                },
                             title = sectionUnratedProducts.title,
                             countProductsText = sectionUnratedProducts.countProductsText,
                             products = sectionUnratedProducts.products
                         )
                     }
+
+                    SheetValue.Hidden -> {
+                        Spacer(modifier = Modifier.fillMaxSize())
+                    }
                 }
             }
         }
-    }
-}
-
-fun Modifier.dropShadow(
-    shape: Shape,
-    color: Color = Color.Black.copy(0.25f),
-    blur: Dp = 4.dp,
-    offsetY: Dp = 4.dp,
-    offsetX: Dp = 0.dp,
-    spread: Dp = 0.dp,
-) = this.drawBehind {
-
-    val shadowSize = Size(size.width + spread.toPx(), size.height + spread.toPx())
-    val shadowOutline = shape.createOutline(shadowSize, layoutDirection, this)
-
-    val paint = Paint()
-    paint.color = color
-
-    if (blur.toPx() > 0) {
-        paint.asFrameworkPaint().apply {
-            maskFilter = BlurMaskFilter(blur.toPx(), BlurMaskFilter.Blur.NORMAL)
-        }
-    }
-
-    drawIntoCanvas { canvas ->
-        canvas.save()
-        canvas.translate(offsetX.toPx(), offsetY.toPx())
-        canvas.drawOutline(shadowOutline, paint)
-        canvas.restore()
     }
 }
 
@@ -301,47 +363,34 @@ fun UpdatedProductsExpanded(
     buttonText: String,
     onProductRatingChanged: (UnratedProductUi, Float) -> Unit,
     onNoRateProductClick: (UnratedProductUi) -> Unit,
-    onClose: () -> Unit,
 ) {
-    val pagerState = rememberPagerState(0) { products.size }
+    val pagerState = rememberPagerState(0) {
+        products.size
+    }
 
     Column(
         modifier = modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background),
+            .fillMaxWidth()
+            .wrapContentHeight()
+            .background(MaterialTheme.colorScheme.background)
+            .padding(bottom = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Row(
+        Text(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp)
-        ) {
-            Spacer(modifier = Modifier.size(24.dp))
-
-            Text(
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(horizontal = 4.dp),
-                text = title,
-                color = MaterialTheme.colorScheme.onBackground,
-                style = MaterialTheme.typography.titleMedium,
-                textAlign = TextAlign.Center
-            )
-
-            Icon(
-                imageVector = ImageVector.vectorResource(id = R.drawable.ic_close),
-                contentDescription = null,
-                modifier = Modifier
-                    .size(24.dp)
-                    .clip(CircleShape)
-                    .clickable { onClose() }
-            )
-        }
+                .padding(horizontal = 16.dp),
+            text = title,
+            color = MaterialTheme.colorScheme.onBackground,
+            style = MaterialTheme.typography.titleMedium,
+            textAlign = TextAlign.Center
+        )
 
         HorizontalPager(
             modifier = Modifier
                 .padding(top = 16.dp)
-                .fillMaxWidth(),
+                .fillMaxWidth()
+                .height(376.dp),
             state = pagerState,
             pageSize = PageSize.Fill,
             beyondViewportPageCount = 2,
@@ -349,49 +398,47 @@ fun UpdatedProductsExpanded(
                 products.getOrNull(page)?.id ?: -page
             },
             verticalAlignment = Alignment.CenterVertically
-        ) lambda@{ page ->
+        ) { page ->
             val product = products.getOrNull(page)
+
             if (product != null) {
                 Column(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     VodovozAsyncImage(
-                        modifier = Modifier
-                            .size(300.dp, 300.dp)
-                        ,
+                        modifier = Modifier.size(200.dp),
                         model = product.detailPicture,
                         contentDescription = null,
                         contentScale = ContentScale.Inside,
                     )
+
                     Text(
-                        modifier = Modifier.padding(top = 16.dp, start = 16.dp, end = 16.dp),
+                        modifier = Modifier
+                            .padding(top = 16.dp)
+                            .padding(horizontal = 32.dp)
+                            .height(48.dp)
+                            .wrapContentHeight(Alignment.CenterVertically),
                         text = product.name,
                         color = MaterialTheme.colorScheme.onBackground,
-                        style = MaterialTheme.typography.headlineSmall,
+                        style = MaterialTheme.typography.bodyLarge.copy(
+                            fontWeight = FontWeight.Medium
+                        ),
                         textAlign = TextAlign.Center,
-                        minLines = 2,
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis
                     )
 
-
-                    var rating by remember {
+                    var rating by remember(product.id) {
                         mutableFloatStateOf(0f)
                     }
 
                     RatingBar(
                         value = rating,
-                        modifier = Modifier
-                            .padding(top = 24.dp)
-                            .background(
-                                MaterialTheme.colorScheme.surface,
-                                MaterialTheme.shapes.small
-                            )
-                            .padding(vertical = 16.dp, horizontal = 24.dp),
+                        modifier = Modifier.padding(top = 16.dp),
                         painterEmpty = painterResource(id = R.drawable.ic_star_inactive),
                         painterFilled = painterResource(id = R.drawable.ic_star_active),
-                        size = 36.dp,
+                        size = 24.dp,
                         spaceBetween = 8.dp,
                         onValueChange = { newRating ->
                             rating = newRating
@@ -400,38 +447,36 @@ fun UpdatedProductsExpanded(
                             onProductRatingChanged(product, newRating)
                         }
                     )
+
+                    Text(
+                        modifier = Modifier
+                            .padding(top = 16.dp)
+                            .fillMaxWidth()
+                            .clip(MaterialTheme.shapes.large)
+                            .clickable {
+                                onNoRateProductClick(product)
+                            }
+                            .padding(
+                                vertical = 8.dp,
+                                horizontal = 16.dp
+                            ),
+                        text = buttonText,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        style = MaterialTheme.typography.bodyMedium,
+                        textAlign = TextAlign.Center
+                    )
                 }
             }
         }
 
-        Spacer(modifier = Modifier.weight(1f))
-
         if (pagerState.pageCount > 1) {
             PagerWormIndicator(
-                modifier = Modifier.padding(vertical = 12.dp),
+                modifier = Modifier.padding(top = 16.dp),
                 pagerState = pagerState,
                 activeDotColor = MaterialTheme.colorScheme.primary,
                 dotColor = MaterialTheme.colorScheme.surfaceVariant,
                 dotCount = 5,
-            )
-        }
-
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 16.dp, end = 16.dp, bottom = 12.dp, top = 4.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = buttonText,
-                color = MaterialTheme.colorScheme.surfaceTint,
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier
-                    .clip(MaterialTheme.shapes.large)
-                    .clickable {
-                        onNoRateProductClick(products[pagerState.currentPage])
-                    }
-                    .padding(12.dp)
+                space = 6.dp
             )
         }
     }
@@ -445,12 +490,16 @@ fun UnratedProductsPartially(
     countProductsText: String,
     products: List<UnratedProductUi>,
 ) {
-    Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
         Text(
             text = title,
             color = MaterialTheme.colorScheme.onBackground,
             style = MaterialTheme.typography.titleSmall
         )
+
         Text(
             text = countProductsText,
             color = MaterialTheme.colorScheme.surfaceTint,
@@ -462,11 +511,10 @@ fun UnratedProductsPartially(
                 .padding(top = 4.dp)
                 .fillMaxWidth()
                 .horizontalScroll(
-                    rememberScrollState(),
-                    rememberOverscrollEffect()
-                )
-                .padding(start = 16.dp),
-            horizontalArrangement = Arrangement.Center
+                    state = rememberScrollState(),
+                    overscrollEffect = rememberOverscrollEffect()
+                ),
+            horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally)
         ) {
             products.take(10).forEach { product ->
                 key(product.id) {
@@ -474,7 +522,7 @@ fun UnratedProductsPartially(
                         modifier = Modifier.size(90.dp),
                         model = product.detailPicture,
                         contentDescription = null,
-                        contentScale = ContentScale.Crop,
+                        contentScale = ContentScale.Inside,
                     )
                 }
             }
@@ -486,7 +534,6 @@ fun UnratedProductsPartially(
 @Composable
 private fun UnratedProductsExpandedPreview() {
     VodovozTheme {
-
         val sodas = listOf(
             UnratedProductUi(
                 name = "Coca-Cola",
@@ -515,19 +562,11 @@ private fun UnratedProductsExpandedPreview() {
             )
         )
 
-
         UpdatedProductsExpanded(
-            title = "Это нижний лист",
-            buttonText = "No rate",
-            onClose = {
-
-            },
-            onNoRateProductClick = {
-
-            },
-            onProductRatingChanged = { _, _ ->
-
-            },
+            title = "Оцените товары",
+            buttonText = "Не оценивать этот товар",
+            onNoRateProductClick = {},
+            onProductRatingChanged = { _, _ -> },
             products = sodas
         )
     }

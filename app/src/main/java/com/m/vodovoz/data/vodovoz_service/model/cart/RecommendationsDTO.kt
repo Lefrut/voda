@@ -13,6 +13,10 @@ data class RecommendationsDTO(
     val description: String?,
     @Json(name = "TOVARY")
     val products: List<TOVAR_DATA_DTO>?,
+    @Json(name = "DATA")
+    val data: List<TOVAR_DATA_DTO>?,
+    @Json(name = "data")
+    val dataLowerCase: List<TOVAR_DATA_DTO>?,
     @Json(name = "COUNT")
     val countProducts: Int?,
     @Json(name = "STRANIC")
@@ -20,5 +24,13 @@ data class RecommendationsDTO(
     @Json(name = "TOVARVSEGO")
     val totalProducts: Int?,
     @Json(name = "KNOPKA")
-    val button: COLORFUL_KNOPKA_DTO?
+    val button: COLORFUL_KNOPKA_DTO?,
+    @Json(name = "NAVIGATION")
+    val navigation: RECOMMENDATIONS_NAVIGATION_DTO?,
+)
+
+@JsonClass(generateAdapter = true)
+data class RECOMMENDATIONS_NAVIGATION_DTO(
+    @Json(name = "TOTAL_PAGES")
+    val totalPages: Int?,
 )

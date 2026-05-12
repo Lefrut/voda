@@ -5,6 +5,7 @@ import com.m.vodovoz.data.vodovoz_service.model.ProductCommentsDTO
 import com.m.vodovoz.data.vodovoz_service.model.PromotionDetailsDTO
 import com.m.vodovoz.data.vodovoz_service.model.PromotionsDTO
 import com.m.vodovoz.data.vodovoz_service.model.ProductsSectionDTO
+import com.m.vodovoz.data.vodovoz_service.model.TOVAR_DATA_DTO
 import com.m.vodovoz.data.vodovoz_service.model.WaitFeedbackProductsDTO
 import com.m.vodovoz.data.vodovoz_service.model.cart.RecommendationsDTO
 import com.m.vodovoz.data.vodovoz_service.model.order.OrdersHistoryDetailsDTO
@@ -76,10 +77,18 @@ fun PromotionsDTO.toPagingSourceData(): PagingSourceData<PromotionModel> {
 
 fun RecommendationsDTO.toPagingSourceData(): PagingSourceData<ProductModel> {
     return PagingSourceData(
-        items = products!!.mapToDomain(),
-        pageCount = countPages.orUnknownPageCount()
+        items = (products ?: data ?: dataLowerCase)!!.mapToDomain(),
+        pageCount = (countPages ?: navigation?.totalPages).orUnknownPageCount()
     )
 }
+
+fun List<TOVAR_DATA_DTO>.toPagingSourceData(): PagingSourceData<ProductModel> {
+    return PagingSourceData(
+        items = this.mapToDomain(),
+        pageCount = null.orUnknownPageCount()
+    )
+}
+
 
 fun WaitFeedbackProductsDTO.toPagingSourceData(): PagingSourceData<WaitFeedbackProductModel> {
     return PagingSourceData(
