@@ -9,13 +9,19 @@ import kotlinx.coroutines.flow.singleOrNull
 import kotlin.reflect.KType
 import kotlin.reflect.javaType
 
-class VodovozPagingSource<T : Any, R : Any>(
+class VodovozPagingSource<T : Any, Item : Any>(
     private val executor: VodovozRequestExecutor,
     private val type: KType,
     private val request: suspend (page: Int, limit: Int) -> retrofit2.Response<VodovozResponseDTO<T>>,
-    private val pageCountProvider: (VodovozResponseDTO<T>) -> Int?,
-    private val mapper: (T) -> PagingSourceData<R>,
-) : PagingSource<Int, R>() {
+    private val mapper: (T) -> PagingSourceData<Item>,
+    private val onPageLoaded: (
+        page: Int,
+        response: VodovozResponseDTO<T>,
+        pagingData: PagingSourceData<Item>,
+        pageCount: Int,
+        endOfPaginationReached: Boolean,
+    ) -> Unit = { _, _, _, _, _ -> },
+) : PagingSource<Int, Item>() {
 
     private companion object {
         const val MIN_ITEMS_FOR_NEXT_PAGE = 3
@@ -24,19 +30,21 @@ class VodovozPagingSource<T : Any, R : Any>(
     private var maxPageCount: Int? = null
 
     @OptIn(ExperimentalStdlibApi::class)
-    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, R> {
+    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, Item> {
         val page = params.key ?: 1
+        var loadedResponse: VodovozResponseDTO<T>? = null
+        var loadedPagingData: PagingSourceData<Item>? = null
 
         val result = executor.executeRequestImpl(
             request = { request(page, params.loadSize) },
             mapper = { response ->
-                pageCountProvider(response)
-                    ?.takeIf { it > 0 }
-                    ?.let { pageCount ->
-                        maxPageCount = maxOf(maxPageCount ?: pageCount, pageCount)
-                    }
 
-                mapper(response.data!!)
+                maxPageCount = response.navigation?.totalPages?.takeIf { it > 0 } ?: maxPageCount
+
+                mapper(response.data!!).also { pagingData ->
+                    loadedResponse = response
+                    loadedPagingData = pagingData
+                }
             },
             type = type.javaType
         ).singleOrNull()
@@ -53,6 +61,15 @@ class VodovozPagingSource<T : Any, R : Any>(
             } else {
                 null
             }
+            loadedResponse?.let { response ->
+                onPageLoaded(
+                    page,
+                    response,
+                    loadedPagingData ?: pagingData,
+                    pageCount,
+                    nextKey == null
+                )
+            }
 
             return LoadResult.Page(
                 data = items,
@@ -67,7 +84,7 @@ class VodovozPagingSource<T : Any, R : Any>(
         return LoadResult.Invalid()
     }
 
-    override fun getRefreshKey(state: PagingState<Int, R>): Int? {
+    override fun getRefreshKey(state: PagingState<Int, Item>): Int? {
         return state.anchorPosition?.let { anchorPosition ->
             state.closestPageToPosition(anchorPosition)?.prevKey?.plus(1)
                 ?: state.closestPageToPosition(anchorPosition)?.nextKey?.minus(1)

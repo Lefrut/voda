@@ -16,6 +16,7 @@ import com.m.vodovoz.data.vodovoz_service.executeRequest
 import com.m.vodovoz.data.vodovoz_service.mappers.mapToDomain
 import com.m.vodovoz.data.vodovoz_service.mappers.toPagingSourceData
 import com.m.vodovoz.data.vodovoz_service.mappers.toDomain
+import com.m.vodovoz.data.vodovoz_service.mappers.toProductRecommendationsMeta
 import com.m.vodovoz.data.vodovoz_service.model.BrandSectionDTO
 import com.m.vodovoz.data.vodovoz_service.model.ProductCommentsDTO
 import com.m.vodovoz.data.vodovoz_service.model.ProductsSectionDTO
@@ -59,6 +60,7 @@ import com.m.vodovoz.domain.general.model.order.PaymentMethodDetailsModel
 import com.m.vodovoz.domain.general.model.order.RecipientDetailsModel
 import com.m.vodovoz.domain.general.model.order.RecipientModel
 import com.m.vodovoz.domain.general.model.order.WhereOrderDetailsModel
+import com.m.vodovoz.domain.general.model.paging.VodovozPagingResult
 import com.m.vodovoz.domain.general.model.product.AllBottlesDetailsModel
 import com.m.vodovoz.domain.general.model.product.BuyCertificateDetailsModel
 import com.m.vodovoz.domain.general.model.product.BuyCertificateModel
@@ -73,6 +75,7 @@ import com.m.vodovoz.domain.general.model.product.PopularCategoryModel
 import com.m.vodovoz.domain.general.model.product.ProductCommentsInfoModel
 import com.m.vodovoz.domain.general.model.product.ProductDetailsScreenModel
 import com.m.vodovoz.domain.general.model.product.ProductModel
+import com.m.vodovoz.domain.general.model.product.ProductRecommendationsMetaModel
 import com.m.vodovoz.domain.general.model.product.ProductsSectionModel
 import com.m.vodovoz.domain.general.model.product.SearchRecommendationsModel
 import com.m.vodovoz.domain.general.model.product.SectionModel
@@ -557,6 +560,29 @@ class VodovozServiceRepositoryImpl @Inject constructor(
                 )
             },
             mapper = { dto -> dto.toPagingSourceData(selectedTabQuery) }
+        )
+    }
+
+    override fun getOrdersHistoryItemsPagingResult(
+        selectedTabId: String?,
+        year: String?,
+        searchQuery: String,
+    ): VodovozPagingResult<OrdersHistoryItemModel, OrdersHistoryDetailsModel> {
+        val selectedTabQuery = selectedTabId?.takeIf { it.isNotBlank() }
+        return VodovozPagerFactory.getResult(
+            executor = canBeEmptyExecutor,
+
+            request = { page, _ ->
+                vodovozService.getOrdersHistoryDetails(
+                    page = page,
+                    selectedTabId = selectedTabQuery,
+                    selectedTabIdCompat = selectedTabQuery,
+                    year = year?.takeIf { it.isNotBlank() },
+                    search = searchQuery.takeIf { it.isNotBlank() }
+                )
+            },
+            mapper = { dto -> dto.toPagingSourceData(selectedTabQuery) },
+            metaMapper = { dto -> dto.toDomain() }
         )
     }
 
@@ -1636,8 +1662,27 @@ class VodovozServiceRepositoryImpl @Inject constructor(
             mapper = { dto ->
                 dto.toPagingSourceData()
             },
-            pageCountProvider = { response ->
-                response.navigation?.totalPages
+        )
+    }
+
+    override fun getBestForYouProductsPagingResult(): VodovozPagingResult<
+        ProductModel,
+        ProductRecommendationsMetaModel,
+    > {
+        return VodovozPagerFactory.getResult(
+            executor = defaultExecutor,
+
+            request = { page, _ ->
+                vodovozService.getBestForYouProducts(
+                    page = page,
+                )
+            },
+
+            mapper = { dto ->
+                dto.toPagingSourceData()
+            },
+            metaMapper = { dto ->
+                dto.toProductRecommendationsMeta()
             },
         )
     }

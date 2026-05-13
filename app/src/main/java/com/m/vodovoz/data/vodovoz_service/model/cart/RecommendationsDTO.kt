@@ -9,6 +9,8 @@ import com.squareup.moshi.JsonClass
 data class RecommendationsDTO(
     @Json(name = "TITLE")
     val title: String?,
+    @Json(name = "title")
+    val titleLowerCase: String?,
     @Json(name = "OPISANIE")
     val description: String?,
     @Json(name = "TOVARY")

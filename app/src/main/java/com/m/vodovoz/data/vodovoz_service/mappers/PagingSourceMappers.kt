@@ -13,6 +13,7 @@ import com.m.vodovoz.data.vodovoz_service.paging.PagingSourceData
 import com.m.vodovoz.domain.general.model.order.OrdersHistoryItemModel
 import com.m.vodovoz.domain.general.model.product.CommentModel
 import com.m.vodovoz.domain.general.model.product.ProductModel
+import com.m.vodovoz.domain.general.model.product.ProductRecommendationsMetaModel
 import com.m.vodovoz.domain.general.model.product.WaitFeedbackProductModel
 import com.m.vodovoz.domain.general.model.promotion.BrandModel
 import com.m.vodovoz.domain.general.model.promotion.PromotionModel
@@ -79,6 +80,12 @@ fun RecommendationsDTO.toPagingSourceData(): PagingSourceData<ProductModel> {
     return PagingSourceData(
         items = (products ?: data ?: dataLowerCase)!!.mapToDomain(),
         pageCount = (countPages ?: navigation?.totalPages).orUnknownPageCount()
+    )
+}
+
+fun RecommendationsDTO.toProductRecommendationsMeta(): ProductRecommendationsMetaModel {
+    return ProductRecommendationsMetaModel(
+        title = (title ?: titleLowerCase).orEmpty()
     )
 }
 

@@ -4,6 +4,7 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.viewModelScope
 import androidx.paging.CombinedLoadStates
+import androidx.paging.LoadState
 import androidx.paging.map
 import com.m.vodovoz.common.cart.CartManager
 import com.m.vodovoz.common.like.LikeManager
@@ -14,6 +15,7 @@ import com.m.vodovoz.design_system.model.VodovozPlaceholderUi
 import com.m.vodovoz.design_system.model.mapToUi
 import com.m.vodovoz.design_system.model.toUi
 import com.m.vodovoz.domain.general.model.exceptions.EmptyResultException
+import com.m.vodovoz.domain.general.model.order.OrdersHistoryDetailsModel
 import com.m.vodovoz.domain.general.respository.UserPreferencesRepository
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
 import com.m.vodovoz.feature.all.orders.history.model.OrdersHistoryItemUi
@@ -31,7 +33,10 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
@@ -80,85 +85,103 @@ class OrdersHistoryViewModel @Inject constructor(
         }
 
         ordersPagingJob?.cancel()
+        productsPagingJob?.cancel()
+        updateState { s ->
+            s.copy(
+                items2 = emptyList(),
+                loadStates2 = emptyCombinedLoadStates,
+                productsTitle = ""
+            )
+        }
+
+        val ordersPagingResult = vodovozServiceRepository.getOrdersHistoryItemsPagingResult(
+            selectedTabId = stateSnapshot.currentTab?.id,
+            year = stateSnapshot.currentYear,
+            searchQuery = stateSnapshot.searchQuery
+        )
+
         ordersPagingJob = viewModelScope.launch {
             launch {
-                vodovozServiceRepository.getOrdersHistoryItemsPaged(
-                    selectedTabId = stateSnapshot.currentTab?.id,
-                    year = stateSnapshot.currentYear,
-                    searchQuery = stateSnapshot.searchQuery
-                ).map { pagingData ->
+                ordersPagingResult.flow.map { pagingData ->
                     pagingData.map { historyItemModel ->
                         historyItemModel.toUi()
                     }
                 }.collectPagingData1()
             }
             launch {
-                fetchBestForYouProducts()
+                ordersPagingResult.meta
+                    .map { meta -> meta.firstPageData }
+                    .filterNotNull()
+                    .collect { ordersHistoryDetails ->
+                        applyOrdersHistoryDetails(ordersHistoryDetails)
+                    }
+            }
+            launch {
+                ordersPagingResult.meta
+                    .map { meta -> meta.pagesInfo.endOfPaginationReached }
+                    .distinctUntilChanged()
+                    .filter { endOfPaginationReached -> endOfPaginationReached }
+                    .collect {
+                        fetchBestForYouProducts()
+                    }
+            }
+            launch {
+                state.map { s -> s.loadStates1.refresh }
+                    .filterIsInstance<LoadState.Error>()
+                    .collect { loadState ->
+                        applyOrdersHistoryError(loadState.error)
+                    }
             }
         }
+    }
 
-        val ordersHistoryDetailsResult =
-            vodovozServiceRepository.getOrdersHistoryDetails(
-                selectedTabId = stateSnapshot.currentTab?.id,
-                year = stateSnapshot.currentYear,
-                searchQuery = stateSnapshot.searchQuery
-            ).singleResult()
-
-        ordersHistoryDetailsResult.onSuccess { ordersHistoryDetails ->
-
-            if (ordersHistoryDetails.placeholder != null && ordersHistoryDetails.tabs.isEmpty()) {
-                updateState { s ->
-                    s.copy(
-                        title = ordersHistoryDetails.title,
-                        uiState = AllOrdersUiState.Empty(ordersHistoryDetails.placeholder.toUi()),
-                        showRefreshIndicator = false
-                    )
-                }
-                return@onSuccess
-            }
-
-            val tabs = ordersHistoryDetails.tabs.mapToUi().mergeYearsWith(stateSnapshot.tabs)
-            val preferredTabId = ordersHistoryDetails.activeTabId.takeIf {
-                stateSnapshot.tabs.isEmpty()
-            }
-            val selectedTabIndex = tabs.resolveSelectedTabIndex(
-                currentIndex = stateSnapshot.selectedTabIndex,
-                preferredTabId = preferredTabId
-            )
-
-            val selectedTab = tabs.getOrNull(selectedTabIndex)
-            val currentYear = stateSnapshot.currentYear?.takeIf { year ->
-                selectedTab?.years.orEmpty().contains(year)
-            } ?: selectedTab?.selectedYear?.takeIf { year ->
-                selectedTab.years.contains(year)
-            }
-
+    private fun applyOrdersHistoryDetails(ordersHistoryDetails: OrdersHistoryDetailsModel) {
+        if (ordersHistoryDetails.placeholder != null && ordersHistoryDetails.tabs.isEmpty()) {
             updateState { s ->
                 s.copy(
                     title = ordersHistoryDetails.title,
-                    tabs = tabs,
-                    selectedTabIndex = selectedTabIndex,
-                    currentYear = currentYear,
-                    currentTabPlaceholder = selectedTab?.placeholder,
-                    banners = ordersHistoryDetails.banners.mapToUi(),
-                    uiState = AllOrdersUiState.Body,
+                    uiState = AllOrdersUiState.Empty(ordersHistoryDetails.placeholder.toUi()),
                     showRefreshIndicator = false
                 )
             }
+            return
+        }
 
-        }.onFailure { t ->
+        val tabs = ordersHistoryDetails.tabs.mapToUi().mergeYearsWith(stateSnapshot.tabs)
+        val preferredTabId = ordersHistoryDetails.activeTabId.takeIf {
+            stateSnapshot.tabs.isEmpty()
+        }
+        val selectedTabIndex = tabs.resolveSelectedTabIndex(
+            currentIndex = stateSnapshot.selectedTabIndex,
+            preferredTabId = preferredTabId
+        )
 
-            val uiState = when {
-                t is EmptyResultException && t.placeholder != null -> AllOrdersUiState.Empty(t.placeholder.toUi())
-                else -> AllOrdersUiState.Error
-            }
+        val selectedTab = tabs.getOrNull(selectedTabIndex)
 
-            if (uiState is AllOrdersUiState.Body) return@onFailure
+        updateState { s ->
+            s.copy(
+                title = ordersHistoryDetails.title,
+                tabs = tabs,
+                selectedTabIndex = selectedTabIndex,
+                currentTabPlaceholder = selectedTab?.placeholder,
+                banners = ordersHistoryDetails.banners.mapToUi(),
+                uiState = AllOrdersUiState.Body,
+                showRefreshIndicator = false
+            )
+        }
+    }
 
-            updateState { s ->
-                s.copy(uiState = uiState)
-            }
+    private fun applyOrdersHistoryError(t: Throwable) {
+        val uiState = when {
+            t is EmptyResultException && t.placeholder != null -> AllOrdersUiState.Empty(t.placeholder.toUi())
+            else -> AllOrdersUiState.Error
+        }
 
+        updateState { s ->
+            s.copy(
+                uiState = uiState,
+                showRefreshIndicator = false
+            )
         }
     }
 
@@ -200,7 +223,10 @@ class OrdersHistoryViewModel @Inject constructor(
                 currentYear = null,
                 currentTabPlaceholder = s.tabs.getOrNull(index)?.placeholder,
                 items1 = emptyList(),
-                loadStates1 = emptyCombinedLoadStates
+                items2 = emptyList(),
+                loadStates1 = emptyCombinedLoadStates,
+                loadStates2 = emptyCombinedLoadStates,
+                productsTitle = ""
             )
         }
 
@@ -210,9 +236,12 @@ class OrdersHistoryViewModel @Inject constructor(
     fun selectYear(year: String) = viewModelScope.launch {
         updateState { s ->
             s.copy(
-                currentYear = year,
+                currentYear = if (year == s.currentYear) null else year,
                 items1 = emptyList(),
-                loadStates1 = emptyCombinedLoadStates
+                items2 = emptyList(),
+                loadStates1 = emptyCombinedLoadStates,
+                loadStates2 = emptyCombinedLoadStates,
+                productsTitle = ""
             )
         }
 
@@ -244,13 +273,31 @@ class OrdersHistoryViewModel @Inject constructor(
     }
 
     private fun fetchBestForYouProducts() {
-        productsPagingJob?.cancel()
+        if (productsPagingJob?.isActive == true) return
         productsPagingJob = viewModelScope.launch {
-            vodovozServiceRepository.getBestForYouProductsPaged().map { pagingData ->
-                pagingData.map { productModel ->
-                    productModel.toUi()
-                }
-            }.collectPagingData2()
+            val productsPagingResult = vodovozServiceRepository.getBestForYouProductsPagingResult()
+
+            launch {
+                productsPagingResult.flow.map { pagingData ->
+                    pagingData.map { productModel ->
+                        productModel.toUi()
+                    }
+                }.collectPagingData2()
+            }
+
+            launch {
+                productsPagingResult.meta
+                    .map { meta ->
+                        meta.firstPageData?.title
+                    }
+                    .filterNotNull()
+                    .distinctUntilChanged()
+                    .collect { title ->
+                        updateState { s ->
+                            s.copy(productsTitle = title)
+                        }
+                    }
+            }
         }
     }
 
@@ -289,8 +336,9 @@ class OrdersHistoryViewModel @Inject constructor(
             s.copy(showRefreshIndicator = true)
         }
 
-        fetchOrdersHistoryDetails().join()
+        fetchOrdersHistoryDetails()
 
+        delay(250L)
         updateState { s ->
             s.copy(showRefreshIndicator = false)
         }

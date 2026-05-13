@@ -316,13 +316,16 @@ fun OrdersHistoryBody(
                     )
                 }
 
-                if(productsTitle.isNotEmpty()){
-                    item {
+                if (productsTitle.isNotEmpty()) {
+                    item(span = { GridItemSpan(maxLineSpan) }) {
                         TitleAndButton(
                             modifier = Modifier
                                 .padding(top = 8.dp)
-                                .background(MaterialTheme.colorScheme.background, shape = MaterialTheme.shapes.large)
-                                .padding(bottom = 8.dp),
+                                .background(
+                                    MaterialTheme.colorScheme.background,
+                                    shape = MaterialTheme.shapes.large
+                                )
+                                .padding(vertical = 8.dp),
                             title = productsTitle,
                             button = null
                         )
@@ -354,13 +357,23 @@ fun OrdersHistoryBody(
                     }
                 }
 
+                item(span = { GridItemSpan(maxLineSpan) }) {
+                    Spacer(
+                        modifier = Modifier
+                            .height(16.dp)
+                            .fillMaxWidth()
+                            .background(MaterialTheme.colorScheme.background, MaterialTheme.shapes.large)
+
+                    )
+                }
+
                 if (appendItems) {
-                    item(span = { GridItemSpan(2) }) {
+                    item(span = { GridItemSpan(maxLineSpan) }) {
                         CircularProgressIndicator(
                             color = MaterialTheme.colorScheme.primary,
                             strokeWidth = 3.dp,
                             modifier = Modifier
-                                .padding(vertical = 2.dp)
+                                .padding(vertical = 8.dp)
                                 .fillMaxWidth()
                                 .wrapContentWidth()
                                 .size(26.dp),

@@ -25,6 +25,7 @@ import com.m.vodovoz.domain.general.model.order.PaymentMethodDetailsModel
 import com.m.vodovoz.domain.general.model.order.RecipientDetailsModel
 import com.m.vodovoz.domain.general.model.order.RecipientModel
 import com.m.vodovoz.domain.general.model.order.WhereOrderDetailsModel
+import com.m.vodovoz.domain.general.model.paging.VodovozPagingResult
 import com.m.vodovoz.domain.general.model.product.AllBottlesDetailsModel
 import com.m.vodovoz.domain.general.model.product.BuyCertificateDetailsModel
 import com.m.vodovoz.domain.general.model.product.BuyCertificateModel
@@ -39,6 +40,7 @@ import com.m.vodovoz.domain.general.model.product.PopularCategoryModel
 import com.m.vodovoz.domain.general.model.product.ProductCommentsInfoModel
 import com.m.vodovoz.domain.general.model.product.ProductDetailsScreenModel
 import com.m.vodovoz.domain.general.model.product.ProductModel
+import com.m.vodovoz.domain.general.model.product.ProductRecommendationsMetaModel
 import com.m.vodovoz.domain.general.model.product.ProductsSectionModel
 import com.m.vodovoz.domain.general.model.product.SearchRecommendationsModel
 import com.m.vodovoz.domain.general.model.product.SectionModel
@@ -182,6 +184,12 @@ interface VodovozServiceRepository {
         year: String?,
         searchQuery: String,
     ): Flow<PagingData<OrdersHistoryItemModel>>
+
+    fun getOrdersHistoryItemsPagingResult(
+        selectedTabId: String?,
+        year: String?,
+        searchQuery: String,
+    ): VodovozPagingResult<OrdersHistoryItemModel, OrdersHistoryDetailsModel>
 
     fun repeatOrder(orderId: Long): FlowResult<String>
 
@@ -436,6 +444,11 @@ interface VodovozServiceRepository {
     ): Flow<PagingData<ProductModel>>
 
     fun getBestForYouProductsPaged(): Flow<PagingData<ProductModel>>
+
+    fun getBestForYouProductsPagingResult(): VodovozPagingResult<
+        ProductModel,
+        ProductRecommendationsMetaModel,
+    >
 
     suspend fun addProductToCart(
         productId: Long,

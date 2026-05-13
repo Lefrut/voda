@@ -51,9 +51,9 @@ fun CartDetailsDTO.toDomain(): CartDetailsModel {
 
 fun RecommendationsDTO.toDomain(): AdditionalProductsBSModel {
     return AdditionalProductsBSModel(
-        title = title ?: "",
-        description = description ?: "",
-        products = (products ?: data)?.mapToDomain() ?: emptyList(),
+        title = (title ?: titleLowerCase).orEmpty(),
+        description = description.orEmpty(),
+        products = (products ?: data ?: dataLowerCase)?.mapToDomain().orEmpty(),
         button = button?.toDomain()
     )
 }

@@ -72,7 +72,9 @@ fun OrdersHistoryScreen(
                         currentTabPlaceholder = viewState.currentTabPlaceholder,
                         orders = viewState.items1,
                         itemsLoading = viewState.loadStates1.refresh is LoadState.Loading,
-                        appendItems = viewState.loadStates1.append is LoadState.Loading || viewState.loadStates2.append is LoadState.Loading,
+                        appendItems = viewState.loadStates1.append is LoadState.Loading ||
+                                viewState.loadStates2.refresh is LoadState.Loading ||
+                                viewState.loadStates2.append is LoadState.Loading,
                         products = viewState.items2,
                         productsTitle = viewState.productsTitle,
                         banners = viewState.banners,
