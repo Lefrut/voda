@@ -71,7 +71,7 @@ class OrdersHistoryViewModel @Inject constructor(
 
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun handleQueries() =
-        querySharedFlow.debounceWithMax(200L, 5).filter { stateSnapshot.searchMode }.mapLatest {
+        querySharedFlow.debounceWithMax(300L, 6).filter { stateSnapshot.searchMode }.mapLatest {
             fetchOrdersHistoryDetails()
         }.launchIn(viewModelScope)
 
@@ -189,7 +189,8 @@ class OrdersHistoryViewModel @Inject constructor(
         updateState { s ->
             s.copy(
                 searchMode = searchMode,
-                searchQuery = ""
+                searchQuery = "",
+                currentYear = null,
             )
         }
 

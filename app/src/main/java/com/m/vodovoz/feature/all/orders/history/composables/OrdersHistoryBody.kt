@@ -119,63 +119,24 @@ fun OrdersHistoryBody(
     onIncrementProductToCart: (ProductUi) -> Unit,
     onDecrementProductToCart: (ProductUi) -> Unit,
 ) {
-    val density = LocalDensity.current
 
     val years = tabs.getOrNull(selectedTabIndex)?.years.orEmpty()
     val selectedYearIndex = years.indexOf(currentYear)
 
-    var columnHeightPx by remember { mutableIntStateOf(0) }
-    var bannersHeightPx by remember { mutableIntStateOf(0) }
-    var topSpacerHeightPx by remember { mutableIntStateOf(0) }
-    var tabsYearsHeightPx by remember { mutableIntStateOf(0) }
-    var bottomSpacerHeightPx by remember { mutableIntStateOf(0) }
 
     val bottomListPadding = 8.dp
-    val bottomListPaddingPx = with(density) {
-        bottomListPadding.roundToPx()
-    }
 
     val hasTopSpacer = tabs.isNotEmpty() || years.isNotEmpty()
-
-    val placeholderHeightDp = with(density) {
-        val remainingHeightPx =
-            columnHeightPx -
-                    measuredHeightOrZero(
-                        shouldCount = banners.isNotEmpty(),
-                        heightPx = bannersHeightPx
-                    ) -
-                    measuredHeightOrZero(
-                        shouldCount = hasTopSpacer,
-                        heightPx = topSpacerHeightPx
-                    ) -
-                    measuredHeightOrZero(
-                        shouldCount = !searchMode,
-                        heightPx = tabsYearsHeightPx
-                    ) -
-                    measuredHeightOrZero(
-                        shouldCount = !searchMode,
-                        heightPx = bottomSpacerHeightPx
-                    ) -
-                    bottomListPaddingPx
-
-        remainingHeightPx.coerceAtLeast(0).toFloat().toDp()
-    }
 
     Column(
         modifier = modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.surface)
-            .onSizeChanged {
-                columnHeightPx = it.height
-            }
     ) {
         if (banners.isNotEmpty()) {
             Box(
                 Modifier
                     .fillMaxWidth()
-                    .onSizeChanged {
-                        bannersHeightPx = it.height
-                    }
                     .background(
                         MaterialTheme.colorScheme.background,
                         MaterialTheme.shapes.large
@@ -200,9 +161,6 @@ fun OrdersHistoryBody(
                         Modifier
                             .height(8.dp)
                             .fillMaxWidth()
-                            .onSizeChanged {
-                                topSpacerHeightPx = it.height
-                            }
                             .background(MaterialTheme.colorScheme.background)
                     )
                 }
@@ -213,9 +171,6 @@ fun OrdersHistoryBody(
                     Column(
                         modifier = Modifier
                             .background(MaterialTheme.colorScheme.background)
-                            .onSizeChanged {
-                                tabsYearsHeightPx = it.height
-                            }
                     ) {
                         if (tabs.isNotEmpty()) {
                             VodovozTabRow(
@@ -263,9 +218,6 @@ fun OrdersHistoryBody(
                         Modifier
                             .height(12.dp)
                             .fillMaxWidth()
-                            .onSizeChanged {
-                                bottomSpacerHeightPx = it.height
-                            }
                             .background(
                                 MaterialTheme.colorScheme.background,
                                 MaterialTheme.shapes.large.copy(
@@ -282,7 +234,8 @@ fun OrdersHistoryBody(
                     LoadingPlaceholder(
                         modifier = Modifier
                             .padding(top = 8.dp)
-                            .height(placeholderHeightDp),
+                            .height(480.dp)
+                            .clip(MaterialTheme.shapes.large),
                         containerColor = Color.Transparent
                     )
                 }
@@ -292,7 +245,8 @@ fun OrdersHistoryBody(
                         modifier = Modifier
                             .padding(top = 8.dp)
                             .fillMaxWidth()
-                            .height(placeholderHeightDp),
+                            .height(480.dp)
+                            .clip(MaterialTheme.shapes.large),
                         data = currentTabPlaceholder,
                         onButtonClick = onPlaceholderButtonClick
                     )
@@ -315,48 +269,50 @@ fun OrdersHistoryBody(
                         onButtonClick = onItemButtonClick
                     )
                 }
+            }
 
-                if (productsTitle.isNotEmpty()) {
-                    item(span = { GridItemSpan(maxLineSpan) }) {
-                        TitleAndButton(
-                            modifier = Modifier
-                                .padding(top = 8.dp)
-                                .background(
-                                    MaterialTheme.colorScheme.background,
-                                    shape = MaterialTheme.shapes.large
-                                )
-                                .padding(vertical = 8.dp),
-                            title = productsTitle,
-                            button = null
+            if (productsTitle.isNotEmpty()) {
+                item(span = { GridItemSpan(maxLineSpan) }) {
+                    TitleAndButton(
+                        modifier = Modifier
+                            .padding(top = 16.dp)
+                            .background(
+                                MaterialTheme.colorScheme.background,
+                                shape = MaterialTheme.shapes.large
+                            )
+                            .padding(vertical = 8.dp),
+                        title = productsTitle,
+                        button = null
+                    )
+                }
+            }
+
+            itemsIndexed(products) { i, product ->
+                LaunchedEffect(i) {
+                    onProductSee(i)
+                }
+
+                if (i != products.lastIndex || products.size % 2 == 0) {
+                    GridHorizontalPadding(
+                        modifier = Modifier
+                            .background(MaterialTheme.colorScheme.background)
+                            .padding(top = 8.dp),
+                        isStartPadding = i % 2 == 0
+                    ) {
+                        GridProductCard(
+                            product = product,
+                            onAnalogsClick = onProductAnalogsClick,
+                            onLike = onProductLike,
+                            onClick = onProductClick,
+                            onDecrementToCart = onDecrementProductToCart,
+                            onIncrementToCart = onIncrementProductToCart
                         )
                     }
+
                 }
+            }
 
-                itemsIndexed(products) { i, product ->
-                    LaunchedEffect(i) {
-                        onProductSee(i)
-                    }
-
-                    if (i != products.lastIndex || products.size % 2 == 0) {
-                        GridHorizontalPadding(
-                            modifier = Modifier
-                                .background(MaterialTheme.colorScheme.background)
-                                .padding(top = 8.dp),
-                            isStartPadding = i % 2 == 0
-                        ) {
-                            GridProductCard(
-                                product = product,
-                                onAnalogsClick = onProductAnalogsClick,
-                                onLike = onProductLike,
-                                onClick = onProductClick,
-                                onDecrementToCart = onDecrementProductToCart,
-                                onIncrementToCart = onIncrementProductToCart
-                            )
-                        }
-
-                    }
-                }
-
+            if(products.isNotEmpty()){
                 item(span = { GridItemSpan(maxLineSpan) }) {
                     Spacer(
                         modifier = Modifier
@@ -366,20 +322,20 @@ fun OrdersHistoryBody(
 
                     )
                 }
+            }
 
-                if (appendItems) {
-                    item(span = { GridItemSpan(maxLineSpan) }) {
-                        CircularProgressIndicator(
-                            color = MaterialTheme.colorScheme.primary,
-                            strokeWidth = 3.dp,
-                            modifier = Modifier
-                                .padding(vertical = 8.dp)
-                                .fillMaxWidth()
-                                .wrapContentWidth()
-                                .size(26.dp),
-                            trackColor = Color.Transparent
-                        )
-                    }
+            if (appendItems) {
+                item(span = { GridItemSpan(maxLineSpan) }) {
+                    CircularProgressIndicator(
+                        color = MaterialTheme.colorScheme.primary,
+                        strokeWidth = 3.dp,
+                        modifier = Modifier
+                            .padding(vertical = 16.dp)
+                            .fillMaxWidth()
+                            .wrapContentWidth()
+                            .size(26.dp),
+                        trackColor = Color.Transparent
+                    )
                 }
             }
         }

@@ -111,7 +111,7 @@ fun UnratedProductsBottomSheet(
     val scope = rememberCoroutineScope()
 
     val partiallyExpandedHeightPx = with(density) {
-        148.dp.toPx()
+        120.dp.toPx()
     }
     val expandedPaddingTopPx = with(density) {
         32.dp.toPx()
@@ -417,7 +417,6 @@ fun UpdatedProductsExpanded(
                         modifier = Modifier
                             .padding(top = 16.dp)
                             .padding(horizontal = 32.dp)
-                            .height(48.dp)
                             .wrapContentHeight(Alignment.CenterVertically),
                         text = product.name,
                         color = MaterialTheme.colorScheme.onBackground,
@@ -425,6 +424,7 @@ fun UpdatedProductsExpanded(
                             fontWeight = FontWeight.Medium
                         ),
                         textAlign = TextAlign.Center,
+                        minLines = 2,
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis
                     )
