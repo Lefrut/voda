@@ -15,6 +15,7 @@ import com.m.vodovoz.design_system.model.VodovozPlaceholderUi
 import com.m.vodovoz.design_system.model.mapToUi
 import com.m.vodovoz.design_system.model.toUi
 import com.m.vodovoz.domain.general.model.exceptions.EmptyResultException
+
 import com.m.vodovoz.domain.general.model.order.OrdersHistoryDetailsModel
 import com.m.vodovoz.domain.general.respository.UserPreferencesRepository
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
@@ -29,6 +30,7 @@ import com.m.vodovoz.ui.paging.emptyCombinedLoadStates
 import com.m.vodovoz.util.extensions.debounceWithMax
 import com.m.vodovoz.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.appmetrica.analytics.impl.ba
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -420,7 +422,9 @@ class OrdersHistoryViewModel @Inject constructor(
     sealed interface AllOrdersUiState {
         data object Loading : AllOrdersUiState
         data object Error : AllOrdersUiState
-        data class Empty(val placeholder: VodovozPlaceholderUi) : AllOrdersUiState
+        data class Empty(val placeholder: VodovozPlaceholderUi) :
+            AllOrdersUiState
+
         data object Body : AllOrdersUiState
     }
 }

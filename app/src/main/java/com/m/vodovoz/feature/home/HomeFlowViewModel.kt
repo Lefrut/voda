@@ -279,9 +279,12 @@ class HomeFlowViewModel @Inject constructor(
                 ""
             }
         }
-        Analytics.reportEvent(eventName) {
-            param("name", categoryWithProducts.name)
+        if(eventName.isNotEmpty()){
+            Analytics.reportEvent(eventName) {
+                param("name", categoryWithProducts.name)
+            }
         }
+
 
         updateState { s ->
             s.copy(items = s.items.plusItem(updatedItem))
@@ -449,7 +452,6 @@ class HomeFlowViewModel @Inject constructor(
     }
 
     fun incrementProductToCart(product: ProductUi) = viewModelScope.launch {
-
         cartManager.change(
             productId = product.id,
             count = product.cartQuantity + 1,

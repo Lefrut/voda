@@ -4,6 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -36,6 +37,12 @@ import com.m.vodovoz.feature.home.composables.ProductSectionRow
 fun VodovozPlaceholder(
     modifier: Modifier = Modifier,
     data: VodovozPlaceholderUi,
+    topContent: @Composable ColumnScope.() -> Unit = {
+        Spacer(modifier = Modifier.weight(1f))
+    },
+    bottomContent: @Composable ColumnScope.() -> Unit = {
+        Spacer(modifier = Modifier.weight(1.2f))
+    },
     onButtonClick: () -> Unit = {},
     onProductClick: (ProductUi) -> Unit = {},
     onProductLike: (ProductUi) -> Unit = {},
@@ -50,7 +57,7 @@ fun VodovozPlaceholder(
             .background(MaterialTheme.colorScheme.background),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(modifier = Modifier.weight(1f))
+        topContent()
 
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -98,7 +105,8 @@ fun VodovozPlaceholder(
             )
         }
 
-        Spacer(modifier = Modifier.weight(1.2f))
+        bottomContent()
+
         if (productsSection != null && productsSection.items.isNotEmpty()) {
             ProductSectionRow(
                 modifier = Modifier.padding(bottom = 16.dp, top = 24.dp),

@@ -2,13 +2,14 @@ package com.m.vodovoz.domain.general.model.exceptions
 
 import com.m.vodovoz.domain.general.model.product.ProductModel
 import com.m.vodovoz.domain.general.model.product.SectionModel
+import com.m.vodovoz.domain.general.model.promotion.BannerModel
 import com.m.vodovoz.domain.general.model.promotion.ColorfulButtonModel
 
 
 open class RequestException(
     message: String = "",
     cause: Throwable? = null,
-    val placeholder: VodovozPlaceholderModel? = null,
+    open val placeholder: VodovozPlaceholderModel? = null,
 ) : IllegalStateException(
     message, cause
 )

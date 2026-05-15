@@ -130,13 +130,14 @@ class WriteCommentViewModel @Inject constructor(
             bitmap.resizeBitmap(1080).compressAsJPEG(150_000)
         }
 
+        Analytics.reportEvent("rate_comment_submit")
+
         vodovozServiceRepository.sendComment(
             productId = productId,
             rating = stateSnapshot.rating,
             message = stateSnapshot.field.value,
             imageBytesArray = imageBytesArray
         ).singleResult().onSuccess { placeholder ->
-            Analytics.reportEvent("rate_comment_submit")
 
             sendEvent(WriteCommentEvent.SetRatedProductResult(productId))
             updateState { s ->

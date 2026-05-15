@@ -140,8 +140,9 @@ class VodovozServiceRepositoryImpl @Inject constructor(
     private val defaultExecutor = object : VodovozRequestExecutor(moshi) {
         override fun <R : Any> onFail(response: Response<ResponseBody>): Result<R> {
             val json = response.stringErrorBody()
+
             val errorMessage = runCatching {
-                moshi.fromJson<VodovozResponseDTO<String>>(json).messageOrEmpty
+                fromJson<VodovozResponseDTO<String>>(json).messageOrEmpty
             }.getOrDefault(response.messageWithCode())
             throw RequestException(errorMessage)
         }
@@ -149,7 +150,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
 
     private val canBeEmptyExecutor = object : VodovozRequestExecutor(moshi) {
         override fun <R : Any> onFail(response: Response<ResponseBody>): Result<R> {
-            val placeholder = moshi.fromJson<VodovozResponseDTO<VodovozPlaceholderDTO>>(
+            val placeholder = fromJson<VodovozResponseDTO<VodovozPlaceholderDTO>>(
                 response.stringErrorBody()
             ).data!!.toDomain()
 
@@ -159,7 +160,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
 
     private val userExecutor = object : VodovozRequestExecutor(moshi) {
         override fun <R : Any> onFail(response: Response<ResponseBody>): Result<R> {
-            val placeholder = moshi.fromJson<VodovozResponseDTO<VodovozPlaceholderDTO>>(
+            val placeholder = fromJson<VodovozResponseDTO<VodovozPlaceholderDTO>>(
                 response.stringErrorBody()
             ).data!!.toDomain()
             throw UserNotLoginException(placeholder = placeholder)
@@ -171,12 +172,12 @@ class VodovozServiceRepositoryImpl @Inject constructor(
             val json = response.stringErrorBody()
 
             throw runCatching {
-                val message = moshi.fromJson<VodovozResponseDTO<Unit?>>(
+                val message = fromJson<VodovozResponseDTO<Unit?>>(
                     json
                 ).messageOrEmpty
                 ValidationException(message = message)
             }.recoverCatching {
-                val placeholder = moshi.fromJson<VodovozResponseDTO<VodovozPlaceholderDTO>>(
+                val placeholder = fromJson<VodovozResponseDTO<VodovozPlaceholderDTO>>(
                     json
                 ).data!!.toDomain()
                 UserNotLoginException(placeholder = placeholder)

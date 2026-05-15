@@ -159,7 +159,7 @@ fun OrdersHistoryBody(
                 if (hasTopSpacer) {
                     Spacer(
                         Modifier
-                            .height(8.dp)
+                            .height(16.dp)
                             .fillMaxWidth()
                             .background(MaterialTheme.colorScheme.background)
                     )
@@ -195,7 +195,7 @@ fun OrdersHistoryBody(
                             VodovozScrollableTabRow(
                                 modifier = Modifier
                                     .background(MaterialTheme.colorScheme.background)
-                                    .padding(top = 8.dp)
+                                    .padding(top = 16.dp)
                                     .fillMaxWidth(),
                                 selectedTabIndex = selectedYearIndex,
                                 edgePadding = 16.dp,
@@ -234,7 +234,7 @@ fun OrdersHistoryBody(
                     LoadingPlaceholder(
                         modifier = Modifier
                             .padding(top = 8.dp)
-                            .height(480.dp)
+                            .height(500.dp)
                             .clip(MaterialTheme.shapes.large),
                         containerColor = Color.Transparent
                     )
@@ -245,10 +245,15 @@ fun OrdersHistoryBody(
                         modifier = Modifier
                             .padding(top = 8.dp)
                             .fillMaxWidth()
-                            .height(480.dp)
                             .clip(MaterialTheme.shapes.large),
                         data = currentTabPlaceholder,
-                        onButtonClick = onPlaceholderButtonClick
+                        onButtonClick = onPlaceholderButtonClick,
+                        topContent = {
+                            Spacer(Modifier.height(16.dp))
+                        },
+                        bottomContent = {
+                            Spacer(Modifier.height(16.dp))
+                        }
                     )
                 }
             } else {
@@ -312,13 +317,16 @@ fun OrdersHistoryBody(
                 }
             }
 
-            if(products.isNotEmpty()){
+            if (products.isNotEmpty()) {
                 item(span = { GridItemSpan(maxLineSpan) }) {
                     Spacer(
                         modifier = Modifier
                             .height(16.dp)
                             .fillMaxWidth()
-                            .background(MaterialTheme.colorScheme.background, MaterialTheme.shapes.large)
+                            .background(
+                                MaterialTheme.colorScheme.background,
+                                MaterialTheme.shapes.large
+                            )
 
                     )
                 }

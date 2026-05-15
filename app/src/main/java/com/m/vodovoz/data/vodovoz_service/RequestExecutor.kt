@@ -75,7 +75,13 @@ abstract class RequestExecutor(
 
 }
 
-open class VodovozRequestExecutor(moshi: Moshi) : RequestExecutor(moshi)
+open class VodovozRequestExecutor(protected val moshi: Moshi) : RequestExecutor(moshi) {
+
+    protected inline fun <reified T : Any> fromJson(json: String): T {
+        return moshi.fromJson<T>(json)
+    }
+
+}
 
 open class BaseRequestExecutor(moshi: Moshi) : RequestExecutor(moshi)
 

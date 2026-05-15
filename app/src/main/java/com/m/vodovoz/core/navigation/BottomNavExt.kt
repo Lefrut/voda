@@ -12,6 +12,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.m.vodovoz.R
 import com.m.vodovoz.core.analytics.Analytics
 import java.util.LinkedList
 
@@ -97,7 +98,15 @@ fun BottomNavigationView.setupWithNavController(
             false
         } else {
             Analytics.reportEvent("bottom_nav_tap") {
-                param("tab_name", item.contentDescription)
+                val tabName = when (item.itemId) {
+                    R.id.graph_home -> "Главный"
+                    R.id.graph_catalog -> "Каталог"
+                    R.id.graph_cart -> "Корзина"
+                    R.id.graph_favorite -> "Избранное"
+                    R.id.graph_profile -> "Профиль"
+                    else -> "Unknown"
+                }
+                param("tab_name", tabName)
             }
             val newlySelectedItemTag = graphIdToTagMap[item.itemId]
             if (selectedItemTag != newlySelectedItemTag) {
