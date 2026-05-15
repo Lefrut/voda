@@ -14,7 +14,6 @@ class LoginManager @Inject constructor(
     private val accountManager: AccountManager,
     private val likeManager: LikeManager,
     private val firebaseTokenManager: FirebaseTokenManager,
-    private val tabManager: TabManager,
 ) {
 
 
@@ -22,7 +21,6 @@ class LoginManager @Inject constructor(
         userId: Long,
         userToken: String
     ) {
-        tabManager.updateBottomNavCartState()
         accountManager.updateUserId(userId)
         accountManager.updateUserToken(userToken)
         likeManager.updateLikesAfterLogin()
