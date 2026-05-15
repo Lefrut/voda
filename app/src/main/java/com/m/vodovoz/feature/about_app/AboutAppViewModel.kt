@@ -85,10 +85,12 @@ class AboutAppViewModel @Inject constructor(
 
         when (appMode) {
             AppMode.Test -> {
+                VodovozWebConfig.isTestMode = true
                 urlManager.setUrl(testUrl)
             }
 
             AppMode.Prod -> {
+                VodovozWebConfig.isTestMode = false
                 urlManager.setUrl(prodUrl)
             }
         }

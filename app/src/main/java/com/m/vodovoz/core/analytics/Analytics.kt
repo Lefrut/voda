@@ -1,13 +1,16 @@
 package com.m.vodovoz.core.analytics
 
 import com.m.vodovoz.BuildConfig
+import com.m.vodovoz.core.network.VodovozWebConfig
 import io.appmetrica.analytics.AppMetrica
+import io.appmetrica.analytics.ecommerce.ECommerceCartItem
 import io.appmetrica.analytics.ecommerce.ECommerceEvent
+import io.appmetrica.analytics.ecommerce.ECommerceOrder
+import io.appmetrica.analytics.ecommerce.ECommerceProduct
 import kotlinx.coroutines.flow.StateFlow
 import org.json.JSONObject
-
-data object Analytics :
-    AnalyticsEvents by (if (!BuildConfig.DEBUG) AnalyticsImpl else FakeAnalytics)
+//todo
+val Analytics get() = if (!VodovozWebConfig.isTestMode) AnalyticsImpl else FakeAnalytics
 
 
 interface AnalyticsEvents {
@@ -54,7 +57,7 @@ private data object AnalyticsImpl : AnalyticsEvents {
 
 }
 
-data object FakeAnalytics : AnalyticsEvents
+private data object FakeAnalytics : AnalyticsEvents
 
 class EventParamsBuilder {
     private val map = mutableMapOf<String, Any?>()
