@@ -4,6 +4,7 @@ import androidx.compose.runtime.Stable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.m.vodovoz.common.cart.CartManager
+import com.m.vodovoz.common.cart.change
 import com.m.vodovoz.design_system.model.ForAdultsUi
 import com.m.vodovoz.design_system.model.ProductUi
 import com.m.vodovoz.domain.general.respository.UserPreferencesRepository
@@ -125,7 +126,10 @@ class PreOrderProductsViewModel @Inject constructor(
             state.copy(button = state.button.copy(loading = true))
         }
 
-        cartManager.change(product.id, 1).join()
+        cartManager.change(
+            product = product,
+            count = 1,
+        ).join()
 
         val productIds = currentProductIdsInCart()
         if (productIds.isNotEmpty()) {
@@ -191,7 +195,10 @@ class PreOrderProductsViewModel @Inject constructor(
                 action = PendingAdultAction.LocalIncrement
             )
         } else {
-            cartManager.change(product.id, product.cartQuantity + 1)
+            cartManager.change(
+                product = product,
+                count = product.cartQuantity + 1,
+            )
         }
     }
 

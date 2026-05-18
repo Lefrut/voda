@@ -7,6 +7,7 @@ import com.m.vodovoz.BuildConfig
 import com.m.vodovoz.R
 import com.m.vodovoz.common.account.AccountManager
 import com.m.vodovoz.common.cart.CartManager
+import com.m.vodovoz.common.cart.change
 import com.m.vodovoz.common.like.LikeManager
 import com.m.vodovoz.common.model.AppLink
 import com.m.vodovoz.common.model.BaseVodovozAction
@@ -453,7 +454,7 @@ class HomeFlowViewModel @Inject constructor(
 
     fun incrementProductToCart(product: ProductUi) = viewModelScope.launch {
         cartManager.change(
-            productId = product.id,
+            product = product,
             count = product.cartQuantity + 1,
             onSuccess = {
                 Analytics.reportEvent("add_to_cart_success")
@@ -465,6 +466,7 @@ class HomeFlowViewModel @Inject constructor(
     }
 
     fun decrementProductToCart(product: ProductUi) = viewModelScope.launch {
+        //todo
         cartManager.change(product.id, product.cartQuantity - 1)
     }
 

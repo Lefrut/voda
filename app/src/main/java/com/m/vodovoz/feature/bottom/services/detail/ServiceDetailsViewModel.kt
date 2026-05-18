@@ -4,6 +4,7 @@ import androidx.compose.runtime.Stable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.m.vodovoz.common.cart.CartManager
+import com.m.vodovoz.common.cart.addMultiple
 import com.m.vodovoz.common.like.LikeManager
 import com.m.vodovoz.design_system.model.ColorfulButtonUi
 import com.m.vodovoz.design_system.model.ProductUi
@@ -95,9 +96,17 @@ class ServiceDetailsViewModel @Inject constructor(
         val productSection = stateSnapshot.productsSection ?: return@launch
         val coefficient = productSection.coefficient
 
-        val (first, second) = productSection.additionalProductId.split("-")
+        val (additionalProductId, additionalProductQuantity) = productSection.additionalProductId.split(
+            "-"
+        )
             .mapNotNull { it.toLongOrNull() }
-        cartManager.add(mapOf(product.id to coefficient, first to second.toInt()))
+        cartManager.addMultiple(
+            cartItems = mapOf(
+                product.id to coefficient,
+                additionalProductId to additionalProductQuantity.toInt()
+            ),
+            product = product,
+        )
     }
 
     fun decrementProductToCard(product: ProductUi) = viewModelScope.launch {

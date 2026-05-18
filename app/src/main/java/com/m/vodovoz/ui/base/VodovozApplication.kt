@@ -30,6 +30,7 @@ class VodovozApplication : Application(), Configuration.Provider, SingletonImage
 
     @Inject
     lateinit var accountManager: AccountManager
+
     @Inject
     lateinit var workerFactory: HiltWorkerFactory
 
@@ -57,8 +58,13 @@ class VodovozApplication : Application(), Configuration.Provider, SingletonImage
     }
 
     private fun initAppMetrica() {
-        if (!BuildConfig.DEBUG) {
-            val config: AppMetricaConfig = AppMetricaConfig.newConfigBuilder(BuildConfig.YANDEX_METRICA_KEY)
+        val apiKey = if (BuildConfig.DEBUG) {
+            BuildConfig.TEST_YANDEX_METRICA_KEY
+        } else {
+            BuildConfig.YANDEX_METRICA_KEY
+        }
+        val config: AppMetricaConfig =
+            AppMetricaConfig.newConfigBuilder(apiKey)
                 .withNativeCrashReporting(false)
                 .withLocationTracking(false)
                 .withAppVersion(BuildConfig.VERSION_NAME)
@@ -66,9 +72,9 @@ class VodovozApplication : Application(), Configuration.Provider, SingletonImage
                 .withLogs()
                 .build()
 
-            AppMetrica.activate(applicationContext, config)
-            AppMetrica.enableActivityAutoTracking(this)
-        }
+        AppMetrica.activate(applicationContext, config)
+        AppMetrica.enableActivityAutoTracking(this)
+
     }
 
     override fun newImageLoader(context: PlatformContext): ImageLoader {

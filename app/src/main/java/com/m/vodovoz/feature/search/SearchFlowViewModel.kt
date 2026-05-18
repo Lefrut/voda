@@ -5,6 +5,7 @@ import androidx.compose.runtime.Stable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.m.vodovoz.common.cart.CartManager
+import com.m.vodovoz.common.cart.change
 import com.m.vodovoz.common.like.LikeManager
 import com.m.vodovoz.common.search.SearchManager
 import com.m.vodovoz.design_system.model.ProductUi
@@ -222,7 +223,7 @@ class SearchFlowViewModel @Inject constructor(
     }
 
     fun incrementProductToCart(product: ProductUi) = viewModelScope.launch {
-        cartManager.change(product.id, product.cartQuantity + 1)
+        cartManager.change(product, product.cartQuantity + 1)
     }
 
     fun decrementProductToCart(product: ProductUi) = viewModelScope.launch {

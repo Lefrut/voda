@@ -9,8 +9,9 @@ import io.appmetrica.analytics.ecommerce.ECommerceOrder
 import io.appmetrica.analytics.ecommerce.ECommerceProduct
 import kotlinx.coroutines.flow.StateFlow
 import org.json.JSONObject
-//todo
-val Analytics get() = if (!VodovozWebConfig.isTestMode) AnalyticsImpl else FakeAnalytics
+
+val Analytics: AnalyticsEvents
+    get() = AnalyticsImpl
 
 
 interface AnalyticsEvents {

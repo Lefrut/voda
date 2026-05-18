@@ -38,9 +38,9 @@ android {
         applicationId = "com.m.vodovoz"
         minSdk = 26
         targetSdk = 35
-        versionCode = 2340
+        versionCode = 2350
         //todo
-        versionName = "2.3.4"
+        versionName = "2.3.5"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         ndk {
@@ -62,7 +62,8 @@ android {
             AppKey("YOUTUBE_API_KEY"),
             AppKey("MAPKIT_API_KEY"),
             AppKey("GEOCODER"),
-            AppKey("YANDEX_METRICA_KEY")
+            AppKey("YANDEX_METRICA_KEY"),
+            AppKey("TEST_YANDEX_METRICA_KEY")
         ).forEach { (buildConfigName, propertyName) ->
             buildConfigField(
                 type = "String",

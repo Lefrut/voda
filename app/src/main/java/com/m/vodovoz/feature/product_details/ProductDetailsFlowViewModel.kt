@@ -7,7 +7,14 @@ import androidx.lifecycle.viewModelScope
 import com.m.vodovoz.common.about_product.AboutProductManager
 import com.m.vodovoz.common.account.AccountManager
 import com.m.vodovoz.common.cart.CartManager
+import com.m.vodovoz.common.cart.addMultiple
+import com.m.vodovoz.common.cart.change
+import com.m.vodovoz.common.cart.toProductUi
 import com.m.vodovoz.common.like.LikeManager
+import com.m.vodovoz.core.analytics.Analytics
+import com.m.vodovoz.core.analytics.AnalyticsEventNames
+import com.m.vodovoz.core.analytics.toAnalyticsProduct
+import com.m.vodovoz.core.analytics.toShowProductDetailsEvent
 import com.m.vodovoz.design_system.model.BrandCategoryItemUi
 import com.m.vodovoz.design_system.model.BuyButtonUi
 import com.m.vodovoz.design_system.model.ColorfulButtonUi
@@ -37,6 +44,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -159,6 +167,16 @@ class ProductDetailsFlowViewModel @Inject constructor(
                 )
             }
 
+            val productDetailsQuantity = cartManager.observeCarts().firstOrNull().orEmpty()
+                .getOrDefault(productDetailsScreenModel.details.id, 0)
+
+            val analyticsProduct = productDetailsScreenModel.details.toUi().copy(
+                cartQuantity = productDetailsQuantity
+            ).toAnalyticsProduct()
+
+            Analytics.reportEcommerce(analyticsProduct.toShowProductDetailsEvent())
+            Analytics.reportEvent(AnalyticsEventNames.PRODUCT_DETAILS_VIEW_NEW)
+
         }.onFailure {
             updateState { s ->
                 s.copy(uiState = ProductDetailsUiState.Error)
@@ -178,7 +196,7 @@ class ProductDetailsFlowViewModel @Inject constructor(
 
     fun incrementCart() = viewModelScope.launch {
         val productDetails = stateSnapshot.productDetails
-        cartManager.change(productDetails.id, productDetails.cartQuantity + 1)
+        cartManager.change(productDetails.toProductUi(), productDetails.cartQuantity + 1)
     }
 
     fun decrementCart() = viewModelScope.launch {
@@ -351,7 +369,7 @@ class ProductDetailsFlowViewModel @Inject constructor(
     }
 
     fun incrementProductToCart(product: ProductUi) = viewModelScope.launch {
-        cartManager.change(product.id, product.cartQuantity + 1)
+        cartManager.change(product, product.cartQuantity + 1)
     }
 
     fun decrementProductToCart(product: ProductUi) = viewModelScope.launch {
@@ -363,7 +381,11 @@ class ProductDetailsFlowViewModel @Inject constructor(
     }
 
     fun addProductWithGift(buyButton: BuyButtonUi) = viewModelScope.launch {
-        cartManager.add(listOf(buyButton.productId, buyButton.moreProductId))
+        val productDetails = stateSnapshot.productDetails
+        cartManager.addMultiple(
+            cartItems = listOf(buyButton.productId, buyButton.moreProductId),
+            product = productDetails.toProductUi(),
+        )
         updateState { s ->
             s.copy(
                 showPresentBottomSheet = false,
@@ -393,7 +415,10 @@ class ProductDetailsFlowViewModel @Inject constructor(
     fun saveMultiProductChoice() = viewModelScope.launch {
         val state = stateSnapshot
         val productDetails = state.productDetails
-        cartManager.change(productDetails.id, state.multiProductQuantity)
+        cartManager.change(
+            product = productDetails.toProductUi(),
+            count = state.multiProductQuantity,
+        )
         updateState { s ->
             s.copy(showMultiBottomSheet = false)
         }

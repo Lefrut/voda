@@ -6,9 +6,14 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.CombinedLoadStates
 import androidx.paging.map
 import com.m.vodovoz.common.account.AccountManager
+import com.m.vodovoz.common.cart.CartItemQuantityChange
 import com.m.vodovoz.common.cart.CartManager
+import com.m.vodovoz.common.cart.change
+import com.m.vodovoz.common.cart.reportCartItemEvent
+import com.m.vodovoz.common.cart.toProductUi
 import com.m.vodovoz.common.like.LikeManager
 import com.m.vodovoz.common.tab.TabManager
+import com.m.vodovoz.core.analytics.Analytics
 import com.m.vodovoz.design_system.model.ForAdultsUi
 import com.m.vodovoz.design_system.model.ProductUi
 import com.m.vodovoz.design_system.model.VodovozPlaceholderUi
@@ -89,11 +94,12 @@ class CartFlowViewModel @Inject constructor(
             val preOrderProductsPopupWindow = cartDetails.preOrderProductsPopupWindow?.toUi()
 
             updateState { s ->
-                val selectedPreOrderProducts = if (preOrderProductsPopupWindow?.items.isNullOrEmpty()) {
-                    emptyList()
-                } else {
-                    s.selectedPreOrderProducts
-                }
+                val selectedPreOrderProducts =
+                    if (preOrderProductsPopupWindow?.items.isNullOrEmpty()) {
+                        emptyList()
+                    } else {
+                        s.selectedPreOrderProducts
+                    }
 
                 s.copy(
                     title = cartDetails.title,
@@ -243,25 +249,28 @@ class CartFlowViewModel @Inject constructor(
     }
 
     fun incrementProduct(product: ProductUi) = viewModelScope.launch {
-        changeCartQuantity(product.id, product.cartQuantity + 1)
+        changeCartQuantity(product, product.cartQuantity + 1)
     }
 
     fun decrementProduct(product: ProductUi) = viewModelScope.launch {
-        changeCartQuantity(product.id, product.cartQuantity - 1)
+        changeCartQuantity(product, product.cartQuantity - 1)
     }
 
 
     fun incrementCartItem(cartItem: CartItemUi) = viewModelScope.launch {
-        changeCartQuantity(cartItem.id, cartItem.cartQuantity + 1)
+        changeCartQuantity(cartItem.toProductUi(), cartItem.cartQuantity + 1)
     }
 
     fun decrementCartItem(cartItem: CartItemUi) = viewModelScope.launch {
-        changeCartQuantity(cartItem.id, cartItem.cartQuantity - 1)
+        changeCartQuantity(cartItem.toProductUi(), cartItem.cartQuantity - 1)
     }
 
-    private suspend fun changeCartQuantity(id: Long, quantity: Int) {
+    private suspend fun changeCartQuantity(
+        product: ProductUi,
+        quantity: Int,
+    ) {
         setSensitiveButtonsAvailability(false)
-        cartManager.change(id, quantity)
+        cartManager.change(product, quantity)
     }
 
     private fun setSensitiveButtonsAvailability(buttonEnabled: Boolean) {
@@ -327,8 +336,10 @@ class CartFlowViewModel @Inject constructor(
                 currentRemoveItem = null
             )
         }
-
-        vodovozServiceRepository.updateProductInCart(currentRemoveItem.id, 0).singleResult()
+        //todo - Analytics
+        vodovozServiceRepository.updateProductInCart(
+            currentRemoveItem.id, 0
+        ).singleResult()
         fetchCartDetails().join()
 
         updateState { s ->
@@ -409,6 +420,7 @@ class CartFlowViewModel @Inject constructor(
     fun addGiftToCart(presentItem: CartPresentItemUi) = viewModelScope.launch {
         updateState { s -> s.copy(lockCart = true) }
 
+        //todo - Analytics
         vodovozServiceRepository.addProductToCart(presentItem.id, 1).singleResult()
         fetchCartDetails().join()
 

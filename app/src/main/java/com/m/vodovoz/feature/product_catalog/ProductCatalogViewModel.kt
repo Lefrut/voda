@@ -10,6 +10,7 @@ import androidx.paging.PagingData
 import androidx.paging.map
 import com.m.vodovoz.R
 import com.m.vodovoz.common.cart.CartManager
+import com.m.vodovoz.common.cart.change
 import com.m.vodovoz.common.like.LikeManager
 import com.m.vodovoz.common.model.BaseVodovozAction
 import com.m.vodovoz.common.resources.ResourcesProvider
@@ -589,7 +590,7 @@ class ProductCatalogViewModel @Inject constructor(
     }
 
     fun incrementProductToCart(product: ProductUi) = viewModelScope.launch {
-        cartManager.change(product.id, product.cartQuantity + 1)
+        cartManager.change(product, product.cartQuantity + 1)
     }
 
     fun navigateToProductAnalogs(product: ProductUi) = viewModelScope.launch {

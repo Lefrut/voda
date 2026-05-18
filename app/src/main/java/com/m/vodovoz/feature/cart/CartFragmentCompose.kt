@@ -28,6 +28,8 @@ import androidx.navigation.fragment.findNavController
 import com.m.vodovoz.R
 import com.m.vodovoz.common.account.AccountManager
 import com.m.vodovoz.common.tab.TabManager
+import com.m.vodovoz.core.analytics.Analytics
+import com.m.vodovoz.core.analytics.AnalyticsEventNames
 import com.m.vodovoz.core.navigation.GIFT_STATE_KEY
 import com.m.vodovoz.core.navigation.PRE_ORDER_PRODUCTS_STATE_KEY
 import com.m.vodovoz.core.navigation.navigateToAllBottles
@@ -64,6 +66,7 @@ class CartFragment : Fragment() {
 
     override fun onStart() {
         super.onStart()
+        Analytics.reportEvent(AnalyticsEventNames.CART_OPENED_NEW)
         findNavController().currentBackStackEntry
             ?.savedStateHandle
             ?.remove<CartPresentItemUi>(GIFT_STATE_KEY)

@@ -5,6 +5,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.m.vodovoz.common.about_product.AboutProductManager
 import com.m.vodovoz.common.cart.CartManager
+import com.m.vodovoz.common.cart.change
 import com.m.vodovoz.design_system.model.ColorfulButtonUi
 import com.m.vodovoz.design_system.model.DocumentUi
 import com.m.vodovoz.design_system.model.PriceUi
@@ -122,7 +123,10 @@ class AboutProductViewModel @Inject constructor(
     }
 
     fun incrementProductToCart() = viewModelScope.launch {
-        cartManager.change(productId, stateSnapshot.product.cartQuantity + 1)
+        cartManager.change(
+            product = stateSnapshot.product,
+            count = stateSnapshot.product.cartQuantity + 1,
+        )
     }
 
     fun decrementProductFromCart() = viewModelScope.launch {

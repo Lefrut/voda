@@ -6,8 +6,6 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import junit.framework.TestCase.assertEquals
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
@@ -16,12 +14,7 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
-import org.junit.After
-import org.junit.Before
 import org.junit.Test
 
 class CartManagerTests: CoroutineTestBase() {
@@ -131,7 +124,7 @@ class CartManagerTests: CoroutineTestBase() {
         } returns flow { emit(Result.success("")) }
 
         launch {
-            cartManager.add(mapOf(1L to 10, 2L to 20))
+            cartManager.addMultiple(mapOf(1L to 10, 2L to 20))
         }.join()
         val cart = cartManager.observeCarts().firstOrNull() ?: emptyMap()
         assertEquals(
@@ -157,7 +150,7 @@ class CartManagerTests: CoroutineTestBase() {
             vodovozServiceRepository.addMultipleProductsToCart(any())
         } returns flowOf(Result.failure(Throwable()))
 
-        cartManager.add(mapOf(1L to 10, 2L to 20)).join()
+        cartManager.addMultiple(mapOf(1L to 10, 2L to 20)).join()
 
         val cart = cartManager.observeCarts().firstOrNull() ?: emptyMap()
 

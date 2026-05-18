@@ -9,6 +9,11 @@ import com.m.vodovoz.common.cart.CartManager
 import com.m.vodovoz.common.model.VodovozBoolean
 import com.m.vodovoz.common.model.boolean
 import com.m.vodovoz.common.model.from
+import com.m.vodovoz.core.analytics.Analytics
+import com.m.vodovoz.core.analytics.AnalyticsEventNames
+import com.m.vodovoz.core.analytics.extractOrderId
+import com.m.vodovoz.core.analytics.toAnalyticsProduct
+import com.m.vodovoz.core.analytics.toPurchaseEvent
 import com.m.vodovoz.common.resources.ResourcesProvider
 import com.m.vodovoz.design_system.model.ColorfulButtonUi
 import com.m.vodovoz.design_system.model.SectionUi
@@ -66,6 +71,7 @@ class OrderingFlowViewModel @Inject constructor(
     private val coupon = savedStateHandle.get<String>("coupon")
 
     init {
+        Analytics.reportEvent(AnalyticsEventNames.CHECKOUT_OPENED_NEW)
         fetchOrderingDetails()
     }
 
@@ -340,6 +346,12 @@ class OrderingFlowViewModel @Inject constructor(
                 s.copy(button = s.button.copy(loading = true))
             }
 
+            val products = vodovozServiceRepository.getCartDetails(coupon)
+                .singleResult()
+                .getOrNull()
+                ?.items
+                .orEmpty()
+                .map { cartItem -> cartItem.toAnalyticsProduct() }
 
             val params = mapOf(earlierDelivery ?: Pair("", "")) + with(stateSnapshot) {
                 val extraPhoneField = notifySection.extraPhoneField
@@ -369,6 +381,10 @@ class OrderingFlowViewModel @Inject constructor(
                 bonuses = ordering.paymentBonusesValue,
                 params = params
             ).singleResult().onSuccess { placeholder ->
+                products.toPurchaseEvent(placeholder.extractOrderId())?.let { event ->
+                    Analytics.reportEcommerce(event)
+                }
+                Analytics.reportEvent(AnalyticsEventNames.ORDER_CREATED_NEW)
                 updateState { s ->
                     s.copy(uiState = OrderingUiState.Success(placeholder.toUi()))
                 }
