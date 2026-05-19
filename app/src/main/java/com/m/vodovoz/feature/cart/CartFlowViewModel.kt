@@ -9,7 +9,6 @@ import com.m.vodovoz.common.account.AccountManager
 import com.m.vodovoz.common.cart.CartItemQuantityChange
 import com.m.vodovoz.common.cart.CartManager
 import com.m.vodovoz.common.cart.change
-import com.m.vodovoz.common.cart.reportCartItemEvent
 import com.m.vodovoz.common.cart.toProductUi
 import com.m.vodovoz.common.like.LikeManager
 import com.m.vodovoz.common.tab.TabManager
@@ -336,7 +335,6 @@ class CartFlowViewModel @Inject constructor(
                 currentRemoveItem = null
             )
         }
-        //todo - Analytics
         vodovozServiceRepository.updateProductInCart(
             currentRemoveItem.id, 0
         ).singleResult()

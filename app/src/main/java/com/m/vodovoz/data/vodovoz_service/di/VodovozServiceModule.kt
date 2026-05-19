@@ -80,5 +80,7 @@ abstract class VodovozServiceModule {
 }
 
 fun String.toVodovozUrl(): String {
-    return VodovozWebConfig.VODOVOZ_URL + this
+    if (startsWith("http://") || startsWith("https://")) return this
+
+    return VodovozWebConfig.VODOVOZ_URL.trimEnd('/') + "/" + trimStart('/')
 }
