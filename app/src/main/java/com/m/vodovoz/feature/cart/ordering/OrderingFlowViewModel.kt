@@ -28,6 +28,8 @@ import com.m.vodovoz.design_system.model.widgets.toQueryMap
 import com.m.vodovoz.domain.general.model.order.OrderingDetailsModel
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
 import com.m.vodovoz.feature.addresses.model.AddressUi
+import com.m.vodovoz.feature.cart.model.ProductRestrictionUi
+import com.m.vodovoz.feature.cart.model.toUi
 import com.m.vodovoz.feature.cart.ordering.model.OrderNotifyItemUi
 import com.m.vodovoz.feature.cart.ordering.model.OrderNotifySectionUi
 import com.m.vodovoz.feature.cart.ordering.model.OrderingMenuItemUi
@@ -346,7 +348,7 @@ class OrderingFlowViewModel @Inject constructor(
                 s.copy(button = s.button.copy(loading = true))
             }
 
-            val products = vodovozServiceRepository.getCartDetails(coupon)
+            val analyticsProducts = vodovozServiceRepository.getCartDetails(coupon)
                 .singleResult()
                 .getOrNull()
                 ?.items
@@ -381,7 +383,7 @@ class OrderingFlowViewModel @Inject constructor(
                 bonuses = ordering.paymentBonusesValue,
                 params = params
             ).singleResult().onSuccess { placeholder ->
-                products.toPurchaseEvent(placeholder.extractOrderId())?.let { event ->
+                analyticsProducts.toPurchaseEvent(placeholder.extractOrderId())?.let { event ->
                     Analytics.reportEcommerce(event)
                 }
                 Analytics.reportEvent(AnalyticsEventNames.ORDER_CREATED_NEW)

@@ -59,8 +59,7 @@ fun AnalyticsEvents.reportCartItemEvent(
     product: ProductUi,
     change: CartItemQuantityChange
 ) {
-    val quantity = kotlin.math.abs(change.delta)
-    val analyticsProduct = product.toAnalyticsProduct(quantity = quantity)
+    val analyticsProduct = product.toAnalyticsProduct()
 
     val event = when {
         change.delta > 0 && change.previousCount == 0 -> {

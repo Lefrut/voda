@@ -25,7 +25,7 @@ data class AnalyticsProduct(
     val name: String,
     val price: Float,
     val oldPrice: Float? = null,
-    val quantity: Int = 1,
+    val cartQuantity: Int,
 )
 
 fun ProductDetailsUi.toAnalyticsProduct(): AnalyticsProduct {
@@ -36,27 +36,27 @@ fun ProductDetailsUi.toAnalyticsProduct(): AnalyticsProduct {
         name = name,
         price = priceForQuantity.price,
         oldPrice = priceForQuantity.oldPrice.takeIf { it > 0f },
-        quantity = cartQuantity,
+        cartQuantity = cartQuantity,
     )
 }
 
-fun ProductUi.toAnalyticsProduct(quantity: Int = 1): AnalyticsProduct {
+fun ProductUi.toAnalyticsProduct(): AnalyticsProduct {
     return AnalyticsProduct(
         id = id,
         name = name,
         price = price,
         oldPrice = oldPrice.takeIf { it > 0f },
-        quantity = quantity.coerceAtLeast(1),
+        cartQuantity = cartQuantity
     )
 }
 
-fun CartItemModel.toAnalyticsProduct(quantity: Int = this.quantity): AnalyticsProduct {
+fun CartItemModel.toAnalyticsProduct(): AnalyticsProduct {
     return AnalyticsProduct(
         id = productId,
         name = productName,
         price = currentPrice,
         oldPrice = basePrice.takeIf { it > 0f && it != currentPrice },
-        quantity = quantity.coerceAtLeast(1),
+        cartQuantity = quantity,
     )
 }
 
@@ -81,7 +81,7 @@ fun AnalyticsProduct.toRemoveCartItemEvent(removedQuantity: Int): ECommerceEvent
 }
 
 fun List<AnalyticsProduct>.toPurchaseEvent(orderId: String?): ECommerceEvent? {
-    val cartItems = filter { product -> product.quantity > 0 }
+    val cartItems = filter { product -> product.cartQuantity > 0 && product.price > 0 }
         .map { product -> product.toECommerceCartItem() }
 
     return cartItems
@@ -105,7 +105,7 @@ private fun AnalyticsProduct.toECommerceProduct(): ECommerceProduct {
     return product
 }
 
-private fun AnalyticsProduct.toECommerceCartItem(quantityForEvent: Int = quantity): ECommerceCartItem {
+private fun AnalyticsProduct.toECommerceCartItem(quantityForEvent: Int = cartQuantity): ECommerceCartItem {
     val totalPrice = (price * quantityForEvent).toECommercePrice()
     return ECommerceCartItem(toECommerceProduct(), totalPrice, quantityForEvent.toDouble())
 }
