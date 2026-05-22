@@ -11,8 +11,9 @@ import kotlinx.coroutines.flow.StateFlow
 import org.json.JSONObject
 
 val Analytics: AnalyticsEvents
-    get() = AnalyticsImpl
+    get() = if (!VodovozWebConfig.isTestMode) AnalyticsImpl else EmptyAnalytics
 
+private val EmptyAnalytics: AnalyticsEvents = object : AnalyticsEvents {}
 
 interface AnalyticsEvents {
 
