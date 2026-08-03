@@ -19,9 +19,15 @@ fun FloatingPromoButtonDTO.toDomain(): FloatingPromoButtonModel? {
         action = action,
         actionId = actionId,
         blockId = IBLOCK_ID?.toLong() ?: 0L,
+        leftScreenNames = POKAZ?.LEFT.toScreenNames(),
         rightScreenNames = POKAZ?.RIGHT.orEmpty()
-            .map(String::trim)
-            .filter(String::isNotEmpty)
-            .toSet(),
+            .toScreenNames(),
     )
+}
+
+private fun List<String>?.toScreenNames(): Set<String> {
+    return orEmpty()
+        .map(String::trim)
+        .filter(String::isNotEmpty)
+        .toSet()
 }

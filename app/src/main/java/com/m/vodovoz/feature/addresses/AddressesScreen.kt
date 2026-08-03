@@ -6,7 +6,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.m.vodovoz.R
@@ -27,8 +34,21 @@ import com.m.vodovoz.feature.addresses.model.AddressUi
 fun AddressesScreen(
     viewModel: AddressesFlowViewModel,
     viewState: AddressesFlowViewModel.AddressesState,
+    onBottomBarHeightChanged: (Int) -> Unit,
 ) {
     val uiState = viewState.uiState
+    var bottomBarHeightPx by remember { mutableIntStateOf(0) }
+    val currentOnBottomBarHeightChanged by rememberUpdatedState(onBottomBarHeightChanged)
+
+    LaunchedEffect(uiState, bottomBarHeightPx) {
+        currentOnBottomBarHeightChanged(
+            if (uiState is AddressesFlowViewModel.AddressesUiState.Success) {
+                bottomBarHeightPx
+            } else {
+                0
+            }
+        )
+    }
 
     Scaffold(
         topBar = {
@@ -51,7 +71,9 @@ fun AddressesScreen(
         },
         bottomBar = {
             if (uiState is AddressesFlowViewModel.AddressesUiState.Success) {
-                BottomFloatingContainer {
+                BottomFloatingContainer(
+                    modifier = Modifier.onSizeChanged { bottomBarHeightPx = it.height }
+                ) {
                     VodovozButton(
                         modifier = Modifier.padding(horizontal = 16.dp),
                         text = when (viewState.screenType) {

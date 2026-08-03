@@ -41,6 +41,7 @@ import com.m.vodovoz.feature.home.model.HomeListItem
 import com.m.vodovoz.feature.home.model.HomeOrderUi
 import com.m.vodovoz.feature.home.model.MenuItemUi
 import com.m.vodovoz.feature.home.model.PopularCategoryUi
+import com.m.vodovoz.feature.main.FloatingPromoBannerDefaults
 
 
 @Composable

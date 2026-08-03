@@ -249,9 +249,12 @@ class MainFragment : Fragment(), SnackbarHostStateOwner, FloatingPromoUiHost {
         binding.floatingPromoButton.setContent {
             VodovozTheme {
                 val state by viewModel.floatingPromoState.collectAsStateWithLifecycle()
+                val presentation = floatingPromoUiState.presentation
                 state.button?.let { button ->
                     FloatingPromoButton(
                         button = button,
+                        isVisible = presentation.isVisible,
+                        side = presentation.side,
                         onClick = {
                             handleFloatingPromoClick(
                                 action = button.action,
@@ -275,30 +278,39 @@ class MainFragment : Fragment(), SnackbarHostStateOwner, FloatingPromoUiHost {
     }
 
     private fun updateFloatingPromoVisibility() {
-        val binding = _binding ?: return
         val state = viewModel.floatingPromoState.value
-        val serverScreen = FloatingPromoScreenRegistry.serverScreenFor(
-            floatingPromoUiState.destinationId
+        val side = FloatingPromoScreenRegistry.sideFor(
+            destinationId = floatingPromoUiState.destinationId,
+            leftScreenNames = state.leftScreenNames,
+            rightScreenNames = state.rightScreenNames,
         )
-        val isAllowedOnCurrentScreen = serverScreen != null &&
-                state.rightScreenNames.any { it.equals(serverScreen, ignoreCase = true) }
-
-        binding.floatingPromoButton.isVisible =
+        val isVisible =
             !state.isLoading &&
-                    state.error == null &&
-                    state.button != null &&
-                    floatingPromoUiState.isBottomNavigationVisible &&
-                    !floatingPromoUiState.isSuppressed &&
-                    isAllowedOnCurrentScreen
+                state.error == null &&
+                state.button != null &&
+                floatingPromoUiState.isBottomNavigationVisible &&
+                !floatingPromoUiState.isSuppressed &&
+                !state.isHiddenByClickCooldown &&
+                side != null
+
+        floatingPromoUiState.setPresentation(isVisible = isVisible, side = side)
     }
 
     private fun updateFloatingPromoBottomMargin() {
         val binding = _binding ?: return
         val density = resources.displayMetrics.density
-        val baseMarginPx = (FLOATING_PROMO_EDGE_MARGIN_DP * density).roundToInt()
+        val defaultBottomInsetPx = (
+            FloatingPromoBannerDefaults.DefaultBottomInset.value * density
+            ).roundToInt()
+        val productButtonSpacingPx = (
+            FloatingPromoBannerDefaults.ProductButtonSpacing.value * density
+            ).roundToInt()
 
         binding.floatingPromoButton.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-            bottomMargin = baseMarginPx + floatingPromoUiState.resolveExtraBottomOffset(0)
+            bottomMargin = floatingPromoUiState.resolveBottomInset(
+                defaultInsetPx = defaultBottomInsetPx,
+                productButtonSpacingPx = productButtonSpacingPx,
+            )
         }
     }
 
@@ -306,10 +318,12 @@ class MainFragment : Fragment(), SnackbarHostStateOwner, FloatingPromoUiHost {
         val navController = selectedNavController ?: return
         val navigationAction = vodovozActionOf(action, id, blockId) ?: return
         if (navigationAction is VodovozAction.Unknown) return
-        if (!binding.floatingPromoButton.isVisible) return
+        if (!floatingPromoUiState.isPromoVisible) return
 
         val now = SystemClock.elapsedRealtime()
         if (!floatingPromoUiState.tryConsumeClick(now)) return
+
+        viewModel.hideFloatingPromoAfterClick(now)
 
         runCatching {
             navigationAction.activate(
@@ -405,6 +419,7 @@ class MainFragment : Fragment(), SnackbarHostStateOwner, FloatingPromoUiHost {
 
     override fun onResume() {
         super.onResume()
+        viewModel.refreshFloatingPromoCooldown(SystemClock.elapsedRealtime())
         appUpdateController.onResumeAction()
     }
 
@@ -462,7 +477,6 @@ class MainFragment : Fragment(), SnackbarHostStateOwner, FloatingPromoUiHost {
     }
 
     private companion object {
-        const val FLOATING_PROMO_EDGE_MARGIN_DP = 16
         const val FLOATING_PROMO_CLICK_DEBOUNCE_MS = 800L
     }
 

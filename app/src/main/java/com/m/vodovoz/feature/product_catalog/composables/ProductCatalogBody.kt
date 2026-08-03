@@ -38,6 +38,7 @@ import com.m.vodovoz.design_system.model.allCategories
 import com.m.vodovoz.design_system.model.toUi
 import com.m.vodovoz.domain.general.model.exceptions.EmptyResultException
 import com.m.vodovoz.feature.home.model.CategoryUi
+import com.m.vodovoz.feature.main.FloatingPromoBannerDefaults
 import com.m.vodovoz.feature.product_comments.model.SortUi
 
 @Suppress("NonSkippableComposable")
@@ -98,7 +99,7 @@ fun ProductCatalogBody(
         state = lazyGridState,
         columns = GridCells.Fixed(2),
         modifier = modifier.fillMaxSize(),
-        contentPadding = PaddingValues(vertical = 16.dp),
+        contentPadding = PaddingValues(top = 16.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         if (banners.isNotEmpty()) {

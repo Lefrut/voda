@@ -1,5 +1,11 @@
 package com.m.vodovoz.feature.main
 
+import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import kotlin.math.max
+
 internal class FloatingPromoUiStateHolder(
     private val clickDebounceMillis: Long,
 ) {
@@ -14,6 +20,12 @@ internal class FloatingPromoUiStateHolder(
 
     private var dynamicExtraBottomOffsetPx: Int? = null
     private var lastClickAt: Long? = null
+
+    var presentation by mutableStateOf(FloatingPromoPresentation())
+        private set
+
+    val isPromoVisible: Boolean
+        get() = presentation.isVisible
 
     fun onDestinationChanged(destinationId: Int) {
         this.destinationId = destinationId
@@ -33,8 +45,16 @@ internal class FloatingPromoUiStateHolder(
         dynamicExtraBottomOffsetPx = offsetPx?.coerceAtLeast(0)
     }
 
-    fun resolveExtraBottomOffset(staticOffsetPx: Int): Int {
-        return dynamicExtraBottomOffsetPx ?: staticOffsetPx.coerceAtLeast(0)
+    fun resolveBottomInset(defaultInsetPx: Int, productButtonSpacingPx: Int): Int {
+        val productButtonHeightPx = dynamicExtraBottomOffsetPx ?: return defaultInsetPx
+        return max(defaultInsetPx, productButtonHeightPx + productButtonSpacingPx)
+    }
+
+    fun setPresentation(isVisible: Boolean, side: FloatingPromoSide?) {
+        presentation = FloatingPromoPresentation(
+            isVisible = isVisible,
+            side = side ?: presentation.side,
+        )
     }
 
     fun tryConsumeClick(now: Long): Boolean {
@@ -52,5 +72,12 @@ internal class FloatingPromoUiStateHolder(
         isSuppressed = false
         dynamicExtraBottomOffsetPx = null
         lastClickAt = null
+        presentation = FloatingPromoPresentation()
     }
 }
+
+@Immutable
+internal data class FloatingPromoPresentation(
+    val isVisible: Boolean = false,
+    val side: FloatingPromoSide = FloatingPromoSide.Right,
+)

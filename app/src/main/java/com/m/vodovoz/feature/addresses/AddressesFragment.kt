@@ -5,9 +5,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.compose.BackHandler
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
@@ -20,6 +19,8 @@ import com.m.vodovoz.core.navigation.navigateToMap
 import com.m.vodovoz.design_system.VodovozTheme
 import com.m.vodovoz.design_system.effects.LifecycleEffect
 import com.m.vodovoz.feature.addresses.model.AddressScreenTypeUi
+import com.m.vodovoz.feature.main.clearFloatingPromoExtraBottomOffset
+import com.m.vodovoz.feature.main.setFloatingPromoExtraBottomOffset
 import com.yandex.mapkit.MapKit
 import com.yandex.mapkit.MapKitFactory
 import dagger.hilt.android.AndroidEntryPoint
@@ -66,16 +67,21 @@ class AddressesFragment : Fragment() {
 
             setContent {
                 val viewState by viewModel.collectAsState()
-                
+
                 VodovozTheme {
                     AddressesScreen(
                         viewModel = viewModel,
-                        viewState = viewState
+                        viewState = viewState,
+                        onBottomBarHeightChanged = ::setFloatingPromoExtraBottomOffset,
                     )
 
                     BackHandler {
                         viewModel.navigateBack()
                     }
+                }
+
+                DisposableEffect(Unit) {
+                    onDispose(::clearFloatingPromoExtraBottomOffset)
                 }
 
                 LifecycleEffect {
@@ -117,4 +123,3 @@ class AddressesFragment : Fragment() {
     }
 
 }
-

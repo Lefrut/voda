@@ -10,10 +10,13 @@ class FloatingPromoUiStateHolderTest {
     private val state = FloatingPromoUiStateHolder(clickDebounceMillis = 800L)
 
     @Test
-    fun `dynamic zero offset overrides static fallback while bottom bar animates out`() {
+    fun `hidden product button resolves to default bottom inset`() {
         state.setDynamicExtraBottomOffset(0)
 
-        assertEquals(0, state.resolveExtraBottomOffset(staticOffsetPx = 72))
+        assertEquals(
+            64,
+            state.resolveBottomInset(defaultInsetPx = 64, productButtonSpacingPx = 60),
+        )
     }
 
     @Test
@@ -24,8 +27,29 @@ class FloatingPromoUiStateHolderTest {
         state.onDestinationChanged(destinationId = 42)
 
         assertEquals(42, state.destinationId)
-        assertEquals(72, state.resolveExtraBottomOffset(staticOffsetPx = 72))
+        assertEquals(
+            64,
+            state.resolveBottomInset(defaultInsetPx = 64, productButtonSpacingPx = 60),
+        )
         assertFalse(state.isSuppressed)
+    }
+
+    @Test
+    fun `visible product button includes configured spacing`() {
+        state.setDynamicExtraBottomOffset(80)
+
+        assertEquals(
+            140,
+            state.resolveBottomInset(defaultInsetPx = 64, productButtonSpacingPx = 60),
+        )
+    }
+
+    @Test
+    fun `presentation stores visibility and server side`() {
+        state.setPresentation(isVisible = true, side = FloatingPromoSide.Left)
+
+        assertTrue(state.isPromoVisible)
+        assertEquals(FloatingPromoSide.Left, state.presentation.side)
     }
 
     @Test

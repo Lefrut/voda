@@ -17,6 +17,7 @@ import com.m.vodovoz.feature.home.composables.HomeTopBar
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CatalogScreen(viewModel: CatalogFlowViewModel, viewState: CatalogFlowViewModel.CatalogState) {
+
     VodovozScaffold(
         topBar = {
             HomeTopBar(

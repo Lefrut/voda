@@ -29,6 +29,7 @@ import com.m.vodovoz.design_system.composables.decoration.SmallBannerPager
 import com.m.vodovoz.design_system.model.AboutAdvertisingUi
 import com.m.vodovoz.design_system.model.BannerUi
 import com.m.vodovoz.design_system.model.ParentCategoryUi
+import com.m.vodovoz.feature.main.FloatingPromoBannerDefaults
 import com.valentinilk.shimmer.ShimmerBounds
 import com.valentinilk.shimmer.rememberShimmer
 

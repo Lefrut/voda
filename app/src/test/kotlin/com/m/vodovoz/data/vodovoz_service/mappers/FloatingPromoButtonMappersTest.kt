@@ -22,6 +22,7 @@ class FloatingPromoButtonMappersTest {
             VodovozAction.Category(5102),
             vodovozActionOf(model?.action, model?.actionId, model?.blockId ?: 0L),
         )
+        assertEquals(setOf("profile"), model?.leftScreenNames)
         assertEquals(setOf("catalog", "detail", "detailPromo", "main"), model?.rightScreenNames)
         assertTrue(model?.imageUrl?.endsWith("/promo.png") == true)
     }
@@ -41,7 +42,7 @@ class FloatingPromoButtonMappersTest {
         HARAKTERISTIK = ACTION_DTO(ACTION = action, ID = actionId),
         POKAZ = FloatingButtonVisibilityDTO(
             RIGHT = listOf("catalog", "detail", "detailPromo", "main"),
-            LEFT = null,
+            LEFT = listOf("profile"),
         ),
         OREKLAME = null,
     )

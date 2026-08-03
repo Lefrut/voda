@@ -10,5 +10,6 @@ data class FloatingPromoButtonModel(
     val action: String,
     val actionId: String,
     val blockId: Long,
+    val leftScreenNames: Set<String>,
     val rightScreenNames: Set<String>,
 )
