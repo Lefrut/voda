@@ -466,7 +466,6 @@ class HomeFlowViewModel @Inject constructor(
     }
 
     fun decrementProductToCart(product: ProductUi) = viewModelScope.launch {
-        //todo
         cartManager.change(product.id, product.cartQuantity - 1)
     }
 

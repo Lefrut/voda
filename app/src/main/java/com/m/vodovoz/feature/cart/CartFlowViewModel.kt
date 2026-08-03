@@ -418,7 +418,6 @@ class CartFlowViewModel @Inject constructor(
     fun addGiftToCart(presentItem: CartPresentItemUi) = viewModelScope.launch {
         updateState { s -> s.copy(lockCart = true) }
 
-        //todo - Analytics
         vodovozServiceRepository.addProductToCart(presentItem.id, 1).singleResult()
         fetchCartDetails().join()
 
