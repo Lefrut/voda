@@ -9,6 +9,7 @@ import com.m.vodovoz.data.vodovoz_service.model.CATEGORY_NODE_DTO
 import com.m.vodovoz.data.vodovoz_service.model.CancelOrderDetailsDTO
 import com.m.vodovoz.data.vodovoz_service.model.CertificateActivationDetailsDTO
 import com.m.vodovoz.data.vodovoz_service.model.FieldsDTO
+import com.m.vodovoz.data.vodovoz_service.model.FloatingPromoButtonDTO
 import com.m.vodovoz.data.vodovoz_service.model.FormDTO
 import com.m.vodovoz.data.vodovoz_service.model.MiniSearchRecommendationsDTO
 import com.m.vodovoz.data.vodovoz_service.model.OrderMenuDTO
@@ -83,6 +84,8 @@ import retrofit2.http.QueryMap
 
 interface VodovozService {
 
+    @GET("osnova/bannerokno.php?action=oknbanner")
+    suspend fun getPromotionFloatingButton(): Response<VodovozResponseDTO<FloatingPromoButtonDTO>>
 
     /**
      * Past purchases requests
