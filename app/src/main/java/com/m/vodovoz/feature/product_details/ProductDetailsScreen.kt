@@ -11,9 +11,16 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.util.lerp
 import com.m.vodovoz.design_system.composables.button.ProductBottomFloatingButton
 import com.m.vodovoz.design_system.composables.placeholders.NetworkErrorPlaceholder
@@ -24,6 +31,7 @@ import com.m.vodovoz.feature.product_details.composables.ProductDetailsBody
 import com.m.vodovoz.feature.product_details.composables.ProductDetailsPlaceholder
 import com.m.vodovoz.feature.product_details.composables.ProductDetailsTopBar
 import com.m.vodovoz.util.extensions.debugLog
+import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -31,14 +39,27 @@ fun ProductDetailsScreen(
     viewState: ProductDetailsFlowViewModel.ProductDetailsState,
     viewModel: ProductDetailsFlowViewModel,
     mediaPagerState: PagerState,
+    onBottomBarVisibleHeightChanged: (Int) -> Unit,
 ) {
     val productDetails = viewState.productDetails
+    var bottomBarHeightPx by remember { mutableIntStateOf(0) }
+    val currentOnBottomBarVisibleHeightChanged by rememberUpdatedState(
+        onBottomBarVisibleHeightChanged
+    )
 
     val floatingButtonProgress by animateFloatAsState(
         targetValue = if (viewState.hideFloatingButton) 1f else 0f,
         animationSpec = tween(easing = LinearEasing, durationMillis = 100),
         label = "floatingButtonProgress"
     )
+
+    LaunchedEffect(Unit) {
+        snapshotFlow {
+            (bottomBarHeightPx * (1f - floatingButtonProgress)).roundToInt()
+        }.collect { visibleHeightPx ->
+            currentOnBottomBarVisibleHeightChanged(visibleHeightPx)
+        }
+    }
 
     VodovozScaffold(
         topBar = {
@@ -61,10 +82,12 @@ fun ProductDetailsScreen(
             debugLog { "Cart quantity: ${productDetails.cartQuantity}" }
 
             ProductBottomFloatingButton(
-                modifier = Modifier.graphicsLayer {
-                    viewState.hideFloatingButton
-                    translationY = lerp(0f, size.height, floatingButtonProgress)
-                },
+                modifier = Modifier
+                    .onSizeChanged { bottomBarHeightPx = it.height }
+                    .graphicsLayer {
+                        viewState.hideFloatingButton
+                        translationY = lerp(0f, size.height, floatingButtonProgress)
+                    },
                 isLoading = viewState.buttonIsLoading,
                 cartQuantity = productDetails.cartQuantity,
                 totalPrice = viewState.totalPrice,

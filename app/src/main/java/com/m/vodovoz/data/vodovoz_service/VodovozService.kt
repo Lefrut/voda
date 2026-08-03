@@ -30,7 +30,6 @@ import com.m.vodovoz.data.vodovoz_service.model.SiteStateResponseDTO
 import com.m.vodovoz.data.vodovoz_service.model.StoriesDTO
 import com.m.vodovoz.data.vodovoz_service.model.SuperTopAndBottomSectionsDTO
 import com.m.vodovoz.data.vodovoz_service.model.TOVAR_DATA_DTO
-import com.m.vodovoz.data.vodovoz_service.model.VodovozErrorResponseDTO
 import com.m.vodovoz.data.vodovoz_service.model.VodovozPlaceholderDTO
 import com.m.vodovoz.data.vodovoz_service.model.VodovozResponseDTO
 import com.m.vodovoz.data.vodovoz_service.model.WaitFeedbackProductsDTO
@@ -68,7 +67,6 @@ import com.m.vodovoz.data.vodovoz_service.model.unrated_products.UnratedProducts
 import com.m.vodovoz.data.vodovoz_service.model.user_data.UserDataDTO
 import com.m.vodovoz.domain.general.model.order.PaymentMethodItemModel
 import com.m.vodovoz.domain.general.model.widgets.FieldModel
-import com.m.vodovoz.feature.cart.ordering.model.OrderingMenuItemUi
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import retrofit2.Response
@@ -85,7 +83,7 @@ import retrofit2.http.QueryMap
 interface VodovozService {
 
     @GET("osnova/bannerokno.php?action=oknbanner")
-    suspend fun getPromotionFloatingButton(): Response<VodovozResponseDTO<FloatingPromoButtonDTO>>
+    suspend fun getFloatingPromoButton(): Response<VodovozResponseDTO<List<FloatingPromoButtonDTO>>>
 
     /**
      * Past purchases requests

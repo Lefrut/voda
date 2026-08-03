@@ -4,6 +4,7 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.os.Build
 import android.os.Bundle
+import android.os.SystemClock
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -14,6 +15,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
@@ -24,21 +26,28 @@ import androidx.core.view.WindowInsetsCompat.CONSUMED
 import androidx.core.view.WindowInsetsCompat.Type
 import androidx.core.view.WindowInsetsCompat.Type.InsetsType
 import androidx.core.view.isVisible
+import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.Navigation
+import androidx.navigation.NavController
 import com.google.android.material.snackbar.Snackbar
 import com.m.vodovoz.R
 import com.m.vodovoz.common.account.AccountManager
+import com.m.vodovoz.common.cookie.CookieManager
+import com.m.vodovoz.common.model.VodovozAction
+import com.m.vodovoz.common.model.vodovozActionOf
 import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.common.update.AppUpdateController
 import com.m.vodovoz.core.android.locationPermissionGranted
 import com.m.vodovoz.core.android.locationPermissions
 import com.m.vodovoz.core.android.notificationPermissionGranted
+import com.m.vodovoz.core.navigation.activate
 import com.m.vodovoz.core.navigation.setupWithNavController
 import com.m.vodovoz.databinding.FragmentMainBinding
 import com.m.vodovoz.design_system.VodovozTheme
@@ -58,10 +67,11 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.math.roundToInt
 
 
 @AndroidEntryPoint
-class MainFragment : Fragment(), SnackbarHostStateOwner {
+class MainFragment : Fragment(), SnackbarHostStateOwner, FloatingPromoUiHost {
 
     private val locationPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
@@ -82,6 +92,9 @@ class MainFragment : Fragment(), SnackbarHostStateOwner {
     lateinit var accountManager: AccountManager
 
     @Inject
+    lateinit var cookieManager: CookieManager
+
+    @Inject
     lateinit var insetsVisibilityState: InsetsVisibilityState
 
     @Inject
@@ -94,6 +107,18 @@ class MainFragment : Fragment(), SnackbarHostStateOwner {
 
     private var _binding: FragmentMainBinding? = null
     private val binding get() = _binding!!
+
+    private var selectedNavController: NavController? = null
+    private val floatingPromoUiState = FloatingPromoUiStateHolder(
+        clickDebounceMillis = FLOATING_PROMO_CLICK_DEBOUNCE_MS,
+    )
+
+    private val destinationChangedListener =
+        NavController.OnDestinationChangedListener { _, destination, _ ->
+            floatingPromoUiState.onDestinationChanged(destination.id)
+            updateFloatingPromoBottomMargin()
+            updateFloatingPromoVisibility()
+        }
 
     override val snackbarHostState = SnackbarHostState()
 
@@ -118,9 +143,11 @@ class MainFragment : Fragment(), SnackbarHostStateOwner {
         observeTabState()
         observeCartState()
         observeTabVisibility()
+        observeFloatingPromoState()
 
         listenInsetsStates()
         setOnApplyWindowInsets()
+        setupFloatingPromoButton()
 
         binding.snackbarHost.setContent {
             VodovozTheme {
@@ -188,6 +215,9 @@ class MainFragment : Fragment(), SnackbarHostStateOwner {
     }
 
     override fun onDestroyView() {
+        selectedNavController?.removeOnDestinationChangedListener(destinationChangedListener)
+        selectedNavController = null
+        floatingPromoUiState.reset()
         super.onDestroyView()
         viewModel.isBottomBarInitialized = false
         _binding = null
@@ -196,6 +226,7 @@ class MainFragment : Fragment(), SnackbarHostStateOwner {
     private fun observeTabVisibility() = lifecycleScope.launch {
         repeatOnLifecycle(Lifecycle.State.STARTED) {
             tabManager.observeTabVisibility().collect { isVisible ->
+                floatingPromoUiState.setBottomNavigationVisible(isVisible)
                 val bottomNavigationView = binding.nvNavigation
                 if (isVisible) {
                     bottomNavigationView.apply {
@@ -209,8 +240,95 @@ class MainFragment : Fragment(), SnackbarHostStateOwner {
                 } else {
                     bottomNavigationView.apply { visibility = View.GONE }
                 }
+                updateFloatingPromoVisibility()
             }
         }
+    }
+
+    private fun setupFloatingPromoButton() {
+        binding.floatingPromoButton.setContent {
+            VodovozTheme {
+                val state by viewModel.floatingPromoState.collectAsStateWithLifecycle()
+                state.button?.let { button ->
+                    FloatingPromoButton(
+                        button = button,
+                        onClick = {
+                            handleFloatingPromoClick(
+                                action = button.action,
+                                id = button.actionId,
+                                blockId = button.blockId,
+                            )
+                        },
+                    )
+                }
+            }
+        }
+        updateFloatingPromoBottomMargin()
+    }
+
+    private fun observeFloatingPromoState() = viewLifecycleOwner.lifecycleScope.launch {
+        viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+            viewModel.floatingPromoState.collect {
+                updateFloatingPromoVisibility()
+            }
+        }
+    }
+
+    private fun updateFloatingPromoVisibility() {
+        val binding = _binding ?: return
+        val state = viewModel.floatingPromoState.value
+        val serverScreen = FloatingPromoScreenRegistry.serverScreenFor(
+            floatingPromoUiState.destinationId
+        )
+        val isAllowedOnCurrentScreen = serverScreen != null &&
+                state.rightScreenNames.any { it.equals(serverScreen, ignoreCase = true) }
+
+        binding.floatingPromoButton.isVisible =
+            !state.isLoading &&
+                    state.error == null &&
+                    state.button != null &&
+                    floatingPromoUiState.isBottomNavigationVisible &&
+                    !floatingPromoUiState.isSuppressed &&
+                    isAllowedOnCurrentScreen
+    }
+
+    private fun updateFloatingPromoBottomMargin() {
+        val binding = _binding ?: return
+        val density = resources.displayMetrics.density
+        val baseMarginPx = (FLOATING_PROMO_EDGE_MARGIN_DP * density).roundToInt()
+
+        binding.floatingPromoButton.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+            bottomMargin = baseMarginPx + floatingPromoUiState.resolveExtraBottomOffset(0)
+        }
+    }
+
+    private fun handleFloatingPromoClick(action: String, id: String, blockId: Long) {
+        val navController = selectedNavController ?: return
+        val navigationAction = vodovozActionOf(action, id, blockId) ?: return
+        if (navigationAction is VodovozAction.Unknown) return
+        if (!binding.floatingPromoButton.isVisible) return
+
+        val now = SystemClock.elapsedRealtime()
+        if (!floatingPromoUiState.tryConsumeClick(now)) return
+
+        runCatching {
+            navigationAction.activate(
+                navController = navController,
+                context = requireActivity(),
+                cookie = cookieManager.fetchCookieSessionId().orEmpty(),
+                tabManager = tabManager,
+            )
+        }
+    }
+
+    override fun setFloatingPromoExtraBottomOffset(offsetPx: Int?) {
+        floatingPromoUiState.setDynamicExtraBottomOffset(offsetPx)
+        updateFloatingPromoBottomMargin()
+    }
+
+    override fun setFloatingPromoSuppressed(suppressed: Boolean) {
+        floatingPromoUiState.setSuppressed(suppressed)
+        updateFloatingPromoVisibility()
     }
 
     private fun listenInsetsStates() = combine(
@@ -316,6 +434,9 @@ class MainFragment : Fragment(), SnackbarHostStateOwner {
             }
         )
         navControllerLiveData.observe(viewLifecycleOwner) { navController ->
+            selectedNavController?.removeOnDestinationChangedListener(destinationChangedListener)
+            selectedNavController = navController
+            navController.addOnDestinationChangedListener(destinationChangedListener)
             Navigation.setViewNavController(requireView(), navController)
         }
     }
@@ -338,6 +459,11 @@ class MainFragment : Fragment(), SnackbarHostStateOwner {
             )
         )
         snackbar.show()
+    }
+
+    private companion object {
+        const val FLOATING_PROMO_EDGE_MARGIN_DP = 16
+        const val FLOATING_PROMO_CLICK_DEBOUNCE_MS = 800L
     }
 
 }

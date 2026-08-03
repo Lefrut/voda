@@ -7,6 +7,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
@@ -33,6 +35,9 @@ import com.m.vodovoz.design_system.VodovozTheme
 import com.m.vodovoz.design_system.composables.placeholders.ForAdultsPlaceholder
 import com.m.vodovoz.design_system.composables.snackbar.VodovozSnackBarVisuals
 import com.m.vodovoz.design_system.effects.LifecycleEffect
+import com.m.vodovoz.feature.main.clearFloatingPromoExtraBottomOffset
+import com.m.vodovoz.feature.main.setFloatingPromoExtraBottomOffset
+import com.m.vodovoz.feature.main.setFloatingPromoSuppressed
 import com.m.vodovoz.ui.mvi.collectAsState
 import com.m.vodovoz.ui.snackbar.snackBarHostState
 import com.m.vodovoz.util.extensions.copyText
@@ -64,6 +69,22 @@ class ProductDetailsFragment : Fragment() {
                 VodovozTheme {
                     val viewState by viewModel.collectAsState()
                     val uiState = viewState.uiState
+                    val suppressFloatingPromo =
+                        uiState is ProductDetailsFlowViewModel.ProductDetailsUiState.ForAdults ||
+                            viewState.showMultiBottomSheet ||
+                            viewState.showPresentBottomSheet ||
+                            viewState.showPresentBlockBottomSheet
+
+                    LaunchedEffect(suppressFloatingPromo) {
+                        setFloatingPromoSuppressed(suppressFloatingPromo)
+                    }
+
+                    DisposableEffect(Unit) {
+                        onDispose {
+                            clearFloatingPromoExtraBottomOffset()
+                            setFloatingPromoSuppressed(false)
+                        }
+                    }
 
                     val mediaPagerState = when (uiState) {
                         ProductDetailsFlowViewModel.ProductDetailsUiState.Success -> {
@@ -93,7 +114,9 @@ class ProductDetailsFragment : Fragment() {
                             ProductDetailsScreen(
                                 viewState = viewState,
                                 viewModel = viewModel,
-                                mediaPagerState = mediaPagerState
+                                mediaPagerState = mediaPagerState,
+                                onBottomBarVisibleHeightChanged =
+                                    ::setFloatingPromoExtraBottomOffset,
                             )
                         }
                     }

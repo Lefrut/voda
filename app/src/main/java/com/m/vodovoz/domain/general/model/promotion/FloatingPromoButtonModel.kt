@@ -1,0 +1,14 @@
+package com.m.vodovoz.domain.general.model.promotion
+
+import androidx.compose.runtime.Immutable
+
+@Immutable
+data class FloatingPromoButtonModel(
+    val id: Int,
+    val name: String,
+    val imageUrl: String,
+    val action: String,
+    val actionId: String,
+    val blockId: Long,
+    val rightScreenNames: Set<String>,
+)

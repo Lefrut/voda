@@ -77,3 +77,39 @@ sealed interface ButtonAction : BaseVodovozAction {
 
     data class Id(val id: Int) : ButtonAction
 }
+
+fun vodovozActionOf(action: String?, id: String?, blockId: Long): VodovozAction? {
+    val actionName = action ?: return null
+    val actionId = id.orEmpty()
+
+    return when (actionName.uppercase()) {
+        "TOVAR" -> VodovozAction.Product(actionId.toLongOrNull() ?: return null)
+        "TOVARY" -> VodovozAction.Products(blockId, actionId.toLongOrNull() ?: return null)
+        "RAZDEL" -> VodovozAction.Category(actionId.toLongOrNull() ?: return null)
+        "AKCIYA" -> VodovozAction.Promotion(actionId.toLongOrNull() ?: return null)
+        "AKCII" -> VodovozAction.Promotions(blockId, actionId.toLongOrNull() ?: return null)
+        "BRAND" -> VodovozAction.Brand(actionId.toLongOrNull() ?: return null)
+        "URL" -> VodovozAction.Url(actionId)
+        "URLKYKI" -> VodovozAction.UrlWithCookie(actionId)
+        "DANNYEVSE" -> dataAllActionOf(actionId)
+        else -> VodovozAction.Unknown(actionName, actionId)
+    }
+}
+
+fun dataAllActionOf(id: String): DataAllAction {
+    return when (id) {
+        "uslugi" -> DataAllAction.AllServices
+        "vseskidki" -> DataAllAction.AllDiscount
+        "vsenovinki" -> DataAllAction.AllNewProducts
+        "vseakcii" -> DataAllAction.AllPromotions
+        "dostavka" -> DataAllAction.Delivery
+        "profil" -> DataAllAction.Profile
+        "trekervodi" -> DataAllAction.WaterTracker
+        "pokypkasertificat" -> DataAllAction.BuyCertificate
+        "sanitarnaya_obrabotka" -> DataAllAction.SanitaryMaintenance
+        "remont_kulerov" -> DataAllAction.CoolerRepair
+        "arenda_kulera" -> DataAllAction.CoolerRental
+        "besplatnaya_arenda_kulera" -> DataAllAction.FreeCoolerRental
+        else -> DataAllAction.Unknown
+    }
+}

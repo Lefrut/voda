@@ -5,6 +5,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
@@ -22,6 +24,7 @@ import com.m.vodovoz.core.navigation.navigateToSubCategories
 import com.m.vodovoz.design_system.VodovozTheme
 import com.m.vodovoz.design_system.composables.placeholders.NetworkErrorPlaceholder
 import com.m.vodovoz.design_system.effects.LifecycleEffect
+import com.m.vodovoz.feature.main.setFloatingPromoSuppressed
 import com.m.vodovoz.ui.mvi.collectAsState
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -64,6 +67,14 @@ class CatalogFragment : Fragment() {
             setContent {
                 VodovozTheme {
                     val viewState by viewModel.collectAsState()
+
+                    LaunchedEffect(viewState.showAdvertisingBS) {
+                        setFloatingPromoSuppressed(viewState.showAdvertisingBS)
+                    }
+
+                    DisposableEffect(Unit) {
+                        onDispose { setFloatingPromoSuppressed(false) }
+                    }
 
 
                     when (viewState.uiState) {

@@ -51,6 +51,7 @@ import com.m.vodovoz.domain.general.model.product.WaitFeedbackProductModel
 import com.m.vodovoz.domain.general.model.promotion.BannerModel
 import com.m.vodovoz.domain.general.model.promotion.BrandModel
 import com.m.vodovoz.domain.general.model.promotion.BrandSectionModel
+import com.m.vodovoz.domain.general.model.promotion.FloatingPromoButtonModel
 import com.m.vodovoz.domain.general.model.promotion.PopupWindowInfoModel
 import com.m.vodovoz.domain.general.model.promotion.PresentInfoModel
 import com.m.vodovoz.domain.general.model.promotion.ProductsTitle
@@ -508,6 +509,8 @@ interface VodovozServiceRepository {
     fun getPresentInfo(): FlowResult<PresentInfoModel>
 
     fun getPopupWindowInfo(): FlowResult<PopupWindowInfoModel>
+
+    fun getFloatingPromoButtons(): FlowResult<List<FloatingPromoButtonModel>>
 
     fun getStories(): FlowResult<List<StoryModel>>
 

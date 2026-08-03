@@ -12,6 +12,8 @@ import androidx.annotation.Keep
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -58,6 +60,7 @@ import com.m.vodovoz.design_system.VodovozTheme
 import com.m.vodovoz.design_system.composables.snackbar.VodovozSnackbarHost
 import com.m.vodovoz.design_system.effects.LifecycleEffect
 import com.m.vodovoz.feature.sitestate.SiteStateManager
+import com.m.vodovoz.feature.main.setFloatingPromoSuppressed
 import com.m.vodovoz.ui.mvi.collectAsState
 import com.m.vodovoz.util.extensions.debugLog
 import com.m.vodovoz.util.extensions.isVpnActive
@@ -133,6 +136,20 @@ class HomeFragment : Fragment() {
                 VodovozTheme {
                     val viewState by viewModel.collectAsState()
                     val snackbarHostState = remember { SnackbarHostState() }
+                    val suppressFloatingPromo =
+                        viewState.showAdvertisingBS ||
+                            viewState.showSpecialPromotionBS ||
+                            (viewState.showUnratedProductsBS && !viewState.showedUnratedProducts) ||
+                            viewState.showExitDialog ||
+                            viewState.uiState is HomeFlowViewModel.HomeUiState.AppNeedUpdate
+
+                    LaunchedEffect(suppressFloatingPromo) {
+                        setFloatingPromoSuppressed(suppressFloatingPromo)
+                    }
+
+                    DisposableEffect(Unit) {
+                        onDispose { setFloatingPromoSuppressed(false) }
+                    }
 
                     BackHandler {
                         viewModel.showExitDialog()

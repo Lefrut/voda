@@ -14,6 +14,7 @@ import com.m.vodovoz.data.vodovoz_service.VodovozRequestExecutor
 import com.m.vodovoz.data.vodovoz_service.VodovozService
 import com.m.vodovoz.data.vodovoz_service.executeRequest
 import com.m.vodovoz.data.vodovoz_service.mappers.mapToDomain
+import com.m.vodovoz.data.vodovoz_service.mappers.mapToFloatingPromoButtons
 import com.m.vodovoz.data.vodovoz_service.mappers.toPagingSourceData
 import com.m.vodovoz.data.vodovoz_service.mappers.toDomain
 import com.m.vodovoz.data.vodovoz_service.mappers.toProductRecommendationsMeta
@@ -88,6 +89,7 @@ import com.m.vodovoz.domain.general.model.product.toSliderQueries
 import com.m.vodovoz.domain.general.model.promotion.BannerModel
 import com.m.vodovoz.domain.general.model.promotion.BrandModel
 import com.m.vodovoz.domain.general.model.promotion.BrandSectionModel
+import com.m.vodovoz.domain.general.model.promotion.FloatingPromoButtonModel
 import com.m.vodovoz.domain.general.model.promotion.PopupWindowInfoModel
 import com.m.vodovoz.domain.general.model.promotion.PresentInfoModel
 import com.m.vodovoz.domain.general.model.promotion.ProductsTitle
@@ -1867,6 +1869,12 @@ class VodovozServiceRepositoryImpl @Inject constructor(
         },
         toDomain = { toDomain() }
     )
+
+    override fun getFloatingPromoButtons(): Flow<Result<List<FloatingPromoButtonModel>>> =
+        executeDefaultRequest(
+            request = { vodovozService.getFloatingPromoButton() },
+            toDomain = { mapToFloatingPromoButtons() }
+        )
 
     override fun getStories(): Flow<Result<List<StoryModel>>> = executeDefaultRequest(
         request = {
