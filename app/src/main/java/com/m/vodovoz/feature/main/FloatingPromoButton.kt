@@ -9,23 +9,31 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import com.m.vodovoz.R
 import com.m.vodovoz.design_system.composables.image.VodovozAsyncImage
 import com.m.vodovoz.domain.general.model.promotion.FloatingPromoButtonModel
 import kotlin.math.roundToInt
@@ -35,6 +43,8 @@ object FloatingPromoBannerDefaults {
     val HorizontalInset = 16.dp
     val DefaultBottomInset = 64.dp
     val ProductButtonSpacing = 60.dp
+    val CloseButtonSize = 24.dp
+    val CloseButtonTrailingOffset = 4.dp
 
     const val PositionAnimationDurationMillis = 220
     const val HideAnimationDurationMillis = 180
@@ -47,6 +57,7 @@ fun FloatingPromoButton(
     isVisible: Boolean,
     side: FloatingPromoSide,
     onClick: () -> Unit,
+    onCloseClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val density = LocalDensity.current
@@ -63,6 +74,7 @@ fun FloatingPromoButton(
         label = "floatingPromoSide",
     )
     val visibilityState = remember(button.id) { MutableTransitionState(false) }
+    var isImageLoaded by remember(button.id, button.imageUrl) { mutableStateOf(false) }
 
     LaunchedEffect(isVisible) {
         visibilityState.targetState = isVisible
@@ -95,18 +107,41 @@ fun FloatingPromoButton(
                 )
             ),
         ) {
-            VodovozAsyncImage(
-                model = button.imageUrl,
-                contentDescription = button.name,
-                modifier = Modifier
-                    .size(FloatingPromoBannerDefaults.BannerSize)
-                    .clickable(
-                        role = Role.Button,
-                        onClick = onClick,
-                        indication = null,
-                        interactionSource = null,
-                    ),
-            )
+            Box(modifier = Modifier.size(FloatingPromoBannerDefaults.BannerSize)) {
+                VodovozAsyncImage(
+                    model = button.imageUrl,
+                    contentDescription = button.name,
+                    modifier = Modifier
+                        .matchParentSize()
+                        .clickable(
+                            enabled = isImageLoaded,
+                            role = Role.Button,
+                            onClick = onClick,
+                            indication = null,
+                            interactionSource = null,
+                        ),
+                    onLoading = { isImageLoaded = false },
+                    onSuccess = { isImageLoaded = true },
+                    onError = { isImageLoaded = false },
+                )
+
+                if (isImageLoaded) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_close_circle),
+                        contentDescription = stringResource(R.string.close_floating_promo),
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .offset(x = FloatingPromoBannerDefaults.CloseButtonTrailingOffset)
+                            .size(FloatingPromoBannerDefaults.CloseButtonSize)
+                            .clip(CircleShape)
+                            .clickable(
+                                role = Role.Button,
+                                onClick = onCloseClick,
+                            ),
+                        tint = MaterialTheme.colorScheme.surfaceVariant,
+                    )
+                }
+            }
         }
     }
 }

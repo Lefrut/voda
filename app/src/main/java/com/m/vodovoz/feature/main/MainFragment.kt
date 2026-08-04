@@ -262,6 +262,7 @@ class MainFragment : Fragment(), SnackbarHostStateOwner, FloatingPromoUiHost {
                                 blockId = button.blockId,
                             )
                         },
+                        onCloseClick = ::handleFloatingPromoCloseClick,
                     )
                 }
             }
@@ -333,6 +334,15 @@ class MainFragment : Fragment(), SnackbarHostStateOwner, FloatingPromoUiHost {
                 tabManager = tabManager,
             )
         }
+    }
+
+    private fun handleFloatingPromoCloseClick() {
+        if (!floatingPromoUiState.isPromoVisible) return
+
+        val now = SystemClock.elapsedRealtime()
+        if (!floatingPromoUiState.tryConsumeClick(now)) return
+
+        viewModel.hideFloatingPromoAfterClick(now)
     }
 
     override fun setFloatingPromoExtraBottomOffset(offsetPx: Int?) {
