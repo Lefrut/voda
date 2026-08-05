@@ -47,6 +47,7 @@ import com.m.vodovoz.common.update.AppUpdateController
 import com.m.vodovoz.core.android.locationPermissionGranted
 import com.m.vodovoz.core.android.locationPermissions
 import com.m.vodovoz.core.android.notificationPermissionGranted
+import com.m.vodovoz.core.analytics.Analytics
 import com.m.vodovoz.core.navigation.activate
 import com.m.vodovoz.core.navigation.setupWithNavController
 import com.m.vodovoz.databinding.FragmentMainBinding
@@ -324,6 +325,7 @@ class MainFragment : Fragment(), SnackbarHostStateOwner, FloatingPromoUiHost {
         val now = SystemClock.elapsedRealtime()
         if (!floatingPromoUiState.tryConsumeClick(now)) return
 
+        Analytics.reportEvent("Тап по плавающему промобаннеру")
         viewModel.hideFloatingPromoAfterClick(now)
 
         runCatching {
