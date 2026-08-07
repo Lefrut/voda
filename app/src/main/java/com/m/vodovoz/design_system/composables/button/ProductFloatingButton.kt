@@ -82,12 +82,16 @@ fun ProductBottomFloatingButton(
             isAvailable -> {
                 VodovozButton(
                     modifier = Modifier.padding(horizontal = 16.dp),
-                    text = buildPriceAndOldPriceAnnotatedString(
-                        price = price,
-                        oldPrice = oldPrice
-                    ),
+                    text = stringResource(R.string.to_cart),
                     onClick = onIncrementProduct
                 )
+                /*
+                * buildPriceAndOldPriceAnnotatedString(
+                        price = price,
+                        oldPrice = oldPrice
+                    )
+                *
+                **/
             }
 
             analogButton != null -> {
