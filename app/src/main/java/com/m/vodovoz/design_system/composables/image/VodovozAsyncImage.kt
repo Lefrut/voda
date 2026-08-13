@@ -20,7 +20,6 @@ typealias AsyncImageStateHandler = (AsyncImagePainter.State.Error) -> Unit
 val LocalAsyncImageErrorHandler = staticCompositionLocalOf<AsyncImageStateHandler> { {} }
 
 @Composable
-@NonRestartableComposable
 fun VodovozAsyncImage(
     model: Any?,
     modifier: Modifier = Modifier,
@@ -63,7 +62,6 @@ fun VodovozAsyncImage(
 }
 
 @Composable
-@NonRestartableComposable
 fun VodovozAsyncImage(
     model: Any?,
     modifier: Modifier = Modifier,

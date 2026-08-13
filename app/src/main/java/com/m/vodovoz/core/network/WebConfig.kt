@@ -1,17 +1,5 @@
 package com.m.vodovoz.core.network
 
-import com.m.vodovoz.common.account.AccountManager
-import com.m.vodovoz.feature.sitestate.SiteStateManager
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.runBlocking
-
-
 data object WebConfig {
 
     private const val MAPKIT_PROTOCOL = "https://"
@@ -24,64 +12,65 @@ data object WebConfig {
 
 }
 
-private class VodovozUrlProvider(
-    private val accountManager: AccountManager,
-    private val siteStateManager: SiteStateManager,
-) {
-    private val _isTestModeState: MutableStateFlow<Boolean> = MutableStateFlow(false)
-    val isTestModeState = _isTestModeState.asStateFlow()
-
-    val currentUrlFlow: Flow<String>
-        get() = combine(
-            siteStateManager.siteStateFlow,
-            accountManager.userUrlFlow,
-            isTestModeState
-        ) { config, userUrl, isTestMode ->
-
-
-            if (isTestMode) config?.testUrl ?: VodovozWebConfig.VODOVOZ_BASE_URL
-            else userUrl.ifEmpty { VodovozWebConfig.VODOVOZ_BASE_URL }
-        }.distinctUntilChanged()
-
-    val currentUrl: String
-        get() = runBlocking {
-            currentUrlFlow.firstOrNull() ?: VodovozWebConfig.VODOVOZ_BASE_URL
-        }
-
-    fun setTestMode() {
-        _isTestModeState.update { true }
-    }
-
-    fun setProdMode() {
-        _isTestModeState.update { false }
-    }
-}
-
 data object VodovozWebConfig {
 
     private const val VODOVOZ_PROTOCOL = "https://"
-
-
     private const val VODOVOZ_CONFIG_DOMAIN = "m.vodovoz.ru/"
-    private const val VODOVOZ_TEST_DOMAIN = "vodovoz.net/"
 
     var isTestMode = false
-    const val VODOVOZ_BASE_URL = "$VODOVOZ_PROTOCOL$VODOVOZ_CONFIG_DOMAIN"
-
-
-    var VODOVOZ_URL = VODOVOZ_BASE_URL
         private set
+    const val VODOVOZ_BASE_URL = "$VODOVOZ_PROTOCOL$VODOVOZ_CONFIG_DOMAIN"
+    const val VODOVOZ_PATH = "newmobile_new/"
 
-    fun setUrl(url: String): String {
-        VODOVOZ_URL = url
-        return VODOVOZ_URL
+    @Volatile
+    private var currentUrl = VODOVOZ_BASE_URL
+    private var testModeUrl = VODOVOZ_BASE_URL
+
+    val VODOVOZ_URL: String
+        get() = currentUrl
+
+    val VODOVOZ_API_URL: String
+        get() = buildUrl(VODOVOZ_PATH)
+
+    val ABOUT_SHOP_URL: String
+        get() = buildUrl("${VODOVOZ_PATH}informatsiya/omagazine.php")
+
+    fun setProdMode(userUrl: String) {
+        isTestMode = false
+        currentUrl = userUrl.ifBlank { VODOVOZ_BASE_URL }
     }
 
-    const val VODOVOZ_PATH = "newmobile_new/"
-    private val VODOVOZ_URL_PATH = "$VODOVOZ_URL$VODOVOZ_PATH"
-    private val VODOVOZ_INFO_URL = "${VODOVOZ_URL_PATH}informatsiya/"
+    fun setTestMode(testUrl: String): Boolean {
+        if (testUrl.isBlank()) return false
+        isTestMode = true
+        testModeUrl = testUrl
+        currentUrl = testUrl
+        return true
+    }
 
-    val ABOUT_SHOP_URL = "${VODOVOZ_INFO_URL}omagazine.php"
+    fun setAuthUrl(userUrl: String): String {
+        currentUrl = userUrl.ifBlank {
+            if (isTestMode) testModeUrl else VODOVOZ_BASE_URL
+        }
+        return currentUrl
+    }
 
+    fun completeAuth(userUrl: String): String? {
+        val actualUrl = setAuthUrl(userUrl)
+        return actualUrl.takeUnless { isTestMode }
+    }
 
+    fun resetAuthUrl(): String? {
+        if (isTestMode) {
+            currentUrl = testModeUrl
+            return null
+        }
+        currentUrl = VODOVOZ_BASE_URL
+        return currentUrl
+    }
+
+    fun buildUrl(path: String): String {
+        if (path.startsWith("http://") || path.startsWith("https://")) return path
+        return currentUrl.trimEnd('/') + "/" + path.trimStart('/')
+    }
 }

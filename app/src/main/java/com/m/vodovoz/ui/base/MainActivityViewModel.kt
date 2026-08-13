@@ -4,9 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.m.vodovoz.common.account.AccountManager
 import com.m.vodovoz.common.cookie.CookieManager
-import com.m.vodovoz.core.network.VodovozUrlManager
 import com.m.vodovoz.core.network.VodovozWebConfig
-import com.m.vodovoz.core.network.interceptor.BaseUrlInterceptor
 import com.m.vodovoz.domain.general.model.exceptions.UserBlockedException
 import com.m.vodovoz.domain.general.model.exceptions.UserNotLoginException
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
@@ -28,7 +26,6 @@ class MainActivityViewModel @Inject constructor(
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val cookieManager: CookieManager,
     private val accountManager: AccountManager,
-    private val urlManager: VodovozUrlManager
 ) : ViewModel() {
 
     private val _appState = MutableStateFlow<AppState>(AppState.Loading)
@@ -49,8 +46,8 @@ class MainActivityViewModel @Inject constructor(
     fun fetchAppConfig() = viewModelScope.launch {
         _appState.update { AppState.Loading }
 
-        if (siteStateManager.siteStateSnapshot.testUrl != VodovozWebConfig.VODOVOZ_URL) {
-            urlManager.setUrl(accountManager.getUserUrl())
+        if (!VodovozWebConfig.isTestMode) {
+            VodovozWebConfig.setProdMode(accountManager.getUserUrl())
         }
 
         val siteStateDeferred = async { siteStateManager.requestSiteState() }

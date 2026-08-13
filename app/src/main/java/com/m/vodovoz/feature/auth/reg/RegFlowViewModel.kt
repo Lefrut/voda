@@ -90,6 +90,7 @@ class RegFlowViewModel @Inject constructor(
         if (!isValid) return@launch
 
         setBlockingButtonState(loading = true)
+        VodovozWebConfig.setAuthUrl(stateSnapshot.userUrl)
 
         val failMessage = resourceProvider.getString(R.string.error_registration)
 
@@ -106,7 +107,8 @@ class RegFlowViewModel @Inject constructor(
 
             loginManager.initializeUserSession(
                 authInfo.userId,
-                authInfo.token
+                authInfo.token,
+                stateSnapshot.userUrl,
             )
 
             accountManager.updateLastLoginSetting(

@@ -3,7 +3,6 @@ package com.m.vodovoz.data.vodovoz_service.mappers
 import com.m.vodovoz.common.model.VodovozBoolean
 import com.m.vodovoz.common.model.boolean
 import com.m.vodovoz.common.model.from
-import com.m.vodovoz.core.network.VodovozWebConfig
 import com.m.vodovoz.data.vodovoz_service.di.toVodovozUrl
 import com.m.vodovoz.data.vodovoz_service.model.profile.BonusesPopupWindowDTO
 import com.m.vodovoz.data.vodovoz_service.model.profile.CHAT_MENU_DTO
@@ -129,7 +128,7 @@ fun PROFILE_MENO_OKNO_DTO.toDomain(): ProfileChatsPopupWindowModel {
 fun CHAT_MENU_DTO.toDomain(): ProfileChatItemModel {
     return ProfileChatItemModel(
         name = this.TEXT ?: "",
-        imageUrl = VodovozWebConfig.VODOVOZ_URL + (this.IMAGE ?: ""),
+        imageUrl = this.IMAGE?.toVodovozUrl().orEmpty(),
         transitionData = this.CHATDAN ?: "",
         id = this.ID ?: ""
     )

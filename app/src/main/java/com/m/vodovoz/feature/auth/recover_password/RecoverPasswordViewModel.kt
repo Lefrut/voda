@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.m.vodovoz.R
 import com.m.vodovoz.common.account.AccountManager
 import com.m.vodovoz.common.resources.ResourcesProvider
+import com.m.vodovoz.core.network.VodovozWebConfig
 import com.m.vodovoz.design_system.model.ColorfulButtonUi
 import com.m.vodovoz.design_system.model.toUi
 import com.m.vodovoz.design_system.model.updateButton
@@ -87,7 +88,7 @@ class RecoverPasswordViewModel @Inject constructor(
 
     private fun recoverPassword() = viewModelScope.launch {
         setBlockingButtonState(loading = true)
-
+        VodovozWebConfig.setAuthUrl(stateSnapshot.userUrl)
 
         val recoverPasswordResult = vodovozServiceRepository.recoverPassword(
             stateSnapshot.fields.mapToDomain()

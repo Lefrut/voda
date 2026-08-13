@@ -7,6 +7,7 @@ import com.m.vodovoz.common.account.AccountManager
 import com.m.vodovoz.common.account.LoginManager
 import com.m.vodovoz.core.android.getString
 import com.m.vodovoz.core.navigation.LoginByPhoneCodeArgs
+import com.m.vodovoz.core.network.VodovozWebConfig
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
 import com.m.vodovoz.feature.auth.login_by_phone_code.model.LoginByPhoneCodeEvent
 import com.m.vodovoz.feature.auth.login_by_phone_code.model.LoginByPhoneCodeState
@@ -64,7 +65,7 @@ class LoginByPhoneCodeViewModel @Inject constructor(
 
     fun sendCode() = viewModelScope.launch {
         val currentCode = stateSnapshot.code.take(smsCodeCount)
-        accountManager.updateUserUrl(userUrl)
+        VodovozWebConfig.setAuthUrl(userUrl)
         loadingByPhone(currentCode)
     }
 
@@ -75,7 +76,7 @@ class LoginByPhoneCodeViewModel @Inject constructor(
 
         val smsUrl = siteStateManager.siteStateFlow.value?.smsUrl ?: ""
 
-        accountManager.updateUserUrl(userUrl)
+        VodovozWebConfig.setAuthUrl(userUrl)
 
         val requestPhoneCodeResult = vodovozServiceRepository
             .requestPhoneCode(smsUrl, stateSnapshot.phone)
@@ -108,7 +109,8 @@ class LoginByPhoneCodeViewModel @Inject constructor(
         loginByPhoneResult.onSuccess { userAuthInfo ->
             loginManager.initializeUserSession(
                 userAuthInfo.userId,
-                userAuthInfo.token
+                userAuthInfo.token,
+                userUrl,
             )
 
             updateState { s ->

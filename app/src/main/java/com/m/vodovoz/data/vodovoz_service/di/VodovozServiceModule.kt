@@ -63,7 +63,7 @@ abstract class VodovozServiceModule {
             moshi: Moshi,
         ): Retrofit {
             return Retrofit.Builder()
-                .baseUrl(VodovozWebConfig.VODOVOZ_URL + VodovozWebConfig.VODOVOZ_PATH)
+                .baseUrl(VodovozWebConfig.VODOVOZ_API_URL)
                 .addCallAdapterFactory(NoOpCallAdapterFactory.create())
                 .addConverterFactory(NoOpConverterFactory.create(moshi))
                 .client(okHttpClient)
@@ -80,7 +80,5 @@ abstract class VodovozServiceModule {
 }
 
 fun String.toVodovozUrl(): String {
-    if (startsWith("http://") || startsWith("https://")) return this
-
-    return VodovozWebConfig.VODOVOZ_URL.trimEnd('/') + "/" + trimStart('/')
+    return VodovozWebConfig.buildUrl(this)
 }

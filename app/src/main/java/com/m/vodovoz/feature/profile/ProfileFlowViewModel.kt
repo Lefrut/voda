@@ -8,8 +8,6 @@ import com.m.vodovoz.common.account.AccountManager
 import com.m.vodovoz.common.model.VodovozAction
 import com.m.vodovoz.common.resources.ResourcesProvider
 import com.m.vodovoz.core.analytics.Analytics
-import com.m.vodovoz.core.network.VodovozUrlManager
-import com.m.vodovoz.core.network.VodovozWebConfig
 import com.m.vodovoz.design_system.model.AboutAdvertisingUi
 import com.m.vodovoz.design_system.model.BannerUi
 import com.m.vodovoz.design_system.model.VodovozPlaceholderUi
@@ -47,7 +45,6 @@ class ProfileFlowViewModel @Inject constructor(
     private val siteStateManager: SiteStateManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val resourcesProvider: ResourcesProvider,
-    private val urlManager: VodovozUrlManager,
     private val accountManager: AccountManager,
 ) : MviViewModel<ProfileFlowViewModel.ProfileState, ProfileFlowViewModel.ProfileEvents>(
     ProfileState()

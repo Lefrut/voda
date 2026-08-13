@@ -1,12 +1,6 @@
 package com.m.vodovoz.common.account
 
-import androidx.annotation.Keep
-import com.m.vodovoz.BuildConfig
 import com.m.vodovoz.common.datastore.DataStorePrefs
-import com.m.vodovoz.core.network.VodovozUrlManager
-import com.m.vodovoz.core.network.VodovozWebConfig
-import com.m.vodovoz.core.network.interceptor.BaseUrlInterceptor
-import io.appmetrica.analytics.AppMetrica
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filter
@@ -20,7 +14,6 @@ import javax.inject.Singleton
 @Singleton
 class AccountManager @Inject constructor(
     private val dataStorePrefs: DataStorePrefs,
-    private val urlManager: VodovozUrlManager,
 ) {
 
     private val _accountIdListener = MutableStateFlow<Long?>(null)
@@ -94,19 +87,16 @@ class AccountManager @Inject constructor(
     }
 
     fun updateUserUrl(url: String) {
-        urlManager.setUrl(url)
         dataStorePrefs.putString(USER_URL, url)
     }
 
     val userUrlFlow
         get() = dataStorePrefs.getStringFlow(USER_URL).map { url ->
-            url.orEmpty().ifEmpty { VodovozWebConfig.VODOVOZ_BASE_URL }
+            url.orEmpty()
         }
 
     suspend fun getUserUrl(): String {
-        return userUrlFlow.firstOrNull().orEmpty().ifEmpty {
-            VodovozWebConfig.VODOVOZ_BASE_URL
-        }
+        return userUrlFlow.firstOrNull().orEmpty()
     }
 
     companion object {

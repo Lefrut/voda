@@ -4,9 +4,7 @@ import androidx.compose.runtime.Stable
 import androidx.lifecycle.viewModelScope
 import com.m.vodovoz.common.account.AccountManager
 import com.m.vodovoz.common.model.GlobalAppLinks
-import com.m.vodovoz.core.network.VodovozUrlManager
 import com.m.vodovoz.core.network.VodovozWebConfig
-import com.m.vodovoz.core.network.interceptor.BaseUrlInterceptor
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
 import com.m.vodovoz.feature.about_app.composables.AppMode
 import com.m.vodovoz.feature.about_app.model.AboutAppEvent
@@ -25,7 +23,6 @@ import javax.inject.Inject
 class AboutAppViewModel @Inject constructor(
     private val accountManager: AccountManager,
     private val siteStateManager: SiteStateManager,
-    private val urlManager: VodovozUrlManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
 ) : MviViewModel<AboutAppState, AboutAppEvent>(AboutAppState()) {
 
@@ -85,13 +82,11 @@ class AboutAppViewModel @Inject constructor(
 
         when (appMode) {
             AppMode.Test -> {
-                VodovozWebConfig.isTestMode = true
-                urlManager.setUrl(testUrl)
+                if (!VodovozWebConfig.setTestMode(testUrl)) return@launch
             }
 
             AppMode.Prod -> {
-                VodovozWebConfig.isTestMode = false
-                urlManager.setUrl(prodUrl)
+                VodovozWebConfig.setProdMode(prodUrl)
             }
         }
         updateState { s ->

@@ -100,7 +100,7 @@ class LoginFlowViewModel @Inject constructor(
         }
 
 
-        accountManager.updateUserUrl(stateSnapshot.userUrl)
+        VodovozWebConfig.setAuthUrl(stateSnapshot.userUrl)
 
         val requestPhoneCodeResult = vodovozServiceRepository.requestPhoneCode(
             url = requestPhoneCodeUrl,

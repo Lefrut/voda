@@ -161,10 +161,9 @@ abstract class AbstractAuthViewModel<State : AuthState<State>, Event>(
     }
 
     override fun onDispose() {
-        if(!accountManager.isAlreadyLogin()){
-            accountManager.updateUserUrl(VodovozWebConfig.VODOVOZ_BASE_URL)
+        if (!accountManager.isAlreadyLogin()) {
+            VodovozWebConfig.resetAuthUrl()?.let(accountManager::updateUserUrl)
         }
-
     }
 
     fun setAccountTypeById(accountTypeId: String?) {

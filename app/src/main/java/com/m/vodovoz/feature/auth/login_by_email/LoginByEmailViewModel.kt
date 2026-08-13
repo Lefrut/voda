@@ -56,7 +56,7 @@ class LoginByEmailViewModel @Inject constructor(
     private fun loginByEmail() = viewModelScope.launch {
         setBlockingButtonState(loading = true)
 
-        accountManager.updateUserUrl(stateSnapshot.userUrl)
+        VodovozWebConfig.setAuthUrl(stateSnapshot.userUrl)
 
         val loginByEmailResult = vodovozServiceRepository.loginByEmail(
             stateSnapshot.fields.associate {
@@ -70,6 +70,7 @@ class LoginByEmailViewModel @Inject constructor(
             loginManager.initializeUserSession(
                 userId = userAuthInfo.userId,
                 userToken = userAuthInfo.token,
+                userUrl = stateSnapshot.userUrl,
             )
 
             setBlockingButtonState(loading = false, enabled = false)
