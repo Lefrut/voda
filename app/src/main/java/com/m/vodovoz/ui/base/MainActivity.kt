@@ -10,7 +10,9 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.google.firebase.messaging.RemoteMessage
 import com.m.vodovoz.R
 import com.m.vodovoz.common.block_app_signal.BlockAppSignal
@@ -22,6 +24,8 @@ import com.m.vodovoz.feature.sitestate.SiteStateManager
 import com.m.vodovoz.ui.base.model.AppState
 import com.m.vodovoz.ui.base.model.SplashFileState
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import org.json.JSONObject
 import javax.inject.Inject
@@ -51,11 +55,6 @@ class MainActivity : AppCompatActivity(),
 
     private val viewModel: MainActivityViewModel by viewModels()
 
-    override fun onResume() {
-        super.onResume()
-        viewModel.updateCookieIfNeeded()
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         installSplashScreen().setKeepOnScreenCondition {
@@ -65,7 +64,17 @@ class MainActivity : AppCompatActivity(),
         setupUi()
         downloadSplashFile()
         viewModel.fetchAppConfig()
+        observeSessionRefresh()
         handleIntent(intent)
+    }
+
+    private fun observeSessionRefresh() = lifecycleScope.launch {
+        repeatOnLifecycle(Lifecycle.State.STARTED) {
+            while (isActive) {
+                viewModel.updateCookieIfNeeded().join()
+                delay(SESSION_CHECK_INTERVAL_IN_MILLIS)
+            }
+        }
     }
 
     private fun setupUi() {
@@ -114,5 +123,8 @@ class MainActivity : AppCompatActivity(),
         val path = appLinkData?.lastPathSegment
         siteStateManager.saveDeepLinkPath(path)
     }
-}
 
+    private companion object {
+        const val SESSION_CHECK_INTERVAL_IN_MILLIS = 60_000L
+    }
+}

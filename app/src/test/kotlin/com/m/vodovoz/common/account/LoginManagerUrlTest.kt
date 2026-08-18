@@ -1,9 +1,12 @@
 package com.m.vodovoz.common.account
 
 import com.m.vodovoz.core.network.VodovozWebConfig
+import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
+import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import io.mockk.verifyOrder
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -13,15 +16,20 @@ import org.junit.Test
 class LoginManagerUrlTest {
 
     private lateinit var accountManager: AccountManager
+    private lateinit var vodovozServiceRepository: VodovozServiceRepository
     private lateinit var loginManager: LoginManager
 
     @Before
     fun setUp() {
         accountManager = mockk(relaxed = true)
+        vodovozServiceRepository = mockk {
+            every { relogin() } returns flowOf(Result.success(true))
+        }
         loginManager = LoginManager(
             accountManager = accountManager,
             likeManager = mockk(relaxed = true),
             firebaseTokenManager = mockk(relaxed = true),
+            vodovozServiceRepository = vodovozServiceRepository,
         )
         VodovozWebConfig.setProdMode(VodovozWebConfig.VODOVOZ_BASE_URL)
     }
@@ -44,6 +52,7 @@ class LoginManagerUrlTest {
             accountManager.updateUserUrl(VodovozWebConfig.VODOVOZ_BASE_URL)
             accountManager.updateUserId(42)
             accountManager.updateUserToken("token")
+            vodovozServiceRepository.relogin()
         }
     }
 
@@ -62,5 +71,6 @@ class LoginManagerUrlTest {
         verify(exactly = 0) { accountManager.updateUserUrl(any()) }
         verify { accountManager.updateUserId(42) }
         verify { accountManager.updateUserToken("token") }
+        verify { vodovozServiceRepository.relogin() }
     }
 }

@@ -27,9 +27,11 @@ class LogoutManager @Inject constructor(
     fun logout(): Flow<Result<Unit>> = flow {
         val logoutResult = vodovozServiceRepository.logout().singleResult().onSuccess {
             firebaseTokenManager.removeFirebaseToken()
-            cookieManager.removeCookieSessionId()
             accountManager.removeUserId()
             accountManager.removeUserToken()
+            // Clear the cookie last so an in-flight relogin cannot leave a session behind after
+            // the account credentials have been removed.
+            cookieManager.removeCookieSessionId()
 
             waterAppHelper.runOrCancelWorkManager(
                 WaterApp.DefaultNotificationSettings

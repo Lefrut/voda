@@ -38,7 +38,11 @@ class MainActivityViewModel @Inject constructor(
     val fileState = _fileState.asStateFlow()
 
     fun updateCookieIfNeeded() = viewModelScope.launch {
-        if (cookieManager.isOldCookie() && appState.value == AppState.App) {
+        if (
+            accountManager.isAlreadyLogin() &&
+            cookieManager.isOldCookie() &&
+            appState.value == AppState.App
+        ) {
             vodovozServiceRepository.relogin().singleResult()
         }
     }

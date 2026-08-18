@@ -1287,7 +1287,16 @@ class VodovozServiceRepositoryImpl @Inject constructor(
 
                 val cookies = response.headers().values("Set-Cookie")
                 val sessionId = cookies.firstOrNull { s -> s.startsWith("PHPSESSID=") }
-                cookieManager.updateCookieSessionId(sessionId)
+                val accountStillExists = accountManager.fetchAccountId() != null &&
+                    accountManager.fetchUserToken() != null
+                if (accountStillExists) {
+                    cookieManager.updateCookieSessionId(sessionId)
+                    if (accountManager.fetchAccountId() == null ||
+                        accountManager.fetchUserToken() == null
+                    ) {
+                        cookieManager.removeCookieSessionId()
+                    }
+                }
             },
             fail = { response ->
                 val code = response.code()

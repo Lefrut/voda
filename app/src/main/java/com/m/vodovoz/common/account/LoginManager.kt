@@ -3,6 +3,8 @@ package com.m.vodovoz.common.account
 import com.m.vodovoz.common.like.LikeManager
 import com.m.vodovoz.common.token.FirebaseTokenManager
 import com.m.vodovoz.core.network.VodovozWebConfig
+import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
+import com.m.vodovoz.util.extensions.singleResult
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -11,6 +13,7 @@ class LoginManager @Inject constructor(
     private val accountManager: AccountManager,
     private val likeManager: LikeManager,
     private val firebaseTokenManager: FirebaseTokenManager,
+    private val vodovozServiceRepository: VodovozServiceRepository,
 ) {
 
 
@@ -22,6 +25,7 @@ class LoginManager @Inject constructor(
         VodovozWebConfig.completeAuth(userUrl)?.let(accountManager::updateUserUrl)
         accountManager.updateUserId(userId)
         accountManager.updateUserToken(userToken)
+        vodovozServiceRepository.relogin().singleResult()
         likeManager.updateLikesAfterLogin()
         firebaseTokenManager.sendFirebaseToken()
     }
