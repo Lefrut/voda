@@ -11,6 +11,11 @@ fun List<FloatingPromoButtonDTO>.mapToFloatingPromoButtons(): List<FloatingPromo
 fun FloatingPromoButtonDTO.toDomain(): FloatingPromoButtonModel? {
     val action = HARAKTERISTIK?.ACTION?.takeIf(String::isNotBlank) ?: return null
     val actionId = HARAKTERISTIK.ID?.takeIf(String::isNotBlank) ?: return null
+    val leftScreenNames = POKAZ?.LEFT.toScreenNames()
+    val configuredRightScreenNames = POKAZ?.RIGHT.toScreenNames()
+    val rightScreenNames = configuredRightScreenNames.ifEmpty {
+        if (leftScreenNames.isEmpty()) setOf(DEFAULT_FLOATING_PROMO_SCREEN) else emptySet()
+    }
 
     return FloatingPromoButtonModel(
         id = ID ?: return null,
@@ -19,11 +24,14 @@ fun FloatingPromoButtonDTO.toDomain(): FloatingPromoButtonModel? {
         action = action,
         actionId = actionId,
         blockId = IBLOCK_ID?.toLong() ?: 0L,
-        leftScreenNames = POKAZ?.LEFT.toScreenNames(),
-        rightScreenNames = POKAZ?.RIGHT.orEmpty()
-            .toScreenNames(),
+        leftScreenNames = leftScreenNames,
+        rightScreenNames = rightScreenNames,
+        width = RAZMER?.WIDTH?.takeIf { it > 0 },
+        height = RAZMER?.HEIGHT?.takeIf { it > 0 },
     )
 }
+
+private const val DEFAULT_FLOATING_PROMO_SCREEN = "main"
 
 private fun List<String>?.toScreenNames(): Set<String> {
     return orEmpty()

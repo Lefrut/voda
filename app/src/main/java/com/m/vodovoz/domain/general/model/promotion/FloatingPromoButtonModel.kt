@@ -12,4 +12,6 @@ data class FloatingPromoButtonModel(
     val blockId: Long,
     val leftScreenNames: Set<String>,
     val rightScreenNames: Set<String>,
+    val width: Int?,
+    val height: Int?,
 )

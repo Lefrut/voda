@@ -17,8 +17,18 @@ data class FloatingPromoButtonDTO(
     val HARAKTERISTIK: ACTION_DTO?,
     @Json(name = "POKAZ")
     val POKAZ: FloatingButtonVisibilityDTO?,
+    @Json(name = "RAZMER")
+    val RAZMER: FloatingPromoButtonSizeDTO?,
     @Json(name = "OREKLAME")
     val OREKLAME: Any?,
+)
+
+@Keep
+data class FloatingPromoButtonSizeDTO(
+    @Json(name = "WIDTH")
+    val WIDTH: Int?,
+    @Json(name = "HEIGHT")
+    val HEIGHT: Int?,
 )
 
 @Keep

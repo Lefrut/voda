@@ -39,12 +39,14 @@ import com.m.vodovoz.domain.general.model.promotion.FloatingPromoButtonModel
 import kotlin.math.roundToInt
 
 object FloatingPromoBannerDefaults {
-    val BannerSize = 100.dp
+    val BannerWidth = 100.dp
+    val BannerHeight = 100.dp
     val HorizontalInset = 16.dp
     val DefaultBottomInset = 64.dp
     val ProductButtonSpacing = 60.dp
     val CloseButtonSize = 24.dp
-    val CloseButtonTrailingOffset = 4.dp
+    val CloseButtonTouchSize = 32.dp
+    val CloseButtonTrailingOffset = 0.dp
 
     const val PositionAnimationDurationMillis = 220
     const val HideAnimationDurationMillis = 180
@@ -61,7 +63,9 @@ fun FloatingPromoButton(
     modifier: Modifier = Modifier,
 ) {
     val density = LocalDensity.current
-    val bannerSizePx = with(density) { FloatingPromoBannerDefaults.BannerSize.roundToPx() }
+    val bannerWidth = button.width?.dp ?: FloatingPromoBannerDefaults.BannerWidth
+    val bannerHeight = button.height?.dp ?: FloatingPromoBannerDefaults.BannerHeight
+    val bannerWidthPx = with(density) { bannerWidth.roundToPx() }
     val horizontalInsetPx = with(density) {
         FloatingPromoBannerDefaults.HorizontalInset.roundToPx()
     }
@@ -83,10 +87,10 @@ fun FloatingPromoButton(
     BoxWithConstraints(
         modifier = modifier
             .fillMaxWidth()
-            .height(FloatingPromoBannerDefaults.BannerSize),
+            .height(bannerHeight),
     ) {
         val availableHorizontalSpacePx = (
-                constraints.maxWidth - bannerSizePx - horizontalInsetPx * 2
+                constraints.maxWidth - bannerWidthPx - horizontalInsetPx * 2
                 ).coerceAtLeast(0)
         val horizontalOffsetPx = horizontalInsetPx +
                 (availableHorizontalSpacePx * sideProgress).roundToInt()
@@ -107,7 +111,7 @@ fun FloatingPromoButton(
                 )
             ),
         ) {
-            Box(modifier = Modifier.size(FloatingPromoBannerDefaults.BannerSize)) {
+            Box(modifier = Modifier.size(width = bannerWidth, height = bannerHeight)) {
                 VodovozAsyncImage(
                     model = button.imageUrl,
                     contentDescription = button.name,
@@ -126,20 +130,26 @@ fun FloatingPromoButton(
                 )
 
                 if (isImageLoaded) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_close_circle),
-                        contentDescription = stringResource(R.string.close_floating_promo),
+                    Box(
                         modifier = Modifier
                             .align(Alignment.TopEnd)
                             .offset(x = FloatingPromoBannerDefaults.CloseButtonTrailingOffset)
-                            .size(FloatingPromoBannerDefaults.CloseButtonSize)
+                            .size(FloatingPromoBannerDefaults.CloseButtonTouchSize)
                             .clip(CircleShape)
                             .clickable(
                                 role = Role.Button,
                                 onClick = onCloseClick,
                             ),
-                        tint = MaterialTheme.colorScheme.surfaceVariant,
-                    )
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_close_circle),
+                            contentDescription = stringResource(R.string.close_floating_promo),
+                            modifier = Modifier
+                                .align(Alignment.Center)
+                                .size(FloatingPromoBannerDefaults.CloseButtonSize),
+                            tint = MaterialTheme.colorScheme.surfaceVariant,
+                        )
+                    }
                 }
             }
         }
