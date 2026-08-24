@@ -12,11 +12,11 @@ class CookieManager @Inject constructor(
 ) {
 
     fun fetchCookieSessionId() = runBlocking {
-        dataStorePrefs.getString(COOKIE_SESSION_ID)?.toSessionCookie()
+        dataStorePrefs.getString(COOKIE_SESSION_ID)
     }
 
     fun updateCookieSessionId(cookieSessionId: String?) {
-        cookieSessionId?.toSessionCookie()?.let { sessionCookie ->
+        cookieSessionId?.let { sessionCookie ->
             dataStorePrefs.putString(COOKIE_SESSION_ID, sessionCookie)
             debugLog { "Session cookie updated" }
             setLastEntire()
@@ -39,11 +39,6 @@ class CookieManager @Inject constructor(
         dataStorePrefs.putLong(COOKIE_LAST_ENTIRE, System.currentTimeMillis())
     }
 
-    private fun String.toSessionCookie(): String? {
-        return substringBefore(';')
-            .trim()
-            .takeIf { cookie -> cookie.startsWith(PHP_SESSION_PREFIX) }
-    }
 
     companion object {
         //Cookie Settings

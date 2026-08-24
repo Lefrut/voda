@@ -32,16 +32,18 @@ class CookieHandlerInterceptor @Inject constructor(
             explicitCookie == null -> {
                 storedSessionCookie?.let { cookieSessionId ->
                     builder.header(COOKIE_HEADER, cookieSessionId)
-                    debugLog { "Session cookie added" }
                 }
             }
         }
 
-        val originalResponse = chain.proceed(builder.build())
+        val request = builder.build()
 
-        // Only guest requests may update the session from an arbitrary response. For an
-        // authenticated user, relogin is the authoritative source of PHPSESSID and updates it
-        // explicitly in VodovozServiceRepositoryImpl.
+        debugLog {
+            "Cookie sent to server: ${request.header(COOKIE_HEADER)}"
+        }
+
+        val originalResponse = chain.proceed(request)
+
         if (!accountManager.isAlreadyLogin()) {
             val guestCookieNeedsUpdate = storedSessionCookie == null || cookieManager.isOldCookie()
             if (guestCookieNeedsUpdate) {

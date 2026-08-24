@@ -116,6 +116,10 @@ import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
 import com.m.vodovoz.util.formatters.VodovozDateFormatters
 import com.squareup.moshi.Moshi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
@@ -138,6 +142,8 @@ class VodovozServiceRepositoryImpl @Inject constructor(
     private val cookieManager: CookieManager,
     private val moshi: Moshi,
 ) : VodovozServiceRepository {
+
+    private val reloginMutex = Mutex()
 
     private val defaultExecutor = object : VodovozRequestExecutor(moshi) {
         override fun <R : Any> onFail(response: Response<ResponseBody>): Result<R> {
@@ -1267,6 +1273,15 @@ class VodovozServiceRepositoryImpl @Inject constructor(
     }
 
     override fun relogin(): Flow<Result<Boolean>> {
+        return flow {
+            val result = reloginMutex.withLock {
+                executeRelogin().first()
+            }
+            emit(result)
+        }
+    }
+
+    private fun executeRelogin(): Flow<Result<Boolean>> {
         return defaultExecutor.executeRequestImpl(
             request = {
                 val id = accountManager.fetchAccountId()
@@ -1287,16 +1302,8 @@ class VodovozServiceRepositoryImpl @Inject constructor(
 
                 val cookies = response.headers().values("Set-Cookie")
                 val sessionId = cookies.firstOrNull { s -> s.startsWith("PHPSESSID=") }
-                val accountStillExists = accountManager.fetchAccountId() != null &&
-                    accountManager.fetchUserToken() != null
-                if (accountStillExists) {
-                    cookieManager.updateCookieSessionId(sessionId)
-                    if (accountManager.fetchAccountId() == null ||
-                        accountManager.fetchUserToken() == null
-                    ) {
-                        cookieManager.removeCookieSessionId()
-                    }
-                }
+                cookieManager.updateCookieSessionId(sessionId)
+
             },
             fail = { response ->
                 val code = response.code()
@@ -1678,9 +1685,9 @@ class VodovozServiceRepositoryImpl @Inject constructor(
     }
 
     override fun getBestForYouProductsPagingResult(): VodovozPagingResult<
-        ProductModel,
-        ProductRecommendationsMetaModel,
-    > {
+            ProductModel,
+            ProductRecommendationsMetaModel,
+            > {
         return VodovozPagerFactory.getResult(
             executor = defaultExecutor,
 
@@ -2156,7 +2163,7 @@ class VodovozServiceRepositoryImpl @Inject constructor(
                     sort = sort.value,
                     order = sort.order,
 
-                )
+                    )
             },
             mapper = { dto -> dto.toPagingSourceData() },
         )

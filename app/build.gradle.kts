@@ -37,10 +37,10 @@ android {
     defaultConfig {
         applicationId = "com.m.vodovoz"
         minSdk = 26
-        targetSdk = 35
-        versionCode = 2370
+        targetSdk = 36
+        versionCode = 2390
         //todo
-        versionName = "2.3.7"
+        versionName = "2.3.9"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         ndk {

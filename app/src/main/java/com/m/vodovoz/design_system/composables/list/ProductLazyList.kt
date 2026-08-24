@@ -26,7 +26,6 @@ import com.m.vodovoz.design_system.composables.card.GridProductCard
 import com.m.vodovoz.design_system.composables.card.LinearProductCard
 import com.m.vodovoz.design_system.composables.decoration.SkeletonBox
 import com.m.vodovoz.design_system.model.ProductUi
-import com.m.vodovoz.util.extensions.indexOfOrNull
 
 
 @Suppress("NonSkippableComposable")
@@ -43,7 +42,6 @@ fun ProductLazyList(
     onDecrementProductToCart: (ProductUi) -> Unit,
     onProductAnalogsClick: (ProductUi) -> Unit,
 ) {
-
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
         modifier = modifier.fillMaxSize(),
@@ -54,7 +52,6 @@ fun ProductLazyList(
         if (isGridView) {
             items(
                 products.size,
-                key = { i -> products[i].id },
                 span = { GridItemSpan(1) },
             ) { i ->
                 GridProductCard(
@@ -72,7 +69,6 @@ fun ProductLazyList(
         } else {
             items(
                 products.size,
-                key = { i -> products[i].id },
                 span = { GridItemSpan(2) }
             ) { i ->
                 LinearProductCard(
@@ -143,17 +139,15 @@ fun LazyGridScope.linearProducts(
     onIncrementProductToCart: (ProductUi) -> Unit,
     onDecrementProductToCart: (ProductUi) -> Unit,
 ) {
-
     when (loadState.refresh) {
         is LoadState.NotLoading -> {
             items(
-                items = products,
+                count = products.size,
                 span = { GridItemSpan(2) },
-                key = { product -> product.id }
-            ) { product ->
-                val currentIndex = products.indexOfOrNull(product) ?: return@items
+            ) { index ->
+                val product = products[index]
 
-                SideEffect { onProductSee(currentIndex) }
+                SideEffect { onProductSee(index) }
 
                 Column(modifier = Modifier.padding(horizontal = 16.dp)) {
                     LinearProductCard(
@@ -165,7 +159,7 @@ fun LazyGridScope.linearProducts(
                         onDecrementToCart = onDecrementProductToCart,
                         onAnalogsClick = onProductAnalogsClick
                     )
-                    if (currentIndex != products.size - 1) {
+                    if (index != products.lastIndex) {
                         Spacer(modifier = Modifier.height(16.dp))
                     }
                 }
@@ -223,13 +217,11 @@ fun LazyGridScope.gridProducts(
     onIncrementProductToCart: (ProductUi) -> Unit,
     onDecrementProductToCart: (ProductUi) -> Unit,
 ) {
-
     when (loadState.refresh) {
         is LoadState.NotLoading -> {
             items(
                 count = products.size,
                 span = { GridItemSpan(1) },
-                key = { i -> products.getOrNull(i)?.id ?: -i }
             ) { index ->
                 SideEffect { onProductSee(index) }
 
@@ -243,7 +235,7 @@ fun LazyGridScope.gridProducts(
                         onAnalogsClick = onProductAnalogsClick,
                         onIncrementToCart = onIncrementProductToCart
                     )
-                    if (index != products.size - 1) {
+                    if (index != products.lastIndex) {
                         Spacer(modifier = Modifier.height(8.dp))
                     }
                 }
