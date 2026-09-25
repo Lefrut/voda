@@ -223,7 +223,7 @@ fun CharacteristicsBlockModel.toUi(): CharacteristicsBlockUi {
 }
 
 fun CharacteristicModel.toUi(): CharacteristicUi {
-    return CharacteristicUi(id, code, name, value, hint)
+    return CharacteristicUi(id, code, name, value, hint, url)
 }
 
 @JvmName("mapToDocumentUi")
@@ -413,6 +413,7 @@ data class CharacteristicUi(
     val name: String,
     val value: String,
     val hint: String?,
+    val url: String? = null,
 )
 
 @Stable

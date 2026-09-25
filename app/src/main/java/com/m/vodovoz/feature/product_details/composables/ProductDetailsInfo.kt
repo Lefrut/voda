@@ -31,6 +31,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.PlaceholderVerticalAlign
@@ -47,6 +48,7 @@ import com.m.vodovoz.design_system.model.CharacteristicsBlockUi
 import com.m.vodovoz.design_system.model.ContentBlockUi
 import com.m.vodovoz.design_system.utils.toAnnotatedString
 import com.m.vodovoz.util.extensions.fromHtml
+import com.m.vodovoz.util.extensions.openUrl
 import kotlinx.coroutines.launch
 
 @Composable
@@ -184,6 +186,7 @@ fun ProductDetailsInfo(
 
 @Composable
 fun CharacteristicItem(modifier: Modifier = Modifier, characteristic: CharacteristicUi) {
+    val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     var showInfoBS by rememberSaveable { mutableStateOf(false) }
 
@@ -226,7 +229,15 @@ fun CharacteristicItem(modifier: Modifier = Modifier, characteristic: Characteri
         Spacer(modifier = Modifier.width(16.dp))
 
         Box(modifier = Modifier.weight(1f)) {
-            SelectionContainer {
+            val url = characteristic.url
+            if (url != null) {
+                Text(
+                    modifier = Modifier.clickable { context.openUrl(url) },
+                    text = characteristic.value,
+                    color = MaterialTheme.colorScheme.primary,
+                    style = MaterialTheme.typography.bodySmall
+                )
+            } else SelectionContainer {
                 Text(
                     text = characteristic.value,
                     color = MaterialTheme.colorScheme.onBackground,

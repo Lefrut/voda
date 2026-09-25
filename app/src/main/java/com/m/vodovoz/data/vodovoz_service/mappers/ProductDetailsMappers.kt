@@ -194,12 +194,26 @@ fun HARAKTERISTIKI_DTO.toDomain(): CharacteristicsBlockModel? {
 }
 
 fun HARAKTERISTIK_BIND_DTO.toDomain(): CharacteristicModel? {
+    val rawValue = VALUE.orEmpty()
+    val linkName = NAMESSILKA?.trim()?.takeIf { it.isNotEmpty() }
+    fun String.webUrlOrNull(): String? = trim().takeIf { value ->
+        runCatching {
+            val uri = java.net.URI(value)
+            (uri.scheme.equals("https", ignoreCase = true) ||
+                uri.scheme.equals("http", ignoreCase = true)) && !uri.host.isNullOrBlank()
+        }.getOrDefault(false)
+    }
+
+    // The backend may put the URL in VALUE and its label in NAMESSILKA.
+    val valueUrl = if (linkName != null) rawValue.webUrlOrNull() else null
+    val url = valueUrl ?: linkName?.webUrlOrNull()
     return CharacteristicModel(
         id = ID ?: return null,
         code = CODE ?: "",
         name = NAME ?: return null,
-        value = VALUE ?: "",
-        hint = HINT?.ifBlank { null }
+        value = if (valueUrl != null) linkName.orEmpty() else rawValue,
+        hint = HINT?.ifBlank { null },
+        url = url
     )
 }
 

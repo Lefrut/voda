@@ -15,5 +15,7 @@ data class HARAKTERISTIK_BIND_DTO(
     @Json(name = "NAME")
     val NAME: String?,
     @Json(name = "VALUE")
-    val VALUE: String?
+    val VALUE: String?,
+    @Json(name = "NAMESSILKA")
+    val NAMESSILKA: String? = null,
 )

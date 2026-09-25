@@ -163,6 +163,7 @@ data class CharacteristicModel(
     val name: String,
     val value: String,
     val hint: String?,
+    val url: String? = null,
 )
 
 
