@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.CombinedLoadStates
 import androidx.paging.map
 import com.m.vodovoz.common.account.AccountManager
+import com.m.vodovoz.common.cart.AppCartManager
 import com.m.vodovoz.common.cart.CartItemQuantityChange
 import com.m.vodovoz.common.cart.CartManager
 import com.m.vodovoz.common.cart.change
@@ -57,6 +58,7 @@ class CartFlowViewModel @Inject constructor(
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val tabManager: TabManager,
     private val userPreferencesRepository: UserPreferencesRepository,
+    private val appCartManager: AppCartManager
 ) : PagingProductsMviViewModel2<CartItemUi, ProductUi, CartFlowViewModel.CartState, CartFlowViewModel.CartEvents>(
     state = CartState(),
     blockedProductsFlow = cartManager.blockedProductsFlow,
@@ -118,10 +120,9 @@ class CartFlowViewModel @Inject constructor(
 
 
             if (currentCartVersion >= cartManager.cartVersion) {
-
-                cartManager.syncCart(
-                    cartItems.associate { item -> item.id to item.cartQuantity }
-                )
+                val quantities = cartItems.associate { item -> item.id to item.cartQuantity }
+                cartManager.syncCart(quantities)
+                appCartManager.syncIfIdle(quantities)
 
                 setSensitiveButtonsAvailability(true)
             }
@@ -130,7 +131,10 @@ class CartFlowViewModel @Inject constructor(
 
             val (uiState, state) = when (t) {
                 is EmptyResultException -> {
-                    cartManager.syncCart(emptyMap())
+                    if (currentCartVersion >= cartManager.cartVersion) {
+                        cartManager.syncCart(emptyMap())
+                        appCartManager.syncIfIdle(emptyMap())
+                    }
                     val placeholder = t.placeholder?.toUi() ?: VodovozPlaceholderUi.Empty
                     val items2 = placeholder.productsSection?.items ?: emptyList()
 

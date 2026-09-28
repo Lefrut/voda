@@ -10,8 +10,10 @@ import com.m.vodovoz.data.vodovoz_service.datastore.ForAdultsDataStoreImpl
 import com.m.vodovoz.data.vodovoz_service.datastore.StoriesDataStore
 import com.m.vodovoz.data.vodovoz_service.datastore.StoriesDataStoreImpl
 import com.m.vodovoz.data.vodovoz_service.repository.UserPreferencesRepositoryImpl
+import com.m.vodovoz.data.vodovoz_service.repository.CartRepositoryImpl
 import com.m.vodovoz.data.vodovoz_service.repository.VodovozServiceRepositoryImpl
 import com.m.vodovoz.domain.general.respository.UserPreferencesRepository
+import com.m.vodovoz.domain.general.respository.CartRepository
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
 import com.squareup.moshi.Moshi
 import dagger.Binds
@@ -33,6 +35,10 @@ abstract class VodovozServiceModule {
     abstract fun bindVodovozServiceRepository(
         vodovozServiceRepository: VodovozServiceRepositoryImpl,
     ): VodovozServiceRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindCartRepository(impl: CartRepositoryImpl): CartRepository
 
     @Binds
     @Singleton
