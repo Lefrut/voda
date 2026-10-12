@@ -6,6 +6,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.m.vodovoz.common.cart.CartManager
 import com.m.vodovoz.common.like.LikeManager
+import com.m.vodovoz.core.analytics.Analytics
 import com.m.vodovoz.design_system.model.ColorfulButtonUi
 import com.m.vodovoz.design_system.model.OrderProductUi
 import com.m.vodovoz.design_system.model.mapToUi
@@ -43,6 +44,7 @@ class OrderDetailsFlowViewModel @Inject constructor(
 
     companion object {
         const val QUESTION_BUTTON_ID = "voproszakaz"
+        private const val TRACK_ORDER_BUTTON_ID = "voditel"
     }
 
     private val orderId = savedState.get<Long>("orderId") ?: navigateBack().run { -1 }
@@ -100,7 +102,8 @@ class OrderDetailsFlowViewModel @Inject constructor(
                 showAboutOrderBottomSheet(orderDetailsButton.popupWindow ?: return@launch)
             }
 
-            orderDetailsButton.id == "voditel" -> {
+            orderDetailsButton.id == TRACK_ORDER_BUTTON_ID -> {
+                Analytics.reportEvent("Где водитель")
                 sendEvent(
                     OrderDetailsEvent.GoToTraceOrder(
                         orderDetailsButton.driverId ?: return@launch,
