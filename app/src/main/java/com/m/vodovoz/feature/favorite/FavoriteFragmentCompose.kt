@@ -13,7 +13,6 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.m.vodovoz.R
-import com.m.vodovoz.common.cart.CartManager
 import com.m.vodovoz.common.like.LikeManager
 import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.core.navigation.navigateToProductAnalogs
@@ -33,9 +32,6 @@ class FavoriteFragment : Fragment() {
 
 
     internal val viewModel: FavoriteFlowViewModel by activityViewModels()
-
-    @Inject
-    lateinit var cartManager: CartManager
 
     @Inject
     lateinit var likeManager: LikeManager

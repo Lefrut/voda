@@ -4,8 +4,8 @@ import androidx.compose.runtime.Stable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.m.vodovoz.common.about_product.AboutProductManager
-import com.m.vodovoz.common.cart.CartManager
-import com.m.vodovoz.common.cart.change
+import com.m.vodovoz.common.cart.AppCartManager
+import com.m.vodovoz.common.cart.adjustQuantity
 import com.m.vodovoz.design_system.model.ColorfulButtonUi
 import com.m.vodovoz.design_system.model.DocumentUi
 import com.m.vodovoz.design_system.model.PriceUi
@@ -17,11 +17,8 @@ import com.m.vodovoz.feature.product_details.model.toUi
 import com.m.vodovoz.ui.paging.ProductsMviViewModel
 import com.m.vodovoz.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -29,13 +26,13 @@ import javax.inject.Inject
 @Stable
 class AboutProductViewModel @Inject constructor(
     private val aboutProductManager: AboutProductManager,
-    private val cartManager: CartManager,
+    private val cartManager: AppCartManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
     savedStateHandle: SavedStateHandle,
 ) : ProductsMviViewModel<ProductUi, AboutProductState, AboutProductEvent>(
     state = AboutProductState(),
-    blockedProductsFlow = cartManager.blockedProductsFlow,
-    cartFlow = cartManager.observeCarts(),
+    blockedProductsFlow = cartManager.loadingProductIds,
+    cartFlow = cartManager.quantities,
     favoritesFlow = MutableStateFlow(emptyMap()),
     canViewAdultProducts = MutableStateFlow(false)
 ) {
@@ -76,11 +73,11 @@ class AboutProductViewModel @Inject constructor(
         }
     }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    suspend fun listenCartUpdates() =
-        cartManager.observeRefreshCart().filter { update -> update }.mapLatest {
+    suspend fun listenCartUpdates() {
+        cartManager.results.conflate().collect {
             updatePresentHtml()
-        }.collect()
+        }
+    }
 
 
     private fun fetchAboutProductInfo() = viewModelScope.launch {
@@ -95,7 +92,7 @@ class AboutProductViewModel @Inject constructor(
         updatePresentHtml()
     }
 
-    private fun updatePresentHtml() = viewModelScope.launch {
+    private suspend fun updatePresentHtml() {
         val result = vodovozServiceRepository.getPresentInfo().singleResult()
         result.onSuccess { presentInfo ->
             updateState { s ->
@@ -123,14 +120,14 @@ class AboutProductViewModel @Inject constructor(
     }
 
     fun incrementProductToCart() = viewModelScope.launch {
-        cartManager.change(
+        cartManager.adjustQuantity(
             product = stateSnapshot.product,
-            count = stateSnapshot.product.cartQuantity + 1,
+            delta = 1,
         )
     }
 
     fun decrementProductFromCart() = viewModelScope.launch {
-        cartManager.change(productId, stateSnapshot.product.cartQuantity - 1)
+        cartManager.adjustQuantity(stateSnapshot.product, delta = -1)
     }
 
 

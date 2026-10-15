@@ -6,8 +6,10 @@ import androidx.lifecycle.viewModelScope
 import com.m.vodovoz.BuildConfig
 import com.m.vodovoz.R
 import com.m.vodovoz.common.account.AccountManager
-import com.m.vodovoz.common.cart.CartManager
-import com.m.vodovoz.common.cart.change
+import com.m.vodovoz.common.cart.AppCartManager
+import com.m.vodovoz.common.cart.adjustQuantity
+import com.m.vodovoz.common.cart.onFailure
+import com.m.vodovoz.common.cart.onSuccess
 import com.m.vodovoz.common.like.LikeManager
 import com.m.vodovoz.common.model.AppLink
 import com.m.vodovoz.common.model.BaseVodovozAction
@@ -75,7 +77,7 @@ import kotlin.math.roundToInt
 @HiltViewModel
 @Stable
 class HomeFlowViewModel @Inject constructor(
-    private val cartManager: CartManager,
+    private val cartManager: AppCartManager,
     private val likeManager: LikeManager,
     private val accountManager: AccountManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
@@ -83,9 +85,9 @@ class HomeFlowViewModel @Inject constructor(
     private val userPreferencesRepository: UserPreferencesRepository,
 ) : ProductsMviViewModel<HomeListItem<*>, HomeFlowViewModel.HomeState, HomeFlowViewModel.HomeEvents>(
     state = HomeState(),
-    blockedProductsFlow = cartManager.blockedProductsFlow,
+    blockedProductsFlow = cartManager.loadingProductIds,
     favoritesFlow = likeManager.observeLikes(),
-    cartFlow = cartManager.observeCarts(),
+    cartFlow = cartManager.quantities,
     canViewAdultProducts = userPreferencesRepository.canViewAdultProducts
 ) {
 
@@ -453,20 +455,17 @@ class HomeFlowViewModel @Inject constructor(
     }
 
     fun incrementProductToCart(product: ProductUi) = viewModelScope.launch {
-        cartManager.change(
-            product = product,
-            count = product.cartQuantity + 1,
-            onSuccess = {
+        cartManager.adjustQuantity(product, delta = 1)
+            .onSuccess {
                 Analytics.reportEvent("add_to_cart_success")
-            },
-            onFailure = { throwable ->
+            }
+            .onFailure {
                 Analytics.reportEvent("error_add_to_cart")
             }
-        )
     }
 
     fun decrementProductToCart(product: ProductUi) = viewModelScope.launch {
-        cartManager.change(product.id, product.cartQuantity - 1)
+        cartManager.adjustQuantity(product, delta = -1)
     }
 
     fun navigateToProductAnalogs(product: ProductUi) = viewModelScope.launch {

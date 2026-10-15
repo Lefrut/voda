@@ -1,7 +1,7 @@
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import com.m.vodovoz.common.account.AccountManager
-import com.m.vodovoz.common.cart.CartManager
+import com.m.vodovoz.common.cart.AppCartManager
 import com.m.vodovoz.common.datastore.DataStorePrefs
 import com.m.vodovoz.common.like.LikeManager
 import com.m.vodovoz.common.resources.ResourcesProvider
@@ -15,7 +15,7 @@ abstract class ViewModelTestBase<T : ViewModel> : CoroutineTestBase() {
 
 
     protected lateinit var viewModel: T
-    protected lateinit var cartManager: CartManager
+    protected lateinit var cartManager: AppCartManager
     protected lateinit var likeManager: LikeManager
     protected lateinit var vodovozServiceRepository: VodovozServiceRepository
     protected lateinit var accountManager: AccountManager

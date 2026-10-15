@@ -1,5 +1,6 @@
 package com.m.vodovoz.common.account
 
+import com.m.vodovoz.common.cart.AppCartManager
 import com.m.vodovoz.common.like.LikeManager
 import com.m.vodovoz.common.token.FirebaseTokenManager
 import com.m.vodovoz.core.network.VodovozWebConfig
@@ -14,6 +15,7 @@ class LoginManager @Inject constructor(
     private val likeManager: LikeManager,
     private val firebaseTokenManager: FirebaseTokenManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
+    private val cartManager: AppCartManager,
 ) {
 
 
@@ -26,6 +28,7 @@ class LoginManager @Inject constructor(
         accountManager.updateUserId(userId)
         accountManager.updateUserToken(userToken)
         vodovozServiceRepository.relogin().singleResult()
+        cartManager.requestRefresh()
         likeManager.updateLikesAfterLogin()
         firebaseTokenManager.sendFirebaseToken()
     }

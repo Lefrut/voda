@@ -4,8 +4,8 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import com.m.vodovoz.common.cart.CartManager
-import com.m.vodovoz.common.cart.change
+import com.m.vodovoz.common.cart.AppCartManager
+import com.m.vodovoz.common.cart.adjustQuantity
 import com.m.vodovoz.common.like.LikeManager
 import com.m.vodovoz.common.search.SearchManager
 import com.m.vodovoz.design_system.model.ProductUi
@@ -35,7 +35,7 @@ import javax.inject.Inject
 @HiltViewModel
 @Stable
 class SearchFlowViewModel @Inject constructor(
-    private val cartManager: CartManager,
+    private val cartManager: AppCartManager,
     private val likeManager: LikeManager,
     private val searchManager: SearchManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
@@ -43,9 +43,9 @@ class SearchFlowViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
 ) : ProductsMviViewModel<ProductUi, SearchFlowViewModel.SearchState, SearchFlowViewModel.SearchEvents>(
     state = SearchState(),
-    blockedProductsFlow = cartManager.blockedProductsFlow,
+    blockedProductsFlow = cartManager.loadingProductIds,
     favoritesFlow = likeManager.observeLikes(),
-    cartFlow = cartManager.observeCarts(),
+    cartFlow = cartManager.quantities,
     canViewAdultProducts = userPreferencesRepository.canViewAdultProducts
 ) {
 
@@ -223,11 +223,11 @@ class SearchFlowViewModel @Inject constructor(
     }
 
     fun incrementProductToCart(product: ProductUi) = viewModelScope.launch {
-        cartManager.change(product, product.cartQuantity + 1)
+        cartManager.adjustQuantity(product, delta = 1)
     }
 
     fun decrementProductToCart(product: ProductUi) = viewModelScope.launch {
-        cartManager.change(product, product.cartQuantity - 1)
+        cartManager.adjustQuantity(product, delta = -1)
     }
 
 

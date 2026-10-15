@@ -6,9 +6,11 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.m.vodovoz.common.about_product.AboutProductManager
 import com.m.vodovoz.common.account.AccountManager
-import com.m.vodovoz.common.cart.CartManager
-import com.m.vodovoz.common.cart.addMultiple
-import com.m.vodovoz.common.cart.change
+import com.m.vodovoz.common.cart.AppCartManager
+import com.m.vodovoz.common.cart.DispatchMode
+import com.m.vodovoz.common.cart.adjustQuantity
+import com.m.vodovoz.common.cart.incrementProducts
+import com.m.vodovoz.common.cart.setQuantity
 import com.m.vodovoz.common.cart.toProductUi
 import com.m.vodovoz.common.like.LikeManager
 import com.m.vodovoz.core.analytics.Analytics
@@ -30,6 +32,8 @@ import com.m.vodovoz.design_system.model.VodovozSectionUi
 import com.m.vodovoz.design_system.model.mapToUi
 import com.m.vodovoz.design_system.model.toUi
 import com.m.vodovoz.design_system.model.toVodovozSectionUi
+import com.m.vodovoz.domain.general.model.product.CartProductsModel
+import com.m.vodovoz.domain.general.model.product.toMap
 import com.m.vodovoz.domain.general.respository.UserPreferencesRepository
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
 import com.m.vodovoz.feature.product_details.model.PresentInfoUi
@@ -41,19 +45,19 @@ import com.m.vodovoz.ui.paging.ProductsMviViewModel
 import com.m.vodovoz.util.calculateProductPrice
 import com.m.vodovoz.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 @HiltViewModel
 @Stable
 class ProductDetailsFlowViewModel @Inject constructor(
-    private val cartManager: CartManager,
+    private val cartManager: AppCartManager,
     private val likeManager: LikeManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val aboutProductManager: AboutProductManager,
@@ -62,9 +66,9 @@ class ProductDetailsFlowViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
 ) : ProductsMviViewModel<VodovozSectionUi<ProductUi>, ProductDetailsFlowViewModel.ProductDetailsState, ProductDetailsFlowViewModel.ProductDetailsEvents>(
     state = ProductDetailsState(),
-    blockedProductsFlow = cartManager.blockedProductsFlow,
+    blockedProductsFlow = cartManager.loadingProductIds,
     favoritesFlow = likeManager.observeLikes(),
-    cartFlow = cartManager.observeCarts(),
+    cartFlow = cartManager.quantities,
     canViewAdultProducts = userPreferencesRepository.canViewAdultProducts
 ) {
 
@@ -80,7 +84,7 @@ class ProductDetailsFlowViewModel @Inject constructor(
     fun listenProductDetailsUpdates(scope: CoroutineScope) {
 
 
-        cartManager.observeCarts().onEach { cart ->
+        cartManager.quantities.onEach { cart ->
             updateState { s ->
                 val productDetails = s.productDetails
                 s.copy(
@@ -94,7 +98,7 @@ class ProductDetailsFlowViewModel @Inject constructor(
             }
         }.launchIn(scope)
 
-        cartManager.blockedProductsFlow.onEach { blocked ->
+        cartManager.loadingProductIds.onEach { blocked ->
             updateState { s ->
                 s.copy(
                     buttonIsLoading = s.productDetails.id in blocked
@@ -116,15 +120,15 @@ class ProductDetailsFlowViewModel @Inject constructor(
         }.launchIn(scope)
     }
 
-    suspend fun listenCartUpdates() = cartManager.observeRefreshCart().onEach { update ->
-        if (update) {
+    suspend fun listenCartUpdates() {
+        cartManager.results.conflate().collect {
             vodovozServiceRepository.getPresentInfo().singleResult().onSuccess { presentInfo ->
                 updateState { s ->
                     s.copy(presentInfo = presentInfo.toUi())
                 }
             }
         }
-    }.collect()
+    }
 
     fun fetchProductDetails() = combine(
         vodovozServiceRepository.getProductDetails(
@@ -167,8 +171,8 @@ class ProductDetailsFlowViewModel @Inject constructor(
                 )
             }
 
-            val productDetailsQuantity = cartManager.observeCarts().firstOrNull().orEmpty()
-                .getOrDefault(productDetailsScreenModel.details.id, 0)
+            val productDetailsQuantity =
+                cartManager.itemsState.value[productDetailsScreenModel.details.id]?.quantity ?: 0
 
             val analyticsProduct = productDetailsScreenModel.details.toUi().copy(
                 cartQuantity = productDetailsQuantity
@@ -182,7 +186,7 @@ class ProductDetailsFlowViewModel @Inject constructor(
                 s.copy(uiState = ProductDetailsUiState.Error)
             }
         }
-    }.combine(cartManager.observeCarts()) { _, cart ->
+    }.combine(cartManager.quantities) { _, cart ->
         updateState { state ->
             val productDetails = state.productDetails
 
@@ -196,12 +200,12 @@ class ProductDetailsFlowViewModel @Inject constructor(
 
     fun incrementCart() = viewModelScope.launch {
         val productDetails = stateSnapshot.productDetails
-        cartManager.change(productDetails.toProductUi(), productDetails.cartQuantity + 1)
+        cartManager.adjustQuantity(productDetails.toProductUi(), delta = 1)
     }
 
     fun decrementCart() = viewModelScope.launch {
         val productDetails = stateSnapshot.productDetails
-        cartManager.change(productDetails.id, productDetails.cartQuantity - 1)
+        cartManager.adjustQuantity(productDetails.toProductUi(), delta = -1)
     }
 
     fun showOrHideDetailText() = viewModelScope.launch {
@@ -369,11 +373,11 @@ class ProductDetailsFlowViewModel @Inject constructor(
     }
 
     fun incrementProductToCart(product: ProductUi) = viewModelScope.launch {
-        cartManager.change(product, product.cartQuantity + 1)
+        cartManager.adjustQuantity(product, delta = 1)
     }
 
     fun decrementProductToCart(product: ProductUi) = viewModelScope.launch {
-        cartManager.change(product.id, product.cartQuantity - 1)
+        cartManager.adjustQuantity(product, delta = -1)
     }
 
     fun navigateToProductAnalogs(product: ProductUi) = viewModelScope.launch {
@@ -382,9 +386,12 @@ class ProductDetailsFlowViewModel @Inject constructor(
 
     fun addProductWithGift(buyButton: BuyButtonUi) = viewModelScope.launch {
         val productDetails = stateSnapshot.productDetails
-        cartManager.addMultiple(
-            cartItems = listOf(buyButton.productId, buyButton.moreProductId),
+        cartManager.incrementProducts(
+            deltas = CartProductsModel(
+                listOf(buyButton.productId, buyButton.moreProductId).joinToString(";")
+            ).toMap(),
             product = productDetails.toProductUi(),
+            mode = DispatchMode.IMMEDIATE,
         )
         updateState { s ->
             s.copy(
@@ -415,9 +422,10 @@ class ProductDetailsFlowViewModel @Inject constructor(
     fun saveMultiProductChoice() = viewModelScope.launch {
         val state = stateSnapshot
         val productDetails = state.productDetails
-        cartManager.change(
+        cartManager.setQuantity(
             product = productDetails.toProductUi(),
-            count = state.multiProductQuantity,
+            quantity = state.multiProductQuantity,
+            mode = DispatchMode.IMMEDIATE,
         )
         updateState { s ->
             s.copy(showMultiBottomSheet = false)

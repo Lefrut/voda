@@ -4,7 +4,7 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import com.m.vodovoz.common.cart.CartManager
+import com.m.vodovoz.common.cart.AppCartManager
 import com.m.vodovoz.common.like.LikeManager
 import com.m.vodovoz.core.analytics.Analytics
 import com.m.vodovoz.design_system.model.ColorfulButtonUi
@@ -30,15 +30,15 @@ import javax.inject.Inject
 @Stable
 class OrderDetailsFlowViewModel @Inject constructor(
     savedState: SavedStateHandle,
-    private val cartManager: CartManager,
+    private val cartManager: AppCartManager,
     private val likeManager: LikeManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
     userPreferencesRepository: UserPreferencesRepository,
 ) : ProductsMviViewModel<OrderProductUi, OrderDetailsFlowViewModel.OrderDetailsState, OrderDetailsFlowViewModel.OrderDetailsEvent>(
     state = OrderDetailsState(),
-    blockedProductsFlow = cartManager.blockedProductsFlow,
+    blockedProductsFlow = cartManager.loadingProductIds,
     favoritesFlow = likeManager.observeLikes(),
-    cartFlow = cartManager.observeCarts(),
+    cartFlow = cartManager.quantities,
     canViewAdultProducts = userPreferencesRepository.canViewAdultProducts
 ) {
 
@@ -125,7 +125,7 @@ class OrderDetailsFlowViewModel @Inject constructor(
             orderDetailsButton.id == "povtorit" -> {
                 vodovozServiceRepository.repeatOrder(orderId).singleResult()
                     .onSuccess {
-                        cartManager.updateRefreshCart(true)
+                        cartManager.requestRefresh()
                         sendEvent(OrderDetailsEvent.GoToCart)
                     }
             }

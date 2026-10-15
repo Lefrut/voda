@@ -97,7 +97,9 @@ internal class CartScheduler(
             }
         }
 
-        val addOrChange = changed.filter { chosen[it]?.requestKind == RequestKind.ADD_OR_CHANGE }
+        // Пакетные команды тоже содержат итоговые количества. Существующие товары
+        // отправляем через UpdateProduct, чтобы addtoqua не прибавил их повторно.
+        val addOrChange = changed.filter { chosen[it]?.requestKind != RequestKind.REPLACE_BOTTLES }
         val newProducts = addOrChange.filter {
             cart.item(it).let { item -> item.confirmedQuantity == 0 && item.quantity > 0 }
         }
@@ -106,9 +108,10 @@ internal class CartScheduler(
             addRequest(listOf(it), RequestKind.ADD_OR_CHANGE)
         }
 
-        for (kind in listOf(RequestKind.ADD_MULTIPLE, RequestKind.REPLACE_BOTTLES)) {
-            addRequest(changed.filter { chosen[it]?.requestKind == kind }, kind)
-        }
+        addRequest(
+            changed.filter { chosen[it]?.requestKind == RequestKind.REPLACE_BOTTLES },
+            RequestKind.REPLACE_BOTTLES,
+        )
         return Ready.Batch(noops, requests)
     }
 

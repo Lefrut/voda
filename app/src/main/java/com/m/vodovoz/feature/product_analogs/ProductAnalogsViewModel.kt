@@ -3,8 +3,8 @@ package com.m.vodovoz.feature.product_analogs
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import com.m.vodovoz.common.cart.CartManager
-import com.m.vodovoz.common.cart.change
+import com.m.vodovoz.common.cart.AppCartManager
+import com.m.vodovoz.common.cart.adjustQuantity
 import com.m.vodovoz.common.like.LikeManager
 import com.m.vodovoz.design_system.model.ProductUi
 import com.m.vodovoz.domain.general.model.product.toUi
@@ -30,14 +30,14 @@ import javax.inject.Inject
 class ProductAnalogsViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val vodovozServiceRepository: VodovozServiceRepository,
-    private val cartManager: CartManager,
+    private val cartManager: AppCartManager,
     private val favoritesManager: LikeManager,
     userPreferencesRepository: UserPreferencesRepository
 ) : ProductsMviViewModel<ProductUi, ProductAnalogsState, ProductAnalogsEvent>(
     state = ProductAnalogsState(),
-    blockedProductsFlow = cartManager.blockedProductsFlow,
+    blockedProductsFlow = cartManager.loadingProductIds,
     favoritesFlow = favoritesManager.observeLikes(),
-    cartFlow = cartManager.observeCarts(),
+    cartFlow = cartManager.quantities,
     canViewAdultProducts = userPreferencesRepository.canViewAdultProducts
 ) {
     private val productId = savedStateHandle.get<Long>("productId") ?: -1
@@ -119,11 +119,11 @@ class ProductAnalogsViewModel @Inject constructor(
     }
 
     fun incrementProductToCart(product: ProductUi) = viewModelScope.launch {
-        cartManager.change(product, product.cartQuantity + 1)
+        cartManager.adjustQuantity(product, delta = 1)
     }
 
     fun decrementProductToCart(product: ProductUi) = viewModelScope.launch {
-        cartManager.change(product.id, product.cartQuantity - 1)
+        cartManager.adjustQuantity(product, delta = -1)
     }
 
 

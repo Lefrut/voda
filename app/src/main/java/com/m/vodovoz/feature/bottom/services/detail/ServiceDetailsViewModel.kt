@@ -3,8 +3,10 @@ package com.m.vodovoz.feature.bottom.services.detail
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import com.m.vodovoz.common.cart.CartManager
-import com.m.vodovoz.common.cart.addMultiple
+import com.m.vodovoz.common.cart.AppCartManager
+import com.m.vodovoz.common.cart.DispatchMode
+import com.m.vodovoz.common.cart.incrementProducts
+import com.m.vodovoz.common.cart.setQuantity
 import com.m.vodovoz.common.like.LikeManager
 import com.m.vodovoz.design_system.model.ColorfulButtonUi
 import com.m.vodovoz.design_system.model.ProductUi
@@ -27,15 +29,15 @@ import javax.inject.Inject
 @Stable
 class ServiceDetailsViewModel @Inject constructor(
     private val vodovozServiceRepository: VodovozServiceRepository,
-    private val cartManager: CartManager,
+    private val cartManager: AppCartManager,
     private val favoriteManager: LikeManager,
     userPreferencesRepository: UserPreferencesRepository,
     savedStateHandle: SavedStateHandle,
 ) : ProductsMviViewModel<ServiceProductsUi, ServiceDetailsState, ServiceDetailsEvent>(
     state = ServiceDetailsState(),
-    blockedProductsFlow = cartManager.blockedProductsFlow,
+    blockedProductsFlow = cartManager.loadingProductIds,
     favoritesFlow = favoriteManager.observeLikes(),
-    cartFlow = cartManager.observeCarts(),
+    cartFlow = cartManager.quantities,
     canViewAdultProducts = userPreferencesRepository.canViewAdultProducts
 ) {
 
@@ -100,24 +102,25 @@ class ServiceDetailsViewModel @Inject constructor(
             "-"
         )
             .mapNotNull { it.toLongOrNull() }
-        cartManager.addMultiple(
-            cartItems = mapOf(
+        cartManager.incrementProducts(
+            deltas = mapOf(
                 product.id to coefficient,
                 additionalProductId to additionalProductQuantity.toInt()
             ),
             product = product,
+            mode = DispatchMode.IMMEDIATE,
         )
     }
 
     fun decrementProductToCard(product: ProductUi) = viewModelScope.launch {
         val coefficient = stateSnapshot.productsSection?.coefficient ?: return@launch
 
-        val newQuantity = product.cartQuantity.run {
+        val newQuantity = (cartManager.itemsState.value[product.id]?.quantity ?: 0).run {
             val count = div(coefficient)
             (count - 1).coerceAtLeast(0) * coefficient
         }
 
-        cartManager.change(product.id, newQuantity.coerceAtLeast(0))
+        cartManager.setQuantity(product, newQuantity.coerceAtLeast(0))
     }
 
     fun navigateToServiceOrder(button: ColorfulButtonUi) = viewModelScope.launch {

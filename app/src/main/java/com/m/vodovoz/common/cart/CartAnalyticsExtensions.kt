@@ -8,40 +8,6 @@ import com.m.vodovoz.core.analytics.toAnalyticsProduct
 import com.m.vodovoz.design_system.model.ProductDetailsUi
 import com.m.vodovoz.design_system.model.ProductUi
 import com.m.vodovoz.feature.cart.model.CartItemUi
-import kotlinx.coroutines.Job
-
-fun CartManager.change(
-    product: ProductUi,
-    count: Int,
-    onSuccess: (CartItemQuantityChange) -> Unit = {},
-    onFailure: (Throwable) -> Unit = {},
-): Job {
-    return change(
-        productId = product.id,
-        count = count,
-        onSuccess = { change ->
-            Analytics.reportCartItemAllEvents(product, change)
-            onSuccess(change)
-        },
-        onFailure = onFailure,
-    )
-}
-
-fun <T : Any> CartManager.addMultiple(
-    cartItems: T,
-    product: ProductUi,
-    onSuccess: (Map<Long, CartItemQuantityChange>) -> Unit = {},
-    onFailure: (Throwable) -> Unit = {},
-): Job {
-    return addMultiple(
-        cartItems = cartItems,
-        onSuccess = { map ->
-            Analytics.reportCartItemAllEvents(product, map[product.id])
-            onSuccess(map)
-        },
-        onFailure = onFailure,
-    )
-}
 
 suspend fun AppCartManager.setQuantity(
     product: ProductUi,
@@ -110,36 +76,20 @@ private fun AnalyticsEvents.reportCartItemAllEvents(
     change: CartItemChange,
 ) {
     val applied = change as? CartItemChange.Applied ?: return
-    reportCartItemAllEvents(
-        product = product,
-        change = CartItemQuantityChange(
-            productId = product.id,
-            previousCount = applied.previousQuantity,
-            currentCount = applied.quantity,
-        ),
-    )
-}
-
-private fun AnalyticsEvents.reportCartItemAllEvents(
-    product: ProductUi,
-    change: CartItemQuantityChange?
-) {
-    change?.let { change ->
-        reportCartItemEvent(product, change)
-        if (change.previousCount == 0 && change.delta > 0) {
-            reportEvent(AnalyticsEventNames.PRODUCT_ADDED_TO_CART_NEW)
-        }
+    reportCartItemEvent(product, applied)
+    if (applied.previousQuantity == 0 && applied.quantity > 0) {
+        reportEvent(AnalyticsEventNames.PRODUCT_ADDED_TO_CART_NEW)
     }
 }
 
 fun AnalyticsEvents.reportCartItemEvent(
     product: ProductUi,
-    change: CartItemQuantityChange
+    change: CartItemChange.Applied
 ) {
     val analyticsProduct = product.toAnalyticsProduct()
 
     val event = when {
-        change.delta > 0 && change.previousCount == 0 -> {
+        change.quantity > 0 && change.previousQuantity == 0 -> {
             analyticsProduct.toAddCartItemEvent(1)
         }
 

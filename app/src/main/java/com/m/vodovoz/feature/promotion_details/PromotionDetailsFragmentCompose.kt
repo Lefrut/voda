@@ -10,7 +10,6 @@ import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
-import com.m.vodovoz.common.cart.CartManager
 import com.m.vodovoz.common.like.LikeManager
 import com.m.vodovoz.core.navigation.navigateToProductAnalogs
 import com.m.vodovoz.core.navigation.navigateToProductDetails
@@ -26,9 +25,6 @@ import javax.inject.Inject
 class PromotionDetailsFragment : Fragment() {
 
     internal val viewModel: PromotionDetailsViewModel by viewModels()
-
-    @Inject
-    lateinit var cartManager: CartManager
 
     @Inject
     lateinit var likeManager: LikeManager

@@ -6,8 +6,8 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.CombinedLoadStates
 import androidx.paging.LoadState
 import androidx.paging.map
-import com.m.vodovoz.common.cart.CartManager
-import com.m.vodovoz.common.cart.change
+import com.m.vodovoz.common.cart.AppCartManager
+import com.m.vodovoz.common.cart.adjustQuantity
 import com.m.vodovoz.common.like.LikeManager
 import com.m.vodovoz.design_system.model.ProductUi
 import com.m.vodovoz.design_system.model.VodovozPlaceholderUi
@@ -35,15 +35,15 @@ import javax.inject.Inject
 @HiltViewModel
 @Stable
 class FavoriteFlowViewModel @Inject constructor(
-    private val cartManager: CartManager,
+    private val cartManager: AppCartManager,
     private val likeManager: LikeManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
     userPreferencesRepository: UserPreferencesRepository,
 ) : PagingProductsMviViewModel<ProductUi, FavoriteFlowViewModel.FavoriteState, FavoriteFlowViewModel.FavoriteEvents>(
     state = FavoriteState(),
-    blockedProductsFlow = cartManager.blockedProductsFlow,
+    blockedProductsFlow = cartManager.loadingProductIds,
     favoritesFlow = likeManager.observeLikes(),
-    cartFlow = cartManager.observeCarts(),
+    cartFlow = cartManager.quantities,
     canViewAdultProducts = userPreferencesRepository.canViewAdultProducts
 ) {
     private fun hasFavoriteChanges(): Boolean {
@@ -223,11 +223,11 @@ class FavoriteFlowViewModel @Inject constructor(
     }
 
     fun incrementProductToCart(product: ProductUi) = viewModelScope.launch {
-        cartManager.change(product, product.cartQuantity + 1)
+        cartManager.adjustQuantity(product, delta = 1)
     }
 
     fun decrementProductToCart(product: ProductUi) = viewModelScope.launch {
-        cartManager.change(product.id, product.cartQuantity - 1)
+        cartManager.adjustQuantity(product, delta = -1)
     }
 
 

@@ -1,6 +1,5 @@
 package com.m.vodovoz.domain.general.model.product
 
-import com.m.vodovoz.common.cart.AbstractCartManager
 import okhttp3.internal.toLongOrDefault
 
 @JvmInline

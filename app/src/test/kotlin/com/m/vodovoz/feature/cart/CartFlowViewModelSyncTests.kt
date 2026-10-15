@@ -37,7 +37,18 @@ class CartFlowViewModelSyncTests {
     fun `stale empty cart never replaces UI after a completed update`() =
         verifyStaleResponse(Result.failure(EmptyResultException()))
 
-    private fun verifyStaleResponse(staleResult: Result<CartDetailsModel>) = runTest {
+    @Test
+    fun `external refresh reloads quantities and rejects details fetched before notification`() =
+        verifyStaleResponse(Result.success(details(2, "stale")), externalUpdate = true)
+
+    @Test
+    fun `external refresh rejects an empty response fetched before notification`() =
+        verifyStaleResponse(Result.failure(EmptyResultException()), externalUpdate = true)
+
+    private fun verifyStaleResponse(
+        staleResult: Result<CartDetailsModel>,
+        externalUpdate: Boolean = false,
+    ) = runTest {
         Dispatchers.setMain(StandardTestDispatcher(testScheduler))
         val manager = AppCartManager(this, object : CartRepository {
             override suspend fun execute(request: CartRequest) = Result.success(Unit)
@@ -71,7 +82,12 @@ class CartFlowViewModelSyncTests {
             runCurrent()
             assertFalse(fetch.isCompleted)
 
-            manager.setQuantity(1, 3, DispatchMode.IMMEDIATE)
+            if (externalUpdate) {
+                manager.requestRefresh()
+                runCurrent()
+            } else {
+                manager.setQuantity(1, 3, DispatchMode.IMMEDIATE)
+            }
             delayedResponse.complete(staleResult)
             runCurrent()
             fetch.join()

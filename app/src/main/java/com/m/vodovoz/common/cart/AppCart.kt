@@ -42,20 +42,18 @@ data class CartItem(
 }
 
 sealed interface CartResult {
-    val requestId: UUID
-    val commandIds: Set<UUID>
-    val request: CartRequest
+    data object RefreshRequested : CartResult
 
     data class Succeeded(
-        override val requestId: UUID,
-        override val commandIds: Set<UUID>,
-        override val request: CartRequest,
+        val requestId: UUID,
+        val commandIds: Set<UUID>,
+        val request: CartRequest,
     ) : CartResult
 
     data class Failed(
-        override val requestId: UUID,
-        override val commandIds: Set<UUID>,
-        override val request: CartRequest,
+        val requestId: UUID,
+        val commandIds: Set<UUID>,
+        val request: CartRequest,
         val error: Throwable,
     ) : CartResult
 }
@@ -140,6 +138,7 @@ class AppCartManager(
         ) : InboxMessage
 
         data class AwaitIdle(val done: CompletableDeferred<Long>) : InboxMessage
+        data object RequestRefresh : InboxMessage
 
         data class UserAction(
             val id: UUID,
@@ -204,6 +203,10 @@ class AppCartManager(
                 is InboxMessage.LoadCart -> load(message)
                 is InboxMessage.SyncIfIdle -> syncIfIdle(message)
                 is InboxMessage.AwaitIdle -> idleWaiters.add(message.done)
+                InboxMessage.RequestRefresh -> {
+                    revision++
+                    publishResult(CartResult.RefreshRequested)
+                }
                 is InboxMessage.UserAction -> if (loaded) accept(message) else waitingForLoad.addLast(
                     message
                 )
@@ -292,6 +295,11 @@ class AppCartManager(
     }
 
     suspend fun clear(): CartChangeResult = submitAwait(Command.Clear)
+
+    /** Уведомляет об изменении корзины вне менеджера: авторизация, выход, повтор заказа. */
+    fun requestRefresh() {
+        inbox.trySend(InboxMessage.RequestRefresh)
+    }
 
     fun close() {
         inbox.close()
@@ -459,9 +467,13 @@ class AppCartManager(
                 message.result.exceptionOrNull() ?: IllegalStateException("Cart request failed"),
             )
         }
-        _results.tryEmit(outcome)
-        scope.launch { onResult(outcome) }
+        publishResult(outcome)
         scheduler.wakeAfterResult()
+    }
+
+    private fun publishResult(result: CartResult) {
+        _results.tryEmit(result)
+        scope.launch { onResult(result) }
     }
 
     private fun completeClear(commandId: UUID, result: (Long) -> CartItemChange) {

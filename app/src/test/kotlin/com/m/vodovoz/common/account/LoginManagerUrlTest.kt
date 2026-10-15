@@ -1,5 +1,6 @@
 package com.m.vodovoz.common.account
 
+import com.m.vodovoz.common.cart.AppCartManager
 import com.m.vodovoz.core.network.VodovozWebConfig
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
 import io.mockk.every
@@ -18,10 +19,12 @@ class LoginManagerUrlTest {
     private lateinit var accountManager: AccountManager
     private lateinit var vodovozServiceRepository: VodovozServiceRepository
     private lateinit var loginManager: LoginManager
+    private lateinit var cartManager: AppCartManager
 
     @Before
     fun setUp() {
         accountManager = mockk(relaxed = true)
+        cartManager = mockk(relaxed = true)
         vodovozServiceRepository = mockk {
             every { relogin() } returns flowOf(Result.success(true))
         }
@@ -30,6 +33,7 @@ class LoginManagerUrlTest {
             likeManager = mockk(relaxed = true),
             firebaseTokenManager = mockk(relaxed = true),
             vodovozServiceRepository = vodovozServiceRepository,
+            cartManager = cartManager,
         )
         VodovozWebConfig.setProdMode(VodovozWebConfig.VODOVOZ_BASE_URL)
     }
@@ -53,6 +57,7 @@ class LoginManagerUrlTest {
             accountManager.updateUserId(42)
             accountManager.updateUserToken("token")
             vodovozServiceRepository.relogin()
+            cartManager.requestRefresh()
         }
     }
 
@@ -72,5 +77,6 @@ class LoginManagerUrlTest {
         verify { accountManager.updateUserId(42) }
         verify { accountManager.updateUserToken("token") }
         verify { vodovozServiceRepository.relogin() }
+        verify(exactly = 1) { cartManager.requestRefresh() }
     }
 }

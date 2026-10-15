@@ -6,8 +6,8 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.paging.CombinedLoadStates
 import androidx.paging.map
-import com.m.vodovoz.common.cart.CartManager
-import com.m.vodovoz.common.cart.change
+import com.m.vodovoz.common.cart.AppCartManager
+import com.m.vodovoz.common.cart.adjustQuantity
 import com.m.vodovoz.common.like.LikeManager
 import com.m.vodovoz.design_system.model.ProductUi
 import com.m.vodovoz.design_system.model.PromotionDetailsUi
@@ -32,15 +32,15 @@ import javax.inject.Inject
 @Stable
 class PromotionDetailsViewModel @Inject constructor(
     savedState: SavedStateHandle,
-    private val cartManager: CartManager,
+    private val cartManager: AppCartManager,
     private val likeManager: LikeManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
     userPreferencesRepository: UserPreferencesRepository,
 ) : PagingProductsMviViewModel<ProductUi, PromotionDetailsViewModel.PromotionDetailsState, PromotionDetailsViewModel.PromotionDetailEvent>(
     state = PromotionDetailsState(),
-    blockedProductsFlow = cartManager.blockedProductsFlow,
+    blockedProductsFlow = cartManager.loadingProductIds,
     favoritesFlow = likeManager.observeLikes(),
-    cartFlow = cartManager.observeCarts(),
+    cartFlow = cartManager.quantities,
     canViewAdultProducts = userPreferencesRepository.canViewAdultProducts
 ) {
 
@@ -51,11 +51,11 @@ class PromotionDetailsViewModel @Inject constructor(
     }
 
     fun decrementProductToCart(product: ProductUi) = viewModelScope.launch {
-        cartManager.change(product.id, product.cartQuantity - 1)
+        cartManager.adjustQuantity(product, delta = -1)
     }
 
     fun incrementProductToCart(product: ProductUi) = viewModelScope.launch {
-        cartManager.change(product, product.cartQuantity + 1)
+        cartManager.adjustQuantity(product, delta = 1)
     }
 
     fun navigateToProductAnalogs(product: ProductUi) = viewModelScope.launch {
