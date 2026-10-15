@@ -3,7 +3,6 @@ package com.m.vodovoz.common.cart
 import com.m.vodovoz.common.di.DefaultDispatcher
 import com.m.vodovoz.domain.general.respository.CartRepository
 import com.m.vodovoz.domain.general.respository.CartRequest
-import java.util.UUID
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -12,19 +11,22 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import java.util.UUID
 import kotlin.coroutines.cancellation.CancellationException
 import javax.inject.Inject
 import javax.inject.Singleton
 
 enum class DispatchMode { DEBOUNCED, IMMEDIATE }
 
-/** REPLACE_BOTTLES рассчитан на изменение перечисленных ID; полная замена группы требует отдельного ключа конфликта. */
+/** Для REPLACE_BOTTLES передавай всю группу, включая нули для удаляемых бутылей. */
 enum class RequestKind { ADD_OR_CHANGE, ADD_MULTIPLE, REPLACE_BOTTLES }
 enum class SyncStatus { IDLE, QUEUED, SENDING, FAILED }
 
@@ -74,7 +76,7 @@ data class CartChangeResult(val items: Map<Long, CartItemChange>) {
 /**
  * Хранит последнюю ожидающую команду для каждого ID. Один срок отправки обновляется
  * каждым действием пользователя; Flow сообщает менеджеру, когда он наступил.
- * Все методы вызываются из последовательного цикла CartManager.
+ * Все методы вызываются из последовательного цикла AppCartManager.
  */
 
 
@@ -133,8 +135,11 @@ class AppCartManager(
 
         data class SyncIfIdle(
             val items: Map<Long, Int>,
+            val expectedRevision: Long,
             val done: CompletableDeferred<Boolean>,
         ) : InboxMessage
+
+        data class AwaitIdle(val done: CompletableDeferred<Long>) : InboxMessage
 
         data class UserAction(
             val id: UUID,
@@ -150,6 +155,15 @@ class AppCartManager(
     private val inbox = Channel<InboxMessage>(Channel.UNLIMITED)
     private val cart = Cart()
     val itemsState: StateFlow<Map<Long, CartItem>> get() = cart.itemsState
+    val quantities = itemsState.map { items -> items.mapValues { it.value.quantity } }
+        .distinctUntilChanged()
+    val loadingProductIds = itemsState.map { items -> items.filterValues { it.isLoading }.keys }
+        .distinctUntilChanged()
+
+    /** Меняется при принятии команд, завершении запросов и применении серверного снимка. */
+    @Volatile
+    var revision: Long = 0L
+        private set
 
     private val _results = MutableSharedFlow<CartResult>(extraBufferCapacity = 64)
     val results: SharedFlow<CartResult> = _results.asSharedFlow()
@@ -163,6 +177,8 @@ class AppCartManager(
     private val inFlight = mutableMapOf<UUID, SentRequest>()
     private val requestJobs = mutableMapOf<UUID, Job>()
     private val awaitingActions = mutableMapOf<UUID, AwaitingAction>()
+    private val awaitingClears = mutableMapOf<UUID, AwaitingAction>()
+    private val idleWaiters = mutableListOf<CompletableDeferred<Long>>()
     private var generation = 0L
     private var loaded = false
     private val waitingForLoad = ArrayDeque<InboxMessage.UserAction>()
@@ -187,6 +203,7 @@ class AppCartManager(
             when (message) {
                 is InboxMessage.LoadCart -> load(message)
                 is InboxMessage.SyncIfIdle -> syncIfIdle(message)
+                is InboxMessage.AwaitIdle -> idleWaiters.add(message.done)
                 is InboxMessage.UserAction -> if (loaded) accept(message) else waitingForLoad.addLast(
                     message
                 )
@@ -195,6 +212,7 @@ class AppCartManager(
                 InboxMessage.TimerExpired -> Unit
             }
             if (loaded) dispatchReady()
+            completeIdleWaiters()
         }
     }
 
@@ -214,44 +232,40 @@ class AppCartManager(
         done.await()
     }
 
-    /** Применяет уже полученный снимок без сетевого запроса и без сброса активных операций. */
-    suspend fun syncIfIdle(quantities: Map<Long, Int>): Boolean {
+    /** expectedRevision нужно получить до загрузки снимка, чтобы отклонить устаревший ответ. */
+    suspend fun syncIfIdle(quantities: Map<Long, Int>, expectedRevision: Long): Boolean {
         if (scope.coroutineContext[Job]?.isActive != true) return false
         val done = CompletableDeferred<Boolean>(scope.coroutineContext[Job])
         val items = quantities.mapValues { it.value.coerceAtLeast(0) }
-        if (inbox.trySend(InboxMessage.SyncIfIdle(items, done)).isFailure) {
+        if (inbox.trySend(InboxMessage.SyncIfIdle(items, expectedRevision, done)).isFailure) {
             done.cancel()
             return false
         }
         return done.await()
     }
 
-    /** Абсолютное количество товара. Для бутылки передай requestKind = REPLACE_BOTTLES. */
-    fun setQuantity(
-        id: Long,
-        quantity: Int,
-        mode: DispatchMode = DispatchMode.DEBOUNCED,
-        requestKind: RequestKind = RequestKind.ADD_OR_CHANGE,
-    ): UUID = setQuantities(mapOf(id to quantity), mode, requestKind)
-
-    /** Несколько товаров идут тем же путём; kind определяет нужный endpoint. */
-    fun setQuantities(
-        targets: Map<Long, Int>,
-        mode: DispatchMode = DispatchMode.DEBOUNCED,
-        requestKind: RequestKind = RequestKind.ADD_OR_CHANGE,
-    ): UUID {
-        if (targets.isEmpty()) return UUID.randomUUID()
-        return submit(Command.Set(targets.mapValues { it.value.coerceAtLeast(0) }, mode, requestKind))
+    /** Дожидается всей очереди и возвращает версию перед загрузкой деталей корзины. */
+    suspend fun awaitIdle(): Long {
+        val done = CompletableDeferred<Long>(scope.coroutineContext[Job])
+        if (inbox.trySend(InboxMessage.AwaitIdle(done)).isFailure) done.cancel()
+        return done.await()
     }
 
-    suspend fun setQuantityAwait(
+    private fun completeIdleWaiters() {
+        idleWaiters.removeAll { it.isCompleted }
+        if (inFlight.isNotEmpty() || scheduler.hasPending()) return
+        idleWaiters.forEach { it.complete(revision) }
+        idleWaiters.clear()
+    }
+
+    suspend fun setQuantity(
         id: Long,
         quantity: Int,
         mode: DispatchMode = DispatchMode.DEBOUNCED,
         requestKind: RequestKind = RequestKind.ADD_OR_CHANGE,
-    ): CartItemChange = setQuantitiesAwait(mapOf(id to quantity), mode, requestKind).item(id)
+    ): CartItemChange = setQuantities(mapOf(id to quantity), mode, requestKind).item(id)
 
-    suspend fun setQuantitiesAwait(
+    suspend fun setQuantities(
         targets: Map<Long, Int>,
         mode: DispatchMode = DispatchMode.DEBOUNCED,
         requestKind: RequestKind = RequestKind.ADD_OR_CHANGE,
@@ -260,31 +274,14 @@ class AppCartManager(
         return submitAwait(Command.Set(targets.mapValues { it.value.coerceAtLeast(0) }, mode, requestKind))
     }
 
-    fun adjustQuantity(
-        id: Long,
-        delta: Int,
-        mode: DispatchMode = DispatchMode.DEBOUNCED,
-        requestKind: RequestKind = RequestKind.ADD_OR_CHANGE,
-    ): UUID = submit(Command.Add(mapOf(id to delta), mode, requestKind))
-
-    suspend fun adjustQuantityAwait(
+    suspend fun adjustQuantity(
         id: Long,
         delta: Int,
         mode: DispatchMode = DispatchMode.DEBOUNCED,
         requestKind: RequestKind = RequestKind.ADD_OR_CHANGE,
     ): CartItemChange = submitAwait(Command.Add(mapOf(id to delta), mode, requestKind)).item(id)
 
-    fun incrementProducts(
-        deltas: Map<Long, Int>,
-        mode: DispatchMode = DispatchMode.DEBOUNCED,
-        requestKind: RequestKind = RequestKind.ADD_MULTIPLE,
-    ): UUID {
-        val positiveDeltas = deltas.filterValues { it > 0 }
-        if (positiveDeltas.isEmpty()) return UUID.randomUUID()
-        return submit(Command.Add(positiveDeltas, mode, requestKind))
-    }
-
-    suspend fun incrementProductsAwait(
+    suspend fun incrementProducts(
         deltas: Map<Long, Int>,
         mode: DispatchMode = DispatchMode.DEBOUNCED,
         requestKind: RequestKind = RequestKind.ADD_MULTIPLE,
@@ -294,19 +291,11 @@ class AppCartManager(
         return submitAwait(Command.Add(positiveDeltas, mode, requestKind))
     }
 
-    fun clear(): UUID = submit(Command.Clear)
+    suspend fun clear(): CartChangeResult = submitAwait(Command.Clear)
 
     fun close() {
         inbox.close()
         scope.cancel()
-    }
-
-    private fun submit(command: Command): UUID {
-        val id = UUID.randomUUID()
-        if (scope.coroutineContext[Job]?.isActive == true) {
-            inbox.trySend(InboxMessage.UserAction(id, command))
-        }
-        return id
     }
 
     private suspend fun submitAwait(command: Command): CartChangeResult {
@@ -327,11 +316,13 @@ class AppCartManager(
 
     private fun load(message: InboxMessage.LoadCart) {
         generation++
-        awaitingActions.values.forEach { action ->
+        revision++
+        (awaitingActions.values + awaitingClears.values).forEach { action ->
             action.remainingIds.forEach { action.results[it] = CartItemChange.Reset }
             action.done.complete(CartChangeResult(action.results.toMap()))
         }
         awaitingActions.clear()
+        awaitingClears.clear()
         requestJobs.values.forEach { it.cancel() }
         requestJobs.clear()
         inFlight.clear()
@@ -343,8 +334,13 @@ class AppCartManager(
     }
 
     private fun syncIfIdle(message: InboxMessage.SyncIfIdle) {
+        if (message.expectedRevision != revision) {
+            message.done.complete(false)
+            return
+        }
         if (!loaded) {
             cart.loadFromServer(message.items)
+            revision++
             loaded = true
             while (waitingForLoad.isNotEmpty()) accept(waitingForLoad.removeFirst())
             message.done.complete(true)
@@ -352,11 +348,15 @@ class AppCartManager(
         }
 
         val idle = inFlight.isEmpty() && !scheduler.hasPending()
-        if (idle) cart.loadFromServer(message.items)
+        if (idle) {
+            cart.loadFromServer(message.items)
+            revision++
+        }
         message.done.complete(idle)
     }
 
     private fun accept(message: InboxMessage.UserAction) {
+        revision++
         when (val command = message.command) {
             is Command.Set -> {
                 acceptItems(message, command.targets, command.mode, command.kind)
@@ -371,6 +371,12 @@ class AppCartManager(
             }
 
             Command.Clear -> {
+                scheduler.takeClear()?.let { previous ->
+                    completeClear(previous.commandId) { CartItemChange.Superseded }
+                }
+                message.done?.let { done ->
+                    awaitingClears[message.id] = AwaitingAction(done, cart.ids().toMutableSet())
+                }
                 scheduler.enqueueClear(message.id, cart.clear()).forEach { (id, commandId) ->
                     completeItem(commandId, id, CartItemChange.Superseded)
                 }
@@ -409,8 +415,19 @@ class AppCartManager(
     private fun finish(message: InboxMessage.NetworkCompleted) {
         val sent = message.sent
         if (sent.generation != generation || inFlight.remove(sent.id) == null) return
+        revision++
         requestJobs.remove(sent.id)
         cart.applyResult(sent.targets, sent.revisions, message.result)
+        if (sent.request is CartRequest.Clear) {
+            sent.commandIds.forEach { commandId ->
+                completeClear(commandId) { id ->
+                    message.result.fold(
+                        onSuccess = { CartItemChange.Applied(sent.previousQuantities[id] ?: 0, 0) },
+                        onFailure = { CartItemChange.Failed(it) },
+                    )
+                }
+            }
+        }
         sent.commandsById.forEach { (id, commandId) ->
             if (commandId !in awaitingActions) return@forEach
             val outcome = message.result.fold(
@@ -445,6 +462,11 @@ class AppCartManager(
         _results.tryEmit(outcome)
         scope.launch { onResult(outcome) }
         scheduler.wakeAfterResult()
+    }
+
+    private fun completeClear(commandId: UUID, result: (Long) -> CartItemChange) {
+        val action = awaitingClears.remove(commandId) ?: return
+        action.done.complete(CartChangeResult(action.remainingIds.associateWith(result)))
     }
 
     private fun dispatchReady() {
@@ -492,7 +514,7 @@ class AppCartManager(
         if (targets.isEmpty()) return null
         return when (kind) {
             RequestKind.ADD_MULTIPLE -> CartRequest.AddProducts(targets)
-            RequestKind.REPLACE_BOTTLES -> CartRequest.ReplaceBottles(targets)
+            RequestKind.REPLACE_BOTTLES -> CartRequest.ReplaceBottles(targets.filterValues { it > 0 })
             RequestKind.ADD_OR_CHANGE -> {
                 if (targets.size > 1) CartRequest.AddProducts(targets)
                 else {

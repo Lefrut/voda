@@ -37,8 +37,11 @@ internal class CartScheduler(
     val wakeups: StateFlow<Wakeup> = _wakeups.asStateFlow()
 
     fun enqueue(ids: Set<Long>, mode: DispatchMode, kind: RequestKind, commandId: UUID): Map<Long, UUID> {
+        val pendingBottleIds = pending.filterValues { it.requestKind == RequestKind.REPLACE_BOTTLES }.keys
         val replaced = ids.mapNotNull { id ->
-            pending.put(id, Pending(commandId, kind))?.commandId?.let { id to it }
+            // Позднее изменение одной бутыли остаётся частью ожидающей полной замены группы.
+            val effectiveKind = if (id in pendingBottleIds) RequestKind.REPLACE_BOTTLES else kind
+            pending.put(id, Pending(commandId, effectiveKind))?.commandId?.let { id to it }
         }.toMap()
         readyAtMillis = nowMillis() + if (mode == DispatchMode.IMMEDIATE) 0L else debounceMillis
         signal()
@@ -64,7 +67,11 @@ internal class CartScheduler(
     /** За один тик забирает все свободные ID. Занятые остаются до ответа своего запроса. */
     fun takeReady(busyIds: Set<Long>): Ready.Batch? {
         if (pendingClear != null || (readyAtMillis ?: return null) > nowMillis()) return null
-        val available = pending.keys.filterNot { it in busyIds }.sorted()
+        val bottleIds = pending.filterValues { it.requestKind == RequestKind.REPLACE_BOTTLES }.keys
+        val bottlesBusy = bottleIds.any { it in busyIds }
+        val available = pending.keys.filterNot {
+            it in busyIds || (bottlesBusy && it in bottleIds)
+        }.sorted()
         if (available.isEmpty()) return null
 
         val chosen = available.mapNotNull { id -> pending.remove(id)?.let { id to it } }.toMap()
@@ -74,9 +81,12 @@ internal class CartScheduler(
         }
         if (pending.isEmpty()) readyAtMillis = null
 
-        val noops = chosen.filterKeys { !cart.needsSync(it) }
+        // Сервер заменяет всю группу бутылей, поэтому неизменившиеся ID тоже нужны в запросе.
+        val noops = chosen.filter { (id, item) ->
+            !cart.needsSync(id) && item.requestKind != RequestKind.REPLACE_BOTTLES
+        }
             .mapValues { it.value.commandId }
-        val changed = chosen.keys.filter { cart.needsSync(it) }
+        val changed = chosen.keys - noops.keys
         val requests = mutableListOf<Ready.Items>()
 
         fun addRequest(ids: List<Long>, kind: RequestKind) {

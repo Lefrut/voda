@@ -7,9 +7,10 @@ import androidx.paging.CombinedLoadStates
 import androidx.paging.map
 import com.m.vodovoz.common.account.AccountManager
 import com.m.vodovoz.common.cart.AppCartManager
-import com.m.vodovoz.common.cart.CartItemQuantityChange
-import com.m.vodovoz.common.cart.CartManager
-import com.m.vodovoz.common.cart.change
+import com.m.vodovoz.common.cart.CartItemChange
+import com.m.vodovoz.common.cart.DispatchMode
+import com.m.vodovoz.common.cart.adjustQuantity
+import com.m.vodovoz.common.cart.setQuantity
 import com.m.vodovoz.common.cart.toProductUi
 import com.m.vodovoz.common.like.LikeManager
 import com.m.vodovoz.common.tab.TabManager
@@ -20,6 +21,8 @@ import com.m.vodovoz.design_system.model.VodovozPlaceholderUi
 import com.m.vodovoz.design_system.model.order.OrderSummaryItemUi
 import com.m.vodovoz.design_system.model.order.mapToUi
 import com.m.vodovoz.design_system.model.toUi
+import com.m.vodovoz.design_system.model.withUpdatedCartRecursive
+import com.m.vodovoz.design_system.model.withUpdatedLoadingsRecursive
 import com.m.vodovoz.domain.general.model.exceptions.EmptyResultException
 import com.m.vodovoz.domain.general.respository.UserPreferencesRepository
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
@@ -35,66 +38,82 @@ import com.m.vodovoz.feature.cart.model.CartPresentUi
 import com.m.vodovoz.feature.cart.model.CartPromoButtonUi
 import com.m.vodovoz.feature.cart.model.mapToUi
 import com.m.vodovoz.feature.cart.model.toUi
+import com.m.vodovoz.feature.cart.model.toProductUi
 import com.m.vodovoz.ui.mvi.Event
 import com.m.vodovoz.ui.paging.PagingProductsMviViewModel2
 import com.m.vodovoz.ui.paging.PagingState2
 import com.m.vodovoz.ui.paging.emptyCombinedLoadStates
 import com.m.vodovoz.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import javax.inject.Inject
 
 @HiltViewModel
 @Stable
 class CartFlowViewModel @Inject constructor(
-    private val cartManager: CartManager,
+    private val cartManager: AppCartManager,
     private val likeManager: LikeManager,
     private val accountManager: AccountManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val tabManager: TabManager,
     private val userPreferencesRepository: UserPreferencesRepository,
-    private val appCartManager: AppCartManager
 ) : PagingProductsMviViewModel2<CartItemUi, ProductUi, CartFlowViewModel.CartState, CartFlowViewModel.CartEvents>(
     state = CartState(),
-    blockedProductsFlow = cartManager.blockedProductsFlow,
+    blockedProductsFlow = cartManager.loadingProductIds,
     favoritesFlow = likeManager.observeLikes(),
-    cartFlow = cartManager.observeCarts(),
+    cartFlow = cartManager.quantities,
     canViewAdultProducts = userPreferencesRepository.canViewAdultProducts
 ) {
+    private val fetchCartMutex = Mutex()
+
     init {
         viewModelScope.launch { listenCartUpdates() }
     }
 
     private suspend fun listenCartUpdates() {
-        cartManager.observeRefreshCart().filter { update -> update }.collect {
-            refresh()
-            cartManager.updateRefreshCart(false)
+        cartManager.results.conflate().collect {
+            refresh().join()
         }
     }
 
     fun fetchCartDetails() = viewModelScope.launch {
+        fetchCartMutex.withLock { fetchCurrentCartDetails() }
+    }
+
+    private suspend fun fetchCurrentCartDetails() {
         if (stateSnapshot.uiState is CartUiState.Empty || stateSnapshot.uiState == CartUiState.Error) {
             updateState { s -> s.copy(uiState = CartUiState.Loading) }
         }
 
-        val currentCartVersion = cartManager.cartVersion
+        val expectedRevision = cartManager.awaitIdle()
+        val promoCode = stateSnapshot.promoCode
+        val cartDetailsResult = vodovozServiceRepository.getCartDetails(promoCode).singleResult()
+        if (promoCode != stateSnapshot.promoCode) return
 
-        val updateBottomCartJob = launch { tabManager.updateBottomNavCartState() }
-        val cartDetailsResult = vodovozServiceRepository.getCartDetails(
-            stateSnapshot.promoCode
-        ).singleResult()
+        val cartDetails = cartDetailsResult.getOrNull()
+        val error = cartDetailsResult.exceptionOrNull()
+        val cartItems = cartDetails?.items?.mapToUi().orEmpty()
+        if (cartDetails != null || error is EmptyResultException) {
+            val quantities = cartItems.associate { item -> item.id to item.cartQuantity }
+            if (!cartManager.syncIfIdle(quantities, expectedRevision)) return
+            // Команда могла быть принята между синхронизацией и возобновлением UI-корутины.
+            if (cartManager.revision != expectedRevision + 1) return
+        } else if (cartManager.revision != expectedRevision) {
+            return
+        }
 
-        cartDetailsResult.onSuccess { cartDetails ->
-            val cartItems = cartDetails.items.mapToUi()
+        if (cartDetails != null) {
             val promoButton = cartDetails.promotionalCodeButton?.toUi()
             val preOrderProductsPopupWindow = cartDetails.preOrderProductsPopupWindow?.toUi()
-
             updateState { s ->
+                val currentItems = cartManager.itemsState.value
                 val selectedPreOrderProducts =
                     if (preOrderProductsPopupWindow?.items.isNullOrEmpty()) {
                         emptyList()
@@ -105,7 +124,9 @@ class CartFlowViewModel @Inject constructor(
                 s.copy(
                     title = cartDetails.title,
                     countText = cartDetails.countText,
-                    items1 = cartDetails.items.mapToUi(),
+                    items1 = cartItems
+                        .withUpdatedCartRecursive(currentItems.mapValues { it.value.quantity })
+                        .withUpdatedLoadingsRecursive(currentItems.filterValues { it.isLoading }.keys),
                     present = cartDetails.present?.toUi(),
                     preOrderProductsPopupWindow = preOrderProductsPopupWindow,
                     bottlesButton = cartDetails.bottlesButton?.toUi(),
@@ -117,54 +138,36 @@ class CartFlowViewModel @Inject constructor(
                     promoCode = s.promoCode.ifEmpty { promoButton?.popupWindow?.value.orEmpty() }
                 )
             }
-
-
-            if (currentCartVersion >= cartManager.cartVersion) {
-                val quantities = cartItems.associate { item -> item.id to item.cartQuantity }
-                cartManager.syncCart(quantities)
-                appCartManager.syncIfIdle(quantities)
-
-                setSensitiveButtonsAvailability(true)
-            }
-
-        }.onFailure { t ->
-
-            val (uiState, state) = when (t) {
+        } else {
+            val (uiState, state) = when (error) {
                 is EmptyResultException -> {
-                    if (currentCartVersion >= cartManager.cartVersion) {
-                        cartManager.syncCart(emptyMap())
-                        appCartManager.syncIfIdle(emptyMap())
-                    }
-                    val placeholder = t.placeholder?.toUi() ?: VodovozPlaceholderUi.Empty
+                    val placeholder = error.placeholder?.toUi() ?: VodovozPlaceholderUi.Empty
                     val items2 = placeholder.productsSection?.items ?: emptyList()
 
-                    CartUiState.Empty(
-                        placeholder = placeholder
-                    ) to stateSnapshot.copy(
+                    CartUiState.Empty(placeholder) to stateSnapshot.copy(
+                        items1 = emptyList(),
                         items2 = items2,
                         preOrderProductsPopupWindow = null,
                         selectedPreOrderProducts = emptyList()
                     )
                 }
 
-                else -> {
-                    CartUiState.Error to stateSnapshot
-                }
+                else -> CartUiState.Error to stateSnapshot
             }
-            updateState { s ->
-                state.copy(uiState = uiState)
-            }
+            updateState { state.copy(uiState = uiState) }
         }
-        updateBottomCartJob.join()
+        setSensitiveButtonsAvailability(cartManager.itemsState.value.values.none { it.isLoading })
+        tabManager.updateBottomNavCartState()
     }
 
     fun refresh() = viewModelScope.launch {
         updateState { s ->
             s.copy(showRefreshIndicator = true)
         }
-        fetchCartDetails().join()
-        updateState { s ->
-            s.copy(showRefreshIndicator = false)
+        try {
+            fetchCartDetails().join()
+        } finally {
+            updateState { s -> s.copy(showRefreshIndicator = false) }
         }
     }
 
@@ -221,14 +224,10 @@ class CartFlowViewModel @Inject constructor(
                 selectedPreOrderProducts = emptyList()
             )
         }
-        val clearCartResult = vodovozServiceRepository.clearCart().singleResult()
-
-        clearCartResult.onSuccess {
-            cartManager.clearCart()
-        }
-
-        updateState { s ->
-            s.copy(lockCart = false)
+        try {
+            cartManager.clear()
+        } finally {
+            updateState { s -> s.copy(lockCart = false) }
         }
     }
 
@@ -252,28 +251,31 @@ class CartFlowViewModel @Inject constructor(
     }
 
     fun incrementProduct(product: ProductUi) = viewModelScope.launch {
-        changeCartQuantity(product, product.cartQuantity + 1)
+        changeCartQuantity(product, 1)
     }
 
     fun decrementProduct(product: ProductUi) = viewModelScope.launch {
-        changeCartQuantity(product, product.cartQuantity - 1)
+        changeCartQuantity(product, -1)
     }
 
 
     fun incrementCartItem(cartItem: CartItemUi) = viewModelScope.launch {
-        changeCartQuantity(cartItem.toProductUi(), cartItem.cartQuantity + 1)
+        changeCartQuantity(cartItem.toProductUi(), 1)
     }
 
     fun decrementCartItem(cartItem: CartItemUi) = viewModelScope.launch {
-        changeCartQuantity(cartItem.toProductUi(), cartItem.cartQuantity - 1)
+        changeCartQuantity(cartItem.toProductUi(), -1)
     }
 
     private suspend fun changeCartQuantity(
         product: ProductUi,
-        quantity: Int,
+        delta: Int,
     ) {
         setSensitiveButtonsAvailability(false)
-        cartManager.change(product, quantity)
+        val change = cartManager.adjustQuantity(product, delta)
+        if (change is CartItemChange.NoChange || change is CartItemChange.Reset) {
+            refresh().join()
+        }
     }
 
     private fun setSensitiveButtonsAvailability(buttonEnabled: Boolean) {
@@ -339,15 +341,14 @@ class CartFlowViewModel @Inject constructor(
                 currentRemoveItem = null
             )
         }
-        vodovozServiceRepository.updateProductInCart(
-            currentRemoveItem.id, 0
-        ).singleResult()
-        fetchCartDetails().join()
-
-        updateState { s ->
-            s.copy(
-                lockCart = false
+        try {
+            cartManager.setQuantity(
+                product = currentRemoveItem.toProductUi(),
+                quantity = 0,
+                mode = DispatchMode.IMMEDIATE,
             )
+        } finally {
+            updateState { s -> s.copy(lockCart = false) }
         }
     }
 
@@ -422,10 +423,15 @@ class CartFlowViewModel @Inject constructor(
     fun addGiftToCart(presentItem: CartPresentItemUi) = viewModelScope.launch {
         updateState { s -> s.copy(lockCart = true) }
 
-        vodovozServiceRepository.addProductToCart(presentItem.id, 1).singleResult()
-        fetchCartDetails().join()
-
-        updateState { s -> s.copy(lockCart = false) }
+        try {
+            cartManager.setQuantity(
+                product = presentItem.toProductUi(),
+                quantity = 1,
+                mode = DispatchMode.IMMEDIATE,
+            )
+        } finally {
+            updateState { s -> s.copy(lockCart = false) }
+        }
 
     }
 

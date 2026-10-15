@@ -28,11 +28,11 @@ class AppCartManagerAwaitTests {
         )
         try {
             manager.loadCart(emptyMap())
-            val added = async { manager.setQuantityAwait(1, 2, DispatchMode.IMMEDIATE) }
+            val added = async { manager.setQuantity(1, 2, DispatchMode.IMMEDIATE) }
             runCurrent()
             assertEquals(CartItemChange.Applied(0, 2), added.await())
 
-            val unchanged = async { manager.setQuantityAwait(1, 2, DispatchMode.IMMEDIATE) }
+            val unchanged = async { manager.setQuantity(1, 2, DispatchMode.IMMEDIATE) }
             runCurrent()
             assertEquals(CartItemChange.NoChange(2), unchanged.await())
             assertEquals(listOf(CartRequest.AddProduct(1, 2)), requests)
@@ -54,9 +54,9 @@ class AppCartManagerAwaitTests {
         )
         try {
             manager.loadCart(emptyMap())
-            val first = async { manager.setQuantityAwait(1, 1) }
+            val first = async { manager.setQuantity(1, 1) }
             runCurrent()
-            val second = async { manager.setQuantityAwait(1, 2) }
+            val second = async { manager.setQuantity(1, 2) }
             runCurrent()
 
             assertEquals(CartItemChange.Superseded, first.await())
@@ -83,7 +83,7 @@ class AppCartManagerAwaitTests {
         try {
             manager.loadCart(mapOf(1L to 2))
             val result = async {
-                manager.setQuantitiesAwait(mapOf(1L to 3, 2L to 1), DispatchMode.IMMEDIATE)
+                manager.setQuantities(mapOf(1L to 3, 2L to 1), DispatchMode.IMMEDIATE)
             }
             runCurrent()
             assertFalse(result.isCompleted)
@@ -108,7 +108,7 @@ class AppCartManagerAwaitTests {
         )
         try {
             manager.loadCart(emptyMap())
-            val result = async { manager.setQuantityAwait(1, 1, DispatchMode.IMMEDIATE) }
+            val result = async { manager.setQuantity(1, 1, DispatchMode.IMMEDIATE) }
             runCurrent()
             assertFalse(result.isCompleted)
 
@@ -131,11 +131,11 @@ class AppCartManagerAwaitTests {
             nowMillis = { testScheduler.currentTime },
         )
         try {
-            val change = async { manager.setQuantityAwait(1, 2, DispatchMode.IMMEDIATE) }
+            val change = async { manager.setQuantity(1, 2, DispatchMode.IMMEDIATE) }
             runCurrent()
             assertFalse(change.isCompleted)
 
-            assertTrue(manager.syncIfIdle(mapOf(1L to 1)))
+            assertTrue(manager.syncIfIdle(mapOf(1L to 1), manager.revision))
             runCurrent()
             assertEquals(CartItemChange.Applied(1, 2), change.await())
             assertEquals(listOf(CartRequest.UpdateProduct(1, 2)), requests)
@@ -153,16 +153,16 @@ class AppCartManagerAwaitTests {
         )
         try {
             manager.loadCart(emptyMap())
-            val change = async { manager.setQuantityAwait(1, 1) }
+            val change = async { manager.setQuantity(1, 1) }
             runCurrent()
 
-            assertFalse(manager.syncIfIdle(mapOf(1L to 9)))
+            assertFalse(manager.syncIfIdle(mapOf(1L to 9), manager.revision))
             assertEquals(1, manager.itemsState.value[1L]?.quantity)
 
             advanceTimeBy(300)
             runCurrent()
             change.await()
-            assertTrue(manager.syncIfIdle(mapOf(1L to 4)))
+            assertTrue(manager.syncIfIdle(mapOf(1L to 4), manager.revision))
             assertEquals(4, manager.itemsState.value[1L]?.quantity)
         } finally {
             manager.close()
@@ -179,13 +179,15 @@ class AppCartManagerAwaitTests {
         )
         try {
             manager.loadCart(emptyMap())
-            manager.clear()
+            val clear = async { manager.clear() }
             runCurrent()
 
-            assertFalse(manager.syncIfIdle(mapOf(1L to 3)))
+            assertFalse(clear.isCompleted)
+            assertFalse(manager.syncIfIdle(mapOf(1L to 3), manager.revision))
             response.complete(Result.success(Unit))
             runCurrent()
-            assertTrue(manager.syncIfIdle(mapOf(1L to 3)))
+            clear.await()
+            assertTrue(manager.syncIfIdle(mapOf(1L to 3), manager.revision))
             assertEquals(3, manager.itemsState.value[1L]?.quantity)
         } finally {
             manager.close()
@@ -206,10 +208,10 @@ class AppCartManagerAwaitTests {
         try {
             manager.loadCart(mapOf(1L to -2))
             assertTrue(manager.itemsState.value.isEmpty())
-            assertTrue(manager.setQuantitiesAwait(emptyMap()).items.isEmpty())
-            assertTrue(manager.incrementProductsAwait(mapOf(1L to -1, 2L to 0)).items.isEmpty())
+            assertTrue(manager.setQuantities(emptyMap()).items.isEmpty())
+            assertTrue(manager.incrementProducts(mapOf(1L to -1, 2L to 0)).items.isEmpty())
 
-            val change = async { manager.setQuantityAwait(1, -3, DispatchMode.IMMEDIATE) }
+            val change = async { manager.setQuantity(1, -3, DispatchMode.IMMEDIATE) }
             runCurrent()
             assertEquals(CartItemChange.NoChange(0), change.await())
             assertTrue(requests.isEmpty())
@@ -228,8 +230,8 @@ class AppCartManagerAwaitTests {
         manager.close()
 
         manager.setQuantity(1, 1)
-        assertEquals(CartItemChange.Reset, manager.setQuantityAwait(1, 1))
-        assertFalse(manager.syncIfIdle(emptyMap()))
+        assertEquals(CartItemChange.Reset, manager.setQuantity(1, 1))
+        assertFalse(manager.syncIfIdle(emptyMap(), manager.revision))
     }
 
     private fun repository(execute: suspend (CartRequest) -> Result<Unit>): CartRepository =

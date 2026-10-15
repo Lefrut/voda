@@ -227,7 +227,7 @@ class SearchFlowViewModel @Inject constructor(
     }
 
     fun decrementProductToCart(product: ProductUi) = viewModelScope.launch {
-        cartManager.change(product.id, product.cartQuantity - 1)
+        cartManager.change(product, product.cartQuantity - 1)
     }
 
 

@@ -4,9 +4,11 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import com.m.vodovoz.common.cart.CartManager
+import com.m.vodovoz.common.cart.AppCartManager
+import com.m.vodovoz.common.cart.CartItemChange
+import com.m.vodovoz.common.cart.DispatchMode
+import com.m.vodovoz.common.cart.RequestKind
 import com.m.vodovoz.core.android.getList
-import com.m.vodovoz.domain.general.model.product.toCartProducts
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
 import com.m.vodovoz.feature.cart.bottles.model.BottleUi
 import com.m.vodovoz.feature.cart.bottles.model.mapToUi
@@ -26,7 +28,7 @@ import javax.inject.Inject
 @Stable
 @HiltViewModel
 class AllBottlesFlowViewModel @Inject constructor(
-    private val cartManager: CartManager,
+    private val cartManager: AppCartManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
     savedStateHandle: SavedStateHandle,
 ) : MviViewModel<AllBottlesFlowViewModel.BottlesState, AllBottlesFlowViewModel.BottlesEvent>(
@@ -177,29 +179,24 @@ class AllBottlesFlowViewModel @Inject constructor(
 
         val bottlesMap = bottles.toMap()
 
-        val updateBottlesResult = if (bottlesMap != cartBottles.toMap())
-            vodovozServiceRepository.replaceMultipleBottlesToCart(
-                bottlesMap.toCartProducts()
-            ).singleResult()
-        else {
+        if (bottlesMap == cartBottles.toMap()) {
             navigateBack()
             return@launch
         }
 
-        updateBottlesResult.onSuccess {
-            cartManager.updateRefreshCart(true)
-            cartManager.observeRefreshCart().collectLatest { hasUpdates ->
-                if (!hasUpdates) {
-                    updateState { s ->
-                        s.copy(
-                            buttonIsLoading = false,
-                            uiState = BottlesUiState.Success
-                        )
-                    }
-                    navigateBack()
-                }
+        // Передаём всю группу, включая нули для удаляемых бутылей.
+        val targets = cartBottles.associate { it.id to 0 } + stateSnapshot.bottles.toMap()
+        val result = cartManager.setQuantities(
+            targets = targets,
+            mode = DispatchMode.IMMEDIATE,
+            requestKind = RequestKind.REPLACE_BOTTLES,
+        )
+        if (result.items.values.all { it is CartItemChange.Applied || it is CartItemChange.NoChange }) {
+            updateState { s ->
+                s.copy(buttonIsLoading = false, uiState = BottlesUiState.Success)
             }
-        }.onFailure {
+            navigateBack()
+        } else {
             viewModelMode.handleFail()
         }
 

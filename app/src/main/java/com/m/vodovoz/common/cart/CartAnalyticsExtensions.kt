@@ -43,6 +43,83 @@ fun <T : Any> CartManager.addMultiple(
     )
 }
 
+suspend fun AppCartManager.setQuantity(
+    product: ProductUi,
+    quantity: Int,
+    mode: DispatchMode = DispatchMode.DEBOUNCED,
+    requestKind: RequestKind = RequestKind.ADD_OR_CHANGE,
+): CartItemChange {
+    val change = setQuantity(
+        id = product.id,
+        quantity = quantity,
+        mode = mode,
+        requestKind = requestKind,
+    )
+    Analytics.reportCartItemAllEvents(product, change)
+    return change
+}
+
+suspend fun AppCartManager.adjustQuantity(
+    product: ProductUi,
+    delta: Int,
+    mode: DispatchMode = DispatchMode.DEBOUNCED,
+    requestKind: RequestKind = RequestKind.ADD_OR_CHANGE,
+): CartItemChange {
+    val change = adjustQuantity(
+        id = product.id,
+        delta = delta,
+        mode = mode,
+        requestKind = requestKind,
+    )
+    Analytics.reportCartItemAllEvents(product, change)
+    return change
+}
+
+suspend fun AppCartManager.setQuantities(
+    targets: Map<Long, Int>,
+    product: ProductUi,
+    mode: DispatchMode = DispatchMode.DEBOUNCED,
+    requestKind: RequestKind = RequestKind.ADD_OR_CHANGE,
+): CartChangeResult {
+    val result = setQuantities(
+        targets = targets,
+        mode = mode,
+        requestKind = requestKind,
+    )
+    Analytics.reportCartItemAllEvents(product, result.item(product.id))
+    return result
+}
+
+suspend fun AppCartManager.incrementProducts(
+    deltas: Map<Long, Int>,
+    product: ProductUi,
+    mode: DispatchMode = DispatchMode.DEBOUNCED,
+    requestKind: RequestKind = RequestKind.ADD_MULTIPLE,
+): CartChangeResult {
+    val result = incrementProducts(
+        deltas = deltas,
+        mode = mode,
+        requestKind = requestKind,
+    )
+    Analytics.reportCartItemAllEvents(product, result.item(product.id))
+    return result
+}
+
+private fun AnalyticsEvents.reportCartItemAllEvents(
+    product: ProductUi,
+    change: CartItemChange,
+) {
+    val applied = change as? CartItemChange.Applied ?: return
+    reportCartItemAllEvents(
+        product = product,
+        change = CartItemQuantityChange(
+            productId = product.id,
+            previousCount = applied.previousQuantity,
+            currentCount = applied.quantity,
+        ),
+    )
+}
+
 private fun AnalyticsEvents.reportCartItemAllEvents(
     product: ProductUi,
     change: CartItemQuantityChange?

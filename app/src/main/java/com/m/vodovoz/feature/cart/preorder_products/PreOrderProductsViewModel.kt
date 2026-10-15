@@ -3,8 +3,11 @@ package com.m.vodovoz.feature.cart.preorder_products
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import com.m.vodovoz.common.cart.CartManager
-import com.m.vodovoz.common.cart.change
+import com.m.vodovoz.common.cart.AppCartManager
+import com.m.vodovoz.common.cart.CartItemChange
+import com.m.vodovoz.common.cart.DispatchMode
+import com.m.vodovoz.common.cart.adjustQuantity
+import com.m.vodovoz.common.cart.setQuantity
 import com.m.vodovoz.design_system.model.ForAdultsUi
 import com.m.vodovoz.design_system.model.ProductUi
 import com.m.vodovoz.domain.general.respository.UserPreferencesRepository
@@ -15,7 +18,6 @@ import com.m.vodovoz.feature.cart.preorder_products.model.PreOrderProductsState
 import com.m.vodovoz.ui.paging.ProductsMviViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -24,13 +26,13 @@ import javax.inject.Inject
 @Stable
 class PreOrderProductsViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    private val cartManager: CartManager,
+    private val cartManager: AppCartManager,
     private val userPreferencesRepository: UserPreferencesRepository,
 ) : ProductsMviViewModel<ProductUi, PreOrderProductsState, PreOrderProductsEvent>(
     state = PreOrderProductsState(),
-    blockedProductsFlow = cartManager.blockedProductsFlow,
+    blockedProductsFlow = cartManager.loadingProductIds,
     favoritesFlow = emptyFlow(),
-    cartFlow = cartManager.observeCarts(),
+    cartFlow = cartManager.quantities,
     canViewAdultProducts = userPreferencesRepository.canViewAdultProducts
 ) {
 
@@ -126,13 +128,14 @@ class PreOrderProductsViewModel @Inject constructor(
             state.copy(button = state.button.copy(loading = true))
         }
 
-        cartManager.change(
+        val change = cartManager.setQuantity(
             product = product,
-            count = 1,
-        ).join()
+            quantity = 1,
+            mode = DispatchMode.IMMEDIATE,
+        )
 
         val productIds = currentProductIdsInCart()
-        if (productIds.isNotEmpty()) {
+        if ((change is CartItemChange.Applied || change is CartItemChange.NoChange) && productIds.isNotEmpty()) {
             navigateToOrdering(productIds)
         } else {
             updateState { state ->
@@ -195,15 +198,15 @@ class PreOrderProductsViewModel @Inject constructor(
                 action = PendingAdultAction.LocalIncrement
             )
         } else {
-            cartManager.change(
+            cartManager.adjustQuantity(
                 product = product,
-                count = product.cartQuantity + 1,
+                delta = 1,
             )
         }
     }
 
     fun decrementProduct(product: ProductUi) = viewModelScope.launch {
-        cartManager.change(product.id, product.cartQuantity - 1)
+        cartManager.adjustQuantity(product, delta = -1)
     }
 
     fun showPreviewImageDialog(image: String) {
@@ -223,17 +226,13 @@ class PreOrderProductsViewModel @Inject constructor(
             state.copy(button = state.button.copy(loading = true))
         }
 
-        delay(250L)
-        cartManager.blockedProductsFlow.collectLatest { blockedProducts ->
-            if (blockedProducts.isEmpty()) {
-                navigateToOrdering(currentProductIdsInCart())
-            }
-        }
+        cartManager.awaitIdle()
+        navigateToOrdering(currentProductIdsInCart())
     }
 
     private fun currentProductIdsInCart(): List<Long> {
         return stateSnapshot.items
-            .filter { product -> product.cartQuantity > 0 }
+            .filter { product -> (cartManager.itemsState.value[product.id]?.quantity ?: 0) > 0 }
             .map { product -> product.id }
     }
 
