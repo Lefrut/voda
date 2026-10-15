@@ -2,11 +2,14 @@ package com.m.vodovoz.common.cart
 
 import com.m.vodovoz.domain.general.respository.CartRepository
 import com.m.vodovoz.domain.general.respository.CartRequest
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -78,6 +81,7 @@ class AppCartManagerMigrationTests {
             }
             runCurrent()
             assertEquals(3, manager.itemsState.value[1L]?.quantity)
+            assertFalse(manager.itemsState.value[1L]!!.isLoading)
 
             advanceTimeBy(300)
             runCurrent()
@@ -86,6 +90,97 @@ class AppCartManagerMigrationTests {
                 changes.awaitAll(),
             )
             assertEquals(listOf(CartRequest.UpdateProduct(1, 3)), requests)
+        } finally {
+            manager.close()
+        }
+    }
+
+    @Test
+    fun `multiple products stay editable during debounce and load only while sending`() = runTest {
+        val requests = mutableListOf<CartRequest>()
+        val response = CompletableDeferred<Result<Unit>>()
+        val loadingIds = mutableListOf<Set<Long>>()
+        val manager = AppCartManager(
+            this,
+            repository { requests += it; response.await() },
+            nowMillis = { testScheduler.currentTime },
+        )
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
+            manager.loadingProductIds.collect { loadingIds += it }
+        }
+        try {
+            manager.loadCart(emptyMap())
+            val first = async { manager.adjustQuantity(1, 1) }
+            runCurrent()
+            advanceTimeBy(100)
+            val second = async { manager.adjustQuantity(1, 1) }
+            val other = async { manager.adjustQuantity(2, 1) }
+            runCurrent()
+
+            assertEquals(mapOf(1L to 2, 2L to 1), manager.itemsState.value.mapValues { it.value.quantity })
+            assertEquals(CartItemChange.Superseded, first.await())
+            assertTrue(loadingIds.all { it.isEmpty() })
+
+            advanceTimeBy(299)
+            runCurrent()
+            assertTrue(requests.isEmpty())
+            assertTrue(loadingIds.last().isEmpty())
+
+            advanceTimeBy(1)
+            runCurrent()
+            assertEquals(listOf(CartRequest.AddProducts(mapOf(1L to 2, 2L to 1))), requests)
+            assertEquals(setOf(1L, 2L), loadingIds.last())
+
+            val error = IllegalStateException("request failed")
+            response.complete(Result.failure(error))
+            runCurrent()
+            assertEquals(CartItemChange.Failed(error), second.await())
+            assertEquals(CartItemChange.Failed(error), other.await())
+            assertTrue(loadingIds.last().isEmpty())
+            assertTrue(manager.itemsState.value.values.all { it.quantity == 0 })
+        } finally {
+            manager.close()
+        }
+    }
+
+    @Test
+    fun `queued edit keeps loading for an active request but not while waiting for its own dispatch`() = runTest {
+        val firstResponse = CompletableDeferred<Result<Unit>>()
+        val secondResponse = CompletableDeferred<Result<Unit>>()
+        val manager = AppCartManager(
+            this,
+            repository {
+                if ((it as CartRequest.UpdateProduct).quantity == 2) firstResponse.await()
+                else secondResponse.await()
+            },
+            nowMillis = { testScheduler.currentTime },
+        )
+        try {
+            manager.loadCart(mapOf(1L to 1))
+            val first = async { manager.setQuantity(1, 2, DispatchMode.IMMEDIATE) }
+            runCurrent()
+            assertTrue(manager.itemsState.value[1L]!!.isLoading)
+
+            val second = async { manager.setQuantity(1, 3) }
+            runCurrent()
+            assertTrue(manager.itemsState.value[1L]!!.isLoading)
+
+            advanceTimeBy(100)
+            firstResponse.complete(Result.success(Unit))
+            runCurrent()
+            assertEquals(CartItemChange.Applied(1, 2), first.await())
+            assertEquals(SyncStatus.QUEUED, manager.itemsState.value[1L]?.status)
+            assertFalse(manager.itemsState.value[1L]!!.isLoading)
+            assertFalse(second.isCompleted)
+
+            advanceTimeBy(200)
+            runCurrent()
+            assertTrue(manager.itemsState.value[1L]!!.isLoading)
+
+            secondResponse.complete(Result.success(Unit))
+            runCurrent()
+            assertEquals(CartItemChange.Applied(2, 3), second.await())
+            assertFalse(manager.itemsState.value[1L]!!.isLoading)
         } finally {
             manager.close()
         }

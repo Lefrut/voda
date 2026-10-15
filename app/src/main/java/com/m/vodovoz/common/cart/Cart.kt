@@ -27,7 +27,7 @@ class Cart {
             val current = next[id] ?: CartItem(id, 0, 0)
             next[id] = current.copy(
                 quantity = quantity.coerceAtLeast(0),
-                status = SyncStatus.QUEUED,
+                status = if (current.status == SyncStatus.SENDING) SyncStatus.SENDING else SyncStatus.QUEUED,
                 revision = current.revision + 1,
             )
         }

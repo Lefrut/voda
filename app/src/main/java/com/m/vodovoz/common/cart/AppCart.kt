@@ -38,7 +38,8 @@ data class CartItem(
     val status: SyncStatus = SyncStatus.IDLE,
     val revision: Long = 0,
 ) {
-    val isLoading: Boolean get() = status == SyncStatus.QUEUED || status == SyncStatus.SENDING
+    /** Ожидание debounce не блокирует счётчик: загрузка начинается при отправке. */
+    val isLoading: Boolean get() = status == SyncStatus.SENDING
 }
 
 sealed interface CartResult {

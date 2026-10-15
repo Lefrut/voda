@@ -205,6 +205,7 @@ class SplashFragment : Fragment() {
 
 
     private fun fetchDataForScreens() = lifecycleScope.launch {
+        val cartInitialization = cartFlowViewModel.initializeCart()
         splashViewModel.sendFirebaseToken()
         val syncFavoritesJob = splashViewModel.syncFavorites()
 
@@ -219,9 +220,9 @@ class SplashFragment : Fragment() {
         importantJob.join()
         listOf(
             catalogViewModel.fetchCatalogDetails(),
-            profileViewModel.fetchProfileDetails(),
-            cartFlowViewModel.fetchCartDetails()
+            profileViewModel.fetchProfileDetails()
         )
+        cartInitialization.join()
         tabManager.updateBottomNavCartState()
     }
 }

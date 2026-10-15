@@ -87,12 +87,17 @@ class CartFlowViewModel @Inject constructor(
         fetchCartMutex.withLock { fetchCurrentCartDetails() }
     }
 
-    private suspend fun fetchCurrentCartDetails() {
+    /** Первая загрузка всегда разблокирует менеджер, даже если доступен только локальный снимок. */
+    fun initializeCart() = viewModelScope.launch {
+        fetchCartMutex.withLock { fetchCurrentCartDetails(initialLoad = true) }
+    }
+
+    private suspend fun fetchCurrentCartDetails(initialLoad: Boolean = false) {
         if (stateSnapshot.uiState is CartUiState.Empty || stateSnapshot.uiState == CartUiState.Error) {
             updateState { s -> s.copy(uiState = CartUiState.Loading) }
         }
 
-        val expectedRevision = cartManager.awaitIdle()
+        val expectedRevision = if (initialLoad) cartManager.revision else cartManager.awaitIdle()
         val promoCode = stateSnapshot.promoCode
         val cartDetailsResult = vodovozServiceRepository.getCartDetails(promoCode).singleResult()
         if (promoCode != stateSnapshot.promoCode) return
@@ -100,7 +105,15 @@ class CartFlowViewModel @Inject constructor(
         val cartDetails = cartDetailsResult.getOrNull()
         val error = cartDetailsResult.exceptionOrNull()
         val cartItems = cartDetails?.items?.mapToUi().orEmpty()
-        if (cartDetails != null || error is EmptyResultException) {
+        val hasServerSnapshot = cartDetails != null || error is EmptyResultException
+        if (initialLoad) {
+            val quantities = if (hasServerSnapshot) {
+                cartItems.associate { item -> item.id to item.cartQuantity }
+            } else {
+                cartManager.itemsState.value.mapValues { it.value.confirmedQuantity }
+            }
+            cartManager.loadCart(quantities)
+        } else if (hasServerSnapshot) {
             val quantities = cartItems.associate { item -> item.id to item.cartQuantity }
             if (!cartManager.syncIfIdle(quantities, expectedRevision)) return
             // Команда могла быть принята между синхронизацией и возобновлением UI-корутины.
