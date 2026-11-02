@@ -31,7 +31,7 @@ class FirebaseTokenManager @Inject constructor(
         val userId = accountManager.fetchAccountId()
         debugLog { "removeFirebaseToken: token $token" }
         if (token != null && userId != null) {
-            vodovozServiceRepository.sendFirebaseToken(token).singleResult()
+            vodovozServiceRepository.removeFirebaseToken(token).singleResult()
         }
     }
 
