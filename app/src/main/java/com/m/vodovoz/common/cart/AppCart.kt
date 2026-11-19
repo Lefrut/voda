@@ -85,7 +85,7 @@ class AppCartManager(
     private val repository: CartRepository,
     private val onResult: suspend (CartResult) -> Unit = {},
     private val nowMillis: () -> Long = { System.nanoTime() / 1_000_000L },
-    debounceMillis: Long = 300L
+    debounceMillis: Long = 350L
 ) {
     @Inject
     constructor(
