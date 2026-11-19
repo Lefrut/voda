@@ -4,7 +4,7 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import androidx.paging.PagingData
+import androidx.paging.CombinedLoadStates
 import androidx.paging.map
 import com.m.vodovoz.R
 import com.m.vodovoz.common.account.AccountManager
@@ -18,13 +18,14 @@ import com.m.vodovoz.feature.product_comments.model.SortUi
 import com.m.vodovoz.feature.product_comments.model.toDomain
 import com.m.vodovoz.feature.product_comments.model.toUi
 import com.m.vodovoz.ui.mvi.Event
-import com.m.vodovoz.ui.mvi.MviViewModel
-import com.m.vodovoz.ui.mvi.State
+import com.m.vodovoz.ui.paging.PagingMviViewModel
+import com.m.vodovoz.ui.paging.PagingState
+import com.m.vodovoz.ui.paging.emptyCombinedLoadStates
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.emptyFlow
-import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -35,9 +36,11 @@ class ProductCommentsFlowViewModel @Inject constructor(
     savedState: SavedStateHandle,
     private val accountManager: AccountManager,
     private val vodovozServiceRepository: VodovozServiceRepository,
-    private val resourcesProvider: ResourcesProvider,
-) : MviViewModel<ProductCommentsFlowViewModel.ProductCommentsState, ProductCommentsFlowViewModel.ProductCommentsEvents>(
-    ProductCommentsState()
+    resourcesProvider: ResourcesProvider,
+) : PagingMviViewModel<CommentUi, ProductCommentsFlowViewModel.ProductCommentsState, ProductCommentsFlowViewModel.ProductCommentsEvents>(
+    ProductCommentsState(
+        currentSort = SortUi(name = resourcesProvider.getString(R.string.all), value = "", order = "")
+    )
 ) {
 
     private val productId = savedState.get<Long>("productId") ?: navigateBack().let { -1 }
@@ -45,7 +48,7 @@ class ProductCommentsFlowViewModel @Inject constructor(
     private val productImage = savedState.get<String>("productImage") ?: ""
 
     init {
-        fetchProductComments()
+        observeCommentsSort()
     }
 
     private fun listenUserLoginStatus() = viewModelScope.launch {
@@ -55,60 +58,31 @@ class ProductCommentsFlowViewModel @Inject constructor(
         }
     }
 
-    private fun fetchProductComments() = viewModelScope.launch {
-        val productCommentsInfoResult =
-            vodovozServiceRepository.getProductCommentsInfo(productId).firstOrNull()
-        val productCommentsInfo = productCommentsInfoResult?.getOrNull()
-
-        if (productCommentsInfo != null) {
-            updateState { s ->
-                val uiInfo = with(productCommentsInfo.toUi()) {
-                    copy(
-                        sorting = buildList {
-                            add(
-                                SortUi(
-                                    name = resourcesProvider.getString(R.string.all),
-                                    value = "",
-                                    order = ""
-                                )
-                            )
-                            addAll(sorting)
-                        }
-                    )
+    private fun observeCommentsSort() = viewModelScope.launch {
+        state.map { it.currentSort }.distinctUntilChanged().collectLatest { sort ->
+            val result = vodovozServiceRepository.getProductCommentsPagingResult(productId, sort.toDomain())
+            coroutineScope {
+                launch {
+                    result.flow.map { page -> page.map { it.toUi() } }.collectPagingData()
                 }
-                val currentSort = uiInfo.sorting.firstOrNull() ?: SortUi.Empty
-                s.copy(
-                    productCommentsInfo = uiInfo,
-                    currentSort = uiInfo.sorting.firstOrNull() ?: SortUi.Empty,
-                    pagedComments = vodovozServiceRepository.getProductCommentsPaged(
-                        productId, currentSort.toDomain()
-                    ).map { pagingData ->
-                        pagingData.map { comment ->
-                            comment.toUi()
-                        }
-                    }
-                )
-            }
 
-            listenUserLoginStatus()
+                if (stateSnapshot.productCommentsInfo == ProductCommentsInfoUi.Empty) {
+                    val info = result.meta
+                        .first { it.firstPageData != null || it.firstPageError != null }
+                        .firstPageData?.toUi() ?: return@coroutineScope
+                    updateState { s ->
+                        s.copy(productCommentsInfo = info.copy(sorting = listOf(sort) + info.sorting))
+                    }
+                    listenUserLoginStatus()
+                }
+            }
         }
     }
 
-
     fun selectSort(sort: SortUi) = viewModelScope.launch {
+        if (sort == stateSnapshot.currentSort) return@launch
+        updateState { s -> s.copy(currentSort = sort, items = emptyList()) }
         sendEvent(ProductCommentsEvents.ScrollToTop)
-        updateState { d ->
-            d.copy(
-                currentSort = sort,
-                pagedComments = vodovozServiceRepository.getProductCommentsPaged(
-                    productId, sort.toDomain()
-                ).map { pagingData ->
-                    pagingData.map { comment ->
-                        comment.toUi()
-                    }
-                }
-            )
-        }
     }
 
     fun navigateToWriteComment() = viewModelScope.launch {
@@ -125,21 +99,20 @@ class ProductCommentsFlowViewModel @Inject constructor(
         sendEvent(ProductCommentsEvents.GoBack)
     }
 
-    fun setFullScreenMedia(media: CommentMediaUi) = viewModelScope.launch {
-        updateState { s ->
-            s.copy(commentMedia = media)
-        }
-    }
-
-    fun resetFullScreenMedia() = viewModelScope.launch {
-        updateState { s ->
-            s.copy(commentMedia = null)
-        }
+    fun navigateToCommentMedia(
+        media: CommentMediaUi,
+        mediaList: List<CommentMediaUi>,
+    ) = viewModelScope.launch {
+        sendEvent(ProductCommentsEvents.GoToCommentMedia(media, mediaList))
     }
 
     sealed class ProductCommentsEvents : Event {
         data object ScrollToTop : ProductCommentsEvents()
         data object GoBack : ProductCommentsEvents()
+        data class GoToCommentMedia(
+            val media: CommentMediaUi,
+            val mediaList: List<CommentMediaUi>,
+        ) : ProductCommentsEvents()
         data class GoToWriteComment(
             val productId: Long,
             val productName: String,
@@ -150,10 +123,15 @@ class ProductCommentsFlowViewModel @Inject constructor(
     @Immutable
     data class ProductCommentsState(
         val productCommentsInfo: ProductCommentsInfoUi = ProductCommentsInfoUi.Empty,
-        val pagedComments: Flow<PagingData<CommentUi>> = emptyFlow(),
         val currentSort: SortUi = SortUi.Empty,
         val showWriteComment: Boolean = false,
-        val commentMedia: CommentMediaUi? = null,
-    ) : State
+        override val items: List<CommentUi> = emptyList(),
+        override val loadStates: CombinedLoadStates = emptyCombinedLoadStates,
+    ) : PagingState<CommentUi, ProductCommentsState>() {
 
+        override fun copyPagingState(
+            items: List<CommentUi>,
+            loadStates: CombinedLoadStates,
+        ): ProductCommentsState = copy(items = items, loadStates = loadStates)
+    }
 }

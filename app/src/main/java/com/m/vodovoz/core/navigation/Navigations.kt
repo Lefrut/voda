@@ -27,6 +27,7 @@ import com.m.vodovoz.feature.cart.ordering.OrderingFlowViewModel
 import com.m.vodovoz.feature.home.model.CategoryUi
 import com.m.vodovoz.feature.map.model.MapAddressUi
 import com.m.vodovoz.feature.product_catalog.ProductCatalogFragment
+import com.m.vodovoz.feature.product_comments.model.CommentMediaUi
 import java.time.LocalDate
 
 const val GIFT_STATE_KEY = "gift"
@@ -579,6 +580,24 @@ fun NavController.navigateToProductComments(
         )
     )
 
+}
+
+fun NavController.navigateToCommentMedia(media: CommentMediaUi, mediaList: List<CommentMediaUi>) {
+    val images = if (media is CommentMediaUi.Image) {
+        mediaList.filterIsInstance<CommentMediaUi.Image>().distinct()
+    } else {
+        emptyList()
+    }
+    navigate(
+        R.id.commentMediaFragment,
+        bundleOf("media" to media, "images" to ArrayList(images)),
+        navOptions {
+            launchSingleTop = true
+            anim {
+                enter = R.anim.fade_in
+            }
+        }
+    )
 }
 
 fun NavController.navigateToPreOrder(productId: Long) {

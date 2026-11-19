@@ -23,6 +23,7 @@ import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.common.VideoSize
+import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.trackselection.DefaultTrackSelector
 import kotlinx.coroutines.delay
@@ -31,6 +32,7 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import androidx.media3.exoplayer.SeekParameters
 import androidx.media3.ui.PlayerView
+import androidx.core.graphics.createBitmap
 
 /**
  * "Один remember" для кадра из mp4 через ExoPlayer.
@@ -41,6 +43,7 @@ import androidx.media3.ui.PlayerView
  * Требование: API 24+ (PixelCopy).
  */
 @Composable
+@UnstableApi
 fun rememberExoVideoFrame(
     url: String,
     frameMs: Long,
@@ -118,7 +121,7 @@ fun rememberExoVideoFrame(
 
             val bmp: Bitmap? = when (val v = pv.videoSurfaceView) {
                 is SurfaceView -> {
-                    val out = Bitmap.createBitmap(wPx, hPx, Bitmap.Config.ARGB_8888)
+                    val out = createBitmap(wPx, hPx)
                     pixelCopy(v, out) // suspend, дождёмся результата
                     out
                 }

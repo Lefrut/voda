@@ -1817,25 +1817,12 @@ class VodovozServiceRepositoryImpl @Inject constructor(
         )
     }
 
-    override fun getProductCommentsInfo(productId: Long): Flow<Result<ProductCommentsInfoModel>> {
-        return executeDefaultRequest(
-            request = {
-                vodovozService.getComments(productId, 1)
-            },
-            toDomain = {
-                toDomain()
-            }
-        )
-    }
-
-
-    override fun getProductCommentsPaged(
+    override fun getProductCommentsPagingResult(
         productId: Long,
         sort: SortModel,
-    ): Flow<PagingData<CommentModel>> {
-        return VodovozPagerFactory.getFlow(
+    ): VodovozPagingResult<CommentModel, ProductCommentsInfoModel> {
+        return VodovozPagerFactory.getResult(
             executor = defaultExecutor,
-
             request = { page, _ ->
                 vodovozService.getComments(
                     productId = productId,
@@ -1844,7 +1831,8 @@ class VodovozServiceRepositoryImpl @Inject constructor(
                     order = sort.order
                 )
             },
-            mapper = { dto -> dto.toPagingSourceData() }
+            mapper = { dto -> dto.toPagingSourceData() },
+            metaMapper = { dto -> dto.toDomain() }
         )
     }
 

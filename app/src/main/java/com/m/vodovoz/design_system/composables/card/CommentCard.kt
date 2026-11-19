@@ -1,7 +1,5 @@
 package com.m.vodovoz.design_system.composables.card
 
-import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -33,6 +31,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.fromHtml
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
@@ -44,15 +43,13 @@ import com.m.vodovoz.design_system.model.CommentUi
 import com.m.vodovoz.feature.product_comments.model.CommentImage
 import com.m.vodovoz.feature.product_comments.model.CommentMediaUi
 
-@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun CommentCard(
     modifier: Modifier = Modifier,
     comment: CommentUi,
     minLines: Int = 2,
     maxLines: Int = Int.MAX_VALUE,
-    sharedTransitionScope: SharedTransitionScope? = null,
-    sharedElementsIsVisible: Boolean = true,
+    mediaThumbnailWidth: Dp = 60.dp,
     onMediaClick: (CommentMediaUi) -> Unit = {},
 ) {
     OutlinedCard(
@@ -108,10 +105,9 @@ fun CommentCard(
 
                         key(media) {
                             CommentImage(
-                                imageWidth = 60.dp,
-                                imageHeight = 90.dp,
+                                imageWidth = mediaThumbnailWidth,
+                                imageHeight = mediaThumbnailWidth * 1.5f,
                                 media = media,
-                                sharedTransitionScope = null,
                                 playIconSize = 12.dp,
                                 onClick = {
                                     onMediaClick(media)

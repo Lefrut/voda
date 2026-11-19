@@ -1,9 +1,11 @@
 package com.m.vodovoz.feature.product_details.composables
 
-import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.MaterialTheme
@@ -21,6 +23,10 @@ import com.m.vodovoz.design_system.composables.card.CommentCard
 import com.m.vodovoz.design_system.model.ButtonUi
 import com.m.vodovoz.design_system.model.CommentUi
 import com.m.vodovoz.feature.home.composables.TitleAndButton
+import com.m.vodovoz.feature.product_comments.model.CommentImage
+import com.m.vodovoz.feature.product_comments.model.CommentMediaUi
+
+private val CommentPhotoWidth = 48.dp
 
 @Suppress("NonSkippableComposable")
 @Composable
@@ -28,6 +34,8 @@ fun ProductDetailsComments(
     modifier: Modifier = Modifier,
     commentsCount: Int,
     comments: List<CommentUi>,
+    commentPhotos: List<CommentMediaUi.Image>,
+    onMediaClick: (CommentMediaUi, List<CommentMediaUi>) -> Unit,
     onWriteCommentClick: () -> Unit,
     onShowAllCommentsClick: () -> Unit,
 ) {
@@ -39,8 +47,29 @@ fun ProductDetailsComments(
             onShowAllClick = { onShowAllCommentsClick() })
 
 
+        if (commentPhotos.isNotEmpty()) {
+            LazyRow(
+                modifier = Modifier.padding(top = 12.dp),
+                contentPadding = PaddingValues(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                items(commentPhotos, key = { it.url }) { photo ->
+                    CommentImage(
+                        imageWidth = CommentPhotoWidth,
+                        imageHeight = CommentPhotoWidth * 1.5f,
+                        media = photo,
+                        onClick = { onMediaClick(it, commentPhotos) }
+                    )
+                }
+            }
+        }
+
         if (commentsCount > 0) {
-            CommentsPager(modifier = Modifier.padding(top = 24.dp), comments = comments)
+            CommentsPager(
+                modifier = Modifier.padding(top = if (commentPhotos.isEmpty()) 24.dp else 12.dp),
+                comments = comments,
+                onMediaClick = onMediaClick
+            )
         } else {
             Text(
                 modifier = Modifier
@@ -67,12 +96,12 @@ fun ProductDetailsComments(
     }
 }
 
-@OptIn(ExperimentalSharedTransitionApi::class)
 @Suppress("NonSkippableComposable")
 @Composable
 private fun CommentsPager(
     modifier: Modifier = Modifier,
     comments: List<CommentUi>,
+    onMediaClick: (CommentMediaUi, List<CommentMediaUi>) -> Unit,
 ) {
     val pagerState = rememberPagerState { comments.size }
 
@@ -84,10 +113,13 @@ private fun CommentsPager(
         beyondViewportPageCount = comments.size,
         verticalAlignment = Alignment.Top
     ) { page ->
+        val comment = comments[page]
         CommentCard(
-            comment = comments[page],
+            comment = comment,
             minLines = 2,
-            maxLines = 2
+            maxLines = 2,
+            mediaThumbnailWidth = CommentPhotoWidth,
+            onMediaClick = { onMediaClick(it, comment.media) }
         )
     }
 }

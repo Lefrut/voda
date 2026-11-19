@@ -40,6 +40,7 @@ import com.m.vodovoz.domain.general.model.product.ButtonDesignBlockModel
 import com.m.vodovoz.domain.general.model.product.BuyButtonModel
 import com.m.vodovoz.domain.general.model.product.CharacteristicModel
 import com.m.vodovoz.domain.general.model.product.CharacteristicsBlockModel
+import com.m.vodovoz.domain.general.model.product.CommentMediaModel
 import com.m.vodovoz.domain.general.model.product.CommentModel
 import com.m.vodovoz.domain.general.model.product.DepositModel
 import com.m.vodovoz.domain.general.model.product.DesignBlockModel
@@ -337,6 +338,10 @@ fun ProductDetailsDTO.toDomain(): ProductDetailsScreenModel {
         moreProducts = BLOCTOVAR?.map { it -> it.toDomain() } ?: emptyList(),
         comments = COMMENTS?.COMMENTS?.mapNotNull { commentDto -> commentDto?.toDomain() }
             ?: emptyList(),
+        commentPhotos = COMMENTS?.KARTINKI.orEmpty()
+            .filterNot { it.isBlank() }
+            .map { CommentMediaModel.Image(it.toVodovozUrl()) }
+            .distinct(),
         tabs = DETAILTEXT?.mapNotNull { it.toDomain() } ?: emptyList()
     )
 }

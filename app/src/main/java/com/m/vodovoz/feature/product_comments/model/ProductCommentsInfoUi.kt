@@ -1,12 +1,7 @@
 package com.m.vodovoz.feature.product_comments.model
 
-import androidx.compose.animation.AnimatedContentScope
-import androidx.compose.animation.BoundsTransform
-import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.SharedTransitionScope
-import androidx.compose.animation.SharedTransitionScope.OverlayClip
-import androidx.compose.animation.SharedTransitionScope.SharedContentState
-import androidx.compose.animation.core.keyframes
+import android.annotation.SuppressLint
+import android.os.Parcelable
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -25,16 +20,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Rect
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.graphics.addOutline
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
@@ -46,6 +35,7 @@ import com.m.vodovoz.domain.general.model.product.CommentMediaModel
 import com.m.vodovoz.domain.general.model.product.ProductCommentsInfoModel
 import com.m.vodovoz.domain.general.model.product.SortModel
 import com.m.vodovoz.ui.compose.player.rememberExoVideoFrame
+import kotlinx.parcelize.Parcelize
 
 
 @Immutable
@@ -70,7 +60,8 @@ data class ProductCommentsInfoUi(
 }
 
 @Stable
-sealed class CommentMediaUi {
+@Parcelize
+sealed class CommentMediaUi : Parcelable {
 
     abstract val url: String
 
@@ -82,16 +73,13 @@ sealed class CommentMediaUi {
 }
 
 
-@OptIn(ExperimentalSharedTransitionApi::class)
+@SuppressLint("UnsafeOptInUsageError")
 @Composable
 fun CommentImage(
     modifier: Modifier = Modifier,
     imageWidth: Dp,
     imageHeight: Dp,
     media: CommentMediaUi,
-    sharedTransitionScope: SharedTransitionScope? = null,
-    animatedContentScope: AnimatedContentScope? = null,
-    transitionKey: String = media.url,
     playIconSize: Dp = 16.dp,
     onClick: (CommentMediaUi) -> Unit
 ) {
@@ -100,29 +88,22 @@ fun CommentImage(
     val mediaUrl = media.url
 
 
-    val sharedElementModifier = if (sharedTransitionScope != null && animatedContentScope != null) {
-        with(sharedTransitionScope) {
-            Modifier.sharedElement(
-                sharedContentState = rememberSharedContentState(transitionKey),
-                animatedVisibilityScope = animatedContentScope,
-            )
+    Box(
+        modifier = modifier
+            .width(imageWidth)
+            .height(imageHeight)
+            .clip(MaterialTheme.shapes.small)
+            .clickable { onClick(media) }
+    ) {
+        val videoFrame = if (media is CommentMediaUi.Video) {
+            rememberExoVideoFrame(
+                url = mediaUrl,
+                frameMs = 1000L,
+                width = imageWidth
+            ).value
+        } else {
+            null
         }
-    } else {
-        Modifier
-    }
-
-
-    Box(modifier = modifier.clip(MaterialTheme.shapes.small)) {
-
-        val mediaData by rememberExoVideoFrame(
-            url = mediaUrl,
-            frameMs = 1000L,
-            width = imageWidth
-        )
-
-        val videoIsLoading = mediaData == null && media is CommentMediaUi.Video
-
-
         AsyncImage(
             model = when (media) {
                 is CommentMediaUi.Image -> ImageRequest.Builder(context)
@@ -132,19 +113,10 @@ fun CommentImage(
                     .crossfade(true)
                     .build()
 
-                is CommentMediaUi.Video -> mediaData
+                is CommentMediaUi.Video -> videoFrame
             },
             contentDescription = null,
-            modifier = Modifier
-                .height(imageHeight)
-                .width(imageWidth)
-                .then(sharedElementModifier)
-                .clip(MaterialTheme.shapes.small)
-                .clickable {
-                    if (!imageIsLoading && !videoIsLoading) {
-                        onClick(media)
-                    }
-                },
+            modifier = Modifier.matchParentSize(),
             contentScale = ContentScale.Crop,
             onLoading = {
                 imageIsLoading = true
@@ -158,12 +130,13 @@ fun CommentImage(
         )
 
 
-        if (imageIsLoading || videoIsLoading) {
+        if (imageIsLoading || (media is CommentMediaUi.Video && videoFrame == null)) {
             SkeletonBox(
                 shimmerState = LocalShimmer.current,
                 modifier = Modifier.matchParentSize()
             )
-        } else if (media is CommentMediaUi.Video) {
+        }
+        if (media is CommentMediaUi.Video) {
             Image(
                 painter = painterResource(R.drawable.svg_play_video),
                 modifier = Modifier

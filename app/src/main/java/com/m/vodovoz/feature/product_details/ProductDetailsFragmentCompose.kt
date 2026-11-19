@@ -22,6 +22,7 @@ import com.m.vodovoz.core.navigation.mainFragment
 import com.m.vodovoz.core.navigation.navigateToAboutProduct
 import com.m.vodovoz.core.navigation.navigateToBrandProductList
 import com.m.vodovoz.core.navigation.navigateToCategoryProductList
+import com.m.vodovoz.core.navigation.navigateToCommentMedia
 import com.m.vodovoz.core.navigation.navigateToDetailMedia
 import com.m.vodovoz.core.navigation.navigateToPreOrder
 import com.m.vodovoz.core.navigation.navigateToProductAnalogs
@@ -232,6 +233,10 @@ class ProductDetailsFragment : Fragment() {
 
                 is ProductDetailsFlowViewModel.ProductDetailsEvents.GoToDetailMedia -> {
                     findNavController().navigateToDetailMedia(event.media, event.mediaList)
+                }
+
+                is ProductDetailsFlowViewModel.ProductDetailsEvents.GoToCommentMedia -> {
+                    findNavController().navigateToCommentMedia(event.media, event.mediaList)
                 }
 
                 is ProductDetailsFlowViewModel.ProductDetailsEvents.ScrollToMediaPage -> {

@@ -1,8 +1,5 @@
 package com.m.vodovoz.design_system.composables
 
-import androidx.compose.animation.AnimatedContentScope
-import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
@@ -19,7 +16,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -37,16 +33,13 @@ import com.m.vodovoz.design_system.composables.zoom.rememberZoomableState
 import com.m.vodovoz.feature.product_comments.model.CommentMediaUi
 
 
-@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun VerticalImagePager(
     modifier: Modifier = Modifier,
     initialPage: Int,
     images: List<CommentMediaUi.Image>,
-    sharedTransitionScope: SharedTransitionScope,
-    animatedContentScope: AnimatedContentScope,
     onCloseClick: () -> Unit,
-) = with(sharedTransitionScope) {
+) {
     val pagerState = rememberPagerState(initialPage) { images.size }
 
     VerticalPager(
@@ -88,10 +81,6 @@ fun VerticalImagePager(
                 Image(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .sharedElement(
-                            sharedContentState = rememberSharedContentState(imageUrl),
-                            animatedVisibilityScope = animatedContentScope,
-                        )
                         .clip(MaterialTheme.shapes.small),
                     painter = asyncImagePainter,
                     contentDescription = null,

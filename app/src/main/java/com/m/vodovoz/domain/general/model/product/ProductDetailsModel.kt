@@ -11,6 +11,7 @@ data class ProductDetailsScreenModel(
     val buttons: ProductDetailsButtonsModel,
     val moreProducts: List<SectionModel<ProductModel>>,
     val comments: List<CommentModel>,
+    val commentPhotos: List<CommentMediaModel.Image>,
     val tabs: List<ProductDetailsTabModel>,
 )
 

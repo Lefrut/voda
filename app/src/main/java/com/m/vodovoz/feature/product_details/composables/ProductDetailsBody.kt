@@ -10,9 +10,11 @@ import androidx.compose.foundation.pager.PagerState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.component1
+import com.m.vodovoz.design_system.composables.decoration.LocalShimmer
 import com.m.vodovoz.design_system.composables.grid.ProductSectionGrid
 import com.m.vodovoz.design_system.model.BrandCategoryItemUi
 import com.m.vodovoz.design_system.model.CommentUi
@@ -22,7 +24,10 @@ import com.m.vodovoz.design_system.model.ProductMediaUi
 import com.m.vodovoz.design_system.model.ProductUi
 import com.m.vodovoz.design_system.model.SectionContentUi
 import com.m.vodovoz.feature.home.composables.ProductSectionRow
+import com.m.vodovoz.feature.product_comments.model.CommentMediaUi
 import com.m.vodovoz.feature.product_details.model.ProductBonusesUi
+import com.valentinilk.shimmer.ShimmerBounds
+import com.valentinilk.shimmer.rememberShimmer
 
 @Composable
 fun ProductDetailsBody(
@@ -30,6 +35,7 @@ fun ProductDetailsBody(
     mediaPagerState: PagerState,
     productDetails: ProductDetailsUi,
     comments: List<CommentUi>,
+    commentPhotos: List<CommentMediaUi.Image>,
     productBonuses: ProductBonusesUi?,
     moreProductSections: List<SectionContentUi<ProductUi>>,
     buttons: ProductDetailsButtonsUi,
@@ -40,6 +46,7 @@ fun ProductDetailsBody(
     quantityButtonIsLoading: Boolean,
     onFloatingButtonChange: (Boolean) -> Unit,
     onProductMediaClick: (ProductMediaUi) -> Unit,
+    onCommentMediaClick: (CommentMediaUi, List<CommentMediaUi>) -> Unit,
     onDescriptionShowOrHide: () -> Unit,
     onAllPropertiesShowOrHide: () -> Unit,
     onDecrementProduct: () -> Unit,
@@ -154,13 +161,17 @@ fun ProductDetailsBody(
         }
 
 
-        ProductDetailsComments(
-            modifier = Modifier.padding(top = 32.dp),
-            commentsCount = productDetails.commentsCount,
-            comments = comments,
-            onShowAllCommentsClick = onShowAllCommentsClick,
-            onWriteCommentClick = onWriteCommentClick,
-        )
+        CompositionLocalProvider(LocalShimmer provides rememberShimmer(ShimmerBounds.View)) {
+            ProductDetailsComments(
+                modifier = Modifier.padding(top = 32.dp),
+                commentsCount = productDetails.commentsCount,
+                comments = comments,
+                commentPhotos = commentPhotos,
+                onMediaClick = onCommentMediaClick,
+                onShowAllCommentsClick = onShowAllCommentsClick,
+                onWriteCommentClick = onWriteCommentClick,
+            )
+        }
 
 
         if(moreProductSections.isNotEmpty()){

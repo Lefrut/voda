@@ -497,14 +497,10 @@ interface VodovozServiceRepository {
         imageBytesArray: List<ByteArray>,
     ): FlowResult<VodovozPlaceholderModel>
 
-    fun getProductCommentsInfo(
-        productId: Long,
-    ): FlowResult<ProductCommentsInfoModel>
-
-    fun getProductCommentsPaged(
+    fun getProductCommentsPagingResult(
         productId: Long,
         sort: SortModel = SortModel.Empty,
-    ): Flow<PagingData<CommentModel>>
+    ): VodovozPagingResult<CommentModel, ProductCommentsInfoModel>
 
     fun getProductDetails(productId: Long): FlowResult<ProductDetailsScreenModel>
 

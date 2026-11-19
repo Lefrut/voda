@@ -130,6 +130,7 @@ fun ProductDetailsScreen(
                     mediaPagerState = mediaPagerState,
                     productDetails = productDetails,
                     comments = viewState.comments,
+                    commentPhotos = viewState.commentPhotos,
                     quantityButtonIsLoading = viewState.buttonIsLoading,
                     productCartQuantity = productDetails.cartQuantity,
                     showAllProperties = viewState.showAllProperties,
@@ -150,6 +151,7 @@ fun ProductDetailsScreen(
                     onProductMediaClick = { media ->
                         viewModel.navigateToDetailMedia(media)
                     },
+                    onCommentMediaClick = viewModel::navigateToCommentMedia,
                     onIncrementProduct = {
                         viewModel.incrementCart()
                     },

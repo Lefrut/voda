@@ -36,6 +36,7 @@ import com.m.vodovoz.domain.general.model.product.CartProductsModel
 import com.m.vodovoz.domain.general.model.product.toMap
 import com.m.vodovoz.domain.general.respository.UserPreferencesRepository
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
+import com.m.vodovoz.feature.product_comments.model.CommentMediaUi
 import com.m.vodovoz.feature.product_details.model.PresentInfoUi
 import com.m.vodovoz.feature.product_details.model.ProductBonusesUi
 import com.m.vodovoz.feature.product_details.model.toUi
@@ -158,6 +159,9 @@ class ProductDetailsFlowViewModel @Inject constructor(
 
                 s.copy(
                     comments = productDetailsScreenModel.comments.mapToUi(),
+                    commentPhotos = productDetailsScreenModel.commentPhotos.map {
+                        CommentMediaUi.Image(it.url)
+                    },
                     productDetails = productDetailsScreenModel.details.toUi(),
                     items = productDetailsItems,
                     buttons = productDetailsScreenModel.buttons.toUi(),
@@ -368,6 +372,13 @@ class ProductDetailsFlowViewModel @Inject constructor(
         )
     }
 
+    fun navigateToCommentMedia(
+        media: CommentMediaUi,
+        mediaList: List<CommentMediaUi>,
+    ) = viewModelScope.launch {
+        sendEvent(ProductDetailsEvents.GoToCommentMedia(media, mediaList))
+    }
+
     fun navigateToBrandProducts(brandItem: BrandCategoryItemUi) = viewModelScope.launch {
         sendEvent(ProductDetailsEvents.GoToBrandProducts(brandItem.data.id.toLong()))
     }
@@ -517,8 +528,15 @@ class ProductDetailsFlowViewModel @Inject constructor(
         data class GoToCategoryProductList(val categoryId: Long) : ProductDetailsEvents()
         data class GoToSearchProductList(val query: String) : ProductDetailsEvents()
         data class Copy(val text: String) : ProductDetailsEvents()
-        data class GoToDetailMedia(val media: ProductMediaUi, val mediaList: List<ProductMediaUi>) :
-            ProductDetailsEvents()
+        data class GoToDetailMedia(
+            val media: ProductMediaUi,
+            val mediaList: List<ProductMediaUi>,
+        ) : ProductDetailsEvents()
+
+        data class GoToCommentMedia(
+            val media: CommentMediaUi,
+            val mediaList: List<CommentMediaUi>,
+        ) : ProductDetailsEvents()
 
         data class GoToBrandProducts(val brandId: Long) : ProductDetailsEvents()
 
@@ -542,6 +560,7 @@ class ProductDetailsFlowViewModel @Inject constructor(
         val hideFloatingButton: Boolean = true,
         val productDetails: ProductDetailsUi = ProductDetailsUi.Empty,
         val comments: List<CommentUi> = emptyList(),
+        val commentPhotos: List<CommentMediaUi.Image> = emptyList(),
         val buttons: ProductDetailsButtonsUi = ProductDetailsButtonsUi.Empty,
         val tabs: List<ProductDetailsTabUi> = emptyList(),
         val uiState: ProductDetailsUiState = ProductDetailsUiState.Loading,

@@ -200,6 +200,11 @@
         android:label="FullScreenDetailPicturesSliderFragment" />
 
     <fragment
+        android:id="@+id/commentMediaFragment"
+        android:name="com.m.vodovoz.feature.product_comments.CommentMediaFragment"
+        android:label="CommentMediaFragment"/>
+
+    <fragment
         android:id="@+id/productCommentsFragment"
         android:name="com.m.vodovoz.feature.product_comments.ProductCommentsFragment"
         android:label="AllCommentsByProductDialogFragment"/>
