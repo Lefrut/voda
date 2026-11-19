@@ -50,8 +50,12 @@ class BuyCertificateFragment : Fragment() {
             setContent {
                 VodovozTheme {
                     val viewState by viewModel.collectAsState()
-                    
+
                     val snackbarHostState = remember { SnackbarHostState() }
+
+                    LifecycleEffect {
+                        viewModel.loadDetailsForCurrentAccount()
+                    }
 
                     when (val uiState = viewState.uiState) {
                         BuyCertificateViewModel.BuyCertificateUiState.Body -> {

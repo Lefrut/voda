@@ -29,8 +29,8 @@ fun ProductCatalogScreen(
     Column(
         modifier = Modifier.fillMaxSize()
     ) {
-        val searchQuery =
-            (viewModel.dataSource as? ProductCatalogFragment.DataSource.Search)?.query ?: ""
+        val search = viewModel.dataSource as? ProductCatalogFragment.DataSource.Search
+        val searchQuery = search?.query.orEmpty()
 
         VodovozSearchTopBar(
             value = searchQuery,
@@ -63,11 +63,16 @@ fun ProductCatalogScreen(
                 }
 
                 ProductCatalogViewModel.ProductCatalogUiState.Body -> {
+                    val showQuantityAsTitle = search != null && productsSection.title.isBlank()
                     ProductCatalogBody(
                         lazyGridState = lazyGridState,
                         banners = productsSection.banners,
-                        title = productsSection.title,
-                        productsQuantity = productsSection.productsQuantityText,
+                        title = if (showQuantityAsTitle) {
+                            productsSection.productsQuantityText
+                        } else {
+                            productsSection.title
+                        },
+                        productsQuantity = if (showQuantityAsTitle) "" else productsSection.productsQuantityText,
                         categories = productsSection.categories,
                         currentCategory = viewState.currentCategory,
                         currentSort = viewState.currentSort,

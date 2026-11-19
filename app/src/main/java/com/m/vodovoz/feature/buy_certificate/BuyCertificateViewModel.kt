@@ -4,10 +4,11 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.viewModelScope
 import com.m.vodovoz.R
+import com.m.vodovoz.common.account.AccountManager
+import com.m.vodovoz.common.resources.ResourcesProvider
 import com.m.vodovoz.ui.mvi.Event
 import com.m.vodovoz.ui.mvi.MviViewModel
 import com.m.vodovoz.ui.mvi.State
-import com.m.vodovoz.common.resources.ResourcesProvider
 import com.m.vodovoz.design_system.model.ColorfulButtonUi
 import com.m.vodovoz.design_system.model.PaymentTypeUi
 import com.m.vodovoz.design_system.model.VodovozPlaceholderUi
@@ -31,6 +32,7 @@ import com.m.vodovoz.feature.buy_certificate.model.mapToUi
 import com.m.vodovoz.feature.buy_certificate.model.toUi
 import com.m.vodovoz.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -38,15 +40,40 @@ import javax.inject.Inject
 class BuyCertificateViewModel @Inject constructor(
     private val vodovozServiceRepository: VodovozServiceRepository,
     private val resourcesProvider: ResourcesProvider,
+    private val accountManager: AccountManager,
 ) : MviViewModel<BuyCertificateViewModel.BuyCertificateState, BuyCertificateViewModel.BuyCertificateEvents>(
     BuyCertificateState()
 ) {
 
-    init {
-        fetchBuyCertificateDetails()
+    private var detailsRequest: Job? = null
+    private var requestedAccountId: Long? = null
+
+    fun loadDetailsForCurrentAccount() {
+        val accountId = accountManager.fetchAccountId()
+        if (detailsRequest == null || requestedAccountId != accountId) {
+            fetchBuyCertificateDetails(accountId)
+        }
     }
 
-    fun fetchBuyCertificateDetails() = viewModelScope.launch {
+    fun fetchBuyCertificateDetails() {
+        fetchBuyCertificateDetails(accountManager.fetchAccountId())
+    }
+
+    private fun fetchBuyCertificateDetails(accountId: Long?) {
+        if (detailsRequest?.isActive == true && requestedAccountId == accountId) return
+
+        val accountChanged = requestedAccountId != accountId
+        detailsRequest?.cancel()
+        requestedAccountId = accountId
+        detailsRequest = viewModelScope.launch {
+            updateState { state ->
+                if (accountChanged) BuyCertificateState() else state.copy(uiState = BuyCertificateUiState.Loading)
+            }
+            loadBuyCertificateDetails()
+        }
+    }
+
+    private suspend fun loadBuyCertificateDetails() {
         val buyCertificateDetailsResult =
             vodovozServiceRepository.getBuyCertificateDetails().singleResult()
 
@@ -58,7 +85,7 @@ class BuyCertificateViewModel @Inject constructor(
                 val certificates = buyCertificateDetails.certificates.mapToUi()
 
                 s.copy(
-                    uiState = if (s.uiState is BuyCertificateUiState.Success) s.uiState else BuyCertificateUiState.Body,
+                    uiState = BuyCertificateUiState.Body,
                     title = buyCertificateDetails.title,
                     certificates = certificates,
                     currentCertificate = certificates.lastOrNull() ?: s.currentCertificate,
