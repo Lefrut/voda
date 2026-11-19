@@ -108,7 +108,6 @@ fun HomeBody(
                     categoriesWithProductsSection = {
                         val topPadding = when {
                             position != HomeListItem.Positions.BOTTOM_SECTION || !showServices -> 32.dp
-                            value.title.isBlank() -> 0.dp
                             else -> 16.dp
                         }
                         HomeCategoryProducts(
