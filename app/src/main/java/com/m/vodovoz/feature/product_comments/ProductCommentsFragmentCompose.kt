@@ -102,12 +102,10 @@ class ProductCommentsFragment : Fragment() {
 
 
                                         DisposableEffect(Unit) {
-                                            tabManager.hideTab()
                                             insetsVisibilityState.consumeStatusBarInsets(false)
 
                                             onDispose {
                                                 insetsVisibilityState.consumeStatusBarInsets(true)
-                                                tabManager.showTab()
                                             }
                                         }
 
