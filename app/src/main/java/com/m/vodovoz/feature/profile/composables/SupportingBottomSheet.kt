@@ -57,7 +57,7 @@ fun SupportingBottomSheet(
             modifier = Modifier.padding(top = 20.dp),
             title = data.title,
             description = data.description,
-            onCopyClick = onCopyClick
+            onCopyClick = onCopyClick.takeIf { data.copyTitle }
         )
 
         SupportingBottomSheetBody(
@@ -72,7 +72,7 @@ private fun SupportingBottomSheetTitle(
     modifier: Modifier = Modifier,
     title: String,
     description: String,
-    onCopyClick: (String) -> Unit,
+    onCopyClick: ((String) -> Unit)?,
 ) {
     Row(
         modifier = modifier.padding(16.dp),
@@ -85,21 +85,25 @@ private fun SupportingBottomSheetTitle(
                 color = MaterialTheme.colorScheme.onBackground,
                 style = MaterialTheme.typography.bodyMedium
             )
-            Text(
-                text = description,
-                color = MaterialTheme.colorScheme.surfaceTint,
-                style = MaterialTheme.typography.labelSmall
+            if (description.isNotEmpty()) {
+                Text(
+                    text = description,
+                    color = MaterialTheme.colorScheme.surfaceTint,
+                    style = MaterialTheme.typography.labelSmall
+                )
+            }
+        }
+        if (onCopyClick != null) {
+            Icon(
+                painter = painterResource(id = R.drawable.ic_copy),
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier
+                    .size(24.dp)
+                    .clip(MaterialTheme.shapes.small)
+                    .clickable(onClick = { onCopyClick(title) })
             )
         }
-        Icon(
-            painter = painterResource(id = R.drawable.ic_copy),
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.primary,
-            modifier = Modifier
-                .size(24.dp)
-                .clip(MaterialTheme.shapes.small)
-                .clickable(onClick = { onCopyClick(title) })
-        )
     }
 }
 
@@ -120,14 +124,16 @@ private fun SupportingBottomSheetBody(
                     .padding(16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                AsyncImage(
-                    model = item.imageUrl,
-                    contentDescription = null,
-                    modifier = Modifier
-                        .padding(end = 16.dp)
-                        .size(24.dp),
-                    contentScale = ContentScale.FillBounds
-                )
+                if (item.imageUrl.isNotEmpty()) {
+                    AsyncImage(
+                        model = item.imageUrl,
+                        contentDescription = null,
+                        modifier = Modifier
+                            .padding(end = 16.dp)
+                            .size(24.dp),
+                        contentScale = ContentScale.FillBounds
+                    )
+                }
 
                 Text(
                     text = item.name,

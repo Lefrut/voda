@@ -10,7 +10,6 @@ import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.unit.dp
 import com.m.vodovoz.design_system.model.ColorfulButtonUi
 
-@Suppress("NonSkippableComposable")
 @Composable
 fun VodovozButtonsColumn(
     buttons: List<ColorfulButtonUi>,

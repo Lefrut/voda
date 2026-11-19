@@ -78,6 +78,11 @@ sealed interface ButtonAction : BaseVodovozAction {
     data class Id(val id: Int) : ButtonAction
 }
 
+enum class SearchAction : BaseVodovozAction {
+    AboutPayment,
+    Contacts,
+}
+
 fun vodovozActionOf(action: String?, id: String?, blockId: Long): VodovozAction? {
     val actionName = action ?: return null
     val actionId = id.orEmpty()

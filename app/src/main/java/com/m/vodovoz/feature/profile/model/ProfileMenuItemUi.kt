@@ -35,6 +35,7 @@ data class ProfileChatsPopupWindowUi(
     val title: String,
     val description: String,
     val menu: List<ProfileChatItemUi>,
+    val copyTitle: Boolean = true,
 ){
     companion object{
         val Empty = ProfileChatsPopupWindowUi("","", emptyList())

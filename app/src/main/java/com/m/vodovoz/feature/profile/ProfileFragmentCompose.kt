@@ -11,7 +11,11 @@ import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
@@ -46,6 +50,7 @@ import com.m.vodovoz.design_system.composables.placeholders.NetworkErrorPlacehol
 import com.m.vodovoz.design_system.composables.placeholders.VodovozPlaceholder
 import com.m.vodovoz.design_system.composables.snackbar.VodovozSnackBarVisuals
 import com.m.vodovoz.design_system.effects.LifecycleEffect
+import com.m.vodovoz.feature.profile.composables.SupportingBottomSheet
 import com.m.vodovoz.feature.profile.navigation.ProfileChatsNavigator
 import com.m.vodovoz.ui.insets.InsetsVisibilityState
 import com.m.vodovoz.ui.mvi.collectAsState
@@ -97,6 +102,15 @@ class ProfileFragment : Fragment() {
                 VodovozTheme {
                     val viewState by viewModel.collectAsState()
 
+                    var openContacts by rememberSaveable {
+                        mutableStateOf(arguments?.getBoolean(ProfileMainNavigator.OPEN_CONTACTS_ARG) == true)
+                    }
+                    LaunchedEffect(openContacts, viewState.uiState) {
+                        if (openContacts && viewState.uiState != ProfileFlowViewModel.ProfileUiState.Loading) {
+                            viewModel.showContacts()
+                            openContacts = false
+                        }
+                    }
 
                     when (val uiState = viewState.uiState) {
                         ProfileFlowViewModel.ProfileUiState.Loading -> {
@@ -142,6 +156,15 @@ class ProfileFragment : Fragment() {
                         ProfileFlowViewModel.ProfileUiState.Error -> {
                             NetworkErrorPlaceholder { viewModel.fetchProfileDetails() }
                         }
+                    }
+
+                    if (viewState.showSupportingBS) {
+                        SupportingBottomSheet(
+                            data = viewState.currentSupportingBSData,
+                            onItemClick = { viewModel.navigateByChatItem(it) },
+                            onCopyClick = { viewModel.copyUserId(it) },
+                            onDismissRequest = viewModel::closeSupportingBottomSheet,
+                        )
                     }
                 }
             }

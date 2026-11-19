@@ -15,6 +15,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import com.m.vodovoz.R
 import com.m.vodovoz.common.cookie.CookieManager
@@ -34,6 +36,9 @@ import com.m.vodovoz.feature.home.model.CategoryUi
 import com.m.vodovoz.ui.mvi.collectAsState
 import com.m.vodovoz.util.extensions.shareText
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 
@@ -74,7 +79,6 @@ class ProductCatalogFragment : Fragment() {
             }
     }
 
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -91,7 +95,6 @@ class ProductCatalogFragment : Fragment() {
 
                     val lazyGridState = rememberLazyGridState()
                     val context = LocalContext.current
-
 
                     when (val uiState = viewState.uiState) {
                         is ProductCatalogViewModel.ProductCatalogUiState.ForAdults -> {
@@ -112,6 +115,19 @@ class ProductCatalogFragment : Fragment() {
                                 viewState = viewState,
                                 lazyGridState = lazyGridState
                             )
+                        }
+                    }
+
+                    LifecycleEffect {
+                        val navController = findNavController()
+                        val catalogEntry = navController.getBackStackEntry(R.id.productCatalogFragment)
+                        catalogEntry.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                            val action = viewModel.state.map { it.searchAction }.filterNotNull().first()
+                            if (navController.currentBackStackEntry == catalogEntry &&
+                                navController.popBackStack()
+                            ) {
+                                action.activate(navController)
+                            }
                         }
                     }
 

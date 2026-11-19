@@ -128,16 +128,61 @@ class ProfileFlowViewModel @Inject constructor(
         val popupWindow = menuItem.popupWindow
 
         if (popupWindow != null) {
-            updateState { s ->
-                s.copy(
-                    showSupportingBS = true,
-                    currentSupportingBSData = popupWindow
-                )
-            }
+            showSupportingBottomSheet(popupWindow)
         } else {
             sendEvent(ProfileEvents.GoByMenuItemId(menuItem.id))
         }
         Analytics.reportProfileEvent(menuItem.text)
+    }
+
+    fun showContacts() {
+        val state = stateSnapshot
+        val profileContacts = if (state.uiState == ProfileUiState.Profile) {
+            state.normalMenu.firstOrNull { it.id == "kontakty" }?.popupWindow
+                ?: state.normalMenu.firstNotNullOfOrNull { it.popupWindow }
+        } else {
+            null
+        }
+        showSupportingBottomSheet(profileContacts ?: publicContacts())
+    }
+
+    private fun publicContacts(): ProfileChatsPopupWindowUi {
+        val config = siteStateManager.siteStateSnapshot
+        val contacts = buildList {
+            if (config.callPhoneNumber.isNotBlank()) {
+                add(
+                    ProfileChatItemUi(
+                        id = "telefon",
+                        name = config.callPhoneNumber,
+                        imageUrl = "",
+                        navigationData = config.callPhoneNumber,
+                    )
+                )
+            }
+            if (config.jivoChat.isActive && config.jivoChat.url.isNotBlank()) {
+                add(
+                    ProfileChatItemUi(
+                        id = "chat",
+                        name = resourcesProvider.getString(R.string.support_chat),
+                        imageUrl = "",
+                        navigationData = config.jivoChat.url,
+                    )
+                )
+            }
+        }
+
+        return ProfileChatsPopupWindowUi(
+            title = resourcesProvider.getString(R.string.contact_us),
+            description = "",
+            menu = contacts,
+            copyTitle = false,
+        )
+    }
+
+    private fun showSupportingBottomSheet(data: ProfileChatsPopupWindowUi) {
+        updateState { s ->
+            s.copy(showSupportingBS = true, currentSupportingBSData = data)
+        }
     }
 
     fun showAdvertisingBottomSheet(advertising: AboutAdvertisingUi) = viewModelScope.launch {

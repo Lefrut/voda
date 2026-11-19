@@ -17,6 +17,8 @@ import com.m.vodovoz.data.vodovoz_service.mappers.mapToDomain
 import com.m.vodovoz.data.vodovoz_service.mappers.mapToFloatingPromoButtons
 import com.m.vodovoz.data.vodovoz_service.mappers.toPagingSourceData
 import com.m.vodovoz.data.vodovoz_service.mappers.toDomain
+import com.m.vodovoz.data.vodovoz_service.mappers.toSearchPage
+import com.m.vodovoz.data.vodovoz_service.mappers.toSearchResult
 import com.m.vodovoz.data.vodovoz_service.mappers.toProductRecommendationsMeta
 import com.m.vodovoz.data.vodovoz_service.model.BrandSectionDTO
 import com.m.vodovoz.data.vodovoz_service.model.ProductCommentsDTO
@@ -79,6 +81,7 @@ import com.m.vodovoz.domain.general.model.product.ProductModel
 import com.m.vodovoz.domain.general.model.product.ProductRecommendationsMetaModel
 import com.m.vodovoz.domain.general.model.product.ProductsSectionModel
 import com.m.vodovoz.domain.general.model.product.SearchRecommendationsModel
+import com.m.vodovoz.domain.general.model.product.SearchResult
 import com.m.vodovoz.domain.general.model.product.SectionModel
 import com.m.vodovoz.domain.general.model.product.SortModel
 import com.m.vodovoz.domain.general.model.product.SuperTopModel
@@ -1414,41 +1417,24 @@ class VodovozServiceRepositoryImpl @Inject constructor(
     }
 
 
-    override fun getSearchProductsPaged(
+    override fun getSearchProductsPagingResult(
         query: String,
         categoryId: Int,
         sort: SortModel,
-    ): Flow<PagingData<ProductModel>> {
-        return VodovozPagerFactory.getFlow(
+    ): VodovozPagingResult<ProductModel, SearchResult> {
+        return VodovozPagerFactory.getResult(
             executor = canBeEmptyExecutor,
-
             request = { page, _ ->
                 vodovozService.getSearchProducts(
                     query = query,
                     page = page,
-                    categoryId = if (categoryId < 0) null else categoryId,
+                    categoryId = categoryId.takeIf { it >= 0 },
                     sort = sort.value,
-                    order = sort.order
+                    order = sort.order,
                 )
             },
-            mapper = { dto -> dto.toPagingSourceData() },
-        )
-    }
-
-    override fun getSearchProducts(
-        query: String,
-        categoryId: Int,
-    ): Flow<Result<ProductsSectionModel>> {
-        return executeCanEmptyRequest(
-            request = {
-                vodovozService.getSearchProducts(
-                    query = query,
-                    categoryId = categoryId.takeIf { it > -1 }
-                )
-            },
-            toDomain = {
-                toDomain()
-            },
+            mapper = { dto -> dto.toSearchPage() },
+            metaMapper = { dto -> dto.toSearchResult() },
         )
     }
 

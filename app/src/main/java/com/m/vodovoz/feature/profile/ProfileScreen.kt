@@ -35,7 +35,6 @@ import com.m.vodovoz.feature.profile.composables.ProfileCardsRow
 import com.m.vodovoz.feature.profile.composables.ProfileMenuColumn
 import com.m.vodovoz.feature.profile.composables.ProfileUserInfoRow
 import com.m.vodovoz.feature.profile.composables.ProfileWalletItemsRow
-import com.m.vodovoz.feature.profile.composables.SupportingBottomSheet
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -144,22 +143,6 @@ fun ProfileScreen(
         AdvertisingInfoBottomSheet(advertising = viewState.currentAdvertising) {
             viewModel.closeAdvertisingBottomSheet()
         }
-    }
-
-    if (viewState.showSupportingBS) {
-        SupportingBottomSheet(
-            data = viewState.currentSupportingBSData,
-            onItemClick = { chatItem ->
-                viewModel.navigateByChatItem(chatItem)
-            },
-            onCopyClick = { text ->
-                viewModel.copyUserId(text)
-            },
-            onDismissRequest = {
-                viewModel.closeSupportingBottomSheet()
-            }
-        )
-
     }
 
     val currentBalanceBSData = viewState.currentTextBSData

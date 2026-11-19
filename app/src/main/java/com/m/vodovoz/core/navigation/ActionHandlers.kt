@@ -10,6 +10,7 @@ import com.m.vodovoz.common.model.BaseVodovozAction
 import com.m.vodovoz.common.model.ButtonAction
 import com.m.vodovoz.common.model.DataAllAction
 import com.m.vodovoz.common.model.GlobalAppLinks
+import com.m.vodovoz.common.model.SearchAction
 import com.m.vodovoz.common.model.VodovozAction
 import com.m.vodovoz.common.tab.TabManager
 import com.m.vodovoz.core.analytics.Analytics
@@ -83,6 +84,14 @@ fun BaseVodovozAction.activate(
 
         DataAllAction.Unknown -> {
 
+        }
+
+        SearchAction.AboutPayment -> {
+            ProfileMainNavigator.navigateToAboutPayment(navController)
+        }
+
+        SearchAction.Contacts -> {
+            ProfileMainNavigator.navigateToContacts(navController)
         }
 
         is ButtonAction.Id -> {

@@ -284,6 +284,7 @@
     <string name="add_address_error">Не удалось создать адрес, попробуйте снова!</string>
     <string name="update_address_error">Не удалось изменить адрес, попробуйте снова!</string>
     <string name="contact_us" translatable="false">Связаться с нами</string>
+    <string name="support_chat">Чат поддержки</string>
     <string name="about_store" translatable="false">О магазине</string>
     <string name="update">Обновить</string>
     <string name="update_is_downloaded">Обновление скачано</string>

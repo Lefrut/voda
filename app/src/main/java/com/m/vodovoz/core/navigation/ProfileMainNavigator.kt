@@ -1,7 +1,8 @@
 package com.m.vodovoz.core.navigation
 
-import android.content.Context
+import androidx.core.os.bundleOf
 import androidx.navigation.NavController
+import com.m.vodovoz.R
 import com.m.vodovoz.common.model.GlobalAppLinks
 import com.m.vodovoz.feature.addresses.model.AddressScreenTypeUi
 
@@ -43,11 +44,7 @@ data object ProfileMainNavigator {
             }
 
             ABOUT_PAYMENT_ROUTE -> {
-                val aboutPaymentLink = GlobalAppLinks.aboutPayment
-                navController.navigateToWebView(
-                    aboutPaymentLink.url,
-                    aboutPaymentLink.title
-                )
+                navigateToAboutPayment(navController)
             }
 
             SETTINGS_NOTIFICATIONS_ROUTE -> {
@@ -64,7 +61,17 @@ data object ProfileMainNavigator {
         }
     }
 
+    fun navigateToAboutPayment(navController: NavController) {
+        with(GlobalAppLinks.aboutPayment) {
+            navController.navigateToWebView(url, title)
+        }
+    }
 
+    fun navigateToContacts(navController: NavController) {
+        navController.navigate(R.id.profileFragment, bundleOf(OPEN_CONTACTS_ARG to true))
+    }
+
+    const val OPEN_CONTACTS_ARG = "openContacts"
     private const val CHANGE_PASSWORD_ROUTE = "parol"
     private const val CERTIFICATE_ACTIVATION_ROUTE = "kodslova"
     private const val ORDER_HISTORY_ROUTE = "historyzakaz"

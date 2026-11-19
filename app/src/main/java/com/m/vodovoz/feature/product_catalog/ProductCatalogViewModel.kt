@@ -36,7 +36,9 @@ import com.m.vodovoz.domain.general.model.product.PriceModel
 import com.m.vodovoz.domain.general.model.product.ProductModel
 import com.m.vodovoz.domain.general.model.product.ProductsSectionModel
 import com.m.vodovoz.domain.general.model.product.ProductsSectionUi
+import com.m.vodovoz.domain.general.model.product.SearchResult
 import com.m.vodovoz.domain.general.model.product.SectionModel
+import com.m.vodovoz.domain.general.model.product.SortModel
 import com.m.vodovoz.domain.general.model.product.toUi
 import com.m.vodovoz.domain.general.respository.UserPreferencesRepository
 import com.m.vodovoz.domain.general.respository.VodovozServiceRepository
@@ -53,7 +55,10 @@ import com.m.vodovoz.ui.paging.emptyCombinedLoadStates
 import com.m.vodovoz.ui.paging.errorOrNull
 import com.m.vodovoz.util.extensions.singleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -77,6 +82,7 @@ class ProductCatalogViewModel @Inject constructor(
 ) {
 
     val dataSource = savedState.get<DataSource>("dataSource") ?: DataSource.Missing
+    private var searchPagingJob: Job? = null
 
     init {
         setupScreen().invokeOnCompletion {
@@ -222,21 +228,7 @@ class ProductCatalogViewModel @Inject constructor(
             }
 
             is DataSource.Search -> {
-                fetchProductsData(
-                    fetchProductsSection = {
-                        vodovozServiceRepository.getSearchProducts(
-                            dataSource.query,
-                            categoryId
-                        ).singleResult()
-                    },
-                    fetchPagedProductsFlow = {
-                        vodovozServiceRepository.getSearchProductsPaged(
-                            dataSource.query,
-                            categoryId,
-                            sortModel
-                        )
-                    }
-                )
+                fetchSearchProducts(dataSource.query, categoryId, sortModel)
             }
 
             is DataSource.Category -> {
@@ -308,15 +300,15 @@ class ProductCatalogViewModel @Inject constructor(
 
 
     fun refresh() = viewModelScope.launch {
-        if (stateSnapshot.uiState is ProductCatalogUiState.Loading) return@launch
+        if (stateSnapshot.uiState is ProductCatalogUiState.Loading || stateSnapshot.showRefreshIndicator) return@launch
         updateState { s ->
             s.copy(showRefreshIndicator = true)
         }
 
         fetchProductListData().join()
 
-        updateState { s ->
-            s.copy(showRefreshIndicator = false)
+        if (dataSource !is DataSource.Search) {
+            updateState { s -> s.copy(showRefreshIndicator = false) }
         }
     }
 
@@ -337,100 +329,120 @@ class ProductCatalogViewModel @Inject constructor(
     }
 
 
+    private fun fetchSearchProducts(query: String, categoryId: Int, sort: SortModel) {
+        val previousJob = searchPagingJob
+        searchPagingJob = viewModelScope.launch {
+            previousJob?.cancelAndJoin()
+            val canViewAdultProducts = userPreferencesRepository.canViewAdultProducts.firstOrNull() ?: false
+            val result = vodovozServiceRepository.getSearchProductsPagingResult(query, categoryId, sort)
+            val collection = launch { presentProducts(result.flow) }
+            val meta = result.meta.first { it.firstPageData != null || it.firstPageError != null }
+
+            when (val firstPage = meta.firstPageData) {
+                is SearchResult.Products -> applyProductsSection(firstPage.section.toUi(), canViewAdultProducts)
+                is SearchResult.Redirect -> {
+                    collection.cancelAndJoin()
+                    updateState { s -> s.copy(searchAction = firstPage.action) }
+                }
+
+                null -> {
+                    collection.cancelAndJoin()
+                    applyProductsError(requireNotNull(meta.firstPageError))
+                }
+            }
+            updateState { s -> s.copy(showRefreshIndicator = false) }
+        }
+    }
+
     private suspend fun fetchProductsData(
         fetchProductsSection: suspend () -> Result<ProductsSectionModel>,
         fetchPagedProductsFlow: () -> Flow<PagingData<ProductModel>>,
     ) {
-
-
-        val canViewAdultProducts =
-            userPreferencesRepository.canViewAdultProducts.firstOrNull() ?: false
+        val canViewAdultProducts = userPreferencesRepository.canViewAdultProducts.firstOrNull() ?: false
         val categoriesTreeJob = fetchCategoriesTree(stateSnapshot.currentCategory.id.toLong())
-        val productsSectionResult =
-            fetchProductsSection().map { productsSectionModel ->
-                productsSectionModel.toUi()
+
+        fetchProductsSection().onSuccess { section ->
+            categoriesTreeJob.join()
+            applyProductsSection(section.toUi(), canViewAdultProducts)
+            viewModelScope.launch { presentProducts(fetchPagedProductsFlow()) }
+        }.onFailure(::applyProductsError)
+    }
+
+    private suspend fun presentProducts(products: Flow<PagingData<ProductModel>>) {
+        products.map { page -> page.map { it.toUi() } }.collectPagingData()
+    }
+
+    private fun applyProductsSection(productsSection: ProductsSectionUi, canViewAdultProducts: Boolean) {
+        updateState { state ->
+
+            val childOrSiblingCategories = with(stateSnapshot) {
+                categoryTree.getChildrenOrSiblings(currentCategory.id).allCategories()
             }
 
-        productsSectionResult.onSuccess { productsSection ->
+            val categoryTreeList: List<CategoryUi> = buildList {
+                addAll(childOrSiblingCategories.map { category -> category.toCategory() })
+            }
 
-            categoriesTreeJob.join()
+            val categories = if (dataSource is DataSource.Category) {
+                categoryTreeList
+            } else {
+                productsSection.categories.takeIf { it.size > 1 } ?: emptyList()
+            }
 
-            updateState { state ->
-
-                val childOrSiblingCategories = with(stateSnapshot) {
-                    categoryTree.getChildrenOrSiblings(currentCategory.id).allCategories()
-                }
-
-                val categoryTreeList: List<CategoryUi> = buildList {
-                    addAll(childOrSiblingCategories.map { category -> category.toCategory() })
-                }
-
-                val categories = if (dataSource is DataSource.Category) {
-                    categoryTreeList
+            state.copy(
+                productsSection = productsSection.copy(categories = categories),
+                uiState = if (productsSection.forAdults != null && !canViewAdultProducts) {
+                    ProductCatalogUiState.ForAdults(productsSection.forAdults)
                 } else {
-                    productsSection.categories.takeIf { it.size > 1 } ?: emptyList()
-                }
+                    ProductCatalogUiState.Body
+                },
+                currentSort = state.currentSort.takeIf { sort ->
+                    sort != SortUi.Empty
+                } ?: productsSection.sorting.firstOrNull() ?: SortUi.Empty,
+                currentBottomSheetCategory = state.currentCategory.toParentCategory(),
+                categoryTree = if (dataSource !is DataSource.Category) productsSection.categories.map { categoryUi ->
+                    categoryUi.toParentCategory()
+                } else state.categoryTree,
+                showShare = "${productsSection.share.url}${productsSection.share.text}".isNotBlank()
+            )
+        }
+    }
 
-                state.copy(
-                    productsSection = productsSection.copy(categories = categories),
-                    uiState = if (productsSection.forAdults != null && !canViewAdultProducts) {
-                        ProductCatalogUiState.ForAdults(productsSection.forAdults)
-                    } else {
-                        ProductCatalogUiState.Body
-                    },
-                    currentSort = state.currentSort.takeIf { sort ->
-                        sort != SortUi.Empty
-                    } ?: productsSection.sorting.firstOrNull() ?: SortUi.Empty,
-                    currentBottomSheetCategory = state.currentCategory.toParentCategory(),
-                    categoryTree = if (dataSource !is DataSource.Category) productsSection.categories.map { categoryUi ->
-                        categoryUi.toParentCategory()
-                    } else state.categoryTree,
-                    showShare = "${productsSection.share.url}${productsSection.share.text}".isNotBlank()
+    private fun applyProductsError(t: Throwable) {
+        val (uiState, extraItems) = when (t) {
+            is EmptyResultException -> t.placeholder?.let {
+                val placeholder = it.toUi()
+                ProductCatalogUiState.Empty(placeholder) to (placeholder.productsSection?.items
+                    ?: emptyList())
+            } ?: (ProductCatalogUiState.Error to emptyList())
+
+            else -> ProductCatalogUiState.Error to emptyList()
+        }
+
+
+        if (uiState is ProductCatalogUiState.Empty && stateSnapshot.productsSection == ProductsSectionUi.Empty) {
+            updateState { s ->
+                s.copy(
+                    uiState = uiState,
+                    items = extraItems
                 )
             }
-
-            viewModelScope.launch {
-                fetchPagedProductsFlow().map { pagingData ->
-                    pagingData.map { productModel -> productModel.toUi() }
-                }.collectPagingData()
+        } else if (stateSnapshot.productsSection != ProductsSectionUi.Empty) {
+            updateState { s ->
+                s.copy(
+                    loadStates = s.loadStates.copy(
+                        refresh = LoadState.Error(t)
+                    ),
+                    uiState = ProductCatalogUiState.Body,
+                    productsSection = s.productsSection.copy(
+                        productsQuantityText = ""
+                    ),
+                    items = extraItems
+                )
             }
-
-        }.onFailure { t ->
-            val (uiState, extraItems) = when (t) {
-                is EmptyResultException -> t.placeholder?.let {
-                    val placeholder = it.toUi()
-                    ProductCatalogUiState.Empty(placeholder) to (placeholder.productsSection?.items
-                        ?: emptyList())
-                } ?: (ProductCatalogUiState.Error to emptyList())
-
-                else -> ProductCatalogUiState.Error to emptyList()
-            }
-
-
-            if (uiState is ProductCatalogUiState.Empty && stateSnapshot.productsSection == ProductsSectionUi.Empty) {
-                updateState { s ->
-                    s.copy(
-                        uiState = uiState,
-                        items = extraItems
-                    )
-                }
-            } else if (stateSnapshot.productsSection != ProductsSectionUi.Empty) {
-                updateState { s ->
-                    s.copy(
-                        loadStates = s.loadStates.copy(
-                            refresh = LoadState.Error(t)
-                        ),
-                        uiState = ProductCatalogUiState.Body,
-                        productsSection = s.productsSection.copy(
-                            productsQuantityText = ""
-                        ),
-                        items = extraItems
-                    )
-                }
-            } else {
-                updateState { s ->
-                    s.copy(uiState = uiState)
-                }
+        } else {
+            updateState { s ->
+                s.copy(uiState = uiState)
             }
         }
     }
@@ -657,6 +669,7 @@ class ProductCatalogViewModel @Inject constructor(
         val showShare: Boolean = false,
         val showAdvertisingBS: Boolean = false,
         val currentAdvertising: AboutAdvertisingUi = AboutAdvertisingUi.Empty,
+        val searchAction: BaseVodovozAction? = null,
     ) : PagingState<ProductUi, ProductCatalogState>() {
 
         override fun copyPagingState(

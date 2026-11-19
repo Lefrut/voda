@@ -317,4 +317,28 @@
             app:nullable="true"
             android:defaultValue="@null" />
     </fragment>
+    <fragment
+        android:id="@+id/changePasswordFragment"
+        android:name="com.m.vodovoz.feature.profile.change_password.ChangePasswordFragment"
+        android:label="ChangePasswordFragment" />
+
+    <fragment
+        android:id="@+id/certificateActivationFragment"
+        android:name="com.m.vodovoz.feature.certificate_activation.CertificateActivationFragment"
+        android:label="CertificateActivationFragment" />
+
+    <fragment
+        android:id="@+id/waitFeedbackProductsFragment"
+        android:name="com.m.vodovoz.feature.wait_feedback_products.WaitFeedbackProductsFragment"
+        android:label="WaitFeedbackProductsFragment" />
+
+    <fragment
+        android:id="@+id/loginByPhoneCodeFragment"
+        android:name="com.m.vodovoz.feature.auth.login_by_phone_code.LoginByPhoneCodeFragment"
+        android:label="LoginByEmailFragment"/>
+
+    <fragment
+        android:id="@+id/recoverPasswordFragment"
+        android:name="com.m.vodovoz.feature.auth.recover_password.RecoverPasswordFragment"
+        android:label="RecoverPasswordFragment" />
 </navigation>

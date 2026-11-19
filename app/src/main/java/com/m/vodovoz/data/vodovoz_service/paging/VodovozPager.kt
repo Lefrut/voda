@@ -27,6 +27,7 @@ data object VodovozPagerFactory {
             pageCount: Int,
             endOfPaginationReached: Boolean,
         ) -> Unit = { _, _, _, _, _ -> },
+        noinline onPageError: (page: Int, error: Throwable) -> Unit = { _, _ -> },
     ): Pager<Int, Item> {
         return Pager(
             config = PagingConfig(5),
@@ -37,6 +38,7 @@ data object VodovozPagerFactory {
                     request = request,
                     mapper = mapper,
                     onPageLoaded = onPageLoaded,
+                    onPageError = onPageError,
                 )
             }
         )
@@ -62,19 +64,22 @@ data object VodovozPagerFactory {
             request = request,
             mapper = mapper,
             onPageLoaded = { page, response, _, pageCount, endOfPaginationReached ->
+                val firstPage = if (page == 1) response.data?.let(metaMapper) else null
                 pagingMeta.update { current ->
                     current.copy(
-                        firstPageData = if (page == 1) {
-                            response.data?.let(metaMapper)
-                        } else {
-                            current.firstPageData
-                        },
+                        firstPageData = if (page == 1) firstPage else current.firstPageData,
+                        firstPageError = if (page == 1) null else current.firstPageError,
                         pagesInfo = VodovozPagesInfo(
                             currentPage = page,
                             pageCount = pageCount,
                             endOfPaginationReached = endOfPaginationReached
                         )
                     )
+                }
+            },
+            onPageError = { page, error ->
+                if (page == 1) {
+                    pagingMeta.update { it.copy(firstPageData = null, firstPageError = error) }
                 }
             }
         )

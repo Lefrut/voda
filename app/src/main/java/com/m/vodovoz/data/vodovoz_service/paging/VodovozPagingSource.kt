@@ -21,6 +21,7 @@ class VodovozPagingSource<T : Any, Item : Any>(
         pageCount: Int,
         endOfPaginationReached: Boolean,
     ) -> Unit = { _, _, _, _, _ -> },
+    private val onPageError: (page: Int, error: Throwable) -> Unit = { _, _ -> },
 ) : PagingSource<Int, Item>() {
 
     private companion object {
@@ -32,56 +33,40 @@ class VodovozPagingSource<T : Any, Item : Any>(
     @OptIn(ExperimentalStdlibApi::class)
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, Item> {
         val page = params.key ?: 1
-        var loadedResponse: VodovozResponseDTO<T>? = null
-        var loadedPagingData: PagingSourceData<Item>? = null
-
         val result = executor.executeRequestImpl(
             request = { request(page, params.loadSize) },
             mapper = { response ->
-
                 maxPageCount = response.navigation?.totalPages?.takeIf { it > 0 } ?: maxPageCount
-
-                mapper(response.data!!).also { pagingData ->
-                    loadedResponse = response
-                    loadedPagingData = pagingData
+                val pagingData = mapper(requireNotNull(response.data))
+                val pageCount = maxPageCount ?: pagingData.pageCount
+                val nextKey = if (pagingData.items.size >= MIN_ITEMS_FOR_NEXT_PAGE && page < pageCount) {
+                    page + 1
+                } else {
+                    null
                 }
-            },
-            type = type.javaType
-        ).singleOrNull()
 
-        if (result == null) {
-            return LoadResult.Error(NoSuchElementException("No elements received from the flow"))
-        }
-
-        result.onSuccess { pagingData ->
-            val items = pagingData.items
-            val pageCount = maxPageCount ?: pagingData.pageCount
-            val nextKey = if (items.size >= MIN_ITEMS_FOR_NEXT_PAGE && page < pageCount) {
-                page + 1
-            } else {
-                null
-            }
-            loadedResponse?.let { response ->
                 onPageLoaded(
                     page,
                     response,
-                    loadedPagingData ?: pagingData,
+                    pagingData,
                     pageCount,
                     nextKey == null
                 )
-            }
 
-            return LoadResult.Page(
-                data = items,
-                prevKey = if (page == 1) null else page - 1,
-                nextKey = nextKey
-            )
-        }.onFailure { throwable ->
+                LoadResult.Page(
+                    data = pagingData.items,
+                    prevKey = if (page == 1) null else page - 1,
+                    nextKey = nextKey
+                )
+            },
+            type = type.javaType
+        ).singleOrNull() ?: Result.failure(NoSuchElementException("No elements received from the flow"))
+
+        return result.getOrElse { throwable ->
+            onPageError(page, throwable)
             debugLog { throwable.stackTraceToString() }
-            return LoadResult.Error(throwable)
+            LoadResult.Error(throwable)
         }
-
-        return LoadResult.Invalid()
     }
 
     override fun getRefreshKey(state: PagingState<Int, Item>): Int? {

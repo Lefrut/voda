@@ -43,6 +43,7 @@ import com.m.vodovoz.domain.general.model.product.ProductModel
 import com.m.vodovoz.domain.general.model.product.ProductRecommendationsMetaModel
 import com.m.vodovoz.domain.general.model.product.ProductsSectionModel
 import com.m.vodovoz.domain.general.model.product.SearchRecommendationsModel
+import com.m.vodovoz.domain.general.model.product.SearchResult
 import com.m.vodovoz.domain.general.model.product.SectionModel
 import com.m.vodovoz.domain.general.model.product.SortModel
 import com.m.vodovoz.domain.general.model.product.SuperTopModel
@@ -379,13 +380,11 @@ interface VodovozServiceRepository {
         filters: FiltersModel,
     ): Flow<PagingData<ProductModel>>
 
-    fun getSearchProductsPaged(
+    fun getSearchProductsPagingResult(
         query: String,
         categoryId: Int = -1,
         sort: SortModel = SortModel.Empty,
-    ): Flow<PagingData<ProductModel>>
-
-    fun getSearchProducts(query: String, categoryId: Int): FlowResult<ProductsSectionModel>
+    ): VodovozPagingResult<ProductModel, SearchResult>
 
     fun getBarCodeProducts(barCode: String): FlowResult<List<ProductModel>>
 

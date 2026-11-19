@@ -13,6 +13,7 @@ data class VodovozPagesInfo(
 data class VodovozPagingMeta<Meta>(
     val firstPageData: Meta? = null,
     val pagesInfo: VodovozPagesInfo = VodovozPagesInfo(),
+    val firstPageError: Throwable? = null,
 )
 
 class VodovozPagingResult<Item : Any, Meta>(
