@@ -37,6 +37,7 @@ import com.m.vodovoz.design_system.model.ProductUi
 import com.m.vodovoz.design_system.model.PromotionUi
 import com.m.vodovoz.design_system.model.StoryUi
 import com.m.vodovoz.feature.home.model.HomeItem
+import com.m.vodovoz.feature.bottom.services.model.ServiceUi
 import com.m.vodovoz.feature.home.model.HomeListItem
 import com.m.vodovoz.feature.home.model.HomeOrderUi
 import com.m.vodovoz.feature.home.model.MenuItemUi
@@ -57,12 +58,15 @@ fun HomeBody(
     onProductCardClick: (ProductUi) -> Unit,
     onProductLike: (ProductUi) -> Unit,
     onPromotionClick: (PromotionUi) -> Unit,
+    onServiceClick: (ServiceUi) -> Unit,
     onAboutAdvertisingClick: (AboutAdvertisingUi) -> Unit,
     onBannerClick: (BannerUi) -> Unit,
     onIncrementProductToCart: (ProductUi) -> Unit,
     onDecrementProductToCart: (ProductUi) -> Unit,
     onProductAnalogsClick: (ProductUi) -> Unit,
 ) {
+    val showServices = items.any { it is HomeListItem.Services && it.value.items.isNotEmpty() }
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -102,8 +106,13 @@ fun HomeBody(
                         )
                     },
                     categoriesWithProductsSection = {
+                        val topPadding = when {
+                            position != HomeListItem.Positions.BOTTOM_SECTION || !showServices -> 32.dp
+                            value.title.isBlank() -> 0.dp
+                            else -> 16.dp
+                        }
                         HomeCategoryProducts(
-                            modifier = Modifier.padding(top = 32.dp),
+                            modifier = Modifier.padding(top = topPadding),
                             onShowAllClick = onShowAllClick,
                             categoryWithProductsId = currentCategoryId,
                             sectionCategoriesWithProducts = value,
@@ -150,6 +159,14 @@ fun HomeBody(
                             onPromotionClick = onPromotionClick,
                             sectionPromotions = value,
                             onAboutAdvertisingClick = onAboutAdvertisingClick
+                        )
+                    },
+                    services = {
+                        HomeServices(
+                            modifier = Modifier.padding(top = 32.dp),
+                            section = value,
+                            onShowAllClick = onShowAllClick,
+                            onServiceClick = onServiceClick,
                         )
                     },
                     stories = {

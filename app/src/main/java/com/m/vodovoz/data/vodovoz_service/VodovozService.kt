@@ -61,6 +61,7 @@ import com.m.vodovoz.data.vodovoz_service.model.product_details.ProductDetailsDT
 import com.m.vodovoz.data.vodovoz_service.model.profile.BonusesPopupWindowDTO
 import com.m.vodovoz.data.vodovoz_service.model.profile.ProfileDetailsDTO
 import com.m.vodovoz.data.vodovoz_service.model.services.AllServicesDetailsDTO
+import com.m.vodovoz.data.vodovoz_service.model.services.HomeServicesDTO
 import com.m.vodovoz.data.vodovoz_service.model.services.ServiceDetailsDTO
 import com.m.vodovoz.data.vodovoz_service.model.services.ServiceOrderDetailsDTO
 import com.m.vodovoz.data.vodovoz_service.model.unrated_products.UnratedProductsSectionDTO
@@ -115,6 +116,9 @@ interface VodovozService {
     /**
      * Service requests
      * */
+    @GET("glavnaya/uslygi/index.php?action=glav")
+    suspend fun getHomeServices(): Response<VodovozResponseDTO<HomeServicesDTO>>
+
     @GET("glavnaya/uslygi/index.php?action=spisok")
     suspend fun getAllServicesDetails(
     ): Response<VodovozResponseDTO<AllServicesDetailsDTO>>

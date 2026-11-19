@@ -38,20 +38,12 @@ fun AutoScrollImagePager(
     onImageClick: (page: Int) -> Unit,
     chip: @Composable (page: Int) -> Unit = {},
 ) {
-    val isDraggedState = pagerState.interactionSource.collectIsDraggedAsState()
-
-    HorizontalPager(
-        modifier = modifier.fillMaxWidth(),
-        state = pagerState,
-        contentPadding = PaddingValues(horizontal = 16.dp),
-        pageSpacing = 8.dp,
-        pageSize = if (pageWidth.isUnspecified) PageSize.Fill else PageSize.Fixed(pageWidth),
-        verticalAlignment = Alignment.CenterVertically,
-        beyondViewportPageCount = 1,
-        snapPosition = SnapPosition.Start,
-
-        ) { page ->
-        val imageIndex = page % images.size
+    AutoScrollPager(
+        modifier = modifier,
+        pagerState = pagerState,
+        itemsCount = images.size,
+        pageWidth = pageWidth,
+    ) { imageIndex ->
         val currentImage = images[imageIndex]
 
         Box {
@@ -74,12 +66,37 @@ fun AutoScrollImagePager(
             }
         }
     }
+}
 
-    LaunchedEffect(isDraggedState) {
+@Composable
+internal fun AutoScrollPager(
+    modifier: Modifier = Modifier,
+    pagerState: PagerState,
+    itemsCount: Int,
+    pageWidth: Dp,
+    content: @Composable (index: Int) -> Unit,
+) {
+    if (itemsCount <= 0) return
+    val isDraggedState = pagerState.interactionSource.collectIsDraggedAsState()
+
+    HorizontalPager(
+        modifier = modifier.fillMaxWidth(),
+        state = pagerState,
+        contentPadding = PaddingValues(horizontal = 16.dp),
+        pageSpacing = 8.dp,
+        pageSize = if (pageWidth.isUnspecified) PageSize.Fill else PageSize.Fixed(pageWidth),
+        verticalAlignment = Alignment.CenterVertically,
+        beyondViewportPageCount = 1,
+        snapPosition = SnapPosition.Start,
+    ) { page ->
+        content(page % itemsCount)
+    }
+
+    LaunchedEffect(pagerState, itemsCount) {
         snapshotFlow { isDraggedState.value }
             .collectLatest { isDragged ->
                 if (!isDragged) {
-                    while (images.size > 1) {
+                    while (itemsCount > 1) {
                         delay(3_750L)
                         runCatching {
                             val targetPage = pagerState.currentPage.inc() % pagerState.pageCount

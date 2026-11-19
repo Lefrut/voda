@@ -27,6 +27,8 @@ import com.m.vodovoz.design_system.model.SpecialPromotionUi
 import com.m.vodovoz.design_system.model.StoryUi
 import com.m.vodovoz.design_system.model.VodovozSectionUi
 import com.m.vodovoz.design_system.model.mapToUi
+import com.m.vodovoz.feature.bottom.services.model.ServiceUi
+import com.m.vodovoz.feature.bottom.services.model.mapToUi
 import com.m.vodovoz.design_system.model.toUi
 import com.m.vodovoz.design_system.model.toVodovozSectionUi
 import com.m.vodovoz.domain.general.model.product.SuperTopModel
@@ -209,6 +211,10 @@ class HomeFlowViewModel @Inject constructor(
                 map = { HomeListItem.Products.newProducts(it.toVodovozSectionUi()) },
             ),
             fetchDataThenUpdateItems(
+                request = { vodovozServiceRepository.getHomeServices() },
+                map = { section -> HomeListItem.Services(section.toUi { it.mapToUi() }) },
+            ),
+            fetchDataThenUpdateItems(
                 request = { vodovozServiceRepository.getStories() },
                 map = { HomeListItem.Stories(it.mapToUi()) },
             ),
@@ -337,6 +343,10 @@ class HomeFlowViewModel @Inject constructor(
 
     fun handleButtonAction(action: ButtonAction) = viewModelScope.launch {
         sendEvent(HomeEvents.ActivateAction(action))
+    }
+
+    fun navigateToServiceDetails(service: ServiceUi) = viewModelScope.launch {
+        sendEvent(HomeEvents.GoToServiceDetails(service.id))
     }
 
     fun navigateToSearch() = viewModelScope.launch {
@@ -590,6 +600,7 @@ class HomeFlowViewModel @Inject constructor(
         data class GoToStories(val storyId: Long, val stories: List<StoryUi>) : HomeEvents()
         data class GoToProductDetails(val productId: Long) : HomeEvents()
         data class GoToPromotionDetails(val promotionId: Long) : HomeEvents()
+        data class GoToServiceDetails(val serviceId: Int) : HomeEvents()
         data class ActivateAction(val action: BaseVodovozAction) : HomeEvents()
         data class GoToCategoryProductList(val categoryId: Long) : HomeEvents()
         data class GoToOrderDetails(val orderId: Long) : HomeEvents()

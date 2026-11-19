@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -25,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.text.HtmlCompat
 import coil3.compose.AsyncImage
 import com.m.vodovoz.design_system.VodovozTheme
+import com.m.vodovoz.design_system.composables.card.VodovozOutlinedCard
 import com.m.vodovoz.design_system.utils.toAnnotatedString
 import com.m.vodovoz.design_system.vodovozTextLinkStyle
 import com.m.vodovoz.feature.bottom.services.model.ServiceUi
@@ -78,11 +80,23 @@ fun AboutServicesBody(
 }
 
 @Composable
-private fun ServiceCard(
+internal fun ServiceCard(
     modifier: Modifier = Modifier,
     service: ServiceUi,
+    outlined: Boolean = false,
     onClick: (ServiceUi) -> Unit,
 ) {
+    if (outlined) {
+        VodovozOutlinedCard(
+            modifier = modifier,
+            contentPadding = PaddingValues(0.dp),
+            onClick = { onClick(service) },
+        ) {
+            ServiceCardContent(service)
+        }
+        return
+    }
+
     Box(
         Modifier.dropShadow(
             shape = MaterialTheme.shapes.medium,
@@ -100,28 +114,25 @@ private fun ServiceCard(
                 )
                 .clickable { onClick(service) }
         ) {
-            AsyncImage(
-                model = service.image,
-                contentDescription = null,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .aspectRatio(1.8f),
-                contentScale = ContentScale.Crop
-            )
-
-            Text(
-                modifier = Modifier.padding(
-                    start = 12.dp,
-                    top = 10.dp,
-                    end = 16.dp,
-                    bottom = 8.dp
-                ),
-                text = service.name,
-                color = MaterialTheme.colorScheme.onBackground,
-                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
-            )
+            ServiceCardContent(service)
         }
     }
+}
+
+@Composable
+private fun ServiceCardContent(service: ServiceUi) {
+    AsyncImage(
+        model = service.image,
+        contentDescription = null,
+        modifier = Modifier.fillMaxWidth().aspectRatio(1.8f),
+        contentScale = ContentScale.Crop
+    )
+    Text(
+        modifier = Modifier.padding(start = 12.dp, top = 10.dp, end = 16.dp, bottom = 8.dp),
+        text = service.name,
+        color = MaterialTheme.colorScheme.onBackground,
+        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
+    )
 }
 
 @Preview

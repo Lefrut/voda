@@ -101,6 +101,7 @@ import com.m.vodovoz.domain.general.model.promotion.PromotionModel
 import com.m.vodovoz.domain.general.model.promotion.PromotionsSectionModel
 import com.m.vodovoz.domain.general.model.promotion.StoryModel
 import com.m.vodovoz.domain.general.model.service.AllServicesDetailsModel
+import com.m.vodovoz.domain.general.model.service.ServiceModel
 import com.m.vodovoz.domain.general.model.service.ServiceDetailsModel
 import com.m.vodovoz.domain.general.model.user.AuthDetailsModel
 import com.m.vodovoz.domain.general.model.user.BonusesPopupWindowModel
@@ -707,6 +708,12 @@ class VodovozServiceRepositoryImpl @Inject constructor(
             toDomain = { toDomain() },
         )
     }
+
+    override fun getHomeServices(): Flow<Result<SectionModel<ServiceModel>>> =
+        executeDefaultRequest(
+            request = { vodovozService.getHomeServices() },
+            toDomain = { toDomain() },
+        )
 
     override fun getAllServicesDetails(): Flow<Result<AllServicesDetailsModel>> {
         return executeDefaultRequest(

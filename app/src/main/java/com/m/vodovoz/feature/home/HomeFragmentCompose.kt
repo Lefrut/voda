@@ -220,6 +220,10 @@ class HomeFragment : Fragment() {
                     findNavController().navigateToPromotionDetails(event.promotionId)
                 }
 
+                is HomeFlowViewModel.HomeEvents.GoToServiceDetails -> {
+                    findNavController().navigateToServiceDetails(event.serviceId)
+                }
+
 
                 HomeFlowViewModel.HomeEvents.GoToSearch -> {
                     findNavController().navigateToSearch()

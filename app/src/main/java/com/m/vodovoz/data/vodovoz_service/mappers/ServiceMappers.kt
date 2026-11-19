@@ -2,12 +2,14 @@ package com.m.vodovoz.data.vodovoz_service.mappers
 
 import com.m.vodovoz.data.vodovoz_service.di.toVodovozUrl
 import com.m.vodovoz.data.vodovoz_service.model.services.AllServicesDetailsDTO
+import com.m.vodovoz.data.vodovoz_service.model.services.HomeServicesDTO
 import com.m.vodovoz.data.vodovoz_service.model.services.SERVICE_DETAILS_BUTTON_DTO
 import com.m.vodovoz.data.vodovoz_service.model.services.SERVICE_DTO
 import com.m.vodovoz.data.vodovoz_service.model.services.ServiceDetailsDTO
 import com.m.vodovoz.data.vodovoz_service.model.services.ServiceOrderDetailsDTO
 import com.m.vodovoz.data.vodovoz_service.model.services.ServiceProductsDTO
 import com.m.vodovoz.domain.general.model.order.FormModel
+import com.m.vodovoz.domain.general.model.product.SectionModel
 import com.m.vodovoz.domain.general.model.promotion.ColorfulButtonModel
 import com.m.vodovoz.domain.general.model.service.AllServicesDetailsModel
 import com.m.vodovoz.domain.general.model.service.ServiceDetailsModel
@@ -24,6 +26,12 @@ fun ServiceOrderDetailsDTO.toDomain(): FormModel{
         button = KNOPKA?.toDomain() ?: throw IllegalArgumentException("ServiceOrderDetails button can't be null")
     )
 }
+
+fun HomeServicesDTO.toDomain(): SectionModel<ServiceModel> = SectionModel(
+    title = title.orEmpty(),
+    items = services.orEmpty().mapToDomain(),
+    button = button?.toDomain(),
+)
 
 fun AllServicesDetailsDTO.toDomain(): AllServicesDetailsModel{
     return AllServicesDetailsModel(

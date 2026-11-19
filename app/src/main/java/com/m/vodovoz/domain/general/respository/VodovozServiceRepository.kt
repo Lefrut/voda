@@ -61,6 +61,7 @@ import com.m.vodovoz.domain.general.model.promotion.PromotionModel
 import com.m.vodovoz.domain.general.model.promotion.PromotionsSectionModel
 import com.m.vodovoz.domain.general.model.promotion.StoryModel
 import com.m.vodovoz.domain.general.model.service.AllServicesDetailsModel
+import com.m.vodovoz.domain.general.model.service.ServiceModel
 import com.m.vodovoz.domain.general.model.service.ServiceDetailsModel
 import com.m.vodovoz.domain.general.model.user.AuthDetailsModel
 import com.m.vodovoz.domain.general.model.user.BonusesPopupWindowModel
@@ -218,6 +219,8 @@ interface VodovozServiceRepository {
         code: String,
         phone: String,
     ): FlowResult<UserAuthInfoModel>
+
+    fun getHomeServices(): FlowResult<SectionModel<ServiceModel>>
 
     fun getAllServicesDetails(): FlowResult<AllServicesDetailsModel>
 

@@ -11,6 +11,7 @@ import com.m.vodovoz.design_system.model.SectionUi
 import com.m.vodovoz.design_system.model.StoryUi
 import com.m.vodovoz.design_system.model.VodovozItemUi
 import com.m.vodovoz.design_system.model.VodovozSectionUi
+import com.m.vodovoz.feature.bottom.services.model.ServiceUi
 
 @Stable
 sealed class HomeListItem<out T>(open val position: Int) : VodovozItemUi<HomeListItem<T>>() {
@@ -46,6 +47,9 @@ sealed class HomeListItem<out T>(open val position: Int) : VodovozItemUi<HomeLis
 
     data class Promotions(override val value: SectionUi<PromotionUi>) :
         HomeListItem<SectionUi<PromotionUi>>(Positions.PROMOTIONS)
+
+    data class Services(override val value: SectionUi<ServiceUi>) :
+        HomeListItem<SectionUi<ServiceUi>>(Positions.SERVICES)
 
     sealed class Products<out T : VodovozItemUi<T>>(
         override val position: Int,
@@ -123,8 +127,9 @@ sealed class HomeListItem<out T>(open val position: Int) : VodovozItemUi<HomeLis
         const val POPULAR_CATEGORIES = 400
         const val TOP_SECTION = 500
         const val HURRY_BUY_UP = 600
-        const val NEW_PRODUCTS = 700
-        const val PROMOTIONS = 800
+        const val PROMOTIONS = 700
+        const val NEW_PRODUCTS = 800
+        const val SERVICES = 850
         const val BOTTOM_SECTION = 900
         const val VIEWED = 1000
     }
@@ -183,6 +188,7 @@ inline fun HomeItem(
     categoriesWithProductsSection: @Composable HomeListItem.Products.CategoriesWithProductsSection.() -> Unit,
     productsSection: @Composable HomeListItem.Products.Section.() -> Unit,
     promotions: @Composable HomeListItem.Promotions.() -> Unit,
+    services: @Composable HomeListItem.Services.() -> Unit,
     stories: @Composable HomeListItem.Stories.() -> Unit,
 ) {
     with(item) {
@@ -194,6 +200,7 @@ inline fun HomeItem(
             is HomeListItem.Products.CategoriesWithProductsSection -> if (value.items.isNotEmpty()) categoriesWithProductsSection()
             is HomeListItem.Products.Section -> if (value.items.isNotEmpty()) productsSection()
             is HomeListItem.Promotions -> if (value.items.isNotEmpty()) promotions()
+            is HomeListItem.Services -> if (value.items.isNotEmpty()) services()
             is HomeListItem.Stories -> if (value.isNotEmpty()) stories()
         }
     }

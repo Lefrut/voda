@@ -168,6 +168,7 @@ fun HomeScreen(
                                 }
                                 viewModel.navigateToPromotionDetails(promotion)
                             },
+                            onServiceClick = viewModel::navigateToServiceDetails,
                             onProductCardClick = { product ->
                                 viewModel.navigateToProductDetails(product)
                             },

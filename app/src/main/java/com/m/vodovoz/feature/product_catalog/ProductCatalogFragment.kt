@@ -120,14 +120,13 @@ class ProductCatalogFragment : Fragment() {
 
                     LifecycleEffect {
                         val navController = findNavController()
-                        val catalogEntry = navController.getBackStackEntry(R.id.productCatalogFragment)
-                        catalogEntry.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                            val action = viewModel.state.map { it.searchAction }.filterNotNull().first()
-                            if (navController.currentBackStackEntry == catalogEntry &&
-                                navController.popBackStack()
-                            ) {
-                                action.activate(navController)
-                            }
+                        val catalogEntry =
+                            navController.getBackStackEntry(R.id.productCatalogFragment)
+                        val action = viewModel.state.map { it.searchAction }.filterNotNull().first()
+                        if (navController.currentBackStackEntry == catalogEntry &&
+                            navController.popBackStack()
+                        ) {
+                            action.activate(navController)
                         }
                     }
 
